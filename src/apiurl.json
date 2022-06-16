@@ -1,0 +1,8 @@
+{
+    "BaseURL": "https://app.melcloud.com/Mitsubishi.Wifi.Client",
+    "ClientLogin": "/Login/ClientLogin",
+    "ListDevices": "/User/ListDevices",
+    "DeviceState": "/Device/Get?id=DID&buildingID=BID",
+    "SetAta": "/Device/SetAta",
+    "UpdateApplicationOptions": "/User/UpdateApplicationOptions"
+}

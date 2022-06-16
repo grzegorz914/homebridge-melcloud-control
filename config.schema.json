@@ -1,0 +1,295 @@
+{
+  "pluginAlias": "MELCloud",
+  "pluginType": "platform",
+  "singular": true,
+  "headerDisplay": "This plugin works with Mitsubishi Heat Pump and A.C. Devicesinterface and are exposed to HomeKit as separate accessories and each needs to be manually paired.\n\n1. Open the Home <img src='https://user-images.githubusercontent.com/3979615/78010622-4ea1d380-738e-11ea-8a17-e6a465eeec35.png' height='16.42px'> app on your device.\n2. Tap the <img src='https://user-images.githubusercontent.com/3979615/78010869-9aed1380-738e-11ea-9644-9f46b3633026.png' height='16.42px'>.\n3. Tap *Add Accessory*, and select *I Don't Have a Code or Cannot Scan* or *More Options*.\n4. Select Your accessory.\n5. Enter the Homebridge PIN or scan the QR code, this can be found in Homebridge UI or Homebridge logs.\n6. Complete the accessory setup.",
+  "footerDisplay": "For documentation please see [GitHub repository](https://github.com/grzegorz914/homebridge-melcloud-control).",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "devices": {
+        "type": "array",
+        "items": {
+          "title": "Device",
+          "type": "object",
+          "properties": {
+            "name": {
+              "title": "Name",
+              "type": "string",
+              "placeholder": "MELCloud",
+              "required": true
+            },
+            "user": {
+              "title": "User",
+              "type": "string",
+              "placeholder": "User",
+              "description": "The MELCloud account username.",
+              "required": true
+            },
+            "pass": {
+              "title": "Password",
+              "type": "string",
+              "placeholder": "Password",
+              "description": "The MELCloud account password.",
+              "required": true
+            },
+            "disableLogInfo": {
+              "title": "Disable Log Info",
+              "type": "boolean",
+              "default": false,
+              "description": "This disable logging values and states on every it change.",
+              "required": false
+            },
+            "disableLogDeviceInfo": {
+              "title": "Disable Log Device Info",
+              "type": "boolean",
+              "default": false,
+              "description": "This disable log device info by every connections device to the network.",
+              "required": false
+            },
+            "enableDebugMode": {
+              "title": "Debug",
+              "type": "boolean",
+              "default": false,
+              "description": "This enable debug mode.",
+              "required": false
+            },
+            "language": {
+              "title": "Language",
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2,
+              "pattern": "^[0-9]+$",
+              "default": "0",
+              "description": "The language used with MELCloud.",
+              "oneOf": [{
+                  "title": "English",
+                  "enum": ["0"]
+                },
+                {
+                  "title": "Български",
+                  "enum": ["1"]
+                },
+                {
+                  "title": "Čeština",
+                  "enum": ["2"]
+                },
+                {
+                  "title": "Dansk",
+                  "enum": ["3"]
+                },
+                {
+                  "title": "Deutsch",
+                  "enum": ["4"]
+                },
+                {
+                  "title": "Eesti",
+                  "enum": ["5"]
+                },
+                {
+                  "title": "Español",
+                  "enum": ["6"]
+                },
+                {
+                  "title": "Français",
+                  "enum": ["7"]
+                },
+                {
+                  "title": "Հայերեն",
+                  "enum": ["8"]
+                },
+                {
+                  "title": "Latviešu",
+                  "enum": ["9"]
+                },
+                {
+                  "title": "Lietuvių",
+                  "enum": ["10"]
+                },
+                {
+                  "title": "Magyar",
+                  "enum": ["11"]
+                },
+                {
+                  "title": "Nederlands",
+                  "enum": ["12"]
+                },
+                {
+                  "title": "Norwegian",
+                  "enum": ["13"]
+                },
+                {
+                  "title": "Polski",
+                  "enum": ["14"]
+                },
+                {
+                  "title": "Português",
+                  "enum": ["15"]
+                },
+                {
+                  "title": "Русский",
+                  "enum": ["16"]
+                },
+                {
+                  "title": "Suomi",
+                  "enum": ["17"]
+                },
+                {
+                  "title": "Svenska",
+                  "enum": ["18"]
+                },
+                {
+                  "title": "Italiano",
+                  "enum": ["19"]
+                },
+                {
+                  "title": "Українська",
+                  "enum": ["20"]
+                },
+                {
+                  "title": "Türkçe",
+                  "enum": ["21"]
+                },
+                {
+                  "title": "Ελληνικά",
+                  "enum": ["22"]
+                },
+                {
+                  "title": "Hrvatski",
+                  "enum": ["23"]
+                },
+                {
+                  "title": "Română",
+                  "enum": ["24"]
+                },
+                {
+                  "title": "Slovenščina",
+                  "enum": ["25"]
+                }
+              ],
+              "required": true
+            },
+            "enableMqtt": {
+              "title": "Enable",
+              "type": "boolean",
+              "default": false,
+              "required": false,
+              "description": "This enable MQTT client."
+            },
+            "mqttHost": {
+              "title": "IP/Hostname",
+              "type": "string",
+              "placeholder": "ip or hostname",
+              "required": true,
+              "format": "hostname",
+              "description": "Here set the IP/Hostname of MQTT Broker.",
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].enableMqtt === true;"
+              }
+            },
+            "mqttPort": {
+              "title": "Port",
+              "type": "integer",
+              "placeholder": 1883,
+              "required": true,
+              "description": "Here set the port of MQTT Broker.",
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].enableMqtt === true;"
+              }
+            },
+            "mqttPrefix": {
+              "title": "Prefix",
+              "type": "string",
+              "placeholder": "home/openwebif",
+              "required": false,
+              "description": "Here set the prefix.",
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].enableMqtt === true;"
+              }
+            },
+            "mqttAuth": {
+              "title": "Authorization",
+              "type": "boolean",
+              "default": false,
+              "required": false,
+              "description": "This enable authorization for MQTT Broker.",
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].enableMqtt === true;"
+              }
+            },
+            "mqttUser": {
+              "title": "User",
+              "type": "string",
+              "placeholder": "user",
+              "required": false,
+              "description": "Here set the user of MQTT Broker.",
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].enableMqtt === true && model.devices[arrayIndices].mqttAuth === true;"
+              }
+            },
+            "mqttPasswd": {
+              "title": "Password",
+              "type": "string",
+              "placeholder": "password",
+              "required": false,
+              "description": "Here set the password of MQTT Broker.",
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].enableMqtt === true && model.devices[arrayIndices].mqttAuth === true;"
+              }
+            },
+            "mqttDebug": {
+              "title": "Debug",
+              "type": "boolean",
+              "default": false,
+              "required": false,
+              "description": "This enable debug mode for MQTT.",
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].enableMqtt === true;"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "layout": [{
+    "key": "devices",
+    "type": "tabarray",
+    "title": "{{ value.name || 'new device' }}",
+    "items": [
+      "devices[].name",
+      "devices[].user",
+      "devices[].pass",
+      "devices[].language",
+      {
+        "key": "devices[]",
+        "type": "section",
+        "title": "Advanced Settings",
+        "expandable": true,
+        "expanded": false,
+        "items": [
+          "devices[].enableDebugMode",
+          "devices[].disableLogInfo",
+          "devices[].disableLogDeviceInfo"
+        ]
+      },
+      {
+        "key": "devices[]",
+        "type": "section",
+        "title": "MQTT",
+        "expandable": true,
+        "expanded": false,
+        "items": [
+          "devices[].enableMqtt",
+          "devices[].mqttHost",
+          "devices[].mqttPort",
+          "devices[].mqttPrefix",
+          "devices[].mqttAuth",
+          "devices[].mqttUser",
+          "devices[].mqttPasswd",
+          "devices[].mqttDebug"
+        ]
+      }
+    ]
+  }]
+}
