@@ -36,9 +36,8 @@ Homebridge plugin for Heat Pump and A.C. devices manufactured by Mistsubishi and
 
 ### About the plugin!
 * All devices are detected automatically..
-* For best experiences please use *Controller App* or *EVE app* for iOS, Home app display it as unsupported.
 * Home automations and shortcuts can be used to control the devices.
-* MQTT Client publisch all available data from all installed devices..
+* MQTT Client publisch all available data from all installed devices.
 
 ### Important changes
 
