@@ -10,7 +10,7 @@
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/grzegorz914/homebridge-melcloud-control.svg)](https://github.com/grzegorz914/homebridge-melcloud-control/pulls)
 [![GitHub issues](https://img.shields.io/github/issues/grzegorz914/homebridge-melcloud-control.svg)](https://github.com/grzegorz914/homebridge-melcloud-control/issues)
 
-Homebridge plugin for Heat Pump and A.C. Ddevices manufactured by Mistsubishi and connected to MELCloud service.                                           
+Homebridge plugin for Heat Pump and A.C. devices manufactured by Mistsubishi and connected to MELCloud service.                                           
 
 </span>
 
