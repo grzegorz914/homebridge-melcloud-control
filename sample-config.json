@@ -1,0 +1,38 @@
+{
+  "bridge": {
+    "name": "Homebridge",
+    "username": "AA:BB:CC:DD:EE:FF",
+    "manufacturer": "homebridge.io",
+    "model": "homebridge",
+    "port": 9100,
+    "pin": "123-45-678"
+  },
+  "description": "HomeKit Bridge",
+  "ports": {
+    "start": 9101,
+    "end": 9150,
+    "comment": "In this section set the port for Homebridge accessories."
+  },
+  "accessories": [],
+  "platforms": [{
+    "platform": "MELCloud",
+    "devices": [{
+      "name": "My House",
+      "user": "user",
+      "pass": "pass",
+      "language": 0,
+      "disableLogInfo": false,
+      "disableLogDeviceInfo": false,
+      "enableDebugMode": false,
+      "displayMode": 0,
+      "enableMqtt": false,
+      "mqttHost": "192.168.1.33",
+      "mqttPort": 1883,
+      "mqttPrefix": "home/My House",
+      "mqttAuth": false,
+      "mqttUser": "user",
+      "mqttPass": "password",
+      "mqttDebug": false
+    }]
+  }]
+}

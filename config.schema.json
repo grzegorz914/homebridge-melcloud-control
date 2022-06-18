@@ -2,35 +2,36 @@
   "pluginAlias": "MELCloud",
   "pluginType": "platform",
   "singular": true,
-  "headerDisplay": "This plugin works with Mitsubishi Heat Pump and A.C. Devicesinterface and are exposed to HomeKit as separate accessories and each needs to be manually paired.\n\n1. Open the Home <img src='https://user-images.githubusercontent.com/3979615/78010622-4ea1d380-738e-11ea-8a17-e6a465eeec35.png' height='16.42px'> app on your device.\n2. Tap the <img src='https://user-images.githubusercontent.com/3979615/78010869-9aed1380-738e-11ea-9644-9f46b3633026.png' height='16.42px'>.\n3. Tap *Add Accessory*, and select *I Don't Have a Code or Cannot Scan* or *More Options*.\n4. Select Your accessory.\n5. Enter the Homebridge PIN or scan the QR code, this can be found in Homebridge UI or Homebridge logs.\n6. Complete the accessory setup.",
+  "headerDisplay": "This plugin works with Mitsubishi Heat Pump and A.C. Devices and are exposed to HomeKit as separate accessories and each needs to be manually paired.\n\n1. Open the Home <img src='https://user-images.githubusercontent.com/3979615/78010622-4ea1d380-738e-11ea-8a17-e6a465eeec35.png' height='16.42px'> app on your device.\n2. Tap the <img src='https://user-images.githubusercontent.com/3979615/78010869-9aed1380-738e-11ea-9644-9f46b3633026.png' height='16.42px'>.\n3. Tap *Add Accessory*, and select *I Don't Have a Code or Cannot Scan* or *More Options*.\n4. Select Your accessory.\n5. Enter the Homebridge PIN or scan the QR code, this can be found in Homebridge UI or Homebridge logs.\n6. Complete the accessory setup.",
   "footerDisplay": "For documentation please see [GitHub repository](https://github.com/grzegorz914/homebridge-melcloud-control).",
   "schema": {
     "type": "object",
     "properties": {
-      "devices": {
+      "accounts": {
         "type": "array",
         "items": {
-          "title": "Device",
+          "title": "MELCloud accounts",
           "type": "object",
           "properties": {
             "name": {
-              "title": "Name",
+              "title": "Account name",
               "type": "string",
-              "placeholder": "MELCloud",
+              "placeholder": "Account name",
+              "description": "Here set the your account name.",
               "required": true
             },
             "user": {
               "title": "User",
               "type": "string",
               "placeholder": "User",
-              "description": "The MELCloud account username.",
+              "description": "Here set the MELCloud account username.",
               "required": true
             },
             "pass": {
               "title": "Password",
               "type": "string",
               "placeholder": "Password",
-              "description": "The MELCloud account password.",
+              "description": "Here set the MELCloud account password.",
               "required": true
             },
             "disableLogInfo": {
@@ -61,7 +62,7 @@
               "maxLength": 2,
               "pattern": "^[0-9]+$",
               "default": "0",
-              "description": "The language used with MELCloud.",
+              "description": "Here set the language used with MELCloud.",
               "oneOf": [{
                   "title": "English",
                   "enum": ["0"]
@@ -169,6 +170,28 @@
               ],
               "required": true
             },
+            "displayMode": {
+              "title": "Display mode",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0,
+              "description": "Here select what a control mode You want to use.",
+              "oneOf": [{
+                  "title": "Heater/Cooler",
+                  "enum": [
+                    0
+                  ]
+                },
+                {
+                  "title": "Thermostat",
+                  "enum": [
+                    1
+                  ]
+                }
+              ],
+              "required": true
+            },
             "enableMqtt": {
               "title": "Enable",
               "type": "boolean",
@@ -184,7 +207,7 @@
               "format": "hostname",
               "description": "Here set the IP/Hostname of MQTT Broker.",
               "condition": {
-                "functionBody": "return model.devices[arrayIndices].enableMqtt === true;"
+                "functionBody": "return model.accounts[arrayIndices].enableMqtt === true;"
               }
             },
             "mqttPort": {
@@ -194,7 +217,7 @@
               "required": true,
               "description": "Here set the port of MQTT Broker.",
               "condition": {
-                "functionBody": "return model.devices[arrayIndices].enableMqtt === true;"
+                "functionBody": "return model.accounts[arrayIndices].enableMqtt === true;"
               }
             },
             "mqttPrefix": {
@@ -204,7 +227,7 @@
               "required": false,
               "description": "Here set the prefix.",
               "condition": {
-                "functionBody": "return model.devices[arrayIndices].enableMqtt === true;"
+                "functionBody": "return model.accounts[arrayIndices].enableMqtt === true;"
               }
             },
             "mqttAuth": {
@@ -214,7 +237,7 @@
               "required": false,
               "description": "This enable authorization for MQTT Broker.",
               "condition": {
-                "functionBody": "return model.devices[arrayIndices].enableMqtt === true;"
+                "functionBody": "return model.accounts[arrayIndices].enableMqtt === true;"
               }
             },
             "mqttUser": {
@@ -224,7 +247,7 @@
               "required": false,
               "description": "Here set the user of MQTT Broker.",
               "condition": {
-                "functionBody": "return model.devices[arrayIndices].enableMqtt === true && model.devices[arrayIndices].mqttAuth === true;"
+                "functionBody": "return model.accounts[arrayIndices].enableMqtt === true && model.accounts[arrayIndices].mqttAuth === true;"
               }
             },
             "mqttPasswd": {
@@ -234,7 +257,7 @@
               "required": false,
               "description": "Here set the password of MQTT Broker.",
               "condition": {
-                "functionBody": "return model.devices[arrayIndices].enableMqtt === true && model.devices[arrayIndices].mqttAuth === true;"
+                "functionBody": "return model.accounts[arrayIndices].enableMqtt === true && model.accounts[arrayIndices].mqttAuth === true;"
               }
             },
             "mqttDebug": {
@@ -244,7 +267,7 @@
               "required": false,
               "description": "This enable debug mode for MQTT.",
               "condition": {
-                "functionBody": "return model.devices[arrayIndices].enableMqtt === true;"
+                "functionBody": "return model.accounts[arrayIndices].enableMqtt === true;"
               }
             }
           }
@@ -253,41 +276,42 @@
     }
   },
   "layout": [{
-    "key": "devices",
+    "key": "accounts",
     "type": "tabarray",
-    "title": "{{ value.name || 'new device' }}",
+    "title": "{{ value.name || 'new account' }}",
     "items": [
-      "devices[].name",
-      "devices[].user",
-      "devices[].pass",
-      "devices[].language",
+      "accounts[].name",
+      "accounts[].user",
+      "accounts[].pass",
+      "accounts[].language",
       {
-        "key": "devices[]",
+        "key": "accounts[]",
         "type": "section",
         "title": "Advanced Settings",
         "expandable": true,
         "expanded": false,
         "items": [
-          "devices[].enableDebugMode",
-          "devices[].disableLogInfo",
-          "devices[].disableLogDeviceInfo"
+          "accounts[].enableDebugMode",
+          "accounts[].disableLogInfo",
+          "accounts[].disableLogDeviceInfo",
+          "accounts[].displayMode"
         ]
       },
       {
-        "key": "devices[]",
+        "key": "accounts[]",
         "type": "section",
         "title": "MQTT",
         "expandable": true,
         "expanded": false,
         "items": [
-          "devices[].enableMqtt",
-          "devices[].mqttHost",
-          "devices[].mqttPort",
-          "devices[].mqttPrefix",
-          "devices[].mqttAuth",
-          "devices[].mqttUser",
-          "devices[].mqttPasswd",
-          "devices[].mqttDebug"
+          "accounts[].enableMqtt",
+          "accounts[].mqttHost",
+          "accounts[].mqttPort",
+          "accounts[].mqttPrefix",
+          "accounts[].mqttAuth",
+          "accounts[].mqttUser",
+          "accounts[].mqttPasswd",
+          "accounts[].mqttDebug"
         ]
       }
     ]

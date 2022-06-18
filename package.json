@@ -1,8 +1,8 @@
 {
   "displayName": "MELCloud",
   "name": "homebridge-melcloud-control",
-  "version": "0.0.1",
-  "description": "Homebridge plugin (https://github.com/homebridge/homebridge) to control Sat Receivers with openWebIf interface.",
+  "version": "0.0.3",
+  "description": "Homebridge plugin (https://github.com/homebridge/homebridge) to control Mitsubishi Heat Pump and A.C. Devices.",
   "license": "MIT",
   "author": "grzegorz914",
   "homepage": "https://github.com/grzegorz914/homebridge-melcloud-control#readme",
@@ -40,7 +40,8 @@
     "homebridge-plugin",
     "homekit",
     "mitsubishi",
-    "melcloud"
+    "melcloud",
+    "ecodan"
   ],
   "contributors": [],
   "scripts": {
