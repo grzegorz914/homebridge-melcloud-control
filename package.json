@@ -1,7 +1,7 @@
 {
   "displayName": "MELCloud",
   "name": "homebridge-melcloud-control",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Homebridge plugin (https://github.com/homebridge/homebridge) to control Mitsubishi Heat Pump and A.C. Devices.",
   "license": "MIT",
   "author": "grzegorz914",
