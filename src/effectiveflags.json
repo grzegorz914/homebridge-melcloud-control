@@ -4,5 +4,9 @@
     "Temperature": 4,
     "FanSpeed": 8,
     "VaneVertical": 16,
-    "VaneHorizontal": 256
+    "VaneHorizontal": 256,
+    "HeatPump": "0L",
+    "HeatPumpPower": "1L",
+    "HeatPumpTemperatureZone1": "8589934720L",
+    "HeatPumpHotWater": "65536L"
 }
