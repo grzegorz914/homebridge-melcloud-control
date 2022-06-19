@@ -86,7 +86,7 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
 ```json
         {
             "platform": "MELCloud",
-            "devices": [
+            "accounts": [
                 {
                     "name": "My House",
                     "user": "user",
