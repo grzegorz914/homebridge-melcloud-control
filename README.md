@@ -38,13 +38,13 @@ Homebridge plugin for Heat Pump and A.C. devices manufactured by Mistsubishi and
 * All devices are detected automatically..
 * The plugin can working with two modes Thermostat and Heater Cooler, selectable in plugin settinge.
 * Possible to control:
- * Power ON/OFF.
- * Operating mode OFF/HEAT/COOL/AUTO.
- * Heating/Cooling temperature.
- * Heating/Cooling threshold temperature.
- * Fan speed.
- * Swing mode.
- * Vertical/Horizontal vane tilt angle.
+  * Power ON/OFF.
+  * Operating mode OFF/HEAT/COOL/AUTO.
+  * Heating/Cooling temperature.
+  * Heating/Cooling threshold temperature.
+  * Fan speed.
+  * Swing mode.
+  * Vertical/Horizontal vane tilt angle.
 * Home automations and shortcuts can be used to control the devices.
 * MQTT Client publisch all available data from all installed devices.
 
