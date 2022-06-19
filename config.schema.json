@@ -38,14 +38,14 @@
               "title": "Disable Log Info",
               "type": "boolean",
               "default": false,
-              "description": "This disable logging values and states on every it change.",
+              "description": "This disable display logg values and states on every it change.",
               "required": false
             },
             "disableLogDeviceInfo": {
               "title": "Disable Log Device Info",
               "type": "boolean",
               "default": false,
-              "description": "This disable log device info by every connections device to the network.",
+              "description": "This disable display log device info on plugin restart.",
               "required": false
             },
             "enableDebugMode": {
