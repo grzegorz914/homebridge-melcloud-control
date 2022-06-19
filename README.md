@@ -40,7 +40,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * Support for multiple buildings, floors, areas.
 * Support two control modes, Thermostat or Heater Cooler, selectable in plugin settings.
 * All devices are detected automatically.
-* Possible control of Air Conditioner:
+* Control of Air Conditioner:
   * Power ON/OFF.
   * Operating mode OFF/HEAT/COOL/AUTO.
   * Heating/Cooling temperature.
@@ -48,9 +48,9 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
   * Fan speed.
   * Swing mode.
   * Vertical/Horizontal vane tilt angle.
-* Possible control of Heat Pump:
+* Control of Heat Pump:
   * Comming soon...
-* Possible control of Energy Recovery Ventilation:
+* Control of Energy Recovery Ventilation:
   * Comming soon...
 * Home automations and shortcuts can be used to control the devices.
 * MQTT Client publisch all available data from all detected devices.
