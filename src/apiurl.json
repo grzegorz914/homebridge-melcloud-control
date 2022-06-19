@@ -5,5 +5,6 @@
     "DeviceState": "/Device/Get?id=DID&buildingID=BID",
     "SetAta": "/Device/SetAta",
     "SetAtw": "/Device/SetAtw",
+    "SetErv": "/Device/SetErv",
     "UpdateApplicationOptions": "/User/UpdateApplicationOptions"
 }

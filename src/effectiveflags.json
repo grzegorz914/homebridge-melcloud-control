@@ -7,6 +7,15 @@
     "VaneHorizontal": 256,
     "HeatPump": "0L",
     "HeatPumpPower": "1L",
-    "HeatPumpTemperatureZone1": "8589934720L",
-    "HeatPumpHotWater": "65536L"
+    "HeatPumpTemperatureZone1": 281474976710688,
+    "SetTankWaterTemperature": 65536,
+    "ForcedHotWaterMode": 8589934720,
+    "SetTemperatureZone1": 34359738880,
+    "SetTemperatureZone2": 281474976710656,
+    "SetHeatFlowTemperatureZone1": 281474976710656,
+    "SetCoolFlowTemperatureZone1": 281474976710656,
+    "SetHeatFlowTemperatureZone2": 281474976710656,
+    "SetCoolFlowTemperatureZone2": 281474976710656,
+    "OperationModeZone1": 8,
+    "OperationModeZone2": 10
 }

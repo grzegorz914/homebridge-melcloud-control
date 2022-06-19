@@ -10,7 +10,7 @@ const API_EFFECTIVE_FLAGS = require('./src/effectiveflags.json');
 
 const PLUGIN_NAME = 'homebridge-melcloud-control';
 const PLATFORM_NAME = 'MELCloud';
-
+const DEVICE_TYPE = ['Air Climate.', 'Air to Water', '', 'Energy Recovery Ventilation']
 const CURRENT_MODES_HEATERCOOLER_THERMOSTAT = [
 	['INACTIVE', 'IDLE', 'HEAT', 'COOL'],
 	['OFF', 'HEAT', 'COOL']
@@ -241,6 +241,8 @@ class melCloudDevice {
 		this.mqttPasswd = accountConfig.mqttPasswd;
 		this.mqttDebug = accountConfig.mqttDebug || false;
 
+		this.deviceType = device.Device.DeviceType; // 0 = Air Climate, 1 = Air to Water, 2 = '', 3 = Energy-Recovery-Ventilation
+		this.deviceTypeText = DEVICE_TYPE[this.deviceType];
 		this.buildingId = device.BuildingID;
 		this.deviceName = device.DeviceName;
 		this.deviceId = device.DeviceID;;
@@ -333,6 +335,7 @@ class melCloudDevice {
 	async updateDevicesState() {
 		return new Promise(async (resolve, reject) => {
 			try {
+				const deviceType = this.deviceType;
 				const deviceId = this.deviceId;
 				const buildingId = this.buildingId;
 
@@ -346,20 +349,19 @@ class melCloudDevice {
 				const data = deviceStateData.data;
 				const effectiveFlags = data.EffectiveFlags;
 
-				const deviceTypeHeatPumpAc = (effectiveFlags == "0L") ? true : false;
 				const localIPAddress = data.LocalIPAddress;
 				const roomTemperature = data.RoomTemperature;
 				const setTemperature = data.SetTemperature;
-				const setTankWaterTemperature = deviceTypeHeatPumpAc ? data.SetTankWaterTemperature : false;
-				const setTemperatureZone1 = deviceTypeHeatPumpAc ? data.SetTemperatureZone1 : false;
-				const forcedHotWaterMode = deviceTypeHeatPumpAc ? data.ForcedHotWaterMode : false;
-				const setTemperatureZone2 = deviceTypeHeatPumpAc ? data.SetTemperatureZone2 : false;
-				const setHeatFlowTemperatureZone1 = deviceTypeHeatPumpAc ? data.SetHeatFlowTemperatureZone1 : false;
-				const setCoolFlowTemperatureZone1 = deviceTypeHeatPumpAc ? data.SetCoolFlowTemperatureZone1 : false;
-				const setHeatFlowTemperatureZone2 = deviceTypeHeatPumpAc ? data.SetHeatFlowTemperatureZone2 : false;
-				const setCoolFlowTemperatureZone2 = deviceTypeHeatPumpAc ? data.SetCoolFlowTemperatureZone2 : false;
-				const operationModeZone1 = deviceTypeHeatPumpAc ? data.OperationModeZone1 : false;
-				const operationModeZone2 = deviceTypeHeatPumpAc ? data.OperationModeZone2 : false;
+				const setTankWaterTemperature = deviceType ? data.SetTankWaterTemperature : false;
+				const setTemperatureZone1 = deviceType ? data.SetTemperatureZone1 : false;
+				const forcedHotWaterMode = deviceType ? data.ForcedHotWaterMode : false;
+				const setTemperatureZone2 = deviceType ? data.SetTemperatureZone2 : false;
+				const setHeatFlowTemperatureZone1 = deviceType ? data.SetHeatFlowTemperatureZone1 : false;
+				const setCoolFlowTemperatureZone1 = deviceType ? data.SetCoolFlowTemperatureZone1 : false;
+				const setHeatFlowTemperatureZone2 = deviceType ? data.SetHeatFlowTemperatureZone2 : false;
+				const setCoolFlowTemperatureZone2 = deviceType ? data.SetCoolFlowTemperatureZone2 : false;
+				const operationModeZone1 = deviceType ? data.OperationModeZone1 : false;
+				const operationModeZone2 = deviceType ? data.OperationModeZone2 : false;
 				const setFanSpeed = data.SetFanSpeed;
 				const operationMode = data.OperationMode;
 				const vaneHorizontal = data.VaneHorizontal;
@@ -380,7 +382,7 @@ class melCloudDevice {
 				const prohibitPower = data.ProhibitPower;
 				const demandPercentage = data.DemandPercentage;
 				const deviceID = data.DeviceID;
-				const deviceType = data.DeviceType;
+				//const deviceType = data.DeviceType;
 				const lastCommunication = data.LastCommunication;
 				const nextCommunication = data.NextCommunication;
 				const power = data.Power;
@@ -428,7 +430,7 @@ class melCloudDevice {
 				const mqtt = this.enableMqtt ? this.mqttClient.send('Device state', JSON.stringify(deviceStateData, null, 2)) : false;
 
 				this.deviceState = data;
-				this.deviceTypeHeatPumpAc = deviceTypeHeatPumpAc;
+				this.deviceType = deviceType;
 				this.refreshDeviceState();
 
 				if (this.startPrepareAccessory) {
@@ -460,9 +462,9 @@ class melCloudDevice {
 		const deviceId = this.deviceId;
 		const melCloudInfo = this.melcloudInfo;
 		const deviceState = this.deviceState;
-		const deviceTypeHeatPumpAc = this.deviceTypeHeatPumpAc;
+		const deviceType = this.deviceType;
 		const temperatureUnit = this.temperatureDisplay ? '°F' : '°C';
-		const HeatPumpAcUrl = deviceTypeHeatPumpAc ? API_URL.SetAtw : API_URL.SetAta;
+		const deviceTypeUrl = [API_URL.SetAta, API_URL.SetAtw, '', API_URL.SetErv][deviceType];
 
 		const accessoryName = this.deviceName;
 		const accessoryUUID = AccessoryUUID.generate(deviceId.toString());
@@ -522,7 +524,7 @@ class melCloudDevice {
 							data: newData
 						}
 						try {
-							const newState = await this.axiosInstancePost(HeatPumpAcUrl, options);
+							const newState = await this.axiosInstancePost(deviceTypeUrl, options);
 							const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Set power state: ${state?'ON':'OFF'}`);
 						} catch (error) {
 							this.log.error(`Device: ${accessoryName}, Set power state error: ${error}`);
@@ -588,7 +590,7 @@ class melCloudDevice {
 						data: newData
 					}
 					try {
-						const newState = await this.axiosInstancePost(HeatPumpAcUrl, options);
+						const newState = await this.axiosInstancePost(deviceTypeUrl, options);
 						const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Set target heating cooling mode: ${targetModeText[value]}`);
 					} catch (error) {
 						this.log.error(`Device: ${accessoryName}, Set target heating cooling mode error: ${error}`);
@@ -621,7 +623,7 @@ class melCloudDevice {
 							data: deviceState
 						}
 						try {
-							const newState = await this.axiosInstancePost(HeatPumpAcUrl, options);
+							const newState = await this.axiosInstancePost(deviceTypeUrl, options);
 							const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Set target temperature: ${temp}${temperatureUnit}`);
 						} catch (error) {
 							this.log.error(`Device: ${accessoryName}, Set target temperature error: ${error}`);
@@ -649,7 +651,7 @@ class melCloudDevice {
 							data: deviceState
 						}
 						try {
-							const newState = await this.axiosInstancePost(HeatPumpAcUrl, options);
+							const newState = await this.axiosInstancePost(deviceTypeUrl, options);
 							const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Set fan speed: ${value}`);
 						} catch (error) {
 							this.log.error(`Device: ${accessoryName}, Set fan speed error: ${error}`);
@@ -677,7 +679,7 @@ class melCloudDevice {
 							data: deviceState
 						}
 						try {
-							const newState = await this.axiosInstancePost(HeatPumpAcUrl, options);
+							const newState = await this.axiosInstancePost(deviceTypeUrl, options);
 							const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Set swing mode: ${TARGET_SWING_MODES[value]}`);
 						} catch (error) {
 							this.log.error(`Device: ${accessoryName}, Set new swing mode error: ${error}`);
@@ -708,7 +710,7 @@ class melCloudDevice {
 							data: deviceState
 						}
 						try {
-							const newState = await this.axiosInstancePost(HeatPumpAcUrl, options);
+							const newState = await this.axiosInstancePost(deviceTypeUrl, options);
 							const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Set target horizontal tilt angle: ${value}°`);
 						} catch (error) {
 							this.log.error(`Device: ${accessoryName}, Set target horizontal tilt angle error: ${error}`);
@@ -739,7 +741,7 @@ class melCloudDevice {
 							data: deviceState
 						}
 						try {
-							const newState = await this.axiosInstancePost(HeatPumpAcUrl, options);
+							const newState = await this.axiosInstancePost(deviceTypeUrl, options);
 							const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Set target vertical tilt angle: ${value}°`);
 						} catch (error) {
 							this.log.error(`Device: ${accessoryName}, Set target vertical tilt angle error: ${error}`);
@@ -766,7 +768,7 @@ class melCloudDevice {
 						data: deviceState
 					}
 					try {
-						const newState = await this.axiosInstancePost(HeatPumpAcUrl, options);
+						const newState = await this.axiosInstancePost(deviceTypeUrl, options);
 						const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Set cooling threshold temperature: ${temp}${temperatureUnit}`);
 					} catch (error) {
 						this.log.error(`Device: ${accessoryName}, Set cooling threshold temperature error: ${error}`);
@@ -792,7 +794,7 @@ class melCloudDevice {
 						data: deviceState
 					}
 					try {
-						const newState = await this.axiosInstancePost(HeatPumpAcUrl, options);
+						const newState = await this.axiosInstancePost(deviceTypeUrl, options);
 						const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Set heating threshold temperature: ${temp}${temperatureUnit}`);
 					} catch (error) {
 						this.log.error(`Device: ${accessoryName}, Set heating threshold temperature error: ${error}`);
