@@ -36,8 +36,10 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
    * Restart Homebridge and try add it to the Home app again.
 
 ### About the plugin
+* Support for multiple MELCloud accounts.
+* Support for multiple buildings, floors, areas.
+* Support two control modes, Thermostat or Heater Cooler, selectable in plugin settings.
 * All devices are detected automatically.
-* The plugin working with two modes, Thermostat or Heater Cooler, selectable in plugin settings.
 * Possible control of Air Conditioner:
   * Power ON/OFF.
   * Operating mode OFF/HEAT/COOL/AUTO.
