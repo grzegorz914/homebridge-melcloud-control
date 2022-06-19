@@ -506,21 +506,16 @@ class melCloudDevice {
 						default:
 							break
 					};
-					if (newData.EffectiveFlags > 0) {
-						newData.HasPendingCommand = true;
-						newData.DeviceID = deviceId;
-						const options = {
-							data: newData
-						}
-						try {
-							const newState = await this.axiosInstancePost(deviceTypeUrl, options);
-							const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set power state: ${state?'ON':'OFF'}`);
-						} catch (error) {
-							this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set power state error: ${error}`);
-						};
-					} else {
-						const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, nothing to send.`);
+					const options = {
+						data: newData
 					}
+					try {
+						deviceState.HasPendingCommand = true;
+						const newState = await this.axiosInstancePost(deviceTypeUrl, options);
+						const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set power state: ${state?'ON':'OFF'}`);
+					} catch (error) {
+						this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set power state error: ${error}`);
+					};
 				});
 		};
 		this.melcloudService.getCharacteristic(characteristicCurrentType)
@@ -568,21 +563,16 @@ class melCloudDevice {
 					default:
 						break
 				}
-				if (newData.EffectiveFlags > 0) {
-					newData.HasPendingCommand = true;
-					newData.DeviceID = deviceId;
-					const options = {
-						data: newData
-					}
-					try {
-						const newState = await this.axiosInstancePost(deviceTypeUrl, options);
-						const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set target heating cooling mode: ${targetModeText[value]}`);
-					} catch (error) {
-						this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set target heating cooling mode error: ${error}`);
-					};
-				} else {
-					const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, nothing to send.`);
+				const options = {
+					data: newData
 				}
+				try {
+					deviceState.HasPendingCommand = true;
+					const newState = await this.axiosInstancePost(deviceTypeUrl, options);
+					const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set target heating cooling mode: ${targetModeText[value]}`);
+				} catch (error) {
+					this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set target heating cooling mode error: ${error}`);
+				};
 			});
 		this.melcloudService.getCharacteristic(Characteristic.CurrentTemperature)
 			.onGet(async () => {
@@ -601,21 +591,16 @@ class melCloudDevice {
 					const temp = Math.round((value <= 10) ? 10 : value >= 31 ? 31 : value * 2) / 2;
 					deviceState.SetTemperature = temp;
 					deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Temperature;
-					if (deviceState.EffectiveFlags > 0) {
-						deviceState.HasPendingCommand = true;
-						deviceState.DeviceID = deviceId;
-						const options = {
-							data: deviceState
-						}
-						try {
-							const newState = await this.axiosInstancePost(deviceTypeUrl, options);
-							const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set target temperature: ${temp}${temperatureUnit}`);
-						} catch (error) {
-							this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set target temperature error: ${error}`);
-						};
-					} else {
-						const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, nothing to send.`);
+					const options = {
+						data: deviceState
 					}
+					try {
+						deviceState.HasPendingCommand = true;
+						const newState = await this.axiosInstancePost(deviceTypeUrl, options);
+						const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set target temperature: ${temp}${temperatureUnit}`);
+					} catch (error) {
+						this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set target temperature error: ${error}`);
+					};
 				});
 		};
 		if (this.displayMode == 0) {
@@ -629,21 +614,16 @@ class melCloudDevice {
 				.onSet(async (value) => {
 					deviceState.SetFanSpeed = ((value / 100.0) * deviceState.NumberOfFanSpeeds).toFixed(0);
 					deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.FanSpeed;
-					if (deviceState.EffectiveFlags > 0) {
-						deviceState.HasPendingCommand = true;
-						deviceState.DeviceID = deviceId;
-						const options = {
-							data: deviceState
-						}
-						try {
-							const newState = await this.axiosInstancePost(deviceTypeUrl, options);
-							const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set fan speed: ${value}`);
-						} catch (error) {
-							this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set fan speed error: ${error}`);
-						};
-					} else {
-						const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, nothing to send.`);
+					const options = {
+						data: deviceState
 					}
+					try {
+						deviceState.HasPendingCommand = true;
+						const newState = await this.axiosInstancePost(deviceTypeUrl, options);
+						const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set fan speed: ${value}`);
+					} catch (error) {
+						this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set fan speed error: ${error}`);
+					};
 				});
 			this.melcloudService.getCharacteristic(Characteristic.SwingMode)
 				.onGet(async () => {
@@ -657,21 +637,16 @@ class melCloudDevice {
 					deviceState.VaneHorizontal = value ? 12 : 0;
 					deviceState.VaneVertical = value ? 7 : 0;
 					deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneVertical + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneHorizontal;
-					if (deviceState.EffectiveFlags > 0) {
-						deviceState.HasPendingCommand = true;
-						deviceState.DeviceID = deviceId;
-						const options = {
-							data: deviceState
-						}
-						try {
-							const newState = await this.axiosInstancePost(deviceTypeUrl, options);
-							const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set swing mode: ${DEVICES_MODES.AirConditioner.TargetSwing[value]}`);
-						} catch (error) {
-							this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set new swing mode error: ${error}`);
-						};
-					} else {
-						const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, nothing to send.`);
+					const options = {
+						data: deviceState
 					}
+					try {
+						deviceState.HasPendingCommand = true;
+						const newState = await this.axiosInstancePost(deviceTypeUrl, options);
+						const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set swing mode: ${DEVICES_MODES.AirConditioner.TargetSwing[value]}`);
+					} catch (error) {
+						this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set new swing mode error: ${error}`);
+					};
 				});
 			this.melcloudService.getCharacteristic(Characteristic.CurrentHorizontalTiltAngle)
 				.onGet(async () => {
@@ -688,21 +663,16 @@ class melCloudDevice {
 				.onSet(async (value) => {
 					deviceState.VaneHorizontal = ((value + 90.0) / 45.0 + 1.0).toFixed(0);
 					deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneHorizontal;
-					if (deviceState.EffectiveFlags > 0) {
-						deviceState.HasPendingCommand = true;
-						deviceState.DeviceID = deviceId;
-						const options = {
-							data: deviceState
-						}
-						try {
-							const newState = await this.axiosInstancePost(deviceTypeUrl, options);
-							const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set target horizontal tilt angle: ${value}°`);
-						} catch (error) {
-							this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set target horizontal tilt angle error: ${error}`);
-						};
-					} else {
-						const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, nothing to send.`);
+					const options = {
+						data: deviceState
 					}
+					try {
+						deviceState.HasPendingCommand = true;
+						const newState = await this.axiosInstancePost(deviceTypeUrl, options);
+						const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set target horizontal tilt angle: ${value}°`);
+					} catch (error) {
+						this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set target horizontal tilt angle error: ${error}`);
+					};
 				});
 			this.melcloudService.getCharacteristic(Characteristic.CurrentVerticalTiltAngle)
 				.onGet(async () => {
@@ -719,21 +689,16 @@ class melCloudDevice {
 				.onSet(async (value) => {
 					deviceState.VaneVertical = ((value + 90.0) / 45.0 + 1.0).toFixed(0);
 					deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneVertical;
-					if (deviceState.EffectiveFlags > 0) {
-						deviceState.HasPendingCommand = true;
-						deviceState.DeviceID = deviceId;
-						const options = {
-							data: deviceState
-						}
-						try {
-							const newState = await this.axiosInstancePost(deviceTypeUrl, options);
-							const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set target vertical tilt angle: ${value}°`);
-						} catch (error) {
-							this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set target vertical tilt angle error: ${error}`);
-						};
-					} else {
-						const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, nothing to send.`);
+					const options = {
+						data: deviceState
 					}
+					try {
+						deviceState.HasPendingCommand = true;
+						const newState = await this.axiosInstancePost(deviceTypeUrl, options);
+						const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set target vertical tilt angle: ${value}°`);
+					} catch (error) {
+						this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set target vertical tilt angle error: ${error}`);
+					};
 				});
 		};
 		this.melcloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
@@ -746,25 +711,20 @@ class melCloudDevice {
 				const temp = Math.round((value <= 16) ? 16 : value >= 31 ? 31 : value * 2) / 2;
 				deviceState.SetTemperature = temp;
 				deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Temperature;
-				if (deviceState.EffectiveFlags > 0) {
-					deviceState.HasPendingCommand = true;
-					deviceState.DeviceID = deviceId;
-					const options = {
-						data: deviceState
-					}
-					try {
-						const newState = await this.axiosInstancePost(deviceTypeUrl, options);
-						const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set cooling threshold temperature: ${temp}${temperatureUnit}`);
-					} catch (error) {
-						this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set cooling threshold temperature error: ${error}`);
-					};
-				} else {
-					const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, nothing to send.`);
+				const options = {
+					data: deviceState
 				}
+				try {
+					deviceState.HasPendingCommand = true;
+					const newState = await this.axiosInstancePost(deviceTypeUrl, options);
+					const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set cooling threshold temperature: ${temp}${temperatureUnit}`);
+				} catch (error) {
+					this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set cooling threshold temperature error: ${error}`);
+				};
 			});
 		this.melcloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
 			.onGet(async () => {
-				const value = deviceState.DefaultHeatingSetTemperature;
+				const value = deviceState.SetTemperature;
 				const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Heating threshold temperature: ${value}${temperatureUnit}`);
 				return value;
 			})
@@ -772,21 +732,16 @@ class melCloudDevice {
 				const temp = Math.round((value <= 10) ? 10 : value >= 31 ? 31 : value * 2) / 2;
 				deviceState.SetTemperature = temp;
 				deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Temperature;
-				if (deviceState.EffectiveFlags > 0) {
-					deviceState.HasPendingCommand = true;
-					deviceState.DeviceID = deviceId;
-					const options = {
-						data: deviceState
-					}
-					try {
-						const newState = await this.axiosInstancePost(deviceTypeUrl, options);
-						const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set heating threshold temperature: ${temp}${temperatureUnit}`);
-					} catch (error) {
-						this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set heating threshold temperature error: ${error}`);
-					};
-				} else {
-					const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, nothing to send.`);
+				const options = {
+					data: deviceState
 				}
+				try {
+					deviceState.HasPendingCommand = true;
+					const newState = await this.axiosInstancePost(deviceTypeUrl, options);
+					const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set heating threshold temperature: ${temp}${temperatureUnit}`);
+				} catch (error) {
+					this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set heating threshold temperature error: ${error}`);
+				};
 			});
 		this.melcloudService.getCharacteristic(Characteristic.TemperatureDisplayUnits)
 			.onGet(async () => {
