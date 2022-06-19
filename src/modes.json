@@ -1,0 +1,27 @@
+{
+    "TemperatureUnits": ["°F", "°C"],
+    "AirConditioner": {
+        "CurrentHeaterCoolerThermostat": [
+            ["INACTIVE", "IDLE", "HEAT", "COOL"],
+            ["OFF", "HEAT", "COOL"]
+        ],
+        "TargetHeaterCoolerThermostat": [
+            ["AUTO", "HEAT", "COOL"],
+            ["OFF", "HEAT", "COOL", "AUTO"]
+        ],
+        "TargetSwing": ["AUTO", "1", "2", "3", "4", "5", "SWING"],
+        "CurrentVerticalVane": ["AUTO", "1", "2", "3", "4", "5", "SWING"],
+        "CurrentHorizontalVane": ["AUTO", "1", "2", "3", "4", "5", "SPLIT", "SWING"],
+        "TargetFan": ["AUTO", "1", "2", "3", "4", "5"]
+    },
+    "HeatPump": {
+        "CurrentState": ["IDLE", "HEAT WATER", "HEAT ZONES", "COOL", "DEFROST", "STANDBY", "LEGIONELLA"],
+        "ZoneOperation": ["HEAT THERMOSTAT", "COOL THERMOSTAT", "HEAT FLOW", "COOL FLOW", "CURVE", "UNKNOWN"],
+        "ZoneStatus": ["HEAT", "IDLE", "COOL", "UNKNOWN"]
+    },
+    "Ventilation": {
+        "Mode": ["RECOVERY", "BYPAS", "AUTO"],
+        "CurrentFanSpeed": ["STOPPED"],
+        "TargetFanSpeed": ["AUTO", "SILENT", "1", "2", "3", "4"]
+    }
+}
