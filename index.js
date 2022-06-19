@@ -248,8 +248,8 @@ class melCloudDevice {
 				arrUnits.push(model);
 			}
 		}
-		const outdorUnit = (arrUnits.length > 0) ? arrUnits[0] : 'Unknown';
-		const indorUnit = (arrUnits.length > 0) ? arrUnits[1] : 'Unknown';
+		const outdorUnit = (arrUnits.length > 0 && this.deviceType == 0) ? arrUnits[0] : 'Unknown';
+		const indorUnit = (arrUnits.length > 0 && this.deviceType == 0) ? arrUnits[1] : 'Unknown';
 		this.modelName = indorUnit;
 		this.modelName1 = outdorUnit;
 		this.serialNumber = device.SerialNumber;
@@ -312,7 +312,7 @@ class melCloudDevice {
 			this.log('Name: %s', this.deviceName);
 			this.log('Model: %s', this.modelName);
 			this.log('Serial: %s', this.serialNumber);
-			const device1 = (arrUnits.length > 0 && this.deviceType) ? this.log('Outdoor: %s', this.modelName1) : false;
+			const device1 = (arrUnits.length > 0 && this.deviceType == 0) ? this.log('Outdoor: %s', this.modelName1) : false;
 			this.log('Manufacturer: %s', this.manufacturer);
 			this.log('----------------------------------');
 		}
