@@ -74,14 +74,14 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
 | `disableLogInfo` | This disable display log values and states on every it change. |
 | `disableLogDeviceInfo` | This disable display log device info on plugin restart. |
 | `displayMode` | Here select control mode `Heater/Cooler`, `Thermostat`. |
-| `enableMqtt` | If enabled, MQTT Broker will start automatically and publish all awailable data. |
+| `enableMqtt` | This enabled MQTT Broker and publish to it all awailable data. |
 | `mqttHost` | Here set the *IP Address* or *Hostname* for MQTT Broker.) |
 | `mqttPort` | Here set the *Port* for MQTT Broker, default 1883.) |
 | `mqttPrefix` | Here set the *Prefix* for *Topic* or leave empty.) |
-| `mqttAuth` | If enabled, MQTT Broker will use authorization credentials. |
+| `mqttAuth` | This enabled MQTT Broker authorization credentials. |
 | `mqttUser` | Here set the MQTT Broker user. |
 | `mqttPasswd` | Here set the MQTT Broker password. |
-| `mqttDebug` | If enabled, deep log will be present in homebridge console for MQTT. |
+| `mqttDebug` | This enabled deep log in homebridge console for MQTT. |
 
 ```json
         {
