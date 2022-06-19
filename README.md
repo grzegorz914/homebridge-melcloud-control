@@ -36,9 +36,9 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
    * Restart Homebridge and try add it to the Home app again.
 
 ### About the plugin!
-* All devices are detected automatically..
-* The plugin can working with two modes Thermostat and Heater Cooler, selectable in plugin settinge.
-* Possible to control:
+* All devices are detected automatically.
+* The plugin working with two modes, Thermostat or Heater Cooler, selectable in plugin settings.
+* Possible control of Air Conditioner:
   * Power ON/OFF.
   * Operating mode OFF/HEAT/COOL/AUTO.
   * Heating/Cooling temperature.
@@ -46,8 +46,12 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
   * Fan speed.
   * Swing mode.
   * Vertical/Horizontal vane tilt angle.
+* Possible control of Heat Pump:
+  * Comming soon...
+* Possible control of Energy Recovery Ventilation:
+  * Comming soon...
 * Home automations and shortcuts can be used to control the devices.
-* MQTT Client publisch all available data from all installed devices.
+* MQTT Client publisch all available data from all detected devices.
 
 ### Important changes
 
