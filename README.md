@@ -23,6 +23,7 @@ Homebridge plugin for Heat Pump and A.C. devices manufactured by Mistsubishi and
 
 ### Note
 * The plugin is in test phase and some function may be not working correct.
+* The Heat Pump is not supported at this time.
 
 ### Know issues
 * If used with Hoobs, there is a possible configuration incompatibilty.
