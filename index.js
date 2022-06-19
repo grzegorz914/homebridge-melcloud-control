@@ -449,7 +449,7 @@ class melCloudDevice {
 		const melCloudInfo = this.melcloudInfo;
 		const deviceState = this.deviceState;
 		const deviceType = this.deviceType;
-		const temperatureUnit = this.temperatureDisplay ? '°F' : '°C';
+		const temperatureUnit = CONSTANS.TemperatureDisplayUnits[this.temperatureDisplay];
 		const deviceTypeUrl = [API_URL.SetAta, API_URL.SetAtw, '', API_URL.SetErv][deviceType];
 
 		const accessoryName = this.deviceName;
