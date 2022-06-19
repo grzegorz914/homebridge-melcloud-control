@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.5] - (19.06.2022)
+## Changes
+- fix parse building structure and read devices [#1](https://github.com/grzegorz914/homebridge-melcloud-control/issues/1)
+- fix set Temperature treshold
+- fix set Target Temperature
+- code cleanup
+
 ## [0.0.4] - (18.06.2022)
 ## Changes
 - first working version

@@ -1,0 +1,8 @@
+{
+    "Power": 1,
+    "OperationMode": 2,
+    "Temperature": 4,
+    "FanSpeed": 8,
+    "VaneVertical": 16,
+    "VaneHorizontal": 256
+}
