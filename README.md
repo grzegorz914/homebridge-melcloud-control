@@ -19,7 +19,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | --- | --- | --- | --- |
 | [Homebridge](https://github.com/homebridge/homebridge) | [Homebridge Wiki](https://github.com/homebridge/homebridge/wiki) | HomeKit Bridge | Required |
 | [Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) | [Config UI X Wiki](https://github.com/oznu/homebridge-config-ui-x/wiki) | Web User Interface | Recommended |
-| [Enphase Envoy](https://www.npmjs.com/package/homebridge-melcloud-control) | `npm install -g homebridge-melcloud-control` | Plug-In | Required |
+| [MELCloud](https://www.npmjs.com/package/homebridge-melcloud-control) | `npm install -g homebridge-melcloud-control` | Plug-In | Required |
 
 ### Note
 * The plugin is in test phase and some function may be not working correct.
