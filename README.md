@@ -38,11 +38,11 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 ### About the plugin
 * Support for multiple MELCloud accounts.
 * Support for multiple buildings, floors, areas.
-* Support two control modes, Thermostat or Heater Cooler, selectable in plugin settings.
+* Support two control modes, *Thermostat* or *Heater Cooler*, selectable in plugin settings.
 * All devices are detected automatically.
 * Control of Air Conditioner:
   * Power ON/OFF.
-  * Operating mode OFF/HEAT/COOL/AUTO.
+  * Operating mode *OFF/HEAT/COOL/AUTO*.
   * Heating/Cooling temperature.
   * Heating/Cooling threshold temperature.
   * Fan speed.
