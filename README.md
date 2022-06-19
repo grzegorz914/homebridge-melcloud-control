@@ -66,13 +66,13 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
 
 | Key | Description | 
 | --- | --- |
-| `name` | Here set the MELCloud name. |
-| `user` | Here set the MELCloud user name. |
+| `name` | Here set the account name. |
+| `user` | Here set the MELCloud username. |
 | `pass` | Here set the MELCloud password. |
 | `language` | Here set the MELCloud language. |
 | `enableDebugMode` | This enable deep log in homebridge console. |
-| `disableLogInfo` | This disable log info, all values and state will not be displayed in Homebridge log console. |
-| `disableLogDeviceInfo` | If enabled, add ability to disable log device info. |
+| `disableLogInfo` | This disable display log values and states on every it change. |
+| `disableLogDeviceInfo` | This disable display log device info on plugin restart. |
 | `displayMode` | Here select control mode `Heater/Cooler`, `Thermostat`. |
 | `enableMqtt` | If enabled, MQTT Broker will start automatically and publish all awailable data. |
 | `mqttHost` | Here set the *IP Address* or *Hostname* for MQTT Broker.) |
