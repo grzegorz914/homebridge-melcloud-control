@@ -38,7 +38,7 @@
               "title": "Disable Log Info",
               "type": "boolean",
               "default": false,
-              "description": "This disable display logg values and states on every it change.",
+              "description": "This disable display log values and states on every it change.",
               "required": false
             },
             "disableLogDeviceInfo": {
