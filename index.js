@@ -229,7 +229,7 @@ class melCloudDevice {
 		this.mqttPasswd = accountConfig.mqttPasswd;
 		this.mqttDebug = accountConfig.mqttDebug || false;
 
-		this.deviceType = device.Device.DeviceType; // 0 = Air Conditioner, 1 = Air to Water, 2 = '', 3 = Energy-Recovery-Ventilation
+		this.deviceType = device.Device.DeviceType;
 		this.deviceTypeText = DEVICE_TYPE[this.deviceType];
 		this.buildingId = device.BuildingID;
 		this.deviceName = device.DeviceName;
@@ -291,19 +291,19 @@ class melCloudDevice {
 		});
 
 		this.mqttClient.on('connected', (message) => {
-				this.log('Device: %s, %s', this.deviceName, message);
+				this.log(`${this.deviceTypeText}: ${this.deviceName}:, ${message}`);
 			})
 			.on('error', (error) => {
-				this.log('Device: %s, %s', this.deviceName, error);
+				this.log(`${this.deviceTypeText}: ${this.deviceName}:, ${error}`);
 			})
 			.on('debug', (message) => {
-				this.log('Device: %s, debug: %s', this.deviceName, message);
+				this.log(`${this.deviceTypeText}: ${this.deviceName}:, debug: ${message}`);
 			})
 			.on('message', (message) => {
-				this.log('Device: %s, %s', this.deviceName, message);
+				this.log(`${this.deviceTypeText}: ${this.deviceName}:,${message}`);
 			})
 			.on('disconnected', (message) => {
-				this.log('Device: %s, %s', this.deviceName, message);
+				this.log(`${this.deviceTypeText}: ${this.deviceName}:, ${message}`);
 			});
 
 		if (!this.disableLogDeviceInfo) {
@@ -332,7 +332,7 @@ class melCloudDevice {
 			try {
 				const deviceStateData = await this.axiosInstanceGet(url);
 				const deviceState = JSON.stringify(deviceStateData.data, null, 2);
-				const debug = this.enableDebugMode ? this.log(`Device: ${this.deviceName}, debug deviceStateData: ${deviceState}`) : false;
+				const debug = this.enableDebugMode ? this.log(`${this.deviceTypeText}: ${this.deviceName}, debug deviceStateData: ${deviceState}`) : false;
 
 				const data = deviceStateData.data;
 				const effectiveFlags = data.EffectiveFlags;
@@ -426,7 +426,7 @@ class melCloudDevice {
 				}
 				resolve(true);
 			} catch (error) {
-				this.log.error(`Device: ${this.deviceName}, Update devices state error: ${error}`);
+				this.log.error(`${this.deviceTypeText}: ${this.deviceName}, Update devices state error: ${error}`);
 				reject(error);
 			};
 		});
@@ -437,7 +437,7 @@ class melCloudDevice {
 			try {
 				await this.updateDevicesState();
 			} catch (error) {
-				this.log.error(`Device: ${this.deviceName}, Update devices state error: ${error}`);
+				this.log.error(`${this.deviceTypeText}: ${this.deviceName}, Update devices state error: ${error}`);
 			};
 		}, 30000)
 	};
@@ -487,7 +487,7 @@ class melCloudDevice {
 			this.melcloudService.getCharacteristic(Characteristic.Active)
 				.onGet(async () => {
 					const state = deviceState.Power;
-					const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Power state: ${state?'ON':'OFF'}`);
+					const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Power state: ${state?'ON':'OFF'}`);
 					return state;
 				})
 				.onSet(async (state) => {
@@ -513,12 +513,12 @@ class melCloudDevice {
 						}
 						try {
 							const newState = await this.axiosInstancePost(deviceTypeUrl, options);
-							const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Set power state: ${state?'ON':'OFF'}`);
+							const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set power state: ${state?'ON':'OFF'}`);
 						} catch (error) {
-							this.log.error(`Device: ${accessoryName}, Set power state error: ${error}`);
+							this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set power state error: ${error}`);
 						};
 					} else {
-						const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, nothing to send.`);
+						const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, nothing to send.`);
 					}
 				});
 		};
@@ -527,7 +527,7 @@ class melCloudDevice {
 				//1 = HEAT, 2 = DRY 3 = COOL, 7 = FAN, 8 = AUTO
 				const currentMode = this.currentModesHeaterCoolerThermostat;
 				const currentModeText = DEVICES_MODES.AirConditioner.CurrentHeaterCoolerThermostat[this.displayMode];
-				const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Heating cooling mode: ${currentModeText[currentMode]}`);
+				const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Heating cooling mode: ${currentModeText[currentMode]}`);
 				return currentMode;
 			});
 		this.melcloudService.getCharacteristic(characteristicTargetType)
@@ -535,7 +535,7 @@ class melCloudDevice {
 				//1 = HEAT, 2 = DRY 3 = COOL, 7 = FAN, 8 = AUTO
 				const targetMode = this.targetModesHeaterCoolerThermostat;
 				const targetModeText = DEVICES_MODES.AirConditioner.TargetHeaterCoolerThermostat[this.displayMode];
-				const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Target heating cooling mode: ${targetModeText[targetMode]}`);
+				const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Target heating cooling mode: ${targetModeText[targetMode]}`);
 				return targetMode;
 			})
 			.onSet(async (value) => {
@@ -579,25 +579,25 @@ class melCloudDevice {
 					}
 					try {
 						const newState = await this.axiosInstancePost(deviceTypeUrl, options);
-						const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Set target heating cooling mode: ${targetModeText[value]}`);
+						const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set target heating cooling mode: ${targetModeText[value]}`);
 					} catch (error) {
-						this.log.error(`Device: ${accessoryName}, Set target heating cooling mode error: ${error}`);
+						this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set target heating cooling mode error: ${error}`);
 					};
 				} else {
-					const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, nothing to send.`);
+					const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, nothing to send.`);
 				}
 			});
 		this.melcloudService.getCharacteristic(Characteristic.CurrentTemperature)
 			.onGet(async () => {
 				const value = deviceState.RoomTemperature;
-				const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Temperature: ${value}${temperatureUnit}`);
+				const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Temperature: ${value}${temperatureUnit}`);
 				return value;
 			});
 		if (this.displayMode == 1) {
 			this.melcloudService.getCharacteristic(Characteristic.TargetTemperature)
 				.onGet(async () => {
 					const value = deviceState.SetTemperature;
-					const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Target temperature: ${value}${temperatureUnit}`);
+					const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Target temperature: ${value}${temperatureUnit}`);
 					return value;
 				})
 				.onSet(async (value) => {
@@ -612,12 +612,12 @@ class melCloudDevice {
 						}
 						try {
 							const newState = await this.axiosInstancePost(deviceTypeUrl, options);
-							const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Set target temperature: ${temp}${temperatureUnit}`);
+							const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set target temperature: ${temp}${temperatureUnit}`);
 						} catch (error) {
-							this.log.error(`Device: ${accessoryName}, Set target temperature error: ${error}`);
+							this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set target temperature error: ${error}`);
 						};
 					} else {
-						const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, nothing to send.`);
+						const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, nothing to send.`);
 					}
 				});
 		};
@@ -626,7 +626,7 @@ class melCloudDevice {
 				.onGet(async () => {
 					//0 = AUTO, 1 = 1, 2 = 2, 3 = 3, 4 = 4, 5 = 5
 					const value = (deviceState.SetFanSpeed / deviceState.NumberOfFanSpeeds) * 100.0;
-					const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Fan speed: ${value}`);
+					const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Fan speed: ${value}`);
 					return value;
 				})
 				.onSet(async (value) => {
@@ -640,12 +640,12 @@ class melCloudDevice {
 						}
 						try {
 							const newState = await this.axiosInstancePost(deviceTypeUrl, options);
-							const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Set fan speed: ${value}`);
+							const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set fan speed: ${value}`);
 						} catch (error) {
-							this.log.error(`Device: ${accessoryName}, Set fan speed error: ${error}`);
+							this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set fan speed error: ${error}`);
 						};
 					} else {
-						const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, nothing to send.`);
+						const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, nothing to send.`);
 					}
 				});
 			this.melcloudService.getCharacteristic(Characteristic.SwingMode)
@@ -653,7 +653,7 @@ class melCloudDevice {
 					//Vane Horizontal: 0 = Auto, 1 = 1, 2 = 2, 3 = 3, 4 = 4, 5 = 5, 12 = Swing.
 					//Vane Vertical: 0 = Auto, 1 = 1, 2 = 2, 3 = 3, 4 = 4, 5 = 5, 7 = Swing.
 					const value = (deviceState.VaneHorizontal == 12 && deviceState.VaneVertical == 7) ? 1 : 0;
-					const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Swing mode: ${DEVICES_MODES.AirConditioner.TargetSwing[value]}`);
+					const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Swing mode: ${DEVICES_MODES.AirConditioner.TargetSwing[value]}`);
 					return value;
 				})
 				.onSet(async (value) => {
@@ -668,24 +668,24 @@ class melCloudDevice {
 						}
 						try {
 							const newState = await this.axiosInstancePost(deviceTypeUrl, options);
-							const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Set swing mode: ${DEVICES_MODES.AirConditioner.TargetSwing[value]}`);
+							const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set swing mode: ${DEVICES_MODES.AirConditioner.TargetSwing[value]}`);
 						} catch (error) {
-							this.log.error(`Device: ${accessoryName}, Set new swing mode error: ${error}`);
+							this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set new swing mode error: ${error}`);
 						};
 					} else {
-						const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, nothing to send.`);
+						const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, nothing to send.`);
 					}
 				});
 			this.melcloudService.getCharacteristic(Characteristic.CurrentHorizontalTiltAngle)
 				.onGet(async () => {
 					const value = deviceState.VaneHorizontal;
-					const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Horizontal tilt angle: ${value}°`);
+					const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Horizontal tilt angle: ${value}°`);
 					return value;
 				})
 			this.melcloudService.getCharacteristic(Characteristic.TargetHorizontalTiltAngle)
 				.onGet(async () => {
 					const value = deviceState.VaneHorizontal;
-					const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Target horizontal tilt angle: ${value}°`);
+					const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Target horizontal tilt angle: ${value}°`);
 					return value;
 				})
 				.onSet(async (value) => {
@@ -699,24 +699,24 @@ class melCloudDevice {
 						}
 						try {
 							const newState = await this.axiosInstancePost(deviceTypeUrl, options);
-							const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Set target horizontal tilt angle: ${value}°`);
+							const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set target horizontal tilt angle: ${value}°`);
 						} catch (error) {
-							this.log.error(`Device: ${accessoryName}, Set target horizontal tilt angle error: ${error}`);
+							this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set target horizontal tilt angle error: ${error}`);
 						};
 					} else {
-						const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, nothing to send.`);
+						const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, nothing to send.`);
 					}
 				});
 			this.melcloudService.getCharacteristic(Characteristic.CurrentVerticalTiltAngle)
 				.onGet(async () => {
 					const value = deviceState.VaneVertical;
-					const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Vertical tilt angle: ${value}°`);
+					const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Vertical tilt angle: ${value}°`);
 					return value;
 				})
 			this.melcloudService.getCharacteristic(Characteristic.TargetVerticalTiltAngle)
 				.onGet(async () => {
 					const value = deviceState.VaneVertical;
-					const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Target vertical tilt angle: ${value}°`);
+					const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Target vertical tilt angle: ${value}°`);
 					return value;
 				})
 				.onSet(async (value) => {
@@ -730,19 +730,19 @@ class melCloudDevice {
 						}
 						try {
 							const newState = await this.axiosInstancePost(deviceTypeUrl, options);
-							const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Set target vertical tilt angle: ${value}°`);
+							const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set target vertical tilt angle: ${value}°`);
 						} catch (error) {
-							this.log.error(`Device: ${accessoryName}, Set target vertical tilt angle error: ${error}`);
+							this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set target vertical tilt angle error: ${error}`);
 						};
 					} else {
-						const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, nothing to send.`);
+						const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, nothing to send.`);
 					}
 				});
 		};
 		this.melcloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
 			.onGet(async () => {
 				const value = deviceState.DefaultCoolingSetTemperature;
-				const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Cooling threshold temperature: ${value}${temperatureUnit}`);
+				const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Cooling threshold temperature: ${value}${temperatureUnit}`);
 				return value;
 			})
 			.onSet(async (value) => {
@@ -757,18 +757,18 @@ class melCloudDevice {
 					}
 					try {
 						const newState = await this.axiosInstancePost(deviceTypeUrl, options);
-						const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Set cooling threshold temperature: ${temp}${temperatureUnit}`);
+						const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set cooling threshold temperature: ${temp}${temperatureUnit}`);
 					} catch (error) {
-						this.log.error(`Device: ${accessoryName}, Set cooling threshold temperature error: ${error}`);
+						this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set cooling threshold temperature error: ${error}`);
 					};
 				} else {
-					const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, nothing to send.`);
+					const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, nothing to send.`);
 				}
 			});
 		this.melcloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
 			.onGet(async () => {
 				const value = deviceState.DefaultHeatingSetTemperature;
-				const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Heating threshold temperature: ${value}${temperatureUnit}`);
+				const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Heating threshold temperature: ${value}${temperatureUnit}`);
 				return value;
 			})
 			.onSet(async (value) => {
@@ -783,18 +783,18 @@ class melCloudDevice {
 					}
 					try {
 						const newState = await this.axiosInstancePost(deviceTypeUrl, options);
-						const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Set heating threshold temperature: ${temp}${temperatureUnit}`);
+						const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set heating threshold temperature: ${temp}${temperatureUnit}`);
 					} catch (error) {
-						this.log.error(`Device: ${accessoryName}, Set heating threshold temperature error: ${error}`);
+						this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set heating threshold temperature error: ${error}`);
 					};
 				} else {
-					const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, nothing to send.`);
+					const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, nothing to send.`);
 				}
 			});
 		this.melcloudService.getCharacteristic(Characteristic.TemperatureDisplayUnits)
 			.onGet(async () => {
 				const value = this.temperatureDisplayUnit;
-				const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Temperature display unit: ${value?'°F': '°C'}`);
+				const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Temperature display unit: ${value?'°F': '°C'}`);
 				return value;
 			})
 			.onSet(async (value) => {
@@ -812,15 +812,15 @@ class melCloudDevice {
 						data: melCloudInfo
 					}
 					const newState = await this.axiosInstancePost(API_URL.UpdateApplicationOptions, options);
-					const logInfo = this.disableLogInfo ? false : this.log(`Device: ${accessoryName}, Set temperature display unit: ${value?'°F': '°C'}`);
+					const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set temperature display unit: ${value?'°F': '°C'}`);
 				} catch (error) {
-					this.log.error(`Device: ${accessoryName}, Set temperature display unit error: ${error}`);
+					this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set temperature display unit error: ${error}`);
 				};
 			});
 		accessory.addService(this.melcloudService);
 
 		this.startPrepareAccessory = false;
-		const debug = this.enableDebugMode ? this.log(`Device: ${accessoryName}, publishExternalAccessory.`) : false;
+		const debug = this.enableDebugMode ? this.log(`${this.deviceTypeText}: ${accessoryName}, publishExternalAccessory.`) : false;
 		this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
 	};
 };
