@@ -8,19 +8,20 @@
         "VaneHorizontal": 256
     },
     "HeatPump": {
-        "HeatPumpTemperatureZone1": 281474976710688,
-        "HeatPumpSetTankWaterTemperature": 65536,
-        "HeatPumpForcedHotWaterMode": 8589934720,
-        "HeatPumpSetTemperatureZone1": 34359738880,
-        "HeatPumpSetTemperatureZone2": 281474976710656,
-        "HeatPumpSetHeatFlowTemperatureZone1": 281474976710656,
-        "HeatPumpSetCoolFlowTemperatureZone1": 281474976710656,
-        "HeatPumpSetHeatFlowTemperatureZone2": 281474976710656,
-        "HeatPumpSetCoolFlowTemperatureZone2": 281474976710656
+        "TemperatureZone1": 281474976710688,
+        "SetTankWaterTemperature": 65536,
+        "ForcedHotWaterMode": 8589934720,
+        "SetTemperatureZone1": 34359738880,
+        "SetTemperatureZone2": 281474976710656,
+        "SetHeatFlowTemperatureZone1": 281474976710656,
+        "SetCoolFlowTemperatureZone1": 281474976710656,
+        "SetHeatFlowTemperatureZone2": 281474976710656,
+        "SetCoolFlowTemperatureZone2": 281474976710656,
+        "OperationMoseZone1": 8,
+        "OperationMoseZone2": 16
     },
     "Ventilation": {
-        "VentilationOperationModeZone1": 8,
         "VentilationMode": 4,
-        "VentilationSetFanSpeed": 8
+        "SetFanSpeed": 8
     }
 }

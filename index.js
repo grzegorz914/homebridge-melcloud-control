@@ -336,21 +336,21 @@ class melCloudDevice {
 
 				const data = deviceStateData.data;
 				const effectiveFlags = data.EffectiveFlags;
-
 				const localIPAddress = data.LocalIPAddress;
 				const roomTemperature = data.RoomTemperature;
 				const setTemperature = data.SetTemperature;
-				const setTankWaterTemperature = deviceType ? data.SetTankWaterTemperature : false;
-				const setTemperatureZone1 = deviceType ? data.SetTemperatureZone1 : false;
-				const forcedHotWaterMode = deviceType ? data.ForcedHotWaterMode : false;
-				const setTemperatureZone2 = deviceType ? data.SetTemperatureZone2 : false;
-				const setHeatFlowTemperatureZone1 = deviceType ? data.SetHeatFlowTemperatureZone1 : false;
-				const setCoolFlowTemperatureZone1 = deviceType ? data.SetCoolFlowTemperatureZone1 : false;
-				const setHeatFlowTemperatureZone2 = deviceType ? data.SetHeatFlowTemperatureZone2 : false;
-				const setCoolFlowTemperatureZone2 = deviceType ? data.SetCoolFlowTemperatureZone2 : false;
-				const operationModeZone1 = deviceType ? data.OperationModeZone1 : false;
-				const operationModeZone2 = deviceType ? data.OperationModeZone2 : false;
-				const setFanSpeed = data.SetFanSpeed;
+				const setTankWaterTemperature = (deviceType == 1) ? data.SetTankWaterTemperature : false;
+				const setTemperatureZone1 = (deviceType == 1) ? data.SetTemperatureZone1 : false;
+				const forcedHotWaterMode = (deviceType == 1) ? data.ForcedHotWaterMode : false;
+				const setTemperatureZone2 = (deviceType == 1) ? data.SetTemperatureZone2 : false;
+				const setHeatFlowTemperatureZone1 = (deviceType == 1) ? data.SetHeatFlowTemperatureZone1 : false;
+				const setCoolFlowTemperatureZone1 = (deviceType == 1) ? data.SetCoolFlowTemperatureZone1 : false;
+				const setHeatFlowTemperatureZone2 = (deviceType == 1) ? data.SetHeatFlowTemperatureZone2 : false;
+				const setCoolFlowTemperatureZone2 = (deviceType == 1) ? data.SetCoolFlowTemperatureZone2 : false;
+				const operationModeZone1 = (deviceType == 1) ? data.OperationModeZone1 : false;
+				const operationModeZone2 = (deviceType == 1) ? data.OperationModeZone2 : false;
+				const ventilationMode = (deviceType == 3) ? data.VentilationMode : false;
+				const setFanSpeed = (deviceType == 0 || deviceType == 3) ? data.SetFanSpeed : false;
 				const operationMode = data.OperationMode;
 				const vaneHorizontal = data.VaneHorizontal;
 				const vaneVertical = data.VaneVertical;
