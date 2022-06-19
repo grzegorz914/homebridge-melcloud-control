@@ -35,7 +35,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
    * Next remove `IdentifierCashe.xxx` file with same name as `AccessoryInfo.xxx`.
    * Restart Homebridge and try add it to the Home app again.
 
-### About the plugin!
+### About the plugin
 * All devices are detected automatically.
 * The plugin working with two modes, Thermostat or Heater Cooler, selectable in plugin settings.
 * Possible control of Air Conditioner:
