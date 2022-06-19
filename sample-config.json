@@ -16,7 +16,7 @@
   "accessories": [],
   "platforms": [{
     "platform": "MELCloud",
-    "devices": [{
+    "accounts": [{
       "name": "My House",
       "user": "user",
       "pass": "pass",
