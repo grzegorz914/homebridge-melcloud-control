@@ -482,6 +482,8 @@ class melCloudDevice {
 		const serviceType = [Service.HeaterCooler, Service.Thermostat][this.displayMode];
 		const characteristicCurrentType = [Characteristic.CurrentHeaterCoolerState, Characteristic.CurrentHeatingCoolingState][this.displayMode];
 		const characteristicTargetType = [Characteristic.TargetHeaterCoolerState, Characteristic.TargetHeatingCoolingState][this.displayMode];
+		const currentModeText = DEVICES_MODES.AirConditioner.CurrentHeaterCoolerThermostat[this.displayMode];
+		const targetModeText = DEVICES_MODES.AirConditioner.TargetHeaterCoolerThermostat[this.displayMode];
 		this.melcloudService = new serviceType(accessoryName, `Service`);
 		if (this.displayMode == 0) {
 			this.melcloudService.getCharacteristic(Characteristic.Active)
@@ -491,7 +493,6 @@ class melCloudDevice {
 					return state;
 				})
 				.onSet(async (state) => {
-					let options = '';
 					let newData = deviceState;
 					switch (state) {
 						case 0:
@@ -508,7 +509,7 @@ class melCloudDevice {
 					if (newData.EffectiveFlags > 0) {
 						newData.HasPendingCommand = true;
 						newData.DeviceID = deviceId;
-						options = {
+						const options = {
 							data: newData
 						}
 						try {
@@ -526,7 +527,6 @@ class melCloudDevice {
 			.onGet(async () => {
 				//1 = HEAT, 2 = DRY 3 = COOL, 7 = FAN, 8 = AUTO
 				const currentMode = this.currentModesHeaterCoolerThermostat;
-				const currentModeText = DEVICES_MODES.AirConditioner.CurrentHeaterCoolerThermostat[this.displayMode];
 				const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Heating cooling mode: ${currentModeText[currentMode]}`);
 				return currentMode;
 			});
@@ -534,14 +534,11 @@ class melCloudDevice {
 			.onGet(async () => {
 				//1 = HEAT, 2 = DRY 3 = COOL, 7 = FAN, 8 = AUTO
 				const targetMode = this.targetModesHeaterCoolerThermostat;
-				const targetModeText = DEVICES_MODES.AirConditioner.TargetHeaterCoolerThermostat[this.displayMode];
 				const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Target heating cooling mode: ${targetModeText[targetMode]}`);
 				return targetMode;
 			})
 			.onSet(async (value) => {
-				let options = '';
 				let newData = deviceState;
-				const targetModeText = AirConditioner.TargetModesHeaterCoolerThermostat[this.displayMode];
 				switch (value) {
 					case 0: //OFF, AUTO
 						if (this.displayMode) {
@@ -574,7 +571,7 @@ class melCloudDevice {
 				if (newData.EffectiveFlags > 0) {
 					newData.HasPendingCommand = true;
 					newData.DeviceID = deviceId;
-					options = {
+					const options = {
 						data: newData
 					}
 					try {
