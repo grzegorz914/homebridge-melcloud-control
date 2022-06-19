@@ -17,7 +17,7 @@
               "title": "Account name",
               "type": "string",
               "placeholder": "Account name",
-              "description": "Here set the your account name.",
+              "description": "Here set your account name.",
               "required": true
             },
             "user": {
@@ -34,27 +34,6 @@
               "description": "Here set the MELCloud account password.",
               "required": true
             },
-            "disableLogInfo": {
-              "title": "Disable Log Info",
-              "type": "boolean",
-              "default": false,
-              "description": "This disable display log values and states on every it change.",
-              "required": false
-            },
-            "disableLogDeviceInfo": {
-              "title": "Disable Log Device Info",
-              "type": "boolean",
-              "default": false,
-              "description": "This disable display log device info on plugin restart.",
-              "required": false
-            },
-            "enableDebugMode": {
-              "title": "Debug",
-              "type": "boolean",
-              "default": false,
-              "description": "This enable debug mode.",
-              "required": false
-            },
             "language": {
               "title": "Language",
               "type": "string",
@@ -62,7 +41,7 @@
               "maxLength": 2,
               "pattern": "^[0-9]+$",
               "default": "0",
-              "description": "Here select the language used with MELCloud.",
+              "description": "Here select the language Ypu use in MELCloud service.",
               "oneOf": [{
                   "title": "English",
                   "enum": ["0"]
@@ -191,6 +170,27 @@
                 }
               ],
               "required": true
+            },
+            "disableLogInfo": {
+              "title": "Disable Log Info",
+              "type": "boolean",
+              "default": false,
+              "description": "This disable display log values and states on every it change.",
+              "required": false
+            },
+            "disableLogDeviceInfo": {
+              "title": "Disable Log Device Info",
+              "type": "boolean",
+              "default": false,
+              "description": "This disable display log device info on plugin restart.",
+              "required": false
+            },
+            "enableDebugMode": {
+              "title": "Debug",
+              "type": "boolean",
+              "default": false,
+              "description": "This enable debug mode.",
+              "required": false
             },
             "enableMqtt": {
               "title": "Enable",
