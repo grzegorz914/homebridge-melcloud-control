@@ -397,8 +397,8 @@ class melCloudDevice {
 							.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
 							.updateCharacteristic(Characteristic.RotationSpeed, (setFanSpeed / numberOfFanSpeeds) * 100.0)
 							.updateCharacteristic(Characteristic.SwingMode, (vaneHorizontal == 12 && vaneVertical == 7) ? 1 : 0)
-							.updateCharacteristic(Characteristic.CoolingThresholdTemperature, defaultCoolingSetTemperature)
-							.updateCharacteristic(Characteristic.HeatingThresholdTemperature, defaultHeatingSetTemperature)
+							.updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature)
+							.updateCharacteristic(Characteristic.HeatingThresholdTemperature, setTemperature)
 							.updateCharacteristic(Characteristic.CurrentHorizontalTiltAngle, vaneHorizontal)
 							.updateCharacteristic(Characteristic.TargetHorizontalTiltAngle, vaneHorizontal)
 							.updateCharacteristic(Characteristic.CurrentVerticalTiltAngle, vaneVertical)
@@ -410,8 +410,8 @@ class melCloudDevice {
 							.updateCharacteristic(Characteristic.TargetHeatingCoolingState, targetMode)
 							.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
 							.updateCharacteristic(Characteristic.TargetTemperature, setTemperature)
-							.updateCharacteristic(Characteristic.CoolingThresholdTemperature, defaultCoolingSetTemperature)
-							.updateCharacteristic(Characteristic.HeatingThresholdTemperature, defaultHeatingSetTemperature)
+							.updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature)
+							.updateCharacteristic(Characteristic.HeatingThresholdTemperature, setTemperature)
 					}
 				};
 
@@ -738,13 +738,13 @@ class melCloudDevice {
 		};
 		this.melcloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
 			.onGet(async () => {
-				const value = deviceState.DefaultCoolingSetTemperature;
+				const value = deviceState.SetTemperature;
 				const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Cooling threshold temperature: ${value}${temperatureUnit}`);
 				return value;
 			})
 			.onSet(async (value) => {
 				const temp = Math.round((value <= 16) ? 16 : value >= 31 ? 31 : value * 2) / 2;
-				deviceState.DefaultCoolingSetTemperature = temp;
+				deviceState.SetTemperature = temp;
 				deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Temperature;
 				if (deviceState.EffectiveFlags > 0) {
 					deviceState.HasPendingCommand = true;
@@ -770,7 +770,7 @@ class melCloudDevice {
 			})
 			.onSet(async (value) => {
 				const temp = Math.round((value <= 10) ? 10 : value >= 31 ? 31 : value * 2) / 2;
-				deviceState.DefaultHeatingSetTemperature = temp;
+				deviceState.SetTemperature = temp;
 				deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Temperature;
 				if (deviceState.EffectiveFlags > 0) {
 					deviceState.HasPendingCommand = true;
