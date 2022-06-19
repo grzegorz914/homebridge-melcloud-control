@@ -1,5 +1,5 @@
 {
-    "TemperatureUnits": ["°F", "°C"],
+    "DeviceType": ["Air Conditioner", "Heat Pump", "", "Energy Recovery Ventilation"],
     "AirConditioner": {
         "CurrentHeaterCoolerThermostat": [
             ["INACTIVE", "IDLE", "HEAT", "COOL"],
@@ -23,5 +23,10 @@
         "Mode": ["RECOVERY", "BYPAS", "AUTO"],
         "CurrentFanSpeed": ["STOPPED"],
         "TargetFanSpeed": ["AUTO", "SILENT", "1", "2", "3", "4"]
+    },
+    "TemperatureDisplayUnits": ["°F", "°C"],
+    "AccessLevel": {
+        "Quest": 3,
+        "Owner": 4
     }
 }

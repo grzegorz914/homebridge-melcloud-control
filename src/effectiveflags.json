@@ -2,23 +2,22 @@
     "AirConditioner": {
         "Power": 1,
         "OperationMode": 2,
-        "Temperature": 4,
-        "FanSpeed": 8,
+        "SetTemperature": 4,
+        "SetFanSpeed": 8,
         "VaneVertical": 16,
         "VaneHorizontal": 256
     },
     "HeatPump": {
-        "TemperatureZone1": 281474976710688,
-        "SetTankWaterTemperature": 65536,
-        "ForcedHotWaterMode": 8589934720,
+        "SetTankWaterTemperature": 281474976710688,
+        "ForcedHotWaterMode": 65536,
         "SetTemperatureZone1": 34359738880,
         "SetTemperatureZone2": 281474976710656,
         "SetHeatFlowTemperatureZone1": 281474976710656,
         "SetCoolFlowTemperatureZone1": 281474976710656,
         "SetHeatFlowTemperatureZone2": 281474976710656,
         "SetCoolFlowTemperatureZone2": 281474976710656,
-        "OperationMoseZone1": 8,
-        "OperationMoseZone2": 16
+        "OperationModeZone1": 8,
+        "OperationModeZone2": 16
     },
     "Ventilation": {
         "VentilationMode": 4,

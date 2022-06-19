@@ -7,12 +7,10 @@ const axios = require('axios');
 const mqttClient = require('./src/mqtt.js');
 const API_URL = require('./src/apiurl.json');
 const DEVICES_EFFECTIVE_FLAGS = require('./src/effectiveflags.json');
-const DEVICES_MODES = require('./src/modes.json');
-const ACCESS_LEVEL = require('./src/accesslevel.json');
+const CONSTANS = require('./src/constans.json');
 
 const PLUGIN_NAME = 'homebridge-melcloud-control';
 const PLATFORM_NAME = 'MELCloud';
-const DEVICE_TYPE = ['Air Conditioner', 'Air to Water', '', 'Energy Recovery Ventilation']
 
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
@@ -230,7 +228,7 @@ class melCloudDevice {
 		this.mqttDebug = accountConfig.mqttDebug || false;
 
 		this.deviceType = device.Device.DeviceType;
-		this.deviceTypeText = DEVICE_TYPE[this.deviceType];
+		this.deviceTypeText = CONSTANS.DeviceType[this.deviceType];
 		this.buildingId = device.BuildingID;
 		this.deviceName = device.DeviceName;
 		this.deviceId = device.DeviceID;;
@@ -482,8 +480,8 @@ class melCloudDevice {
 		const serviceType = [Service.HeaterCooler, Service.Thermostat][this.displayMode];
 		const characteristicCurrentType = [Characteristic.CurrentHeaterCoolerState, Characteristic.CurrentHeatingCoolingState][this.displayMode];
 		const characteristicTargetType = [Characteristic.TargetHeaterCoolerState, Characteristic.TargetHeatingCoolingState][this.displayMode];
-		const currentModeText = DEVICES_MODES.AirConditioner.CurrentHeaterCoolerThermostat[this.displayMode];
-		const targetModeText = DEVICES_MODES.AirConditioner.TargetHeaterCoolerThermostat[this.displayMode];
+		const currentModeText = CONSTANS.AirConditioner.CurrentHeaterCoolerThermostat[this.displayMode];
+		const targetModeText = CONSTANS.AirConditioner.TargetHeaterCoolerThermostat[this.displayMode];
 		this.melcloudService = new serviceType(accessoryName, `Service`);
 		if (this.displayMode == 0) {
 			this.melcloudService.getCharacteristic(Characteristic.Active)
@@ -590,7 +588,7 @@ class melCloudDevice {
 				.onSet(async (value) => {
 					const temp = Math.round((value <= 10) ? 10 : value >= 31 ? 31 : value * 2) / 2;
 					deviceState.SetTemperature = temp;
-					deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Temperature;
+					deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetTemperature;
 					deviceState.HasPendingCommand = true;
 					const options = {
 						data: deviceState
@@ -613,7 +611,7 @@ class melCloudDevice {
 				})
 				.onSet(async (value) => {
 					deviceState.SetFanSpeed = ((value / 100.0) * deviceState.NumberOfFanSpeeds).toFixed(0);
-					deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.FanSpeed;
+					deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetFanSpeed;
 					deviceState.HasPendingCommand = true;
 					const options = {
 						data: deviceState
@@ -630,7 +628,7 @@ class melCloudDevice {
 					//Vane Horizontal: 0 = Auto, 1 = 1, 2 = 2, 3 = 3, 4 = 4, 5 = 5, 12 = Swing.
 					//Vane Vertical: 0 = Auto, 1 = 1, 2 = 2, 3 = 3, 4 = 4, 5 = 5, 7 = Swing.
 					const value = (deviceState.VaneHorizontal == 12 && deviceState.VaneVertical == 7) ? 1 : 0;
-					const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Swing mode: ${DEVICES_MODES.AirConditioner.TargetSwing[value]}`);
+					const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Swing mode: ${CONSTANS.AirConditioner.TargetSwing[value]}`);
 					return value;
 				})
 				.onSet(async (value) => {
@@ -643,7 +641,7 @@ class melCloudDevice {
 					}
 					try {
 						const newState = await this.axiosInstancePost(deviceTypeUrl, options);
-						const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set swing mode: ${DEVICES_MODES.AirConditioner.TargetSwing[value]}`);
+						const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set swing mode: ${CONSTANS.AirConditioner.TargetSwing[value]}`);
 					} catch (error) {
 						this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set new swing mode error: ${error}`);
 					};
@@ -710,7 +708,7 @@ class melCloudDevice {
 			.onSet(async (value) => {
 				const temp = Math.round((value <= 16) ? 16 : value >= 31 ? 31 : value * 2) / 2;
 				deviceState.SetTemperature = temp;
-				deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Temperature;
+				deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetTemperature;
 				deviceState.HasPendingCommand = true;
 				const options = {
 					data: deviceState
@@ -731,7 +729,7 @@ class melCloudDevice {
 			.onSet(async (value) => {
 				const temp = Math.round((value <= 10) ? 10 : value >= 31 ? 31 : value * 2) / 2;
 				deviceState.SetTemperature = temp;
-				deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Temperature;
+				deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetTemperature;
 				deviceState.HasPendingCommand = true;
 				const options = {
 					data: deviceState
