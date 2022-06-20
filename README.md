@@ -37,8 +37,9 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 
 ### About the plugin
 * Support for multiple MELCloud accounts.
-* Support for multiple buildings, floors, areas.
+* Support for multiple buildings, flors, areas.
 * Support two control modes, *Thermostat* or *Heater Cooler*, selectable in plugin settings.
+* Support control *ON/OFF, HEAT, DRY, COOL, FAN, PURIFY* using extra buttons.
 * All devices are detected automatically.
 * Control of Air Conditioner:
   * Power ON/OFF.
@@ -70,10 +71,13 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
 | `user` | Here set the MELCloud username. |
 | `pass` | Here set the MELCloud password. |
 | `language` | Here set the MELCloud language. |
+| `displayMode` | Here select control mode `Heater/Cooler`, `Thermostat`. |
+| `buttons.name` | Here set *Button Name* which You want expose to the *Homebridge/HomeKit*.| 
+| `buttons.mode` | Here select button mode, `On/Off`, `Heat`, `Dry`, `Cool`, `Fan`, `Auto`, `Purify`. |
 | `enableDebugMode` | This enable deep log in homebridge console. |
+| `buttons.displayType` | Here select display type in HomeKit app, possible `Switch`, `Button` - selectable in HomeKit app as Light, Fan, Outlet.|
 | `disableLogInfo` | This disable display log values and states on every it change. |
 | `disableLogDeviceInfo` | This disable display log device info on plugin restart. |
-| `displayMode` | Here select control mode `Heater/Cooler`, `Thermostat`. |
 | `enableMqtt` | This enabled MQTT Broker and publish to it all awailable data. |
 | `mqttHost` | Here set the *IP Address* or *Hostname* for MQTT Broker.) |
 | `mqttPort` | Here set the *Port* for MQTT Broker, default 1883.) |
@@ -92,10 +96,15 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
                     "user": "user",
                     "pass": "pass",
                     "language": 0,
+                    "displayMode": 0,
+                    "buttons": [{
+                        "name": "ON/OFF",
+                        "mode": 0,
+                        "displayType": 0
+                    }],
                     "disableLogInfo": false,
                     "disableLogDeviceInfo": false,
                     "enableDebugMode": false,
-                    "displayMode": 0,
                     "enableMqtt": false,
                     "mqttHost": "192.168.1.33",
                     "mqttPort": 1883,
