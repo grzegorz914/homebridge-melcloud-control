@@ -43,7 +43,9 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * All devices are detected automatically.
 * Control of Air Conditioner:
   * Power ON/OFF.
-  * Operating mode *OFF/HEAT/COOL/AUTO*.
+  * Operating modes:
+    * Using *Thermostat* or *Heater Cooler*, *OFF/HEAT/COOL/AUTO*.
+    * Using buttons *OFF/ON/HEAT/DRY/COOL/FAN/AUTO/PURIFY*.
   * Heating/Cooling temperature.
   * Heating/Cooling threshold temperature.
   * Fan speed.
