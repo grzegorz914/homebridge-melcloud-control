@@ -59,7 +59,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 ### Important changes
 
 ## Configuration
-Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) plugin to configure this plugin (Highly Recommended). The sample configuration can be edited and used manually as an alternative. See the `sample-config.json` file in this repository for an example or copy the example below into your config.json file, making the apporpriate changes before saving it. Be sure to always make a backup copy of your config.json file before making any changes to it.
+Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) to configure this plugin (Highly Recommended). The sample configuration can be edited and used manually as an alternative. See the `sample-config.json` file in this repository for an example or copy the example below into your config.json file, making the apporpriate changes before saving it. Be sure to always make a backup copy of your config.json file before making any changes to it.
 
 <p align="left">
   <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/master/graphics/ustawienia.png" width="840"></a>
@@ -96,11 +96,11 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
                     "user": "user",
                     "pass": "pass",
                     "language": 0,
-                    "displayMode": 0,
+                    "displayMode": 0, //possible 0,1
                     "buttons": [{
                         "name": "ON/OFF",
-                        "mode": 0,
-                        "displayType": 0
+                        "mode": 0, //possible 0,1,2,3,7,8,9
+                        "displayType": 0 //possible 0,1
                     }],
                     "disableLogInfo": false,
                     "disableLogDeviceInfo": false,
