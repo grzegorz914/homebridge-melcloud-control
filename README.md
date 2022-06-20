@@ -45,13 +45,13 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * Control of Air Conditioner:
   * Power *ON/OFF*.
   * Operating modes:
-    * Using *Heater Cooler* or *Thermostat*, *ON/OFF/HEAT/COOL/AUTO*.
+    * Using *Heater/Cooler* or *Thermostat*, *ON/OFF/HEAT/COOL/AUTO*.
     * Using buttons *ON/OFF/HEAT/DRY/COOL/FAN/AUTO/PURIFY*.
   * Heating/Cooling temperature.
   * Heating/Cooling threshold temperature.
   * Fan speed.
   * Swing mode.
-  * Vertical/Horizontal vane tilt angle.
+  * Vanes Vertical/Horizonta tilt angle.
 * Control of Heat Pump:
   * Comming soon...
 * Control of Energy Recovery Ventilation:
