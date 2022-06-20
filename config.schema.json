@@ -171,6 +171,91 @@
               ],
               "required": true
             },
+            "buttons": {
+              "title": "Button",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "title": "Name",
+                    "type": "string",
+                    "placeholder": "Button name",
+                    "description": "Here set Your own name.",
+                    "required": false
+                  },
+                  "mode": {
+                    "title": "Mode",
+                    "type": "integer",
+                    "maximum": 1,
+                    "description": "Here select the function mode.",
+                    "oneOf": [{
+                        "title": "ON/OFF",
+                        "enum": [
+                          0
+                        ]
+                      },
+                      {
+                        "title": "HEAT",
+                        "enum": [
+                          1
+                        ]
+                      },
+                      {
+                        "title": "DRY",
+                        "enum": [
+                          2
+                        ]
+                      },
+                      {
+                        "title": "COOL",
+                        "enum": [
+                          3
+                        ]
+                      },
+                      {
+                        "title": "FAN",
+                        "enum": [
+                          7
+                        ]
+                      },
+                      {
+                        "title": "AUTO",
+                        "enum": [
+                          8
+                        ]
+                      },
+                      {
+                        "title": "PURIFY",
+                        "enum": [
+                          9
+                        ]
+                      }
+                    ],
+                    "required": true
+                  },
+                  "displayType": {
+                    "title": "Display Type",
+                    "type": "integer",
+                    "oneOf": [{
+                        "title": "Button",
+                        "enum": [
+                          0
+                        ]
+                      },
+                      {
+                        "title": "Switch",
+                        "enum": [
+                          1
+                        ]
+                      }
+                    ],
+                    "description": "Here select display type in HomeKit app",
+                    "required": true
+                  }
+                }
+              }
+            },
             "disableLogInfo": {
               "title": "Disable Log Info",
               "type": "boolean",
@@ -284,6 +369,23 @@
       "accounts[].user",
       "accounts[].pass",
       "accounts[].language",
+      {
+        "key": "accounts[]",
+        "type": "section",
+        "title": "Buttons",
+        "expandable": true,
+        "expanded": false,
+        "items": [{
+          "key": "accounts[].buttons",
+          "type": "tabarray",
+          "title": "{{ value.name || 'new button' }}",
+          "items": [
+            "accounts[].buttons[].name",
+            "accounts[].buttons[].mode",
+            "accounts[].buttons[].displayType"
+          ]
+        }]
+      },
       {
         "key": "accounts[]",
         "type": "section",

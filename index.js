@@ -78,19 +78,19 @@ class melCloudPlatform {
 	}
 
 	async melCloudLogin(user, pass, language) {
-		try {
-			const options = {
-				data: {
-					AppVersion: '1.22.10.0',
-					CaptchaChallenge: '',
-					CaptchaResponse: '',
-					Email: user,
-					Password: pass,
-					Language: language,
-					Persist: 'true',
-				}
-			};
+		const options = {
+			data: {
+				AppVersion: '1.22.10.0',
+				CaptchaChallenge: '',
+				CaptchaResponse: '',
+				Email: user,
+				Password: pass,
+				Language: language,
+				Persist: 'true',
+			}
+		};
 
+		try {
 			const melCloudInfoData = await this.axiosInstanceLogin(API_URL.ClientLogin, options);
 			const melCloudInfo = JSON.stringify(melCloudInfoData.data, null, 2);
 			const debug = this.enableDebugMode ? this.log(`Account: ${this.accountName}, debug melCloudInfoData: ${melCloudInfo}`) : false;
@@ -107,21 +107,21 @@ class melCloudPlatform {
 	};
 
 	async updateDevicesList(contextKey, temperatureDisplayUnit, melCloudInfo) {
+		this.buildings = new Array();
+		this.buildingsAreas = new Array();
+		this.floors = new Array();
+		this.florsAreas = new Array();
+		this.devices = new Array();
+
+		this.axiosInstanceGet = axios.create({
+			method: 'GET',
+			baseURL: API_URL.BaseURL,
+			headers: {
+				'X-MitsContextKey': contextKey,
+			}
+		});
+
 		try {
-			this.buildings = new Array();
-			this.buildingsAreas = new Array();
-			this.floors = new Array();
-			this.florsAreas = new Array();
-			this.devices = new Array();
-
-			this.axiosInstanceGet = axios.create({
-				method: 'GET',
-				baseURL: API_URL.BaseURL,
-				headers: {
-					'X-MitsContextKey': contextKey,
-				}
-			});
-
 			const devicesListData = await this.axiosInstanceGet(API_URL.ListDevices);
 			const devicesList = JSON.stringify(devicesListData.data, null, 2);
 			const debug = this.enableDebugMode ? this.log(`Account: ${this.accountName}, debug devicesListData: ${devicesList}`) : false;
@@ -215,6 +215,7 @@ class melCloudDevice {
 
 		this.accountName = accountConfig.name;
 		this.displayMode = accountConfig.displayMode;
+		this.buttons = accountConfig.buttons || [];
 		this.disableLogInfo = accountConfig.disableLogInfo || false;
 		this.disableLogDeviceInfo = accountConfig.disableLogDeviceInfo || false;
 		this.enableDebugMode = accountConfig.enableDebugMode || false;
@@ -323,9 +324,7 @@ class melCloudDevice {
 			const deviceType = this.deviceType;
 			const deviceId = this.deviceId;
 			const buildingId = this.buildingId;
-
-			let url = API_URL.DeviceState.replace("DID", deviceId);
-			url = url.replace("BID", buildingId);
+			const url = API_URL.DeviceState.replace("DID", deviceId).replace("BID", buildingId);
 
 			try {
 				const deviceStateData = await this.axiosInstanceGet(url);
@@ -768,6 +767,90 @@ class melCloudDevice {
 				};
 			});
 		accessory.addService(this.melcloudService);
+
+		//prepare buttons service
+		const buttons = this.buttons;
+		const buttonsCount = buttons.length;
+		if (buttonsCount > 0) {
+			this.log.debug('prepareButtonsService');
+			for (let i = 0; i < buttonsCount; i++) {
+
+				//get button mode
+				const buttonMode = buttons[i].mode;
+
+				//get button name
+				const buttonName = (buttons[i].name != undefined) ? buttons[i].name : buttonMode;
+
+				//get button display type
+				const buttonDisplayType = (buttons[i].displayType != undefined) ? buttons[i].displayType : 0;
+
+				const serviceType = [Service.Outlet, Service.Switch][buttonDisplayType];
+				const buttonService = new serviceType(`${accessoryName} ${buttonName}`, `Button ${i}`);
+				buttonService.getCharacteristic(Characteristic.On)
+					.onGet(async () => {
+						const state = !deviceState.Power ? false : (buttonMode > 0) ? (deviceState.OperationMode == buttonMode) ? true : false : deviceState.Power;
+						return state;
+					})
+					.onSet(async (state) => {
+						let newData = deviceState;
+						switch (buttonMode) {
+							case 0: //ON,OFF
+								if (state) {
+									newData.Power = true;
+									newData.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power;
+								} else {
+									newData.Power = false;
+									newData.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power;
+								}
+								break
+							case 1: //HEAT
+								newData.Power = true;
+								newData.OperationMode = 1;
+								newData.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.OperationMode;
+								break
+							case 2: //DRY
+								newData.Power = true;
+								newData.OperationMode = 2;
+								newData.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.OperationMode;
+								break
+							case 3: //COOL
+								newData.Power = true;
+								newData.OperationMode = 3;
+								newData.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.OperationMode;
+								break
+							case 7: //FAN
+								newData.Power = true;
+								newData.OperationMode = 7;
+								newData.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.OperationMode;
+								break
+							case 8: //AUTO
+								newData.Power = true;
+								newData.OperationMode = 8;
+								newData.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.OperationMode;
+								break
+							case 9: //PURIFY
+								newData.Power = true;
+								newData.OperationMode = 9;
+								newData.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.OperationMode;
+								break
+							default:
+								break
+						}
+						newData.HasPendingCommand = true;
+						const options = {
+							data: newData
+						}
+						try {
+							const newState = await this.axiosInstancePost(deviceTypeUrl, options);
+							const logInfo = this.disableLogInfo ? false : this.log(`${this.deviceTypeText}: ${accessoryName}, Set button mode: ${buttonName}`);
+						} catch (error) {
+							this.log.error(`${this.deviceTypeText}: ${accessoryName}, Set button error: ${error}`);
+						};
+					});
+
+				accessory.addService(buttonService);
+			}
+		}
 
 		this.startPrepareAccessory = false;
 		const debug = this.enableDebugMode ? this.log(`${this.deviceTypeText}: ${accessoryName}, publishExternalAccessory.`) : false;
