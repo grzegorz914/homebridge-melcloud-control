@@ -788,7 +788,7 @@ class melCloudDevice {
 				const buttonService = new serviceType(`${accessoryName} ${buttonName}`, `Button ${i}`);
 				buttonService.getCharacteristic(Characteristic.On)
 					.onGet(async () => {
-						const state = !deviceState.Power ? false : (buttonMode > 0) ? (deviceState.OperationMode == buttonMode) ? true : false : deviceState.Power;
+						const state = (deviceState.Power == true) ? (buttonMode > 0) ? (deviceState.OperationMode == buttonMode) ? true : false : deviceState.Power : false;
 						return state;
 					})
 					.onSet(async (state) => {

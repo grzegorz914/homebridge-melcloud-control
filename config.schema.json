@@ -187,7 +187,8 @@
                   "mode": {
                     "title": "Mode",
                     "type": "integer",
-                    "maximum": 1,
+                    "minimum": 0,
+                    "maximum": 9,
                     "description": "Here select the function mode.",
                     "oneOf": [{
                         "title": "ON/OFF",
@@ -232,11 +233,13 @@
                         ]
                       }
                     ],
-                    "required": true
+                    "required": false
                   },
                   "displayType": {
                     "title": "Display Type",
                     "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1,
                     "oneOf": [{
                         "title": "Button",
                         "enum": [
@@ -251,7 +254,7 @@
                       }
                     ],
                     "description": "Here select display type in HomeKit app",
-                    "required": true
+                    "required": false
                   }
                 }
               }

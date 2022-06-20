@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.9] - (20.06.2022)
 ## Changes
+- fix add all operating mode for buttons
+
+## [0.0.9] - (20.06.2022)
+## Changes
 - added possibility to set all modes using extra buttons fix [#2](https://github.com/grzegorz914/homebridge-melcloud-control/issues/2)
 
 ## [0.0.8] - (19.06.2022)
