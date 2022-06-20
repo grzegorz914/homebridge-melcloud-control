@@ -24,6 +24,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 ### Note
 * The plugin is in test phase and some function may be not working correct.
 * The Heat Pump and Energy Recovery Ventilation is not supported at this time.
+* Change plugin settings will applied to all devices same type in account.
 
 ### Know issues
 * If used with Hoobs, there is a possible configuration incompatibilty.
@@ -44,7 +45,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * Control of Air Conditioner:
   * Power *ON/OFF*.
   * Operating modes:
-    * Using *Thermostat* or *Heater Cooler*, *ON/OFF/HEAT/COOL/AUTO*.
+    * Using *Heater Cooler* or *Thermostat*, *ON/OFF/HEAT/COOL/AUTO*.
     * Using buttons *ON/OFF/HEAT/DRY/COOL/FAN/AUTO/PURIFY*.
   * Heating/Cooling temperature.
   * Heating/Cooling threshold temperature.
