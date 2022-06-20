@@ -21,10 +21,15 @@
       "user": "user",
       "pass": "pass",
       "language": 0,
+      "displayMode": 0,
+      "buttons": [{
+        "name": "ON/OFF",
+        "mode": 0,
+        "displayType": 0
+      }],
       "disableLogInfo": false,
       "disableLogDeviceInfo": false,
       "enableDebugMode": false,
-      "displayMode": 0,
       "enableMqtt": false,
       "mqttHost": "192.168.1.33",
       "mqttPort": 1883,
