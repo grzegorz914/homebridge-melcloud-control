@@ -1,5 +1,5 @@
 {
-    "DeviceType": ["Air Conditioner", "Heat Pump", "", "Energy Recovery Ventilation"],
+    "DeviceType": ["Air Conditioner", "Heat Pump", "", "E.R. Ventilation"],
     "AirConditioner": {
         "CurrentHeaterCoolerThermostat": [
             ["INACTIVE", "IDLE", "HEAT", "COOL"],
