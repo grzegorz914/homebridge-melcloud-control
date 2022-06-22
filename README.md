@@ -98,7 +98,7 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
                 {
                     "name": "My House",
                     "user": "user",
-                    "passwd": "pass",
+                    "passwd": "password",
                     "language": 0,
                     "displayMode": 0, //possible 0,1
                     "buttons": [{
