@@ -27,7 +27,7 @@
               "description": "Here set the MELCloud account username.",
               "required": true
             },
-            "pass": {
+            "passwd": {
               "title": "Password",
               "type": "string",
               "placeholder": "Password",
@@ -311,7 +311,7 @@
             "mqttPrefix": {
               "title": "Prefix",
               "type": "string",
-              "placeholder": "home/openwebif",
+              "placeholder": "home/account",
               "required": false,
               "description": "Here set the prefix.",
               "condition": {
@@ -370,7 +370,7 @@
     "items": [
       "accounts[].name",
       "accounts[].user",
-      "accounts[].pass",
+      "accounts[].passwd",
       "accounts[].language",
       {
         "key": "accounts[]",

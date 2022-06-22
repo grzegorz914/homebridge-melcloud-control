@@ -21,6 +21,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | [Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) | [Config UI X Wiki](https://github.com/oznu/homebridge-config-ui-x/wiki) | Web User Interface | Recommended |
 | [MELCloud](https://www.npmjs.com/package/homebridge-melcloud-control) | `npm install -g homebridge-melcloud-control` | Plug-In | Required |
 
+### Important changes
+* After update to v0.1.x and above need configure the MELCloud password in plugin config again.
 ### Note
 * The plugin is in test phase and some function may be not working correct.
 * The Heat Pump and Energy Recovery Ventilation is not supported at this time.
@@ -58,9 +60,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * Home automations and shortcuts can be used to control the devices.
 * MQTT Client publisch all available data from all detected devices.
 
-### Important changes
-
-## Configuration
+### Configuration
 Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) to configure this plugin (Highly Recommended). The sample configuration can be edited and used manually as an alternative. See the `sample-config.json` file in this repository for an example or copy the example below into your config.json file, making the apporpriate changes before saving it. Be sure to always make a backup copy of your config.json file before making any changes to it.
 
 <p align="left">
@@ -71,7 +71,7 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
 | --- | --- |
 | `name` | Here set the account name. |
 | `user` | Here set the MELCloud username. |
-| `pass` | Here set the MELCloud password. |
+| `passwd` | Here set the MELCloud password. |
 | `language` | Here set the MELCloud language. |
 | `displayMode` | Here select control mode `Heater/Cooler`, `Thermostat`. |
 | `buttons.name` | Here set *Button Name* which You want expose to the *Homebridge/HomeKit*.| 
@@ -96,7 +96,7 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
                 {
                     "name": "My House",
                     "user": "user",
-                    "pass": "pass",
+                    "passwd": "pass",
                     "language": 0,
                     "displayMode": 0, //possible 0,1
                     "buttons": [{
@@ -120,7 +120,7 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
         }
 ```
 
-## Adding to HomeKit
+### Adding to HomeKit
 Each accessory needs to be manually paired. 
 1. Open the Home <img src='https://user-images.githubusercontent.com/3979615/78010622-4ea1d380-738e-11ea-8a17-e6a465eeec35.png' width='16.42px'> app on your device. 
 2. Tap the Home tab, then tap <img src='https://user-images.githubusercontent.com/3979615/78010869-9aed1380-738e-11ea-9644-9f46b3633026.png' width='16.42px'>. 
@@ -128,7 +128,7 @@ Each accessory needs to be manually paired.
 4. Select Your accessory and press add anyway. 
 5. Enter the PIN or scan the QR code, this can be found in Homebridge UI or Homebridge logs.
 
-## [What's New](https://github.com/grzegorz914/homebridge-melcloud-control/blob/master/CHANGELOG.md)
+### [What's New](https://github.com/grzegorz914/homebridge-melcloud-control/blob/master/CHANGELOG.md)
 
-## Development
+### Development
 Please feel free to create a Pull request and help in development. It will be highly appreciated.

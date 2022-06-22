@@ -19,7 +19,7 @@
     "accounts": [{
       "name": "My House",
       "user": "user",
-      "pass": "pass",
+      "passwd": "password",
       "language": 0,
       "displayMode": 0,
       "buttons": [{
