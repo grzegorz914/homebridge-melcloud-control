@@ -685,7 +685,7 @@ class melCloudPlatform {
 					meCloudInfo.AlternateEmailAddress = '';
 					meCloudInfo.Fred = 4;
 
-					const newState = await this.melCloudDevice.sendt(API_URL.UpdateApplicationOptions, meCloudInfo, 1);
+					const newState = await this.melCloudDevice.send(API_URL.UpdateApplicationOptions, meCloudInfo, 1);
 					const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set temperature display unit: ${value?'°F': '°C'}`);
 				} catch (error) {
 					this.log.error(`${deviceTypeText}: ${accessoryName}, Set temperature display unit error: ${error}`);
