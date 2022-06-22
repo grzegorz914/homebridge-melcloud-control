@@ -83,7 +83,7 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
 | `disableLogInfo` | This disable display log values and states on every it change. |
 | `disableLogDeviceInfo` | This disable display log device info on plugin restart. |
 | `enableMqtt` | This enabled MQTT Broker and publish to it all awailable data. |
-| `mqttHost` | Here set the *IP Address* or *Hostname* for MQTT Broker.) |
+| `mqttHost` | Here set the *IP Address* or *Hostname* for MQTT Broker. |
 | `mqttPort` | Here set the *Port* for MQTT Broker, default 1883. |
 | `mqttPrefix` | Here set the *Prefix* for *Topic* or leave empty. |
 | `mqttAuth` | This enabled MQTT Broker authorization credentials. |
