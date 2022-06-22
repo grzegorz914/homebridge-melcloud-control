@@ -71,7 +71,7 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
 
 | Key | Description | 
 | --- | --- |
-| `name` | Here set the account name. |
+| `name` | Here set the own account name. |
 | `user` | Here set the MELCloud username. |
 | `passwd` | Here set the MELCloud password. |
 | `language` | Here set the MELCloud language. |
