@@ -23,8 +23,9 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | [Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) | [Config UI X Wiki](https://github.com/oznu/homebridge-config-ui-x/wiki) | Web User Interface | Recommended |
 | [MELCloud](https://www.npmjs.com/package/homebridge-melcloud-control) | `npm install -g homebridge-melcloud-control` | Plug-In | Required |
 
-### Important changes
-* After update to v0.1.x and above need configure the MELCloud password in plugin config again.
+### Important changes v0.1.x and above!!!
+* The old plugin and config need to be first removed from Homebridge and HomeKit and added again.
+* The platform name and password properties was changes due collision with same already exist plugins from other developers.
 ### Note
 * The plugin is in test phase and some function may be not working correct.
 * The Heat Pump and Energy Recovery Ventilation is not supported at this time.
@@ -93,7 +94,7 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
 
 ```json
         {
-            "platform": "MELCloud",
+            "platform": "melcloudcontrol",
             "accounts": [
                 {
                     "name": "My House",

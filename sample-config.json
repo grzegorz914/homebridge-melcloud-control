@@ -15,7 +15,7 @@
   },
   "accessories": [],
   "platforms": [{
-    "platform": "MELCloud",
+    "platform": "melcloudcontrol",
     "accounts": [{
       "name": "My House",
       "user": "user",

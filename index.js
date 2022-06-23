@@ -11,7 +11,7 @@ const DEVICES_EFFECTIVE_FLAGS = require('./src/effectiveflags.json');
 const CONSTANS = require('./src/constans.json');
 
 const PLUGIN_NAME = 'homebridge-melcloud-control';
-const PLATFORM_NAME = 'MELCloud';
+const PLATFORM_NAME = 'melcloudcontrol';
 
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
@@ -143,228 +143,228 @@ class melCloudPlatform {
 										debugLog: enableDebugMode,
 										mqttEnabled: enableMqtt
 									});
-								};
 
-								this.melCloudDevice.on('deviceInfo', (deviceInfo) => {
-										const deviceId = deviceInfo.DeviceID;
-										const deviceName = deviceInfo.DeviceName;
-										const deviceType = deviceInfo.Type;
-										const deviceTypeText = CONSTANS.DeviceType[deviceType];
-										const accessLevel = deviceInfo.AccessLevel;
-										const minTemperature = deviceInfo.MinTemperature;
-										const maxTemperature = deviceInfo.MaxTemperature;
-										const hideVaneControls = deviceInfo.HideVaneControls;
-										const hideDryModeControl = deviceInfo.HideDryModeControl;
-										const hideRoomTemperature = deviceInfo.HideRoomTemperature;
-										const hideSupplyTemperature = deviceInfo.HideSupplyTemperature;
-										const hideOutdoorTemperature = deviceInfo.HideOutdoorTemperature;
-										const macAddress = deviceInfo.MacAddress;
-										const serialNumber = deviceInfo.SerialNumber;
-										const firmwareRevision = deviceInfo.FirmwareRevision;
-										const pCycleActual = deviceInfo.Device.PCycleActual;
-										const canCool = deviceInfo.Device.CanCool;
-										const canHeat = deviceInfo.Device.CanHeat;
-										const canDry = deviceInfo.Device.CanDry;
-										const hasAutomaticFanSpeed = deviceInfo.Device.HasAutomaticFanSpeed;
-										const airDirectionFunction = deviceInfo.Device.AirDirectionFunction;
-										const swingFunction = deviceInfo.Device.SwingFunction;
-										const numberOfFanSpeeds = deviceInfo.Device.NumberOfFanSpeeds;
-										const useTemperatureA = deviceInfo.Device.UseTemperatureA;
-										const temperatureIncrementOverride = deviceInfo.Device.TemperatureIncrementOverride;
-										const temperatureIncrement = deviceInfo.Device.TemperatureIncrement;
-										const minTempCoolDry = deviceInfo.Device.MinTempCoolDry;
-										const maxTempCoolDry = deviceInfo.Device.MaxTempCoolDry;
-										const minTempHeat = deviceInfo.Device.MinTempHeat;
-										const maxTempHeat = deviceInfo.Device.MaxTempHeat;
-										const minTempAutomatic = deviceInfo.Device.MinTempAutomatic;
-										const maxTempAutomatic = deviceInfo.Device.MaxTempAutomatic;
-										const legacyDevice = deviceInfo.Device.LegacyDevice;
-										const unitSupportsStandbyMode = deviceInfo.Device.UnitSupportsStandbyMode;
-										const isSplitSystem = deviceInfo.Device.IsSplitSystem;
-										const modelIsAirCurtain = deviceInfo.Device.ModelIsAirCurtain;
-										const modelSupportsFanSpeed = deviceInfo.Device.ModelSupportsFanSpeed;
-										const modelSupportsAuto = deviceInfo.Device.ModelSupportsAuto;
-										const modelSupportsHeat = deviceInfo.Device.ModelSupportsHeat;
-										const modelSupportsDry = deviceInfo.Device.ModelSupportsDry;
-										const modelSupportsVaneVertical = deviceInfo.Device.ModelSupportsVaneVertical;
-										const modelSupportsVaneHorizontal = deviceInfo.Device.ModelSupportsVaneHorizontal;
-										const modelSupportsWideVane = deviceInfo.Device.ModelSupportsWideVane;
-										const modelSupportsStandbyMode = deviceInfo.Device.ModelSupportsStandbyMode;
-										const modelSupportsEnergyReporting = deviceInfo.Device.ModelSupportsEnergyReporting;
-										const prohibitSetTemperature = deviceInfo.Device.ProhibitSetTemperature;
-										const prohibitOperationMode = deviceInfo.Device.ProhibitOperationMode;
-										const prohibitPower = deviceInfo.Device.ProhibitPower;
-										const hasZone2 = deviceInfo.Device.HasZone2;
+									this.melCloudDevice.on('deviceInfo', (deviceInfo) => {
+											const deviceId = deviceInfo.DeviceID;
+											const deviceName = deviceInfo.DeviceName;
+											const deviceType = deviceInfo.Type;
+											const deviceTypeText = CONSTANS.DeviceType[deviceType];
+											const accessLevel = deviceInfo.AccessLevel;
+											const minTemperature = deviceInfo.MinTemperature;
+											const maxTemperature = deviceInfo.MaxTemperature;
+											const hideVaneControls = deviceInfo.HideVaneControls;
+											const hideDryModeControl = deviceInfo.HideDryModeControl;
+											const hideRoomTemperature = deviceInfo.HideRoomTemperature;
+											const hideSupplyTemperature = deviceInfo.HideSupplyTemperature;
+											const hideOutdoorTemperature = deviceInfo.HideOutdoorTemperature;
+											const macAddress = deviceInfo.MacAddress;
+											const serialNumber = deviceInfo.SerialNumber;
+											const firmwareRevision = deviceInfo.FirmwareRevision;
+											const pCycleActual = deviceInfo.Device.PCycleActual;
+											const canCool = deviceInfo.Device.CanCool;
+											const canHeat = deviceInfo.Device.CanHeat;
+											const canDry = deviceInfo.Device.CanDry;
+											const hasAutomaticFanSpeed = deviceInfo.Device.HasAutomaticFanSpeed;
+											const airDirectionFunction = deviceInfo.Device.AirDirectionFunction;
+											const swingFunction = deviceInfo.Device.SwingFunction;
+											const numberOfFanSpeeds = deviceInfo.Device.NumberOfFanSpeeds;
+											const useTemperatureA = deviceInfo.Device.UseTemperatureA;
+											const temperatureIncrementOverride = deviceInfo.Device.TemperatureIncrementOverride;
+											const temperatureIncrement = deviceInfo.Device.TemperatureIncrement;
+											const minTempCoolDry = deviceInfo.Device.MinTempCoolDry;
+											const maxTempCoolDry = deviceInfo.Device.MaxTempCoolDry;
+											const minTempHeat = deviceInfo.Device.MinTempHeat;
+											const maxTempHeat = deviceInfo.Device.MaxTempHeat;
+											const minTempAutomatic = deviceInfo.Device.MinTempAutomatic;
+											const maxTempAutomatic = deviceInfo.Device.MaxTempAutomatic;
+											const legacyDevice = deviceInfo.Device.LegacyDevice;
+											const unitSupportsStandbyMode = deviceInfo.Device.UnitSupportsStandbyMode;
+											const isSplitSystem = deviceInfo.Device.IsSplitSystem;
+											const modelIsAirCurtain = deviceInfo.Device.ModelIsAirCurtain;
+											const modelSupportsFanSpeed = deviceInfo.Device.ModelSupportsFanSpeed;
+											const modelSupportsAuto = deviceInfo.Device.ModelSupportsAuto;
+											const modelSupportsHeat = deviceInfo.Device.ModelSupportsHeat;
+											const modelSupportsDry = deviceInfo.Device.ModelSupportsDry;
+											const modelSupportsVaneVertical = deviceInfo.Device.ModelSupportsVaneVertical;
+											const modelSupportsVaneHorizontal = deviceInfo.Device.ModelSupportsVaneHorizontal;
+											const modelSupportsWideVane = deviceInfo.Device.ModelSupportsWideVane;
+											const modelSupportsStandbyMode = deviceInfo.Device.ModelSupportsStandbyMode;
+											const modelSupportsEnergyReporting = deviceInfo.Device.ModelSupportsEnergyReporting;
+											const prohibitSetTemperature = deviceInfo.Device.ProhibitSetTemperature;
+											const prohibitOperationMode = deviceInfo.Device.ProhibitOperationMode;
+											const prohibitPower = deviceInfo.Device.ProhibitPower;
+											const hasZone2 = deviceInfo.Device.HasZone2;
 
-										//units info
-										const units = deviceInfo.Device.Units;
-										const sunitsSerialsNumbers = new Array();
-										const unitsModelsNumbers = new Array();
-										const unitsModels = new Array();
-										const unitsTypes = new Array();
-										const unitsIsIndors = new Array();
-										if (Array.isArray(units) && units.length > 0) {
-											for (let i = 0; i < units.length; i++) {
-												const unit = units[i];
-												const unitId = unit.ID;
-												const unitDevice = unit.Device;
-												const unitSerialNumber = unit.SerialNumber;
-												const unitModelNumber = unit.ModelNumber;
-												const unitModel = unit.Model;
-												const unitType = unit.UnitType;
-												const unitIsIndor = unit.IsIndor;
-												sunitsSerialsNumbers.push(unitSerialNumber);
-												unitsModelsNumbers.push(unitModelNumber);
-												unitsModels.push(unitModel);
-												unitsTypes.push(unitType);
-												unitsIsIndors.push(unitIsIndor);
+											//units info
+											const units = deviceInfo.Device.Units;
+											const sunitsSerialsNumbers = new Array();
+											const unitsModelsNumbers = new Array();
+											const unitsModels = new Array();
+											const unitsTypes = new Array();
+											const unitsIsIndors = new Array();
+											if (Array.isArray(units) && units.length > 0) {
+												for (let i = 0; i < units.length; i++) {
+													const unit = units[i];
+													const unitId = unit.ID;
+													const unitDevice = unit.Device;
+													const unitSerialNumber = unit.SerialNumber;
+													const unitModelNumber = unit.ModelNumber;
+													const unitModel = unit.Model;
+													const unitType = unit.UnitType;
+													const unitIsIndor = unit.IsIndor;
+													sunitsSerialsNumbers.push(unitSerialNumber);
+													unitsModelsNumbers.push(unitModelNumber);
+													unitsModels.push(unitModel);
+													unitsTypes.push(unitType);
+													unitsIsIndors.push(unitIsIndor);
+												}
 											}
-										}
-										const unit0 = (models.length > 0 && deviceType == 0) ? unitsModels[0] : 'Unknown';
-										const unit1 = (models.length > 0 && deviceType == 0) ? unitsModels[1] : 'Unknown';
+											const unit0 = (models.length > 0 && deviceType == 0) ? unitsModels[0] : 'Unknown';
+											const unit1 = (models.length > 0 && deviceType == 0) ? unitsModels[1] : 'Unknown';
 
-										const manufacturer = 'Mitsubishi';
-										const modelName = unit1;
-										const modelName1 = unit0;
+											const manufacturer = 'Mitsubishi';
+											const modelName = unit1;
+											const modelName1 = unit0;
 
-										if (!disableLogDeviceInfo) {
-											this.log('------- %s --------', deviceTypeText);
-											this.log('Account: %s', accountName);
-											this.log('Name: %s', deviceName);
-											this.log('Model: %s', modelName);
-											this.log('Serial: %s', serialNumber);
-											const device1 = (modelName1 != undefined && deviceType == 0) ? this.log('Outdoor: %s', modelName1) : false;
-											this.log('Manufacturer: %s', manufacturer);
-											this.log('----------------------------------');
-										};
-
-										this.deviceId = deviceId;
-										this.deviceName = deviceName;
-										this.deviceType = deviceType;
-										this.deviceTypeText = deviceTypeText;
-										this.manufacturer = manufacturer;
-										this.modelName = modelName;
-										this.serialNumber = serialNumber;
-										this.firmwareRevision = firmwareRevision;
-									})
-									.on('deviceState', (deviceState, startPrepareAccessory) => {
-										// device state
-										const deviceType = deviceState.DeviceType;
-										const effectiveFlags = deviceState.EffectiveFlags;
-										const localIPAddress = deviceState.LocalIPAddress;
-										const roomTemperature = deviceState.RoomTemperature;
-										const setTemperature = deviceState.SetTemperature;
-										const setTankWaterTemperature = (deviceType == 1) ? deviceState.SetTankWaterTemperature : false;
-										const setTemperatureZone1 = (deviceType == 1) ? deviceState.SetTemperatureZone1 : false;
-										const forcedHotWaterMode = (deviceType == 1) ? deviceState.ForcedHotWaterMode : false;
-										const setTemperatureZone2 = (deviceType == 1) ? deviceState.SetTemperatureZone2 : false;
-										const setHeatFlowTemperatureZone1 = (deviceType == 1) ? deviceState.SetHeatFlowTemperatureZone1 : false;
-										const setCoolFlowTemperatureZone1 = (deviceType == 1) ? deviceState.SetCoolFlowTemperatureZone1 : false;
-										const setHeatFlowTemperatureZone2 = (deviceType == 1) ? deviceState.SetHeatFlowTemperatureZone2 : false;
-										const setCoolFlowTemperatureZone2 = (deviceType == 1) ? deviceState.SetCoolFlowTemperatureZone2 : false;
-										const operationModeZone1 = (deviceType == 1) ? deviceState.OperationModeZone1 : false;
-										const operationModeZone2 = (deviceType == 1) ? deviceState.OperationModeZone2 : false;
-										const ventilationMode = (deviceType == 3) ? deviceState.VentilationMode : false;
-										const setFanSpeed = (deviceType == 0 || deviceType == 3) ? deviceState.SetFanSpeed : false;
-										const operationMode = deviceState.OperationMode;
-										const vaneHorizontal = deviceState.VaneHorizontal;
-										const vaneVertical = deviceState.VaneVertical;
-										const name = deviceState.Name;
-										const numberOfFanSpeeds = deviceState.NumberOfFanSpeeds;
-										const errorMessage = deviceState.ErrorMessage;
-										const errorCode = deviceState.ErrorCode;
-										const defaultHeatingSetTemperature = deviceState.DefaultHeatingSetTemperature;
-										const defaultCoolingSetTemperature = deviceState.DefaultCoolingSetTemperature;
-										const hideVaneControls = deviceState.HideVaneControls;
-										const hideDryModeControl = deviceState.HideDryModeControl;
-										const roomTemperatureLabel = deviceState.RoomTemperatureLabel;
-										const inStandbyMode = deviceState.InStandbyMode;
-										const temperatureIncrementOverride = deviceState.TemperatureIncrementOverride;
-										const prohibitSetTemperature = deviceState.ProhibitSetTemperature;
-										const prohibitOperationMode = deviceState.ProhibitOperationMode;
-										const prohibitPower = deviceState.ProhibitPower;
-										const demandPercentage = deviceState.DemandPercentage;
-										const deviceID = deviceState.DeviceID;
-										const lastCommunication = deviceState.LastCommunication;
-										const nextCommunication = deviceState.NextCommunication;
-										const power = deviceState.Power;
-										const hasPendingCommand = deviceState.HasPendingCommand;
-										const offline = deviceState.Offline;
-										const scene = deviceState.Scene;
-										const sceneOwner = deviceState.SceneOwner;
-										this.deviceState = deviceState;
-
-										const displayMode = this.displayMode;
-										const valueHeaterCooler = power ? inStandbyMode ? 1 : [1, 2, 1, 3, 1, 1, 1, 1, 1][operationMode] : 0;
-										const valueThermostat = power ? inStandbyMode ? 0 : [0, 1, 0, 2, 0, 0, 0, 0, 0][operationMode] : 0;
-										const currentMode = [valueHeaterCooler, valueThermostat][displayMode];
-										this.currentModesHeaterCoolerThermostat = currentMode;
-
-										const valueTargetHeaterCooler = power ? inStandbyMode ? 0 : [0, 1, 0, 2, 0, 0, 0, 0, 0][operationMode] : 0;
-										const valueTargetThermostat = power ? inStandbyMode ? 0 : [0, 1, 3, 2, 3, 3, 3, 3, 3][operationMode] : 0;
-										const targetMode = [valueTargetHeaterCooler, valueTargetThermostat][displayMode];
-										this.targetModesHeaterCoolerThermostat = targetMode;
-
-										if (this.melcloudService) {
-											if (displayMode == 0) {
-												this.melcloudService
-													.updateCharacteristic(Characteristic.Active, power)
-													.updateCharacteristic(Characteristic.CurrentHeaterCoolerState, currentMode)
-													.updateCharacteristic(Characteristic.TargetHeaterCoolerState, targetMode)
-													.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-													.updateCharacteristic(Characteristic.RotationSpeed, (setFanSpeed / numberOfFanSpeeds) * 100.0)
-													.updateCharacteristic(Characteristic.SwingMode, (vaneHorizontal == 12 && vaneVertical == 7) ? 1 : 0)
-													.updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature)
-													.updateCharacteristic(Characteristic.HeatingThresholdTemperature, setTemperature)
-													.updateCharacteristic(Characteristic.CurrentHorizontalTiltAngle, vaneHorizontal)
-													.updateCharacteristic(Characteristic.TargetHorizontalTiltAngle, vaneHorizontal)
-													.updateCharacteristic(Characteristic.CurrentVerticalTiltAngle, vaneVertical)
-													.updateCharacteristic(Characteristic.TargetVerticalTiltAngle, vaneVertical)
+											if (!disableLogDeviceInfo) {
+												this.log('------- %s --------', deviceTypeText);
+												this.log('Account: %s', accountName);
+												this.log('Name: %s', deviceName);
+												this.log('Model: %s', modelName);
+												this.log('Serial: %s', serialNumber);
+												const device1 = (modelName1 != undefined && deviceType == 0) ? this.log('Outdoor: %s', modelName1) : false;
+												this.log('Manufacturer: %s', manufacturer);
+												this.log('----------------------------------');
 											};
-											if (displayMode == 1) {
-												this.melcloudService
-													.updateCharacteristic(Characteristic.CurrentHeatingCoolingState, currentMode)
-													.updateCharacteristic(Characteristic.TargetHeatingCoolingState, targetMode)
-													.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-													.updateCharacteristic(Characteristic.TargetTemperature, setTemperature)
-													.updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature)
-													.updateCharacteristic(Characteristic.HeatingThresholdTemperature, setTemperature)
-											};
-										};
 
-										this.buttonsStates = new Array();
-										const buttonsCount = this.buttonsCount;
-										if (buttonsCount > 0) {
-											for (let i = 0; i < buttonsCount; i++) {
-												const button = buttons[i];
-												const buttonMode = button.mode;
-												const buttonState = (power == false) ? false : (buttonMode == operationMode) ? true : false;
-												const state = (buttonMode == 0) ? power : buttonState;
-												this.buttonsStates.push(state);
-												this.log('button mode %s, %s', buttonMode, state)
-												if (this.buttonsServices) {
-													this.buttonsServices[i]
-														.updateCharacteristic(Characteristic.On, state)
+											this.deviceId = deviceId;
+											this.deviceName = deviceName;
+											this.deviceType = deviceType;
+											this.deviceTypeText = deviceTypeText;
+											this.manufacturer = manufacturer;
+											this.modelName = modelName;
+											this.serialNumber = serialNumber;
+											this.firmwareRevision = firmwareRevision;
+										})
+										.on('deviceState', (deviceState, startPrepareAccessory) => {
+											// device state
+											const deviceType = deviceState.DeviceType;
+											const effectiveFlags = deviceState.EffectiveFlags;
+											const localIPAddress = deviceState.LocalIPAddress;
+											const roomTemperature = deviceState.RoomTemperature;
+											const setTemperature = deviceState.SetTemperature;
+											const setTankWaterTemperature = (deviceType == 1) ? deviceState.SetTankWaterTemperature : false;
+											const setTemperatureZone1 = (deviceType == 1) ? deviceState.SetTemperatureZone1 : false;
+											const forcedHotWaterMode = (deviceType == 1) ? deviceState.ForcedHotWaterMode : false;
+											const setTemperatureZone2 = (deviceType == 1) ? deviceState.SetTemperatureZone2 : false;
+											const setHeatFlowTemperatureZone1 = (deviceType == 1) ? deviceState.SetHeatFlowTemperatureZone1 : false;
+											const setCoolFlowTemperatureZone1 = (deviceType == 1) ? deviceState.SetCoolFlowTemperatureZone1 : false;
+											const setHeatFlowTemperatureZone2 = (deviceType == 1) ? deviceState.SetHeatFlowTemperatureZone2 : false;
+											const setCoolFlowTemperatureZone2 = (deviceType == 1) ? deviceState.SetCoolFlowTemperatureZone2 : false;
+											const operationModeZone1 = (deviceType == 1) ? deviceState.OperationModeZone1 : false;
+											const operationModeZone2 = (deviceType == 1) ? deviceState.OperationModeZone2 : false;
+											const ventilationMode = (deviceType == 3) ? deviceState.VentilationMode : false;
+											const setFanSpeed = (deviceType == 0 || deviceType == 3) ? deviceState.SetFanSpeed : false;
+											const operationMode = deviceState.OperationMode;
+											const vaneHorizontal = deviceState.VaneHorizontal;
+											const vaneVertical = deviceState.VaneVertical;
+											const name = deviceState.Name;
+											const numberOfFanSpeeds = deviceState.NumberOfFanSpeeds;
+											const errorMessage = deviceState.ErrorMessage;
+											const errorCode = deviceState.ErrorCode;
+											const defaultHeatingSetTemperature = deviceState.DefaultHeatingSetTemperature;
+											const defaultCoolingSetTemperature = deviceState.DefaultCoolingSetTemperature;
+											const hideVaneControls = deviceState.HideVaneControls;
+											const hideDryModeControl = deviceState.HideDryModeControl;
+											const roomTemperatureLabel = deviceState.RoomTemperatureLabel;
+											const inStandbyMode = deviceState.InStandbyMode;
+											const temperatureIncrementOverride = deviceState.TemperatureIncrementOverride;
+											const prohibitSetTemperature = deviceState.ProhibitSetTemperature;
+											const prohibitOperationMode = deviceState.ProhibitOperationMode;
+											const prohibitPower = deviceState.ProhibitPower;
+											const demandPercentage = deviceState.DemandPercentage;
+											const deviceID = deviceState.DeviceID;
+											const lastCommunication = deviceState.LastCommunication;
+											const nextCommunication = deviceState.NextCommunication;
+											const power = deviceState.Power;
+											const hasPendingCommand = deviceState.HasPendingCommand;
+											const offline = deviceState.Offline;
+											const scene = deviceState.Scene;
+											const sceneOwner = deviceState.SceneOwner;
+											this.deviceState = deviceState;
+
+											const displayMode = this.displayMode;
+											const valueHeaterCooler = power ? inStandbyMode ? 1 : [1, 2, 1, 3, 1, 1, 1, 1, 1][operationMode] : 0;
+											const valueThermostat = power ? inStandbyMode ? 0 : [0, 1, 0, 2, 0, 0, 0, 0, 0][operationMode] : 0;
+											const currentMode = [valueHeaterCooler, valueThermostat][displayMode];
+											this.currentModesHeaterCoolerThermostat = currentMode;
+
+											const valueTargetHeaterCooler = power ? inStandbyMode ? 0 : [0, 1, 0, 2, 0, 0, 0, 0, 0][operationMode] : 0;
+											const valueTargetThermostat = power ? inStandbyMode ? 0 : [0, 1, 3, 2, 3, 3, 3, 3, 3][operationMode] : 0;
+											const targetMode = [valueTargetHeaterCooler, valueTargetThermostat][displayMode];
+											this.targetModesHeaterCoolerThermostat = targetMode;
+
+											if (this.melcloudService) {
+												if (displayMode == 0) {
+													this.melcloudService
+														.updateCharacteristic(Characteristic.Active, power)
+														.updateCharacteristic(Characteristic.CurrentHeaterCoolerState, currentMode)
+														.updateCharacteristic(Characteristic.TargetHeaterCoolerState, targetMode)
+														.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+														.updateCharacteristic(Characteristic.RotationSpeed, (setFanSpeed / numberOfFanSpeeds) * 100.0)
+														.updateCharacteristic(Characteristic.SwingMode, (vaneHorizontal == 12 && vaneVertical == 7) ? 1 : 0)
+														.updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature)
+														.updateCharacteristic(Characteristic.HeatingThresholdTemperature, setTemperature)
+														.updateCharacteristic(Characteristic.CurrentHorizontalTiltAngle, vaneHorizontal)
+														.updateCharacteristic(Characteristic.TargetHorizontalTiltAngle, vaneHorizontal)
+														.updateCharacteristic(Characteristic.CurrentVerticalTiltAngle, vaneVertical)
+														.updateCharacteristic(Characteristic.TargetVerticalTiltAngle, vaneVertical)
+												};
+												if (displayMode == 1) {
+													this.melcloudService
+														.updateCharacteristic(Characteristic.CurrentHeatingCoolingState, currentMode)
+														.updateCharacteristic(Characteristic.TargetHeatingCoolingState, targetMode)
+														.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+														.updateCharacteristic(Characteristic.TargetTemperature, setTemperature)
+														.updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature)
+														.updateCharacteristic(Characteristic.HeatingThresholdTemperature, setTemperature)
 												};
 											};
-										};
 
-										if (startPrepareAccessory) {
-											this.prepareAccessory();
-										};
-									})
-									.on('error', (error) => {
-										this.log(error);
-									})
-									.on('debug', (message) => {
-										this.log(message);
-									})
-									.on('message', (message) => {
-										this.log(message);
-									})
-									.on('mqtt', (topic, message) => {
-										this.mqttClient.send(topic, message);
-									});
+											this.buttonsStates = new Array();
+											const buttonsCount = this.buttonsCount;
+											if (buttonsCount > 0) {
+												for (let i = 0; i < buttonsCount; i++) {
+													const button = buttons[i];
+													const buttonMode = button.mode;
+													const buttonState = (power == false) ? false : (buttonMode == operationMode) ? true : false;
+													const state = (buttonMode == 0) ? power : buttonState;
+													this.buttonsStates.push(state);
+													this.log('button mode %s, %s', buttonMode, state)
+													if (this.buttonsServices) {
+														this.buttonsServices[i]
+															.updateCharacteristic(Characteristic.On, state)
+													};
+												};
+											};
+
+											if (startPrepareAccessory) {
+												this.prepareAccessory();
+											};
+										})
+										.on('error', (error) => {
+											this.log(error);
+										})
+										.on('debug', (message) => {
+											this.log(message);
+										})
+										.on('message', (message) => {
+											this.log(message);
+										})
+										.on('mqtt', (topic, message) => {
+											this.mqttClient.send(topic, message);
+										});
+								};
 							};
 						})
 						.on('error', (error) => {
