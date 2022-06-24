@@ -216,16 +216,22 @@ class melCloudAccessory {
 				this.deviceState = deviceState;
 
 				const displayMode = this.displayMode;
-				const valueHeaterCooler = power ? inStandbyMode ? 1 : [1, 2, 1, 3, 1, 1, 1, 1, 1][operationMode] : 0;
-				const valueThermostat = power ? inStandbyMode ? 0 : [0, 1, 0, 2, 0, 0, 0, 0, 0][operationMode] : 0;
+				//INACTIVE, IDLE, HEATING, COOLING
+				const valueHeaterCooler = power ? inStandbyMode ? 1 : [1, 2, 2, 3, 3, 3, 3, 3, 3][operationMode] : 0;
+				//OFF, HEAT, COOL
+				const valueThermostat = power ? inStandbyMode ? 0 : [0, 1, 2, 2, 2, 2, 2, 2, 2][operationMode] : 0;
 				const currentMode = displayMode ? valueThermostat : valueHeaterCooler;
 				this.currentModesHeaterCoolerThermostat = currentMode;
 
-				const valueTargetHeaterCooler = power ? inStandbyMode ? 0 : [0, 1, 0, 2, 0, 0, 0, 0, 0][operationMode] : 0;
-				const valueTargetThermostat = power ? inStandbyMode ? 0 : [0, 1, 3, 2, 3, 3, 3, 3, 3][operationMode] : 0;
+				//AUTO/ HEAT, COOL
+				const valueTargetHeaterCooler = power ? inStandbyMode ? 0 : [0, 1, 1, 2, 2, 2, 2, 2, 0][operationMode] : 0;
+				//OFF, HEAT, COOL, AUTO
+				const valueTargetThermostat = power ? inStandbyMode ? 0 : [0, 1, 2, 2, 2, 2, 2, 2, 3][operationMode] : 0;
 				const targetMode = displayMode ? valueTargetThermostat : valueTargetHeaterCooler;
 				this.targetModesHeaterCoolerThermostat = targetMode;
 
+				const rotationSpeed = ((setFanSpeed / numberOfFanSpeeds) * 100.0).toFixed(0);
+				const swingMode = (vaneHorizontal == 12 && vaneVertical == 7) ? 1 : 0;
 				if (this.melcloudService) {
 					if (displayMode == 0) {
 						this.melcloudService
@@ -233,8 +239,8 @@ class melCloudAccessory {
 							.updateCharacteristic(Characteristic.CurrentHeaterCoolerState, currentMode)
 							.updateCharacteristic(Characteristic.TargetHeaterCoolerState, targetMode)
 							.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-							.updateCharacteristic(Characteristic.RotationSpeed, (setFanSpeed / numberOfFanSpeeds) * 100.0)
-							.updateCharacteristic(Characteristic.SwingMode, (vaneHorizontal == 12 && vaneVertical == 7) ? 1 : 0)
+							.updateCharacteristic(Characteristic.RotationSpeed, rotationSpeed)
+							.updateCharacteristic(Characteristic.SwingMode, swingMode)
 							.updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature)
 							.updateCharacteristic(Characteristic.HeatingThresholdTemperature, setTemperature)
 							.updateCharacteristic(Characteristic.CurrentHorizontalTiltAngle, vaneHorizontal)
@@ -309,9 +315,6 @@ class melCloudAccessory {
 		const firmwareRevision = this.firmwareRevision;
 
 		const displayMode = this.displayMode;
-		const serviceType = displayMode ? Service.Thermostat : Service.HeaterCooler;
-		const characteristicCurrentType = displayMode ? Characteristic.CurrentHeatingCoolingState : Characteristic.CurrentHeaterCoolerState;
-		const characteristicTargetType = displayMode ? Characteristic.TargetHeatingCoolingState : Characteristic.TargetHeaterCoolerState;
 		const currentModeText = CONSTANS.AirConditioner.CurrentHeaterCoolerThermostat[displayMode];
 		const targetModeText = CONSTANS.AirConditioner.TargetHeaterCoolerThermostat[displayMode];
 
@@ -332,9 +335,10 @@ class melCloudAccessory {
 			.setCharacteristic(Characteristic.FirmwareRevision, firmwareRevision);
 		accessory.addService(informationService);
 
+
 		//accessory services
 		this.log.debug('prepareMelCloudService');
-		this.melcloudService = new serviceType(accessoryName, `MelCloudService`);
+		this.melcloudService = displayMode ? new Service.Thermostat(accessoryName, 'Thermostat') : new Service.HeaterCooler(accessoryName, 'HeaterCooler');
 		if (displayMode == 0) {
 			//Only for Heater Cooler Service
 			this.melcloudService.getCharacteristic(Characteristic.Active)
@@ -344,16 +348,8 @@ class melCloudAccessory {
 					return state;
 				})
 				.onSet(async (state) => {
-					switch (state) {
-						case 0:
-							deviceState.Power = false;
-							deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power;
-							break;
-						case 1:
-							deviceState.Power = true;
-							deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power;
-							break;
-					};
+					deviceState.Power = state;
+					deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power;
 
 					try {
 						const newState = await this.melCloudDevice.send(deviceTypeUrl, deviceState, 0);
@@ -453,14 +449,14 @@ class melCloudAccessory {
 					};
 				});
 		};
-		this.melcloudService.getCharacteristic(characteristicCurrentType)
+		this.melcloudService.getCharacteristic( displayMode ? Characteristic.CurrentHeatingCoolingState : Characteristic.CurrentHeaterCoolerState)
 			.onGet(async () => {
 				//1 = HEAT, 2 = DRY 3 = COOL, 7 = FAN, 8 = AUTO
 				const currentMode = this.currentModesHeaterCoolerThermostat;
 				const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Heating cooling mode: ${currentModeText[currentMode]}`);
 				return currentMode;
 			});
-		this.melcloudService.getCharacteristic(characteristicTargetType)
+		this.melcloudService.getCharacteristic(displayMode ? Characteristic.TargetHeatingCoolingState : Characteristic.TargetHeaterCoolerState)
 			.onGet(async () => {
 				//1 = HEAT, 2 = DRY 3 = COOL, 7 = FAN, 8 = AUTO
 				const targetMode = this.targetModesHeaterCoolerThermostat;
@@ -470,14 +466,9 @@ class melCloudAccessory {
 			.onSet(async (value) => {
 				switch (value) {
 					case 0: //OFF, AUTO
-						if (displayMode) {
-							deviceState.Power = false;
-							deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power;
-						} else {
-							deviceState.Power = true;
-							deviceState.OperationMode = 8;
-							deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.OperationMode;
-						}
+						deviceState.Power = displayMode ? false : true;
+						deviceState.OperationMode = displayMode ? deviceState.OperationMode : 8;
+						deviceState.EffectiveFlags = displayMode ? DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power : DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.OperationMode;
 						break;
 					case 1: //HEAT
 						deviceState.Power = true;
@@ -621,13 +612,8 @@ class melCloudAccessory {
 					.onSet(async (state) => {
 						switch (buttonMode) {
 							case 0: //ON,OFF
-								if (state) {
-									deviceState.Power = true;
-									deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power;
-								} else {
-									deviceState.Power = false;
-									deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power;
-								}
+								deviceState.Power = state;
+								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power;
 								break;
 							case 1: //HEAT
 								deviceState.Power = true;
