@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Important changes v0.1.x and above!!!
 ### The old plugin and config need to be first removed from Homebridge and HomeKit and added again.
-### The platform name and password properties was changes due collision with same already exist plugins from other developers.
+### The platform name and password properties was changed due collision with same already exist plugins from other developers.
 
 ## [0.1.0] - (xx.06.2022)
 ## Changes

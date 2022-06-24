@@ -3,6 +3,7 @@ const fsPromises = fs.promises;
 const EventEmitter = require('events');
 const axios = require('axios');
 const API_URL = require('./apiurl.json');
+const CONSTANS = require('./constans.json');
 
 class MELCLOUD extends EventEmitter {
     constructor(config) {
@@ -14,8 +15,6 @@ class MELCLOUD extends EventEmitter {
         const debugLog = config.debugLog;
         const melCloudInfoFile = config.melCloudInfoFile;
         const melCloudBuildingsFile = config.melCloudBuildingsFile;
-        const melCloudDevicesFile = config.melCloudDevicesFile;
-        const mqttEnabled = config.enableMqtt;
 
         this.axiosInstanceLogin = axios.create({
             method: 'POST',
@@ -32,115 +31,106 @@ class MELCLOUD extends EventEmitter {
                         Email: user,
                         Password: passwd,
                         Language: language,
-                        Persist: 'true',
+                        Persist: 'true'
                     }
                 };
 
                 try {
-                    const data = await this.axiosInstanceLogin(API_URL.ClientLogin, options);
-                    const melCloudInfo = data.data;
-                    const melCloudInfoData = JSON.stringify(melCloudInfo, null, 2);
+                    const loginData = await this.axiosInstanceLogin(API_URL.ClientLogin, options);
+                    const melCloudInfoData = JSON.stringify(loginData.data, null, 2);
                     const debug = debugLog ? this.emit('debug', `Account: ${accountName}, debug melCloudInfo: ${melCloudInfoData}`) : false;
                     const writeMelCloudInfoData = await fsPromises.writeFile(melCloudInfoFile, melCloudInfoData);
 
-                    const melCloudData = melCloudInfoData.data;
-                    const contextKey = melCloudData.LoginData.ContextKey;
+                    this.contextKey = loginData.data.LoginData.ContextKey;
+                    this.temperatureDisplayUnitValue = loginData.data.LoginData.UseFahrenheit ? 1 : 0;
+                    this.temperatureDisplayUnitString = CONSTANS.TemperatureDisplayUnits[this.temperatureDisplayUnitValue]
+                    this.melCloudInfo = loginData.data;
 
-                    this.emit('mesasage', `Account: ${accountName}, Connected.`);
-                    this.emit('checkDevicesList', melCloudInfo, contextKey);
-                    const mqtt = mqttEnabled ? this.emit('mqtt', `Account Info:`, melCloudInfoData) : false;
+                    this.emit('message', `Account: ${accountName}, Connected.`);
+                    this.emit('checkDevicesList');
                 } catch (error) {
-                    this.emit('error', `Account: ${this.accountName}, login error: ${error}`);
+                    this.emit('error', `Account: ${accountName}, login error: ${error}`);
                 };
             })
-            .on('checkDevicesList', async (melCloudInfo, contextKey) => {
-                this.buildings = new Array();
-                this.buildingsAreas = new Array();
-                this.floors = new Array();
-                this.florsAreas = new Array();
-                this.devices = new Array();
-
+            .on('checkDevicesList', async () => {
+                this.emit('message', `Account: ${accountName}, Scanning for devices.`);
                 this.axiosInstanceGet = axios.create({
                     method: 'GET',
                     baseURL: API_URL.BaseURL,
                     headers: {
-                        'X-MitsContextKey': contextKey,
+                        'X-MitsContextKey': this.contextKey
                     }
                 });
 
                 try {
-                    const data = await this.axiosInstanceGet(API_URL.ListDevices);
-                    const buildings = data.data;
-                    const buildingsData = JSON.stringify(buildings, null, 2);
+                    const listDevicesData = await this.axiosInstanceGet(API_URL.ListDevices);
+                    const buildingsData = JSON.stringify(listDevicesData.data, null, 2);
                     const debug = debugLog ? this.emit('debug', `Account: ${accountName}, debug buildings: ${buildingsData}`) : false;
-                    const writeBuildingsData = await fsPromises.writeFile(melCloudBuildingsFile, buildingsData);
+                    const writeDevicesData = await fsPromises.writeFile(melCloudBuildingsFile, buildingsData);
+
 
                     //read building structure and get the devices
+                    this.buildings = new Array();
+                    this.buildingsStructure = new Array();
+                    this.buildingsAreas = new Array();
+                    this.floors = new Array();
+                    this.floorsAreas = new Array();
+                    this.devicesList = new Array();
+
+                    const buildings = listDevicesData.data;
                     const buildingsCount = buildings.length;
                     for (let i = 0; i < buildingsCount; i++) {
-                        const building = buildings[i].Structure;
+                        const building = buildings[i];
+                        const buildingStructure = building.Structure;
                         this.buildings.push(building);
+                        this.buildingsStructure.push(buildingStructure);
 
-                        if (building.Devices) {
-                            const devicesCount = building.Devices.length;
-                            for (let j = 0; j < devicesCount; j++) {
-                                const device = building.Devices[j];
-                                this.devices.push(device);
+                        //floors
+                        const floorsCount = buildingStructure.Floors.length;
+                        for (let j = 0; j < floorsCount; j++) {
+                            const floor = buildingStructure.Floors[j];
+                            this.floors.push(floor);
+
+                            //floor areas
+                            const florAreasCount = floor.Areas.length;
+                            for (let l = 0; l < florAreasCount; l++) {
+                                const florArea = floor.Areas[l];
+                                this.floorsAreas.push(florArea);
+
+                                //floor areas devices
+                                const florAreaDevicesCount = florArea.Devices.length;
+                                for (let m = 0; m < florAreaDevicesCount; m++) {
+                                    const floorAreaDevice = florArea.Devices[m];
+                                    this.devicesList.push(floorAreaDevice);
+                                };
+                            };
+
+                            //floor devices
+                            const floorDevicesCount = floor.Devices.length;
+                            for (let k = 0; k < floorDevicesCount; k++) {
+                                const floorDevice = floor.Devices[k];
+                                this.devicesList.push(floorDevice);
                             };
                         };
 
-                        const floorsCount = building.Floors.length;
-                        for (let k = 0; k < floorsCount; k++) {
-                            const flor = building.Floors[k];
-                            this.floors.push(flor);
-
-                            if (flor.Devices) {
-                                const devicesCount = flor.Devices.length;
-                                for (let l = 0; l < devicesCount; l++) {
-                                    const device = flor.Devices[l];
-                                    this.devices.push(device);
-                                };
-                            };
-
-                            const florAreasCount = flor.Areas.length;
-                            for (let m = 0; m < florAreasCount; m++) {
-                                const florArea = flor.Areas[m];
-                                this.florsAreas.push(florArea);
-
-                                if (florArea.Devices) {
-                                    const devicesCount = florArea.Devices.length;
-                                    for (let n = 0; n < devicesCount; n++) {
-                                        const device = florArea.Devices[n];
-                                        this.devices.push(device);
-                                    };
-                                };
-                            };
+                        //building areas
+                        const buildingAreasCount = buildingStructure.Areas.length;
+                        for (let n = 0; n < buildingAreasCount; n++) {
+                            const buildingArea = buildingStructure.Areas[n];
+                            this.buildingsAreas.push(buildingArea);
                         };
 
-                        if (building.Areas) {
-                            const buildingsAreasCount = building.Areas.length;
-                            for (let o = 0; o < buildingsAreasCount; o++) {
-                                const buildingArea = building.Areas[o];
-                                this.buildingsAreas.push(buildingArea);
-
-                                if (buildingArea.Devices) {
-                                    const devicesCount = buildingArea.Devices.length;
-                                    for (let p = 0; p < devicesCount; p++) {
-                                        const device = buildingArea.Devices[p];
-                                        this.devices.push(device);
-                                    };
-                                };
-                            };
+                        //building devices
+                        const buildingDevicesCount = buildingStructure.Devices.length;
+                        for (let p = 0; p < buildingDevicesCount; p++) {
+                            const buildingDevice = buildingStructure.Devices[p];
+                            this.devicesList.push(buildingDevice);
                         };
                     };
 
-                    const devicesList = this.devices;
-                    const devicesCount = devicesList.length;
-                    const devicesListData = JSON.stringify(devicesList, null, 2);
-                    const writeDevicesDevicesListData = await fsPromises.writeFile(melCloudDevicesFile, devicesListData);
-
-                    this.emit('connected', melCloudInfo, contextKey, devicesList, devicesCount);
-                    const mqtt = mqttEnabled ? this.emit('mqtt', 'mqtt', `Devices List:`, devicesListData) : false;
+                    const devicesCount = this.devicesList.length;
+                    this.emit('message', `Account: ${accountName}, Found devices: ${devicesCount}.`);
+                    this.emit('connected', this.melCloudInfo, this.contextKey, this.devicesList, devicesCount, this.temperatureDisplayUnitValue, this.temperatureDisplayUnitString);
                 } catch (error) {
                     this.emit('error', `Account: ${accountName}, Update devices list error: ${error}`);
                 };
