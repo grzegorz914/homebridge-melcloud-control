@@ -405,18 +405,19 @@ class melCloudAccessory {
 				.onGet(async () => {
 					//AUTO, 1, 2, 3, 4, 5
 					const value = this.fanSpeed;
-					const fansSpeedMode = [0, 1, 2, 3, 4, 5, 0][value];
+					const fansSpeedMode = [0, 1, 2, 3, 4, 5, 6][value];
 					const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Fan speed: ${CONSTANS.AirConditioner.SetFanSpeed[fansSpeedMode]}`);
 					return value;
 				})
 				.onSet(async (value) => {
-					value = [0, 1, 2, 3, 4, 5, 0][value];
+					value = [0, 1, 2, 3, 4, 5, 6][value];
+					const fansSpeedMode = [0, 1, 2, 3, 4, 5, 6][value];
 					deviceState.SetFanSpeed = value;
 					deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetFanSpeed;
 
 					try {
 						const newState = await this.melCloudDevice.send(deviceTypeUrl, deviceState, 0);
-						const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set fan speed: ${CONSTANS.AirConditioner.SetFanSpeed[value]}`);
+						const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set fan speed: ${CONSTANS.AirConditioner.SetFanSpeed[fansSpeedMode]}`);
 					} catch (error) {
 						this.log.error(`${deviceTypeText}: ${accessoryName}, Set fan speed error: ${error}`);
 					};
