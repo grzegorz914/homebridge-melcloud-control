@@ -3,6 +3,7 @@
     "ClientLogin": "/Login/ClientLogin",
     "GetUserDetails": "/User/GetUserDetails",
     "ListDevices": "/User/ListDevices",
+    "ListDevicesUnits": "/Device/ListDeviceUnits",
     "DeviceState": "/Device/Get?id=DID&buildingID=BID",
     "SetAta": "/Device/SetAta",
     "SetAtw": "/Device/SetAtw",
