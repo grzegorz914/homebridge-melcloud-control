@@ -84,7 +84,7 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
 | `user` | Here set the MELCloud username. |
 | `passwd` | Here set the MELCloud password. |
 | `language` | Here set the MELCloud language. |
-| `displayMode` | Here select control mode `Heater/Cooler`, `Thermostat`. |
+| `displayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
 | `buttons.name` | Here set *Button Name* which You want expose to the *Homebridge/HomeKit*. | 
 | `buttons.mode` | Here select button mode, `On/Off`, `Heat`, `Dry`, `Cool`, `Fan`, `Auto`, `Purify`, `Physical Lock Controls`. |
 | `buttons.displayType` | Here select HomeKit display type, `Switch`, `Button` - selectable in HomeKit app as Light, Fan, Outlet. |
