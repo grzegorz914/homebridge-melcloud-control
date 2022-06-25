@@ -53,7 +53,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
     * Operating modes *ON/OFF/HEAT/COOL/AUTO*.
     * Heating/Cooling temperature.
     * Heating/Cooling threshold temperature.
-    * Fan speed *AUTO/1/2/3/4/5*.
+    * Fan speed *OFF/1/2/3/4/5/AUTO*.
     * Swing mode *AUTO/SWING*.
     * Vanes Vertical/Horizontal tilt angle (only read).
     * Lock physical controls *LOCK/UNLOCK*.
