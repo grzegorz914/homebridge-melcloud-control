@@ -44,19 +44,26 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 ### About the plugin
 * All devices are detected automatically.
 * Support multiple MELCloud accounts, buildings, flors, areas.
-* Support temperature *CELSIUS/FAHRENHEIT*.
+* Support temperature display units *CELSIUS/FAHRENHEIT*.
 * Main control, *Heater/Cooler*, *Thermostat*, configurable in plugin settings.
 * Additional control, *Buttons*, configurable in plugin settings.
-* Control of Air Conditioner:
-  * Power *ON/OFF*.
-  * Operating modes:
-    * Using *Heater/Cooler* or *Thermostat*, *ON/OFF/HEAT/COOL/AUTO*.
-    * Using buttons *ON/OFF/HEAT/DRY/COOL/FAN/AUTO/PURIFY*.
-  * Heating/Cooling temperature.
-  * Heating/Cooling threshold temperature.
-  * Fan speed *AUTO/SWING*.
-  * Swing mode *OFF/1/2/3/4/5/AUTO*.
-  * Vanes Vertical/Horizonta tilt angle.
+* Controls of Air Conditioner:
+  * Heater Cooler:
+    * Power *ON/OFF*.
+    * Operating modes *ON/OFF/HEAT/COOL/AUTO*.
+    * Heating/Cooling temperature.
+    * Heating/Cooling threshold temperature.
+    * Fan speed *AUTO/SWING*.
+    * Swing mode *OFF/1/2/3/4/5/AUTO*.
+    * Vanes Vertical/Horizontal tilt angle (only read).
+    * Lock physical controls *LOCK/UNLOCK*.
+  * Thermostat:
+    * Power *ON/OFF*.
+    * Operating modes *AUTO/HEAT/COOL*.
+    * Heating/Cooling temperature.
+    * Heating/Cooling threshold temperature.
+  * Buttons:
+    * Functions *ON/OFF/HEAT/DRY/COOL/FAN/AUTO/PURIFY/PHYSICAL LOCK CONTROLS*.
 * Control of Heat Pump:
   * Comming soon...
 * Control of Energy Recovery Ventilation:
@@ -79,7 +86,7 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
 | `language` | Here set the MELCloud language. |
 | `displayMode` | Here select control mode `Heater/Cooler`, `Thermostat`. |
 | `buttons.name` | Here set *Button Name* which You want expose to the *Homebridge/HomeKit*. | 
-| `buttons.mode` | Here select button mode, `On/Off`, `Heat`, `Dry`, `Cool`, `Fan`, `Auto`, `Purify`. |
+| `buttons.mode` | Here select button mode, `On/Off`, `Heat`, `Dry`, `Cool`, `Fan`, `Auto`, `Purify`, `Phzsical Lock Controls`. |
 | `buttons.displayType` | Here select HomeKit display type, `Switch`, `Button` - selectable in HomeKit app as Light, Fan, Outlet. |
 | `enableDebugMode` | This enable deep log in homebridge console. |
 | `disableLogInfo` | This disable display log values and states on every it change. |
@@ -102,11 +109,11 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
                     "user": "user",
                     "passwd": "password",
                     "language": 0,
-                    "displayMode": 0, //possible 0,1
+                    "displayMode": 0,
                     "buttons": [{
                         "name": "ON/OFF",
-                        "mode": 0, //possible 0,1,2,3,7,8,9
-                        "displayType": 0 //possible 0,1
+                        "mode": 0,
+                        "displayType": 0
                     }],
                     "disableLogInfo": false,
                     "disableLogDeviceInfo": false,

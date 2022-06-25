@@ -8,7 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### The old plugin and config need to be first removed from Homebridge and HomeKit and added again.
 ### The platform name and password properties was changed due collision with same already exist plugins from other developers.
 
-## [0.1.0] - (xx.06.2022)
+## [0.1.1] - (26.06.2022)
+## Changes
+- added lock physical controls for Heater/Cooler accessory
+- fix display undefined value for fan speed mode in log
+- fix display wrong swing mode in log
+
+## [0.1.0] - (26.06.2022)
 ## Changes
 - full code rebuild
 - fix display buttons state

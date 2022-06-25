@@ -76,7 +76,7 @@ class melCloudPlatform {
 						melCloudBuildingsFile: melCloudBuildingsFile
 					});
 
-					this.melCloud.on('connected', (melCloudInfo, contextKey, devices, devicesCount, temperatureDisplayUnitValue, temperatureDisplayUnitString) => {
+					this.melCloud.on('connected', (melCloudInfo, contextKey, devices, devicesCount) => {
 							if (devicesCount > 0) {
 								for (let i = 0; i < devicesCount; i++) {
 									const device = devices[i];
@@ -210,11 +210,12 @@ class melCloudAccessory {
 				this.serialNumber = serialNumber;
 				this.firmwareRevision = firmwareRevision;
 			})
-			.on('deviceState', (melCloudInfo, useFahrenheit, deviceState, power, inStandbyMode, operationMode, roomTemperature, setTemperature, setFanSpeed, numberOfFanSpeeds, vaneHorizontal, vaneVertical) => {
+			.on('deviceState', (melCloudInfo, useFahrenheit, deviceState, power, inStandbyMode, operationMode, roomTemperature, setTemperature, setFanSpeed, numberOfFanSpeeds, vaneHorizontal, vaneVertical, lockPhysicalControls) => {
 				this.deviceState = deviceState;
 				this.melCloudInfo = melCloudInfo;
 				this.temperatureDisplayUnitValue = useFahrenheit;
 				this.temperatureDisplayUnitString = CONSTANS.TemperatureDisplayUnits[this.temperatureDisplayUnitValue]
+				this.lockPhysicalControls = lockPhysicalControls;
 
 				const displayMode = this.displayMode;
 				//INACTIVE, IDLE, HEATING, COOLING
@@ -236,7 +237,10 @@ class melCloudAccessory {
 				this.roomTemperatureFahrenheitCelsius = roomTemperatureFahrenheitCelsius;
 				this.setTemperatureFahrenheitCelsius = setTemperatureFahrenheitCelsius;
 				const fanSpeed = [6, 1, 2, 3, 4, 5][setFanSpeed]
+				this.fanSpeed = fanSpeed;
 				const swingMode = (vaneHorizontal == 12 && vaneVertical == 7) ? 1 : 0;
+				this.swingMode = swingMode;
+
 				if (this.melcloudService) {
 					if (displayMode == 0) {
 						this.melcloudService
@@ -253,6 +257,7 @@ class melCloudAccessory {
 							.updateCharacteristic(Characteristic.CurrentVerticalTiltAngle, vaneVertical)
 							.updateCharacteristic(Characteristic.TargetVerticalTiltAngle, vaneVertical)
 							.updateCharacteristic(Characteristic.TemperatureDisplayUnits, useFahrenheit)
+							.updateCharacteristic(Characteristic.LockPhysicalControls, lockPhysicalControls)
 					};
 					if (displayMode == 1) {
 						this.melcloudService
@@ -273,12 +278,37 @@ class melCloudAccessory {
 					for (let i = 0; i < buttonsCount; i++) {
 						const button = buttons[i];
 						const buttonMode = button.mode;
-						const buttonState = (power == false) ? false : (buttonMode == operationMode) ? true : false;
-						const state = (buttonMode == 0) ? power : buttonState;
-						this.buttonsStates.push(state);
+						let buttonState = false;
+						switch (buttonMode) {
+							case 0: //ON,OFF
+								buttonState = (power == true);
+								break;
+							case 1: //HEAT
+								buttonState = power ? (buttonMode == operationMode) : false;
+								break;
+							case 2: //DRY
+								buttonState = power ? (buttonMode == operationMode) : false;
+								break
+							case 3: //COOL
+								buttonState = power ? (buttonMode == operationMode) : false;
+								break;
+							case 7: //FAN
+								buttonState = power ? (buttonMode == operationMode) : false;
+								break;
+							case 8: //AUTO
+								buttonState = power ? (buttonMode == operationMode) : false;
+								break;
+							case 9: //PURIFY
+								buttonState = power ? (buttonMode == operationMode) : false;
+								break;
+							case 10: //PHYSICAL LOCK CONTROLS
+								buttonState = (lockPhysicalControls == 1);
+								break;
+						}
+						this.buttonsStates.push(buttonState);
 						if (this.buttonsServices) {
 							this.buttonsServices[i]
-								.updateCharacteristic(Characteristic.On, state)
+								.updateCharacteristic(Characteristic.On, buttonState)
 						};
 					};
 				};
@@ -372,8 +402,8 @@ class melCloudAccessory {
 				})
 				.onGet(async () => {
 					//0 = AUTO, 1 = 1, 2 = 2, 3 = 3, 4 = 4, 5 = 5
-					const value = [6, 1, 2, 3, 4, 5][deviceState.SetFanSpeed];
-					const fansSpeedMode = [0, 1, 2, 3, 4, 5][value];
+					const value = this.fanSpeed;
+					const fansSpeedMode = [0, 1, 2, 3, 4, 5, 0][value];
 					const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Fan speed: ${CONSTANS.AirConditioner.SetFanSpeed[fansSpeedMode]}`);
 					return value;
 				})
@@ -393,8 +423,8 @@ class melCloudAccessory {
 				.onGet(async () => {
 					//Vane Horizontal: 0 = Auto, 1 = 1, 2 = 2, 3 = 3, 4 = 4, 5 = 5, 12 = Swing.
 					//Vane Vertical: 0 = Auto, 1 = 1, 2 = 2, 3 = 3, 4 = 4, 5 = 5, 7 = Swing.
-					const value = (deviceState.VaneHorizontal == 12 && deviceState.VaneVertical == 7) ? 1 : 0;
-					const swingMode = value ? 6 : 1;
+					const value = this.swingMode;
+					const swingMode = value ? 6 : 0;
 					const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Swing mode: ${CONSTANS.AirConditioner.SwingMode[swingMode]}`);
 					return value;
 				})
@@ -457,6 +487,25 @@ class melCloudAccessory {
 						const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set target vertical tilt angle: ${value}°`);
 					} catch (error) {
 						this.log.error(`${deviceTypeText}: ${accessoryName}, Set target vertical tilt angle error: ${error}`);
+					};
+				});
+			this.melcloudService.getCharacteristic(Characteristic.LockPhysicalControls)
+				.onGet(async () => {
+					const value = this.lockPhysicalControls;
+					const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Lock physical controls: ${value ? 'LOCKED':'UNLOCKED'}`);
+					return value;
+				})
+				.onSet(async (value) => {
+					value = value ? true : false;
+					deviceState.ProhibitSetTemperature = value;
+					deviceState.ProhibitOperationMode = value;
+					deviceState.ProhibitPower = value;
+
+					try {
+						const newState = await this.melCloudDevice.send(deviceTypeUrl, deviceState, 0);
+						const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set locl physical controls: ${value ? 'LOCK':'UNLOCK'}`);
+					} catch (error) {
+						this.log.error(`${deviceTypeText}: ${accessoryName}, Set lock physical controls error: ${error}`);
 					};
 				});
 		};
@@ -673,6 +722,11 @@ class melCloudAccessory {
 								deviceState.Power = true;
 								deviceState.OperationMode = 9;
 								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.OperationMode;
+								break;
+							case 10: //PHYSICAL LOCK CONTROLS
+								deviceState.ProhibitSetTemperature = state;
+								deviceState.ProhibitOperationMode = state;
+								deviceState.ProhibitPower = state;
 								break;
 						}
 						try {

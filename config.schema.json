@@ -231,6 +231,12 @@
                         "enum": [
                           9
                         ]
+                      },
+                      {
+                        "title": "PHYSIOCAL LOCK CONTROLS",
+                        "enum": [
+                          10
+                        ]
                       }
                     ],
                     "required": false

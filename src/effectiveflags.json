@@ -1,5 +1,6 @@
 {
     "AirConditioner": {
+        "Settings": 0,
         "Power": 1,
         "OperationMode": 2,
         "SetTemperature": 4,
