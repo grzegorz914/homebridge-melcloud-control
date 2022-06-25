@@ -236,8 +236,10 @@ class melCloudAccessory {
 				const setTemperatureFahrenheitCelsius = (useFahrenheit == 0) ? (setTemperature - 32) * 5 / 9 : setTemperature * 9 / 5 + 32;
 				this.roomTemperatureFahrenheitCelsius = roomTemperatureFahrenheitCelsius;
 				this.setTemperatureFahrenheitCelsius = setTemperatureFahrenheitCelsius;
+
 				const fanSpeed = [6, 1, 2, 3, 4, 5][setFanSpeed]
 				this.fanSpeed = fanSpeed;
+
 				const swingMode = (vaneHorizontal == 12 && vaneVertical == 7) ? 1 : 0;
 				this.swingMode = swingMode;
 
@@ -401,7 +403,7 @@ class melCloudAccessory {
 					minStep: 1
 				})
 				.onGet(async () => {
-					//0 = AUTO, 1 = 1, 2 = 2, 3 = 3, 4 = 4, 5 = 5
+					//AUTO, 1, 2, 3, 4, 5
 					const value = this.fanSpeed;
 					const fansSpeedMode = [0, 1, 2, 3, 4, 5, 0][value];
 					const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Fan speed: ${CONSTANS.AirConditioner.SetFanSpeed[fansSpeedMode]}`);
@@ -421,8 +423,8 @@ class melCloudAccessory {
 				});
 			this.melcloudService.getCharacteristic(Characteristic.SwingMode)
 				.onGet(async () => {
-					//Vane Horizontal: 0 = Auto, 1 = 1, 2 = 2, 3 = 3, 4 = 4, 5 = 5, 12 = Swing.
-					//Vane Vertical: 0 = Auto, 1 = 1, 2 = 2, 3 = 3, 4 = 4, 5 = 5, 7 = Swing.
+					//Vane Horizontal: Auto, 1, 2, 3, 4, 5, 12 = Swing
+					//Vane Vertical: Auto, 1, 2, 3, 4, 5, 7 = Swing
 					const value = this.swingMode;
 					const swingMode = value ? 6 : 0;
 					const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Swing mode: ${CONSTANS.AirConditioner.SwingMode[swingMode]}`);
