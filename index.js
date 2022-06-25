@@ -243,9 +243,9 @@ class melCloudAccessory {
 				const swingMode = (vaneHorizontal == 12 && vaneVertical == 7) ? 1 : 0;
 				this.swingMode = swingMode;
 
-				if (this.melcloudService) {
+				if (this.melCloudService) {
 					if (displayMode == 0) {
-						this.melcloudService
+						this.melCloudService
 							.updateCharacteristic(Characteristic.Active, power)
 							.updateCharacteristic(Characteristic.CurrentHeaterCoolerState, currentMode)
 							.updateCharacteristic(Characteristic.TargetHeaterCoolerState, targetMode)
@@ -262,7 +262,7 @@ class melCloudAccessory {
 							.updateCharacteristic(Characteristic.LockPhysicalControls, lockPhysicalControls)
 					};
 					if (displayMode == 1) {
-						this.melcloudService
+						this.melCloudService
 							.updateCharacteristic(Characteristic.CurrentHeatingCoolingState, currentMode)
 							.updateCharacteristic(Characteristic.TargetHeatingCoolingState, targetMode)
 							.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
@@ -362,7 +362,7 @@ class melCloudAccessory {
 		const accessoryCategory = displayMode ? Categories.THERMOSTAT : Categories.AIR_CONDITIONER;
 		const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 
-		//accessory information
+		//information service
 		this.log.debug('prepareInformationService');
 		accessory.removeService(accessory.getService(Service.AccessoryInformation));
 		const informationService = new Service.AccessoryInformation(accessoryName);
@@ -374,12 +374,12 @@ class melCloudAccessory {
 		accessory.addService(informationService);
 
 
-		//accessory services
+		//melcloud service
 		this.log.debug('prepareMelCloudService');
-		this.melcloudService = displayMode ? new Service.Thermostat(accessoryName, 'Thermostat') : new Service.HeaterCooler(accessoryName, 'HeaterCooler');
+		this.melCloudService = displayMode ? new Service.Thermostat(accessoryName, 'Thermostat') : new Service.HeaterCooler(accessoryName, 'HeaterCooler');
 		if (displayMode == 0) {
 			//Only for Heater Cooler Service
-			this.melcloudService.getCharacteristic(Characteristic.Active)
+			this.melCloudService.getCharacteristic(Characteristic.Active)
 				.onGet(async () => {
 					const state = deviceState.Power;
 					const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Power state: ${state?'ON':'OFF'}`);
@@ -396,7 +396,7 @@ class melCloudAccessory {
 						this.log.error(`${deviceTypeText}: ${accessoryName}, Set power state error: ${error}`);
 					};
 				});
-			this.melcloudService.getCharacteristic(Characteristic.RotationSpeed)
+			this.melCloudService.getCharacteristic(Characteristic.RotationSpeed)
 				.setProps({
 					minValue: 0,
 					maxValue: 6,
@@ -422,7 +422,7 @@ class melCloudAccessory {
 						this.log.error(`${deviceTypeText}: ${accessoryName}, Set fan speed error: ${error}`);
 					};
 				});
-			this.melcloudService.getCharacteristic(Characteristic.SwingMode)
+			this.melCloudService.getCharacteristic(Characteristic.SwingMode)
 				.onGet(async () => {
 					//Vane Horizontal: Auto, 1, 2, 3, 4, 5, 12 = Swing
 					//Vane Vertical: Auto, 1, 2, 3, 4, 5, 7 = Swing
@@ -444,13 +444,13 @@ class melCloudAccessory {
 						this.log.error(`${deviceTypeText}: ${accessoryName}, Set new swing mode error: ${error}`);
 					};
 				});
-			this.melcloudService.getCharacteristic(Characteristic.CurrentHorizontalTiltAngle)
+			this.melCloudService.getCharacteristic(Characteristic.CurrentHorizontalTiltAngle)
 				.onGet(async () => {
 					const value = deviceState.VaneHorizontal;
 					const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Horizontal tilt angle: ${value}°`);
 					return value;
 				})
-			this.melcloudService.getCharacteristic(Characteristic.TargetHorizontalTiltAngle)
+			this.melCloudService.getCharacteristic(Characteristic.TargetHorizontalTiltAngle)
 				.onGet(async () => {
 					const value = deviceState.VaneHorizontal;
 					const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Target horizontal tilt angle: ${value}°`);
@@ -468,13 +468,13 @@ class melCloudAccessory {
 						this.log.error(`${deviceTypeText}: ${accessoryName}, Set target horizontal tilt angle error: ${error}`);
 					};
 				});
-			this.melcloudService.getCharacteristic(Characteristic.CurrentVerticalTiltAngle)
+			this.melCloudService.getCharacteristic(Characteristic.CurrentVerticalTiltAngle)
 				.onGet(async () => {
 					const value = deviceState.VaneVertical;
 					const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Vertical tilt angle: ${value}°`);
 					return value;
 				})
-			this.melcloudService.getCharacteristic(Characteristic.TargetVerticalTiltAngle)
+			this.melCloudService.getCharacteristic(Characteristic.TargetVerticalTiltAngle)
 				.onGet(async () => {
 					const value = deviceState.VaneVertical;
 					const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Target vertical tilt angle: ${value}°`);
@@ -492,7 +492,7 @@ class melCloudAccessory {
 						this.log.error(`${deviceTypeText}: ${accessoryName}, Set target vertical tilt angle error: ${error}`);
 					};
 				});
-			this.melcloudService.getCharacteristic(Characteristic.LockPhysicalControls)
+			this.melCloudService.getCharacteristic(Characteristic.LockPhysicalControls)
 				.onGet(async () => {
 					const value = this.lockPhysicalControls;
 					const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Lock physical controls: ${value ? 'LOCKED':'UNLOCKED'}`);
@@ -512,14 +512,14 @@ class melCloudAccessory {
 					};
 				});
 		};
-		this.melcloudService.getCharacteristic(displayMode ? Characteristic.CurrentHeatingCoolingState : Characteristic.CurrentHeaterCoolerState)
+		this.melCloudService.getCharacteristic(displayMode ? Characteristic.CurrentHeatingCoolingState : Characteristic.CurrentHeaterCoolerState)
 			.onGet(async () => {
 				//1 = HEAT, 2 = DRY 3 = COOL, 7 = FAN, 8 = AUTO
 				const currentMode = this.currentModesHeaterCoolerThermostat;
 				const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Heating cooling mode: ${currentModeText[currentMode]}`);
 				return currentMode;
 			});
-		this.melcloudService.getCharacteristic(displayMode ? Characteristic.TargetHeatingCoolingState : Characteristic.TargetHeaterCoolerState)
+		this.melCloudService.getCharacteristic(displayMode ? Characteristic.TargetHeatingCoolingState : Characteristic.TargetHeaterCoolerState)
 			.onGet(async () => {
 				//1 = HEAT, 2 = DRY 3 = COOL, 7 = FAN, 8 = AUTO
 				const targetMode = this.targetModesHeaterCoolerThermostat;
@@ -557,7 +557,7 @@ class melCloudAccessory {
 					this.log.error(`${deviceTypeText}: ${accessoryName}, Set target heating cooling mode error: ${error}`);
 				};
 			});
-		this.melcloudService.getCharacteristic(Characteristic.CurrentTemperature)
+		this.melCloudService.getCharacteristic(Characteristic.CurrentTemperature)
 			.setProps({
 				minValue: this.temperatureDisplayUnitValue ? 32 : 0,
 				maxValue: this.temperatureDisplayUnitValue ? 212 : 100,
@@ -570,7 +570,7 @@ class melCloudAccessory {
 			});
 		if (displayMode == 1) {
 			//Only for Thermostat Service
-			this.melcloudService.getCharacteristic(Characteristic.TargetTemperature)
+			this.melCloudService.getCharacteristic(Characteristic.TargetTemperature)
 				.setProps({
 					minValue: this.temperatureDisplayUnitValue ? 50 : 10,
 					maxValue: this.temperatureDisplayUnitValue ? 88 : 31,
@@ -593,7 +593,7 @@ class melCloudAccessory {
 					};
 				});
 		};
-		this.melcloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
+		this.melCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
 			.setProps({
 				minValue: this.temperatureDisplayUnitValue ? 61 : 10,
 				maxValue: this.temperatureDisplayUnitValue ? 88 : 31,
@@ -615,7 +615,7 @@ class melCloudAccessory {
 					this.log.error(`${deviceTypeText}: ${accessoryName}, Set cooling threshold temperature error: ${error}`);
 				};
 			});
-		this.melcloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
+		this.melCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
 			.setProps({
 				minValue: this.temperatureDisplayUnitValue ? 50 : 10,
 				maxValue: this.temperatureDisplayUnitValue ? 88 : 31,
@@ -637,7 +637,7 @@ class melCloudAccessory {
 					this.log.error(`${deviceTypeText}: ${accessoryName}, Set heating threshold temperature error: ${error}`);
 				};
 			});
-		this.melcloudService.getCharacteristic(Characteristic.TemperatureDisplayUnits)
+		this.melCloudService.getCharacteristic(Characteristic.TemperatureDisplayUnits)
 			.onGet(async () => {
 				const value = this.temperatureDisplayUnitValue;
 				const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Temperature display unit: ${temperatureUnit}`);
@@ -661,9 +661,9 @@ class melCloudAccessory {
 					this.log.error(`${deviceTypeText}: ${accessoryName}, Set temperature display unit error: ${error}`);
 				};
 			});
-		accessory.addService(this.melcloudService);
+		accessory.addService(this.melCloudService);
 
-		//accessory buttons services
+		//buttons services
 		const buttonsCount = this.buttonsCount;
 		if (buttonsCount > 0) {
 			this.log.debug('prepareButtonsService');
@@ -682,9 +682,9 @@ class melCloudAccessory {
 				//get button display type
 				const buttonDisplayType = (button.displayType != undefined) ? button.displayType : 0;
 
-				const serviceType = [Service.Outlet, Service.Switch][buttonDisplayType];
-				const buttonNameService = accessoryName + ' ' + buttonName;
-				const buttonService = new serviceType(buttonNameService, `ButtonService${i}`);
+				const buttonServiceType = [Service.Outlet, Service.Switch][buttonDisplayType];
+				const buttonServiceName = accessoryName + ' ' + buttonName;
+				const buttonService = new buttonServiceType(buttonServiceName, `ButtonService${i}`);
 				buttonService.getCharacteristic(Characteristic.On)
 					.onGet(async () => {
 						const state = this.buttonsStates[i];
