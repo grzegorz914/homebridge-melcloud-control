@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### The old plugin and config need to be first removed from Homebridge and HomeKit and added again.
 ### The platform name and password properties was changed due collision with same already exist plugins from other developers.
 
+## [0.1.2] - (26.06.2022)
+## Changes
+- rebuilded refresch device state
+
+
 ## [0.1.1] - (26.06.2022)
 ## Changes
 - added lock physical controls for Heater/Cooler accessory
