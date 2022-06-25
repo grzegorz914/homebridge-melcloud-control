@@ -44,6 +44,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 ### About the plugin
 * All devices are detected automatically.
 * Support multiple MELCloud accounts, buildings, flors, areas.
+* Support temperature *CELSIUS/FAHRENHEIT*.
 * Main control, *Heater/Cooler*, *Thermostat*, configurable in plugin settings.
 * Additional control, *Buttons*, configurable in plugin settings.
 * Control of Air Conditioner:
@@ -53,8 +54,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
     * Using buttons *ON/OFF/HEAT/DRY/COOL/FAN/AUTO/PURIFY*.
   * Heating/Cooling temperature.
   * Heating/Cooling threshold temperature.
-  * Fan speed.
-  * Swing mode.
+  * Fan speed *AUTO/SWING*.
+  * Swing mode *OFF/1/2/3/4/5/AUTO*.
   * Vanes Vertical/Horizonta tilt angle.
 * Control of Heat Pump:
   * Comming soon...

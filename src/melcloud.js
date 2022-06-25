@@ -42,9 +42,7 @@ class MELCLOUD extends EventEmitter {
                     const writeMelCloudInfoData = await fsPromises.writeFile(melCloudInfoFile, melCloudInfoData);
 
                     this.contextKey = loginData.data.LoginData.ContextKey;
-                    this.temperatureDisplayUnitValue = loginData.data.LoginData.UseFahrenheit ? 1 : 0;
-                    this.temperatureDisplayUnitString = CONSTANS.TemperatureDisplayUnits[this.temperatureDisplayUnitValue]
-                    this.melCloudInfo = loginData.data;
+                    this.melCloudInfo = loginData.data.LoginData;
 
                     this.emit('message', `Account: ${accountName}, Connected.`);
                     this.emit('checkDevicesList');
@@ -130,7 +128,7 @@ class MELCLOUD extends EventEmitter {
 
                     const devicesCount = this.devicesList.length;
                     this.emit('message', `Account: ${accountName}, Found devices: ${devicesCount}.`);
-                    this.emit('connected', this.melCloudInfo, this.contextKey, this.devicesList, devicesCount, this.temperatureDisplayUnitValue, this.temperatureDisplayUnitString);
+                    this.emit('connected', this.melCloudInfo, this.contextKey, this.devicesList, devicesCount);
                 } catch (error) {
                     this.emit('error', `Account: ${accountName}, Update devices list error: ${error}`);
                 };

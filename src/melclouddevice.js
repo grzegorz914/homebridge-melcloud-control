@@ -12,6 +12,7 @@ class MELCLOUDDEVICE extends EventEmitter {
         this.buildingId = config.buildingId;
         this.deviceId = config.deviceId;
         this.debugLog = config.debugLog;
+        this.melCloudInfo = config.melCloudInfo;
 
         this.axiosInstanceGet = axios.create({
             method: 'GET',
@@ -30,7 +31,7 @@ class MELCLOUDDEVICE extends EventEmitter {
         });
 
         this.on('checkDeviceInfo', () => {
-                //melCloudInfo
+                //deviceInfo
                 this.deviceType = deviceInfo.Type;
                 this.deviceName = deviceInfo.DeviceName;
                 this.deviceTypeText = CONSTANS.DeviceType[this.deviceType];
@@ -167,8 +168,10 @@ class MELCLOUDDEVICE extends EventEmitter {
                     const scene = deviceState.Scene;
                     const sceneOwner = deviceState.SceneOwner;
 
+                    const melCloudInfo = this.melCloudInfo;
+                    const useFahrenheit = melCloudInfo.UseFahrenheit ? 1 : 0;
                     this.emit('deviceInfo', manufacturer, modelName, modelName1, serialNumber, firmwareRevision);
-                    this.emit('deviceState', deviceState, power, inStandbyMode, operationMode, roomTemperature, setTemperature, setFanSpeed, numberOfFanSpeeds, vaneHorizontal, vaneVertical);
+                    this.emit('deviceState', melCloudInfo, useFahrenheit, deviceState, power, inStandbyMode, operationMode, roomTemperature, setTemperature, setFanSpeed, numberOfFanSpeeds, vaneHorizontal, vaneVertical);
                 } catch (error) {
                     this.emit('error', `Check device state error: ${error}`);
                 };
@@ -194,6 +197,7 @@ class MELCLOUDDEVICE extends EventEmitter {
             try {
                 const newState = await this.axiosInstancePost(url, options);
                 const debug = this.debugLog ? this.emit('message', `Response newState: ${JSON.stringify(newState.data, null, 2)}`) : false;
+                this.melCloudInfo = (type == 1) ? newData : this.melCloudInfo;
                 this.emit('checkDeviceInfo');
                 resolve(true);
             } catch (error) {

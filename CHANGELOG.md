@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - full code rebuild
 - fix display buttons state
 - performance and stability improvement
+- fix [#3](https://github.com/grzegorz914/homebridge-melcloud-control/issues/3)
 
 ## [0.0.11] - (20.06.2022)
 ## Changes
