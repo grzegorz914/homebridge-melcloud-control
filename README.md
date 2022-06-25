@@ -85,9 +85,9 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
 | `passwd` | Here set the MELCloud password. |
 | `language` | Here set the MELCloud language. |
 | `displayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
-| `buttons.name` | Here set *Button Name* which You want expose to the *Homebridge/HomeKit*. | 
+| `buttons.name` | Here set `Button Name` which You want expose to the *Homebridge/HomeKit*. | 
 | `buttons.mode` | Here select button mode, `On/Off`, `Heat`, `Dry`, `Cool`, `Fan`, `Auto`, `Purify`, `Physical Lock Controls`. |
-| `buttons.displayType` | Here select HomeKit display type, `Switch`, `Button` - selectable in HomeKit app as Light, Fan, Outlet. |
+| `buttons.displayType` | Here select HomeKit display type, `Switch`, `Button` - selectable in HomeKit app as `Light`, `Fan`, `Outlet`. |
 | `enableDebugMode` | This enable deep log in homebridge console. |
 | `disableLogInfo` | This disable display log values and states on every it change. |
 | `disableLogDeviceInfo` | This disable display log device info on plugin restart. |
