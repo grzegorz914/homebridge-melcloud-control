@@ -12,7 +12,7 @@
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/grzegorz914/homebridge-melcloud-control.svg)](https://github.com/grzegorz914/homebridge-melcloud-control/pulls)
 [![GitHub issues](https://img.shields.io/github/issues/grzegorz914/homebridge-melcloud-control.svg)](https://github.com/grzegorz914/homebridge-melcloud-control/issues)
 
-Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation devices manufactured by Mistsubishi and connected to MELCloud service.                                           
+Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation devices manufactured by Mistsubishi and connected to MELCloud.                                           
 
 </span>
 
@@ -29,15 +29,12 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 ### Note
 * The Heat Pump and Energy Recovery Ventilation is not supported at this time.
 
-### Know issues
-* If used with Hoobs, there is a possible configuration incompatibilty.
-
 ### Troubleshooting
 * If for some reason the device is not displayed in HomeKit app try this procedure:
    * Go to `./homebridge/persist`.
    * Remove `AccessoryInfo.xxx` file which contain Your device data: `{"displayName":"DeviceName"}`.
    * Next remove `IdentifierCashe.xxx` file with same name as `AccessoryInfo.xxx`.
-   * Restart Homebridge and try add it to the Home app again.
+   * Restart Homebridge and try add it to the HomeKit app again.
 
 ### About the plugin
 * All devices are detected automatically.

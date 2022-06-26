@@ -210,7 +210,7 @@ class MELCLOUDDEVICE extends EventEmitter {
 
             try {
                 const newState = await this.axiosInstancePost(url, options);
-                const debug = this.debugLog ? this.emit('message', `Response newState: ${JSON.stringify(newState.data, null, 2)}`) : false;
+                const debug = this.debugLog ? this.emit('message', `Send command response: ${JSON.stringify(newState.data, null, 2)}`) : false;
                 switch (type) {
                     case 0: //deviceState
                         this.deviceState = newData;

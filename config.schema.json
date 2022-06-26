@@ -17,7 +17,7 @@
               "title": "Account name",
               "type": "string",
               "placeholder": "Account name",
-              "description": "Here set your account name.",
+              "description": "Here set your own account name.",
               "required": true
             },
             "user": {
@@ -41,7 +41,7 @@
               "maxLength": 2,
               "pattern": "^[0-9]+$",
               "default": "0",
-              "description": "Here select the language Ypu use in MELCloud service.",
+              "description": "Here select the language used in MELCloud account.",
               "oneOf": [{
                   "title": "English",
                   "enum": ["0"]
@@ -150,12 +150,12 @@
               "required": true
             },
             "displayMode": {
-              "title": "Display mode",
+              "title": "Control mode",
               "type": "integer",
               "minimum": 0,
               "maximum": 1,
               "default": 0,
-              "description": "Here select what a control mode You want to use.",
+              "description": "Here select main control mode.",
               "oneOf": [{
                   "title": "Heater/Cooler",
                   "enum": [
@@ -181,7 +181,7 @@
                     "title": "Name",
                     "type": "string",
                     "placeholder": "Button name",
-                    "description": "Here set Your own name.",
+                    "description": "Here set Your own name displayed in Homebridge/HomeKit app.",
                     "required": false
                   },
                   "mode": {
@@ -233,91 +233,91 @@
                         ]
                       },
                       {
-                        "title": "PHYSIOCAL LOCK CONTROLS",
+                        "title": "PHYSICAL CONTROLS LOCK/UNLOCK",
                         "enum": [
                           10
                         ]
                       },
                       {
-                        "title": "SWING H VANE MODE AUTO",
+                        "title": "VANE H SWING MODE AUTO",
                         "enum": [
                           11
                         ]
                       },
                       {
-                        "title": "SWING H VANE  MODE 1",
+                        "title": "VANE H SWING MODE 1",
                         "enum": [
                           12
                         ]
                       },
                       {
-                        "title": "SWING H VANE MODE 2",
+                        "title": "VANE H SWING MODE 2",
                         "enum": [
                           13
                         ]
                       },
                       {
-                        "title": "SWING H VANE MODE 3",
+                        "title": "VANE H SWING MODE 3",
                         "enum": [
                           14
                         ]
                       },
                       {
-                        "title": "SWING H VANE MODE 4",
+                        "title": "VANE H SWING MODE 4",
                         "enum": [
                           15
                         ]
                       },
                       {
-                        "title": "SWING H VANE MODE 5",
+                        "title": "VANE H SWING MODE 5",
                         "enum": [
                           16
                         ]
                       },
                       {
-                        "title": "SWING H VANE MODE SWING",
+                        "title": "VANE H SWING MODE SWING",
                         "enum": [
                           17
                         ]
                       },
                       {
-                        "title": "SWING V VANE MODE AUTO",
+                        "title": "VANE V SWING MODE AUTO",
                         "enum": [
                           18
                         ]
                       },
                       {
-                        "title": "SWING V VANE  MODE 1",
+                        "title": "VANE V SWING  MODE 1",
                         "enum": [
                           19
                         ]
                       },
                       {
-                        "title": "SWING V VANE MODE 2",
+                        "title": "VANE V SWING MODE 2",
                         "enum": [
                           20
                         ]
                       },
                       {
-                        "title": "SWING V VANE MODE 3",
+                        "title": "VANE V SWING MODE 3",
                         "enum": [
                           21
                         ]
                       },
                       {
-                        "title": "SWING V VANE MODE 4",
+                        "title": "VANE V SWING MODE 4",
                         "enum": [
                           22
                         ]
                       },
                       {
-                        "title": "SWING V VANE MODE 5",
+                        "title": "VANE V SWING MODE 5",
                         "enum": [
                           23
                         ]
                       },
                       {
-                        "title": "SWING V VANE MODE SWING",
+                        "title": "VANE V SWING MODE SWING",
                         "enum": [
                           24
                         ]
