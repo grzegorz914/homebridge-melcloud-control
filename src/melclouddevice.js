@@ -187,7 +187,7 @@ class MELCLOUDDEVICE extends EventEmitter {
                 const useFahrenheit = (melCloudInfo.UseFahrenheit == true) ? 1 : 0;
                 const lockPhysicalControls = (prohibitSetTemperature == true || prohibitOperationMode == true || prohibitPower == true) ? 1 : 0;
                 this.emit('deviceInfo', manufacturer, modelName, modelName1, serialNumber, firmwareRevision);
-                this.emit('deviceState', melCloudInfo, useFahrenheit, deviceState, power, inStandbyMode, operationMode, roomTemperature, setTemperature, setFanSpeed, numberOfFanSpeeds, vaneHorizontal, vaneVertical, lockPhysicalControls);
+                this.emit('deviceState', melCloudInfo, deviceState, power, inStandbyMode, operationMode, roomTemperature, setTemperature, setFanSpeed, numberOfFanSpeeds, vaneHorizontal, vaneVertical, lockPhysicalControls, useFahrenheit);
             });
 
         this.emit('refreschDeviceState');
