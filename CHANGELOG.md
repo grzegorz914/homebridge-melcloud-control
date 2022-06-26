@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### The old plugin and config need to be first removed from Homebridge and HomeKit and added again.
 ### The platform name and password properties was changed due collision with same already exist plugins from other developers.
 
+## [0.2.2] - (27.06.2022)
+## Changes
+- fix select button mone abowe as 9
+
 ## [0.2.1] - (27.06.2022)
 ## Changes
 - config schema updated

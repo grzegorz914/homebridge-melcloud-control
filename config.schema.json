@@ -188,7 +188,7 @@
                     "title": "Mode",
                     "type": "integer",
                     "minimum": 0,
-                    "maximum": 9,
+                    "maximum": 30,
                     "description": "Here select the function mode.",
                     "oneOf": [{
                         "title": "POWER ON/OFF",
@@ -287,7 +287,7 @@
                         ]
                       },
                       {
-                        "title": "VANE V SWING  MODE 1",
+                        "title": "VANE V SWING MODE 1",
                         "enum": [
                           19
                         ]
