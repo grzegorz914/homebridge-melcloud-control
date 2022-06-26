@@ -191,43 +191,43 @@
                     "maximum": 9,
                     "description": "Here select the function mode.",
                     "oneOf": [{
-                        "title": "ON/OFF",
+                        "title": "POWER ON/OFF",
                         "enum": [
                           0
                         ]
                       },
                       {
-                        "title": "HEAT",
+                        "title": "OPERATING MODE HEAT",
                         "enum": [
                           1
                         ]
                       },
                       {
-                        "title": "DRY",
+                        "title": "OPERATING MODE DRY",
                         "enum": [
                           2
                         ]
                       },
                       {
-                        "title": "COOL",
+                        "title": "OPERATING MODE COOL",
                         "enum": [
                           3
                         ]
                       },
                       {
-                        "title": "FAN",
+                        "title": "OPERATING MODE FAN",
                         "enum": [
                           7
                         ]
                       },
                       {
-                        "title": "AUTO",
+                        "title": "OPERATING MODE AUTO",
                         "enum": [
                           8
                         ]
                       },
                       {
-                        "title": "PURIFY",
+                        "title": "OPERATING MODE PURIFY",
                         "enum": [
                           9
                         ]
@@ -236,6 +236,126 @@
                         "title": "PHYSIOCAL LOCK CONTROLS",
                         "enum": [
                           10
+                        ]
+                      },
+                      {
+                        "title": "SWING H VANE MODE AUTO",
+                        "enum": [
+                          11
+                        ]
+                      },
+                      {
+                        "title": "SWING H VANE  MODE 1",
+                        "enum": [
+                          12
+                        ]
+                      },
+                      {
+                        "title": "SWING H VANE MODE 2",
+                        "enum": [
+                          13
+                        ]
+                      },
+                      {
+                        "title": "SWING H VANE MODE 3",
+                        "enum": [
+                          14
+                        ]
+                      },
+                      {
+                        "title": "SWING H VANE MODE 4",
+                        "enum": [
+                          15
+                        ]
+                      },
+                      {
+                        "title": "SWING H VANE MODE 5",
+                        "enum": [
+                          16
+                        ]
+                      },
+                      {
+                        "title": "SWING H VANE MODE SWING",
+                        "enum": [
+                          17
+                        ]
+                      },
+                      {
+                        "title": "SWING V VANE MODE AUTO",
+                        "enum": [
+                          18
+                        ]
+                      },
+                      {
+                        "title": "SWING V VANE  MODE 1",
+                        "enum": [
+                          19
+                        ]
+                      },
+                      {
+                        "title": "SWING V VANE MODE 2",
+                        "enum": [
+                          20
+                        ]
+                      },
+                      {
+                        "title": "SWING V VANE MODE 3",
+                        "enum": [
+                          21
+                        ]
+                      },
+                      {
+                        "title": "SWING V VANE MODE 4",
+                        "enum": [
+                          22
+                        ]
+                      },
+                      {
+                        "title": "SWING V VANE MODE 5",
+                        "enum": [
+                          23
+                        ]
+                      },
+                      {
+                        "title": "SWING V VANE MODE SWING",
+                        "enum": [
+                          24
+                        ]
+                      },
+                      {
+                        "title": "FAN SPEED MODE AUTO",
+                        "enum": [
+                          25
+                        ]
+                      },
+                      {
+                        "title": "FAN SPEED MODE 1",
+                        "enum": [
+                          26
+                        ]
+                      },
+                      {
+                        "title": "FAN SPEED MODE 2",
+                        "enum": [
+                          27
+                        ]
+                      },
+                      {
+                        "title": "FAN SPEED MODE 3",
+                        "enum": [
+                          28
+                        ]
+                      },
+                      {
+                        "title": "FAN SPEED MODE 4",
+                        "enum": [
+                          29
+                        ]
+                      },
+                      {
+                        "title": "FAN SPEED MODE 5",
+                        "enum": [
+                          30
                         ]
                       }
                     ],

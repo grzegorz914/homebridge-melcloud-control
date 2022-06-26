@@ -291,25 +291,85 @@ class melCloudAccessory {
 								buttonState = (power == true);
 								break;
 							case 1: //HEAT
-								buttonState = power ? (buttonMode == operationMode) : false;
+								buttonState = power ? (operationMode == 1) : false;
 								break;
 							case 2: //DRY
-								buttonState = power ? (buttonMode == operationMode) : false;
+								buttonState = power ? (operationMode == 2) : false;
 								break
 							case 3: //COOL
-								buttonState = power ? (buttonMode == operationMode) : false;
+								buttonState = power ? (operationMode == 3) : false;
 								break;
 							case 7: //FAN
-								buttonState = power ? (buttonMode == operationMode) : false;
+								buttonState = power ? (operationMode == 7) : false;
 								break;
 							case 8: //AUTO
-								buttonState = power ? (buttonMode == operationMode) : false;
+								buttonState = power ? (operationMode == 8) : false;
 								break;
 							case 9: //PURIFY
-								buttonState = power ? (buttonMode == operationMode) : false;
+								buttonState = power ? (operationMode == 9) : false;
 								break;
 							case 10: //PHYSICAL LOCK CONTROLS
 								buttonState = (lockPhysicalControls == 1);
+								break;
+							case 11: //SWING H VANE MODE AUTO
+								buttonState = power ? (vaneHorizontal == 0) : false;
+								break;
+							case 12: //SWING H VANE MODE 1
+								buttonState = power ? (vaneHorizontal == 1) : false;
+								break;
+							case 13: //SWING H VANE MODE 2
+								buttonState = power ? (vaneHorizontal == 2) : false;
+								break;
+							case 14: //SWING H VANE MODE 3
+								buttonState = power ? (vaneHorizontal == 3) : false;
+								break;
+							case 15: //SWING H VANE MODE 4
+								buttonState = power ? (vaneHorizontal == 4) : false;
+								break;
+							case 16: //SWING H VANE MODE 5
+								buttonState = power ? (vaneHorizontal == 5) : false;
+								break;
+							case 17: //SWING H VANE MODE SWING
+								buttonState = power ? (vaneHorizontal == 12) : false;
+								break;
+							case 18: //SWING V VANE MODE AUTO
+								buttonState = power ? (vaneVertical == 0) : false;
+								break;
+							case 19: //SWING V VANE MODE 1
+								buttonState = power ? (vaneVertical == 1) : false;
+								break;
+							case 20: //SWING V VANE MODE 2
+								buttonState = power ? (vaneVertical == 2) : false;
+								break;
+							case 21: //SWING V VANE MODE 3
+								buttonState = power ? (vaneVertical == 3) : false;
+								break;
+							case 22: //SWING V VANE MODE 4
+								buttonState = power ? (vaneVertical == 4) : false;
+								break;
+							case 23: //SWING V VANE MODE 5
+								buttonState = power ? (vaneVertical == 5) : false;
+								break;
+							case 24: //SWING V VANE MODE SWING
+								buttonState = power ? (vaneVertical == 7) : false;
+								break;
+							case 25: //FAN MODE AUTO
+								buttonState = power ? (setFanSpeed == 0) : false;
+								break;
+							case 26: //FAN MODE 1
+								buttonState = power ? (setFanSpeed == 1) : false;
+								break;
+							case 27: //FAN MODE 2
+								buttonState = power ? (setFanSpeed == 2) : false;
+								break;
+							case 28: //FAN MODE 3
+								buttonState = power ? (setFanSpeed == 3) : false;
+								break;
+							case 29: //FAN MODE 4
+								buttonState = power ? (setFanSpeed == 4) : false;
+								break;
+							case 30: //FAN MODE 5
+								buttonState = power ? (setFanSpeed == 5) : false;
 								break;
 						};
 
@@ -723,10 +783,111 @@ class melCloudAccessory {
 								deviceState.ProhibitOperationMode = state;
 								deviceState.ProhibitPower = state;
 								break;
-						}
+							case 11: //SWING H VANE MODE AUTO
+								deviceState.Power = true;
+								deviceState.VaneHorizontal = 0;
+								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneHorizontal;
+								break;
+							case 12: //SWING H VANE MODE 1
+								deviceState.Power = true;
+								deviceState.VaneHorizontal = 1;
+								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneHorizontal;
+								break;
+							case 13: //SWING H VANE MODE 2
+								deviceState.Power = true;
+								deviceState.VaneHorizontal = 2;
+								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneHorizontal;
+								break;
+							case 14: //SWING H VANE MODE 3
+								deviceState.Power = true;
+								deviceState.VaneHorizontal = 3;
+								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneHorizontal;
+								break;
+							case 15: //SWING H VANE MODE 4
+								deviceState.Power = true;
+								deviceState.VaneHorizontal = 4;
+								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneHorizontal;
+								break;
+							case 16: //SWING H VANE MODE 5
+								deviceState.Power = true;
+								deviceState.VaneHorizontal = 5;
+								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneHorizontal;
+								break;
+							case 17: //SWING H VANE MODE SWING
+								deviceState.Power = true;
+								deviceState.VaneHorizontal = 12;
+								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneHorizontal;
+								break;
+							case 18: //SWING V VANE MODE AUTO
+								deviceState.Power = true;
+								deviceState.VaneVertical = 0;
+								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneVertical;
+								break;
+							case 19: //SWING V VANE MODE 1
+								deviceState.Power = true;
+								deviceState.VaneVertical = 1;
+								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneVertical;
+								break;
+							case 20: //SWING V VANE MODE 2
+								deviceState.Power = true;
+								deviceState.VaneVertical = 2;
+								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneVertical;
+								break;
+							case 21: //SWING V VANE MODE 3
+								deviceState.Power = true;
+								deviceState.VaneVertical = 3;
+								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneVertical;
+								break;
+							case 22: //SWING V VANE MODE 4
+								deviceState.Power = true;
+								deviceState.VaneVertical = 4;
+								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneVertical;
+								break;
+							case 23: //SWING V VANE MODE 5
+								deviceState.Power = true;
+								deviceState.VaneVertical = 5;
+								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneVertical;
+								break;
+							case 24: //SWING V VANE MODE SWING
+								deviceState.Power = true;
+								deviceState.VaneVertical = 7;
+								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneVertical;
+								break;
+							case 25: //FAN MODE AUTO
+								deviceState.Power = true;
+								deviceState.SetFanSpeed = 0;
+								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetFanSpeed;
+								break;
+							case 26: //FAN MODE 1
+								deviceState.Power = true;
+								deviceState.SetFanSpeed = 1;
+								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetFanSpeed;
+								break;
+							case 27: //FAN MODE 2
+								deviceState.Power = true;
+								deviceState.SetFanSpeed = 2;
+								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetFanSpeed;
+								break;
+							case 28: //FAN MODE 3
+								deviceState.Power = true;
+								deviceState.SetFanSpeed = 3;
+								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetFanSpeed;
+								break;
+							case 29: //FAN MODE 4
+								deviceState.Power = true;
+								deviceState.SetFanSpeed = 4;
+								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetFanSpeed;
+								break;
+							case 30: //FAN MODE 5
+								deviceState.Power = true;
+								deviceState.SetFanSpeed = 5;
+								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetFanSpeed;
+								break;
+						};
+
 						try {
 							const newState = await this.melCloudDevice.send(deviceTypeUrl, deviceState, 0);
-							const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set button mode: ${buttonName}`);
+							const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set: ${buttonName}`);
 						} catch (error) {
 							this.log.error(`${deviceTypeText}: ${accessoryName}, Set button error: ${error}`);
 						};

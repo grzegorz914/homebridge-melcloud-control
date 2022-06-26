@@ -63,7 +63,12 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
     * Heating/Cooling temperature.
     * Heating/Cooling threshold temperature.
   * Buttons:
-    * Functions *ON/OFF/HEAT/DRY/COOL/FAN/AUTO/PURIFY/PHYSICAL LOCK CONTROLS*.
+    * *POWER ON/OFF*.
+    * *OPERATING MODE HEAT/DRY/COOL/FAN/AUTO/PURIFY*.
+    * *PHYSICAL LOCK CONTROLS*.
+    * *VANE H MODE AUTO/1/2/3/4/5/SWING*.
+    * *VANE V MODE AUTO/1/2/3/4/5/SWING*.
+    * *FAN SPEED MODE AUTO/1/2/3/4/5*.
 * Control of Heat Pump:
   * Comming soon...
 * Control of Energy Recovery Ventilation:
@@ -86,7 +91,7 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
 | `language` | Here set the MELCloud language. |
 | `displayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
 | `buttons.name` | Here set `Button Name` which You want expose to the *Homebridge/HomeKit*. | 
-| `buttons.mode` | Here select button mode, `On/Off`, `Heat`, `Dry`, `Cool`, `Fan`, `Auto`, `Purify`, `Physical Lock Controls`. |
+| `buttons.mode` | Here select button mode, `On/Off`, `Heat`, `Dry`, `Cool`, `Fan`, `Auto`, `Purify`, `Physical Lock Controls`, `Vane H Mode`, `Vane V Mode`, `Fan Speed Mode`. |
 | `buttons.displayType` | Here select HomeKit display type, `Switch`, `Button` - selectable in HomeKit app as `Light`, `Fan`, `Outlet`. |
 | `enableDebugMode` | This enable deep log in homebridge console. |
 | `disableLogInfo` | This disable display log values and states on every it change. |

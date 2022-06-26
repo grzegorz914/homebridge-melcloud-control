@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### The old plugin and config need to be first removed from Homebridge and HomeKit and added again.
 ### The platform name and password properties was changed due collision with same already exist plugins from other developers.
 
+## [0.2.0] - (27.06.2022)
+## Added
+- control vane H all modes with buttons
+- control vane V all modes with buttons
+- control fan speed all modes with buttons
+
+## Changes
+- code cleanup
+
 ## [0.1.2] - (26.06.2022)
 ## Changes
 - rebuilded refresch device state
