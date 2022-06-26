@@ -27,9 +27,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * The old plugin and config need to be first removed from Homebridge and HomeKit and added again.
 * The platform name and password properties was changed due collision with same already exist plugins from other developers.
 ### Note
-* The plugin is in test phase and some function may be not working correct.
 * The Heat Pump and Energy Recovery Ventilation is not supported at this time.
-* Change plugin settings will applied to all devices same type in account.
 
 ### Know issues
 * If used with Hoobs, there is a possible configuration incompatibilty.
@@ -43,6 +41,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 
 ### About the plugin
 * All devices are detected automatically.
+* All configured settings are appiled to all devices in account.
 * Support multiple MELCloud accounts, buildings, flors, areas.
 * Support temperature display units *CELSIUS/FAHRENHEIT*.
 * Main control, *Heater/Cooler*, *Thermostat*, configurable in plugin settings.
