@@ -4,15 +4,15 @@ const API_URL = require('./apiurl.json');
 const CONSTANS = require('./constans.json');
 
 
-class MELCLOUDDEVICE extends EventEmitter {
+class MELCLOUDCLIENTDEVICE extends EventEmitter {
     constructor(config) {
         super();
-        this.deviceInfo = config.device;
+        this.melCloudInfo = config.melCloudInfo;
+        this.deviceInfo = config.deviceInfo;
         this.contextKey = config.contextKey;
         this.buildingId = config.buildingId;
         this.deviceId = config.deviceId;
         this.debugLog = config.debugLog;
-        this.melCloudInfo = config.melCloudInfo;
 
         this.axiosInstanceGet = axios.create({
             method: 'GET',
@@ -52,8 +52,10 @@ class MELCLOUDDEVICE extends EventEmitter {
             })
             .on('checkDeviceInfo', () => {
                 //deviceInfo
+                const melCloudInfo = this.melCloudInfo;
                 const deviceInfo = this.deviceInfo;
 
+                const deviceId = this.deviceId;
                 const deviceType = deviceInfo.Type;
                 const deviceName = deviceInfo.DeviceName;
                 const deviceTypeText = CONSTANS.DeviceType[deviceType];
@@ -133,9 +135,10 @@ class MELCLOUDDEVICE extends EventEmitter {
                 const modelName = (unitsModels.length > 0 && deviceType == 0) ? unitsModels[1] : 'Unknown';
                 const modelName1 = (unitsModels.length > 0 && deviceType == 0) ? unitsModels[0] : 'Unknown';
 
-                this.emit('checkDeviceState', manufacturer, modelName, modelName1, serialNumber, firmwareRevision);
+                this.emit('deviceInfo', melCloudInfo, deviceId, deviceType, deviceName, deviceTypeText, manufacturer, modelName, modelName1, serialNumber, firmwareRevision);
+                this.emit('checkDeviceState');
             })
-            .on('checkDeviceState', async (manufacturer, modelName, modelName1, serialNumber, firmwareRevision) => {
+            .on('checkDeviceState', async () => {
                 // device state
                 const deviceState = this.deviceState;
 
@@ -183,11 +186,8 @@ class MELCLOUDDEVICE extends EventEmitter {
                 const scene = deviceState.Scene;
                 const sceneOwner = deviceState.SceneOwner;
 
-                const melCloudInfo = this.melCloudInfo;
-                const useFahrenheit = (melCloudInfo.UseFahrenheit == true) ? 1 : 0;
-                const lockPhysicalControls = (prohibitSetTemperature == true || prohibitOperationMode == true || prohibitPower == true) ? 1 : 0;
-                this.emit('deviceInfo', manufacturer, modelName, modelName1, serialNumber, firmwareRevision);
-                this.emit('deviceState', melCloudInfo, deviceState, power, inStandbyMode, operationMode, roomTemperature, setTemperature, setFanSpeed, numberOfFanSpeeds, vaneHorizontal, vaneVertical, lockPhysicalControls, useFahrenheit);
+                const deviceInfo = this.deviceInfo;
+                this.emit('deviceState', deviceInfo, deviceState, power, inStandbyMode, operationMode, roomTemperature, setTemperature, defaultHeatingSetTemperature, defaultCoolingSetTemperature, vaneHorizontal, vaneVertical);
             });
 
         this.emit('refreschDeviceState');
@@ -228,4 +228,4 @@ class MELCLOUDDEVICE extends EventEmitter {
         });
     };
 };
-module.exports = MELCLOUDDEVICE;
+module.exports = MELCLOUDCLIENTDEVICE;
