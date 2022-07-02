@@ -625,7 +625,7 @@ class melCloudDevice {
 			.setProps({
 				minValue: this.useFahrenheit ? 50 : 10,
 				maxValue: this.useFahrenheit ? 95 : 35,
-				minStep: this.useFahrenheit ? 1 : 0
+				minStep: this.useFahrenheit ? 1 : 0.5
 			})
 			.onGet(async () => {
 				const value = this.setTemperature;
@@ -647,7 +647,7 @@ class melCloudDevice {
 			.setProps({
 				minValue: this.useFahrenheit ? 50 : 10,
 				maxValue: this.useFahrenheit ? 95 : 35,
-				minStep: this.useFahrenheit ? 1 : 0
+				minStep: this.useFahrenheit ? 1 : 0.5
 			})
 			.onGet(async () => {
 				const value = this.setTemperature;
