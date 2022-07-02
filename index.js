@@ -489,19 +489,19 @@ class melCloudDevice {
 				.onGet(async () => {
 					//AUTO, 1, 2, 3, 4, 5
 					const value = this.fanSpeed;
-					const fansSpeedMode = [0, 1, 2, 3, 4, 5, 6][value];
-					const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Fan speed: ${CONSTANS.AirConditioner.SetFanSpeed[fansSpeedMode]}`);
+					const fanSpeedMode = [0, 1, 2, 3, 4, 5, 0][value];
+					const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Fan speed: ${CONSTANS.AirConditioner.SetFanSpeed[fanSpeedMode]}`);
 					return value;
 				})
 				.onSet(async (value) => {
-					value = [0, 1, 2, 3, 4, 5, 6][value];
-					const fansSpeedMode = [0, 1, 2, 3, 4, 5, 6][value];
-					deviceState.SetFanSpeed = value;
+					const fanSpeedMode = [6, 1, 2, 3, 4, 5, 0][value];
+					const newSpeedMode = [0, 1, 2, 3, 4, 5, 0][value];
+					deviceState.SetFanSpeed = newSpeedMode;
 					deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetFanSpeed;
 
 					try {
 						const newState = await this.melCloudClientDevice.send(deviceTypeUrl, deviceState, 0);
-						const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set fan speed: ${CONSTANS.AirConditioner.SetFanSpeed[fansSpeedMode]}`);
+						const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set fan speed: ${CONSTANS.AirConditioner.SetFanSpeed[fanSpeedMode]}`);
 					} catch (error) {
 						this.log.error(`${deviceTypeText}: ${accessoryName}, Set fan speed error: ${error}`);
 					};
@@ -622,6 +622,11 @@ class melCloudDevice {
 				});
 		};
 		this.melCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
+			.setProps({
+				minValue: this.useFahrenheit ? 50 : 10,
+				maxValue: this.useFahrenheit ? 95 : 35,
+				minStep: this.useFahrenheit ? 1 : 0
+			})
 			.onGet(async () => {
 				const value = this.setTemperature;
 				const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Heating threshold temperature: ${value}${temperatureUnit}`);
@@ -639,7 +644,11 @@ class melCloudDevice {
 				};
 			});
 		this.melCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
-
+			.setProps({
+				minValue: this.useFahrenheit ? 50 : 10,
+				maxValue: this.useFahrenheit ? 95 : 35,
+				minStep: this.useFahrenheit ? 1 : 0
+			})
 			.onGet(async () => {
 				const value = this.setTemperature;
 				const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Cooling threshold temperature: ${value}${temperatureUnit}`);

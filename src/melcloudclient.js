@@ -44,7 +44,7 @@ class MELCLOUDCLIENT extends EventEmitter {
                     this.melCloudInfo = loginData.data.LoginData;
                     this.contextKey = loginData.data.LoginData.ContextKey;
 
-                    this.emit('message', `Account: ${accountName}, Connected.`);
+                    const debug1 = debugLog ? this.emit('message', `Account: ${accountName}, Connected.`) : false;
                     this.emit('checkDevicesList');
                 } catch (error) {
                     this.emit('error', `Account: ${accountName}, login error: ${error}`);
@@ -54,7 +54,7 @@ class MELCLOUDCLIENT extends EventEmitter {
                 const melCloudInfo = this.melCloudInfo;
                 const contextKey = this.contextKey;
 
-                this.emit('message', `Account: ${accountName}, Scanning for devices.`);
+                const debug = debugLog ? this.emit('message', `Account: ${accountName}, Scanning for devices.`) : false;
                 this.axiosInstanceGet = axios.create({
                     method: 'GET',
                     baseURL: API_URL.BaseURL,
@@ -66,7 +66,7 @@ class MELCLOUDCLIENT extends EventEmitter {
                 try {
                     const listDevicesData = await this.axiosInstanceGet(API_URL.ListDevices);
                     const buildingsData = JSON.stringify(listDevicesData.data, null, 2);
-                    const debug = debugLog ? this.emit('debug', `Account: ${accountName}, debug buildings: ${buildingsData}`) : false;
+                    const debug1 = debugLog ? this.emit('debug', `Account: ${accountName}, debug buildings: ${buildingsData}`) : false;
                     const writeDevicesData = await fsPromises.writeFile(melCloudBuildingsFile, buildingsData);
 
 
@@ -130,7 +130,7 @@ class MELCLOUDCLIENT extends EventEmitter {
                     };
 
                     const devicesCount = devices.length;
-                    this.emit('message', `Account: ${accountName}, Found devices: ${devicesCount}.`);
+                    const debug2 = debugLog ? this.emit('message', `Account: ${accountName}, Found devices: ${devicesCount}.`) : false;
                     this.emit('connected', melCloudInfo, contextKey, devices, devicesCount);
                 } catch (error) {
                     this.emit('error', `Account: ${accountName}, Update devices list error: ${error}`);

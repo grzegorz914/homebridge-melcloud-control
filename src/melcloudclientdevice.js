@@ -139,7 +139,8 @@ class MELCLOUDCLIENTDEVICE extends EventEmitter {
                 this.emit('checkDeviceState');
             })
             .on('checkDeviceState', async () => {
-                // device state
+                // device info / state
+                const deviceInfo = this.deviceInfo;
                 const deviceState = this.deviceState;
 
                 const deviceType = deviceState.DeviceType;
@@ -186,7 +187,6 @@ class MELCLOUDCLIENTDEVICE extends EventEmitter {
                 const scene = deviceState.Scene;
                 const sceneOwner = deviceState.SceneOwner;
 
-                const deviceInfo = this.deviceInfo;
                 this.emit('deviceState', deviceInfo, deviceState, power, inStandbyMode, operationMode, roomTemperature, setTemperature, defaultHeatingSetTemperature, defaultCoolingSetTemperature, vaneHorizontal, vaneVertical);
             });
 
@@ -196,7 +196,7 @@ class MELCLOUDCLIENTDEVICE extends EventEmitter {
     refreshDeviceState() {
         setInterval(() => {
             this.emit('refreschDeviceState');
-        }, 60000);
+        }, 61000);
     };
 
     send(url, newData, type) {
