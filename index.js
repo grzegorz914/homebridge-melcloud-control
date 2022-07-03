@@ -501,6 +501,7 @@ class melCloudDevice {
 				.onSet(async (value) => {
 					const fanSpeedMode = [6, 1, 2, 3, 4, 5, 0][value];
 					const newSpeedMode = [0, 1, 2, 3, 4, 5, 0][value];
+					deviceState.Power = true;
 					deviceState.SetFanSpeed = newSpeedMode;
 					deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetFanSpeed;
 
@@ -522,6 +523,7 @@ class melCloudDevice {
 						return value;
 					})
 					.onSet(async (value) => {
+						deviceState.Power = true;
 						deviceState.VaneHorizontal = value ? 12 : 0;
 						deviceState.VaneVertical = value ? 7 : 0;
 						const swingMode = value ? 6 : 1;
@@ -617,6 +619,7 @@ class melCloudDevice {
 					return value;
 				})
 				.onSet(async (value) => {
+					deviceState.Power = true;
 					deviceState.SetTemperature = value;
 					deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetTemperature;
 
@@ -640,6 +643,7 @@ class melCloudDevice {
 				return value;
 			})
 			.onSet(async (value) => {
+				deviceState.Power = true;
 				deviceState.SetTemperature = value;
 				deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetTemperature;
 
@@ -662,6 +666,7 @@ class melCloudDevice {
 				return value;
 			})
 			.onSet(async (value) => {
+				deviceState.Power = true;
 				deviceState.SetTemperature = value;
 				deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetTemperature;
 
