@@ -68,7 +68,7 @@ class MELCLOUDCLIENTDEVICE extends EventEmitter {
                 const hideSupplyTemperature = deviceInfo.HideSupplyTemperature;
                 const hideOutdoorTemperature = deviceInfo.HideOutdoorTemperature;
                 const macAddress = deviceInfo.MacAddress;
-                const serialNumber = deviceInfo.SerialNumber;
+                const wifiSerialNumber = deviceInfo.SerialNumber;
                 const pCycleActual = deviceInfo.Device.PCycleActual;
                 const canCool = deviceInfo.Device.CanCool;
                 const canHeat = deviceInfo.Device.CanHeat;
@@ -107,11 +107,14 @@ class MELCLOUDCLIENTDEVICE extends EventEmitter {
 
                 //units info
                 const units = deviceInfo.Device.Units;
-                const sunitsSerialsNumbers = new Array();
-                const unitsModelsNumbers = new Array();
-                const unitsModels = new Array();
-                const unitsTypes = new Array();
-                const unitsIsIndors = new Array();
+                const serialsNumberIndoor = new Array();
+                const serialsNumberOutdoor = new Array();
+                const modelsNumberIndoor = new Array();
+                const modelsNumberOutdoor = new Array();
+                const modelsIndoor = new Array();
+                const modelsOutdoor = new Array();
+                const typesIndoor = new Array();
+                const typesOutdoor = new Array();
                 if (Array.isArray(units) && units.length > 0) {
                     for (let i = 0; i < units.length; i++) {
                         const unit = units[i];
@@ -121,21 +124,29 @@ class MELCLOUDCLIENTDEVICE extends EventEmitter {
                         const unitModelNumber = unit.ModelNumber;
                         const unitModel = unit.Model;
                         const unitType = unit.UnitType;
-                        const unitIsIndor = unit.IsIndor;
+                        const unitIsIndoor = (unit.IsIndoor == true);
 
-
-                        sunitsSerialsNumbers.push(unitSerialNumber);
-                        unitsModelsNumbers.push(unitModelNumber);
-                        unitsModels.push(unitModel);
-                        unitsTypes.push(unitType);
-                        unitsIsIndors.push(unitIsIndor);
+                        if (unitIsIndoor) {
+                            serialsNumberIndoor.push(unitSerialNumber);
+                            modelsNumberIndoor.push(unitModelNumber);
+                            modelsIndoor.push(unitModel);
+                            typesIndoor.push(unitType);
+                        }
+                        if (!unitIsIndoor) {
+                            serialsNumberOutdoor.push(unitSerialNumber);
+                            modelsNumberOutdoor.push(unitModelNumber);
+                            modelsOutdoor.push(unitModel);
+                            typesOutdoor.push(unitType);
+                        }
                     }
                 }
                 const manufacturer = 'Mitsubishi';
-                const modelName = (unitsModels.length > 0 && deviceType == 0) ? unitsModels[1] : 'Unknown';
-                const modelName1 = (unitsModels.length > 0 && deviceType == 0) ? unitsModels[0] : 'Unknown';
+                const modelName = modelsIndoor.length > 0 ? modelsIndoor[0] : 'Undefined';
+                const modelName1 = modelsOutdoor.length > 0 ? modelsOutdoor[0] : 'Undefined';
+                const serialNumber = serialsNumberIndoor.length > 0 ? serialsNumberIndoor[0] : 'Undefined';
+                const serialNumber1 = serialsNumberOutdoor.length > 0 ? serialsNumberOutdoor[0] : 'Undefined';
 
-                this.emit('deviceInfo', melCloudInfo, deviceId, deviceType, deviceName, deviceTypeText, manufacturer, modelName, modelName1, serialNumber, firmwareRevision);
+                this.emit('deviceInfo', melCloudInfo, deviceId, deviceType, deviceName, deviceTypeText, manufacturer, modelName, modelName1, serialNumber, serialNumber1, firmwareRevision);
                 this.emit('checkDeviceState');
             })
             .on('checkDeviceState', async () => {
