@@ -198,7 +198,7 @@ class MELCLOUDCLIENTDEVICE extends EventEmitter {
                 const scene = deviceState.Scene;
                 const sceneOwner = deviceState.SceneOwner;
 
-                this.emit('deviceState', deviceInfo, deviceState, power, inStandbyMode, operationMode, roomTemperature, setTemperature, defaultHeatingSetTemperature, defaultCoolingSetTemperature, vaneHorizontal, vaneVertical);
+                this.emit('deviceState', deviceInfo, deviceState, roomTemperature, setTemperature, setFanSpeed, operationMode, vaneHorizontal, vaneVertical, defaultHeatingSetTemperature, defaultCoolingSetTemperature, inStandbyMode, power);
             });
 
         this.emit('refreschDeviceState');

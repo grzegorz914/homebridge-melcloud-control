@@ -214,7 +214,7 @@ class melCloudDevice {
 				this.serialNumber = deviceType == 0 ? serialNumber : serialNumber1;
 				this.firmwareRevision = firmwareRevision;
 			})
-			.on('deviceState', (deviceInfo, deviceState, power, inStandbyMode, operationMode, roomTemperature, setTemperature, defaultHeatingSetTemperature, defaultCoolingSetTemperature, setFanSpeed, vaneHorizontal, vaneVertical) => {
+			.on('deviceState', (deviceInfo, deviceState, roomTemperature, setTemperature, setFanSpeed, operationMode, vaneHorizontal, vaneVertical, defaultHeatingSetTemperature, defaultCoolingSetTemperature, inStandbyMode, power) => {
 				const displayMode = this.displayMode;
 				const buttonsCount = this.buttons.length;
 				this.deviceInfo = deviceInfo;
