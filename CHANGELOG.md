@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### The old plugin and config need to be first removed from Homebridge and HomeKit and added again.
 ### The platform name and password properties was changed due collision with same already exist plugins from other developers.
 
+## [0.2.10] - (05.07.2022)
+## Changes
+- added auto detection of device support standby mode
+- some logs cosmetics changes
+- config schema updated
+
 ## [0.2.9] - (04.07.2022)
 ## Changes
 - fix [#6](https://github.com/grzegorz914/homebridge-melcloud-control/issues/6)

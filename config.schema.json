@@ -150,7 +150,7 @@
               "required": true
             },
             "displayMode": {
-              "title": "Control mode",
+              "title": "Main control mode",
               "type": "integer",
               "minimum": 0,
               "maximum": 1,
@@ -396,7 +396,7 @@
               "title": "Disable Log Device Info",
               "type": "boolean",
               "default": false,
-              "description": "This disable display log device info on plugin restart.",
+              "description": "This disable display log device info on plugin start.",
               "required": false
             },
             "enableDebugMode": {
