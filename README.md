@@ -40,7 +40,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * All devices are detected automatically.
 * All configured settings are appiled to all devices in account.
 * Support multiple MELCloud accounts, buildings, flors, areas.
-* Support temperature display units *CELSIUS/FAHRENHEIT*.
+* Support temperature display units *Celsius/Fahrenheit*.
 * Main control mode, *Heater/Cooler*, *Thermostat*.
 * Additional control mode, *Buttons*.
 * Controls of Air Conditioner:
