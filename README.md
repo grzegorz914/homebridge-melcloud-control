@@ -31,7 +31,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 
 ### Troubleshooting
 * If for some reason the device is not displayed in HomeKit app try this procedure:
-   * Go to `./homebridge/persist`.
+   * Go to `./homebridge/persist` for macOS or `/var/lib/homebridge/persist` for RPI.
    * Remove `AccessoryInfo.xxx` file which contain Your device data: `{"displayName":"DeviceName"}`.
    * Next remove `IdentifierCashe.xxx` file with same name as `AccessoryInfo.xxx`.
    * Restart Homebridge and try add it to the HomeKit app again.
