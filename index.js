@@ -197,7 +197,7 @@ class melCloudDevice {
 					this.log('Model: %s', model);
 					this.log('Serial: %s', serial);
 					this.log('Firmware: %s', firmwareRevision);
-					const device1 = (modelName1 != undefined && deviceType == 0) ? this.log('Outdoor: %s', modelName1) : false;
+					const device1 = (modelName1 != 'Undefined' && deviceType == 0) ? this.log('Outdoor: %s', modelName1) : false;
 					this.log('Manufacturer: %s', manufacturer);
 					this.log('----------------------------------');
 					this.displayDeviceInfo = false;
