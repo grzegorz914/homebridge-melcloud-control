@@ -419,10 +419,6 @@ class melCloudDevice {
 
 				};
 
-				const mqtt = enableMqtt ? this.mqttClient.send('MELCloud Info:', this.melCloudInfo) : false;
-				const mqtt1 = enableMqtt ? this.mqttClient.send('Device Info:', this.deviceInfo) : false;
-				const mqtt2 = enableMqtt ? this.mqttClient.send('Device State:', this.deviceState) : false;
-
 				//start prepare accessory
 				if (this.startPrepareAccessory) {
 					this.prepareAccessory();
