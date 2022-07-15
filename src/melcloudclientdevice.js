@@ -202,8 +202,8 @@ class MELCLOUDCLIENTDEVICE extends EventEmitter {
                 const sceneOwner = deviceState.SceneOwner;
 
                 this.emit('deviceState', deviceInfo, deviceState, roomTemperature, setTemperature, setFanSpeed, operationMode, vaneHorizontal, vaneVertical, defaultHeatingSetTemperature, defaultCoolingSetTemperature, inStandbyMode, power);
-				const mqtt = this.enableMqtt ? this.emit('mqtt', `Device ${deviceName} Info:`, JSON.stringify(deviceInfo, null, 2)) : false;
-				const mqtt1 = this.enableMqtt ? this.emit('mqtt', `Device ${deviceName} State:`, JSON.stringify(deviceState, null, 2)) : false;         
+	        const mqtt = this.enableMqtt ? this.emit('mqtt', `Device ${deviceName} Info:`, JSON.stringify(deviceInfo, null, 2)) : false;
+		const mqtt1 = this.enableMqtt ? this.emit('mqtt', `Device ${deviceName} State:`, JSON.stringify(deviceState, null, 2)) : false;         
         });
 
         this.emit('refreschDeviceState');
