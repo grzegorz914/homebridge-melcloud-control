@@ -321,7 +321,6 @@ class melCloudDevice {
 					for (let i = 0; i < buttonsCount; i++) {
 						const button = this.buttons[i];
 						const buttonMode = button.mode;
-						this.buttonsStates.push(buttonState);
 
 						let buttonState = false;
 						switch (buttonMode) {
@@ -410,7 +409,8 @@ class melCloudDevice {
 								buttonState = power ? (setFanSpeed == 5) : false;
 								break;
 						};
-
+					        this.buttonsStates.push(buttonState);
+						
 						if (this.buttonsServices) {
 							this.buttonsServices[i]
 								.updateCharacteristic(Characteristic.On, buttonState)
