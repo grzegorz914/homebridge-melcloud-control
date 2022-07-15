@@ -13,6 +13,7 @@ class MELCLOUDCLIENTDEVICE extends EventEmitter {
         this.buildingId = config.buildingId;
         this.deviceId = config.deviceId;
         this.debugLog = config.debugLog;
+        this.enableMqtt = config.mqttEnabled;
 
         this.axiosInstanceGet = axios.create({
             method: 'GET',
@@ -151,8 +152,10 @@ class MELCLOUDCLIENTDEVICE extends EventEmitter {
             })
             .on('checkDeviceState', async () => {
                 // device info / state
+                const melCloudInfo = this.melCloudInfo;
                 const deviceInfo = this.deviceInfo;
                 const deviceState = this.deviceState;
+                const deviceName = deviceInfo.DeviceName;
 
                 const deviceType = deviceState.DeviceType;
                 const effectiveFlags = deviceState.EffectiveFlags;
@@ -199,7 +202,9 @@ class MELCLOUDCLIENTDEVICE extends EventEmitter {
                 const sceneOwner = deviceState.SceneOwner;
 
                 this.emit('deviceState', deviceInfo, deviceState, roomTemperature, setTemperature, setFanSpeed, operationMode, vaneHorizontal, vaneVertical, defaultHeatingSetTemperature, defaultCoolingSetTemperature, inStandbyMode, power);
-            });
+				const mqtt = this.enableMqtt ? this.emit('mqtt', `Device ${deviceName} Info:`, JSON.stringify(deviceInfo, null, 2)) : false;
+				const mqtt1 = this.enableMqtt ? this.emit('mqtt', `Device ${deviceName} State:`, JSON.stringify(deviceState, null, 2)) : false;         
+        });
 
         this.emit('refreschDeviceState');
     };
