@@ -456,7 +456,7 @@ class melCloudDevice {
 
 		const manufacturer = this.manufacturer;
 		const modelName = this.modelName;
-		const serialNumber = this.serialNumber.toString();
+		const serialNumber = this.serialNumber;
 		const firmwareRevision = this.firmwareRevision;
 
 		const displayMode = this.displayMode;
