@@ -121,7 +121,7 @@ class MELCLOUDCLIENTDEVICE extends EventEmitter {
                         const unit = units[i];
                         const unitId = unit.ID;
                         const unitDevice = unit.Device;
-                        const unitSerialNumber = unit.SerialNumber;
+                        const unitSerialNumber = (unit.SerialNumber != mull) ? unit.SerialNumber : 'Undefined';
                         const unitModelNumber = unit.ModelNumber;
                         const unitModel = unit.Model;
                         const unitType = unit.UnitType;
@@ -144,8 +144,8 @@ class MELCLOUDCLIENTDEVICE extends EventEmitter {
                 const manufacturer = 'Mitsubishi';
                 const modelName = modelsIndoor.length > 0 ? modelsIndoor[0] : 'Undefined';
                 const modelName1 = modelsOutdoor.length > 0 ? modelsOutdoor[0] : 'Undefined';
-                const serialNumber = (serialsNumberIndoor.length > 0 && serialsNumberIndoor != null) ? serialsNumberIndoor[0] : 'Undefined';
-                const serialNumber1 = (serialsNumberOutdoor.length > 0  && serialsNumberOutdoor != null) ? serialsNumberOutdoor[0] : 'Undefined';
+                const serialNumber = (serialsNumberIndoor.length > 0) ? serialsNumberIndoor[0] : 'Undefined';
+                const serialNumber1 = (serialsNumberOutdoor.length > 0) ? serialsNumberOutdoor[0] : 'Undefined';
 
                 this.emit('deviceInfo', melCloudInfo, deviceId, deviceType, deviceName, deviceTypeText, manufacturer, modelName, modelName1, serialNumber, serialNumber1, firmwareRevision);
                 this.emit('checkDeviceState');
