@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changes
 - fixed [#7](https://github.com/grzegorz914/homebridge-melcloud-control/issues/7)
 - fixed [#8](https://github.com/grzegorz914/homebridge-melcloud-control/issues/8)
+- fixed [#9](https://github.com/grzegorz914/homebridge-melcloud-control/issues/9)
 - fixed display undefined outdoor unit in log
 
 ## [0.2.10] - (05.07.2022)
