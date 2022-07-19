@@ -230,12 +230,13 @@ class MELCLOUDCLIENTDEVICE extends EventEmitter {
                 switch (type) {
                     case 0: //deviceState
                         this.deviceState = newData;
+                        this.emit('checkDeviceState');
                         break;
                     case 1: //melCloudInfo
                         this.melCloudInfo = newData;
+                        this.emit('checkDeviceInfo');
                         break;
                 };
-                this.emit('checkDeviceInfo');
                 resolve(true);
             } catch (error) {
                 this.emit('error', `Send command error: ${error}`);
