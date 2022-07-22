@@ -202,9 +202,9 @@ class MELCLOUDCLIENTDEVICE extends EventEmitter {
                 const sceneOwner = deviceState.SceneOwner;
 
                 this.emit('deviceState', deviceInfo, deviceState, roomTemperature, setTemperature, setFanSpeed, operationMode, vaneHorizontal, vaneVertical, defaultHeatingSetTemperature, defaultCoolingSetTemperature, inStandbyMode, power);
-	        const mqtt = this.enableMqtt ? this.emit('mqtt', `Device ${deviceName} Info:`, JSON.stringify(deviceInfo, null, 2)) : false;
-		const mqtt1 = this.enableMqtt ? this.emit('mqtt', `Device ${deviceName} State:`, JSON.stringify(deviceState, null, 2)) : false;         
-        });
+                const mqtt = this.enableMqtt ? this.emit('mqtt', `Device ${deviceName} Info:`, JSON.stringify(deviceInfo, null, 2)) : false;
+                const mqtt1 = this.enableMqtt ? this.emit('mqtt', `Device ${deviceName} State:`, JSON.stringify(deviceState, null, 2)) : false;
+            });
 
         this.emit('refreschDeviceState');
     };
@@ -229,11 +229,9 @@ class MELCLOUDCLIENTDEVICE extends EventEmitter {
                 const debug = this.debugLog ? this.emit('message', `Send command response: ${JSON.stringify(newState.data, null, 2)}`) : false;
                 switch (type) {
                     case 0: //deviceState
-                        this.deviceState = newData;
                         this.emit('checkDeviceState');
                         break;
                     case 1: //melCloudInfo
-                        this.melCloudInfo = newData;
                         this.emit('checkDeviceInfo');
                         break;
                 };

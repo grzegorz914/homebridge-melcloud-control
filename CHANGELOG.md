@@ -8,11 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### The old plugin and config need to be first removed from Homebridge and HomeKit and added again.
 ### The platform name and password properties was changed due collision with same already exist plugins from other developers.
 
-## [0.2.11] - (xx.07.2022)
+## [0.2.11] - (22.07.2022)
 ## Changes
 - fixed [#7](https://github.com/grzegorz914/homebridge-melcloud-control/issues/7)
 - fixed [#8](https://github.com/grzegorz914/homebridge-melcloud-control/issues/8)
 - fixed [#9](https://github.com/grzegorz914/homebridge-melcloud-control/issues/9)
+- fixed [#10](https://github.com/grzegorz914/homebridge-melcloud-control/issues/10)
 - fixed display undefined outdoor unit in log
 
 ## [0.2.10] - (05.07.2022)

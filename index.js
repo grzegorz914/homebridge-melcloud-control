@@ -409,8 +409,8 @@ class melCloudDevice {
 								buttonState = power ? (setFanSpeed == 5) : false;
 								break;
 						};
-					        this.buttonsStates.push(buttonState);
-						
+						this.buttonsStates.push(buttonState);
+
 						if (this.buttonsServices) {
 							this.buttonsServices[i]
 								.updateCharacteristic(Characteristic.On, buttonState)
