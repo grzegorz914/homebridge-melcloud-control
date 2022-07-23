@@ -59,7 +59,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
     * Heating/Cooling threshold temperature.
   * Buttons:
     * Power *ON/OFF*.
-    * Operating mode *HEAT/DRY/COOL/FAN/AUTO/PURIFY*.
+    * Operating mode *HEAT/DRY/COOL/FAN/AUTO*.
     * Physical lock controls *LOCK/UNLOCK*.
     * Vane H mode *AUTO/1/2/3/4/5/SWING*.
     * Vane V mode *AUTO/1/2/3/4/5/SWING*.
