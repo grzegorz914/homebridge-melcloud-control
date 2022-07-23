@@ -212,7 +212,7 @@ class MELCLOUDCLIENTDEVICE extends EventEmitter {
     refreshDeviceState() {
         setInterval(() => {
             this.emit('refreschDeviceState');
-        }, 61000);
+        }, 30000);
     };
 
     send(url, newData, type) {
@@ -227,14 +227,7 @@ class MELCLOUDCLIENTDEVICE extends EventEmitter {
             try {
                 const newState = await this.axiosInstancePost(url, options);
                 const debug = this.debugLog ? this.emit('message', `Send command response: ${JSON.stringify(newState.data, null, 2)}`) : false;
-                switch (type) {
-                    case 0: //deviceState
-                        this.emit('checkDeviceState');
-                        break;
-                    case 1: //melCloudInfo
-                        this.emit('checkDeviceInfo');
-                        break;
-                };
+                this.emit('refreschDeviceState');
                 resolve(true);
             } catch (error) {
                 this.emit('error', `Send command error: ${error}`);

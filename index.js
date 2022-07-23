@@ -212,8 +212,8 @@ class melCloudDevice {
 
 				this.manufacturer = manufacturer;
 				this.modelName = model;
-				this.serialNumber = serial;
-				this.firmwareRevision = firmwareRevision;
+				this.serialNumber = (serial.length > 1) ? serial : 'Serial to schort';
+				this.firmwareRevision = firmwareRevision.toString();
 			})
 			.on('deviceState', (deviceInfo, deviceState, roomTemperature, setTemperature, setFanSpeed, operationMode, vaneHorizontal, vaneVertical, defaultHeatingSetTemperature, defaultCoolingSetTemperature, inStandbyMode, power) => {
 				const displayMode = this.displayMode;
@@ -257,10 +257,10 @@ class melCloudDevice {
 				const currentOperationMode = displayMode ? currentThermostatOperationMode : currentHeaterCoolerOperationMode;
 				this.currentOperationMode = currentOperationMode;
 
-				//AUTO/ HEAT, COOL
-				const targetHeaterCoolerOperationMode = power ? inStandby ? 0 : [0, 1, 1, 2, 2, 2, 2, 2, 0][operationMode] : 0;
+				//AUTO, HEAT, COOL, OFF - not supported in HB1.5
+				const targetHeaterCoolerOperationMode = power ? [0, 1, 1, 2, 2, 2, 2, 2, 0][operationMode] : 0;
 				//OFF, HEAT, COOL, AUTO
-				const targetThermostatOperationMode = power ? inStandby ? 0 : [0, 1, 2, 2, 2, 2, 2, 2, 3][operationMode] : 0;
+				const targetThermostatOperationMode = power ? [0, 1, 1, 2, 2, 2, 2, 2, 3][operationMode] : 0;
 				const targetOperationMode = displayMode ? targetThermostatOperationMode : targetHeaterCoolerOperationMode;
 				this.targetOperationMode = targetOperationMode;
 
@@ -466,24 +466,20 @@ class melCloudDevice {
 		//accessory
 		const accessoryName = deviceName;
 		const accessoryUUID = AccessoryUUID.generate(deviceId);
-		const accessoryCategory = displayMode ? Categories.THERMOSTAT : Categories.AIR_CONDITIONER;
+		const accessoryCategory = Categories.AIR_CONDITIONER;
 		const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 
 		//information service
 		this.log.debug('prepareInformationService');
-		accessory.removeService(accessory.getService(Service.AccessoryInformation));
-		const informationService = new Service.AccessoryInformation(accessoryName);
-		informationService
+		accessory.getService(Service.AccessoryInformation)
 			.setCharacteristic(Characteristic.Manufacturer, manufacturer)
 			.setCharacteristic(Characteristic.Model, modelName)
 			.setCharacteristic(Characteristic.SerialNumber, serialNumber)
 			.setCharacteristic(Characteristic.FirmwareRevision, firmwareRevision);
-		accessory.addService(informationService);
-
 
 		//melcloud service
 		this.log.debug('prepareMelCloudService');
-		this.melCloudService = displayMode ? new Service.Thermostat(accessoryName, 'Thermostat') : new Service.HeaterCooler(accessoryName, 'HeaterCooler');
+		this.melCloudService = displayMode ? accessory.addService(Service.Thermostat, 'Thermostat') : accessory.addService(Service.HeaterCooler, 'HeaterCooler');
 		if (displayMode == 0) {
 			//Only for Heater Cooler
 			this.melCloudService.getCharacteristic(Characteristic.Active)
@@ -535,10 +531,10 @@ class melCloudDevice {
 						deviceState.OperationMode = 3;
 						deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.OperationMode;
 						break;
-					case 3: //AUTO only Thermostat
-						deviceState.Power = true;
-						deviceState.OperationMode = 8;
-						deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.OperationMode;
+					case 3: //AUTO, OFF
+						deviceState.Power = displayMode ? true : false;
+						deviceState.OperationMode = displayMode ? 8 : deviceState.OperationMode;
+						deviceState.EffectiveFlags = displayMode ? DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.OperationMode : DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power;
 						break;
 				};
 
@@ -726,7 +722,6 @@ class melCloudDevice {
 					this.log.error(`${deviceTypeText}: ${accessoryName}, Set temperature display unit error: ${error}`);
 				};
 			});
-		accessory.addService(this.melCloudService);
 
 		//buttons services
 		const buttonsCount = this.buttons.length;
@@ -748,8 +743,7 @@ class melCloudDevice {
 				const buttonDisplayType = (button.displayType != undefined) ? button.displayType : 0;
 
 				const buttonServiceType = [Service.Outlet, Service.Switch][buttonDisplayType];
-				const buttonServiceName = accessoryName + ' ' + buttonName;
-				const buttonService = new buttonServiceType(buttonServiceName, `ButtonService${i}`);
+				const buttonService = new buttonServiceType(accessoryName + buttonName, `ButtonService${i}`);
 				buttonService.getCharacteristic(Characteristic.On)
 					.onGet(async () => {
 						const state = this.buttonsStates[i];
@@ -907,7 +901,7 @@ class melCloudDevice {
 					});
 
 				this.buttonsServices.push(buttonService);
-				accessory.addService(this.buttonsServices[i]);
+				accessory.addService(this.buttonsServices[i])
 			};
 		};
 
