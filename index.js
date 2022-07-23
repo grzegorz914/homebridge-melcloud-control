@@ -744,7 +744,7 @@ class melCloudDevice {
 				const buttonDisplayType = (button.displayType != undefined) ? button.displayType : 0;
 
 				const buttonServiceType = [Service.Outlet, Service.Switch][buttonDisplayType];
-				const buttonService = new buttonServiceType(accessoryName + buttonName, `ButtonService${i}`);
+				const buttonService = new buttonServiceType(`${accessoryName} ${buttonName}`, `Button ${i}`
 				buttonService.getCharacteristic(Characteristic.On)
 					.onGet(async () => {
 						const state = this.buttonsStates[i];
