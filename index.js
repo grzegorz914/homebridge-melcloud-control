@@ -479,7 +479,8 @@ class melCloudDevice {
 
 		//melcloud service
 		this.log.debug('prepareMelCloudService');
-		this.melCloudService = displayMode ? accessory.addService(Service.Thermostat, 'Thermostat') : accessory.addService(Service.HeaterCooler, 'HeaterCooler');
+		const serviceName = `${accessoryName} ${deviceTypeText}`;
+		this.melCloudService = displayMode ? accessory.addService(Service.Thermostat, serviceName) : accessory.addService(Service.HeaterCooler, serviceName);
 		if (displayMode == 0) {
 			//Only for Heater Cooler
 			this.melCloudService.getCharacteristic(Characteristic.Active)
