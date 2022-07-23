@@ -46,7 +46,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * Controls of Air Conditioner:
   * Heater Cooler:
     * Power *ON/OFF*.
-    * Operating mode *AUTO/HEAT/COOL*.
+    * Operating mode *AUTO/HEAT/COOL/OFF*.
     * Heating/Cooling temperature.
     * Heating/Cooling threshold temperature.
     * Fan speed *OFF/1/2/3/4/5/AUTO*.
