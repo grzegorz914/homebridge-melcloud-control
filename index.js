@@ -250,17 +250,20 @@ class melCloudDevice {
 				this.power = power;
 				this.inStandbyMode = inStandby;
 
-				//INACTIVE, IDLE, HEATING, COOLING
+			        //heater/cooler
+				//INACTIVE, IDLE, HEATING, COOLING - current
 				const currentHeaterCoolerOperationMode = power ? inStandby ? 1 : [1, 2, 2, 3, 3, 3, 3, 3, 3][operationMode] : 0;
-				//OFF, HEAT, COOL
-				const currentThermostatOperationMode = power ? inStandby ? 0 : [0, 1, 2, 2, 2, 2, 2, 2, 2][operationMode] : 0;
-				const currentOperationMode = displayMode ? currentThermostatOperationMode : currentHeaterCoolerOperationMode;
-				this.currentOperationMode = currentOperationMode;
-
-				//AUTO, HEAT, COOL, OFF - not supported in HB1.5
+				//AUTO, HEAT, COOL - target
 				const targetHeaterCoolerOperationMode = power ? [0, 1, 1, 2, 2, 2, 2, 2, 0][operationMode] : 0;
-				//OFF, HEAT, COOL, AUTO
+			
+			        //thermostat
+				//OFF, HEAT, COOL - current
+				const currentThermostatOperationMode = power ? inStandby ? 0 : [0, 1, 2, 2, 2, 2, 2, 2, 2][operationMode] : 0;
+				//OFF, HEAT, COOL, AUTO - target
 				const targetThermostatOperationMode = power ? [0, 1, 1, 2, 2, 2, 2, 2, 3][operationMode] : 0;
+			
+				const currentOperationMode = displayMode ? currentThermostatOperationMode : currentHeaterCoolerOperationMode;
+			        this.currentOperationMode = currentOperationMode;
 				const targetOperationMode = displayMode ? targetThermostatOperationMode : targetHeaterCoolerOperationMode;
 				this.targetOperationMode = targetOperationMode;
 
@@ -289,7 +292,7 @@ class melCloudDevice {
 
 				if (this.melCloudService) {
 					switch (displayMode) {
-						case 0: //HEATER COOLET
+						case 0: //heater/cooler
 							this.melCloudService
 								.updateCharacteristic(Characteristic.Active, power)
 								.updateCharacteristic(Characteristic.CurrentHeaterCoolerState, currentOperationMode)
@@ -302,7 +305,7 @@ class melCloudDevice {
 							const updateRotationSpeed = modelSupportsFanSpeed ? this.melCloudService.updateCharacteristic(Characteristic.RotationSpeed, fanSpeed) : false;
 							const updateSwingMode = swingFunction ? this.melCloudService.updateCharacteristic(Characteristic.SwingMode, swingMode) : false;
 							break;
-						case 1: //THERMOSTAT
+						case 1: //thermostat
 							this.melCloudService
 								.updateCharacteristic(Characteristic.CurrentHeatingCoolingState, currentOperationMode)
 								.updateCharacteristic(Characteristic.TargetHeatingCoolingState, targetOperationMode)
