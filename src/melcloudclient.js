@@ -130,8 +130,11 @@ class MELCLOUDCLIENT extends EventEmitter {
                     };
 
                     const devicesCount = devices.length;
+                    const useFahrenheit = (melCloudInfo.UseFahrenheit == true) ? 1 : 0;
+                    const temperatureDisplayUnit = CONSTANS.TemperatureDisplayUnits[useFahrenheit];
+                    
                     const debug2 = debugLog ? this.emit('message', `Account: ${accountName}, Found devices: ${devicesCount}.`) : false;
-                    this.emit('connected', melCloudInfo, contextKey, devices, devicesCount);
+                    this.emit('connected', melCloudInfo, contextKey, devices, devicesCount, useFahrenheit, temperatureDisplayUnit);
                 } catch (error) {
                     this.emit('error', `Account: ${accountName}, Update devices list error: ${error}`);
                 };

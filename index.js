@@ -76,18 +76,15 @@ class melCloudPlatform {
 						melCloudBuildingsFile: melCloudBuildingsFile
 					});
 
-					this.melCloudClient.on('connected', (melCloudInfo, contextKey, devices, devicesCount) => {
+					this.melCloudClient.on('connected', (melCloudInfo, contextKey, devices, devicesCount, useFahrenheit, temperatureDisplayUnit) => {
 							if (devicesCount > 0) {
 								for (let i = 0; i < devicesCount; i++) {
 									const device = devices[i];
-									const buildingId = device.BuildingID;
-									const deviceId = device.DeviceID;
-									const deviceName = device.DeviceName;
-									const deviceType = device.Type;
-									const deviceTypeText = CONSTANS.DeviceType[deviceType];
+									const buildingId = (device.BuildingID).toString();
+									const deviceId = (device.DeviceID).toString();
 									const deviceInfo = device;
 
-									new melCloudDevice(this.log, this.api, account, melCloudInfo, contextKey, deviceInfo, buildingId, deviceId, deviceName, deviceType, deviceTypeText);
+									new melCloudDevice(this.log, this.api, account, melCloudInfo, contextKey, deviceInfo, buildingId, deviceId, useFahrenheit, temperatureDisplayUnit);
 								};
 							} else {
 								this.log(`Account: ${accountName}, No devices found!!!`)
@@ -120,7 +117,7 @@ class melCloudPlatform {
 
 
 class melCloudDevice {
-	constructor(log, api, account, melCloudInfo, contextKey, deviceInfo, buildingId, deviceId, deviceName, deviceType, deviceTypeText) {
+	constructor(log, api, account, melCloudInfo, contextKey, deviceInfo, buildingId, deviceId, useFahrenheit, temperatureDisplayUnit) {
 		this.log = log;
 		this.api = api;
 
@@ -131,7 +128,6 @@ class melCloudDevice {
 		this.disableLogInfo = account.disableLogInfo || false;
 		this.disableLogDeviceInfo = account.disableLogDeviceInfo || false;
 		this.enableDebugMode = account.enableDebugMode || false;
-
 		const enableMqtt = account.enableMqtt || false;
 		const mqttHost = account.mqttHost;
 		const mqttPort = account.mqttPort || 1883;
@@ -141,9 +137,11 @@ class melCloudDevice {
 		const mqttPasswd = account.mqttPass;
 		const mqttDebug = account.mqttDebug || false;
 
-		//default properties
 		this.startPrepareAccessory = true;
 		this.displayDeviceInfo = true;
+		this.melCloudInfo = melCloudInfo;
+		this.useFahrenheit = useFahrenheit;
+		this.temperatureDisplayUnit = temperatureDisplayUnit;
 
 		//mqtt client
 		if (enableMqtt) {
@@ -178,7 +176,6 @@ class melCloudDevice {
 
 		//melcloud device
 		this.melCloudClientDevice = new melCloudClientDevice({
-			melCloudInfo: melCloudInfo,
 			deviceInfo: deviceInfo,
 			contextKey: contextKey,
 			buildingId: buildingId,
@@ -187,7 +184,7 @@ class melCloudDevice {
 			mqttEnabled: enableMqtt
 		});
 
-		this.melCloudClientDevice.on('deviceInfo', (melCloudInfo, deviceId, deviceType, deviceName, deviceTypeText, manufacturer, modelName, modelName1, serialNumber, serialNumber1, firmwareRevision) => {
+		this.melCloudClientDevice.on('deviceInfo', (deviceId, deviceType, deviceName, deviceTypeText, manufacturer, modelName, modelName1, serialNumber, serialNumber1, firmwareRevision) => {
 				const model = (deviceType == 0) ? modelName : modelName1;
 				const serial = (deviceType == 0) ? serialNumber : serialNumber1;
 				if (!this.disableLogDeviceInfo && this.displayDeviceInfo) {
@@ -195,25 +192,21 @@ class melCloudDevice {
 					this.log('Account: %s', this.accountName);
 					this.log('Name: %s', deviceName);
 					this.log('Model: %s', model);
-					this.log('Serial: %s', serial);
 					this.log('Firmware: %s', firmwareRevision);
 					const device1 = (modelName1 != 'Undefined' && deviceType == 0) ? this.log('Outdoor: %s', modelName1) : false;
 					this.log('Manufacturer: %s', manufacturer);
 					this.log('----------------------------------');
 					this.displayDeviceInfo = false;
 				};
-				this.melCloudInfo = melCloudInfo;
 				this.deviceId = deviceId;
 				this.deviceName = deviceName;
 				this.deviceType = deviceType;
 				this.deviceTypeText = deviceTypeText;
-				this.useFahrenheit = (melCloudInfo.UseFahrenheit == true) ? 1 : 0;
-				this.temperatureDisplayUnit = CONSTANS.TemperatureDisplayUnits[this.useFahrenheit];
 
 				this.manufacturer = manufacturer;
 				this.modelName = model;
-				this.serialNumber = (serial.length > 1) ? serial : 'Serial to short';
-				this.firmwareRevision = firmwareRevision.toString();
+				this.serialNumber = serial;
+				this.firmwareRevision = firmwareRevision;
 			})
 			.on('deviceState', (deviceInfo, deviceState, roomTemperature, setTemperature, setFanSpeed, operationMode, vaneHorizontal, vaneVertical, defaultHeatingSetTemperature, defaultCoolingSetTemperature, inStandbyMode, power) => {
 				const displayMode = this.displayMode;
@@ -445,7 +438,7 @@ class melCloudDevice {
 	async prepareAccessory() {
 		this.log.debug('prepareAccessory');
 		const melCloudInfo = this.melCloudInfo;
-		const deviceId = this.deviceId.toString();
+		const deviceId = this.deviceId;
 		const deviceState = this.deviceState;
 		const deviceName = this.deviceName;
 		const deviceType = this.deviceType;
