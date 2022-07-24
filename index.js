@@ -250,20 +250,20 @@ class melCloudDevice {
 				this.power = power;
 				this.inStandbyMode = inStandby;
 
-			        //heater/cooler
+				//heater/cooler
 				//INACTIVE, IDLE, HEATING, COOLING - current
 				const currentHeaterCoolerOperationMode = power ? inStandby ? 1 : [1, 2, 2, 3, 3, 3, 3, 3, 3][operationMode] : 0;
 				//AUTO, HEAT, COOL - target
 				const targetHeaterCoolerOperationMode = power ? [0, 1, 1, 2, 2, 2, 2, 2, 0][operationMode] : 0;
-			
-			        //thermostat
+
+				//thermostat
 				//OFF, HEAT, COOL - current
 				const currentThermostatOperationMode = power ? inStandby ? 0 : [0, 1, 2, 2, 2, 2, 2, 2, 2][operationMode] : 0;
 				//OFF, HEAT, COOL, AUTO - target
 				const targetThermostatOperationMode = power ? [0, 1, 1, 2, 2, 2, 2, 2, 3][operationMode] : 0;
-			
+
 				const currentOperationMode = displayMode ? currentThermostatOperationMode : currentHeaterCoolerOperationMode;
-			        this.currentOperationMode = currentOperationMode;
+				this.currentOperationMode = currentOperationMode;
 				const targetOperationMode = displayMode ? targetThermostatOperationMode : targetHeaterCoolerOperationMode;
 				this.targetOperationMode = targetOperationMode;
 
@@ -747,7 +747,7 @@ class melCloudDevice {
 				const buttonDisplayType = (button.displayType != undefined) ? button.displayType : 0;
 
 				const buttonServiceType = [Service.Outlet, Service.Switch][buttonDisplayType];
-				const buttonService = new buttonServiceType(`${accessoryName} ${buttonName}`, `Button ${i}`
+				const buttonService = new buttonServiceType(`${accessoryName} ${buttonName}`, `Button ${i}`);
 				buttonService.getCharacteristic(Characteristic.On)
 					.onGet(async () => {
 						const state = this.buttonsStates[i];
