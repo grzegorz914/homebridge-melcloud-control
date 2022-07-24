@@ -40,20 +40,16 @@ class MELCLOUDCLIENT extends EventEmitter {
                     const melCloudInfoData = JSON.stringify(loginData.data, null, 2);
                     const debug = debugLog ? this.emit('debug', `Account: ${accountName}, debug melCloudInfo: ${melCloudInfoData}`) : false;
                     const writeMelCloudInfoData = await fsPromises.writeFile(melCloudInfoFile, melCloudInfoData);
-
-                    this.melCloudInfo = loginData.data.LoginData;
-                    this.contextKey = loginData.data.LoginData.ContextKey;
+                    const melCloudInfo = loginData.data.LoginData;
+                    const contextKey = loginData.data.LoginData.ContextKey;
 
                     const debug1 = debugLog ? this.emit('message', `Account: ${accountName}, Connected.`) : false;
-                    this.emit('checkDevicesList');
+                    this.emit('checkDevicesList', melCloudInfo, contextKey);
                 } catch (error) {
                     this.emit('error', `Account: ${accountName}, login error: ${error}`);
                 };
             })
-            .on('checkDevicesList', async () => {
-                const melCloudInfo = this.melCloudInfo;
-                const contextKey = this.contextKey;
-
+            .on('checkDevicesList', async (melCloudInfo, contextKey) => {
                 const debug = debugLog ? this.emit('message', `Account: ${accountName}, Scanning for devices.`) : false;
                 this.axiosInstanceGet = axios.create({
                     method: 'GET',
@@ -132,7 +128,7 @@ class MELCLOUDCLIENT extends EventEmitter {
                     const devicesCount = devices.length;
                     const useFahrenheit = (melCloudInfo.UseFahrenheit == true) ? 1 : 0;
                     const temperatureDisplayUnit = CONSTANS.TemperatureDisplayUnits[useFahrenheit];
-                    
+
                     const debug2 = debugLog ? this.emit('message', `Account: ${accountName}, Found devices: ${devicesCount}.`) : false;
                     this.emit('connected', melCloudInfo, contextKey, devices, devicesCount, useFahrenheit, temperatureDisplayUnit);
                 } catch (error) {
