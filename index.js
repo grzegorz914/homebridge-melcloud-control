@@ -212,7 +212,7 @@ class melCloudDevice {
 
 				this.manufacturer = manufacturer;
 				this.modelName = model;
-				this.serialNumber = (serial.length > 1) ? serial : 'Serial to schort';
+				this.serialNumber = (serial.length > 1) ? serial : 'Serial to short';
 				this.firmwareRevision = firmwareRevision.toString();
 			})
 			.on('deviceState', (deviceInfo, deviceState, roomTemperature, setTemperature, setFanSpeed, operationMode, vaneHorizontal, vaneVertical, defaultHeatingSetTemperature, defaultCoolingSetTemperature, inStandbyMode, power) => {
