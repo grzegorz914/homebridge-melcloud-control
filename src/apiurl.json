@@ -3,10 +3,12 @@
     "ClientLogin": "/Login/ClientLogin",
     "GetUserDetails": "/User/GetUserDetails",
     "ListDevices": "/User/ListDevices",
-    "ListDevicesUnits": "/Device/ListDeviceUnits",
+    "ListDeviceUnits": "/Device/ListDeviceUnits",
     "DeviceState": "/Device/Get?id=DID&buildingID=BID",
+    "TileState": "/Tile/Get2?id=DID&buildingID=BID",
     "SetAta": "/Device/SetAta",
     "SetAtw": "/Device/SetAtw",
     "SetErv": "/Device/SetErv",
-    "UpdateApplicationOptions": "/User/UpdateApplicationOptions"
+    "UpdateApplicationOptions": "/User/UpdateApplicationOptions",
+    "HolidayModeUpdate": "/HolidayMode/Update"
 }
