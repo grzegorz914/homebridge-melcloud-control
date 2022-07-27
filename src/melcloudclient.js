@@ -67,11 +67,6 @@ class MELCLOUDCLIENT extends EventEmitter {
 
 
                     //read building structure and get the devices
-                    const buildings = new Array();
-                    const buildingsStructure = new Array();
-                    const buildingsAreas = new Array();
-                    const floors = new Array();
-                    const floorsAreas = new Array();
                     const devices = new Array();
 
                     const buildingsList = listDevicesData.data;
@@ -79,20 +74,16 @@ class MELCLOUDCLIENT extends EventEmitter {
                     for (let i = 0; i < buildingsCount; i++) {
                         const building = buildingsList[i];
                         const buildingStructure = building.Structure;
-                        buildings.push(building);
-                        buildingsStructure.push(buildingStructure);
 
                         //floors
                         const floorsCount = buildingStructure.Floors.length;
                         for (let j = 0; j < floorsCount; j++) {
                             const floor = buildingStructure.Floors[j];
-                            floors.push(floor);
 
                             //floor areas
                             const florAreasCount = floor.Areas.length;
                             for (let l = 0; l < florAreasCount; l++) {
                                 const florArea = floor.Areas[l];
-                                floorsAreas.push(florArea);
 
                                 //floor areas devices
                                 const florAreaDevicesCount = florArea.Devices.length;
@@ -114,7 +105,13 @@ class MELCLOUDCLIENT extends EventEmitter {
                         const buildingAreasCount = buildingStructure.Areas.length;
                         for (let n = 0; n < buildingAreasCount; n++) {
                             const buildingArea = buildingStructure.Areas[n];
-                            buildingsAreas.push(buildingArea);
+
+                            //floor areas devices
+                            const buildingAreaCount = buildingArea.Devices.length;
+                            for (let o = 0; o < buildingAreaCount; o++) {
+                                const buildingAreaDevice = buildingArea.Devices[o];
+                                devices.push(buildingAreaDevice);
+                            };
                         };
 
                         //building devices
