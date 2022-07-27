@@ -77,7 +77,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                     const sceneOwner = deviceState.SceneOwner;
 
                     this.emit('checkDeviceInfo');
-                    this.emit('deviceState', deviceInfo, deviceState, roomTemperature, supplyTemperature, outdoorTemperature, roomCO2Level, setTemperature, setFanSpeed, operationMode, ventilationMode, inStandbyMode, power);
+                    this.emit('deviceState', deviceInfo, deviceState, power, roomTemperature, supplyTemperature, outdoorTemperature, roomCO2Level, setTemperature, numberOfFanSpeeds, setFanSpeed, operationMode, ventilationMode);
                     const mqtt = enableMqtt ? this.emit('mqtt', `Device ${deviceName} Info:`, JSON.stringify(deviceInfo, null, 2)) : false;
                     const mqtt1 = enableMqtt ? this.emit('mqtt', `Device ${deviceName} State:`, JSON.stringify(deviceState, null, 2)) : false;
                 } catch (error) {
@@ -160,7 +160,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const deviceMinTempAutomatic = deviceInfo.Device.MinTempAutomatic;
                 const deviceMaxTempAutomatic = deviceInfo.Device.MaxTempAutomatic;
                 const deviceSetSupplyTemperatureMode = deviceInfo.Device.SetSupplyTemperatureMode;
-                const deviceUnitSupportsStandbyMode = deviceInfo.Device.UnitSupportsStandbyMode;
+                const deviceHasAutomaticFanSpeed = deviceInfo.Device.HasAutomaticFanSpeed;
                 const deviceCoreMaintenanceRequired = deviceInfo.Device.CoreMaintenanceRequired;
                 const deviceFilterMaintenanceRequired = deviceInfo.Device.FilterMaintenanceRequired;
                 const devicePower = deviceInfo.Device.Power;
@@ -314,7 +314,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const serialNumber1 = (serialsNumberOutdoor.length > 0) ? (serialsNumberOutdoor[0].length > 1) ? serialsNumberOutdoor[0].toString() : 'Serial to short' : 'Undefined';
                 const firmwareRevision = (deviceFirmwareAppVersion != undefined && deviceFirmwareAppVersion != null) ? deviceFirmwareAppVersion.toString() : 'Undefined';
 
-                this.emit('deviceInfo', manufacturer, modelName, modelName1, serialNumber0, firmwareRevision);
+                this.emit('deviceInfo', manufacturer, modelName, serialNumber0, firmwareRevision);
             });
 
         this.emit('refreschDeviceState');

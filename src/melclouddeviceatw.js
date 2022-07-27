@@ -44,7 +44,7 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                     const temperatureIncrement = deviceState.TemperatureIncrement
                     const defrostMode = deviceState.DefrostMode
                     const heatPumpFrequenc = deviceState.HeatPumpFrequenc
-                    const haxSetTemperature = deviceState.MaxSetTemperature
+                    const maxSetTemperature = deviceState.MaxSetTemperature
                     const minSetTemperature = deviceState.MinSetTemperature
                     const roomTemperatureZone1 = deviceState.RoomTemperatureZone1
                     const roomTemperatureZone2 = deviceState.RoomTemperatureZone2
@@ -194,7 +194,7 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                     const units = deviceState.Units
 
                     this.emit('checkDeviceInfo');
-                    this.emit('deviceState', deviceInfo, deviceState, roomTemperature, setTemperature, setFanSpeed, operationMode, vaneHorizontal, vaneVertical, inStandbyMode, power);
+                    this.emit('deviceState', deviceInfo, deviceState, power, roomTemperatureZone1, setTemperatureZone1, roomTemperatureZone2, setTemperatureZone2, tankWaterTemperature, setTankWaterTemperatureconst, operationMode, operationModeZone1, operationModeZone2);
                     const mqtt = enableMqtt ? this.emit('mqtt', `Device ${deviceName} Info:`, JSON.stringify(deviceInfo, null, 2)) : false;
                     const mqtt1 = enableMqtt ? this.emit('mqtt', `Device ${deviceName} State:`, JSON.stringify(deviceState, null, 2)) : false;
                 } catch (error) {
@@ -317,7 +317,7 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                 const deviceEcoHotWater = deviceInfo.Device.EcoHotWater;
                 const deviceOperationMode = deviceInfo.Device.OperationMode;
                 const deviceOperationModeZone1 = deviceInfo.Device.OperationModeZone1;
-                const devicedeviceFanSpeed = deviceInfo.Device.OperationModeZone2;
+                const deviceOperationModeZone2 = deviceInfo.Device.OperationModeZone2;
                 const deviceSetTemperatureZone1 = deviceInfo.Device.SetTemperatureZone1;
                 const deviceSetTemperatureZone2 = deviceInfo.Device.SetTemperatureZone2;
                 const deviceTargetHCTemperatureZone1 = deviceInfo.Device.TargetHCTemperatureZone1;
@@ -494,12 +494,13 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                 const firmwareUpdateAborted = deviceInfo.FirmwareUpdateAborted;
 
                 //permissions
+                const canSetForcedHotWater = deviceInfo.Permissions.CanSetForcedHotWater;
                 const canSetOperationMode = deviceInfo.Permissions.CanSetOperationMode;
-                const canSetFanSpeed = deviceInfo.Permissions.CanSetFanSpeed;
-                const canSetVaneDirection = deviceInfo.Permissions.CanSetVaneDirection;
                 const canSetPower = deviceInfo.Permissions.CanSetPower;
+                const canSetTankWaterTemperature = deviceInfo.Permissions.CanSetTankWaterTemperature;
+                const canSetEcoHotWater = deviceInfo.Permissions.CanSetEcoHotWater;
+                const canSetFlowTemperature = deviceInfo.Permissions.CanSetFlowTemperature;
                 const canSetTemperatureIncrementOverride = deviceInfo.Permissions.CanSetTemperatureIncrementOverride;
-                const canDisableLocalController = deviceInfo.Permissions.CanDisableLocalController;
 
                 //device info
                 const manufacturer = 'Mitsubishi';
@@ -509,7 +510,7 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                 const serialNumber1 = (serialsNumberOutdoor.length > 0) ? (serialsNumberOutdoor[0].length > 1) ? serialsNumberOutdoor[0].toString() : 'Serial to short' : 'Undefined';
                 const firmwareRevision = (deviceFirmwareAppVersion != undefined && deviceFirmwareAppVersion != null) ? deviceFirmwareAppVersion.toString() : 'Undefined';
 
-                this.emit('deviceInfo', manufacturer, modelName, modelName1, serialNumber0, firmwareRevision);
+                this.emit('deviceInfo', manufacturer, modelName, serialNumber0, firmwareRevision);
             });
 
         this.emit('refreschDeviceState');
