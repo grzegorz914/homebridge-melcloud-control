@@ -689,6 +689,9 @@ class melCloudDevice {
 						this.deviceInfo = deviceInfo;
 						this.deviceState = deviceState;
 
+						//device info
+						const hasAutomaticFanSpeed = deviceInfo.Device.HasAutomaticFanSpeed;
+
 						//device state
 						this.power = power;
 
@@ -700,7 +703,7 @@ class melCloudDevice {
 
 						//thermostat
 						//OFF, HEAT, COOL - current
-						const currentThermostatOperationMode = power ? [0, 1, 2, 2, 2, 2, 2, 2, 2][operationMode] : 0;
+						const currentThermostatOperationMode = power ? [0, 1, 1, 2, 2, 2, 2, 2, 2][operationMode] : 0;
 						//OFF, HEAT, COOL, AUTO - target
 						const targetThermostatOperationMode = power ? [0, 1, 1, 2, 2, 2, 2, 2, 3][operationMode] : 0;
 
@@ -716,7 +719,6 @@ class melCloudDevice {
 						this.setTemperature = setTemperature;
 
 						//fan speed mode
-						const hasAutomaticFanSpeed = deviceInfo.Device.HasAutomaticFanSpeed;
 						const fanSpeed = (numberOfFanSpeeds == 3) ? hasAutomaticFanSpeed ? [4, 1, 2, 3][setFanSpeed] : [0, 1, 2, 3][setFanSpeed] : (numberOfFanSpeeds == 5) ? hasAutomaticFanSpeed ? [6, 1, 2, 3, 4, 5][setFanSpeed] : [0, 1, 2, 3, 4, 5][setFanSpeed] : false;
 						const fanSpeedSetProps = (numberOfFanSpeeds == 3) ? hasAutomaticFanSpeed ? 4 : 3 : (numberOfFanSpeeds == 5) ? hasAutomaticFanSpeed ? 6 : 5 : false;
 						this.fanSpeed = fanSpeed;
