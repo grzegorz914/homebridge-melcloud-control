@@ -331,8 +331,8 @@ class MELCLOUDDEVICEATA extends EventEmitter {
 
                 //device info
                 const manufacturer = 'Mitsubishi';
-                const modelName = (modelsIndoor.length > 0) ? (modelsIndoor[0] != undefined && modelsIndoor[0] != null) ? modelsIndoor[0].toString() : 'Undefined' : (CONSTANS.DeviceModel[deviceModelCode] != undefined) ? CONSTANS.DeviceModel[deviceModelCode] : 'Undefined';
-                const modelName1 = (modelsOutdoor.length > 0) ? modelsOutdoor[0].toString() : 'Undefined';
+                const modelName = (modelsIndoor.length > 0) ? (modelsIndoor[0] != undefined && modelsIndoor[0] != null) ? modelsIndoor[0].toString() : 'Undefined' : 'Undefined';
+                const modelName1 = (modelsOutdoor.length > 0) ? (modelsOutdoor[0] != undefined && modelsOutdoor[0] != null) ? modelsOutdoor[0].toString() : 'Undefined' : 'Undefined';
 
                 this.emit('deviceInfo', manufacturer, modelName, modelName1, serialNumber, deviceFirmwareAppVersion);
             });

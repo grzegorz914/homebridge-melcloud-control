@@ -185,12 +185,12 @@ class melCloudDevice {
 
 				this.melCloudDeviceAta.on('deviceInfo', (manufacturer, modelName, modelName1, serialNumber, firmwareRevision) => {
 						if (!this.disableLogDeviceInfo && this.displayDeviceInfo) {
-							this.log('------- %s --------', this.deviceTypeText);
+							this.log('---- %s: %s ----', this.deviceTypeText, this.deviceName);
 							this.log('Account: %s', this.accountName);
-							this.log('Name: %s', this.deviceName);
 							this.log('Model: %s', modelName);
+							this.log('Serial: %s', serialNumber);
 							this.log('Firmware: %s', firmwareRevision);
-							const device1 = (modelName1 != 'Undefined') ? this.log('Outdoor: %s', modelName1) : false;
+							const outdoorDevice = (modelName1 != 'Undefined') ? this.log('Outdoor: %s', modelName1) : false;
 							this.log('Manufacturer: %s', manufacturer);
 							this.log('----------------------------------');
 							this.displayDeviceInfo = false;
@@ -436,10 +436,10 @@ class melCloudDevice {
 
 				this.melCloudDeviceAtw.on('deviceInfo', (manufacturer, modelName, serialNumber, firmwareRevision) => {
 						if (!this.disableLogDeviceInfo && this.displayDeviceInfo) {
-							this.log('------- %s --------', this.deviceTypeText);
+							this.log('---- %s: %s ----', this.deviceTypeText, this.deviceName);
 							this.log('Account: %s', this.accountName);
-							this.log('Name: %s', this.deviceName);
 							this.log('Model: %s', modelName);
+							this.log('Serial: %s', serialNumber);
 							this.log('Firmware: %s', firmwareRevision);
 							this.log('Manufacturer: %s', manufacturer);
 							this.log('----------------------------------');
@@ -652,13 +652,14 @@ class melCloudDevice {
 					mqttEnabled: enableMqtt
 				});
 
-				this.melCloudDeviceErv.on('deviceInfo', (manufacturer, modelName, serialNumber, firmwareRevision) => {
+				this.melCloudDeviceErv.on('deviceInfo', (manufacturer, modelName, modelName1, serialNumber, firmwareRevision) => {
 						if (!this.disableLogDeviceInfo && this.displayDeviceInfo) {
-							this.log('------- %s --------', this.deviceTypeText);
+							this.log('---- %s: %s ----', this.deviceTypeText, this.deviceName);
 							this.log('Account: %s', this.accountName);
-							this.log('Name: %s', this.deviceName);
 							this.log('Model: %s', modelName);
+							this.log('Serial: %s', serialNumber);
 							this.log('Firmware: %s', firmwareRevision);
+							const outdoorDevice = (modelName1 != 'Undefined') ? this.log('Outdoor: %s', modelName1) : false;
 							this.log('Manufacturer: %s', manufacturer);
 							this.log('----------------------------------');
 							this.displayDeviceInfo = false;
