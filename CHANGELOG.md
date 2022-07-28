@@ -12,8 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changes
 - code cleanup
 - code rebuild
-- added support for heat pump
-- added support for enrgy recovery ventilation
+- stability improvements
+- added account reconect process if for some reason login fail
+- added devices list and state recheck if for some reason fail
+- added support for Heat Pump
+- added support for Enrgy Recovery Ventilation
 
 ## [0.2.16] - (24.07.2022)
 ## Changes
