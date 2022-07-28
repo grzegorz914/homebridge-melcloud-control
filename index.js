@@ -1138,18 +1138,10 @@ class melCloudDevice {
 					})
 					.onSet(async (value) => {
 						melCloudInfo.UseFahrenheit = value ? true : false;
-						melCloudInfo.EmailOnCommsError = false;
-						melCloudInfo.EmailOnUnitError = false;
-						melCloudInfo.EmailCommsErrors = 1;
-						melCloudInfo.EmailUnitErrors = 1;
-						melCloudInfo.RestorePages = false;
-						melCloudInfo.MarketingCommunication = false;
-						melCloudInfo.AlternateEmailAddress = '';
-						melCloudInfo.Fred = 4;
-
 						try {
 							const newState = await this.melCloudDeviceAta.send(API_URL.UpdateApplicationOptions, melCloudInfo, 1);
 							const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
+							this.melCloudInfo = melCloudInfo;
 						} catch (error) {
 							this.log.error(`${deviceTypeText}: ${accessoryName}, Set temperature display unit error: ${error}`);
 						};
@@ -1390,18 +1382,11 @@ class melCloudDevice {
 					})
 					.onSet(async (value) => {
 						melCloudInfo.UseFahrenheit = value ? true : false;
-						melCloudInfo.EmailOnCommsError = false;
-						melCloudInfo.EmailOnUnitError = false;
-						melCloudInfo.EmailCommsErrors = 1;
-						melCloudInfo.EmailUnitErrors = 1;
-						melCloudInfo.RestorePages = false;
-						melCloudInfo.MarketingCommunication = false;
-						melCloudInfo.AlternateEmailAddress = '';
-						melCloudInfo.Fred = 4;
 
 						try {
 							const newState = await this.melCloudDeviceAta.send(API_URL.UpdateApplicationOptions, melCloudInfo, 1);
 							const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
+							this.melCloudInfo = melCloudInfo;
 						} catch (error) {
 							this.log.error(`${deviceTypeText}: ${accessoryName}, Set temperature display unit error: ${error}`);
 						};
