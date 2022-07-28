@@ -81,10 +81,9 @@ class melCloudPlatform {
 					this.melCloudClient.on('connected', (melCloudInfo, contextKey, devices, devicesCount, useFahrenheit, temperatureDisplayUnit) => {
 							if (devicesCount > 0) {
 								for (let i = 0; i < devicesCount; i++) {
-									const device = devices[i];
-									const buildingId = (device.BuildingID).toString();
-									const deviceId = (device.DeviceID).toString();
-									const deviceInfo = device;
+									const deviceInfo = devices[i];
+									const buildingId = (deviceInfo.BuildingID).toString();
+									const deviceId = (deviceInfo.DeviceID).toString();
 									const deviceType = deviceInfo.Type;
 									const deviceName = deviceInfo.DeviceName;
 									const deviceTypeText = CONSTANS.DeviceType[deviceType];
@@ -1605,7 +1604,6 @@ class melCloudDevice {
 		};
 
 		this.startPrepareAccessory = false;
-		this.melCloudDeviceAta.refreshDeviceState();
 		this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
 		const debug = this.enableDebugMode ? this.log(`${deviceTypeText}: ${accessoryName}, published as external accessory.`) : false;
 	};

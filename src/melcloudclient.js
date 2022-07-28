@@ -38,19 +38,20 @@ class MELCLOUDCLIENT extends EventEmitter {
                 try {
                     const loginData = await this.axiosInstanceLogin(API_URL.ClientLogin, options);
                     const melCloudInfoData = JSON.stringify(loginData.data, null, 2);
-                    const debug = debugLog ? this.emit('debug', `Account: ${accountName}, debug melCloudInfo: ${melCloudInfoData}`) : false;
+                    const debug = debugLog ? this.emit('debug', `Account ${accountName}, debug melCloudInfo: ${melCloudInfoData}`) : false;
                     const writeMelCloudInfoData = await fsPromises.writeFile(melCloudInfoFile, melCloudInfoData);
                     const melCloudInfo = loginData.data.LoginData;
                     const contextKey = loginData.data.LoginData.ContextKey;
 
-                    const debug1 = debugLog ? this.emit('message', `Account: ${accountName}, Connected.`) : false;
-                    this.emit('checkDevicesList', melCloudInfo, contextKey);
+                    const debug1 = debugLog ? this.emit('message', `Account ${accountName}, Connected.`) : false;
+                    const checkDevicesList = (contextKey != undefined) ? this.emit('checkDevicesList', melCloudInfo, contextKey) : this.reconnect();
                 } catch (error) {
-                    this.emit('error', `Account: ${accountName}, login error: ${error}`);
+                    this.emit('error', `Account: ${accountName}, login error, ${error}, trying to reconnect in 60s.`);
+                    this.reconnect();
                 };
             })
             .on('checkDevicesList', async (melCloudInfo, contextKey) => {
-                const debug = debugLog ? this.emit('message', `Account: ${accountName}, Scanning for devices.`) : false;
+                const debug = debugLog ? this.emit('message', `Account ${accountName}, Scanning for devices.`) : false;
                 this.axiosInstanceGet = axios.create({
                     method: 'GET',
                     baseURL: API_URL.BaseURL,
@@ -62,7 +63,7 @@ class MELCLOUDCLIENT extends EventEmitter {
                 try {
                     const listDevicesData = await this.axiosInstanceGet(API_URL.ListDevices);
                     const buildingsData = JSON.stringify(listDevicesData.data, null, 2);
-                    const debug1 = debugLog ? this.emit('debug', `Account: ${accountName}, debug buildings: ${buildingsData}`) : false;
+                    const debug1 = debugLog ? this.emit('debug', `Account ${accountName}, debug buildings: ${buildingsData}`) : false;
                     const writeDevicesData = await fsPromises.writeFile(melCloudBuildingsFile, buildingsData);
 
 
@@ -126,13 +127,26 @@ class MELCLOUDCLIENT extends EventEmitter {
                     const useFahrenheit = (melCloudInfo.UseFahrenheit == true) ? 1 : 0;
                     const temperatureDisplayUnit = CONSTANS.TemperatureDisplayUnits[useFahrenheit];
 
-                    const debug2 = debugLog ? this.emit('message', `Account: ${accountName}, Found devices: ${devicesCount}.`) : false;
+                    const debug2 = debugLog ? this.emit('message', `Account ${accountName}, Found devices: ${devicesCount}.`) : false;
                     this.emit('connected', melCloudInfo, contextKey, devices, devicesCount, useFahrenheit, temperatureDisplayUnit);
                 } catch (error) {
-                    this.emit('error', `Account: ${accountName}, Update devices list error: ${error}`);
+                    this.emit('error', `Account ${accountName}, check devices list error, check again in 30s: ${error}`);
+                    this.checkDevicesList();
                 };
             })
         this.emit('connect');
+    };
+
+    reconnect() {
+        setTimeout(() => {
+            this.emit('connect');
+        }, 60000);
+    };
+
+    checkDevicesList() {
+        setTimeout(() => {
+            this.emit('checkDevicesList');
+        }, 60000);
     };
 };
 module.exports = MELCLOUDCLIENT;

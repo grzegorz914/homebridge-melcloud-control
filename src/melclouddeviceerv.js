@@ -31,14 +31,14 @@ class MELCLOUDDEVICEERV extends EventEmitter {
             }
         });
 
-        this.on('refreschDeviceState', async () => {
+        this.on('checkDeviceState', async () => {
                 //deviceState
                 try {
                     const deviceUrl = API_URL.DeviceState.replace("DID", deviceId).replace("BID", buildingId);
                     const responseData = await this.axiosInstanceGet(deviceUrl);
                     const deviceState = responseData.data;
                     const deviceStateData = JSON.stringify(deviceState, null, 2);
-                    const debug = debugLog ? this.emit('debug', `${deviceTypeText}: ${deviceName}, debug deviceState: ${deviceStateData}`) : false;
+                    const debug = debugLog ? this.emit('debug', `${deviceTypeText} ${deviceName}, debug deviceState: ${deviceStateData}`) : false;
 
                     // device ata state
                     const effectiveFlags = deviceState.EffectiveFlags;
@@ -78,10 +78,13 @@ class MELCLOUDDEVICEERV extends EventEmitter {
 
                     this.emit('checkDeviceInfo');
                     this.emit('deviceState', deviceInfo, deviceState, power, roomTemperature, supplyTemperature, outdoorTemperature, roomCO2Level, setTemperature, numberOfFanSpeeds, setFanSpeed, operationMode, ventilationMode);
-                    const mqtt = enableMqtt ? this.emit('mqtt', `Device ${deviceName} Info:`, JSON.stringify(deviceInfo, null, 2)) : false;
-                    const mqtt1 = enableMqtt ? this.emit('mqtt', `Device ${deviceName} State:`, JSON.stringify(deviceState, null, 2)) : false;
+                    const mqtt = enableMqtt ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, Info:`, JSON.stringify(deviceInfo, null, 2)) : false;
+                    const mqtt1 = enableMqtt ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, State:`, JSON.stringify(deviceState, null, 2)) : false;
+
+                    this.checkDeviceState();
                 } catch (error) {
-                    this.emit('error', `Check device state error: ${error}`);
+                    this.emit('error', `${deviceTypeText} ${deviceName}, check state error, ${error}, check again in 60s.`);
+                    this.checkDeviceState();
                 };
             })
             .on('checkDeviceInfo', () => {
@@ -126,7 +129,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const linkedDevice = deviceInfo.LinkedDevice;
                 const type = deviceInfo.Type;
                 const macAddress = deviceInfo.MacAddress;
-                const serialNumber = deviceInfo.SerialNumber;
+                const serialNumber = (deviceInfo.SerialNumbe != undefined && deviceInfo.SerialNumber != null) ? (deviceInfo.SerialNumber).toString() : 'Undefined';
 
                 //device
                 const deviceListHistory24Formatters = deviceInfo.Device.ListHistory24Formatters;
@@ -199,7 +202,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const deviceModelCode = deviceInfo.Device.ModelCode;
                 const deviceDeviceID = deviceInfo.Device.DeviceID;
                 const deviceMacAddress = deviceInfo.Device.MacAddress;
-                const deviceSerialNumber = deviceInfo.Device.SerialNumber;
+                const deviceSerialNumber = (deviceInfo.Device.SerialNumber != undefined && deviceInfo.Device.SerialNumber != null) ? (deviceInfo.Device.SerialNumber).toString() : 'Undefined';
                 const deviceTimeZoneID = deviceInfo.Device.TimeZoneID;
                 const deviceDiagnosticMode = deviceInfo.Device.DiagnosticMode;
                 const deviceDiagnosticEndDate = deviceInfo.Device.DiagnosticEndDate;
@@ -237,7 +240,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const deviceRate2StartTime = deviceInfo.Device.Rate2StartTime;
                 const deviceProtocolVersion = deviceInfo.Device.ProtocolVersion;
                 const deviceUnitVersion = deviceInfo.Device.UnitVersion;
-                const deviceFirmwareAppVersion = deviceInfo.Device.FirmwareAppVersion;
+                const deviceFirmwareAppVersion = (deviceInfo.Device.FirmwareAppVersion != undefined && deviceInfo.Device.FirmwareAppVersion != null) ? deviceInfo.Device.FirmwareAppVersion.toString() : 'Undefined';
                 const deviceFirmwareWebVersion = deviceInfo.Device.FirmwareWebVersion;
                 const deviceFirmwareWlanVersion = deviceInfo.Device.FirmwareWlanVersion;
                 const deviceMqttFlags = deviceInfo.Device.MqttFlags;
@@ -310,20 +313,17 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const manufacturer = 'Mitsubishi';
                 const modelName = (modelsIndoor.length > 0) ? modelsIndoor[0].toString() : 'Undefined';
                 const modelName1 = (modelsOutdoor.length > 0) ? modelsOutdoor[0].toString() : 'Undefined';
-                const serialNumber0 = (serialsNumberIndoor.length > 0) ? (serialsNumberIndoor[0].length > 1) ? serialsNumberIndoor[0].toString() : 'Serial to short' : 'Undefined';
-                const serialNumber1 = (serialsNumberOutdoor.length > 0) ? (serialsNumberOutdoor[0].length > 1) ? serialsNumberOutdoor[0].toString() : 'Serial to short' : 'Undefined';
-                const firmwareRevision = (deviceFirmwareAppVersion != undefined && deviceFirmwareAppVersion != null) ? deviceFirmwareAppVersion.toString() : 'Undefined';
 
-                this.emit('deviceInfo', manufacturer, modelName, serialNumber0, firmwareRevision);
+                this.emit('deviceInfo', manufacturer, modelName, serialNumber, deviceFirmwareAppVersion);
             });
 
-        this.emit('refreschDeviceState');
+        this.emit('checkDeviceState');
     };
 
-    refreshDeviceState() {
-        setInterval(() => {
-            this.emit('refreschDeviceState');
-        }, 30000);
+    checkDeviceState() {
+        setTimeout(() => {
+            this.emit('checkDeviceState');
+        }, 60000);
     };
 
     send(url, newData, type) {
@@ -337,7 +337,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
 
             try {
                 const newState = await this.axiosInstancePost(url, options);
-                this.emit('refreschDeviceState');
+                this.emit('checkDeviceState');
                 resolve(true);
             } catch (error) {
                 this.emit('error', `Send command error: ${error}`);
