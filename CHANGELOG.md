@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - stability improvements
 - added account reconect process if for some reason login fail
 - added devices list and state recheck if for some reason fail
+- added detect model name based on model code
+- revert to get serial mumber from wifi adapter not the device itself
 - added support for Heat Pump
 - added support for Enrgy Recovery Ventilation
 

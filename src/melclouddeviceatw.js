@@ -249,7 +249,7 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                 const linkedDevice = deviceInfo.LinkedDevice;
                 const type = deviceInfo.Type;
                 const macAddress = deviceInfo.MacAddress;
-                const serialNumber = (deviceInfo.SerialNumbe != undefined && deviceInfo.SerialNumber != null) ? (deviceInfo.SerialNumber).toString() : 'Undefined';
+                const serialNumber = (deviceInfo.SerialNumber != undefined && deviceInfo.SerialNumber != null) ? deviceInfo.SerialNumber : 'Undefined';
 
                 //device
                 const deviceListHistory24Formatters = deviceInfo.Device.ListHistory24Formatters;
@@ -400,7 +400,7 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                 const deviceMaxTemperatureControlUnits = deviceInfo.Device.MaxTemperatureControlUnits;
                 const deviceDeviceID = deviceInfo.Device.DeviceID;
                 const deviceMacAddress = deviceInfo.Device.MacAddress;
-                const deviceSerialNumber = (deviceInfo.Device.SerialNumber != undefined && deviceInfo.Device.SerialNumber != null) ? (deviceInfo.Device.SerialNumber).toString() : 'Undefined';
+                const deviceSerialNumber = (deviceInfo.Device.SerialNumber != undefined && deviceInfo.Device.SerialNumber != null) ? deviceInfo.Device.SerialNumber : 'Undefined';
                 const deviceTimeZoneID = deviceInfo.Device.TimeZoneID;
                 const deviceDiagnosticMode = deviceInfo.Device.DiagnosticMode;
                 const deviceDiagnosticEndDate = deviceInfo.Device.DiagnosticEndDate;
