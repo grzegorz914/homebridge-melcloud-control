@@ -78,21 +78,8 @@ class melCloudPlatform {
 						melCloudBuildingsFile: melCloudBuildingsFile
 					});
 
-					this.melCloudClient.on('connected', (melCloudInfo, contextKey, devices, devicesCount, useFahrenheit, temperatureDisplayUnit) => {
-							if (devicesCount > 0) {
-								for (let i = 0; i < devicesCount; i++) {
-									const deviceInfo = devices[i];
-									const buildingId = (deviceInfo.BuildingID).toString();
-									const deviceId = (deviceInfo.DeviceID).toString();
-									const deviceType = deviceInfo.Type;
-									const deviceName = deviceInfo.DeviceName;
-									const deviceTypeText = CONSTANS.DeviceType[deviceType];
-
-									new melCloudDevice(this.log, this.api, account, melCloudInfo, contextKey, deviceInfo, deviceType, deviceName, deviceTypeText, buildingId, deviceId, useFahrenheit, temperatureDisplayUnit);
-								};
-							} else {
-								this.log(`Account: ${accountName}, No devices found!!!`)
-							};
+					this.melCloudClient.on('connected', (melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit) => {
+							new melCloudDevice(this.log, this.api, account, melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit);
 						})
 						.on('message', (message) => {
 							this.log(message);
@@ -121,7 +108,7 @@ class melCloudPlatform {
 
 
 class melCloudDevice {
-	constructor(log, api, account, melCloudInfo, contextKey, deviceInfo, deviceType, deviceName, deviceTypeText, buildingId, deviceId, useFahrenheit, temperatureDisplayUnit) {
+	constructor(log, api, account, melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit) {
 		this.log = log;
 		this.api = api;
 
@@ -436,7 +423,7 @@ class melCloudDevice {
 					});
 				break;
 			case 1: //heat pump
-				this.melCloudDeviceAtw = new melCloudDeviceAta({
+				this.melCloudDeviceAtw = new melCloudDeviceAtw({
 					deviceInfo: deviceInfo,
 					contextKey: contextKey,
 					buildingId: buildingId,
@@ -654,7 +641,7 @@ class melCloudDevice {
 
 				break;
 			case 3: //ventilation
-				this.melCloudDeviceAtw = new melCloudDeviceAta({
+				this.melCloudDeviceAtw = new melCloudDeviceErv({
 					deviceInfo: deviceInfo,
 					contextKey: contextKey,
 					buildingId: buildingId,

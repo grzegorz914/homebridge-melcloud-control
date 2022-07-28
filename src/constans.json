@@ -1,5 +1,9 @@
 {
     "DeviceType": ["Air Conditioner", "Heat Pump", "", "E.R. Ventilation"],
+    "DeviceModel": {
+        "0130": "MSZ-LN18VG2(W/V/R/B)",
+        "0120": "MSZ-LN18VG2(W/V/R/B)"
+      },
     "TemperatureDisplayUnits": ["°C", "°F"],
     "AirConditioner": {
         "CurrentHeaterCoolerThermostat": [

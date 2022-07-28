@@ -18,7 +18,8 @@ class MELCLOUDCLIENT extends EventEmitter {
 
         this.axiosInstanceLogin = axios.create({
             method: 'POST',
-            baseURL: API_URL.BaseURL
+            baseURL: API_URL.BaseURL,
+            timeout: 10000
         });
 
 
@@ -55,6 +56,7 @@ class MELCLOUDCLIENT extends EventEmitter {
                 this.axiosInstanceGet = axios.create({
                     method: 'GET',
                     baseURL: API_URL.BaseURL,
+                    timeout: 10000,
                     headers: {
                         'X-MitsContextKey': contextKey
                     }
@@ -127,10 +129,24 @@ class MELCLOUDCLIENT extends EventEmitter {
                     const useFahrenheit = (melCloudInfo.UseFahrenheit == true) ? 1 : 0;
                     const temperatureDisplayUnit = CONSTANS.TemperatureDisplayUnits[useFahrenheit];
 
-                    const debug2 = debugLog ? this.emit('message', `Account ${accountName}, Found devices: ${devicesCount}.`) : false;
-                    this.emit('connected', melCloudInfo, contextKey, devices, devicesCount, useFahrenheit, temperatureDisplayUnit);
+                    if (devicesCount > 0) {
+                        for (let i = 0; i < devicesCount; i++) {
+                            const deviceInfo = devices[i];
+                            const buildingId = (deviceInfo.BuildingID).toString();
+                            const deviceId = (deviceInfo.DeviceID).toString();
+                            const deviceType = deviceInfo.Type;
+                            const deviceName = deviceInfo.DeviceName;
+                            const deviceTypeText = CONSTANS.DeviceType[deviceType];
+
+                            const debug2 = debugLog ? this.emit('message', `Account ${accountName}, Found devices: ${devicesCount}.`) : false;
+                            this.emit('connected', melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit);
+                        };
+                    } else {
+                        this.log(`Account ${accountName}, no devices found, check again in 60s`)
+                        this.checkDevicesList();
+                    };
                 } catch (error) {
-                    this.emit('error', `Account ${accountName}, check devices list error, check again in 30s: ${error}`);
+                    this.emit('error', `Account ${accountName}, check devices list error, ${error}, check again in 60s.`);
                     this.checkDevicesList();
                 };
             })

@@ -1,6 +1,7 @@
 const EventEmitter = require('events');
 const axios = require('axios');
 const API_URL = require('./apiurl.json');
+const CONSTANS = require('./constans.json');
 
 
 class MELCLOUDDEVICEERV extends EventEmitter {
@@ -18,6 +19,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
         this.axiosInstanceGet = axios.create({
             method: 'GET',
             baseURL: API_URL.BaseURL,
+            timeout: 10000,
             headers: {
                 'X-MitsContextKey': contextKey,
             }
@@ -25,6 +27,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
         this.axiosInstancePost = axios.create({
             method: 'POST',
             baseURL: API_URL.BaseURL,
+            timeout: 10000,
             headers: {
                 'X-MitsContextKey': contextKey,
                 'content-type': 'application/json'
@@ -311,7 +314,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 //device info
 
                 const manufacturer = 'Mitsubishi';
-                const modelName = (modelsIndoor.length > 0) ? modelsIndoor[0].toString() : 'Undefined';
+                const modelName = (modelsIndoor.length > 0) ? (modelsIndoor[0] != undefined && modelsIndoor[0] != null) ? modelsIndoor[0].toString() : 'Undefined' : (CONSTANS.DeviceModel[deviceModelCode] != undefined) ? CONSTANS.DeviceModel[deviceModelCode] : 'Undefined';
                 const modelName1 = (modelsOutdoor.length > 0) ? modelsOutdoor[0].toString() : 'Undefined';
 
                 this.emit('deviceInfo', manufacturer, modelName, serialNumber, deviceFirmwareAppVersion);
