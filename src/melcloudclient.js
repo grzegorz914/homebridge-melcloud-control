@@ -138,13 +138,13 @@ class MELCLOUDCLIENT extends EventEmitter {
                         const debug2 = debugLog ? this.emit('debug', `Account ${accountName}, Found devices: ${devicesCount}.`) : false;
                         for (let i = 0; i < devicesCount; i++) {
                             const deviceInfo = devices[i];
-                            const buildingId = (deviceInfo.BuildingID).toString();
-                            const deviceId = (deviceInfo.DeviceID).toString();
+                            const buildingId = (deviceInfo.BuildingID != null) ? (deviceInfo.BuildingID).toString() : 'Undefined';
+                            const deviceId = (deviceInfo.DeviceID != null) ? (deviceInfo.DeviceID).toString() : 'Undefined';
                             const deviceType = deviceInfo.Type;
                             const deviceName = deviceInfo.DeviceName;
                             const deviceTypeText = CONSTANS.DeviceType[deviceType];
 
-                            if (deviceId != undefined && deviceId != null) {
+                            if (buildingId != 'Undefined' && deviceId != 'Undefined') {
                                 this.emit('connected', melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit);
                             } else {
                                 this.emit('message', `${deviceTypeText} ${deviceName}, device Id not found, please restart plugin to check again.`);
