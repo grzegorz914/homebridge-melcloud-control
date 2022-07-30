@@ -43,6 +43,9 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                     const deviceStateData = JSON.stringify(deviceState, null, 2);
                     const debug = debugLog ? this.emit('debug', `${deviceTypeText} ${deviceName}, debug deviceState: ${deviceStateData}`) : false;
 
+                     //device info
+                     this.emit('checkDeviceInfo');
+
                     // device ata state
                     const effectiveFlags = deviceState.EffectiveFlags;
                     const localIPAddress = deviceState.LocalIPAddress;
@@ -79,10 +82,8 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                     const scene = deviceState.Scene;
                     const sceneOwner = deviceState.SceneOwner;
 
-                    this.emit('checkDeviceInfo');
                     this.emit('deviceState', deviceInfo, deviceState, power, roomTemperature, supplyTemperature, outdoorTemperature, roomCO2Level, setTemperature, numberOfFanSpeeds, setFanSpeed, operationMode, ventilationMode);
-                    const mqtt = enableMqtt ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, Info:`, JSON.stringify(deviceInfo, null, 2)) : false;
-                    const mqtt1 = enableMqtt ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, State:`, JSON.stringify(deviceState, null, 2)) : false;
+                    const mqtt = enableMqtt ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, State:`, JSON.stringify(deviceState, null, 2)) : false;
 
                     this.checkDeviceState();
                 } catch (error) {
@@ -309,6 +310,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const modelName1 = (modelsOutdoor.length > 0) ? modelsOutdoor[0] : 'Undefined';
 
                 this.emit('deviceInfo', manufacturer, modelName, modelName1, serialNumber, deviceFirmwareAppVersion);
+                const mqtt = enableMqtt ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, Info:`, JSON.stringify(deviceInfo, null, 2)) : false;
             });
 
         this.emit('checkDeviceState');
