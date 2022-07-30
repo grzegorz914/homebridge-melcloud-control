@@ -27,7 +27,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * The old plugin and config need to be first removed from Homebridge and HomeKit and added again.
 * The platform name and password properties was changed due collision with same already exist plugins from other developers.
 ### Note
-* The Heat Pump and Energy Recovery Ventilation is not supported at this time.
+* The Heat Pump and Energy Recovery Ventilation is in beta test.
 
 ### Troubleshooting
 * If for some reason the device is not displayed in HomeKit app try this procedure:
