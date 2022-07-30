@@ -82,6 +82,7 @@
     },
     "TemperatureDisplayUnits": ["°C", "°F"],
     "AirConditioner": {
+        "OperationMode": ["0", "HEAT", "DRY", "COOL", "4", "5", "6", "FAN", "AUTO"],
         "CurrentHeaterCoolerThermostat": [
             ["INACTIVE", "IDLE", "HEAT", "COOL"],
             ["OFF", "HEAT", "COOL"]
@@ -101,7 +102,7 @@
         "ZoneStatus": ["HEAT", "IDLE", "COOL", "UNKNOWN"]
     },
     "Ventilation": {
-        "Mode": ["RECOVERY", "BYPAS", "AUTO"],
+        "OperationMode": ["RECOVERY", "BYPAS", "AUTO"],
         "CurrentFanSpeed": ["STOPPED"],
         "TargetFanSpeed": ["AUTO", "SILENT", "1", "2", "3", "4"]
     },

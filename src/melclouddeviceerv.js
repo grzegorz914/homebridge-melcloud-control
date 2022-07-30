@@ -267,7 +267,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                         const unit = units[i];
                         const unitId = unit.ID;
                         const unitDevice = unit.Device;
-                        const unitSerialNumber = (unit.SerialNumber != null) ? (unit.SerialNumber.length > 1) != null ? unit.SerialNumber.toString() : 'Serial to short' : 'Undefined';
+                        const unitSerialNumber = (unit.SerialNumber != null) ? (unit.SerialNumber.length > 1) ? unit.SerialNumber.toString() : 'Serial to short' : 'Undefined';
                         const unitModelNumber = unit.ModelNumber;
                         const unitModel = (unit.Model != null) ? unit.Model.toString() : 'Undefined';
                         const unitType = unit.UnitType;

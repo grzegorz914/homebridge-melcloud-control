@@ -460,6 +460,7 @@ class melCloudDevice {
 						//device state
 						this.power = power;
 
+						//operationMde 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO
 						//heater/cooler
 						//INACTIVE, IDLE, HEATING, COOLING - current
 						const currentHeaterCoolerOperationMode = power ? [1, 2, 2, 3, 3, 3, 3, 3, 3][operationMode] : 0;
