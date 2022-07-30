@@ -469,18 +469,10 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                         const unitType = unit.UnitType;
                         const unitIsIndoor = (unit.IsIndoor == true);
 
-                        if (unitIsIndoor) {
-                            serialsNumberIndoor.push(unitSerialNumber);
-                            modelsNumberIndoor.push(unitModelNumber);
-                            modelsIndoor.push(unitModel);
-                            typesIndoor.push(unitType);
-                        }
-                        if (!unitIsIndoor) {
-                            serialsNumberOutdoor.push(unitSerialNumber);
-                            modelsNumberOutdoor.push(unitModelNumber);
-                            modelsOutdoor.push(unitModel);
-                            typesOutdoor.push(unitType);
-                        }
+                        const pushSerial = unitIsIndoor ? serialsNumberIndoor.push(unitSerialNumber) : serialsNumberOutdoor.push(unitSerialNumber);
+                        const pushModelNumber = unitIsIndoor ? modelsNumberIndoor.push(unitModelNumber) : modelsNumberOutdoor.push(unitModelNumber);
+                        const pushUnitModel = unitIsIndoor ? modelsIndoor.push(unitModel) : modelsOutdoor.push(unitModel);
+                        const pushUnitTypel = unitIsIndoor ? typesIndoor.push(unitType) : typesOutdoor.push(unitType);
                     }
                 }
 
