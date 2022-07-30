@@ -405,7 +405,7 @@ class melCloudDevice {
 						};
 
 						//start prepare accessory
-						if (this.startPrepareAccessory && this.deviceId) {
+						if (this.startPrepareAccessory) {
 							this.prepareAccessory();
 						};
 					})
@@ -620,7 +620,7 @@ class melCloudDevice {
 						};
 
 						//start prepare accessory
-						if (this.startPrepareAccessory && this.deviceId) {
+						if (this.startPrepareAccessory) {
 							this.prepareAccessory();
 						};
 					})
@@ -848,7 +848,7 @@ class melCloudDevice {
 						};
 
 						//start prepare accessory
-						if (this.startPrepareAccessory && this.deviceId) {
+						if (this.startPrepareAccessory) {
 							this.prepareAccessory();
 						};
 					})

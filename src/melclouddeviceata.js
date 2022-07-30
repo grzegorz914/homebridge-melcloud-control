@@ -131,7 +131,7 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 const linkedDevice = deviceInfo.LinkedDevice;
                 const type = deviceInfo.Type;
                 const macAddress = deviceInfo.MacAddress;
-                const serialNumber = (deviceInfo.SerialNumber != undefined && deviceInfo.SerialNumber != null) ? deviceInfo.SerialNumber : 'Undefined';
+                const serialNumber = (deviceInfo.SerialNumber != null) ? deviceInfo.SerialNumber.toString() : 'Undefined';
 
                 //device
                 const deviceListHistory24Formatters = deviceInfo.Device.ListHistory24Formatters;
@@ -223,7 +223,7 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 const deviceModelCode = deviceInfo.Device.ModelCode;
                 const deviceDeviceID = deviceInfo.Device.DeviceID;
                 const deviceMacAddress = deviceInfo.Device.MacAddress;
-                const deviceSerialNumber = (deviceInfo.Device.SerialNumber != undefined && deviceInfo.Device.SerialNumber != null) ? deviceInfo.Device.SerialNumber : 'Undefined';
+                const deviceSerialNumber = (deviceInfo.Device.SerialNumber != null) ? deviceInfo.Device.SerialNumber.toString() : 'Undefined';
                 const deviceTimeZoneID = deviceInfo.Device.TimeZoneID;
                 const deviceDiagnosticMode = deviceInfo.Device.DiagnosticMode;
                 const deviceDiagnosticEndDate = deviceInfo.Device.DiagnosticEndDate;
@@ -261,7 +261,7 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 const deviceRate2StartTime = deviceInfo.Device.Rate2StartTime;
                 const deviceProtocolVersion = deviceInfo.Device.ProtocolVersion;
                 const deviceUnitVersion = deviceInfo.Device.UnitVersion;
-                const deviceFirmwareAppVersion = (deviceInfo.Device.FirmwareAppVersion != undefined && deviceInfo.Device.FirmwareAppVersion != null) ? deviceInfo.Device.FirmwareAppVersion.toString() : 'Undefined';
+                const deviceFirmwareAppVersion = (deviceInfo.Device.FirmwareAppVersion != null) ? deviceInfo.Device.FirmwareAppVersion.toString() : 'Undefined';
                 const deviceFirmwareWebVersion = deviceInfo.Device.FirmwareWebVersion;
                 const deviceFirmwareWlanVersion = deviceInfo.Device.FirmwareWlanVersion;
                 const deviceMqttFlags = deviceInfo.Device.MqttFlags;
@@ -285,9 +285,9 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                         const unit = units[i];
                         const unitId = unit.ID;
                         const unitDevice = unit.Device;
-                        const unitSerialNumber = (unit.SerialNumber != undefined && unit.SerialNumber != null) ? unit.SerialNumber.toString() : 'Undefined';
+                        const unitSerialNumber = (unit.SerialNumber != null) ? (unit.SerialNumber.length > 1) != null ? unit.SerialNumber.toString() : 'Serial to short' : 'Undefined';
                         const unitModelNumber = unit.ModelNumber;
-                        const unitModel = (unit.Model != undefined && unit.Model != null) ? unit.Model.toString() : 'Undefined';
+                        const unitModel = (unit.Model != null) ? unit.Model.toString() : 'Undefined';
                         const unitType = unit.UnitType;
                         const unitIsIndoor = (unit.IsIndoor == true);
 

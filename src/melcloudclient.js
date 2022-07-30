@@ -40,19 +40,24 @@ class MELCLOUDCLIENT extends EventEmitter {
                     const loginData = await this.axiosInstanceLogin(API_URL.ClientLogin, options);
                     const melCloudInfoData = JSON.stringify(loginData.data, null, 2);
                     const debug = debugLog ? this.emit('debug', `Account ${accountName}, debug melCloudInfo: ${melCloudInfoData}`) : false;
+                    const debug1 = debugLog ? this.emit('debug', `Account ${accountName}, Connected.`) : false;
                     const writeMelCloudInfoData = await fsPromises.writeFile(melCloudInfoFile, melCloudInfoData);
                     const melCloudInfo = loginData.data.LoginData;
                     const contextKey = loginData.data.LoginData.ContextKey;
 
-                    const debug1 = debugLog ? this.emit('message', `Account ${accountName}, Connected.`) : false;
-                    const checkDevicesList = (contextKey != undefined) ? this.emit('checkDevicesList', melCloudInfo, contextKey) : this.reconnect();
+                    if (contextKey != undefined && contextKey != null) {
+                        this.emit('checkDevicesList', melCloudInfo, contextKey)
+                    } else {
+                        this.emit('message', `Account ${accountName}, context key not found, reconnect in 60s.`)
+                        this.reconnect();
+                    };
                 } catch (error) {
-                    this.emit('error', `Account: ${accountName}, login error, ${error}, trying to reconnect in 60s.`);
+                    this.emit('error', `Account: ${accountName}, login error, ${error}, reconnect in 60s.`);
                     this.reconnect();
                 };
             })
             .on('checkDevicesList', async (melCloudInfo, contextKey) => {
-                const debug = debugLog ? this.emit('message', `Account ${accountName}, Scanning for devices.`) : false;
+                const debug = debugLog ? this.emit('debug', `Account ${accountName}, Scanning for devices.`) : false;
                 this.axiosInstanceGet = axios.create({
                     method: 'GET',
                     baseURL: API_URL.BaseURL,
@@ -130,6 +135,7 @@ class MELCLOUDCLIENT extends EventEmitter {
                     const temperatureDisplayUnit = CONSTANS.TemperatureDisplayUnits[useFahrenheit];
 
                     if (devicesCount > 0) {
+                        const debug2 = debugLog ? this.emit('debug', `Account ${accountName}, Found devices: ${devicesCount}.`) : false;
                         for (let i = 0; i < devicesCount; i++) {
                             const deviceInfo = devices[i];
                             const buildingId = (deviceInfo.BuildingID).toString();
@@ -138,11 +144,14 @@ class MELCLOUDCLIENT extends EventEmitter {
                             const deviceName = deviceInfo.DeviceName;
                             const deviceTypeText = CONSTANS.DeviceType[deviceType];
 
-                            const debug2 = debugLog ? this.emit('message', `Account ${accountName}, Found devices: ${devicesCount}.`) : false;
-                            this.emit('connected', melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit);
+                            if (deviceId != undefined && deviceId != null) {
+                                this.emit('connected', melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit);
+                            } else {
+                                this.emit('message', `${deviceTypeText} ${deviceName}, device Id not found, please restart plugin to check again.`);
+                            };
                         };
                     } else {
-                        this.log(`Account ${accountName}, no devices found, check again in 60s`)
+                        this.emit('message', `Account ${accountName}, no devices found, check again in 60s`)
                         this.checkDevicesList();
                     };
                 } catch (error) {
