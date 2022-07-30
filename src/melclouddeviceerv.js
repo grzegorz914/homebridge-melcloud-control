@@ -267,9 +267,9 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                         const unit = units[i];
                         const unitId = unit.ID;
                         const unitDevice = unit.Device;
-                        const unitSerialNumber = (unit.SerialNumber != null) ? unit.SerialNumber : 'Undefined';
+                        const unitSerialNumber = (unit.SerialNumber != undefined && unit.SerialNumber != null) ? unit.SerialNumber.toString() : 'Undefined';
                         const unitModelNumber = unit.ModelNumber;
-                        const unitModel = unit.Model;
+                        const unitModel = (unit.Model != undefined && unit.Model != null) ? unit.Model.toString() : 'Undefined';
                         const unitType = unit.UnitType;
                         const unitIsIndoor = (unit.IsIndoor == true);
 
@@ -312,10 +312,9 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const CanDisableLocalController = deviceInfo.Permissions.CanDisableLocalController;
 
                 //device info
-
                 const manufacturer = 'Mitsubishi';
-                const modelName = (modelsIndoor.length > 0) ? (modelsIndoor[0] != undefined && modelsIndoor[0] != null) ? modelsIndoor[0].toString() : 'Undefined' : 'Undefined'
-                const modelName1 = (modelsOutdoor.length > 0) ? (modelsOutdoor[0] != undefined && modelsOutdoor[0] != null) ? modelsOutdoor[0].toString() : 'Undefined' : 'Undefined';
+                const modelName = (modelsIndoor.length > 0) ? modelsIndoor[0] : 'Undefined';
+                const modelName1 = (modelsOutdoor.length > 0) ? modelsOutdoor[0] : 'Undefined';
 
                 this.emit('deviceInfo', manufacturer, modelName, modelName1, serialNumber, deviceFirmwareAppVersion);
             });
