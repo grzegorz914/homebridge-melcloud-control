@@ -115,6 +115,13 @@ class MELCLOUDCLIENT extends EventEmitter {
                         for (let n = 0; n < buildingAreasCount; n++) {
                             const buildingArea = buildingStructure.Areas[n];
                             buildingsAreas.push(buildingArea);
+
+                            //building areas devices
+                            const buildingAreaDevicesCount = buildingArea.Devices.length;
+                            for (let o = 0; o < buildingAreaDevicesCount; o++) {
+                                const buildingAreaDevice = buildingArea.Devices[o];
+                                devices.push(buildingAreaDevice);
+                            };
                         };
 
                         //building devices

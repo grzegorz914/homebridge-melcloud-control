@@ -101,7 +101,7 @@ class MELCLOUDCLIENTDEVICE extends EventEmitter {
                 const prohibitSetTemperature = deviceInfo.Device.ProhibitSetTemperature;
                 const prohibitOperationMode = deviceInfo.Device.ProhibitOperationMode;
                 const prohibitPower = deviceInfo.Device.ProhibitPower;
-                const firmware = deviceInfo.Device.FirmwareAppVersion;
+                const firmwareRevision = (deviceInfo.Device.FirmwareAppVersion != null) ? deviceInfo.Device.FirmwareAppVersion.toString() : 'Undefined';
                 const hasZone2 = deviceInfo.Device.HasZone2;
 
                 //units info
@@ -119,9 +119,9 @@ class MELCLOUDCLIENTDEVICE extends EventEmitter {
                         const unit = units[i];
                         const unitId = unit.ID;
                         const unitDevice = unit.Device;
-                        const unitSerialNumber = (unit.SerialNumber != null) ? unit.SerialNumber : 'Undefined';
+                        const unitSerialNumber = (unit.SerialNumber != null) ? (unit.SerialNumber.length > 1) ? unit.SerialNumber.toString() : 'Serial to short' : 'Undefined';
                         const unitModelNumber = unit.ModelNumber;
-                        const unitModel = unit.Model;
+                        const unitModel = (unit.Model != null) ? unit.Model.toString() : 'Undefined';
                         const unitType = unit.UnitType;
                         const unitIsIndoor = (unit.IsIndoor == true);
 
@@ -140,11 +140,10 @@ class MELCLOUDCLIENTDEVICE extends EventEmitter {
                     }
                 }
                 const manufacturer = 'Mitsubishi';
-                const modelName = (modelsIndoor.length > 0) ? modelsIndoor[0].toString() : 'Undefined';
-                const modelName1 = (modelsOutdoor.length > 0) ? modelsOutdoor[0].toString() : 'Undefined';
-                const serialNumber = (serialsNumberIndoor.length > 0) ? (serialsNumberIndoor[0].length > 1) ? serialsNumberIndoor[0].toString() : 'Serial to short' : 'Undefined';
-                const serialNumber1 = (serialsNumberOutdoor.length > 0) ? (serialsNumberOutdoor[0].length > 1) ? serialsNumberOutdoor[0].toString() : 'Serial to short' : 'Undefined';
-                const firmwareRevision = (firmware != null) ? firmware.toString() : 'Undefined';
+                const modelName = (modelsIndoor.length > 0) ? modelsIndoor[0] : 'Undefined';
+                const modelName1 = (modelsOutdoor.length > 0) ? modelsOutdoor[0] : 'Undefined';
+                const serialNumber = (serialsNumberIndoor.length > 0) ? serialsNumberIndoor[0] : 'Undefined';
+                const serialNumber1 = (serialsNumberOutdoor.length > 0) ? serialsNumberOutdoor[0] : 'Undefined';
 
                 this.emit('deviceInfo', deviceId, deviceType, deviceName, deviceTypeText, manufacturer, modelName, modelName1, serialNumber, serialNumber1, firmwareRevision);
                 this.emit('checkDeviceState');
