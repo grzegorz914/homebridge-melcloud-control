@@ -2,8 +2,8 @@
 
 const fs = require('fs');
 const path = require('path');
-const mqttClient = require('./src/mqtt.js');
-const melCloudClient = require('./src/melcloudclient.js')
+const mqtt = require('./src/mqtt.js');
+const melCloud = require('./src/melcloud.js')
 const melCloudDeviceAta = require('./src/melclouddeviceata.js');
 const melCloudDeviceAtw = require('./src/melclouddeviceatw.js');
 const melCloudDeviceErv = require('./src/melclouddeviceerv.js');
@@ -68,7 +68,7 @@ class melCloudPlatform {
 					};
 
 					//melcloud client
-					this.melCloudClient = new melCloudClient({
+					this.melCloud = new melCloud({
 						name: accountName,
 						user: user,
 						passwd: passwd,
@@ -78,7 +78,7 @@ class melCloudPlatform {
 						melCloudBuildingsFile: melCloudBuildingsFile
 					});
 
-					this.melCloudClient.on('connected', (melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit) => {
+					this.melCloud.on('connected', (melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit) => {
 							new melCloudDevice(this.log, this.api, account, melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit);
 						})
 						.on('message', (message) => {
@@ -140,7 +140,7 @@ class melCloudDevice {
 
 		//mqtt client
 		if (enableMqtt) {
-			this.mqttClient = new mqttClient({
+			this.mqtt = new mqtt({
 				enabled: enableMqtt,
 				host: mqttHost,
 				port: mqttPort,
@@ -152,7 +152,7 @@ class melCloudDevice {
 				debug: mqttDebug
 			});
 
-			this.mqttClient.on('connected', (message) => {
+			this.mqtt.on('connected', (message) => {
 					this.log(message);
 				})
 				.on('error', (error) => {

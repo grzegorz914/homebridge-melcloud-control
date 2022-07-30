@@ -5,7 +5,7 @@ const axios = require('axios');
 const API_URL = require('./apiurl.json');
 const CONSTANS = require('./constans.json');
 
-class MELCLOUDCLIENT extends EventEmitter {
+class MELCLOUD extends EventEmitter {
     constructor(config) {
         super();
         const accountName = config.name;
@@ -147,7 +147,7 @@ class MELCLOUDCLIENT extends EventEmitter {
                             if (buildingId != 'Undefined' && deviceId != 'Undefined') {
                                 this.emit('connected', melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit);
                             } else {
-                                this.emit('message', `${deviceTypeText} ${deviceName}, device Id not found, please restart plugin to check again.`);
+                                this.emit('message', `${deviceTypeText} ${deviceName}, buildingId: ${buildingId}, deviceId: ${deviceId}, please restart plugin to check again.`);
                             };
                         };
                     } else {
@@ -174,4 +174,4 @@ class MELCLOUDCLIENT extends EventEmitter {
         }, 60000);
     };
 };
-module.exports = MELCLOUDCLIENT;
+module.exports = MELCLOUD;
