@@ -245,6 +245,9 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 const pushUnitTypel = unitIsIndoor ? typesIndoor.push(unitType) : typesOutdoor.push(unitType);
             }
         }
+        const manufacturer = 'Mitsubishi';
+        const modelName = (modelsIndoor.length > 0) ? modelsIndoor[0] : 'Undefined';
+        const modelName1 = (modelsOutdoor.length > 0) ? modelsOutdoor[0] : 'Undefined';
 
         //diagnostic
         const diagnosticMode = deviceInfo.DiagnosticMode;
@@ -268,11 +271,6 @@ class MELCLOUDDEVICEATA extends EventEmitter {
         const CanSetPower = deviceInfo.Permissions.CanSetPower;
         const CanSetTemperatureIncrementOverride = deviceInfo.Permissions.CanSetTemperatureIncrementOverride;
         const CanDisableLocalController = deviceInfo.Permissions.CanDisableLocalController;
-
-        //device info
-        const manufacturer = 'Mitsubishi';
-        const modelName = (modelsIndoor.length > 0) ? modelsIndoor[0] : 'Undefined';
-        const modelName1 = (modelsOutdoor.length > 0) ? modelsOutdoor[0] : 'Undefined';
 
         this.on('checkDeviceState', async () => {
             //deviceState

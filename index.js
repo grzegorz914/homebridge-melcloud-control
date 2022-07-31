@@ -185,13 +185,13 @@ class melCloudDevice {
 
 				this.melCloudDeviceAta.on('deviceInfo', (manufacturer, modelName, modelName1, serialNumber, firmwareRevision) => {
 						if (!this.disableLogDeviceInfo && this.displayDeviceInfo) {
-							this.log('---- %s: %s ----', this.deviceTypeText, this.deviceName);
-							this.log('Account: %s', this.accountName);
-							this.log('Model: %s', modelName);
-							this.log('Serial: %s', serialNumber);
-							this.log('Firmware: %s', firmwareRevision);
-							const outdoorDevice = (modelName1 != 'Undefined') ? this.log('Outdoor: %s', modelName1) : false;
-							this.log('Manufacturer: %s', manufacturer);
+							this.log(`---- ${this.deviceTypeText}: ${this.deviceName} ----`);
+							this.log(`Account: ${this.accountName}`);
+							this.log(`Model: ${modelName}`);
+							this.log(`Serial: ${serialNumber}`);
+							this.log(`Firmware: ${firmwareRevision}`);
+							const outdoorDevice = (modelName1 != 'Undefined') ? this.log(`Outdoor: ${modelName1}`) : false;
+							this.log(`Manufacturer: ${manufacturer}`);
 							this.log('----------------------------------');
 							this.displayDeviceInfo = false;
 						};
@@ -436,12 +436,12 @@ class melCloudDevice {
 
 				this.melCloudDeviceAtw.on('deviceInfo', (manufacturer, modelName, serialNumber, firmwareRevision) => {
 						if (!this.disableLogDeviceInfo && this.displayDeviceInfo) {
-							this.log('---- %s: %s ----', this.deviceTypeText, this.deviceName);
-							this.log('Account: %s', this.accountName);
-							this.log('Model: %s', modelName);
-							this.log('Serial: %s', serialNumber);
-							this.log('Firmware: %s', firmwareRevision);
-							this.log('Manufacturer: %s', manufacturer);
+							this.log(`---- ${this.deviceTypeText}: ${this.deviceName} ----`);
+							this.log(`Account: ${this.accountName}`);
+							this.log(`Model: ${modelName}`);
+							this.log(`Serial: ${serialNumber}`);
+							this.log(`Firmware: ${firmwareRevision}`);
+							this.log(`Manufacturer: ${manufacturer}`);
 							this.log('----------------------------------');
 							this.displayDeviceInfo = false;
 						};
@@ -655,13 +655,13 @@ class melCloudDevice {
 
 				this.melCloudDeviceErv.on('deviceInfo', (manufacturer, modelName, modelName1, serialNumber, firmwareRevision) => {
 						if (!this.disableLogDeviceInfo && this.displayDeviceInfo) {
-							this.log('---- %s: %s ----', this.deviceTypeText, this.deviceName);
-							this.log('Account: %s', this.accountName);
-							this.log('Model: %s', modelName);
-							this.log('Serial: %s', serialNumber);
-							this.log('Firmware: %s', firmwareRevision);
-							const outdoorDevice = (modelName1 != 'Undefined') ? this.log('Outdoor: %s', modelName1) : false;
-							this.log('Manufacturer: %s', manufacturer);
+							this.log(`---- ${this.deviceTypeText}: ${this.deviceName} ----`);
+							this.log(`Account: ${this.accountName}`);
+							this.log(`Model: ${modelName}`);
+							this.log(`Serial: ${serialNumber}`);
+							this.log(`Firmware: ${firmwareRevision}`);
+							const outdoorDevice = (modelName1 != 'Undefined') ? this.log(`Outdoor: ${modelName1}`) : false;
+							this.log(`Manufacturer: ${manufacturer}`);
 							this.log('----------------------------------');
 							this.displayDeviceInfo = false;
 						};

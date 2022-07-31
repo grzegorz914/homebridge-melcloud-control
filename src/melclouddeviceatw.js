@@ -305,6 +305,8 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                 const pushUnitTypel = unitIsIndoor ? typesIndoor.push(unitType) : typesOutdoor.push(unitType);
             }
         }
+        const manufacturer = 'Mitsubishi';
+        const modelName = (modelsIndoor.length > 0) ? modelsIndoor[0] : 'Undefined';
 
         //diagnostic
         const diagnosticMode = deviceInfo.DiagnosticMode;
@@ -329,10 +331,6 @@ class MELCLOUDDEVICEATW extends EventEmitter {
         const canSetEcoHotWater = deviceInfo.Permissions.CanSetEcoHotWater;
         const canSetFlowTemperature = deviceInfo.Permissions.CanSetFlowTemperature;
         const canSetTemperatureIncrementOverride = deviceInfo.Permissions.CanSetTemperatureIncrementOverride;
-
-        //device info
-        const manufacturer = 'Mitsubishi';
-        const modelName = (modelsIndoor.length > 0) ? modelsIndoor[0] : 'Undefined';
 
         this.on('checkDeviceState', async () => {
             //deviceState

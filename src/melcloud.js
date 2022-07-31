@@ -151,7 +151,7 @@ class MELCLOUD extends EventEmitter {
                             };
                         };
                     } else {
-                        this.emit('message', `Account ${accountName}, no devices found, check again in 60s`)
+                        this.emit('message', `Account ${accountName}, no devices found, check again in 60s.`)
                         this.checkDevicesList();
                     };
                 } catch (error) {
