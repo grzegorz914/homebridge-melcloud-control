@@ -49,8 +49,10 @@ class MELCLOUDDEVICEATA extends EventEmitter {
         //presets
         const presets = deviceInfo.Presets;
         if (Array.isArray(presets) && presets.length > 0) {
+            const devicePresets = new Array();
             for (let i = 0; i < presets.length; i++) {
                 const preset = presets[i];
+                devicePresets.push(preset);
             }
         }
 
@@ -80,8 +82,10 @@ class MELCLOUDDEVICEATA extends EventEmitter {
         //device
         const deviceListHistory24Formatters = deviceInfo.Device.ListHistory24Formatters;
         if (Array.isArray(deviceListHistory24Formatters) && deviceListHistory24Formatters.length > 0) {
+            const derviceListsHistory24Formatters = new Array();
             for (let i = 0; i < deviceListHistory24Formatters.length; i++) {
                 const deviveListHistory24Formatter = deviceListHistory24Formatters[i];
+                derviceListsHistory24Formatters.pusch(deviveListHistory24Formatter);
             }
         }
 
