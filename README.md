@@ -69,7 +69,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * Control of Energy Recovery Ventilation:
   * Comming soon...
 * Home automations and shortcuts can be used to control the devices.
-* MQTT Client publisch all available data from all detected devices.
+* Siri can be used to control the devices.
+* MQTT publisch all available data from all detected devices.
 
 ### Configuration
 Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) to configure this plugin (Highly Recommended). The sample configuration can be edited and used manually as an alternative. See the `sample-config.json` file in this repository for an example or copy the example below into your config.json file, making the apporpriate changes before saving it. Be sure to always make a backup copy of your config.json file before making any changes to it.
