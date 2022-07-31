@@ -1,3 +1,5 @@
+"use strict";
+
 const EventEmitter = require('events');
 const axios = require('axios');
 const API_URL = require('./apiurl.json');

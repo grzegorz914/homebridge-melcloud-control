@@ -1,3 +1,5 @@
+"use strict";
+
 const fs = require('fs');
 const fsPromises = fs.promises;
 const EventEmitter = require('events');
