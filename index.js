@@ -53,18 +53,10 @@ class melCloudPlatform {
 				} else {
 					const enableDebugMode = account.enableDebugMode;
 					const prefDir = path.join(api.user.storagePath(), 'melcloud');
-					const melCloudInfoFile = `${prefDir}/${accountName}_Account`;
-					const melCloudBuildingsFile = `${prefDir}/${accountName}_Buildings`;
 
 					//check if the directory exists, if not then create it
 					if (fs.existsSync(prefDir) == false) {
 						fs.mkdirSync(prefDir);
-					};
-					if (fs.existsSync(melCloudInfoFile) == false) {
-						fs.writeFileSync(melCloudInfoFile, '');
-					};
-					if (fs.existsSync(melCloudBuildingsFile) == false) {
-						fs.writeFileSync(melCloudBuildingsFile, '');
 					};
 
 					//melcloud client
@@ -74,12 +66,11 @@ class melCloudPlatform {
 						passwd: passwd,
 						language: language,
 						debugLog: enableDebugMode,
-						melCloudInfoFile: melCloudInfoFile,
-						melCloudBuildingsFile: melCloudBuildingsFile
+						prefDir: prefDir
 					});
 
-					this.melCloud.on('connected', (melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit) => {
-							new melCloudDevice(this.log, this.api, account, melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit);
+					this.melCloud.on('checkDevicesListComplete', (melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit) => {
+							new melCloudDevice(this.log, this.api, account, prefDir, melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit);
 						})
 						.on('message', (message) => {
 							this.log(message);
@@ -108,7 +99,7 @@ class melCloudPlatform {
 
 
 class melCloudDevice {
-	constructor(log, api, account, melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit) {
+	constructor(log, api, account, prefDir, melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit) {
 		this.log = log;
 		this.api = api;
 
@@ -173,6 +164,7 @@ class melCloudDevice {
 		switch (deviceType) {
 			case 0: //air conditioner
 				this.melCloudDeviceAta = new melCloudDeviceAta({
+					name: this.accountName,
 					deviceInfo: deviceInfo,
 					contextKey: contextKey,
 					buildingId: buildingId,
@@ -180,7 +172,8 @@ class melCloudDevice {
 					deviceName: deviceName,
 					deviceTypeText: deviceTypeText,
 					debugLog: this.enableDebugMode,
-					mqttEnabled: enableMqtt
+					mqttEnabled: enableMqtt,
+					prefDir: prefDir
 				});
 
 				this.melCloudDeviceAta.on('deviceInfo', (manufacturer, modelName, modelName1, serialNumber, firmwareRevision) => {
@@ -424,6 +417,7 @@ class melCloudDevice {
 				break;
 			case 1: //heat pump
 				this.melCloudDeviceAtw = new melCloudDeviceAtw({
+					name: this.accountName,
 					deviceInfo: deviceInfo,
 					contextKey: contextKey,
 					buildingId: buildingId,
@@ -431,7 +425,8 @@ class melCloudDevice {
 					deviceName: deviceName,
 					deviceTypeText: deviceTypeText,
 					debugLog: this.enableDebugMode,
-					mqttEnabled: enableMqtt
+					mqttEnabled: enableMqtt,
+					prefDir: prefDir
 				});
 
 				this.melCloudDeviceAtw.on('deviceInfo', (manufacturer, modelName, serialNumber, firmwareRevision) => {
@@ -643,6 +638,7 @@ class melCloudDevice {
 				break;
 			case 3: //ventilation
 				this.melCloudDeviceAtw = new melCloudDeviceErv({
+					name: this.accountName,
 					deviceInfo: deviceInfo,
 					contextKey: contextKey,
 					buildingId: buildingId,
@@ -650,7 +646,8 @@ class melCloudDevice {
 					deviceName: deviceName,
 					deviceTypeText: deviceTypeText,
 					debugLog: this.enableDebugMode,
-					mqttEnabled: enableMqtt
+					mqttEnabled: enableMqtt,
+					prefDir: prefDir
 				});
 
 				this.melCloudDeviceErv.on('deviceInfo', (manufacturer, modelName, modelName1, serialNumber, firmwareRevision) => {
