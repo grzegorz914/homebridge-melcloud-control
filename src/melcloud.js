@@ -163,11 +163,14 @@ class MELCLOUD extends EventEmitter {
 
                                 if (this.emitDeviceInfo) {
                                     this.emit('checkDevicesListComplete', melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit);
-                                };
-
-                                if (i == index) {
-                                    this.emitDeviceInfo = false;
-                                    this.checkDevicesList();
+                                    if (i == index) {
+                                        this.emitDeviceInfo = false;
+                                        this.checkDevicesList();
+                                    };
+                                } else {
+                                    if (i == index) {
+                                        this.checkDevicesList();
+                                    };
                                 };
                             };
                         } else {
