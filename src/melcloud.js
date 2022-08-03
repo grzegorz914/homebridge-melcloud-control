@@ -6,9 +6,6 @@ const EventEmitter = require('events');
 const axios = require('axios');
 const API_URL = require('./apiurl.json');
 const CONSTANS = require('./constans.json');
-const {
-    setInterval
-} = require('timers/promises');
 
 class MELCLOUD extends EventEmitter {
     constructor(config) {
