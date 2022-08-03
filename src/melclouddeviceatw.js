@@ -1,5 +1,7 @@
 "use strict";
 
+const fs = require('fs');
+const fsPromises = fs.promises;
 const EventEmitter = require('events');
 const axios = require('axios');
 const API_URL = require('./apiurl.json');
@@ -343,14 +345,14 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                 const canSetFlowTemperature = deviceInfo.Permissions.CanSetFlowTemperature;
                 const canSetTemperatureIncrementOverride = deviceInfo.Permissions.CanSetTemperatureIncrementOverride;
 
-                this.emit('deviceInfo', manufacturer, modelName, modelName1, serialNumber, deviceFirmwareAppVersion);
-                this.emit('checkDeviceState', deviceInfo);
+                this.emit('deviceInfo', deviceInfo, manufacturer, modelName, serialNumber, deviceFirmwareAppVersion);
+                this.emit('checkDeviceState');
                 const mqtt = enableMqtt ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, Info:`, JSON.stringify(deviceInfo, null, 2)) : false;
             } catch (error) {
                 this.emit('error', `${deviceTypeText} ${deviceName}, check info, ${error}, check again in 60s.`);
                 this.checkDeviceInfo();
             };
-        }).on('checkDeviceState', async (deviceInfo) => {
+        }).on('checkDeviceState', async () => {
             //deviceState
             try {
                 const deviceUrl = API_URL.DeviceState.replace("DID", deviceId).replace("BID", buildingId);
@@ -512,7 +514,7 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                 const offline = deviceState.Offline
                 const units = deviceState.Units
 
-                this.emit('deviceState', deviceInfo, deviceState, power, roomTemperatureZone1, setTemperatureZone1, roomTemperatureZone2, setTemperatureZone2, tankWaterTemperature, setTankWaterTemperatureconst, operationMode, operationModeZone1, operationModeZone2);
+                this.emit('deviceState', deviceState, power, roomTemperatureZone1, setTemperatureZone1, roomTemperatureZone2, setTemperatureZone2, tankWaterTemperature, setTankWaterTemperatureconst, operationMode, operationModeZone1, operationModeZone2);
                 const mqtt = enableMqtt ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, State:`, JSON.stringify(deviceState, null, 2)) : false;
 
                 this.checkDeviceState();

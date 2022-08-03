@@ -110,6 +110,7 @@ class melCloudDevice {
 		this.disableLogInfo = account.disableLogInfo || false;
 		this.disableLogDeviceInfo = account.disableLogDeviceInfo || false;
 		this.enableDebugMode = account.enableDebugMode || false;
+
 		const enableMqtt = account.enableMqtt || false;
 		const mqttHost = account.mqttHost;
 		const mqttPort = account.mqttPort || 1883;
@@ -161,6 +162,8 @@ class melCloudDevice {
 		};
 
 		//melcloud device
+		const displayMode = this.displayMode;
+		const buttonsCount = this.buttons.length;
 		switch (deviceType) {
 			case 0: //air conditioner
 				this.melCloudDeviceAta = new melCloudDeviceAta({
@@ -176,7 +179,7 @@ class melCloudDevice {
 					prefDir: prefDir
 				});
 
-				this.melCloudDeviceAta.on('deviceInfo', (manufacturer, modelName, modelName1, serialNumber, firmwareRevision) => {
+				this.melCloudDeviceAta.on('deviceInfo', (deviceInfo, manufacturer, modelName, modelName1, serialNumber, firmwareRevision) => {
 						if (!this.disableLogDeviceInfo && this.displayDeviceInfo) {
 							this.log(`---- ${this.deviceTypeText}: ${this.deviceName} ----`);
 							this.log(`Account: ${this.accountName}`);
@@ -188,17 +191,6 @@ class melCloudDevice {
 							this.log('----------------------------------');
 							this.displayDeviceInfo = false;
 						};
-						this.manufacturer = manufacturer;
-						this.modelName = modelName;
-						this.serialNumber = serialNumber;
-						this.firmwareRevision = firmwareRevision;
-					})
-					.on('deviceState', (deviceInfo, deviceState, roomTemperature, setTemperature, setFanSpeed, operationMode, vaneHorizontal, vaneVertical, inStandbyMode, power) => {
-						const displayMode = this.displayMode;
-						const buttonsCount = this.buttons.length;
-						const useFahrenheit = this.useFahrenheit
-						this.deviceInfo = deviceInfo;
-						this.deviceState = deviceState;
 
 						//device info
 						const canCool = (deviceInfo.Device.CanCool == true);
@@ -218,12 +210,28 @@ class melCloudDevice {
 						const modelSupportsWideVane = (deviceInfo.Device.ModelSupportsWideVane == true);
 						const modelSupportsStandbyMode = (deviceInfo.Device.ModelSupportsStandbyMode == true);
 
+						this.deviceInfo = deviceInfo;
 						this.hasAutomaticFanSpeed = hasAutomaticFanSpeed;
 						this.swingFunction = swingFunction;
 						this.numberOfFanSpeeds = numberOfFanSpeeds;
 						this.modelSupportsFanSpeed = modelSupportsFanSpeed;
+						this.modelSupportsStandbyMode = modelSupportsStandbyMode;
+
+						this.manufacturer = manufacturer;
+						this.modelName = modelName;
+						this.serialNumber = serialNumber;
+						this.firmwareRevision = firmwareRevision;
+					})
+					.on('deviceState', (deviceState, roomTemperature, setTemperature, setFanSpeed, operationMode, vaneHorizontal, vaneVertical, inStandbyMode, power) => {
+						//device info
+						const hasAutomaticFanSpeed = this.hasAutomaticFanSpeed;
+						const swingFunction = this.swingFunction;
+						const numberOfFanSpeeds = this.numberOfFanSpeeds;
+						const modelSupportsFanSpeed = this.modelSupportsFanSpeed;
+						const modelSupportsStandbyMode = this.modelSupportsStandbyMode;
 
 						//device state
+						this.deviceState = deviceState;
 						this.power = power;
 						const inStandby = modelSupportsStandbyMode ? inStandbyMode : false;
 						this.inStandbyMode = inStandby;
@@ -429,7 +437,7 @@ class melCloudDevice {
 					prefDir: prefDir
 				});
 
-				this.melCloudDeviceAtw.on('deviceInfo', (manufacturer, modelName, serialNumber, firmwareRevision) => {
+				this.melCloudDeviceAtw.on('deviceInfo', (deviceInfo, manufacturer, modelName, serialNumber, firmwareRevision) => {
 						if (!this.disableLogDeviceInfo && this.displayDeviceInfo) {
 							this.log(`---- ${this.deviceTypeText}: ${this.deviceName} ----`);
 							this.log(`Account: ${this.accountName}`);
@@ -440,19 +448,15 @@ class melCloudDevice {
 							this.log('----------------------------------');
 							this.displayDeviceInfo = false;
 						};
+						this.deviceInfo = deviceInfo;
 						this.manufacturer = manufacturer;
 						this.modelName = modelName;
 						this.serialNumber = serialNumber;
 						this.firmwareRevision = firmwareRevision;
 					})
-					.on('deviceState', (deviceInfo, deviceState, power, roomTemperatureZone1, setTemperatureZone1, roomTemperatureZone2, setTemperatureZone2, tankWaterTemperature, setTankWaterTemperatureconst, operationMode, operationModeZone1, operationModeZone2) => {
-						const displayMode = this.displayMode;
-						const buttonsCount = this.buttons.length;
-						const useFahrenheit = this.useFahrenheit
-						this.deviceInfo = deviceInfo;
-						this.deviceState = deviceState;
-
+					.on('deviceState', (deviceState, power, roomTemperatureZone1, setTemperatureZone1, roomTemperatureZone2, setTemperatureZone2, tankWaterTemperature, setTankWaterTemperatureconst, operationMode, operationModeZone1, operationModeZone2) => {
 						//device state
+						this.deviceState = deviceState;
 						this.power = power;
 
 						//operationMde 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO
@@ -650,7 +654,7 @@ class melCloudDevice {
 					prefDir: prefDir
 				});
 
-				this.melCloudDeviceErv.on('deviceInfo', (manufacturer, modelName, modelName1, serialNumber, firmwareRevision) => {
+				this.melCloudDeviceErv.on('deviceInfo', (deviceInfo, manufacturer, modelName, modelName1, serialNumber, firmwareRevision) => {
 						if (!this.disableLogDeviceInfo && this.displayDeviceInfo) {
 							this.log(`---- ${this.deviceTypeText}: ${this.deviceName} ----`);
 							this.log(`Account: ${this.accountName}`);
@@ -662,22 +666,24 @@ class melCloudDevice {
 							this.log('----------------------------------');
 							this.displayDeviceInfo = false;
 						};
+
+						//device info
+						this.deviceInfo = deviceInfo;
+						this.hasAutomaticFanSpeed = deviceInfo.Device.HasAutomaticFanSpeed;
+						this.numberOfFanSpeeds = deviceInfo.Device.numberOfFanSpeeds;
+
 						this.manufacturer = manufacturer;
 						this.modelName = modelName;
 						this.serialNumber = serialNumber;
 						this.firmwareRevision = firmwareRevision;
 					})
-					.on('deviceState', (deviceInfo, deviceState, power, roomTemperature, supplyTemperature, outdoorTemperature, roomCO2Level, setTemperature, numberOfFanSpeeds, setFanSpeed, operationMode, ventilationMode) => {
-						const displayMode = this.displayMode;
-						const buttonsCount = this.buttons.length;
-						const useFahrenheit = this.useFahrenheit
-						this.deviceInfo = deviceInfo;
-						this.deviceState = deviceState;
-
+					.on('deviceState', (deviceState, power, roomTemperature, supplyTemperature, outdoorTemperature, roomCO2Level, setTemperature, setFanSpeed, operationMode, ventilationMode) => {
 						//device info
-						const hasAutomaticFanSpeed = deviceInfo.Device.HasAutomaticFanSpeed;
+						const hasAutomaticFanSpeed = this.hasAutomaticFanSpeed;
+						const numberOfFanSpeeds = this.numberOfFanSpeeds;
 
 						//device state
+						this.deviceState = deviceState;
 						this.power = power;
 
 						//heater/cooler

@@ -1,5 +1,7 @@
 "use strict";
 
+const fs = require('fs');
+const fsPromises = fs.promises;
 const EventEmitter = require('events');
 const axios = require('axios');
 const API_URL = require('./apiurl.json');
@@ -19,7 +21,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
         const debugLog = config.debugLog;
         const enableMqtt = config.mqttEnabled;
         const prefDir = config.prefDir;
-        const melCloudBuildingDeviceFile = `${prefDir}/${accountName}_Device_${deviceId}`;;
+        const melCloudBuildingDeviceFile = `${prefDir}/${accountName}_Device_${deviceId}`;
 
         this.axiosInstanceGet = axios.create({
             method: 'GET',
@@ -265,14 +267,14 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const CanSetTemperatureIncrementOverride = deviceInfo.Permissions.CanSetTemperatureIncrementOverride;
                 const CanDisableLocalController = deviceInfo.Permissions.CanDisableLocalController;
 
-                this.emit('deviceInfo', manufacturer, modelName, modelName1, serialNumber, deviceFirmwareAppVersion);
-                this.emit('checkDeviceState', deviceInfo);
+                this.emit('deviceInfo', deviceInfo, manufacturer, modelName, modelName1, serialNumber, deviceFirmwareAppVersion);
+                this.emit('checkDeviceState');
                 const mqtt = enableMqtt ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, Info:`, JSON.stringify(deviceInfo, null, 2)) : false;
             } catch (error) {
                 this.emit('error', `${deviceTypeText} ${deviceName}, check info, ${error}, check again in 60s.`);
                 this.checkDeviceInfo();
             };
-        }).on('checkDeviceState', async (deviceInfo) => {
+        }).on('checkDeviceState', async () => {
             //deviceState
             try {
                 const deviceUrl = API_URL.DeviceState.replace("DID", deviceId).replace("BID", buildingId);
@@ -317,7 +319,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const scene = deviceState.Scene;
                 const sceneOwner = deviceState.SceneOwner;
 
-                this.emit('deviceState', deviceInfo, deviceState, power, roomTemperature, supplyTemperature, outdoorTemperature, roomCO2Level, setTemperature, numberOfFanSpeeds, setFanSpeed, operationMode, ventilationMode);
+                this.emit('deviceState', deviceState, power, roomTemperature, supplyTemperature, outdoorTemperature, roomCO2Level, setTemperature, setFanSpeed, operationMode, ventilationMode);
                 const mqtt = enableMqtt ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, State:`, JSON.stringify(deviceState, null, 2)) : false;
 
                 this.checkDeviceState();
