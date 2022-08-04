@@ -18,7 +18,7 @@ class MELCLOUD extends EventEmitter {
         const prefDir = config.prefDir;
         const melCloudInfoFile = `${prefDir}/${accountName}_Account`;
         const melCloudBuildingsFile = `${prefDir}/${accountName}_Buildings`;
-        this.emitDeviceInfo = false;
+        const devicesId = new Array();
 
         this.axiosInstanceLogin = axios.create({
             method: 'POST',
@@ -160,16 +160,12 @@ class MELCLOUD extends EventEmitter {
                                 const melCloudBuildingDeviceFile = `${prefDir}/${accountName}_Device_${deviceId}`;
                                 const writeDeviceInfoData = await fsPromises.writeFile(melCloudBuildingDeviceFile, deviceData);
 
-                                if (this.emitDeviceInfo) {
-                                    this.emit('checkDevicesListComplete', melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit);
-                                    if (i == index) {
-                                        this.emitDeviceInfo = false;
-                                        this.checkDevicesList();
-                                    };
+                                if (devicesId.indexOf(deviceId) >= 0) {
+                                    const updateDevicesList = (i == index) ? this.checkDevicesList() : false;
                                 } else {
-                                    if (i == index) {
-                                        this.checkDevicesList();
-                                    };
+                                    devicesId.push(deviceId);
+                                    this.emit('checkDevicesListComplete', melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit);
+                                    const updateDevicesList = (i == index) ? this.checkDevicesList() : false;
                                 };
                             };
                         } else {
