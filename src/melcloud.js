@@ -52,7 +52,6 @@ class MELCLOUD extends EventEmitter {
                     this.contextKey = contextKey;
 
                     if (contextKey != undefined && contextKey != null) {
-                        this.emitDeviceInfo = true;
                         this.emit('checkDevicesList')
                     } else {
                         this.emit('message', `Account ${accountName}, context key not found, reconnect in 60s.`)
@@ -124,7 +123,7 @@ class MELCLOUD extends EventEmitter {
                             for (let n = 0; n < buildingAreasCount; n++) {
                                 const buildingArea = buildingStructure.Areas[n];
 
-                                //building areas devices
+                                //building area devices
                                 const buildingAreaDevicesCount = buildingArea.Devices.length;
                                 for (let o = 0; o < buildingAreaDevicesCount; o++) {
                                     const buildingAreaDevice = buildingArea.Devices[o];
@@ -146,6 +145,7 @@ class MELCLOUD extends EventEmitter {
 
                         if (devicesCount > 0) {
                             const debug2 = debugLog ? this.emit('debug', `Account ${accountName}, Found: ${devicesCount} devices.`) : false;
+                            const lastDevice = devicesCount - 1;
                             for (let i = 0; i < devicesCount; i++) {
                                 const deviceInfo = devices[i];
                                 const buildingId = deviceInfo.BuildingID.toString();
@@ -154,18 +154,19 @@ class MELCLOUD extends EventEmitter {
                                 const deviceName = deviceInfo.DeviceName;
                                 const deviceTypeText = CONSTANS.DeviceType[deviceType];
 
-                                //wrire device info
+                                //write device info
                                 const deviceData = JSON.stringify(deviceInfo, null, 2);
                                 const melCloudBuildingDeviceFile = `${prefDir}/${accountName}_Device_${deviceId}`;
                                 const writeDeviceInfoData = await fsPromises.writeFile(melCloudBuildingDeviceFile, deviceData);
 
+                                //prepare device if not in devices array
                                 const deviceNotExist = (devicesId.indexOf(deviceId) == -1);
                                 if (deviceNotExist) {
                                     devicesId.push(deviceId);
                                     this.emit('checkDevicesListComplete', melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit);
                                 };
+                                const updateDevicesList = (i == lastDevice) ? this.checkDevicesList() : false;
                             };
-                            this.checkDevicesList()
                         } else {
                             this.emit('message', `Account ${accountName}, no devices found, check again in 60s.`)
                             this.checkDevicesList();
