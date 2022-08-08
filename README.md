@@ -141,6 +141,7 @@ Each accessory needs to be manually paired.
 3. Tap *Add Accessory*, and select *I Don't Have a Code, Cannot Scan* or *More options*. 
 4. Select Your accessory and press add anyway. 
 5. Enter the PIN or scan the QR code, this can be found in Homebridge UI or Homebridge logs.
+6. Complete the accessory setup.
 
 ### [What's New](https://github.com/grzegorz914/homebridge-melcloud-control/blob/master/CHANGELOG.md)
 
