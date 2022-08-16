@@ -86,14 +86,14 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `name` | Here set the own account name. |
 | `user` | Here set the MELCloud username. |
 | `passwd` | Here set the MELCloud password. |
-| `language` | Here set the MELCloud language. |
+| `language` | Here select the MELCloud language. |
 | `displayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
 | `buttons.name` | Here set `Button Name` which You want expose to the *Homebridge/HomeKit*. | 
 | `buttons.mode` | Here select button mode, `On/Off`, `Heat`, `Dry`, `Cool`, `Fan`, `Auto`, `Purify`, `Physical Lock Controls`, `Vane H Mode`, `Vane V Mode`, `Fan Speed Mode`. |
 | `buttons.displayType` | Here select HomeKit display type, `Switch`, `Button` - selectable in HomeKit app as `Light`, `Fan`, `Outlet`. |
 | `enableDebugMode` | This enable deep log in homebridge console. |
 | `disableLogInfo` | This disable display log values and states on every it change. |
-| `disableLogDeviceInfo` | This disable display log device info on plugin restart. |
+| `disableLogDeviceInfo` | This disable display log device info on plugin start. |
 | `enableMqtt` | This enabled MQTT Broker and publish to it all awailable data. |
 | `mqttHost` | Here set the *IP Address* or *Hostname* for MQTT Broker. |
 | `mqttPort` | Here set the *Port* for MQTT Broker, default 1883. |
