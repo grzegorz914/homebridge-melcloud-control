@@ -229,7 +229,7 @@ class melCloudDevice {
 						const inStandby = modelSupportsStandbyMode ? inStandbyMode : false;
 						this.inStandbyMode = inStandby;
 
-						//Operating mode
+						//operating mode
 						let currentOperationMode = 0;
 						let targetOperationMode = 0;
 						switch (displayMode) {
@@ -291,6 +291,7 @@ class melCloudDevice {
 						this.vaneHorizontal = vaneHorizontal;
 						this.vaneVertical = vaneVertical;
 
+						//lock physical controls
 						const lockPhysicalControls = (deviceState.prohibitSetTemperature == true || deviceState.prohibitOperationMode == true || deviceState.prohibitPower == true) ? 1 : 0;
 						this.lockPhysicalControls = lockPhysicalControls;
 
@@ -488,7 +489,7 @@ class melCloudDevice {
 						this.deviceState = deviceState;
 						this.power = power;
 
-						//Operating mode
+						//operating mode
 						let currentOperationMode = 0;
 						let targetOperationMode = 0;
 						switch (displayMode) {
@@ -504,7 +505,7 @@ class melCloudDevice {
 						this.currentOperationMode = currentOperationMode;
 						this.targetOperationMode = targetOperationMode;
 
-						//Temperature
+						//temperature
 						this.roomTemperatureZone1 = roomTemperatureZone1;
 						this.roomTemperatureZone2 = roomTemperatureZone2;
 						this.tankWaterTemperature = tankWaterTemperature;
@@ -512,6 +513,7 @@ class melCloudDevice {
 						this.setTemperatureZone2 = setTemperatureZone2;
 						this.setTankWaterTemperatureconst = setTankWaterTemperatureconst;
 
+						//lock physical controls
 						const lockPhysicalControls = (deviceState.ProhibitHotWater == true || deviceState.ProhibitHeatingZone1 == true || deviceState.ProhibitHeatingZone2 == true) ? 1 : 0;
 						this.lockPhysicalControls = lockPhysicalControls;
 
@@ -720,7 +722,7 @@ class melCloudDevice {
 						this.deviceState = deviceState;
 						this.power = power;
 
-						//Operating mode
+						//operating mode
 						let currentOperationMode = 0;
 						let targetOperationMode = 0;
 						switch (displayMode) {
@@ -736,7 +738,10 @@ class melCloudDevice {
 						this.currentOperationMode = currentOperationMode;
 						this.targetOperationMode = targetOperationMode;
 
-						//Temperature
+						//ventilation mode
+						this.ventilationMode = ventilationMode;
+
+						//temperature
 						this.roomTemperature = roomTemperature;
 						this.supplyTemperature = supplyTemperature;
 						this.outdoorTemperature = outdoorTemperature;
@@ -779,9 +784,6 @@ class melCloudDevice {
 						this.fanSpeed = fanSpeed;
 						this.fanSpeedSetProps = fanSpeedSetProps;
 						this.fanSpeedModeInfoGet = setFanSpeed;
-
-						//ventilation mode
-						this.ventilationMode = ventilationMode;
 
 						if (this.melCloudService) {
 							switch (displayMode) {
