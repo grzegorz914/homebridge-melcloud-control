@@ -30,7 +30,7 @@ class melCloudPlatform {
 	constructor(log, config, api) {
 		// only load if configured
 		if (!config || !Array.isArray(config.accounts)) {
-			log('No configuration found for %s', PLUGIN_NAME);
+			log(`No configuration found for ${PLUGIN_NAME}`);
 			return;
 		}
 		this.log = log;
@@ -48,7 +48,7 @@ class melCloudPlatform {
 				const passwd = account.passwd;
 				const language = account.language;
 				if (!accountName || !user || !passwd || !language) {
-					this.log('Name, user, password or language for %s accout missing.', i);
+					this.log(`Name, user, password or language in config missing.`);
 					return;
 				} else {
 					const enableDebugMode = account.enableDebugMode;
@@ -284,10 +284,9 @@ class melCloudDevice {
 						this.fanSpeedSetProps = fanSpeedSetProps;
 						this.fanSpeedModeInfoGet = setFanSpeed;
 
-						//swing mode
+						//swing and vane mode
 						const swingMode = swingFunction ? (vaneHorizontal == 12 && vaneVertical == 7) ? 1 : 0 : false;
 						this.swingMode = swingMode;
-
 						this.vaneHorizontal = vaneHorizontal;
 						this.vaneVertical = vaneVertical;
 
@@ -674,7 +673,7 @@ class melCloudDevice {
 			case 2: //curtain
 
 				break;
-			case 3: //ventilation
+			case 3: //energy recovery ventilation
 				this.melCloudDeviceAtw = new melCloudDeviceErv({
 					name: this.accountName,
 					deviceInfo: deviceInfo,
@@ -780,7 +779,6 @@ class melCloudDevice {
 									break;
 							};
 						};
-
 						this.fanSpeed = fanSpeed;
 						this.fanSpeedSetProps = fanSpeedSetProps;
 						this.fanSpeedModeInfoGet = setFanSpeed;
