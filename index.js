@@ -417,6 +417,12 @@ class melCloudDevice {
 									case 30: //FAN SPEED  MODE 5
 										buttonState = power ? (setFanSpeed == 5) : false;
 										break;
+									case 31: //FAN SPEED  MODE 6
+										buttonState = power ? (setFanSpeed == 6) : false;
+										break;
+									case 32: //FAN SPEED  MODE 7
+										buttonState = power ? (setFanSpeed == 7) : false;
+										break;
 								};
 								this.buttonsStates.push(buttonState);
 
@@ -630,6 +636,12 @@ class melCloudDevice {
 										break;
 									case 30: //FAN SPEED  MODE 5
 										buttonState = power ? (setFanSpeed == 5) : false;
+										break;
+									case 31: //FAN SPEED  MODE 6
+										buttonState = power ? (setFanSpeed == 6) : false;
+										break;
+									case 32: //FAN SPEED  MODE 7
+										buttonState = power ? (setFanSpeed == 7) : false;
 										break;
 								};
 								this.buttonsStates.push(buttonState);
@@ -893,6 +905,12 @@ class melCloudDevice {
 										break;
 									case 30: //FAN SPEED  MODE 5
 										buttonState = power ? (setFanSpeed == 5) : false;
+										break;
+									case 31: //FAN SPEED  MODE 6
+										buttonState = power ? (setFanSpeed == 6) : false;
+										break;
+									case 32: //FAN SPEED  MODE 7
+										buttonState = power ? (setFanSpeed == 7) : false;
 										break;
 								};
 								this.buttonsStates.push(buttonState);
@@ -1645,6 +1663,16 @@ class melCloudDevice {
 							case 30: //FAN SPEED MODE 5
 								deviceState.Power = true;
 								deviceState.SetFanSpeed = 5;
+								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetFanSpeed;
+								break;
+							case 31: //FAN SPEED MODE 6
+								deviceState.Power = true;
+								deviceState.SetFanSpeed = 6;
+								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetFanSpeed;
+								break;
+							case 32: //FAN SPEED MODE 7
+								deviceState.Power = true;
+								deviceState.SetFanSpeed = 7;
 								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetFanSpeed;
 								break;
 						};
