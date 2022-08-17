@@ -229,30 +229,29 @@ class melCloudDevice {
 						const inStandby = modelSupportsStandbyMode ? inStandbyMode : false;
 						this.inStandbyMode = inStandby;
 
-						//heater/cooler
-						//INACTIVE, IDLE, HEATING, COOLING - current
-						const currentHeaterCoolerOperationMode = power ? inStandby ? 1 : [1, 2, 2, 3, 3, 3, 3, 3, 3][operationMode] : 0;
-						//AUTO, HEAT, COOL - target
-						const targetHeaterCoolerOperationMode = power ? [0, 1, 1, 2, 2, 2, 2, 2, 0][operationMode] : 0;
-
-						//thermostat
-						//OFF, HEAT, COOL - current
-						const currentThermostatOperationMode = power ? inStandby ? 0 : [0, 1, 2, 2, 2, 2, 2, 2, 2][operationMode] : 0;
-						//OFF, HEAT, COOL, AUTO - target
-						const targetThermostatOperationMode = power ? [0, 1, 1, 2, 2, 2, 2, 2, 3][operationMode] : 0;
-
-						const currentOperationMode = displayMode ? currentThermostatOperationMode : currentHeaterCoolerOperationMode;
+						//Operating mode
+						let currentOperationMode = 0;
+						let targetOperationMode = 0;
+						switch (displayMode) {
+							case 0: //Heater Cooler INACTIVE, IDLE, HEATING, COOLING - current, AUTO, HEAT, COOL - target
+								currentOperationMode = power ? inStandby ? 1 : [1, 2, 2, 3, 3, 3, 3, 3, 3][operationMode] : 0;
+								targetOperationMode = power ? [0, 1, 1, 2, 2, 2, 2, 2, 0][operationMode] : 0;
+								break;
+							case 1: //Thermostat //OFF, HEAT, COOL - current, //OFF, HEAT, COOL, AUTO - target
+								currentOperationMode = power ? inStandby ? 0 : [0, 1, 2, 2, 2, 2, 2, 2, 2][operationMode] : 0;
+								targetOperationMode = power ? [0, 1, 1, 2, 2, 2, 2, 2, 3][operationMode] : 0;
+								break;
+						};
 						this.currentOperationMode = currentOperationMode;
-						const targetOperationMode = displayMode ? targetThermostatOperationMode : targetHeaterCoolerOperationMode;
 						this.targetOperationMode = targetOperationMode;
 
+						//temperature
 						this.roomTemperature = roomTemperature;
 						this.setTemperature = setTemperature;
 
 						//fan speed mode
 						let fanSpeed = 0;
 						let fanSpeedSetProps = 0;
-
 						if (modelSupportsFanSpeed) {
 							switch (numberOfFanSpeeds) {
 								case 2: //Fan speed mode 2
@@ -281,7 +280,6 @@ class melCloudDevice {
 									break;
 							};
 						};
-
 						this.fanSpeed = fanSpeed;
 						this.fanSpeedSetProps = fanSpeedSetProps;
 						this.fanSpeedModeInfoGet = setFanSpeed;
@@ -490,24 +488,23 @@ class melCloudDevice {
 						this.deviceState = deviceState;
 						this.power = power;
 
-						//operationMde 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO
-						//heater/cooler
-						//INACTIVE, IDLE, HEATING, COOLING - current
-						const currentHeaterCoolerOperationMode = power ? [1, 2, 2, 3, 3, 3, 3, 3, 3][operationMode] : 0;
-						//AUTO, HEAT, COOL - target
-						const targetHeaterCoolerOperationMode = power ? [0, 1, 1, 2, 2, 2, 2, 2, 0][operationMode] : 0;
-
-						//thermostat
-						//OFF, HEAT, COOL - current
-						const currentThermostatOperationMode = power ? [0, 1, 2, 2, 2, 2, 2, 2, 2][operationMode] : 0;
-						//OFF, HEAT, COOL, AUTO - target
-						const targetThermostatOperationMode = power ? [0, 1, 1, 2, 2, 2, 2, 2, 3][operationMode] : 0;
-
-						const currentOperationMode = displayMode ? currentThermostatOperationMode : currentHeaterCoolerOperationMode;
+						//Operating mode
+						let currentOperationMode = 0;
+						let targetOperationMode = 0;
+						switch (displayMode) {
+							case 0: //Heater Cooler INACTIVE, IDLE, HEATING, COOLING - current, AUTO, HEAT, COOL - target
+								currentOperationMode = power ? inStandby ? 1 : [1, 2, 2, 3, 3, 3, 3, 3, 3][operationMode] : 0;
+								targetOperationMode = power ? [0, 1, 1, 2, 2, 2, 2, 2, 0][operationMode] : 0;
+								break;
+							case 1: //Thermostat //OFF, HEAT, COOL - current, //OFF, HEAT, COOL, AUTO - target
+								currentOperationMode = power ? inStandby ? 0 : [0, 1, 2, 2, 2, 2, 2, 2, 2][operationMode] : 0;
+								targetOperationMode = power ? [0, 1, 1, 2, 2, 2, 2, 2, 3][operationMode] : 0;
+								break;
+						};
 						this.currentOperationMode = currentOperationMode;
-						const targetOperationMode = displayMode ? targetThermostatOperationMode : targetHeaterCoolerOperationMode;
 						this.targetOperationMode = targetOperationMode;
 
+						//Temperature
 						this.roomTemperatureZone1 = roomTemperatureZone1;
 						this.roomTemperatureZone2 = roomTemperatureZone2;
 						this.tankWaterTemperature = tankWaterTemperature;
@@ -723,23 +720,23 @@ class melCloudDevice {
 						this.deviceState = deviceState;
 						this.power = power;
 
-						//heater/cooler
-						//INACTIVE, IDLE, HEATING, COOLING - current
-						const currentHeaterCoolerOperationMode = power ? [1, 2, 2, 3, 3, 3, 3, 3, 3][operationMode] : 0;
-						//AUTO, HEAT, COOL - target
-						const targetHeaterCoolerOperationMode = power ? [0, 1, 1, 2, 2, 2, 2, 2, 0][operationMode] : 0;
-
-						//thermostat
-						//OFF, HEAT, COOL - current
-						const currentThermostatOperationMode = power ? [0, 1, 1, 2, 2, 2, 2, 2, 2][operationMode] : 0;
-						//OFF, HEAT, COOL, AUTO - target
-						const targetThermostatOperationMode = power ? [0, 1, 1, 2, 2, 2, 2, 2, 3][operationMode] : 0;
-
-						const currentOperationMode = displayMode ? currentThermostatOperationMode : currentHeaterCoolerOperationMode;
+						//Operating mode
+						let currentOperationMode = 0;
+						let targetOperationMode = 0;
+						switch (displayMode) {
+							case 0: //Heater Cooler INACTIVE, IDLE, HEATING, COOLING - current, AUTO, HEAT, COOL - target
+								currentOperationMode = power ? inStandby ? 1 : [1, 2, 2, 3, 3, 3, 3, 3, 3][operationMode] : 0;
+								targetOperationMode = power ? [0, 1, 1, 2, 2, 2, 2, 2, 0][operationMode] : 0;
+								break;
+							case 1: //Thermostat //OFF, HEAT, COOL - current, //OFF, HEAT, COOL, AUTO - target
+								currentOperationMode = power ? inStandby ? 0 : [0, 1, 2, 2, 2, 2, 2, 2, 2][operationMode] : 0;
+								targetOperationMode = power ? [0, 1, 1, 2, 2, 2, 2, 2, 3][operationMode] : 0;
+								break;
+						};
 						this.currentOperationMode = currentOperationMode;
-						const targetOperationMode = displayMode ? targetThermostatOperationMode : targetHeaterCoolerOperationMode;
 						this.targetOperationMode = targetOperationMode;
 
+						//Temperature
 						this.roomTemperature = roomTemperature;
 						this.supplyTemperature = supplyTemperature;
 						this.outdoorTemperature = outdoorTemperature;
