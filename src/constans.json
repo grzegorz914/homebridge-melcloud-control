@@ -104,7 +104,7 @@
     "Ventilation": {
         "OperationMode": ["RECOVERY", "BYPAS", "AUTO"],
         "CurrentFanSpeed": ["STOPPED"],
-        "TargetFanSpeed": ["AUTO", "SILENT", "1", "2", "3", "4"]
+        "TargetFanSpeed": ["AUTO", "SILENT", "2", "3", "4", "5", "6", "7", "OFF"]
     },
     "AccessLevel": {
         "Quest": 3,
