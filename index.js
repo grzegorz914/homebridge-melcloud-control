@@ -193,29 +193,22 @@ class melCloudDevice {
 						};
 
 						//device info
-						const canCool = (deviceInfo.Device.CanCool == true);
-						const canHeat = (deviceInfo.Device.CanHeat == true);
-						const canDry = (deviceInfo.Device.CanDry == true);
-						const hasAutomaticFanSpeed = (deviceInfo.Device.HasAutomaticFanSpeed == true);
-						const airDirectionFunction = (deviceInfo.Device.AirDirectionFunction == true);
-						const swingFunction = (deviceInfo.Device.SwingFunction == true);
-						const numberOfFanSpeeds = deviceInfo.Device.NumberOfFanSpeeds;
-						const modelIsAirCurtain = (deviceInfo.Device.ModelIsAirCurtain == true);
-						const modelSupportsFanSpeed = (deviceInfo.Device.ModelSupportsFanSpeed == true);
-						const modelSupportsAuto = (deviceInfo.Device.ModelSupportsAuto == true);
-						const modelSupportsHeat = (deviceInfo.Device.ModelSupportsHeat == true);
-						const modelSupportsDry = (deviceInfo.Device.ModelSupportsDry == true);
-						const modelSupportsVaneVertical = (deviceInfo.Device.ModelSupportsVaneVertical == true);
-						const modelSupportsVaneHorizontal = (deviceInfo.Device.ModelSupportsVaneHorizontal == true);
-						const modelSupportsWideVane = (deviceInfo.Device.ModelSupportsWideVane == true);
-						const modelSupportsStandbyMode = (deviceInfo.Device.ModelSupportsStandbyMode == true);
-
-						this.deviceInfo = deviceInfo;
-						this.hasAutomaticFanSpeed = hasAutomaticFanSpeed;
-						this.swingFunction = swingFunction;
-						this.numberOfFanSpeeds = numberOfFanSpeeds;
-						this.modelSupportsFanSpeed = modelSupportsFanSpeed;
-						this.modelSupportsStandbyMode = modelSupportsStandbyMode;
+						this.canCool = (deviceInfo.Device.CanCool == true);
+						this.canHeat = (deviceInfo.Device.CanHeat == true);
+						this.canDry = (deviceInfo.Device.CanDry == true);
+						this.hasAutomaticFanSpeed = (deviceInfo.Device.HasAutomaticFanSpeed == true);
+						this.airDirectionFunction = (deviceInfo.Device.AirDirectionFunction == true);
+						this.swingFunction = (deviceInfo.Device.SwingFunction == true);
+						this.numberOfFanSpeeds = deviceInfo.Device.NumberOfFanSpeeds;
+						this.modelIsAirCurtain = (deviceInfo.Device.ModelIsAirCurtain == true);
+						this.modelSupportsFanSpeed = (deviceInfo.Device.ModelSupportsFanSpeed == true);
+						this.modelSupportsAuto = (deviceInfo.Device.ModelSupportsAuto == true);
+						this.modelSupportsHeat = (deviceInfo.Device.ModelSupportsHeat == true);
+						this.modelSupportsDry = (deviceInfo.Device.ModelSupportsDry == true);
+						this.modelSupportsVaneVertical = (deviceInfo.Device.ModelSupportsVaneVertical == true);
+						this.modelSupportsVaneHorizontal = (deviceInfo.Device.ModelSupportsVaneHorizontal == true);
+						this.modelSupportsWideVane = (deviceInfo.Device.ModelSupportsWideVane == true);
+						this.modelSupportsStandbyMode = (deviceInfo.Device.ModelSupportsStandbyMode == true);
 
 						this.manufacturer = manufacturer;
 						this.modelName = modelName;
@@ -257,8 +250,38 @@ class melCloudDevice {
 						this.setTemperature = setTemperature;
 
 						//fan speed mode
-						const fanSpeed = modelSupportsFanSpeed ? (numberOfFanSpeeds == 3) ? hasAutomaticFanSpeed ? [4, 1, 2, 3][setFanSpeed] : [0, 1, 2, 3][setFanSpeed] : (numberOfFanSpeeds == 5) ? hasAutomaticFanSpeed ? [6, 1, 2, 3, 4, 5][setFanSpeed] : [0, 1, 2, 3, 4, 5][setFanSpeed] : false : false;
-						const fanSpeedSetProps = modelSupportsFanSpeed ? (numberOfFanSpeeds == 3) ? hasAutomaticFanSpeed ? 4 : 3 : (numberOfFanSpeeds == 5) ? hasAutomaticFanSpeed ? 6 : 5 : false : false;
+						let fanSpeed = 0;
+						let fanSpeedSetProps = 0;
+
+						if (modelSupportsFanSpeed) {
+							switch (numberOfFanSpeeds) {
+								case 2: //Fan speed modes 3
+									fanSpeed = hasAutomaticFanSpeed ? [3, 1, 2][setFanSpeed] : [0, 1, 2][setFanSpeed];
+									fanSpeedSetProps = hasAutomaticFanSpeed ? 3 : 2;
+									break;
+								case 3: //Fan speed modes 3
+									fanSpeed = hasAutomaticFanSpeed ? [4, 1, 2, 3][setFanSpeed] : [0, 1, 2, 3][setFanSpeed];
+									fanSpeedSetProps = hasAutomaticFanSpeed ? 4 : 3;
+									break;
+								case 4: //Fan speed modes 4
+									fanSpeed = hasAutomaticFanSpeed ? [5, 1, 2, 3, 4][setFanSpeed] : [0, 1, 2, 3, 4][setFanSpeed];
+									fanSpeedSetProps = hasAutomaticFanSpeed ? 5 : 4;
+									break;
+								case 5: //Fan speed modes 5
+									fanSpeed = hasAutomaticFanSpeed ? [6, 1, 2, 3, 4, 5][setFanSpeed] : [0, 1, 2, 3, 4, 5][setFanSpeed];
+									fanSpeedSetProps = hasAutomaticFanSpeed ? 6 : 5;
+									break;
+								case 6: //Fan speed modes 6
+									fanSpeed = hasAutomaticFanSpeed ? [7, 1, 2, 3, 4, 5, 6][setFanSpeed] : [0, 1, 2, 3, 4, 5, 6][setFanSpeed];
+									fanSpeedSetProps = hasAutomaticFanSpeed ? 7 : 6;
+									break;
+								case 7: //Fan speed modes 7
+									fanSpeed = hasAutomaticFanSpeed ? [8, 1, 2, 3, 4, 5, 6, 7][setFanSpeed] : [0, 1, 2, 3, 4, 5, 6, 7][setFanSpeed];
+									fanSpeedSetProps = hasAutomaticFanSpeed ? 8 : 7;
+									break;
+							};
+						};
+
 						this.fanSpeed = fanSpeed;
 						this.fanSpeedSetProps = fanSpeedSetProps;
 						this.fanSpeedModeInfoGet = setFanSpeed;
@@ -448,6 +471,8 @@ class melCloudDevice {
 							this.log('----------------------------------');
 							this.displayDeviceInfo = false;
 						};
+
+						//device info
 						this.deviceInfo = deviceInfo;
 						this.manufacturer = manufacturer;
 						this.modelName = modelName;
@@ -499,8 +524,6 @@ class melCloudDevice {
 										.updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature)
 										.updateCharacteristic(Characteristic.LockPhysicalControls, lockPhysicalControls)
 										.updateCharacteristic(Characteristic.TemperatureDisplayUnits, useFahrenheit);
-									const updateRotationSpeed = modelSupportsFanSpeed ? this.melCloudService.updateCharacteristic(Characteristic.RotationSpeed, fanSpeed) : false;
-									const updateSwingMode = swingFunction ? this.melCloudService.updateCharacteristic(Characteristic.SwingMode, swingMode) : false;
 									break;
 								case 1: //thermostat
 									this.melCloudService
@@ -669,7 +692,8 @@ class melCloudDevice {
 
 						//device info
 						this.deviceInfo = deviceInfo;
-						this.hasAutomaticFanSpeed = deviceInfo.Device.HasAutomaticFanSpeed;
+						this.modelSupportsFanSpeed = (deviceInfo.Device.ModelSupportsFanSpeed == true);
+						this.hasAutomaticFanSpeed = (deviceInfo.Device.HasAutomaticFanSpeed == true);
 						this.numberOfFanSpeeds = deviceInfo.Device.numberOfFanSpeeds;
 
 						this.manufacturer = manufacturer;
@@ -679,6 +703,7 @@ class melCloudDevice {
 					})
 					.on('deviceState', (deviceState, power, roomTemperature, supplyTemperature, outdoorTemperature, roomCO2Level, setTemperature, setFanSpeed, operationMode, ventilationMode) => {
 						//device info
+						const modelSupportsFanSpeed = this.modelSupportsFanSpeed;
 						const hasAutomaticFanSpeed = this.hasAutomaticFanSpeed;
 						const numberOfFanSpeeds = this.numberOfFanSpeeds;
 
@@ -710,8 +735,38 @@ class melCloudDevice {
 						this.setTemperature = setTemperature;
 
 						//fan speed mode
-						const fanSpeed = (numberOfFanSpeeds == 3) ? hasAutomaticFanSpeed ? [4, 1, 2, 3][setFanSpeed] : [0, 1, 2, 3][setFanSpeed] : (numberOfFanSpeeds == 5) ? hasAutomaticFanSpeed ? [6, 1, 2, 3, 4, 5][setFanSpeed] : [0, 1, 2, 3, 4, 5][setFanSpeed] : false;
-						const fanSpeedSetProps = (numberOfFanSpeeds == 3) ? hasAutomaticFanSpeed ? 4 : 3 : (numberOfFanSpeeds == 5) ? hasAutomaticFanSpeed ? 6 : 5 : false;
+						let fanSpeed = 0;
+						let fanSpeedSetProps = 0;
+
+						if (modelSupportsFanSpeed) {
+							switch (numberOfFanSpeeds) {
+								case 2: //Fan speed modes 3
+									fanSpeed = hasAutomaticFanSpeed ? [3, 1, 2][setFanSpeed] : [0, 1, 2][setFanSpeed];
+									fanSpeedSetProps = hasAutomaticFanSpeed ? 3 : 2;
+									break;
+								case 3: //Fan speed modes 3
+									fanSpeed = hasAutomaticFanSpeed ? [4, 1, 2, 3][setFanSpeed] : [0, 1, 2, 3][setFanSpeed];
+									fanSpeedSetProps = hasAutomaticFanSpeed ? 4 : 3;
+									break;
+								case 4: //Fan speed modes 4
+									fanSpeed = hasAutomaticFanSpeed ? [5, 1, 2, 3, 4][setFanSpeed] : [0, 1, 2, 3, 4][setFanSpeed];
+									fanSpeedSetProps = hasAutomaticFanSpeed ? 5 : 4;
+									break;
+								case 5: //Fan speed modes 5
+									fanSpeed = hasAutomaticFanSpeed ? [6, 1, 2, 3, 4, 5][setFanSpeed] : [0, 1, 2, 3, 4, 5][setFanSpeed];
+									fanSpeedSetProps = hasAutomaticFanSpeed ? 6 : 5;
+									break;
+								case 6: //Fan speed modes 6
+									fanSpeed = hasAutomaticFanSpeed ? [7, 1, 2, 3, 4, 5, 6][setFanSpeed] : [0, 1, 2, 3, 4, 5, 6][setFanSpeed];
+									fanSpeedSetProps = hasAutomaticFanSpeed ? 7 : 6;
+									break;
+								case 7: //Fan speed modes 7
+									fanSpeed = hasAutomaticFanSpeed ? [8, 1, 2, 3, 4, 5, 6, 7][setFanSpeed] : [0, 1, 2, 3, 4, 5, 6, 7][setFanSpeed];
+									fanSpeedSetProps = hasAutomaticFanSpeed ? 8 : 7;
+									break;
+							};
+						};
+
 						this.fanSpeed = fanSpeed;
 						this.fanSpeedSetProps = fanSpeedSetProps;
 						this.fanSpeedModeInfoGet = setFanSpeed;
@@ -732,7 +787,6 @@ class melCloudDevice {
 										.updateCharacteristic(Characteristic.LockPhysicalControls, lockPhysicalControls)
 										.updateCharacteristic(Characteristic.TemperatureDisplayUnits, useFahrenheit);
 									const updateRotationSpeed = modelSupportsFanSpeed ? this.melCloudService.updateCharacteristic(Characteristic.RotationSpeed, fanSpeed) : false;
-									const updateSwingMode = swingFunction ? this.melCloudService.updateCharacteristic(Characteristic.SwingMode, swingMode) : false;
 									break;
 								case 1: //thermostat
 									this.melCloudService
