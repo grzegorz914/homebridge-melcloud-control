@@ -94,7 +94,7 @@
         "CurrentVerticalVane": ["AUTO", "1", "2", "3", "4", "5", "SWING"],
         "CurrentHorizontalVane": ["AUTO", "1", "2", "3", "4", "5", "SPLIT", "SWING"],
         "SwingMode": ["AUTO", "1", "2", "3", "4", "5", "SWING"],
-        "SetFanSpeed": ["AUTO", "1", "2", "3", "4", "5", "OFF"]
+        "SetFanSpeed": ["AUTO", "1", "2", "3", "4", "5", "6", "7", "OFF"]
     },
     "HeatPump": {
         "CurrentState": ["IDLE", "HEAT WATER", "HEAT ZONES", "COOL", "DEFROST", "STANDBY", "LEGIONELLA"],

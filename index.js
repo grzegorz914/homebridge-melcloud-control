@@ -255,27 +255,27 @@ class melCloudDevice {
 
 						if (modelSupportsFanSpeed) {
 							switch (numberOfFanSpeeds) {
-								case 2: //Fan speed modes 3
+								case 2: //Fan speed mode 2
 									fanSpeed = hasAutomaticFanSpeed ? [3, 1, 2][setFanSpeed] : [0, 1, 2][setFanSpeed];
 									fanSpeedSetProps = hasAutomaticFanSpeed ? 3 : 2;
 									break;
-								case 3: //Fan speed modes 3
+								case 3: //Fan speed mode 3
 									fanSpeed = hasAutomaticFanSpeed ? [4, 1, 2, 3][setFanSpeed] : [0, 1, 2, 3][setFanSpeed];
 									fanSpeedSetProps = hasAutomaticFanSpeed ? 4 : 3;
 									break;
-								case 4: //Fan speed modes 4
+								case 4: //Fan speed mode 4
 									fanSpeed = hasAutomaticFanSpeed ? [5, 1, 2, 3, 4][setFanSpeed] : [0, 1, 2, 3, 4][setFanSpeed];
 									fanSpeedSetProps = hasAutomaticFanSpeed ? 5 : 4;
 									break;
-								case 5: //Fan speed modes 5
+								case 5: //Fan speed mode 5
 									fanSpeed = hasAutomaticFanSpeed ? [6, 1, 2, 3, 4, 5][setFanSpeed] : [0, 1, 2, 3, 4, 5][setFanSpeed];
 									fanSpeedSetProps = hasAutomaticFanSpeed ? 6 : 5;
 									break;
-								case 6: //Fan speed modes 6
+								case 6: //Fan speed mode 6
 									fanSpeed = hasAutomaticFanSpeed ? [7, 1, 2, 3, 4, 5, 6][setFanSpeed] : [0, 1, 2, 3, 4, 5, 6][setFanSpeed];
 									fanSpeedSetProps = hasAutomaticFanSpeed ? 7 : 6;
 									break;
-								case 7: //Fan speed modes 7
+								case 7: //Fan speed mode 7
 									fanSpeed = hasAutomaticFanSpeed ? [8, 1, 2, 3, 4, 5, 6, 7][setFanSpeed] : [0, 1, 2, 3, 4, 5, 6, 7][setFanSpeed];
 									fanSpeedSetProps = hasAutomaticFanSpeed ? 8 : 7;
 									break;
@@ -740,27 +740,27 @@ class melCloudDevice {
 
 						if (modelSupportsFanSpeed) {
 							switch (numberOfFanSpeeds) {
-								case 2: //Fan speed modes 3
+								case 2: //Fan speed mode 2
 									fanSpeed = hasAutomaticFanSpeed ? [3, 1, 2][setFanSpeed] : [0, 1, 2][setFanSpeed];
 									fanSpeedSetProps = hasAutomaticFanSpeed ? 3 : 2;
 									break;
-								case 3: //Fan speed modes 3
+								case 3: //Fan speed mode 3
 									fanSpeed = hasAutomaticFanSpeed ? [4, 1, 2, 3][setFanSpeed] : [0, 1, 2, 3][setFanSpeed];
 									fanSpeedSetProps = hasAutomaticFanSpeed ? 4 : 3;
 									break;
-								case 4: //Fan speed modes 4
+								case 4: //Fan speed mode 4
 									fanSpeed = hasAutomaticFanSpeed ? [5, 1, 2, 3, 4][setFanSpeed] : [0, 1, 2, 3, 4][setFanSpeed];
 									fanSpeedSetProps = hasAutomaticFanSpeed ? 5 : 4;
 									break;
-								case 5: //Fan speed modes 5
+								case 5: //Fan speed mode 5
 									fanSpeed = hasAutomaticFanSpeed ? [6, 1, 2, 3, 4, 5][setFanSpeed] : [0, 1, 2, 3, 4, 5][setFanSpeed];
 									fanSpeedSetProps = hasAutomaticFanSpeed ? 6 : 5;
 									break;
-								case 6: //Fan speed modes 6
+								case 6: //Fan speed mode 6
 									fanSpeed = hasAutomaticFanSpeed ? [7, 1, 2, 3, 4, 5, 6][setFanSpeed] : [0, 1, 2, 3, 4, 5, 6][setFanSpeed];
 									fanSpeedSetProps = hasAutomaticFanSpeed ? 7 : 6;
 									break;
-								case 7: //Fan speed modes 7
+								case 7: //Fan speed mode 7
 									fanSpeed = hasAutomaticFanSpeed ? [8, 1, 2, 3, 4, 5, 6, 7][setFanSpeed] : [0, 1, 2, 3, 4, 5, 6, 7][setFanSpeed];
 									fanSpeedSetProps = hasAutomaticFanSpeed ? 8 : 7;
 									break;
@@ -1295,8 +1295,36 @@ class melCloudDevice {
 								return value;
 							})
 							.onSet(async (value) => {
-								const fanSpeedMode = (numberOfFanSpeeds == 3) ? hasAutomaticFanSpeed ? [0, 1, 2, 3, 0][value] : [1, 1, 2, 3][value] : (numberOfFanSpeeds == 5) ? hasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 0][value] : [1, 1, 2, 3, 4, 5][value] : false;
-								const fanSpeedModeInfo = (numberOfFanSpeeds == 3) ? hasAutomaticFanSpeed ? [6, 1, 2, 3, 0][value] : [6, 1, 2, 3][value] : (numberOfFanSpeeds == 5) ? hasAutomaticFanSpeed ? [6, 1, 2, 3, 4, 5, 0][value] : [6, 1, 2, 3, 4, 5][value] : false;
+								//fan speed mode
+								let fanSpeedMode = 0;
+								let fanSpeedModeInfo = 0;
+
+								switch (numberOfFanSpeeds) {
+									case 2: //Fan speed mode 2
+										fanSpeedMode = hasAutomaticFanSpeed ? [0, 1, 2, 0][value] : [1, 1, 2][value]
+										fanSpeedModeInfo = hasAutomaticFanSpeed ? [8, 1, 2, 0][value] : [8, 1, 2][value]
+										break;
+									case 3: //Fan speed mode 3
+										fanSpeedMode = hasAutomaticFanSpeed ? [0, 1, 2, 3, 0][value] : [1, 1, 2, 3][value];
+										fanSpeedModeInfo = hasAutomaticFanSpeed ? [8, 1, 2, 3, 0][value] : [8, 1, 2, 3][value];
+										break;
+									case 4: //Fan speed mode 4
+										fanSpeedMode = hasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 0][value] : [1, 1, 2, 3, 4][value]
+										fanSpeedModeInfo = hasAutomaticFanSpeed ? [8, 1, 2, 3, 4, 0][value] : [8, 1, 2, 3, 4][value]
+										break;
+									case 5: //Fan speed mode 5
+										fanSpeedMode = hasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 0][value] : [1, 1, 2, 3, 4, 5][value]
+										fanSpeedModeInfo = hasAutomaticFanSpeed ? [8, 1, 2, 3, 4, 5, 0][value] : [8, 1, 2, 3, 4, 5][value]
+										break;
+									case 6: //Fan speed mode 6
+										fanSpeedMode = hasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 6, 0][value] : [1, 1, 2, 3, 4, 5, 6][value]
+										fanSpeedModeInfo = hasAutomaticFanSpeed ? [8, 1, 2, 3, 4, 5, 6, 0][value] : [8, 1, 2, 3, 4, 5, 6][value]
+										break;
+									case 7: //Fan speed mode 7
+										fanSpeedMode = hasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 6, 7, 0][value] : [1, 1, 2, 3, 4, 5, 6, 7][value]
+										fanSpeedModeInfo = hasAutomaticFanSpeed ? [8, 1, 2, 3, 4, 5, 6, 7, 0][value] : [8, 1, 2, 3, 4, 5, 6, 7][value]
+										break;
+								};
 
 								deviceState.Power = true;
 								deviceState.SetFanSpeed = fanSpeedMode;
