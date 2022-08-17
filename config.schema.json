@@ -188,7 +188,7 @@
                     "title": "Mode",
                     "type": "integer",
                     "minimum": 0,
-                    "maximum": 30,
+                    "maximum": 32,
                     "description": "Here select the function mode.",
                     "oneOf": [{
                         "title": "POWER ON/OFF",
@@ -356,6 +356,18 @@
                         "title": "FAN SPEED MODE 5",
                         "enum": [
                           30
+                        ]
+                      },
+                      {
+                        "title": "FAN SPEED MODE 6",
+                        "enum": [
+                          31
+                        ]
+                      },
+                      {
+                        "title": "FAN SPEED MODE 7",
+                        "enum": [
+                          32
                         ]
                       }
                     ],
