@@ -1,6 +1,5 @@
 {
     "AirConditioner": {
-        "Settings": 0,
         "Power": 1,
         "OperationMode": 2,
         "SetTemperature": 4,
@@ -9,6 +8,8 @@
         "VaneHorizontal": 256
     },
     "HeatPump": {
+        "Power": 1,
+        "OperationMode": 4,
         "OperationModeZone1": 8,
         "OperationModeZone2": 16,
         "ForcedHotWaterMode": 65536,
@@ -21,6 +22,7 @@
         "SetTankWaterTemperature": 281474976710688
     },
     "Ventilation": {
+        "Power": 1,
         "OperationMode": 4,
         "SetFanSpeed": 8
     }

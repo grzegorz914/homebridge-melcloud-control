@@ -1,30 +1,31 @@
 {
     "DeviceType": ["Air Conditioner", "Heat Pump", "", "Energy Recovery Ventilation"],
     "TemperatureDisplayUnits": ["°C", "°F"],
+    "CurrentHeaterCoolerThermostat": [
+        ["INACTIVE", "IDLE", "HEAT", "COOL"],
+        ["OFF", "HEAT", "COOL"]
+    ],
+    "TargetHeaterCoolerThermostat": [
+        ["AUTO", "HEAT", "COOL"],
+        ["OFF", "HEAT", "COOL", "AUTO"]
+    ],
     "AirConditioner": {
         "OperationMode": ["0", "HEAT", "DRY", "COOL", "4", "5", "6", "FAN", "AUTO"],
-        "CurrentHeaterCoolerThermostat": [
-            ["INACTIVE", "IDLE", "HEAT", "COOL"],
-            ["OFF", "HEAT", "COOL"]
-        ],
-        "TargetHeaterCoolerThermostat": [
-            ["AUTO", "HEAT", "COOL"],
-            ["OFF", "HEAT", "COOL", "AUTO"]
-        ],
         "CurrentVerticalVane": ["AUTO", "1", "2", "3", "4", "5", "SWING"],
         "CurrentHorizontalVane": ["AUTO", "1", "2", "3", "4", "5", "SPLIT", "SWING"],
         "SwingMode": ["AUTO", "1", "2", "3", "4", "5", "SWING"],
-        "SetFanSpeed": ["AUTO", "1", "2", "3", "4", "5", "6", "7", "OFF"]
+        "SetFanSpeed": ["AUTO", "1", "2", "3", "4", "5", "6", "7", "8", "OFF"]
     },
     "HeatPump": {
         "CurrentState": ["IDLE", "HEAT WATER", "HEAT ZONES", "COOL", "DEFROST", "STANDBY", "LEGIONELLA"],
         "ZoneOperation": ["HEAT THERMOSTAT", "COOL THERMOSTAT", "HEAT FLOW", "COOL FLOW", "CURVE", "UNKNOWN"],
-        "ZoneStatus": ["HEAT", "IDLE", "COOL", "UNKNOWN"]
+        "ZoneStatus": ["HEAT", "IDLE", "COOL", "UNKNOWN"],
+        "Zones": ["Zone 1", "Hot Water", "Zone 2"]
     },
     "Ventilation": {
         "OperationMode": ["RECOVERY", "BYPAS", "AUTO"],
         "CurrentFanSpeed": ["STOPPED"],
-        "TargetFanSpeed": ["AUTO", "SILENT", "2", "3", "4", "5", "6", "7", "OFF"]
+        "TargetFanSpeed": ["AUTO", "1", "2", "3", "4", "5", "6", "7", "8", "OFF"]
     },
     "AccessLevel": {
         "Quest": 3,

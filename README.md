@@ -89,7 +89,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `language` | Here select the MELCloud language. |
 | `displayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
 | `buttons.name` | Here set `Button Name` which You want expose to the *Homebridge/HomeKit*. | 
-| `buttons.mode` | Here select button mode, `On/Off`, `Heat`, `Dry`, `Cool`, `Fan`, `Auto`, `Purify`, `Physical Lock Controls`, `Vane H Mode`, `Vane V Mode`, `Fan Speed Mode`. |
+| `buttons.mode` | Here select button mode, AC - Air Conditioner, HP - Heat Pump, ERV - Energy Recovery Ventilation, VH - Vane Horizontal, VV - Vane Horizontal. |
 | `buttons.displayType` | Here select HomeKit display type, `Switch`, `Button` - selectable in HomeKit app as `Light`, `Fan`, `Outlet`. |
 | `enableDebugMode` | This enable deep log in homebridge console. |
 | `disableLogInfo` | This disable display log values and states on every it change. |

@@ -388,7 +388,7 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                 const operationModeZone2 = deviceState.OperationModeZone2
                 const setTemperatureZone1 = deviceState.SetTemperatureZone1
                 const setTemperatureZone2 = deviceState.SetTemperatureZone2
-                const setTankWaterTemperatureconst = deviceState.SetTankWaterTemperatureconst
+                const setTankWaterTemperature = deviceState.SetTankWaterTemperature
                 const targetHCTemperatureZone1 = deviceState.TargetHCTemperatureZone1
                 const targetHCTemperatureZone2 = deviceState.TargetHCTemperatureZone2
                 const forcedHotWaterMode = deviceState.ForcedHotWaterMode
@@ -513,8 +513,9 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                 const hasErrorMessages = deviceState.HasErrorMessages
                 const offline = deviceState.Offline
                 const units = deviceState.Units
+                const zonesCount = hasZone2 ? 3 : 2;
 
-                this.emit('deviceState', deviceState, power, roomTemperatureZone1, setTemperatureZone1, roomTemperatureZone2, setTemperatureZone2, tankWaterTemperature, setTankWaterTemperatureconst, operationMode, operationModeZone1, operationModeZone2);
+                this.emit('deviceState', deviceState, zonesCount, power, roomTemperatureZone1, setTemperatureZone1, roomTemperatureZone2, setTemperatureZone2, tankWaterTemperature, setTankWaterTemperature, operationMode, operationModeZone1, operationModeZone2);
                 const mqtt = enableMqtt ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, State:`, JSON.stringify(deviceState, null, 2)) : false;
 
                 this.checkDeviceState();
