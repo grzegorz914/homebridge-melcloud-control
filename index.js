@@ -107,7 +107,7 @@ class melCloudDevice {
 		this.accountName = account.name;
 		this.displayMode = account.displayMode;
 		this.buttons = account.buttons || [];
-		this.displayDevicePresets = account.displayDevicePresets || false;
+		this.enableDevicePresets = account.enableDevicePresets || false;
 		this.disableLogInfo = account.disableLogInfo || false;
 		this.disableLogDeviceInfo = account.disableLogDeviceInfo || false;
 		this.enableDebugMode = account.enableDebugMode || false;
@@ -443,7 +443,7 @@ class melCloudDevice {
 
 						};
 
-						if (this.displayDevicePresets && this.devicePresetsCount > 0) {
+						if (this.enableDevicePresets && this.devicePresetsCount > 0) {
 							this.devicePresetsStates = new Array();
 
 							for (let i = 0; i < this.devicePresetsCount; i++) {
@@ -658,7 +658,7 @@ class melCloudDevice {
 								};
 							};
 
-							if (this.displayDevicePresets && this.devicePresetsCount > 0) {
+							if (this.enableDevicePresets && this.devicePresetsCount > 0) {
 								this.devicePresetsStates = new Array();
 
 								for (let i = 0; i < this.devicePresetsCount; i++) {
@@ -902,7 +902,7 @@ class melCloudDevice {
 
 						};
 
-						if (this.displayDevicePresets && this.devicePresetsCount > 0) {
+						if (this.enableDevicePresets && this.devicePresetsCount > 0) {
 							this.devicePresetsStates = new Array();
 
 							for (let i = 0; i < this.devicePresetsCount; i++) {
@@ -1443,7 +1443,7 @@ class melCloudDevice {
 				};
 
 				//presets services
-				if (this.displayDevicePresets && this.devicePresetsCount > 0) {
+				if (this.enableDevicePresets && this.devicePresetsCount > 0) {
 					this.log.debug('preparePresetsService');
 
 					this.presetsServices = new Array();
@@ -1827,7 +1827,7 @@ class melCloudDevice {
 				};
 
 				//presets services
-				if (this.displayDevicePresets && this.devicePresetsCount > 0) {
+				if (this.enableDevicePresets && this.devicePresetsCount > 0) {
 					this.log.debug('preparePresetsService');
 					this.presetsServices = new Array();
 
@@ -2231,7 +2231,7 @@ class melCloudDevice {
 				};
 
 				//presets services
-				if (this.displayDevicePresets && this.devicePresetsCount > 0) {
+				if (this.enableDevicePresets && this.devicePresetsCount > 0) {
 					this.log.debug('preparePresetsService');
 					this.presetsServices = new Array();
 

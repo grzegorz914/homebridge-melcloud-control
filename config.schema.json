@@ -529,11 +529,11 @@
                 }
               }
             },
-            "displayDevicePresets": {
-              "title": "Display Device Presets",
+            "enableDevicePresets": {
+              "title": "Device Presets",
               "type": "boolean",
               "default": false,
-              "description": "This enable display device presets as extra buttons.",
+              "description": "This enable display device presets as extra buttons in HomeKit app.",
               "required": false
             },
             "disableLogInfo": {
@@ -656,7 +656,7 @@
         "expandable": true,
         "expanded": false,
         "items": [
-          "accounts[].displayDevicePresets",
+          "accounts[].enableDevicePresets",
           {
             "key": "accounts[].buttons",
             "type": "tabarray",

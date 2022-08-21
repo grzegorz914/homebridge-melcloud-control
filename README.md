@@ -31,7 +31,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 
 ### Troubleshooting
 * If for some reason the device is not displayed in HomeKit app try this procedure:
-   * Go to `./homebridge/persist` for macOS or `/var/lib/homebridge/persist` for RPI.
+   * Go to `./homebridge/persist` macOS or `/var/lib/homebridge/persist` for RPI.
    * Remove `AccessoryInfo.xxx` file which contain Your device data: `{"displayName":"DeviceName"}`.
    * Next remove `IdentifierCashe.xxx` file with same name as `AccessoryInfo.xxx`.
    * Restart Homebridge and try add it to the HomeKit app again.
@@ -92,6 +92,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `buttons.name` | Here set `Button Name` which You want expose to the *Homebridge/HomeKit*. | 
 | `buttons.mode` | Here select button mode, AC - Air Conditioner, HP - Heat Pump, ERV - Energy Recovery Ventilation, VH - Vane Horizontal, VV - Vane Horizontal. |
 | `buttons.displayType` | Here select HomeKit display type, `Switch`, `Button` - selectable in HomeKit app as `Light`, `Fan`, `Outlet`. |
+| `enableDevicePresets` | This enable display device presets in HomeKit app. |
 | `enableDebugMode` | This enable deep log in homebridge console. |
 | `disableLogInfo` | This disable display log values and states on every it change. |
 | `disableLogDeviceInfo` | This disable display log device info on plugin start. |
@@ -119,6 +120,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
                         "mode": 0,
                         "displayType": 0
                     }],
+                    "enableDevicePresets": false,
                     "disableLogInfo": false,
                     "disableLogDeviceInfo": false,
                     "enableDebugMode": false,
