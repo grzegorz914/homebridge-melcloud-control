@@ -8,15 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### The old plugin and config need to be first removed from Homebridge and HomeKit and added again.
 ### The platform name and password properties was changed due collision with same already exist plugins from other developers.
 
-## [0.3.0] - (xx.07.2022)
+## [0.3.0] - (xx.08.2022)
 ## Changes
-- code cleanup
-- code rebuild
+- code cleanup and rebuild
 - stability improvements
 - added account reconect process if for some reason login fail
 - added devices list and state recheck if for some reason fail
 - revert to get serial mumber from wifi adapter not the device itself
-- added possibility display device presets as button
+- added expose device presets as a buttons in home app
 - added support for Heat Pump
 - added support for Enrgy Recovery Ventilation
 
