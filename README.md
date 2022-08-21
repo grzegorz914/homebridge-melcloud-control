@@ -64,6 +64,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
     * Vane H mode *AUTO/1/2/3/4/5/SWING*.
     * Vane V mode *AUTO/1/2/3/4/5/SWING*.
     * Fan speed mode *AUTO/1/2/3/4/5*.
+    * Set device presets.
 * Control of Heat Pump:
   * Comming soon...
 * Control of Energy Recovery Ventilation:

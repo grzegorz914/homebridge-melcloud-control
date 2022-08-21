@@ -59,14 +59,8 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const lastServiceDate = deviceInfo.LastServiceDate;
 
                 //presets
-                const presets = deviceInfo.Presets;
-                const devicePresets = new Array();
-                if (Array.isArray(presets) && presets.length > 0) {
-                    for (let i = 0; i < presets.length; i++) {
-                        const preset = presets[i];
-                        devicePresets.push(preset);
-                    }
-                }
+                const devicePresets = deviceInfo.Presets;
+                const devicePresetsCount = devicePresets.length;
 
                 const ownerID = deviceInfo.OwnerID;
                 const ownerName = deviceInfo.OwnerName;
@@ -267,7 +261,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const CanSetTemperatureIncrementOverride = deviceInfo.Permissions.CanSetTemperatureIncrementOverride;
                 const CanDisableLocalController = deviceInfo.Permissions.CanDisableLocalController;
 
-                this.emit('deviceInfo', deviceInfo, manufacturer, modelName, modelName1, serialNumber, deviceFirmwareAppVersion);
+                this.emit('deviceInfo', deviceInfo, manufacturer, modelName, modelName1, serialNumber, deviceFirmwareAppVersion, devicePresets, devicePresetsCount);
                 this.emit('checkDeviceState');
                 const mqtt = enableMqtt ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, Info:`, JSON.stringify(deviceInfo, null, 2)) : false;
             } catch (error) {
