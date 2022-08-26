@@ -4,7 +4,6 @@ const fs = require('fs');
 const fsPromises = fs.promises;
 const EventEmitter = require('events');
 const axios = require('axios');
-const API_URL = require('./apiurl.json');
 const CONSTANS = require('./constans.json');
 
 
@@ -25,7 +24,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
 
         this.axiosInstanceGet = axios.create({
             method: 'GET',
-            baseURL: API_URL.BaseURL,
+            baseURL: CONSTANS.ApiUrls.BaseURL,
             timeout: 10000,
             headers: {
                 'X-MitsContextKey': contextKey,
@@ -33,7 +32,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
         });
         this.axiosInstancePost = axios.create({
             method: 'POST',
-            baseURL: API_URL.BaseURL,
+            baseURL: CONSTANS.ApiUrls.BaseURL,
             timeout: 10000,
             headers: {
                 'X-MitsContextKey': contextKey,
@@ -59,7 +58,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const lastServiceDate = deviceInfo.LastServiceDate;
 
                 //presets
-                const devicePresets = deviceInfo.Presets;
+                const devicePresets = Array.isArray(deviceInfo.Presets) ? deviceInfo.Presets : [];
                 const devicePresetsCount = devicePresets.length;
 
                 const ownerID = deviceInfo.OwnerID;
@@ -86,14 +85,8 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const serialNumber = (deviceInfo.SerialNumber != undefined && deviceInfo.SerialNumber != null) ? deviceInfo.SerialNumber : 'Undefined';
 
                 //device
-                const deviceListHistory24Formatters = deviceInfo.Device.ListHistory24Formatters;
-                const derviceListsHistory24Formatters = new Array();
-                if (Array.isArray(deviceListHistory24Formatters) && deviceListHistory24Formatters.length > 0) {
-                    for (let i = 0; i < deviceListHistory24Formatters.length; i++) {
-                        const deviveListHistory24Formatter = deviceListHistory24Formatters[i];
-                        derviceListsHistory24Formatters.pusch(deviveListHistory24Formatter);
-                    }
-                }
+                const deviceListHistory24Formatters = Array.isArray(deviceInfo.Device.ListHistory24Formatters) ? deviceInfo.Device.ListHistory24Formatters : [];
+                const deviceListHistory24FormattersCount = deviceListHistory24Formatters.length;
 
                 const devicePCycleActual = deviceInfo.Device.PCycleActual;
                 const deviceErrorMessages = deviceInfo.Device.ErrorMessages;
@@ -207,7 +200,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const deviceSupportsHourlyEnergyReport = deviceInfo.Device.SupportsHourlyEnergyReport;
 
                 //units info
-                const units = deviceInfo.Device.Units;
+                const units = Array.isArray(deviceInfo.Device.Units) ? deviceInfo.Device.Units : [];
                 const unitsCount = units.length;
                 const serialsNumberIndoor = new Array();
                 const serialsNumberOutdoor = new Array();
@@ -271,7 +264,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
         }).on('checkDeviceState', async () => {
             //deviceState
             try {
-                const deviceUrl = API_URL.DeviceState.replace("DID", deviceId).replace("BID", buildingId);
+                const deviceUrl = CONSTANS.ApiUrls.DeviceState.replace("DID", deviceId).replace("BID", buildingId);
                 const responseData = await this.axiosInstanceGet(deviceUrl);
                 const deviceState = responseData.data;
                 const deviceStateData = JSON.stringify(deviceState, null, 2);

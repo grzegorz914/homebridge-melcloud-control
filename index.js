@@ -8,12 +8,9 @@ const melCloudAta = require('./src/melcloudata.js');
 const melCloudAtw = require('./src/melcloudatw.js');
 const melCloudErv = require('./src/melclouderv.js');
 
-const API_URL = require('./src/apiurl.json');
-const DEVICES_EFFECTIVE_FLAGS = require('./src/effectiveflags.json');
-const CONSTANS = require('./src/constans.json');
-
 const PLUGIN_NAME = 'homebridge-melcloud-control';
 const PLATFORM_NAME = 'melcloudcontrol';
+const CONSTANS = require('./src/constans.json');
 
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
@@ -105,7 +102,7 @@ class melCloudDevice {
 
 		//account config
 		this.accountName = account.name;
-		this.displayMode = account.displayMode;
+		this.displayMode = account.displayMode || 0;
 		this.buttons = account.buttons || [];
 		this.enableDevicePresets = account.enableDevicePresets || false;
 		this.disableLogInfo = account.disableLogInfo || false;
@@ -211,7 +208,7 @@ class melCloudDevice {
 						this.modelSupportsWideVane = (deviceInfo.Device.ModelSupportsWideVane == true);
 						this.modelSupportsStandbyMode = (deviceInfo.Device.ModelSupportsStandbyMode == true);
 						this.devicePresets = devicePresets;
-						this.devicePresetsCount = devicePresetsCount;
+						this.devicePresetsCount = this.enableDevicePresets ? devicePresetsCount : 0;
 
 						this.manufacturer = manufacturer;
 						this.modelName = modelName;
@@ -443,7 +440,7 @@ class melCloudDevice {
 
 						};
 
-						if (this.enableDevicePresets && this.devicePresetsCount > 0) {
+						if (this.devicePresetsCount > 0) {
 							this.devicePresetsStates = new Array();
 
 							for (let i = 0; i < this.devicePresetsCount; i++) {
@@ -504,7 +501,7 @@ class melCloudDevice {
 						};
 
 						this.devicePresets = devicePresets;
-						this.devicePresetsCount = devicePresetsCount;
+						this.devicePresetsCount = this.enableDevicePresets ? devicePresetsCount : 0;
 
 						//device info
 						this.deviceInfo = deviceInfo;
@@ -658,7 +655,7 @@ class melCloudDevice {
 								};
 							};
 
-							if (this.enableDevicePresets && this.devicePresetsCount > 0) {
+							if (this.devicePresetsCount > 0) {
 								this.devicePresetsStates = new Array();
 
 								for (let i = 0; i < this.devicePresetsCount; i++) {
@@ -729,7 +726,7 @@ class melCloudDevice {
 						this.hasAutomaticFanSpeed = (deviceInfo.Device.HasAutomaticFanSpeed == true);
 						this.numberOfFanSpeeds = deviceInfo.Device.numberOfFanSpeeds;
 						this.devicePresets = devicePresets;
-						this.devicePresetsCount = devicePresetsCount;
+						this.devicePresetsCount = this.enableDevicePresets ? devicePresetsCount : 0;
 
 						this.manufacturer = manufacturer;
 						this.modelName = modelName;
@@ -902,7 +899,7 @@ class melCloudDevice {
 
 						};
 
-						if (this.enableDevicePresets && this.devicePresetsCount > 0) {
+						if (this.devicePresetsCount > 0) {
 							this.devicePresetsStates = new Array();
 
 							for (let i = 0; i < this.devicePresetsCount; i++) {
@@ -993,10 +990,10 @@ class melCloudDevice {
 						})
 						.onSet(async (state) => {
 							deviceState.Power = state;
-							deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power;
+							deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power;
 
 							try {
-								const newState = await this.melCloudAta.send(API_URL.SetAta, deviceState, 0);
+								const newState = await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState, 0);
 								const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set power: ${state?'ON':'OFF'}`);
 							} catch (error) {
 								this.log.error(`${deviceTypeText}: ${accessoryName}, Set power error: ${error}`);
@@ -1022,27 +1019,27 @@ class melCloudDevice {
 							case 0: //OFF, AUTO
 								deviceState.Power = displayMode ? false : true;
 								deviceState.OperationMode = displayMode ? deviceState.OperationMode : 8;
-								deviceState.EffectiveFlags = displayMode ? DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power : DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.OperationMode;
+								deviceState.EffectiveFlags = displayMode ? CONSTANS.AirConditioner.EffectiveFlags.Power : CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
 								break;
 							case 1: //HEAT
 								deviceState.Power = true;
 								deviceState.OperationMode = 1;
-								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.OperationMode;
+								deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
 								break;
 							case 2: //COOL
 								deviceState.Power = true;
 								deviceState.OperationMode = 3;
-								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.OperationMode;
+								deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
 								break;
 							case 3: //AUTO, OFF
 								deviceState.Power = displayMode ? true : false;
 								deviceState.OperationMode = displayMode ? 8 : deviceState.OperationMode;
-								deviceState.EffectiveFlags = displayMode ? DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.OperationMode : DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power;
+								deviceState.EffectiveFlags = displayMode ? CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode : CONSTANS.AirConditioner.EffectiveFlags.Power;
 								break;
 						};
 
 						try {
-							const newState = await this.melCloudAta.send(API_URL.SetAta, deviceState, 0);
+							const newState = await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState, 0);
 							const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set target heating cooling mode: ${targetModeText[value]}`);
 						} catch (error) {
 							this.log.error(`${deviceTypeText}: ${accessoryName}, Set target heating cooling mode error: ${error}`);
@@ -1101,10 +1098,10 @@ class melCloudDevice {
 
 								deviceState.Power = true;
 								deviceState.SetFanSpeed = fanSpeedMode;
-								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetFanSpeed;
+								deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
 
 								try {
-									const newState = await this.melCloudAta.send(API_URL.SetAta, deviceState, 0);
+									const newState = await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState, 0);
 									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set fan speed mode: ${CONSTANS.AirConditioner.SetFanSpeed[fanSpeedModeInfo]}`);
 								} catch (error) {
 									this.log.error(`${deviceTypeText}: ${accessoryName}, Set fan speed mode error: ${error}`);
@@ -1126,10 +1123,10 @@ class melCloudDevice {
 								deviceState.Power = true;
 								deviceState.VaneHorizontal = value ? 12 : 0;
 								deviceState.VaneVertical = value ? 7 : 0;
-								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneHorizontal + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneVertical;
+								deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
 
 								try {
-									const newState = await this.melCloudAta.send(API_URL.SetAta, deviceState, 0);
+									const newState = await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState, 0);
 									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set vane swing mode: ${CONSTANS.AirConditioner.SwingMode[swingMode]}`);
 								} catch (error) {
 									this.log.error(`${deviceTypeText}: ${accessoryName}, Set vane swing mode error: ${error}`);
@@ -1155,10 +1152,10 @@ class melCloudDevice {
 						.onSet(async (value) => {
 							deviceState.Power = true;
 							deviceState.SetTemperature = value;
-							deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetTemperature;
+							deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.SetTemperature;
 
 							try {
-								const newState = await this.melCloudAta.send(API_URL.SetAta, deviceState, 0);
+								const newState = await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState, 0);
 								const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set target temperature: ${value}${temperatureUnit}`);
 							} catch (error) {
 								this.log.error(`${deviceTypeText}: ${accessoryName}, Set target temperature error: ${error}`);
@@ -1179,10 +1176,10 @@ class melCloudDevice {
 					.onSet(async (value) => {
 						deviceState.Power = true;
 						deviceState.SetTemperature = value;
-						deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetTemperature;
+						deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.SetTemperature;
 
 						try {
-							const newState = await this.melCloudAta.send(API_URL.SetAta, deviceState, 0);
+							const newState = await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState, 0);
 							const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set heating threshold temperature: ${value}${temperatureUnit}`);
 						} catch (error) {
 							this.log.error(`${deviceTypeText}: ${accessoryName}, Set heating threshold temperature error: ${error}`);
@@ -1202,10 +1199,10 @@ class melCloudDevice {
 					.onSet(async (value) => {
 						deviceState.Power = true;
 						deviceState.SetTemperature = value;
-						deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetTemperature;
+						deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.SetTemperature;
 
 						try {
-							const newState = await this.melCloudAta.send(API_URL.SetAta, deviceState, 0);
+							const newState = await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState, 0);
 							const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set cooling threshold temperature: ${value}${temperatureUnit}`);
 						} catch (error) {
 							this.log.error(`${deviceTypeText}: ${accessoryName}, Set cooling threshold temperature error: ${error}`);
@@ -1226,7 +1223,7 @@ class melCloudDevice {
 							deviceState.ProhibitPower = value;
 
 							try {
-								const newState = await this.melCloudAta.send(API_URL.SetAta, deviceState, 0);
+								const newState = await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState, 0);
 								const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set locl physical controls: ${value ? 'LOCK':'UNLOCK'}`);
 							} catch (error) {
 								this.log.error(`${deviceTypeText}: ${accessoryName}, Set lock physical controls error: ${error}`);
@@ -1243,7 +1240,7 @@ class melCloudDevice {
 						melCloudInfo.UseFahrenheit = value ? true : false;
 
 						try {
-							const newState = await this.melCloudAta.send(API_URL.UpdateApplicationOptions, melCloudInfo, 1);
+							const newState = await this.melCloudAta.send(CONSTANS.ApiUrls.UpdateApplicationOptions, melCloudInfo, 1);
 							const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
 							this.melCloudInfo = melCloudInfo;
 						} catch (error) {
@@ -1280,37 +1277,37 @@ class melCloudDevice {
 								switch (buttonMode) {
 									case 0: //POWER ON,OFF
 										deviceState.Power = state;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power;
 										break;
 									case 1: //OPERATING MODE HEAT
 										deviceState.Power = true;
 										deviceState.OperationMode = 1;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.OperationMode;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
 										break;
 									case 2: //OPERATING MODE DRY
 										deviceState.Power = true;
 										deviceState.OperationMode = 2;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.OperationMode;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
 										break
 									case 3: //OPERATING MODE COOL
 										deviceState.Power = true;
 										deviceState.OperationMode = 3;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.OperationMode;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
 										break;
 									case 7: //OPERATING MODE FAN
 										deviceState.Power = true;
 										deviceState.OperationMode = 7;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.OperationMode;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
 										break;
 									case 8: //OPERATING MODE AUTO
 										deviceState.Power = true;
 										deviceState.OperationMode = 8;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.OperationMode;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
 										break;
 									case 9: //OPERATING MODE PURIFY
 										deviceState.Power = true;
 										deviceState.OperationMode = 9;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.OperationMode;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
 										break;
 									case 10: //PHYSICAL LOCK CONTROLS
 										deviceState.ProhibitSetTemperature = state;
@@ -1320,117 +1317,117 @@ class melCloudDevice {
 									case 11: //WANE H SWING MODE AUTO
 										deviceState.Power = true;
 										deviceState.VaneHorizontal = 0;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneHorizontal;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal;
 										break;
 									case 12: //WANE H SWING MODE 1
 										deviceState.Power = true;
 										deviceState.VaneHorizontal = 1;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneHorizontal;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal;
 										break;
 									case 13: //WANE H SWING MODE 2
 										deviceState.Power = true;
 										deviceState.VaneHorizontal = 2;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneHorizontal;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal;
 										break;
 									case 14: //WANE H SWING MODE 3
 										deviceState.Power = true;
 										deviceState.VaneHorizontal = 3;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneHorizontal;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal;
 										break;
 									case 15: //WANE H SWING MODE 4
 										deviceState.Power = true;
 										deviceState.VaneHorizontal = 4;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneHorizontal;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal;
 										break;
 									case 16: //WANE H SWING MODE 5
 										deviceState.Power = true;
 										deviceState.VaneHorizontal = 5;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneHorizontal;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal;
 										break;
 									case 17: //WANE H SWING MODE SWING
 										deviceState.Power = true;
 										deviceState.VaneHorizontal = 12;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneHorizontal;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal;
 										break;
 									case 18: //VANE V SWING MODE AUTO
 										deviceState.Power = true;
 										deviceState.VaneVertical = 0;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneVertical;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
 										break;
 									case 19: //VANE V SWING MODE 1
 										deviceState.Power = true;
 										deviceState.VaneVertical = 1;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneVertical;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
 										break;
 									case 20: //VANE V SWING MODE 2
 										deviceState.Power = true;
 										deviceState.VaneVertical = 2;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneVertical;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
 										break;
 									case 21: //VANE V SWING MODE 3
 										deviceState.Power = true;
 										deviceState.VaneVertical = 3;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneVertical;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
 										break;
 									case 22: //VANE V SWING MODE 4
 										deviceState.Power = true;
 										deviceState.VaneVertical = 4;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneVertical;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
 										break;
 									case 23: //VANE V SWING MODE 5
 										deviceState.Power = true;
 										deviceState.VaneVertical = 5;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneVertical;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
 										break;
 									case 24: //VANE V SWING MODE SWING
 										deviceState.Power = true;
 										deviceState.VaneVertical = 7;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.VaneVertical;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
 										break;
 									case 25: //FAN SPEED MODE AUTO
 										deviceState.Power = true;
 										deviceState.SetFanSpeed = 0;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetFanSpeed;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
 										break;
 									case 26: //FAN SPEED MODE 1
 										deviceState.Power = true;
 										deviceState.SetFanSpeed = 1;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetFanSpeed;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
 										break;
 									case 27: //FAN SPEED MODE 2
 										deviceState.Power = true;
 										deviceState.SetFanSpeed = 2;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetFanSpeed;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
 										break;
 									case 28: //FAN SPEED MODE 3
 										deviceState.Power = true;
 										deviceState.SetFanSpeed = 3;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetFanSpeed;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
 										break;
 									case 29: //FAN MODE 4
 										deviceState.Power = true;
 										deviceState.SetFanSpeed = 4;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetFanSpeed;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
 										break;
 									case 30: //FAN SPEED MODE 5
 										deviceState.Power = true;
 										deviceState.SetFanSpeed = 5;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetFanSpeed;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
 										break;
 									case 31: //FAN SPEED MODE 6
 										deviceState.Power = true;
 										deviceState.SetFanSpeed = 6;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetFanSpeed;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
 										break;
 									case 32: //FAN SPEED MODE 7
 										deviceState.Power = true;
 										deviceState.SetFanSpeed = 7;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.SetFanSpeed;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
 										break;
 								};
 
 								try {
-									const newState = await this.melCloudAta.send(API_URL.SetAta, deviceState, 0);
+									const newState = await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState, 0);
 									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set: ${buttonName}`);
 								} catch (error) {
 									this.log.error(`${deviceTypeText}: ${accessoryName}, Set button error: ${error}`);
@@ -1443,7 +1440,7 @@ class melCloudDevice {
 				};
 
 				//presets services
-				if (this.enableDevicePresets && this.devicePresetsCount > 0) {
+				if (this.devicePresetsCount > 0) {
 					this.log.debug('preparePresetsService');
 
 					this.presetsServices = new Array();
@@ -1474,12 +1471,12 @@ class melCloudDevice {
 										deviceState.VaneHorizontal = vaneHorizontal;
 										deviceState.VaneVertical = vaneVertical;
 										deviceState.FanSpeed = fanSpeed;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.AirConditioner.Power + DEVICES_EFFECTIVE_FLAGS.AirConditioner.OperationMode;
+										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
 										break;
 								};
 
 								try {
-									const newState = await this.melCloudAta.send(API_URL.SetAta, deviceState, 0);
+									const newState = await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState, 0);
 									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set: ${presetName}`);
 								} catch (error) {
 									this.log.error(`${deviceTypeText}: ${accessoryName}, Set preset error: ${error}`);
@@ -1496,8 +1493,8 @@ class melCloudDevice {
 					this.log.debug('prepareMelCloudServiceAtw');
 					this.melCloudServicesAtw = new Array();
 					const hetPumpZone = CONSTANS.HeatPump.Zones[i];
-					const heatPumpOperationMode = [DEVICES_EFFECTIVE_FLAGS.HeatPump.Power + DEVICES_EFFECTIVE_FLAGS.HeatPump.operationModeZone1, DEVICES_EFFECTIVE_FLAGS.HeatPump.Power + DEVICES_EFFECTIVE_FLAGS.HeatPump.OperationMode, DEVICES_EFFECTIVE_FLAGS.HeatPump.Power + DEVICES_EFFECTIVE_FLAGS.HeatPump.operationModeZone2][i];
-					const heatPumpSetTemperature = [DEVICES_EFFECTIVE_FLAGS.HeatPump.SetTemperatureZone1, DEVICES_EFFECTIVE_FLAGS.HeatPump.SetTankWaterTemperature, DEVICES_EFFECTIVE_FLAGS.HeatPump.SetTemperatureZone2][i];
+					const heatPumpOperationMode = [CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.operationModeZone1, CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationMode, CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.operationModeZone2][i];
+					const heatPumpSetTemperature = [CONSTANS.HeatPump.EffectiveFlags.SetTemperatureZone1, CONSTANS.HeatPump.EffectiveFlags.SetTankWaterTemperature, CONSTANS.HeatPump.EffectiveFlags.SetTemperatureZone2][i];
 					const atwServiceName = (accessoryName + ' ' + hetPumpZone);
 
 					for (let i = 0; i < this.zonesCount; i++) {
@@ -1512,10 +1509,10 @@ class melCloudDevice {
 								})
 								.onSet(async (state) => {
 									deviceState.Power = state;
-									deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.HeatPump.Power;
+									deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power;
 
 									try {
-										const newState = await this.melCloudAtw.send(API_URL.SetAtw, deviceState, 0);
+										const newState = await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState, 0);
 										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set power: ${state?'ON':'OFF'}`);
 									} catch (error) {
 										this.log.error(`${deviceTypeText}: ${accessoryName}, Set power error: ${error}`);
@@ -1541,7 +1538,7 @@ class melCloudDevice {
 									case 0: //OFF, AUTO
 										deviceState.Power = displayMode ? false : true;
 										deviceState.OperationMode = displayMode ? deviceState.OperationMode : 8;
-										deviceState.EffectiveFlags = displayMode ? DEVICES_EFFECTIVE_FLAGS.HeatPump.Power : heatPumpOperationMode;
+										deviceState.EffectiveFlags = displayMode ? CONSTANS.HeatPump.EffectiveFlags.Power : heatPumpOperationMode;
 										break;
 									case 1: //HEAT
 										deviceState.Power = true;
@@ -1556,12 +1553,12 @@ class melCloudDevice {
 									case 3: //AUTO, OFF
 										deviceState.Power = displayMode ? true : false;
 										deviceState.OperationMode = displayMode ? 8 : deviceState.OperationMode;
-										deviceState.EffectiveFlags = displayMode ? heatPumpOperationMode : DEVICES_EFFECTIVE_FLAGS.HeatPump.Power;
+										deviceState.EffectiveFlags = displayMode ? heatPumpOperationMode : CONSTANS.HeatPump.EffectiveFlags.Power;
 										break;
 								};
 
 								try {
-									const newState = await this.melCloudAtw.send(API_URL.SetAtw, deviceState, 0);
+									const newState = await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState, 0);
 									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${hetPumpZone}, Set target heating cooling mode: ${targetModeText[value]}`);
 								} catch (error) {
 									this.log.error(`${deviceTypeText}: ${accessoryName}, ${hetPumpZone}, Set target heating cooling mode error: ${error}`);
@@ -1588,7 +1585,7 @@ class melCloudDevice {
 									deviceState.EffectiveFlags = heatPumpSetTemperature;
 
 									try {
-										const newState = await this.melCloudAtw.send(API_URL.SetAtw, deviceState, 0);
+										const newState = await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState, 0);
 										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${hetPumpZone}, Set target temperature: ${value}${temperatureUnit}`);
 									} catch (error) {
 										this.log.error(`${deviceTypeText}: ${accessoryName}, ${hetPumpZone}, Set target temperature error: ${error}`);
@@ -1612,7 +1609,7 @@ class melCloudDevice {
 								deviceState.EffectiveFlags = heatPumpSetTemperature;
 
 								try {
-									const newState = await this.melCloudAtw.send(API_URL.SetAtw, deviceState, 0);
+									const newState = await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState, 0);
 									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${hetPumpZone}, Set heating threshold temperature: ${value}${temperatureUnit}`);
 								} catch (error) {
 									this.log.error(`${deviceTypeText}: ${accessoryName}, ${hetPumpZone}, Set heating threshold temperature error: ${error}`);
@@ -1635,7 +1632,7 @@ class melCloudDevice {
 								deviceState.EffectiveFlags = heatPumpSetTemperature;
 
 								try {
-									const newState = await this.melCloudAtw.send(API_URL.SetAtw, deviceState, 0);
+									const newState = await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState, 0);
 									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${hetPumpZone}, Set cooling threshold temperature: ${value}${temperatureUnit}`);
 								} catch (error) {
 									this.log.error(`${deviceTypeText}: ${accessoryName}, ${hetPumpZone}, Set cooling threshold temperature error: ${error}`);
@@ -1656,7 +1653,7 @@ class melCloudDevice {
 									deviceState.ProhibitPower = value;
 
 									try {
-										const newState = await this.melCloudAtw.send(API_URL.SetAtw, deviceState, 0);
+										const newState = await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState, 0);
 										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set lock physical controls: ${value ? 'LOCK':'UNLOCK'}`);
 									} catch (error) {
 										this.log.error(`${deviceTypeText}: ${accessoryName}, Set lock physical controls error: ${error}`);
@@ -1673,7 +1670,7 @@ class melCloudDevice {
 								melCloudInfo.UseFahrenheit = value ? true : false;
 
 								try {
-									const newState = await this.melCloudAtw.send(API_URL.UpdateApplicationOptions, melCloudInfo, 1);
+									const newState = await this.melCloudAtw.send(CONSTANS.ApiUrls.UpdateApplicationOptions, melCloudInfo, 1);
 									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
 									this.melCloudInfo = melCloudInfo;
 								} catch (error) {
@@ -1714,7 +1711,7 @@ class melCloudDevice {
 								switch (buttonMode) {
 									case 0: //POWER ON,OFF
 										deviceState.Power = state;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.HeatPump.Power;
+										deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power;
 										break;
 									case 10: //PHYSICAL LOCK CONTROLS
 										deviceState.ProhibitSetTemperature = state;
@@ -1724,97 +1721,97 @@ class melCloudDevice {
 									case 40: //HEAT THERMOSTAT
 										deviceState.Power = true;
 										deviceState.OperationMode = 1;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.HeatPump.Power + DEVICES_EFFECTIVE_FLAGS.HeatPump.OperationMode;
+										deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationMode;
 										break;
 									case 41: //COOL THERMOSTAT
 										deviceState.Power = true;
 										deviceState.OperationMode = 3;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.HeatPump.Power + DEVICES_EFFECTIVE_FLAGS.HeatPump.OperationMode;
+										deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationMode;
 										break;
 									case 42: //HEAT FLOW
 										deviceState.Power = true;
 										deviceState.OperationMode = 8;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.HeatPump.Power + DEVICES_EFFECTIVE_FLAGS.HeatPump.OperationMode;
+										deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationMode;
 										break;
 									case 43: //COOL FLOW
 										deviceState.Power = true;
 										deviceState.OperationMode = 8;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.HeatPump.Power + DEVICES_EFFECTIVE_FLAGS.HeatPump.OperationMode;
+										deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationMode;
 										break;
 									case 44: //CURVE
 										deviceState.Power = true;
 										deviceState.OperationMode = 8;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.HeatPump.Power + DEVICES_EFFECTIVE_FLAGS.HeatPump.OperationMode;
+										deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationMode;
 										break;
 									case 45: //UNKNOWN
 										deviceState.Power = true;
 										deviceState.OperationMode = 8;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.HeatPump.Power + DEVICES_EFFECTIVE_FLAGS.HeatPump.OperationMode;
+										deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationMode;
 										break;
 									case 50: //HEAT THERMOSTAT
 										deviceState.Power = true;
 										deviceState.OperationMode = 1;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.HeatPump.Power + DEVICES_EFFECTIVE_FLAGS.HeatPump.OperationModeZone1;
+										deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationModeZone1;
 										break;
 									case 51: //COOL THERMOSTAT
 										deviceState.Power = true;
 										deviceState.OperationMode = 3;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.HeatPump.Power + DEVICES_EFFECTIVE_FLAGS.HeatPump.OperationModeZone1;
+										deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationModeZone1;
 										break;
 									case 52: //HEAT FLOW
 										deviceState.Power = true;
 										deviceState.OperationMode = 8;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.HeatPump.Power + DEVICES_EFFECTIVE_FLAGS.HeatPump.OperationModeZone1;
+										deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationModeZone1;
 										break;
 									case 53: //COOL FLOW
 										deviceState.Power = true;
 										deviceState.OperationMode = 8;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.HeatPump.Power + DEVICES_EFFECTIVE_FLAGS.HeatPump.OperationModeZone1;
+										deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationModeZone1;
 										break;
 									case 54: //CURVE
 										deviceState.Power = true;
 										deviceState.OperationMode = 8;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.HeatPump.Power + DEVICES_EFFECTIVE_FLAGS.HeatPump.OperationModeZone1;
+										deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationModeZone1;
 										break;
 									case 55: //UNKNOWN
 										deviceState.Power = true;
 										deviceState.OperationMode = 8;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.HeatPump.Power + DEVICES_EFFECTIVE_FLAGS.HeatPump.OperationModeZone1;
+										deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationModeZone1;
 										break;
 									case 60: //HEAT THERMOSTAT
 										deviceState.Power = true;
 										deviceState.OperationMode = 1;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.HeatPump.Power + DEVICES_EFFECTIVE_FLAGS.HeatPump.OperationModeZone2;
+										deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationModeZone2;
 										break;
 									case 61: //COOL THERMOSTAT
 										deviceState.Power = true;
 										deviceState.OperationMode = 3;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.HeatPump.Power + DEVICES_EFFECTIVE_FLAGS.HeatPump.OperationModeZone2;
+										deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationModeZone2;
 										break;
 									case 62: //HEAT FLOW
 										deviceState.Power = true;
 										deviceState.OperationMode = 8;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.HeatPump.Power + DEVICES_EFFECTIVE_FLAGS.HeatPump.OperationModeZone2;
+										deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationModeZone2;
 										break;
 									case 63: //COOL FLOW
 										deviceState.Power = true;
 										deviceState.OperationMode = 8;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.HeatPump.Power + DEVICES_EFFECTIVE_FLAGS.HeatPump.OperationModeZone2;
+										deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationModeZone2;
 										break;
 									case 64: //CURVE
 										deviceState.Power = true;
 										deviceState.OperationMode = 8;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.HeatPump.Power + DEVICES_EFFECTIVE_FLAGS.HeatPump.OperationModeZone2;
+										deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationModeZone2;
 										break;
 									case 65: //UNKNOWN
 										deviceState.Power = true;
 										deviceState.OperationMode = 8;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.HeatPump.Power + DEVICES_EFFECTIVE_FLAGS.HeatPump.OperationModeZone2;
+										deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationModeZone2;
 										break;
 								};
 
 								try {
-									const newState = await this.melCloudAtw.send(API_URL.SetAtw, deviceState, 0);
+									const newState = await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState, 0);
 									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set: ${buttonName}`);
 								} catch (error) {
 									this.log.error(`${deviceTypeText}: ${accessoryName}, Set button error: ${error}`);
@@ -1827,7 +1824,7 @@ class melCloudDevice {
 				};
 
 				//presets services
-				if (this.enableDevicePresets && this.devicePresetsCount > 0) {
+				if (this.devicePresetsCount > 0) {
 					this.log.debug('preparePresetsService');
 					this.presetsServices = new Array();
 
@@ -1852,12 +1849,12 @@ class melCloudDevice {
 										deviceState.Power = state ? power : false;
 										deviceState.SetTemperature = setTemperature;
 										deviceState.OperationMode = operationMode;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.HeatPump.Power + DEVICES_EFFECTIVE_FLAGS.HeatPump.OperationMode;
+										deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationMode;
 										break;
 								};
 
 								try {
-									const newState = await this.melCloudAtw.send(API_URL.SetAtw, deviceState, 0);
+									const newState = await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState, 0);
 									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set: ${presetName}`);
 								} catch (error) {
 									this.log.error(`${deviceTypeText}: ${accessoryName}, Set preset error: ${error}`);
@@ -1886,10 +1883,10 @@ class melCloudDevice {
 						})
 						.onSet(async (state) => {
 							deviceState.Power = state;
-							deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.Ventilation.Power;
+							deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power;
 
 							try {
-								const newState = await this.melCloudErv.send(API_URL.SetErv, deviceState, 0);
+								const newState = await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState, 0);
 								const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set power: ${state?'ON':'OFF'}`);
 							} catch (error) {
 								this.log.error(`${deviceTypeText}: ${accessoryName}, Set power error: ${error}`);
@@ -1915,27 +1912,27 @@ class melCloudDevice {
 							case 0: //OFF, AUTO
 								deviceState.Power = displayMode ? false : true;
 								deviceState.OperationMode = displayMode ? deviceState.OperationMode : 8;
-								deviceState.EffectiveFlags = displayMode ? DEVICES_EFFECTIVE_FLAGS.Ventilation.Power : DEVICES_EFFECTIVE_FLAGS.Ventilation.Power + DEVICES_EFFECTIVE_FLAGS.Ventilation.OperationMode;
+								deviceState.EffectiveFlags = displayMode ? CONSTANS.Ventilation.EffectiveFlags.Power : CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.OperationMode;
 								break;
 							case 1: //HEAT
 								deviceState.Power = true;
 								deviceState.OperationMode = 1;
-								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.Ventilation.Power + DEVICES_EFFECTIVE_FLAGS.Ventilation.OperationMode;
+								deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.OperationMode;
 								break;
 							case 2: //COOL
 								deviceState.Power = true;
 								deviceState.OperationMode = 3;
-								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.Ventilation.Power + DEVICES_EFFECTIVE_FLAGS.Ventilation.OperationMode;
+								deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.OperationMode;
 								break;
 							case 3: //AUTO, OFF
 								deviceState.Power = displayMode ? true : false;
 								deviceState.OperationMode = displayMode ? 8 : deviceState.OperationMode;
-								deviceState.EffectiveFlags = displayMode ? DEVICES_EFFECTIVE_FLAGS.Ventilation.Power + DEVICES_EFFECTIVE_FLAGS.Ventilation.OperationMode : DEVICES_EFFECTIVE_FLAGS.Ventilation.Power;
+								deviceState.EffectiveFlags = displayMode ? CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.OperationMode : CONSTANS.Ventilation.EffectiveFlags.Power;
 								break;
 						};
 
 						try {
-							const newState = await this.melCloudErv.send(API_URL.SetErv, deviceState, 0);
+							const newState = await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState, 0);
 							const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set target heating cooling mode: ${targetModeText[value]}`);
 						} catch (error) {
 							this.log.error(`${deviceTypeText}: ${accessoryName}, Set target heating cooling mode error: ${error}`);
@@ -1994,10 +1991,10 @@ class melCloudDevice {
 
 								deviceState.Power = true;
 								deviceState.SetFanSpeed = fanSpeedMode;
-								deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.Ventilation.SetFanSpeed;
+								deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
 
 								try {
-									const newState = await this.melCloudErv.send(API_URL.SetErv, deviceState, 0);
+									const newState = await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState, 0);
 									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set fan speed mode: ${CONSTANS.Ventilation.SetFanSpeed[fanSpeedModeInfo]}`);
 								} catch (error) {
 									this.log.error(`${deviceTypeText}: ${accessoryName}, Set fan speed mode error: ${error}`);
@@ -2023,10 +2020,10 @@ class melCloudDevice {
 						.onSet(async (value) => {
 							deviceState.Power = true;
 							deviceState.SetTemperature = value;
-							deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.Ventilation.SetTemperature;
+							deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.SetTemperature;
 
 							try {
-								const newState = await this.melCloudErv.send(API_URL.SetErv, deviceState, 0);
+								const newState = await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState, 0);
 								const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set target temperature: ${value}${temperatureUnit}`);
 							} catch (error) {
 								this.log.error(`${deviceTypeText}: ${accessoryName}, Set target temperature error: ${error}`);
@@ -2047,10 +2044,10 @@ class melCloudDevice {
 					.onSet(async (value) => {
 						deviceState.Power = true;
 						deviceState.SetTemperature = value;
-						deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.Ventilation.SetTemperature;
+						deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.SetTemperature;
 
 						try {
-							const newState = await this.melCloudErv.send(API_URL.SetErv, deviceState, 0);
+							const newState = await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState, 0);
 							const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set heating threshold temperature: ${value}${temperatureUnit}`);
 						} catch (error) {
 							this.log.error(`${deviceTypeText}: ${accessoryName}, Set heating threshold temperature error: ${error}`);
@@ -2070,10 +2067,10 @@ class melCloudDevice {
 					.onSet(async (value) => {
 						deviceState.Power = true;
 						deviceState.SetTemperature = value;
-						deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.Ventilation.SetTemperature;
+						deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.SetTemperature;
 
 						try {
-							const newState = await this.melCloudErv.send(API_URL.SetErv, deviceState, 0);
+							const newState = await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState, 0);
 							const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set cooling threshold temperature: ${value}${temperatureUnit}`);
 						} catch (error) {
 							this.log.error(`${deviceTypeText}: ${accessoryName}, Set cooling threshold temperature error: ${error}`);
@@ -2094,7 +2091,7 @@ class melCloudDevice {
 							deviceState.ProhibitPower = value;
 
 							try {
-								const newState = await this.melCloudErv.send(API_URL.SetErv, deviceState, 0);
+								const newState = await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState, 0);
 								const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set locl physical controls: ${value ? 'LOCK':'UNLOCK'}`);
 							} catch (error) {
 								this.log.error(`${deviceTypeText}: ${accessoryName}, Set lock physical controls error: ${error}`);
@@ -2111,7 +2108,7 @@ class melCloudDevice {
 						melCloudInfo.UseFahrenheit = value ? true : false;
 
 						try {
-							const newState = await this.melCloudErv.send(API_URL.UpdateApplicationOptions, melCloudInfo, 1);
+							const newState = await this.melCloudErv.send(CONSTANS.ApiUrls.UpdateApplicationOptions, melCloudInfo, 1);
 							const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
 							this.melCloudInfo = melCloudInfo;
 						} catch (error) {
@@ -2148,7 +2145,7 @@ class melCloudDevice {
 								switch (buttonMode) {
 									case 0: //POWER ON,OFF
 										deviceState.Power = state;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.Ventilation.Power;
+										deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power;
 										break;
 									case 10: //PHYSICAL LOCK CONTROLS
 										deviceState.ProhibitSetTemperature = state;
@@ -2158,67 +2155,67 @@ class melCloudDevice {
 									case 25: //FAN SPEED MODE AUTO
 										deviceState.Power = true;
 										deviceState.SetFanSpeed = 0;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.Ventilation.Power + DEVICES_EFFECTIVE_FLAGS.Ventilation.SetFanSpeed;
+										deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
 										break;
 									case 26: //FAN SPEED MODE 1
 										deviceState.Power = true;
 										deviceState.SetFanSpeed = 1;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.Ventilation.Power + DEVICES_EFFECTIVE_FLAGS.Ventilation.SetFanSpeed;
+										deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
 										break;
 									case 27: //FAN SPEED MODE 2
 										deviceState.Power = true;
 										deviceState.SetFanSpeed = 2;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.Ventilation.Power + DEVICES_EFFECTIVE_FLAGS.Ventilation.SetFanSpeed;
+										deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
 										break;
 									case 28: //FAN SPEED MODE 3
 										deviceState.Power = true;
 										deviceState.SetFanSpeed = 3;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.Ventilation.Power + DEVICES_EFFECTIVE_FLAGS.Ventilation.SetFanSpeed;
+										deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
 										break;
 									case 29: //FAN MODE 4
 										deviceState.Power = true;
 										deviceState.SetFanSpeed = 4;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.Ventilation.Power + DEVICES_EFFECTIVE_FLAGS.Ventilation.SetFanSpeed;
+										deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
 										break;
 									case 30: //FAN SPEED MODE 5
 										deviceState.Power = true;
 										deviceState.SetFanSpeed = 5;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.Ventilation.Power + DEVICES_EFFECTIVE_FLAGS.Ventilation.SetFanSpeed;
+										deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
 										break;
 									case 31: //FAN SPEED MODE 6
 										deviceState.Power = true;
 										deviceState.SetFanSpeed = 6;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.Ventilation.Power + DEVICES_EFFECTIVE_FLAGS.Ventilation.SetFanSpeed;
+										deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
 										break;
 									case 32: //FAN SPEED MODE 7
 										deviceState.Power = true;
 										deviceState.SetFanSpeed = 7;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.Ventilation.Power + DEVICES_EFFECTIVE_FLAGS.Ventilation.SetFanSpeed;
+										deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
 										break;
 									case 33: //FAN SPEED MODE 8
 										deviceState.Power = true;
 										deviceState.SetFanSpeed = 8;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.Ventilation.Power + DEVICES_EFFECTIVE_FLAGS.Ventilation.SetFanSpeed;
+										deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
 										break;
 									case 70: //OPERATING MODE RECOVERY
 										deviceState.Power = true;
 										deviceState.OperationMode = 0;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.Ventilation.Power + DEVICES_EFFECTIVE_FLAGS.Ventilation.OperationMode;
+										deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.OperationMode;
 										break;
 									case 71: //OPERATING MODE BYPAS
 										deviceState.Power = true;
 										deviceState.OperationMode = 1;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.Ventilation.Power + DEVICES_EFFECTIVE_FLAGS.Ventilation.OperationMode;
+										deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.OperationMode;
 										break
 									case 72: //OPERATING MODE AUTO
 										deviceState.Power = true;
 										deviceState.OperationMode = 2;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.Ventilation.Power + DEVICES_EFFECTIVE_FLAGS.Ventilation.OperationMode;
+										deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.OperationMode;
 										break;
 								};
 
 								try {
-									const newState = await this.melCloudErv.send(API_URL.SetErv, deviceState, 0);
+									const newState = await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState, 0);
 									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set: ${buttonName}`);
 								} catch (error) {
 									this.log.error(`${deviceTypeText}: ${accessoryName}, Set button error: ${error}`);
@@ -2231,7 +2228,7 @@ class melCloudDevice {
 				};
 
 				//presets services
-				if (this.enableDevicePresets && this.devicePresetsCount > 0) {
+				if (this.devicePresetsCount > 0) {
 					this.log.debug('preparePresetsService');
 					this.presetsServices = new Array();
 
@@ -2258,12 +2255,12 @@ class melCloudDevice {
 										deviceState.SetTemperature = setTemperature;
 										deviceState.OperationMode = operationMode;
 										deviceState.FanSpeed = fanSpeed;
-										deviceState.EffectiveFlags = DEVICES_EFFECTIVE_FLAGS.Ventilation.Power + DEVICES_EFFECTIVE_FLAGS.Ventilation.OperationMode;
+										deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.OperationMode;
 										break;
 								};
 
 								try {
-									const newState = await this.melCloudErv.send(API_URL.SetErv, deviceState, 0);
+									const newState = await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState, 0);
 									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set: ${presetName}`);
 								} catch (error) {
 									this.log.error(`${deviceTypeText}: ${accessoryName}, Set preset error: ${error}`);
@@ -2277,8 +2274,8 @@ class melCloudDevice {
 				break;
 		};
 
-		this.startPrepareAccessory = false;
 		this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
 		const debug = this.enableDebugMode ? this.log(`${deviceTypeText}: ${accessoryName}, published as external accessory.`) : false;
+		this.startPrepareAccessory = false;
 	};
 };

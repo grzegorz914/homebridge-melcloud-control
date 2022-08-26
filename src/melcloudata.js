@@ -4,7 +4,6 @@ const fs = require('fs');
 const fsPromises = fs.promises;
 const EventEmitter = require('events');
 const axios = require('axios');
-const API_URL = require('./apiurl.json');
 const CONSTANS = require('./constans.json');
 
 
@@ -25,7 +24,7 @@ class MELCLOUDDEVICEATA extends EventEmitter {
 
         this.axiosInstanceGet = axios.create({
             method: 'GET',
-            baseURL: API_URL.BaseURL,
+            baseURL: CONSTANS.ApiUrls.BaseURL,
             timeout: 10000,
             headers: {
                 'X-MitsContextKey': contextKey,
@@ -33,7 +32,7 @@ class MELCLOUDDEVICEATA extends EventEmitter {
         });
         this.axiosInstancePost = axios.create({
             method: 'POST',
-            baseURL: API_URL.BaseURL,
+            baseURL: CONSTANS.ApiUrls.BaseURL,
             timeout: 10000,
             headers: {
                 'X-MitsContextKey': contextKey,
@@ -59,7 +58,7 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 const lastServiceDate = deviceInfo.LastServiceDate;
 
                 //presets
-                const devicePresets = deviceInfo.Presets;
+                const devicePresets = Array.isArray(deviceInfo.Presets) ? deviceInfo.Presets : [];
                 const devicePresetsCount = devicePresets.length;
 
                 const ownerID = deviceInfo.OwnerID;
@@ -216,7 +215,8 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 const deviceSupportsHourlyEnergyReport = deviceInfo.Device.SupportsHourlyEnergyReport;
 
                 //units info
-                const units = deviceInfo.Device.Units;
+                const units = Array.isArray(deviceInfo.Device.Units) ? deviceInfo.Device.Units : [];
+                const unitsCount = units.length;
                 const serialsNumberIndoor = new Array();
                 const serialsNumberOutdoor = new Array();
                 const modelsNumberIndoor = new Array();
@@ -225,8 +225,8 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 const modelsOutdoor = new Array();
                 const typesIndoor = new Array();
                 const typesOutdoor = new Array();
-                if (Array.isArray(units) && units.length > 0) {
-                    for (let i = 0; i < units.length; i++) {
+                if (unitsCount > 0) {
+                    for (let i = 0; i < unitsCount; i++) {
                         const unit = units[i];
                         const unitId = unit.ID;
                         const unitDevice = unit.Device;
@@ -279,7 +279,7 @@ class MELCLOUDDEVICEATA extends EventEmitter {
         }).on('checkDeviceState', async () => {
             //deviceState
             try {
-                const deviceUrl = API_URL.DeviceState.replace("DID", deviceId).replace("BID", buildingId);
+                const deviceUrl = CONSTANS.ApiUrls.DeviceState.replace("DID", deviceId).replace("BID", buildingId);
                 const responseData = await this.axiosInstanceGet(deviceUrl);
                 const deviceState = responseData.data;
                 const deviceStateData = JSON.stringify(deviceState, null, 2);

@@ -14,7 +14,7 @@
           "type": "object",
           "properties": {
             "name": {
-              "title": "Account name",
+              "title": "Account",
               "type": "string",
               "placeholder": "Account name",
               "description": "Here set your own account name.",
@@ -150,7 +150,7 @@
               "required": true
             },
             "displayMode": {
-              "title": "Main control mode",
+              "title": "Control mode",
               "type": "integer",
               "minimum": 0,
               "maximum": 1,
@@ -188,8 +188,8 @@
                     "title": "Mode",
                     "type": "integer",
                     "minimum": 0,
-                    "maximum": 70,
-                    "description": "Here select the function, AC - Air Conditioner, HP - Heat Pump, ERV - Energy Recovery Ventilation, VH - Vane Horizontal, VV - Vane Horizontal.",
+                    "maximum": 80,
+                    "description": "Here select the function, AC - Air Conditioner, HP - Heat Pump, ERV - Energy Recovery Ventilation, VH - Vane Horizontal, VV - Vane Veretical.",
                     "oneOf": [{
                         "title": "POWER ON/OFF",
                         "enum": [
