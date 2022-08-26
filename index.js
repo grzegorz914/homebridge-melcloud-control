@@ -12,14 +12,14 @@ const PLUGIN_NAME = 'homebridge-melcloud-control';
 const PLATFORM_NAME = 'melcloudcontrol';
 const CONSTANS = require('./src/constans.json');
 
-let Accessory, Characteristic, Service, Categories, AccessoryUUID;
+let Accessory, Characteristic, Service, Categories, UUID;
 
 module.exports = (api) => {
 	Accessory = api.platformAccessory;
 	Characteristic = api.hap.Characteristic;
 	Service = api.hap.Service;
 	Categories = api.hap.Categories;
-	AccessoryUUID = api.hap.uuid;
+	UUID = api.hap.uuid;
 	api.registerPlatform(PLUGIN_NAME, PLATFORM_NAME, melCloudPlatform, true);
 };
 
@@ -961,7 +961,7 @@ class melCloudDevice {
 
 		//accessory
 		const accessoryName = deviceName;
-		const accessoryUUID = AccessoryUUID.generate(deviceId);
+		const accessoryUUID = UUID.generate(deviceId);
 		const accessoryCategory = [Categories.AIR_CONDITIONER, Categories.AIR_HEATER, Categories.OTHER, Categories.FAN][deviceType];
 		const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 		const buttonsCount = this.buttons.length;
