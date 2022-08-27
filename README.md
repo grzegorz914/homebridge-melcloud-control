@@ -27,7 +27,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * The old plugin and config need to be first removed from Homebridge and HomeKit and added again.
 * The platform name and password properties was changed due collision with same already exist plugins from other developers.
 ### Note
-* The Heat Pump and Energy Recovery Ventilation is in beta test.
+* The Heat Pump and Energy Recovery Ventilation v0.3.0 is in beta test.
 
 ### Troubleshooting
 * If for some reason the device is not displayed in HomeKit app try this procedure:
@@ -66,9 +66,9 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
     * Fan speed mode *AUTO/1/2/3/4/5*.
     * Set device presets.
 * Control of Heat Pump:
-  * Comming soon...
+  * Test phase...
 * Control of Energy Recovery Ventilation:
-  * Comming soon...
+  * Test phase...
 * Home automations and shortcuts can be used to control the devices.
 * Siri can be used to control the devices.
 * MQTT publisch all available data from all detected devices.
