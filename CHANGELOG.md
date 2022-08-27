@@ -8,10 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### The old plugin and config need to be first removed from Homebridge and HomeKit and added again.
 ### The platform name and password properties was changed due collision with same already exist plugins from other developers.
 
-## [0.2.17] - (30.07.2022)
+## [0.3.0] - (27.08.2022)
 ## Changes
-- fix [#14](https://github.com/grzegorz914/homebridge-melcloud-control/issues/14)
-- fis search devices in building areas
+- code cleanup and rebuild
+- stability improvements
+- added account reconect process if for some reason login fail
+- added devices list and state recheck if for some reason fail
+- revert to get serial mumber from wifi adapter not the device itself
+- added expose device presets as a buttons in home app
+- added support for Heat Pump (Test phase)
+- added support for Enrgy Recovery Ventilation (Test phase)
 
 ## [0.2.16] - (24.07.2022)
 ## Changes

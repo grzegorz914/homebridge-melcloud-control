@@ -14,7 +14,7 @@
           "type": "object",
           "properties": {
             "name": {
-              "title": "Account name",
+              "title": "Account",
               "type": "string",
               "placeholder": "Account name",
               "description": "Here set your own account name.",
@@ -150,7 +150,7 @@
               "required": true
             },
             "displayMode": {
-              "title": "Main control mode",
+              "title": "Control mode",
               "type": "integer",
               "minimum": 0,
               "maximum": 1,
@@ -188,8 +188,8 @@
                     "title": "Mode",
                     "type": "integer",
                     "minimum": 0,
-                    "maximum": 30,
-                    "description": "Here select the function mode.",
+                    "maximum": 80,
+                    "description": "Here select the function, AC - Air Conditioner, HP - Heat Pump, ERV - Energy Recovery Ventilation, VH - Vane Horizontal, VV - Vane Veretical.",
                     "oneOf": [{
                         "title": "POWER ON/OFF",
                         "enum": [
@@ -197,165 +197,309 @@
                         ]
                       },
                       {
-                        "title": "OPERATING MODE HEAT",
-                        "enum": [
-                          1
-                        ]
-                      },
-                      {
-                        "title": "OPERATING MODE DRY",
-                        "enum": [
-                          2
-                        ]
-                      },
-                      {
-                        "title": "OPERATING MODE COOL",
-                        "enum": [
-                          3
-                        ]
-                      },
-                      {
-                        "title": "OPERATING MODE FAN",
-                        "enum": [
-                          7
-                        ]
-                      },
-                      {
-                        "title": "OPERATING MODE AUTO",
-                        "enum": [
-                          8
-                        ]
-                      },
-                      {
-                        "title": "OPERATING MODE PURIFY",
-                        "enum": [
-                          9
-                        ]
-                      },
-                      {
-                        "title": "PHYSICAL CONTROLS LOCK/UNLOCK",
+                        "title": "PHYSICAL LOCK CONTROL",
                         "enum": [
                           10
                         ]
                       },
                       {
-                        "title": "VANE H SWING MODE AUTO",
+                        "title": "AC MODE HEAT",
+                        "enum": [
+                          1
+                        ]
+                      },
+                      {
+                        "title": "AC MODE DRY",
+                        "enum": [
+                          2
+                        ]
+                      },
+                      {
+                        "title": "AC MODE COOL",
+                        "enum": [
+                          3
+                        ]
+                      },
+                      {
+                        "title": "AC MODE FAN",
+                        "enum": [
+                          7
+                        ]
+                      },
+                      {
+                        "title": "AC MODE AUTO",
+                        "enum": [
+                          8
+                        ]
+                      },
+                      {
+                        "title": "AC MODE PURIFY",
+                        "enum": [
+                          9
+                        ]
+                      },
+                      {
+                        "title": "AC VH MODE AUTO",
                         "enum": [
                           11
                         ]
                       },
                       {
-                        "title": "VANE H SWING MODE 1",
+                        "title": "AC VH MODE 1",
                         "enum": [
                           12
                         ]
                       },
                       {
-                        "title": "VANE H SWING MODE 2",
+                        "title": "AC VH MODE 2",
                         "enum": [
                           13
                         ]
                       },
                       {
-                        "title": "VANE H SWING MODE 3",
+                        "title": "AC VH MODE 3",
                         "enum": [
                           14
                         ]
                       },
                       {
-                        "title": "VANE H SWING MODE 4",
+                        "title": "AC VH MODE 4",
                         "enum": [
                           15
                         ]
                       },
                       {
-                        "title": "VANE H SWING MODE 5",
+                        "title": "AC VH MODE 5",
                         "enum": [
                           16
                         ]
                       },
                       {
-                        "title": "VANE H SWING MODE SWING",
+                        "title": "AC VH MODE SWING",
                         "enum": [
                           17
                         ]
                       },
                       {
-                        "title": "VANE V SWING MODE AUTO",
+                        "title": "AC VV MODE AUTO",
                         "enum": [
                           18
                         ]
                       },
                       {
-                        "title": "VANE V SWING MODE 1",
+                        "title": "AC VV MODE 1",
                         "enum": [
                           19
                         ]
                       },
                       {
-                        "title": "VANE V SWING MODE 2",
+                        "title": "AC VV MODE 2",
                         "enum": [
                           20
                         ]
                       },
                       {
-                        "title": "VANE V SWING MODE 3",
+                        "title": "AC VV MODE 3",
                         "enum": [
                           21
                         ]
                       },
                       {
-                        "title": "VANE V SWING MODE 4",
+                        "title": "AC VV MODE 4",
                         "enum": [
                           22
                         ]
                       },
                       {
-                        "title": "VANE V SWING MODE 5",
+                        "title": "AC VV MODE 5",
                         "enum": [
                           23
                         ]
                       },
                       {
-                        "title": "VANE V SWING MODE SWING",
+                        "title": "AC VV SWING",
                         "enum": [
                           24
                         ]
                       },
                       {
-                        "title": "FAN SPEED MODE AUTO",
+                        "title": "AC/ERV FAN MODE AUTO",
                         "enum": [
                           25
                         ]
                       },
                       {
-                        "title": "FAN SPEED MODE 1",
+                        "title": "AC/ERV FAN MODE 1",
                         "enum": [
                           26
                         ]
                       },
                       {
-                        "title": "FAN SPEED MODE 2",
+                        "title": "AC/ERV FAN MODE 2",
                         "enum": [
                           27
                         ]
                       },
                       {
-                        "title": "FAN SPEED MODE 3",
+                        "title": "AC/ERV FAN MODE 3",
                         "enum": [
                           28
                         ]
                       },
                       {
-                        "title": "FAN SPEED MODE 4",
+                        "title": "AC/ERV FAN MODE 4",
                         "enum": [
                           29
                         ]
                       },
                       {
-                        "title": "FAN SPEED MODE 5",
+                        "title": "AC/ERV FAN MODE 5",
                         "enum": [
                           30
+                        ]
+                      },
+                      {
+                        "title": "AC/ERV FAN MODE 6",
+                        "enum": [
+                          31
+                        ]
+                      },
+                      {
+                        "title": "AC/ERV FAN MODE 7",
+                        "enum": [
+                          32
+                        ]
+                      },
+                      {
+                        "title": "AC/ERV FAN MODE 8",
+                        "enum": [
+                          33
+                        ]
+                      },
+                      {
+                        "title": "HP MODE HEAT THERMOSTAT",
+                        "enum": [
+                          40
+                        ]
+                      },
+                      {
+                        "title": "HP MODE COOL THERMOSTAT",
+                        "enum": [
+                          41
+                        ]
+                      },
+                      {
+                        "title": "HP MODE HEAT FLOW",
+                        "enum": [
+                          42
+                        ]
+                      },
+                      {
+                        "title": "HP MODE COOL FLOW",
+                        "enum": [
+                          43
+                        ]
+                      },
+                      {
+                        "title": "HP MODE CURVE",
+                        "enum": [
+                          44
+                        ]
+                      },
+                      {
+                        "title": "HP MODE UNKNOWN",
+                        "enum": [
+                          45
+                        ]
+                      },
+                      {
+                        "title": "HP Z1 MODE HEAT THERMOSTAT",
+                        "enum": [
+                          50
+                        ]
+                      },
+                      {
+                        "title": "HP Z1 MODE COOL THERMOSTAT",
+                        "enum": [
+                          51
+                        ]
+                      },
+                      {
+                        "title": "HP Z1 MODE HEAT FLOW",
+                        "enum": [
+                          52
+                        ]
+                      },
+                      {
+                        "title": "HP Z1 MODE COOL FLOW",
+                        "enum": [
+                          53
+                        ]
+                      },
+                      {
+                        "title": "HP Z1 MODE CURVE",
+                        "enum": [
+                          54
+                        ]
+                      },
+                      {
+                        "title": "HP Z1 UNKNOWN",
+                        "enum": [
+                          55
+                        ]
+                      },
+                      {
+                        "title": "HP Z2 MODE HEAT THERMOSTAT",
+                        "enum": [
+                          60
+                        ]
+                      },
+                      {
+                        "title": "HP Z2 MODE COOL THERMOSTAT",
+                        "enum": [
+                          61
+                        ]
+                      },
+                      {
+                        "title": "HP Z2 MODE HEAT FLOW",
+                        "enum": [
+                          62
+                        ]
+                      },
+                      {
+                        "title": "HP Z2 MODE COOL FLOW",
+                        "enum": [
+                          63
+                        ]
+                      },
+                      {
+                        "title": "HP Z2 MODE CURVE",
+                        "enum": [
+                          64
+                        ]
+                      },
+                      {
+                        "title": "HP Z2 MODE UNKNOWN",
+                        "enum": [
+                          65
+                        ]
+                      },
+                      {
+                        "title": "ERV MODE RECOVERY",
+                        "enum": [
+                          70
+                        ]
+                      },
+                      {
+                        "title": "ERV MODE BYPAS",
+                        "enum": [
+                          71
+                        ]
+                      },
+                      {
+                        "title": "ERV MODE AUTO",
+                        "enum": [
+                          72
                         ]
                       }
                     ],
@@ -384,6 +528,13 @@
                   }
                 }
               }
+            },
+            "enableDevicePresets": {
+              "title": "Device Presets",
+              "type": "boolean",
+              "default": false,
+              "description": "This enable display device presets as extra buttons in HomeKit app.",
+              "required": false
             },
             "disableLogInfo": {
               "title": "Disable Log Info",
@@ -504,16 +655,19 @@
         "title": "Buttons",
         "expandable": true,
         "expanded": false,
-        "items": [{
-          "key": "accounts[].buttons",
-          "type": "tabarray",
-          "title": "{{ value.name || 'new button' }}",
-          "items": [
-            "accounts[].buttons[].name",
-            "accounts[].buttons[].mode",
-            "accounts[].buttons[].displayType"
-          ]
-        }]
+        "items": [
+          "accounts[].enableDevicePresets",
+          {
+            "key": "accounts[].buttons",
+            "type": "tabarray",
+            "title": "{{ value.name || 'new button' }}",
+            "items": [
+              "accounts[].buttons[].name",
+              "accounts[].buttons[].mode",
+              "accounts[].buttons[].displayType"
+            ]
+          }
+        ]
       },
       {
         "key": "accounts[]",

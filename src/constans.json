@@ -1,32 +1,188 @@
 {
-    "DeviceType": ["Air Conditioner", "Heat Pump", "", "E.R. Ventilation"],
-    "TemperatureDisplayUnits": ["°C", "°F"],
+    "DeviceType": [
+        "Air Conditioner",
+        "Heat Pump",
+        "",
+        "Energy Recovery Ventilation"
+    ],
+    "TemperatureDisplayUnits": [
+        "°C",
+        "°F"
+    ],
+    "CurrentHeaterCoolerThermostat": [
+        [
+            "INACTIVE",
+            "IDLE",
+            "HEAT",
+            "COOL"
+        ],
+        [
+            "OFF",
+            "HEAT",
+            "COOL"
+        ]
+    ],
+    "TargetHeaterCoolerThermostat": [
+        [
+            "AUTO",
+            "HEAT",
+            "COOL"
+        ],
+        [
+            "OFF",
+            "HEAT",
+            "COOL",
+            "AUTO"
+        ]
+    ],
     "AirConditioner": {
-        "CurrentHeaterCoolerThermostat": [
-            ["INACTIVE", "IDLE", "HEAT", "COOL"],
-            ["OFF", "HEAT", "COOL"]
+        "OperationMode": [
+            "0",
+            "HEAT",
+            "DRY",
+            "COOL",
+            "4",
+            "5",
+            "6",
+            "FAN",
+            "AUTO"
         ],
-        "TargetHeaterCoolerThermostat": [
-            ["AUTO", "HEAT", "COOL"],
-            ["OFF", "HEAT", "COOL", "AUTO"]
+        "CurrentVerticalVane": [
+            "AUTO",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "SWING"
         ],
-        "CurrentVerticalVane": ["AUTO", "1", "2", "3", "4", "5", "SWING"],
-        "CurrentHorizontalVane": ["AUTO", "1", "2", "3", "4", "5", "SPLIT", "SWING"],
-        "SwingMode": ["AUTO", "1", "2", "3", "4", "5", "SWING"],
-        "SetFanSpeed": ["AUTO", "1", "2", "3", "4", "5", "OFF"]
+        "CurrentHorizontalVane": [
+            "AUTO",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "SPLIT",
+            "SWING"
+        ],
+        "SwingMode": [
+            "AUTO",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "SWING"
+        ],
+        "SetFanSpeed": [
+            "AUTO",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "OFF"
+        ],
+        "EffectiveFlags": {
+            "Power": 1,
+            "OperationMode": 2,
+            "SetTemperature": 4,
+            "SetFanSpeed": 8,
+            "VaneVertical": 16,
+            "VaneHorizontal": 256
+        }
     },
     "HeatPump": {
-        "CurrentState": ["IDLE", "HEAT WATER", "HEAT ZONES", "COOL", "DEFROST", "STANDBY", "LEGIONELLA"],
-        "ZoneOperation": ["HEAT THERMOSTAT", "COOL THERMOSTAT", "HEAT FLOW", "COOL FLOW", "CURVE", "UNKNOWN"],
-        "ZoneStatus": ["HEAT", "IDLE", "COOL", "UNKNOWN"]
+        "CurrentState": [
+            "IDLE",
+            "HEAT WATER",
+            "HEAT ZONES",
+            "COOL",
+            "DEFROST",
+            "STANDBY",
+            "LEGIONELLA"
+        ],
+        "ZoneOperation": [
+            "HEAT THERMOSTAT",
+            "COOL THERMOSTAT",
+            "HEAT FLOW",
+            "COOL FLOW",
+            "CURVE",
+            "UNKNOWN"
+        ],
+        "ZoneStatus": [
+            "HEAT",
+            "IDLE",
+            "COOL",
+            "UNKNOWN"
+        ],
+        "Zones": [
+            "Zone 1",
+            "Hot Water",
+            "Zone 2"
+        ],
+        "EffectiveFlags": {
+            "Power": 1,
+            "OperationMode": 4,
+            "OperationModeZone1": 8,
+            "OperationModeZone2": 16,
+            "ForcedHotWaterMode": 65536,
+            "SetTemperatureZone1": 34359738880,
+            "SetTemperatureZone2": 281474976710656,
+            "SetHeatFlowTemperatureZone1": 281474976710656,
+            "SetHeatFlowTemperatureZone2": 281474976710656,
+            "SetCoolFlowTemperatureZone1": 281474976710656,
+            "SetCoolFlowTemperatureZone2": 281474976710656,
+            "SetTankWaterTemperature": 281474976710688
+        }
     },
     "Ventilation": {
-        "Mode": ["RECOVERY", "BYPAS", "AUTO"],
-        "CurrentFanSpeed": ["STOPPED"],
-        "TargetFanSpeed": ["AUTO", "SILENT", "1", "2", "3", "4"]
+        "OperationMode": [
+            "RECOVERY",
+            "BYPAS",
+            "AUTO"
+        ],
+        "CurrentFanSpeed": [
+            "STOPPED"
+        ],
+        "TargetFanSpeed": [
+            "AUTO",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "OFF"
+        ],
+        "EffectiveFlags": {
+            "Power": 1,
+            "OperationMode": 4,
+            "SetFanSpeed": 8
+        }
     },
     "AccessLevel": {
         "Quest": 3,
         "Owner": 4
+    },
+    "ApiUrls": {
+        "BaseURL": "https://app.melcloud.com/Mitsubishi.Wifi.Client",
+        "ClientLogin": "/Login/ClientLogin",
+        "GetUserDetails": "/User/GetUserDetails",
+        "ListDevices": "/User/ListDevices",
+        "ListDeviceUnits": "/Device/ListDeviceUnits",
+        "DeviceState": "/Device/Get?id=DID&buildingID=BID",
+        "TileState": "/Tile/Get2?id=DID&buildingID=BID",
+        "SetAta": "/Device/SetAta",
+        "SetAtw": "/Device/SetAtw",
+        "SetErv": "/Device/SetErv",
+        "UpdateApplicationOptions": "/User/UpdateApplicationOptions",
+        "HolidayModeUpdate": "/HolidayMode/Update"
     }
 }

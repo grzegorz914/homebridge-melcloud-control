@@ -27,6 +27,7 @@
         "mode": 0,
         "displayType": 0
       }],
+      "enableDevicePresets": false,
       "disableLogInfo": false,
       "disableLogDeviceInfo": false,
       "enableDebugMode": false,

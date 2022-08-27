@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/master/graphics/homebridge-melcloud-control.png" width="540"></a>
+  <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/homebridge-melcloud-control.png" width="540"></a>
 </p>
 
 <span align="center">
@@ -27,11 +27,11 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * The old plugin and config need to be first removed from Homebridge and HomeKit and added again.
 * The platform name and password properties was changed due collision with same already exist plugins from other developers.
 ### Note
-* The Heat Pump and Energy Recovery Ventilation is not supported at this time.
+* The Heat Pump and Energy Recovery Ventilation is in beta test.
 
 ### Troubleshooting
 * If for some reason the device is not displayed in HomeKit app try this procedure:
-   * Go to `./homebridge/persist` for macOS or `/var/lib/homebridge/persist` for RPI.
+   * Go to `./homebridge/persist` macOS or `/var/lib/homebridge/persist` for RPI.
    * Remove `AccessoryInfo.xxx` file which contain Your device data: `{"displayName":"DeviceName"}`.
    * Next remove `IdentifierCashe.xxx` file with same name as `AccessoryInfo.xxx`.
    * Restart Homebridge and try add it to the HomeKit app again.
@@ -64,6 +64,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
     * Vane H mode *AUTO/1/2/3/4/5/SWING*.
     * Vane V mode *AUTO/1/2/3/4/5/SWING*.
     * Fan speed mode *AUTO/1/2/3/4/5*.
+    * Set device presets.
 * Control of Heat Pump:
   * Comming soon...
 * Control of Energy Recovery Ventilation:
@@ -73,10 +74,12 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * MQTT publisch all available data from all detected devices.
 
 ### Configuration
-Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) to configure this plugin (Highly Recommended). The sample configuration can be edited and used manually as an alternative. See the `sample-config.json` file in this repository for an example or copy the example below into your config.json file, making the apporpriate changes before saving it. Be sure to always make a backup copy of your config.json file before making any changes to it.
+* Run this plugin as a child bridge (Highly Recommended).
+* Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) to configure this plugin (Highly Recommended). 
+* The sample configuration can be edited and used manually as an alternative. See the `sample-config.json` file in this repository for an example or copy the example below into your config.json file, making the apporpriate changes before saving it. Be sure to always make a backup copy of your config.json file before making any changes to it.
 
 <p align="left">
-  <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/master/graphics/ustawienia.png" width="840"></a>
+  <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/ustawienia.png" width="840"></a>
 </p>
 
 | Key | Description | 
@@ -84,14 +87,15 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
 | `name` | Here set the own account name. |
 | `user` | Here set the MELCloud username. |
 | `passwd` | Here set the MELCloud password. |
-| `language` | Here set the MELCloud language. |
+| `language` | Here select the MELCloud language. |
 | `displayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
 | `buttons.name` | Here set `Button Name` which You want expose to the *Homebridge/HomeKit*. | 
-| `buttons.mode` | Here select button mode, `On/Off`, `Heat`, `Dry`, `Cool`, `Fan`, `Auto`, `Purify`, `Physical Lock Controls`, `Vane H Mode`, `Vane V Mode`, `Fan Speed Mode`. |
+| `buttons.mode` | Here select button mode, AC - Air Conditioner, HP - Heat Pump, ERV - Energy Recovery Ventilation, VH - Vane Horizontal, VV - Vane Horizontal. |
 | `buttons.displayType` | Here select HomeKit display type, `Switch`, `Button` - selectable in HomeKit app as `Light`, `Fan`, `Outlet`. |
+| `enableDevicePresets` | This enable display device presets in HomeKit app. |
 | `enableDebugMode` | This enable deep log in homebridge console. |
 | `disableLogInfo` | This disable display log values and states on every it change. |
-| `disableLogDeviceInfo` | This disable display log device info on plugin restart. |
+| `disableLogDeviceInfo` | This disable display log device info on plugin start. |
 | `enableMqtt` | This enabled MQTT Broker and publish to it all awailable data. |
 | `mqttHost` | Here set the *IP Address* or *Hostname* for MQTT Broker. |
 | `mqttPort` | Here set the *Port* for MQTT Broker, default 1883. |
@@ -116,6 +120,7 @@ Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-conf
                         "mode": 0,
                         "displayType": 0
                     }],
+                    "enableDevicePresets": false,
                     "disableLogInfo": false,
                     "disableLogDeviceInfo": false,
                     "enableDebugMode": false,
@@ -139,8 +144,9 @@ Each accessory needs to be manually paired.
 3. Tap *Add Accessory*, and select *I Don't Have a Code, Cannot Scan* or *More options*. 
 4. Select Your accessory and press add anyway. 
 5. Enter the PIN or scan the QR code, this can be found in Homebridge UI or Homebridge logs.
+6. Complete the accessory setup.
 
-### [What's New](https://github.com/grzegorz914/homebridge-melcloud-control/blob/master/CHANGELOG.md)
+### [What's New](https://github.com/grzegorz914/homebridge-melcloud-control/blob/main/CHANGELOG.md)
 
 ### Development
 Please feel free to create a Pull request and help in development. It will be highly appreciated.
