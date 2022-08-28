@@ -67,8 +67,8 @@ class melCloudPlatform {
 					});
 
 					this.melCloud.on('checkDevicesListComplete', (melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit) => {
-							new melCloudDevice(this.log, this.api, account, prefDir, melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit);
-						})
+						new melCloudDevice(this.log, this.api, account, prefDir, melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit);
+					})
 						.on('message', (message) => {
 							this.log(message);
 						})
@@ -129,35 +129,33 @@ class melCloudDevice {
 		this.deviceTypeText = deviceTypeText;
 
 		//mqtt client
-		if (mqttEnabled) {
-			this.mqtt = new mqtt({
-				enabled: mqttEnabled,
-				host: mqttHost,
-				port: mqttPort,
-				prefix: mqttPrefix,
-				topic: this.accountName,
-				auth: mqttAuth,
-				user: mqttUser,
-				passwd: mqttPasswd,
-				debug: mqttDebug
-			});
+		this.mqtt = new mqtt({
+			enabled: mqttEnabled,
+			host: mqttHost,
+			port: mqttPort,
+			prefix: mqttPrefix,
+			topic: this.accountName,
+			auth: mqttAuth,
+			user: mqttUser,
+			passwd: mqttPasswd,
+			debug: mqttDebug
+		});
 
-			this.mqtt.on('connected', (message) => {
-					this.log(message);
-				})
-				.on('error', (error) => {
-					this.log(error);
-				})
-				.on('debug', (message) => {
-					this.log(message);
-				})
-				.on('message', (message) => {
-					this.log(message);
-				})
-				.on('disconnected', (message) => {
-					this.log(message);
-				});
-		};
+		this.mqtt.on('connected', (message) => {
+			this.log(message);
+		})
+			.on('error', (error) => {
+				this.log(error);
+			})
+			.on('debug', (message) => {
+				this.log(message);
+			})
+			.on('message', (message) => {
+				this.log(message);
+			})
+			.on('disconnected', (message) => {
+				this.log(message);
+			});
 
 		//melcloud device
 		const displayMode = this.displayMode;
@@ -178,43 +176,43 @@ class melCloudDevice {
 				});
 
 				this.melCloudAta.on('deviceInfo', (deviceInfo, manufacturer, modelName, modelName1, serialNumber, firmwareRevision, devicePresets, devicePresetsCount) => {
-						if (!this.disableLogDeviceInfo && this.displayDeviceInfo) {
-							this.log(`---- ${this.deviceTypeText}: ${this.deviceName} ----`);
-							this.log(`Account: ${this.accountName}`);
-							this.log(`Model: ${modelName}`);
-							this.log(`Serial: ${serialNumber}`);
-							this.log(`Firmware: ${firmwareRevision}`);
-							const outdoorDevice = (modelName1 != 'Undefined') ? this.log(`Outdoor: ${modelName1}`) : false;
-							this.log(`Manufacturer: ${manufacturer}`);
-							this.log('----------------------------------');
-							this.displayDeviceInfo = false;
-						};
+					if (!this.disableLogDeviceInfo && this.displayDeviceInfo) {
+						this.log(`---- ${this.deviceTypeText}: ${this.deviceName} ----`);
+						this.log(`Account: ${this.accountName}`);
+						this.log(`Model: ${modelName}`);
+						this.log(`Serial: ${serialNumber}`);
+						this.log(`Firmware: ${firmwareRevision}`);
+						const outdoorDevice = (modelName1 != 'Undefined') ? this.log(`Outdoor: ${modelName1}`) : false;
+						this.log(`Manufacturer: ${manufacturer}`);
+						this.log('----------------------------------');
+						this.displayDeviceInfo = false;
+					};
 
-						//device info
-						this.canCool = (deviceInfo.Device.CanCool == true);
-						this.canHeat = (deviceInfo.Device.CanHeat == true);
-						this.canDry = (deviceInfo.Device.CanDry == true);
-						this.hasAutomaticFanSpeed = (deviceInfo.Device.HasAutomaticFanSpeed == true);
-						this.airDirectionFunction = (deviceInfo.Device.AirDirectionFunction == true);
-						this.swingFunction = (deviceInfo.Device.SwingFunction == true);
-						this.numberOfFanSpeeds = deviceInfo.Device.NumberOfFanSpeeds;
-						this.modelIsAirCurtain = (deviceInfo.Device.ModelIsAirCurtain == true);
-						this.modelSupportsFanSpeed = (deviceInfo.Device.ModelSupportsFanSpeed == true);
-						this.modelSupportsAuto = (deviceInfo.Device.ModelSupportsAuto == true);
-						this.modelSupportsHeat = (deviceInfo.Device.ModelSupportsHeat == true);
-						this.modelSupportsDry = (deviceInfo.Device.ModelSupportsDry == true);
-						this.modelSupportsVaneVertical = (deviceInfo.Device.ModelSupportsVaneVertical == true);
-						this.modelSupportsVaneHorizontal = (deviceInfo.Device.ModelSupportsVaneHorizontal == true);
-						this.modelSupportsWideVane = (deviceInfo.Device.ModelSupportsWideVane == true);
-						this.modelSupportsStandbyMode = (deviceInfo.Device.ModelSupportsStandbyMode == true);
-						this.devicePresets = devicePresets;
-						this.devicePresetsCount = this.enableDevicePresets ? devicePresetsCount : 0;
+					//device info
+					this.canCool = (deviceInfo.Device.CanCool == true);
+					this.canHeat = (deviceInfo.Device.CanHeat == true);
+					this.canDry = (deviceInfo.Device.CanDry == true);
+					this.hasAutomaticFanSpeed = (deviceInfo.Device.HasAutomaticFanSpeed == true);
+					this.airDirectionFunction = (deviceInfo.Device.AirDirectionFunction == true);
+					this.swingFunction = (deviceInfo.Device.SwingFunction == true);
+					this.numberOfFanSpeeds = deviceInfo.Device.NumberOfFanSpeeds;
+					this.modelIsAirCurtain = (deviceInfo.Device.ModelIsAirCurtain == true);
+					this.modelSupportsFanSpeed = (deviceInfo.Device.ModelSupportsFanSpeed == true);
+					this.modelSupportsAuto = (deviceInfo.Device.ModelSupportsAuto == true);
+					this.modelSupportsHeat = (deviceInfo.Device.ModelSupportsHeat == true);
+					this.modelSupportsDry = (deviceInfo.Device.ModelSupportsDry == true);
+					this.modelSupportsVaneVertical = (deviceInfo.Device.ModelSupportsVaneVertical == true);
+					this.modelSupportsVaneHorizontal = (deviceInfo.Device.ModelSupportsVaneHorizontal == true);
+					this.modelSupportsWideVane = (deviceInfo.Device.ModelSupportsWideVane == true);
+					this.modelSupportsStandbyMode = (deviceInfo.Device.ModelSupportsStandbyMode == true);
+					this.devicePresets = devicePresets;
+					this.devicePresetsCount = this.enableDevicePresets ? devicePresetsCount : 0;
 
-						this.manufacturer = manufacturer;
-						this.modelName = modelName;
-						this.serialNumber = serialNumber;
-						this.firmwareRevision = firmwareRevision;
-					})
+					this.manufacturer = manufacturer;
+					this.modelName = modelName;
+					this.serialNumber = serialNumber;
+					this.firmwareRevision = firmwareRevision;
+				})
 					.on('deviceState', (deviceState, currentTemperature, setTemperature, setFanSpeed, operationMode, vaneHorizontal, vaneVertical, inStandbyMode, power) => {
 						//device info
 						const hasAutomaticFanSpeed = this.hasAutomaticFanSpeed;
@@ -489,27 +487,27 @@ class melCloudDevice {
 				});
 
 				this.melCloudAtw.on('deviceInfo', (deviceInfo, manufacturer, modelName, serialNumber, firmwareRevision, devicePresets, devicePresetsCount) => {
-						if (!this.disableLogDeviceInfo && this.displayDeviceInfo) {
-							this.log(`---- ${this.deviceTypeText}: ${this.deviceName} ----`);
-							this.log(`Account: ${this.accountName}`);
-							this.log(`Model: ${modelName}`);
-							this.log(`Serial: ${serialNumber}`);
-							this.log(`Firmware: ${firmwareRevision}`);
-							this.log(`Manufacturer: ${manufacturer}`);
-							this.log('----------------------------------');
-							this.displayDeviceInfo = false;
-						};
+					if (!this.disableLogDeviceInfo && this.displayDeviceInfo) {
+						this.log(`---- ${this.deviceTypeText}: ${this.deviceName} ----`);
+						this.log(`Account: ${this.accountName}`);
+						this.log(`Model: ${modelName}`);
+						this.log(`Serial: ${serialNumber}`);
+						this.log(`Firmware: ${firmwareRevision}`);
+						this.log(`Manufacturer: ${manufacturer}`);
+						this.log('----------------------------------');
+						this.displayDeviceInfo = false;
+					};
 
-						this.devicePresets = devicePresets;
-						this.devicePresetsCount = this.enableDevicePresets ? devicePresetsCount : 0;
+					this.devicePresets = devicePresets;
+					this.devicePresetsCount = this.enableDevicePresets ? devicePresetsCount : 0;
 
-						//device info
-						this.deviceInfo = deviceInfo;
-						this.manufacturer = manufacturer;
-						this.modelName = modelName;
-						this.serialNumber = serialNumber;
-						this.firmwareRevision = firmwareRevision;
-					})
+					//device info
+					this.deviceInfo = deviceInfo;
+					this.manufacturer = manufacturer;
+					this.modelName = modelName;
+					this.serialNumber = serialNumber;
+					this.firmwareRevision = firmwareRevision;
+				})
 					.on('deviceState', (deviceState, zonesCount, power, roomTemperatureZone1, setTemperatureZone1, roomTemperatureZone2, setTemperatureZone2, tankWaterTemperature, setTankWaterTemperature, operationMode, operationModeZone1, operationModeZone2) => {
 						//device state
 						this.deviceState = deviceState;
@@ -708,31 +706,31 @@ class melCloudDevice {
 				});
 
 				this.melCloudErv.on('deviceInfo', (deviceInfo, manufacturer, modelName, modelName1, serialNumber, firmwareRevision, devicePresets, devicePresetsCount) => {
-						if (!this.disableLogDeviceInfo && this.displayDeviceInfo) {
-							this.log(`---- ${this.deviceTypeText}: ${this.deviceName} ----`);
-							this.log(`Account: ${this.accountName}`);
-							this.log(`Model: ${modelName}`);
-							this.log(`Serial: ${serialNumber}`);
-							this.log(`Firmware: ${firmwareRevision}`);
-							const outdoorDevice = (modelName1 != 'Undefined') ? this.log(`Outdoor: ${modelName1}`) : false;
-							this.log(`Manufacturer: ${manufacturer}`);
-							this.log('----------------------------------');
-							this.displayDeviceInfo = false;
-						};
+					if (!this.disableLogDeviceInfo && this.displayDeviceInfo) {
+						this.log(`---- ${this.deviceTypeText}: ${this.deviceName} ----`);
+						this.log(`Account: ${this.accountName}`);
+						this.log(`Model: ${modelName}`);
+						this.log(`Serial: ${serialNumber}`);
+						this.log(`Firmware: ${firmwareRevision}`);
+						const outdoorDevice = (modelName1 != 'Undefined') ? this.log(`Outdoor: ${modelName1}`) : false;
+						this.log(`Manufacturer: ${manufacturer}`);
+						this.log('----------------------------------');
+						this.displayDeviceInfo = false;
+					};
 
-						//device info
-						this.deviceInfo = deviceInfo;
-						this.modelSupportsFanSpeed = (deviceInfo.Device.ModelSupportsFanSpeed == true);
-						this.hasAutomaticFanSpeed = (deviceInfo.Device.HasAutomaticFanSpeed == true);
-						this.numberOfFanSpeeds = deviceInfo.Device.numberOfFanSpeeds;
-						this.devicePresets = devicePresets;
-						this.devicePresetsCount = this.enableDevicePresets ? devicePresetsCount : 0;
+					//device info
+					this.deviceInfo = deviceInfo;
+					this.modelSupportsFanSpeed = (deviceInfo.Device.ModelSupportsFanSpeed == true);
+					this.hasAutomaticFanSpeed = (deviceInfo.Device.HasAutomaticFanSpeed == true);
+					this.numberOfFanSpeeds = deviceInfo.Device.numberOfFanSpeeds;
+					this.devicePresets = devicePresets;
+					this.devicePresetsCount = this.enableDevicePresets ? devicePresetsCount : 0;
 
-						this.manufacturer = manufacturer;
-						this.modelName = modelName;
-						this.serialNumber = serialNumber;
-						this.firmwareRevision = firmwareRevision;
-					})
+					this.manufacturer = manufacturer;
+					this.modelName = modelName;
+					this.serialNumber = serialNumber;
+					this.firmwareRevision = firmwareRevision;
+				})
 					.on('deviceState', (deviceState, power, currentTemperature, supplyTemperature, outdoorTemperature, roomCO2Level, setTemperature, setFanSpeed, operationMode, ventilationMode) => {
 						//device info
 						const modelSupportsFanSpeed = this.modelSupportsFanSpeed;
@@ -985,7 +983,7 @@ class melCloudDevice {
 					this.melCloudServiceAta.getCharacteristic(Characteristic.Active)
 						.onGet(async () => {
 							const state = this.power;
-							const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Power: ${state?'ON':'OFF'}`);
+							const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Power: ${state ? 'ON' : 'OFF'}`);
 							return state;
 						})
 						.onSet(async (state) => {
@@ -994,7 +992,7 @@ class melCloudDevice {
 
 							try {
 								const newState = await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState, 0);
-								const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set power: ${state?'ON':'OFF'}`);
+								const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set power: ${state ? 'ON' : 'OFF'}`);
 							} catch (error) {
 								this.log.error(`${deviceTypeText}: ${accessoryName}, Set power error: ${error}`);
 							};
@@ -1213,7 +1211,7 @@ class melCloudDevice {
 					this.melCloudServiceAta.getCharacteristic(Characteristic.LockPhysicalControls)
 						.onGet(async () => {
 							const value = this.lockPhysicalControls;
-							const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Lock physical controls: ${value ? 'LOCKED':'UNLOCKED'}`);
+							const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Lock physical controls: ${value ? 'LOCKED' : 'UNLOCKED'}`);
 							return value;
 						})
 						.onSet(async (value) => {
@@ -1224,7 +1222,7 @@ class melCloudDevice {
 
 							try {
 								const newState = await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState, 0);
-								const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set locl physical controls: ${value ? 'LOCK':'UNLOCK'}`);
+								const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set locl physical controls: ${value ? 'LOCK' : 'UNLOCK'}`);
 							} catch (error) {
 								this.log.error(`${deviceTypeText}: ${accessoryName}, Set lock physical controls error: ${error}`);
 							};
@@ -1504,7 +1502,7 @@ class melCloudDevice {
 							this.melCloudServiceErv.getCharacteristic(Characteristic.Active)
 								.onGet(async () => {
 									const state = this.power;
-									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Power: ${state?'ON':'OFF'}`);
+									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Power: ${state ? 'ON' : 'OFF'}`);
 									return state;
 								})
 								.onSet(async (state) => {
@@ -1513,7 +1511,7 @@ class melCloudDevice {
 
 									try {
 										const newState = await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState, 0);
-										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set power: ${state?'ON':'OFF'}`);
+										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set power: ${state ? 'ON' : 'OFF'}`);
 									} catch (error) {
 										this.log.error(`${deviceTypeText}: ${accessoryName}, Set power error: ${error}`);
 									};
@@ -1643,7 +1641,7 @@ class melCloudDevice {
 							melCloudServiceAtw.getCharacteristic(Characteristic.LockPhysicalControls)
 								.onGet(async () => {
 									const value = this.lockPhysicalControls;
-									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Lock physical controls: ${value ? 'LOCKED':'UNLOCKED'}`);
+									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Lock physical controls: ${value ? 'LOCKED' : 'UNLOCKED'}`);
 									return value;
 								})
 								.onSet(async (value) => {
@@ -1654,7 +1652,7 @@ class melCloudDevice {
 
 									try {
 										const newState = await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState, 0);
-										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set lock physical controls: ${value ? 'LOCK':'UNLOCK'}`);
+										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set lock physical controls: ${value ? 'LOCK' : 'UNLOCK'}`);
 									} catch (error) {
 										this.log.error(`${deviceTypeText}: ${accessoryName}, Set lock physical controls error: ${error}`);
 									};
@@ -1878,7 +1876,7 @@ class melCloudDevice {
 					this.melCloudServiceErv.getCharacteristic(Characteristic.Active)
 						.onGet(async () => {
 							const state = this.power;
-							const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Power: ${state?'ON':'OFF'}`);
+							const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Power: ${state ? 'ON' : 'OFF'}`);
 							return state;
 						})
 						.onSet(async (state) => {
@@ -1887,7 +1885,7 @@ class melCloudDevice {
 
 							try {
 								const newState = await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState, 0);
-								const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set power: ${state?'ON':'OFF'}`);
+								const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set power: ${state ? 'ON' : 'OFF'}`);
 							} catch (error) {
 								this.log.error(`${deviceTypeText}: ${accessoryName}, Set power error: ${error}`);
 							};
@@ -2081,7 +2079,7 @@ class melCloudDevice {
 					this.melCloudServiceErv.getCharacteristic(Characteristic.LockPhysicalControls)
 						.onGet(async () => {
 							const value = this.lockPhysicalControls;
-							const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Lock physical controls: ${value ? 'LOCKED':'UNLOCKED'}`);
+							const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Lock physical controls: ${value ? 'LOCKED' : 'UNLOCKED'}`);
 							return value;
 						})
 						.onSet(async (value) => {
@@ -2092,7 +2090,7 @@ class melCloudDevice {
 
 							try {
 								const newState = await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState, 0);
-								const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set locl physical controls: ${value ? 'LOCK':'UNLOCK'}`);
+								const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set locl physical controls: ${value ? 'LOCK' : 'UNLOCK'}`);
 							} catch (error) {
 								this.log.error(`${deviceTypeText}: ${accessoryName}, Set lock physical controls error: ${error}`);
 							};
