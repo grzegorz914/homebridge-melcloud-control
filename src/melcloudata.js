@@ -18,7 +18,7 @@ class MELCLOUDDEVICEATA extends EventEmitter {
         const buildingId = config.buildingId;
         const deviceId = config.deviceId;
         const debugLog = config.debugLog;
-        const enableMqtt = config.mqttEnabled;
+        const mqttEnabled = config.mqttEnabled;
         const prefDir = config.prefDir;
         const melCloudBuildingDeviceFile = `${prefDir}/${accountName}_Device_${deviceId}`;
 
@@ -271,7 +271,7 @@ class MELCLOUDDEVICEATA extends EventEmitter {
 
                 this.emit('deviceInfo', deviceInfo, manufacturer, modelName, modelName1, serialNumber, deviceFirmwareAppVersion, devicePresets, devicePresetsCount);
                 this.emit('checkDeviceState');
-                const mqtt = enableMqtt ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, Info:`, JSON.stringify(deviceInfo, null, 2)) : false;
+                const mqtt = mqttEnabled ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, Info:`, JSON.stringify(deviceInfo, null, 2)) : false;
             } catch (error) {
                 this.emit('error', `${deviceTypeText} ${deviceName}, check info, ${error}, check again in 60s.`);
                 this.checkDeviceInfo();
@@ -321,7 +321,7 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 const sceneOwner = deviceState.SceneOwner;
 
                 this.emit('deviceState', deviceState, roomTemperature, setTemperature, setFanSpeed, operationMode, vaneHorizontal, vaneVertical, inStandbyMode, power);
-                const mqtt = enableMqtt ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, State:`, JSON.stringify(deviceState, null, 2)) : false;
+                const mqtt = mqttEnabled ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, State:`, JSON.stringify(deviceState, null, 2)) : false;
 
                 this.checkDeviceInfo();
             } catch (error) {

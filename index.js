@@ -109,7 +109,7 @@ class melCloudDevice {
 		this.disableLogDeviceInfo = account.disableLogDeviceInfo || false;
 		this.enableDebugMode = account.enableDebugMode || false;
 
-		const enableMqtt = account.enableMqtt || false;
+		const mqttEnabled = account.enableMqtt || false;
 		const mqttHost = account.mqttHost;
 		const mqttPort = account.mqttPort || 1883;
 		const mqttPrefix = account.mqttPrefix;
@@ -129,9 +129,9 @@ class melCloudDevice {
 		this.deviceTypeText = deviceTypeText;
 
 		//mqtt client
-		if (enableMqtt) {
+		if (mqttEnabled) {
 			this.mqtt = new mqtt({
-				enabled: enableMqtt,
+				enabled: mqttEnabled,
 				host: mqttHost,
 				port: mqttPort,
 				prefix: mqttPrefix,
@@ -173,7 +173,7 @@ class melCloudDevice {
 					deviceName: deviceName,
 					deviceTypeText: deviceTypeText,
 					debugLog: this.enableDebugMode,
-					mqttEnabled: enableMqtt,
+					mqttEnabled: mqttEnabled,
 					prefDir: prefDir
 				});
 
@@ -484,7 +484,7 @@ class melCloudDevice {
 					deviceName: deviceName,
 					deviceTypeText: deviceTypeText,
 					debugLog: this.enableDebugMode,
-					mqttEnabled: enableMqtt,
+					mqttEnabled: mqttEnabled,
 					prefDir: prefDir
 				});
 
@@ -703,7 +703,7 @@ class melCloudDevice {
 					deviceName: deviceName,
 					deviceTypeText: deviceTypeText,
 					debugLog: this.enableDebugMode,
-					mqttEnabled: enableMqtt,
+					mqttEnabled: mqttEnabled,
 					prefDir: prefDir
 				});
 
