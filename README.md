@@ -73,11 +73,17 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * Siri can be used to control the devices.
 * MQTT publisch all available data from all detected devices.
 
+<p align="left">
+  <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/homekit.png" width="382"></a> 
+  <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/settings.png" width="135"></a> <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/settings1.png" width="135"></a>
+  <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/settings2.png" width="135"></a>
+</p>
+
 ### Configuration
 * Run this plugin as a child bridge (Highly Recommended).
 * Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) to configure this plugin (Highly Recommended). 
 * The sample configuration can be edited and used manually as an alternative. 
-* See the `sample-config.json` file in this repository for an example or copy the example below into your config.json file, making the apporpriate changes before saving it. 
+* See the `sample-config.json` file for an example or copy the example below into your config.json file, making the apporpriate changes before saving it. 
 * Be sure to always make a backup copy of your config.json file before making any changes to it.
 
 <p align="left">
