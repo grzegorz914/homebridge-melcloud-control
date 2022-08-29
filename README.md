@@ -131,17 +131,3 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
             ]
         }
 ```
-
-### Adding to HomeKit
-* Each accessory needs to be manually paired. 
-  *Open the Home <img src='https://user-images.githubusercontent.com/3979615/78010622-4ea1d380-738e-11ea-8a17-e6a465eeec35.png' width='16.42px'> app on your device. 
-  * Tap the Home tab, then tap <img src='https://user-images.githubusercontent.com/3979615/78010869-9aed1380-738e-11ea-9644-9f46b3633026.png' width='16.42px'>. 
-  * Tap *Add Accessory*, and select *I Don't Have a Code, Cannot Scan* or *More options*. 
-  * Select Your accessory and press add anyway. 
-  * Enter the PIN or scan the QR code, this can be found in Homebridge UI or Homebridge logs.
-  * Complete the accessory setup.
-
-### [What's New](https://github.com/grzegorz914/homebridge-melcloud-control/blob/main/CHANGELOG.md)
-
-### Development
-Please feel free to create a Pull request and help in development. It will be highly appreciated.
