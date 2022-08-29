@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### The old plugin and config need to be first removed from Homebridge and HomeKit and added again.
 ### The platform name and password properties was changed due collision with same already exist plugins from other developers.
 
+## [0.3.1] - (29.08.2022)
+## Changes
+- code cleanup
+- mqtt topics standarization
+
 ## [0.3.0] - (27.08.2022)
 ## Changes
 - code cleanup and rebuild
