@@ -23,7 +23,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | [Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) | [Config UI X Wiki](https://github.com/oznu/homebridge-config-ui-x/wiki) | Homebridge Web User Interface | Recommended |
 | [MELCloud](https://www.npmjs.com/package/homebridge-melcloud-control) | [Plug-In Wiki](https://github.com/grzegorz914/homebridge-melcloud-control/wiki) | Homebridge Plug-In | Required |
 
-### About the plugin
+### About The Plugin
 * All devices are detected automatically.
 * All configured settings are appiled to all devices in account.
 * Support multiple MELCloud accounts, buildings, flors, areas.
