@@ -23,18 +23,9 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | [Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) | [Config UI X Wiki](https://github.com/oznu/homebridge-config-ui-x/wiki) | Web User Interface | Recommended |
 | [MELCloud](https://www.npmjs.com/package/homebridge-melcloud-control) | `npm install -g homebridge-melcloud-control` | Plug-In | Required |
 
-### Important changes v0.1.x and above!!!
-* The old plugin and config need to be first removed from Homebridge and HomeKit and added again.
-* The platform name and password properties was changed due collision with same already exist plugins from other developers.
-### Note
-* The Heat Pump and Energy Recovery Ventilation v0.3.0 is in beta test.
-
-### Troubleshooting
-* If for some reason the device is not displayed in HomeKit app try this procedure:
-   * Go to `./homebridge/persist` macOS or `/var/lib/homebridge/persist` for RPI.
-   * Remove `AccessoryInfo.xxx` file which contain Your device data: `{"displayName":"DeviceName"}`.
-   * Next remove `IdentifierCashe.xxx` file with same name as `AccessoryInfo.xxx`.
-   * Restart Homebridge and try add it to the HomeKit app again.
+## [Important changes v0.1.x and above!!!](https://github.com/grzegorz914/homebridge-melcloud-control/wiki#important-changes-v01x-and-above).
+## [Note](https://github.com/grzegorz914/homebridge-melcloud-control/wiki#note).
+## [Troubleshooting](https://github.com/grzegorz914/homebridge-melcloud-control/wiki#troubleshooting).
 
 ### About the plugin
 * All devices are detected automatically.
