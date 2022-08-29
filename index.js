@@ -73,7 +73,7 @@ class melCloudPlatform {
 							this.log(message);
 						})
 						.on('error', (error) => {
-							this.log(error);
+							this.log.error(error);
 						})
 						.on('debug', (message) => {
 							this.log(message);
@@ -145,7 +145,7 @@ class melCloudDevice {
 			this.log(message);
 		})
 			.on('error', (error) => {
-				this.log(error);
+				this.log.error(error);
 			})
 			.on('debug', (message) => {
 				this.log(message);
@@ -460,7 +460,7 @@ class melCloudDevice {
 						};
 					})
 					.on('error', (error) => {
-						this.log(error);
+						this.log.error(error);
 					})
 					.on('debug', (message) => {
 						this.log(message);
@@ -676,7 +676,7 @@ class melCloudDevice {
 						};
 					})
 					.on('error', (error) => {
-						this.log(error);
+						this.log.error(error);
 					})
 					.on('debug', (message) => {
 						this.log(message);
@@ -918,7 +918,7 @@ class melCloudDevice {
 						};
 					})
 					.on('error', (error) => {
-						this.log(error);
+						this.log.error(error);
 					})
 					.on('debug', (message) => {
 						this.log(message);

@@ -42,7 +42,7 @@ class MELCLOUD extends EventEmitter {
             try {
                 const loginData = await this.axiosInstanceLogin(CONSTANS.ApiUrls.ClientLogin, options);
                 const melCloudInfoData = JSON.stringify(loginData.data, null, 2);
-                const debug = debugLog ? this.emit('debug', `Account ${accountName}, debug melCloudInfo: ${melCloudInfoData}`) : false;
+                const debug = debugLog ? this.emit('debug', `Account ${accountName}, debug MELCloud Info: ${melCloudInfoData}`) : false;
                 const debug1 = debugLog ? this.emit('debug', `Account ${accountName}, Connected.`) : false;
                 const writeMelCloudInfoData = await fsPromises.writeFile(melCloudInfoFile, melCloudInfoData);
                 const melCloudInfo = loginData.data.LoginData;
@@ -78,7 +78,7 @@ class MELCLOUD extends EventEmitter {
                 try {
                     const listDevicesData = await this.axiosInstanceGet(CONSTANS.ApiUrls.ListDevices);
                     const buildingsData = JSON.stringify(listDevicesData.data, null, 2);
-                    const debug1 = debugLog ? this.emit('debug', `Account ${accountName}, debug buildings: ${buildingsData}`) : false;
+                    const debug1 = debugLog ? this.emit('debug', `Account ${accountName}, debug Buildings: ${buildingsData}`) : false;
                     const writeDevicesData = await fsPromises.writeFile(melCloudBuildingsFile, buildingsData);
 
 

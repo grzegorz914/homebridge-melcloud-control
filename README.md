@@ -71,7 +71,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
   * Test phase...
 * Home automations and shortcuts can be used to control the devices.
 * Siri can be used to control the devices.
-* MQTT publisch all available data from all detected devices.
+* MQTT publisch topic *Info*, *State* as payload JSON data.
 
 <p align="left">
   <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/homekit.png" width="382"></a> 
