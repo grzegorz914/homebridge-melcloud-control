@@ -14,31 +14,55 @@
     "comment": "In this section set the port for Homebridge accessories."
   },
   "accessories": [],
-  "platforms": [{
-    "platform": "melcloudcontrol",
-    "accounts": [{
-      "name": "My House",
-      "user": "user",
-      "passwd": "password",
-      "language": 0,
-      "displayMode": 0,
-      "buttons": [{
-        "name": "ON/OFF",
-        "mode": 0,
-        "displayType": 0
-      }],
-      "enableDevicePresets": false,
-      "disableLogInfo": false,
-      "disableLogDeviceInfo": false,
-      "enableDebugMode": false,
-      "enableMqtt": false,
-      "mqttHost": "192.168.1.33",
-      "mqttPort": 1883,
-      "mqttPrefix": "home/My House",
-      "mqttAuth": false,
-      "mqttUser": "user",
-      "mqttPass": "password",
-      "mqttDebug": false
-    }]
-  }]
+  "platforms": [
+    {
+      "platform": "melcloudcontrol",
+      "accounts": [
+        {
+          "name": "My House",
+          "user": "user",
+          "passwd": "password",
+          "language": 0,
+          "ataDisplayMode": 0,
+          "ataPresets": false,
+          "ataButtons": [
+            {
+              "name": "ON/OFF",
+              "mode": 0,
+              "displayType": 0
+            }
+          ],
+          "atwDisplayMode": 0,
+          "atwPresets": false,
+          "atwButtons": [
+            {
+              "name": "ON/OFF",
+              "mode": 0,
+              "displayType": 0
+            }
+          ],
+          "ervDisplayMode": 0,
+          "ervPresets": false,
+          "ervButtons": [
+            {
+              "name": "ON/OFF",
+              "mode": 0,
+              "displayType": 0
+            }
+          ],
+          "disableLogInfo": false,
+          "disableLogDeviceInfo": false,
+          "enableDebugMode": false,
+          "enableMqtt": false,
+          "mqttHost": "192.168.1.33",
+          "mqttPort": 1883,
+          "mqttPrefix": "home/My House",
+          "mqttAuth": false,
+          "mqttUser": "user",
+          "mqttPass": "password",
+          "mqttDebug": false
+        }
+      ]
+    }
+  ]
 }

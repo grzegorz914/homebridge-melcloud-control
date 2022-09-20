@@ -25,7 +25,6 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 
 ### About The Plugin
 * All devices are detected automatically.
-* All configured settings are appiled to all devices of same type in account.
 * Support multiple MELCloud accounts, buildings, flors, areas.
 * Support temperature display units *Celsius/Fahrenheit*.
 * Support control device *Presets*.
@@ -124,11 +123,21 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `user` | Here set the MELCloud username. |
 | `passwd` | Here set the MELCloud password. |
 | `language` | Here select the MELCloud language. |
-| `displayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
-| `buttons.name` | Here set `Button Name` which You want expose to the *Homebridge/HomeKit*. | 
-| `buttons.mode` | Here select button mode, AC - Air Conditioner, HP - Heat Pump, ERV - Energy Recovery Ventilation, VH - Vane Horizontal, VV - Vane Horizontal. |
-| `buttons.displayType` | Here select HomeKit display type, `Switch`, `Button` - selectable in HomeKit app as `Light`, `Fan`, `Outlet`. |
-| `enableDevicePresets` | This enable display device presets in HomeKit app. |
+| `ataDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
+| `ataPresets` | This enable display Air Conditioner presets in HomeKit app. |
+| `ataButtons.name` | Here set `Button Name` which You want expose to the *Homebridge/HomeKit*. | 
+| `ataButtons.mode` | Here select button mode, VH - Vane Horizontal, VV - Vane Horizontal. |
+| `ataButtons.displayType` | Here select HomeKit display type, `Switch`, `Button` - selectable in HomeKit app as `Light`, `Fan`, `Outlet`. |
+| `atwDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
+| `atwPresets` | This enable display Heat Pump presets in HomeKit app. |
+| `atwButtons.name` | Here set `Button Name` which You want expose to the *Homebridge/HomeKit*. | 
+| `atwButtons.mode` | Here select button mode. |
+| `atwButtons.displayType` | Here select HomeKit display type, `Switch`, `Button` - selectable in HomeKit app as `Light`, `Fan`, `Outlet`. |
+| `ervDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
+| `ervPresets` | This enable display EnergyRecovery Ventilation presets in HomeKit app. |
+| `ervButtons.name` | Here set `Button Name` which You want expose to the *Homebridge/HomeKit*. | 
+| `ervButtons.mode` | Here select button mode. |
+| `ervButtons.displayType` | Here select HomeKit display type, `Switch`, `Button` - selectable in HomeKit app as `Light`, `Fan`, `Outlet`. |
 | `enableDebugMode` | This enable deep log in homebridge console. |
 | `disableLogInfo` | This disable display log values and states on every it change. |
 | `disableLogDeviceInfo` | This disable display log device info on plugin start. |
@@ -150,13 +159,27 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
                     "user": "user",
                     "passwd": "password",
                     "language": 0,
-                    "displayMode": 0,
-                    "buttons": [{
+                    "ataDisplayMode": 0,
+                    "ataPresets": false,
+                    "ataButtons": [{
                         "name": "ON/OFF",
                         "mode": 0,
                         "displayType": 0
                     }],
-                    "enableDevicePresets": false,
+                    "atwDisplayMode": 0,
+                    "atwPresets": false,
+                    "atwButtons": [{
+                        "name": "ON/OFF",
+                        "mode": 0,
+                        "displayType": 0
+                    }],
+                    "ervDisplayMode": 0,
+                    "ervPresets": false,
+                    "ervButtons": [{
+                        "name": "ON/OFF",
+                        "mode": 0,
+                        "displayType": 0
+                    }],
                     "disableLogInfo": false,
                     "disableLogDeviceInfo": false,
                     "enableDebugMode": false,

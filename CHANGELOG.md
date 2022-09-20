@@ -5,8 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Important changes v0.1.x and above!!!
-### The old plugin and config need to be first removed from Homebridge and HomeKit and added again.
-### The platform name and password properties was changed due collision with same already exist plugins from other developers.
+  * The old plugin and config need to be first removed from Homebridge and HomeKit and added again.
+
+## Important changes v0.4.0 and above!!!
+  * Main control mode, buttons and presets need to be configured again!!!
+
+## [0.4.0] - (xx.09.2022)
+## Changes
+- added possibility individually configure (control mode, presets and buttons) for devices of same type
+- update config.schema json
 
 ## [0.3.2] - (20.09.2022)
 ## Changes
