@@ -1,9 +1,8 @@
 "use strict";
-
 const fs = require('fs');
 const fsPromises = fs.promises;
-const EventEmitter = require('events');
 const axios = require('axios');
+const EventEmitter = require('events');
 const CONSTANS = require('./constans.json');
 
 class MELCLOUD extends EventEmitter {
@@ -29,13 +28,13 @@ class MELCLOUD extends EventEmitter {
         this.on('connect', async () => {
             const options = {
                 data: {
-                    AppVersion: '1.22.10.0',
-                    CaptchaChallenge: '',
-                    CaptchaResponse: '',
                     Email: user,
                     Password: passwd,
                     Language: language,
-                    Persist: 'true'
+                    AppVersion: '1.22.10.0',
+                    CaptchaChallenge: '',
+                    CaptchaResponse: '',
+                    Persist: true
                 }
             };
 
@@ -60,138 +59,137 @@ class MELCLOUD extends EventEmitter {
                 this.emit('error', `Account: ${accountName}, login error, ${error}, reconnect in 60s.`);
                 this.reconnect();
             };
-        })
-            .on('checkDevicesList', async () => {
-                const debug = debugLog ? this.emit('debug', `Account ${accountName}, Scanning for devices.`) : false;
-                const melCloudInfo = this.melCloudInfo;
-                const contextKey = this.contextKey;
+        }).on('checkDevicesList', async () => {
+            const debug = debugLog ? this.emit('debug', `Account ${accountName}, Scanning for devices.`) : false;
+            const melCloudInfo = this.melCloudInfo;
+            const contextKey = this.contextKey;
 
-                this.axiosInstanceGet = axios.create({
-                    method: 'GET',
-                    baseURL: CONSTANS.ApiUrls.BaseURL,
-                    timeout: 10000,
-                    headers: {
-                        'X-MitsContextKey': contextKey
-                    }
-                });
+            this.axiosInstanceGet = axios.create({
+                method: 'GET',
+                baseURL: CONSTANS.ApiUrls.BaseURL,
+                timeout: 10000,
+                headers: {
+                    'X-MitsContextKey': contextKey
+                }
+            });
 
-                try {
-                    const listDevicesData = await this.axiosInstanceGet(CONSTANS.ApiUrls.ListDevices);
-                    const buildingsData = JSON.stringify(listDevicesData.data, null, 2);
-                    const debug1 = debugLog ? this.emit('debug', `Account ${accountName}, debug Buildings: ${buildingsData}`) : false;
-                    const writeDevicesData = await fsPromises.writeFile(melCloudBuildingsFile, buildingsData);
+            try {
+                const listDevicesData = await this.axiosInstanceGet(CONSTANS.ApiUrls.ListDevices);
+                const buildingsData = JSON.stringify(listDevicesData.data, null, 2);
+                const debug1 = debugLog ? this.emit('debug', `Account ${accountName}, debug Buildings: ${buildingsData}`) : false;
+                const writeDevicesData = await fsPromises.writeFile(melCloudBuildingsFile, buildingsData);
 
 
-                    //read building structure and get the devices
-                    const buildingsList = listDevicesData.data;
-                    const buildingsCount = buildingsList.length;
-                    if (buildingsCount > 0) {
-                        const devices = new Array();
-                        for (let i = 0; i < buildingsCount; i++) {
-                            const building = buildingsList[i];
-                            const buildingStructure = building.Structure;
+                //read building structure and get the devices
+                const buildingsList = listDevicesData.data;
+                const buildingsCount = buildingsList.length;
+                if (buildingsCount > 0) {
+                    const devices = new Array();
+                    for (let i = 0; i < buildingsCount; i++) {
+                        const building = buildingsList[i];
+                        const buildingStructure = building.Structure;
 
-                            //floors
-                            const floorsCount = buildingStructure.Floors.length;
-                            for (let j = 0; j < floorsCount; j++) {
-                                const floor = buildingStructure.Floors[j];
+                        //floors
+                        const floorsCount = buildingStructure.Floors.length;
+                        for (let j = 0; j < floorsCount; j++) {
+                            const floor = buildingStructure.Floors[j];
 
-                                //floor areas
-                                const florAreasCount = floor.Areas.length;
-                                for (let l = 0; l < florAreasCount; l++) {
-                                    const florArea = floor.Areas[l];
+                            //floor areas
+                            const florAreasCount = floor.Areas.length;
+                            for (let l = 0; l < florAreasCount; l++) {
+                                const florArea = floor.Areas[l];
 
-                                    //floor areas devices
-                                    const florAreaDevicesCount = florArea.Devices.length;
-                                    for (let m = 0; m < florAreaDevicesCount; m++) {
-                                        const floorAreaDevice = florArea.Devices[m];
-                                        devices.push(floorAreaDevice);
-                                    };
-                                };
-
-                                //floor devices
-                                const floorDevicesCount = floor.Devices.length;
-                                for (let k = 0; k < floorDevicesCount; k++) {
-                                    const floorDevice = floor.Devices[k];
-                                    devices.push(floorDevice);
+                                //floor areas devices
+                                const florAreaDevicesCount = florArea.Devices.length;
+                                for (let m = 0; m < florAreaDevicesCount; m++) {
+                                    const floorAreaDevice = florArea.Devices[m];
+                                    devices.push(floorAreaDevice);
                                 };
                             };
 
-                            //building areas
-                            const buildingAreasCount = buildingStructure.Areas.length;
-                            for (let n = 0; n < buildingAreasCount; n++) {
-                                const buildingArea = buildingStructure.Areas[n];
-
-                                //building area devices
-                                const buildingAreaDevicesCount = buildingArea.Devices.length;
-                                for (let o = 0; o < buildingAreaDevicesCount; o++) {
-                                    const buildingAreaDevice = buildingArea.Devices[o];
-                                    devices.push(buildingAreaDevice);
-                                };
-                            };
-
-                            //building devices
-                            const buildingDevicesCount = buildingStructure.Devices.length;
-                            for (let p = 0; p < buildingDevicesCount; p++) {
-                                const buildingDevice = buildingStructure.Devices[p];
-                                devices.push(buildingDevice);
+                            //floor devices
+                            const floorDevicesCount = floor.Devices.length;
+                            for (let k = 0; k < floorDevicesCount; k++) {
+                                const floorDevice = floor.Devices[k];
+                                devices.push(floorDevice);
                             };
                         };
 
-                        const devicesCount = devices.length;
-                        const useFahrenheit = (melCloudInfo.UseFahrenheit == true) ? 1 : 0;
-                        const temperatureDisplayUnit = CONSTANS.TemperatureDisplayUnits[useFahrenheit];
+                        //building areas
+                        const buildingAreasCount = buildingStructure.Areas.length;
+                        for (let n = 0; n < buildingAreasCount; n++) {
+                            const buildingArea = buildingStructure.Areas[n];
 
-                        if (devicesCount > 0) {
-                            const debug2 = debugLog ? this.emit('debug', `Account ${accountName}, Found: ${devicesCount} devices.`) : false;
-                            const lastDevice = devicesCount - 1;
-                            for (let i = 0; i < devicesCount; i++) {
-                                const deviceInfo = devices[i];
-                                const buildingId = deviceInfo.BuildingID.toString();
-                                const deviceId = deviceInfo.DeviceID.toString();
-                                const deviceType = deviceInfo.Type;
-                                const deviceName = deviceInfo.DeviceName;
-                                const deviceTypeText = CONSTANS.DeviceType[deviceType];
-
-                                //write device info
-                                const deviceData = JSON.stringify(deviceInfo, null, 2);
-                                const melCloudBuildingDeviceFile = `${prefDir}/${accountName}_Device_${deviceId}`;
-                                const writeDeviceInfoData = await fsPromises.writeFile(melCloudBuildingDeviceFile, deviceData);
-
-                                //prepare device if not in devices array
-                                const deviceNotExist = (devicesId.indexOf(deviceId) == -1);
-                                if (deviceNotExist) {
-                                    devicesId.push(deviceId);
-                                    this.emit('checkDevicesListComplete', melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit);
-                                };
-                                const updateDevicesList = (i == lastDevice) ? this.checkDevicesList() : false;
+                            //building area devices
+                            const buildingAreaDevicesCount = buildingArea.Devices.length;
+                            for (let o = 0; o < buildingAreaDevicesCount; o++) {
+                                const buildingAreaDevice = buildingArea.Devices[o];
+                                devices.push(buildingAreaDevice);
                             };
-                        } else {
-                            this.emit('message', `Account ${accountName}, no devices found, check again in 60s.`)
-                            this.checkDevicesList();
+                        };
+
+                        //building devices
+                        const buildingDevicesCount = buildingStructure.Devices.length;
+                        for (let p = 0; p < buildingDevicesCount; p++) {
+                            const buildingDevice = buildingStructure.Devices[p];
+                            devices.push(buildingDevice);
+                        };
+                    };
+
+                    const devicesCount = devices.length;
+                    const useFahrenheit = (melCloudInfo.UseFahrenheit == true) ? 1 : 0;
+                    const temperatureDisplayUnit = CONSTANS.TemperatureDisplayUnits[useFahrenheit];
+
+                    if (devicesCount > 0) {
+                        const debug2 = debugLog ? this.emit('debug', `Account ${accountName}, Found: ${devicesCount} devices.`) : false;
+                        const lastDevice = devicesCount - 1;
+                        for (let i = 0; i < devicesCount; i++) {
+                            const deviceInfo = devices[i];
+                            const buildingId = deviceInfo.BuildingID.toString();
+                            const deviceId = deviceInfo.DeviceID.toString();
+                            const deviceType = deviceInfo.Type;
+                            const deviceName = deviceInfo.DeviceName;
+                            const deviceTypeText = CONSTANS.DeviceType[deviceType];
+
+                            //write device info
+                            const deviceData = JSON.stringify(deviceInfo, null, 2);
+                            const melCloudBuildingDeviceFile = `${prefDir}/${accountName}_Device_${deviceId}`;
+                            const writeDeviceInfoData = await fsPromises.writeFile(melCloudBuildingDeviceFile, deviceData);
+
+                            //prepare device if not in devices array
+                            const deviceNotExist = (devicesId.indexOf(deviceId) == -1);
+                            if (deviceNotExist) {
+                                devicesId.push(deviceId);
+                                this.emit('checkDevicesListComplete', melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit);
+                            };
+                            const updateDevicesList = (i == lastDevice) ? this.checkDevicesList() : false;
                         };
                     } else {
-                        this.emit('message', `Account ${accountName}, no building found, check again in 60s.`)
+                        this.emit('message', `Account ${accountName}, no devices found, check again in 90s.`)
                         this.checkDevicesList();
                     };
-                } catch (error) {
-                    this.emit('error', `Account ${accountName}, check devices list error, ${error}, check again in 60s.`);
+                } else {
+                    this.emit('message', `Account ${accountName}, no building found, check again in 90s.`)
                     this.checkDevicesList();
                 };
-            })
+            } catch (error) {
+                this.emit('error', `Account ${accountName}, check devices list error, ${error}, check again in 90s.`);
+                this.checkDevicesList();
+            };
+        })
         this.emit('connect');
     };
 
     reconnect() {
         setTimeout(() => {
             this.emit('connect');
-        }, 60000);
+        }, 90000);
     };
 
     checkDevicesList() {
         setTimeout(() => {
             this.emit('checkDevicesList');
-        }, 60000);
+        }, 90000);
     };
 };
 module.exports = MELCLOUD;

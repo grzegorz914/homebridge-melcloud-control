@@ -1,9 +1,8 @@
 "use strict";
-
 const fs = require('fs');
 const fsPromises = fs.promises;
-const EventEmitter = require('events');
 const axios = require('axios');
+const EventEmitter = require('events');
 const CONSTANS = require('./constans.json');
 
 
@@ -44,7 +43,7 @@ class MELCLOUDDEVICEATW extends EventEmitter {
             try {
                 const readDeviceInfoData = await fsPromises.readFile(melCloudBuildingDeviceFile);
                 const deviceInfo = JSON.parse(readDeviceInfoData);
-                const debug = debugLog ? this.emit('debug', `${deviceTypeText} ${deviceName}, debug Info: ${deviceInfo}`) : false;
+                const debug = debugLog ? this.emit('debug', `${deviceTypeText} ${deviceName}, debug Info: ${JSON.stringify(deviceInfo, null, 2)}`) : false;
 
                 //deviceInfo
                 //const deviceID = deviceInfo.DeviceID;
@@ -92,8 +91,9 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                 const devicePCycleActual = deviceInfo.Device.PCycleActual;
                 const deviceErrorMessages = deviceInfo.Device.ErrorMessages;
                 const deviceDeviceType = deviceInfo.Device.DeviceType;
-                const deviceCanCool = deviceInfo.Device.CanCool;
                 const deviceCanHeat = deviceInfo.Device.CanHeat;
+                const deviceCanCool = deviceInfo.Device.CanCool;
+                const deviceHasHotWaterTank = deviceInfo.Device.HasHotWaterTank;
                 const deviceFTCVersion = deviceInfo.Device.FTCVersion;
                 const deviceFTCRevision = deviceInfo.Device.FTCRevision;
                 const deviceLastFTCVersion = deviceInfo.Device.LastFTCVersion;
@@ -222,7 +222,7 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                 const deviceIsFtcModelSupported = deviceInfo.Device.IsFtcModelSupported;
                 const deviceMaxTankTemperature = deviceInfo.Device.MaxTankTemperature;
                 const deviceIdleZone1 = deviceInfo.Device.IdleZone1;
-                const deviceDIdleZone2 = deviceInfo.Device.IdleZone2;
+                const deviceIdleZone2 = deviceInfo.Device.IdleZone2;
                 const deviceMinPcycle = deviceInfo.Device.MinPcycle;
                 const deviceMaxPcycle = deviceInfo.Device.MaxPcycle;
                 const deviceMaxOutdoorUnits = deviceInfo.Device.MaxOutdoorUnits;
@@ -230,7 +230,7 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                 const deviceMaxTemperatureControlUnits = deviceInfo.Device.MaxTemperatureControlUnits;
                 const deviceDeviceID = deviceInfo.Device.DeviceID;
                 const deviceMacAddress = deviceInfo.Device.MacAddress;
-                const deviceSerialNumber = (ddeviceInfo.Device.SerialNumber != null) ? deviceInfo.Device.SerialNumber.toString() : 'Undefined';
+                const deviceSerialNumber = (deviceInfo.Device.SerialNumber != null) ? deviceInfo.Device.SerialNumber.toString() : 'Undefined';
                 const deviceTimeZoneID = deviceInfo.Device.TimeZoneID;
                 const deviceDiagnosticMode = deviceInfo.Device.DiagnosticMode;
                 const deviceDiagnosticEndDate = deviceInfo.Device.DiagnosticEndDate;
@@ -274,9 +274,9 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                 const deviceEffectivePCycle = deviceInfo.Device.EffectivePCycle;
                 const deviceMqttFlags = deviceInfo.Device.MqttFlags;
                 const deviceHasErrorMessages = deviceInfo.Device.HasErrorMessages;
-                const deviceHasZone2 = deviceInfo.Device.HasZone2;
                 const deviceOffline = deviceInfo.Device.Offline;
                 const deviceSupportsHourlyEnergyReport = deviceInfo.Device.SupportsHourlyEnergyReport;
+                const deviceHasZone2 = deviceInfo.Device.HasZone2;
 
                 //units info
                 const units = Array.isArray(deviceInfo.Device.Units) ? deviceInfo.Device.Units : [];
@@ -307,7 +307,8 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                     }
                 }
                 const manufacturer = 'Mitsubishi';
-                const modelName = (modelsIndoor.length > 0) ? modelsIndoor[0] : 'Undefined';
+                const modelIndoor = (modelsIndoor.length > 0) ? modelsIndoor[0] : 'Undefined';
+                const modelOutdoor = (modelsOutdoor.length > 0) ? modelsOutdoor[0] : 'Undefined';
 
                 //diagnostic
                 const diagnosticMode = deviceInfo.DiagnosticMode;
@@ -333,7 +334,8 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                 const canSetFlowTemperature = deviceInfo.Permissions.CanSetFlowTemperature;
                 const canSetTemperatureIncrementOverride = deviceInfo.Permissions.CanSetTemperatureIncrementOverride;
 
-                this.emit('deviceInfo', deviceInfo, manufacturer, modelName, serialNumber, deviceFirmwareAppVersion, devicePresets, devicePresetsCount);
+                const zonesCount = 4;
+                this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, deviceFirmwareAppVersion, devicePresets, devicePresetsCount, zonesCount, deviceHasHotWaterTank, deviceHasZone2, zone1Name, zone2Name);
                 this.emit('checkDeviceState');
                 const mqtt = mqttEnabled ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, Info`, JSON.stringify(deviceInfo, null, 2)) : false;
             } catch (error) {
@@ -350,176 +352,66 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                 const debug = debugLog ? this.emit('debug', `${deviceTypeText} ${deviceName}, debug State: ${deviceStateData}`) : false;
 
                 // device state
-                const temperatureIncrement = deviceState.TemperatureIncrement
-                const defrostMode = deviceState.DefrostMode
-                const heatPumpFrequenc = deviceState.HeatPumpFrequenc
-                const maxSetTemperature = deviceState.MaxSetTemperature
-                const minSetTemperature = deviceState.MinSetTemperature
-                const roomTemperatureZone1 = deviceState.RoomTemperatureZone1
-                const roomTemperatureZone2 = deviceState.RoomTemperatureZone2
-                const tankWaterTemperature = deviceState.TankWaterTemperature
-                const unitStatus = deviceState.UnitStatus
-                const heatingFunctionEnabled = deviceState.HeatingFunctionEnabled
-                const serverTimerEnabled = deviceState.ServerTimerEnabled
-                const thermostatStatusZone1 = deviceState.ThermostatStatusZone1
-                const thermostatStatusZone2 = deviceState.ThermostatStatusZone2
-                const thermostatTypeZone1 = deviceState.ThermostatTypeZone1
-                const thermostatTypeZone2 = deviceState.ThermostatTypeZone2
-                const mixingTankWaterTemperature = deviceState.MixingTankWaterTemperature
-                const condensingTemperature = deviceState.CondensingTemperature
-                const effectiveFlags = deviceState.EffectiveFlags
-                const lastEffectiveFlags = deviceState.LastEffectiveFlags
-                const power = deviceState.Power
-                const ecoHotWater = deviceState.EcoHotWater
-                const operationMode = deviceState.OperationMode
-                const operationModeZone1 = deviceState.OperationModeZone1
-                const operationModeZone2 = deviceState.OperationModeZone2
-                const setTemperatureZone1 = deviceState.SetTemperatureZone1
-                const setTemperatureZone2 = deviceState.SetTemperatureZone2
-                const setTankWaterTemperature = deviceState.SetTankWaterTemperature
-                const targetHCTemperatureZone1 = deviceState.TargetHCTemperatureZone1
-                const targetHCTemperatureZone2 = deviceState.TargetHCTemperatureZone2
-                const forcedHotWaterMode = deviceState.ForcedHotWaterMode
-                const holidayMode = deviceState.HolidayMode
-                const prohibitHotWater = deviceState.ProhibitHotWater
-                const prohibitHeatingZone1 = deviceState.ProhibitHeatingZone1
-                const prohibitHeatingZone2 = deviceState.ProhibitHeatingZone2
-                const prohibitCoolingZone1 = deviceState.ProhibitCoolingZone1
-                const prohibitCoolingZone2 = deviceState.ProhibitCoolingZone2
-                const serverTimerDesired = deviceState.ServerTimerDesired
-                const secondaryZoneHeatCurve = deviceState.SecondaryZoneHeatCurve
-                const setHeatFlowTemperatureZone1 = deviceState.SetHeatFlowTemperatureZone1
-                const setHeatFlowTemperatureZone2 = deviceState.SetHeatFlowTemperatureZone2
-                const setCoolFlowTemperatureZone1 = deviceState.SetCoolFlowTemperatureZone1
-                const setCoolFlowTemperatureZone2 = deviceState.SetCoolFlowTemperatureZone2
-                const thermostatTemperatureZone1 = deviceState.ThermostatTemperatureZone1
-                const thermostatTemperatureZone2 = deviceState.ThermostatTemperatureZone2
-                const dECCReport = deviceState.DECCReport
-                const cSVReport1min = deviceState.CSVReport1min
-                const zone2Master = deviceState.Zone2Master
-                const dailyEnergyConsumedDate = deviceState.DailyEnergyConsumedDate
-                const dailyEnergyProducedDate = deviceState.DailyEnergyProducedDate
-                const currentEnergyConsumed = deviceState.CurrentEnergyConsumed
-                const currentEnergyProduced = deviceState.CurrentEnergyProduced
-                const currentEnergyMode = deviceState.CurrentEnergyMode
-                const heatingEnergyConsumedRate1 = deviceState.HeatingEnergyConsumedRate1
-                const heatingEnergyConsumedRate2 = deviceState.HeatingEnergyConsumedRate2
-                const coolingEnergyConsumedRate1 = deviceState.CoolingEnergyConsumedRate1
-                const coolingEnergyConsumedRate2 = deviceState.CoolingEnergyConsumedRate2
-                const hotWaterEnergyConsumedRate1 = deviceState.HotWaterEnergyConsumedRate1
-                const hotWaterEnergyConsumedRate2 = deviceState.HotWaterEnergyConsumedRate2
-                const heatingEnergyProducedRate1 = deviceState.HeatingEnergyProducedRate1
-                const heatingEnergyProducedRate2 = deviceState.HeatingEnergyProducedRate2
-                const coolingEnergyProducedRate1 = deviceState.CoolingEnergyProducedRate1
-                const coolingEnergyProducedRate2 = deviceState.CoolingEnergyProducedRate2
-                const hotWaterEnergyProducedRate1 = deviceState.HotWaterEnergyProducedRate1
-                const hotWaterEnergyProducedRate2 = deviceState.HotWaterEnergyProducedRate2
-                const errorCode2Digit = deviceState.ErrorCode2Digit
-                const sendSpecialFunctions = deviceState.SendSpecialFunctions
-                const requestSpecialFunctions = deviceState.RequestSpecialFunctions
-                const specialFunctionsState = deviceState.SpecialFunctionsState
-                const pendingSendSpecialFunctions = deviceState.PendingSendSpecialFunctions
-                const pendingRequestSpecialFunctions = deviceState.PendingRequestSpecialFunctions
-                const hasZone2 = deviceState.HasZone2
-                const hasSimplifiedZone2 = deviceState.HasSimplifiedZone2
-                const canHeat = deviceState.CanHeat
-                const canCool = deviceState.CanCool
-                const hasHotWaterTank = deviceState.HasHotWaterTank
-                const canSetTankTemperature = deviceState.CanSetTankTemperature
-                const canSetEcoHotWater = deviceState.CanSetEcoHotWater
-                const hasEnergyConsumedMeter = deviceState.HasEnergyConsumedMeter
-                const hasEnergyProducedMeter = deviceState.HasEnergyProducedMeter
-                const canMeasureEnergyProduced = deviceState.CanMeasureEnergyProduced
-                const canMeasureEnergyConsumed = deviceState.CanMeasureEnergyConsumed
-                const zone1InRoomMode = deviceState.Zone1InRoomMode
-                const zone2InRoomMode = deviceState.Zone2InRoomMode
-                const zone1InHeatMode = deviceState.Zone1InHeatMode
-                const zone2InHeatMode = deviceState.Zone2InHeatMode
-                const zone1InCoolMode = deviceState.Zone1InCoolMode
-                const zone2InCoolMode = deviceState.Zone2InCoolMode
-                const allowDualRoomTemperature = deviceState.AllowDualRoomTemperature
-                const isGeodan = deviceState.IsGeodan
-                const hasEcoCuteSettings = deviceState.HasEcoCuteSettings
-                const hasFTC45Settings = deviceState.HasFTC45Settings
-                const hasFTC6Settings = deviceState.HasFTC6Settings
-                const canEstimateEnergyUsage = deviceState.CanEstimateEnergyUsage
-                const canUseRoomTemperatureCooling = deviceState.CanUseRoomTemperatureCooling
-                const isFtcModelSupported = deviceState.IsFtcModelSupported
-                const maxTankTemperature = deviceState.MaxTankTemperature
-                const idleZone1 = deviceState.IdleZone1
-                const idleZone2 = deviceState.IdleZone2
-                const minPcycle = deviceState.MinPcycle
-                const maxPcycle = deviceState.MaxPcycle
-                const maxOutdoorUnits = deviceState.MaxOutdoorUnits
-                const maxIndoorUnits = deviceState.MaxIndoorUnits
-                const maxTemperatureControlUnits = deviceState.MaxTemperatureControlUnits
-                const deviceID = deviceState.DeviceID
-                const macAddress = deviceState.MacAddress
-                const serialNumber = deviceState.SerialNumber
-                const timeZoneID = deviceState.TimeZoneID
-                const diagnosticMode = deviceState.DiagnosticMode
-                const diagnosticEndDate = deviceState.DiagnosticEndDate
-                const expectedCommand = deviceState.ExpectedCommand
-                const owner = deviceState.Owner
-                const detectedCountry = deviceState.DetectedCountry
-                const adaptorType = deviceState.AdaptorType
-                const firmwareDeployment = deviceState.FirmwareDeployment
-                const firmwareUpdateAborted = deviceState.FirmwareUpdateAborted
-                const linkedDevice = deviceState.LinkedDevice
-                const wifiSignalStrength = deviceState.WifiSignalStrength
-                const wifiAdapterStatus = deviceState.WifiAdapterStatus
-                const position = deviceState.Position
-                const pCycle = deviceState.PCycle
-                const recordNumMax = deviceState.RecordNumMax
-                const lastTimeStamp = deviceState.LastTimeStamp
-                const errorCode = deviceState.ErrorCode
-                const hasError = deviceState.HasError
-                const lastReset = deviceState.LastReset
-                const flashWrites = deviceState.FlashWrites
-                const scene = deviceState.Scene
+                const effectiveFlags = deviceState.EffectiveFlags;
+                const localIpAddress = deviceState.LocalIpAddress;
+                const setTemperatureZone1 = deviceState.SetTemperatureZone1;
+                const setTemperatureZone2 = deviceState.SetTemperatureZone2;
+                const roomTemperatureZone1 = deviceState.RoomTemperatureZone1;
+                const roomTemperatureZone2 = deviceState.RoomTemperatureZone2;
+                const operationMode = deviceState.OperationMode;
+                const operationModeZone1 = deviceState.OperationModeZone1;
+                const operationModeZone2 = deviceState.OperationModeZone2;
+                const weatherObservations = deviceState.WeatherObservations;
+                const errorMessage = deviceState.ErrorMessage;
+                const errorCode = deviceState.ErrorCode;
+                const setHeatFlowTemperatureZone1 = deviceState.SetHeatFlowTemperatureZone1;
+                const setHeatFlowTemperatureZone2 = deviceState.SetHeatFlowTemperatureZone2;
+                const setCoolFlowTemperatureZone1 = deviceState.SetCoolFlowTemperatureZone1;
+                const setCoolFlowTemperatureZone2 = deviceState.SetCoolFlowTemperatureZone2;
+                const hcControlType = deviceState.HcControlType;
+                const tankWaterTemperature = deviceState.TankWaterTemperature;
+                const setTankWaterTemperature = deviceState.SetTankWaterTemperature;
+                const forcedHotWaterMode = deviceState.ForcedHotWaterMode;
+                const unitStatus = deviceState.UnitStatus;
+                const outdoorTemperature = deviceState.OutdoorTemperature;
+                const ecoHotWater = deviceState.EcoHotWater;
+                const zone1Name = deviceState.Zone1Name;
+                const zone2Name = deviceState.Zone2Name;
+                const holidayMode = deviceState.HolidayMode;
+                const prohibitZone1 = deviceState.ProhibitZone1;
+                const prohibitZone2 = deviceState.ProhibitZone2;
+                const prohibitHotWater = deviceState.ProhibitHotWater;
                 const temperatureIncrementOverride = deviceState.TemperatureIncrementOverride
-                const sSLExpirationDate = deviceState.SSLExpirationDate
-                const sPTimeout = deviceState.SPTimeout
-                const passcode = deviceState.Passcode
-                const serverCommunicationDisabled = deviceState.ServerCommunicationDisabled
-                const consecutiveUploadErrors = deviceState.ConsecutiveUploadErrors
-                const doNotRespondAfter = deviceState.DoNotRespondAfter
-                const ownerRoleAccessLevel = deviceState.OwnerRoleAccessLevel
-                const ownerCountry = deviceState.OwnerCountry
-                const hideEnergyReport = deviceState.HideEnergyReport
-                const exceptionHash = deviceState.ExceptionHash
-                const exceptionDate = deviceState.ExceptionDate
-                const exceptionCount = deviceState.ExceptionCount
-                const rate1StartTime = deviceState.Rate1StartTime
-                const rate2StartTime = deviceState.Rate2StartTime
-                const protocolVersion = deviceState.ProtocolVersion
-                const unitVersion = deviceState.UnitVersion
-                const firmwareAppVersion = deviceState.FirmwareAppVersion
-                const firmwareWebVersion = deviceState.FirmwareWebVersion
-                const firmwareWlanVersion = deviceState.FirmwareWlanVersion
-                const effectivePCycle = deviceState.EffectivePCycle
-                const hasErrorMessages = deviceState.HasErrorMessages
-                const offline = deviceState.Offline
-                const units = deviceState.Units
-                const zonesCount = hasZone2 ? 3 : 2;
+                const idleZone1 = deviceState.IdleZone1;
+                const idleZone2 = deviceState.IdleZone2;
+                const demandPercentage = deviceState.DemandPercentage;
+                //const deviceId = deviceState.DeviceId;
+                const deviceType = deviceState.DeviceType;
+                const lastCommunication = deviceState.LastCommunication;
+                const nextCommunication = deviceState.NextCommunication;
+                const power = deviceState.Power;
+                const hasPendingCommand = deviceState.HasPendingCommand;
+                const offline = deviceState.Offline;
+                const scene = deviceState.Scene;
+                const sceneOwner = deviceState.SceneOwner;
 
-                this.emit('deviceState', deviceState, zonesCount, power, roomTemperatureZone1, setTemperatureZone1, roomTemperatureZone2, setTemperatureZone2, tankWaterTemperature, setTankWaterTemperature, operationMode, operationModeZone1, operationModeZone2);
+                this.emit('deviceState', deviceState, unitStatus, outdoorTemperature, power, operationMode, holidayMode, operationModeZone1, roomTemperatureZone1, setTemperatureZone1, setHeatFlowTemperatureZone1, setCoolFlowTemperatureZone1, prohibitZone1, idleZone1, forcedHotWaterMode, ecoHotWater, tankWaterTemperature, setTankWaterTemperature, prohibitHotWater, operationModeZone2, roomTemperatureZone2, setTemperatureZone2, setHeatFlowTemperatureZone2, setCoolFlowTemperatureZone2, prohibitZone2, idleZone2);
                 const mqtt = mqttEnabled ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, State`, JSON.stringify(deviceState, null, 2)) : false;
 
-                this.checkDeviceState();
+                this.checkDeviceInfo();
             } catch (error) {
                 this.emit('error', `${deviceTypeText} ${deviceName}, check state error, ${error}, check again in 60s.`);
-                this.checkDeviceState();
+                this.checkDeviceInfo();
             };
         });
 
         this.emit('checkDeviceInfo');
     };
 
-    checkDeviceState() {
+    checkDeviceInfo() {
         setTimeout(() => {
             this.emit('checkDeviceInfo');
-        }, 60000);
+        }, 65000);
     };
 
     send(url, newData, type) {

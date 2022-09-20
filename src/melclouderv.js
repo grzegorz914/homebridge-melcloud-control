@@ -1,9 +1,8 @@
 "use strict";
-
 const fs = require('fs');
 const fsPromises = fs.promises;
-const EventEmitter = require('events');
 const axios = require('axios');
+const EventEmitter = require('events');
 const CONSTANS = require('./constans.json');
 
 
@@ -44,7 +43,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
             try {
                 const readDeviceInfoData = await fsPromises.readFile(melCloudBuildingDeviceFile);
                 const deviceInfo = JSON.parse(readDeviceInfoData);
-                const debug = debugLog ? this.emit('debug', `${deviceTypeText} ${deviceName}, debug Info: ${deviceInfo}`) : false;
+                const debug = debugLog ? this.emit('debug', `${deviceTypeText} ${deviceName}, debug Info: ${JSON.stringify(deviceInfo, null, 2)}`) : false;
 
                 //deviceInfo
                 //const deviceID = deviceInfo.DeviceID;
@@ -229,8 +228,8 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                     }
                 }
                 const manufacturer = 'Mitsubishi';
-                const modelName = (modelsIndoor.length > 0) ? modelsIndoor[0] : 'Undefined';
-                const modelName1 = (modelsOutdoor.length > 0) ? modelsOutdoor[0] : 'Undefined'
+                const modelIndoor = (modelsIndoor.length > 0) ? modelsIndoor[0] : 'Undefined';
+                const modelOutdoor = (modelsOutdoor.length > 0) ? modelsOutdoor[0] : 'Undefined'
 
                 //diagnostic
                 const diagnosticMode = deviceInfo.DiagnosticMode;
@@ -255,7 +254,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const CanSetTemperatureIncrementOverride = deviceInfo.Permissions.CanSetTemperatureIncrementOverride;
                 const CanDisableLocalController = deviceInfo.Permissions.CanDisableLocalController;
 
-                this.emit('deviceInfo', deviceInfo, manufacturer, modelName, modelName1, serialNumber, deviceFirmwareAppVersion, devicePresets, devicePresetsCount);
+                this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, deviceFirmwareAppVersion, devicePresets, devicePresetsCount, deviceHasAutoVentilationMode, deviceHasBypassVentilationMode, deviceHasAutomaticFanSpeed, deviceNumberOfFanSpeeds);
                 this.emit('checkDeviceState');
                 const mqtt = mqttEnabled ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, Info`, JSON.stringify(deviceInfo, null, 2)) : false;
             } catch (error) {
@@ -277,12 +276,14 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const roomTemperature = deviceState.RoomTemperature;
                 const supplyTemperature = deviceState.SupplyTemperature;
                 const outdoorTemperature = deviceState.OutdoorTemperature;
+
                 const roomCO2Level = deviceState.RoomCO2Level;
                 const nightPurgeMode = deviceState.NightPurgeMode;
                 const setTemperature = deviceState.SetTemperature;
                 const setFanSpeed = deviceState.SetFanSpeed;
                 const operationMode = deviceState.OperationMode;
                 const ventilationMode = deviceState.VentilationMode;
+                const actualVentilationMode = deviceState.ActualVentilationMode;
                 const name = deviceState.Name;
                 const numberOfFanSpeeds = deviceState.NumberOfFanSpeeds;
                 const weatherObservations = deviceState.WeatherObservations;
@@ -290,14 +291,11 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const errorCode = deviceState.ErrorCode;
                 const defaultHeatingSetTemperature = deviceState.DefaultHeatingSetTemperature;
                 const defaultCoolingSetTemperature = deviceState.DefaultCoolingSetTemperature;
-                const inStandbyMode = deviceState.InStandbyMode;
                 const temperatureIncrementOverride = deviceState.TemperatureIncrementOverride;
                 const hideRoomTemperature = deviceState.HideRoomTemperature;
                 const hideSupplyTemperature = deviceState.HideSupplyTemperature;
                 const hideOutdoorTemperature = deviceState.HideOutdoorTemperature;
-                const coreMaintenanceRequired = deviceState.CoreMaintenanceRequired;
-                const filterMaintenanceRequired = deviceState.FilterMaintenanceRequired;
-                const deviceID = deviceState.DeviceID;
+                //const deviceId = deviceState.DeviceID;
                 const deviceType = deviceState.DeviceType;
                 const lastCommunication = deviceState.LastCommunication;
                 const nextCommunication = deviceState.NextCommunication;
@@ -307,23 +305,23 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const scene = deviceState.Scene;
                 const sceneOwner = deviceState.SceneOwner;
 
-                this.emit('deviceState', deviceState, power, roomTemperature, supplyTemperature, outdoorTemperature, roomCO2Level, setTemperature, setFanSpeed, operationMode, ventilationMode);
+                this.emit('deviceState', deviceState, power, roomTemperature, supplyTemperature, outdoorTemperature, nightPurgeMode, roomCO2Level, setTemperature, setFanSpeed, operationMode, ventilationMode);
                 const mqtt = mqttEnabled ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, State`, JSON.stringify(deviceState, null, 2)) : false;
 
-                this.checkDeviceState();
+                this.checkDeviceInfo();
             } catch (error) {
                 this.emit('error', `${deviceTypeText} ${deviceName}, check state error, ${error}, check again in 60s.`);
-                this.checkDeviceState();
+                this.checkDeviceInfo();
             };
         });
 
         this.emit('checkDeviceInfo');
     };
 
-    checkDeviceState() {
+    checkDeviceInfo() {
         setTimeout(() => {
             this.emit('checkDeviceInfo');
-        }, 60000);
+        }, 65000);
     };
 
     send(url, newData, type) {

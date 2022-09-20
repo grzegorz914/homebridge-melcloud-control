@@ -9,33 +9,33 @@
         "°C",
         "°F"
     ],
-    "CurrentHeaterCoolerThermostat": [
-        [
-            "INACTIVE",
-            "IDLE",
-            "HEAT",
-            "COOL"
-        ],
-        [
-            "OFF",
-            "HEAT",
-            "COOL"
-        ]
-    ],
-    "TargetHeaterCoolerThermostat": [
-        [
-            "AUTO",
-            "HEAT",
-            "COOL"
-        ],
-        [
-            "OFF",
-            "HEAT",
-            "COOL",
-            "AUTO"
-        ]
-    ],
     "AirConditioner": {
+        "CurrentHeaterCoolerThermostat": [
+            [
+                "INACTIVE",
+                "IDLE",
+                "HEAT",
+                "COOL"
+            ],
+            [
+                "OFF",
+                "HEAT",
+                "COOL"
+            ]
+        ],
+        "TargetHeaterCoolerThermostat": [
+            [
+                "AUTO",
+                "HEAT",
+                "COOL"
+            ],
+            [
+                "OFF",
+                "HEAT",
+                "COOL",
+                "AUTO"
+            ]
+        ],
         "OperationMode": [
             "0",
             "HEAT",
@@ -97,7 +97,7 @@
         }
     },
     "HeatPump": {
-        "CurrentState": [
+        "Status": [
             "IDLE",
             "HEAT WATER",
             "HEAT ZONES",
@@ -106,24 +106,32 @@
             "STANDBY",
             "LEGIONELLA"
         ],
+        "OperationMode": [
+            "HEAT",
+            "COOL"
+        ],
         "ZoneOperation": [
             "HEAT THERMOSTAT",
             "COOL THERMOSTAT",
+            "CURVE",
             "HEAT FLOW",
             "COOL FLOW",
-            "CURVE",
-            "UNKNOWN"
+            "HEAT PUMP OFF"
         ],
         "ZoneStatus": [
             "HEAT",
             "IDLE",
-            "COOL",
-            "UNKNOWN"
+            "COOL"
         ],
-        "Zones": [
+        "ZoneName": [
+            "Heat Pump",
             "Zone 1",
             "Hot Water",
             "Zone 2"
+        ],
+        "OperationHotWater": [
+            "AUTO",
+            "HEAT NOW"
         ],
         "EffectiveFlags": {
             "Power": 1,
@@ -131,8 +139,8 @@
             "OperationModeZone1": 8,
             "OperationModeZone2": 16,
             "ForcedHotWaterMode": 65536,
-            "SetTemperatureZone1": 34359738880,
-            "SetTemperatureZone2": 281474976710656,
+            "SetTemperatureZone1": 8589934720,
+            "SetTemperatureZone2": 34359738880,
             "SetHeatFlowTemperatureZone1": 281474976710656,
             "SetHeatFlowTemperatureZone2": 281474976710656,
             "SetCoolFlowTemperatureZone1": 281474976710656,
@@ -141,6 +149,32 @@
         }
     },
     "Ventilation": {
+        "CurrentHeaterCoolerThermostat": [
+            [
+                "INACTIVE",
+                "IDLE",
+                "HEAT",
+                "COOL"
+            ],
+            [
+                "OFF",
+                "HEAT",
+                "COOL"
+            ]
+        ],
+        "TargetHeaterCoolerThermostat": [
+            [
+                "AUTO",
+                "HEAT",
+                "COOL"
+            ],
+            [
+                "OFF",
+                "HEAT",
+                "COOL",
+                "AUTO"
+            ]
+        ],
         "OperationMode": [
             "RECOVERY",
             "BYPAS",
@@ -149,7 +183,7 @@
         "CurrentFanSpeed": [
             "STOPPED"
         ],
-        "TargetFanSpeed": [
+        "SetFanSpeed": [
             "AUTO",
             "1",
             "2",
@@ -163,7 +197,7 @@
         ],
         "EffectiveFlags": {
             "Power": 1,
-            "OperationMode": 4,
+            "VentilationMode": 4,
             "SetFanSpeed": 8
         }
     },

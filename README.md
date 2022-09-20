@@ -25,25 +25,24 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 
 ### About The Plugin
 * All devices are detected automatically.
-* All configured settings are appiled to all devices in account.
+* All configured settings are appiled to all devices of same type in account.
 * Support multiple MELCloud accounts, buildings, flors, areas.
 * Support temperature display units *Celsius/Fahrenheit*.
+* Support control device *Presets*.
 * Main control mode, *Heater/Cooler*, *Thermostat*.
 * Additional control mode, *Buttons*.
 * Controls of Air Conditioner:
   * Heater Cooler:
     * Power *ON/OFF*.
-    * Operating mode *AUTO/HEAT/COOL/OFF*.
+    * Operating mode *AUTO/HEAT/COOL/POWER OFF*.
     * Heating/Cooling temperature.
-    * Heating/Cooling threshold temperature.
     * Fan speed *OFF/1/2/3/4/5/AUTO*.
     * Swing mode *AUTO/SWING*.
     * Lock physical controls *LOCK/UNLOCK*.
   * Thermostat:
     * Power *ON/OFF*.
-    * Operating mode *OFF/HEAT/COOL/AUTO*.
+    * Operating mode *POWER OFF/HEAT/COOL/AUTO*.
     * Heating/Cooling temperature.
-    * Heating/Cooling threshold temperature.
   * Buttons:
     * Power *ON/OFF*.
     * Operating mode *HEAT/DRY/COOL/FAN/AUTO*.
@@ -53,9 +52,51 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
     * Fan speed mode *AUTO/1/2/3/4/5*.
     * Set device presets.
 * Control of Heat Pump:
-  * Test phase...
+  * Heater Cooler:
+    * Heat Pump:
+      * Power *ON/OFF*.
+      * Operating mode *HEAT/COOL/POWER OFF* (HEAT, COOL, HEAT PUMP OFF).
+      * Display outdoor temperature.
+      * Lock physical controls all Zones and Hot Water *LOCK/UNLOCK*.
+    * Zone 1 and 2:
+      * Operating mode *AUTO/HEAT/COOL* (CURVE, ROOM, FLOW).
+      * Heating/Cooling temperature zone 1 an 2.
+      * Lock physical controls *LOCK/UNLOCK*.
+    * Hot Water Tank:
+      * Operating mode *AUTO/HEAT* (AUTO, HEAT NOW).
+      * Water temperature.
+      * Lock physical controls *LOCK/UNLOCK*.
+  * Thermostat:
+    * Heat Pump:
+      * Power *ON/OFF*.
+      * Operating mode *OFF/HEAT/COOL* (HEAT PUMP OFF, HEAT, COOL).
+      * Display outdoor temperature.
+    * Zone 1 and 2:
+      * Operating mode *HEAT/COOL/AUTO* (ROOM, FLOW, CURVE).
+      * Heating/Cooling temperature zone 1 an 2.
+    * Hot Water Tank:
+      * Operating mode *HEAT/AUTO* (HEAT NOW, AUTO).
+      * Water temperature.
+  * Buttons:
+    * Power *ON/OFF*.
+    * Operating mode *HEAT/COOL/CURVE/HOLIDAY/AUTO HOT WATER/ECO HOT WATER/FORCE HOT WATER*.
+    * Physical lock controls *LOCK/UNLOCK* Zone 1, 2 und Hot Water.
+    * Set device presets.    
 * Control of Energy Recovery Ventilation:
-  * Test phase...
+  * Heater Cooler:
+    * Power *ON/OFF*.
+    * Operating mode *AUTO/HEAT/COOL/POWER OFF* (AUTO, RECOVERY, BYPAS, POWER OFF).
+    * Fan speed *OFF/1/2/3/4/5/AUTO*.
+    * Lock physical controls *LOCK/UNLOCK*.
+  * Thermostat:
+    * Power *ON/OFF*.
+    * Operating mode *POWER OFF/HEAT/COOL/AUTO* (POWER OFF, RECOVERY, BYPAS, AUTO).
+  * Buttons:
+    * Power *ON/OFF*.
+    * Operating mode *RECOVERY/BYPAS/AUTO/NIGHT PURGE*.
+    * Physical lock controls *LOCK/UNLOCK*.
+    * Fan speed mode *AUTO/1/2/3/4/5*.
+    * Set device presets.
 * Home automations and shortcuts can be used to control the devices.
 * Siri can be used to control the devices.
 * MQTT publisch topic *Info*, *State* as payload JSON data.
@@ -67,7 +108,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 </p>
 
 ### Configuration
-* Run this plugin as a child bridge (Highly Recommended).
+* Run this plugin as a [Child Bridge](https://github.com/homebridge/homebridge/wiki/Child-Bridges) (Highly Recommended).
 * Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) to configure this plugin (Highly Recommended). 
 * The sample configuration can be edited and used manually as an alternative. 
 * See the `sample-config.json` file for an example or copy the example below into your config.json file, making the apporpriate changes before saving it. 
