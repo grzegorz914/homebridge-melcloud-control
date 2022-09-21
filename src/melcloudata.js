@@ -269,7 +269,7 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 const CanSetTemperatureIncrementOverride = deviceInfo.Permissions.CanSetTemperatureIncrementOverride;
                 const CanDisableLocalController = deviceInfo.Permissions.CanDisableLocalController;
 
-                this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, deviceFirmwareAppVersion, devicePresets, devicePresetsCount, deviceHasAutomaticFanSpeed, deviceSwingFunction, deviceNumberOfFanSpeeds, deviceModelSupportsFanSpeed, deviceModelSupportsStandbyMode);
+                this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, deviceFirmwareAppVersion, devicePresets, devicePresetsCount, deviceHasAutomaticFanSpeed, deviceSwingFunction, deviceNumberOfFanSpeeds, deviceModelSupportsFanSpeed, deviceModelSupportsAuto, deviceModelSupportsStandbyMode);
                 this.emit('checkDeviceState');
                 const mqtt = mqttEnabled ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, Info`, JSON.stringify(deviceInfo, null, 2)) : false;
             } catch (error) {
@@ -320,7 +320,7 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 const scene = deviceState.Scene;
                 const sceneOwner = deviceState.SceneOwner;
 
-                this.emit('deviceState', deviceState, roomTemperature, setTemperature, setFanSpeed, operationMode, vaneHorizontal, vaneVertical, inStandbyMode, power);
+                this.emit('deviceState', deviceState, roomTemperature, setTemperature, setFanSpeed, operationMode, vaneHorizontal, vaneVertical, inStandbyMode, power, prohibitSetTemperature, prohibitOperationMode, prohibitPower);
                 const mqtt = mqttEnabled ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, State`, JSON.stringify(deviceState, null, 2)) : false;
 
                 this.checkDeviceInfo();

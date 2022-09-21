@@ -28,6 +28,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * Support multiple MELCloud accounts, buildings, flors, areas.
 * Support temperature display units *Celsius/Fahrenheit*.
 * Support control device *Presets*.
+* Support automations, shortcuts and siri.
+* Support MQTT protocol, publisch topic *Info*, *State* as payload JSON data.
 * Main control mode, *Heater/Cooler*, *Thermostat*.
 * Additional control mode, *Buttons*.
 * Controls of Air Conditioner:
@@ -96,9 +98,6 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
     * Physical lock controls *LOCK/UNLOCK*.
     * Fan speed mode *AUTO/1/2/3/4/5*.
     * Set device presets.
-* Home automations and shortcuts can be used to control the devices.
-* Siri can be used to control the devices.
-* MQTT publisch topic *Info*, *State* as payload JSON data.
 
 <p align="left">
   <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/homekit.png" width="382"></a> 

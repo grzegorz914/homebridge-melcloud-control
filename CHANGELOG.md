@@ -10,7 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Important changes v0.4.0 and above!!!
   * Main control mode, buttons and presets need to be configured again!!!
 
-## [0.4.0] - (xx.09.2022)
+  ## [0.4.1] - (21.09.2022)
+## Changes
+- removed mode AUTO for Energy Recovery Ventilation if device not support it
+- removed mode AUTO for Air Conditioner if device not support it
+- fix [#19](https://github.com/grzegorz914/homebridge-melcloud-control/issues/19)
+- fix characteristic warning for Zone 2 of Heat Pump
+- update config.schema
+
+## [0.4.0] - (21.09.2022)
 ## Changes
 - added possibility individually configure (control mode, presets and buttons) for devices of same type
 - update config.schema json
