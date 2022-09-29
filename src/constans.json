@@ -217,6 +217,7 @@
         "SetAtw": "/Device/SetAtw",
         "SetErv": "/Device/SetErv",
         "UpdateApplicationOptions": "/User/UpdateApplicationOptions",
-        "HolidayModeUpdate": "/HolidayMode/Update"
+        "HolidayModeUpdate": "/HolidayMode/Update",
+        "EnergyCostReport": "/EnergyCost/Report"
     }
 }
