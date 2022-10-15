@@ -249,7 +249,7 @@
                     "title": "Mode",
                     "type": "integer",
                     "minimum": 0,
-                    "maximum": 40,
+                    "maximum": 43,
                     "description": "Here select the function, VH - Vane Horizontal, VV - Vane Veretical.",
                     "oneOf": [
                       {
@@ -292,6 +292,12 @@
                         "title": "MODE PURIFY",
                         "enum": [
                           6
+                        ]
+                      },
+                      {
+                        "title": "MODE DRY CONTROL HIDE",
+                        "enum": [
+                          7
                         ]
                       },
                       {
@@ -376,6 +382,12 @@
                         "title": "VV SWING",
                         "enum": [
                           26
+                        ]
+                      },
+                      {
+                        "title": "VH/VV CONTROLS HIDE",
+                        "enum": [
+                          27
                         ]
                       },
                       {
@@ -711,7 +723,7 @@
                     "title": "Mode",
                     "type": "integer",
                     "minimum": 0,
-                    "maximum": 20,
+                    "maximum": 23,
                     "description": "Here select the function.",
                     "oneOf": [
                       {
@@ -802,6 +814,24 @@
                         "title": "LOCK CONTROL",
                         "enum": [
                           20
+                        ]
+                      },
+                      {
+                        "title": "ROOM TEMP HIDE",
+                        "enum": [
+                          21
+                        ]
+                      },
+                      {
+                        "title": "SUPPLY TEMP HIDE",
+                        "enum": [
+                          22
+                        ]
+                      },
+                      {
+                        "title": "OUTDOOR TEMP HIDE",
+                        "enum": [
+                          23
                         ]
                       }
                     ],

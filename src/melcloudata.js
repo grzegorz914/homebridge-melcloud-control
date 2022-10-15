@@ -58,7 +58,7 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 const lastServiceDate = deviceInfo.LastServiceDate;
 
                 //presets
-                const devicePresets = Array.isArray(deviceInfo.Presets) ? deviceInfo.Presets : [];
+                const devicePresets = deviceInfo.Presets;
                 const devicePresetsCount = devicePresets.length;
 
                 const ownerID = deviceInfo.OwnerID;
@@ -320,7 +320,7 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 const scene = deviceState.Scene;
                 const sceneOwner = deviceState.SceneOwner;
 
-                this.emit('deviceState', deviceState, roomTemperature, setTemperature, setFanSpeed, operationMode, vaneHorizontal, vaneVertical, inStandbyMode, power, prohibitSetTemperature, prohibitOperationMode, prohibitPower);
+                this.emit('deviceState', deviceState, roomTemperature, setTemperature, setFanSpeed, operationMode, vaneHorizontal, vaneVertical, inStandbyMode, power, hideVaneControls, hideDryModeControl, prohibitSetTemperature, prohibitOperationMode, prohibitPower);
                 const mqtt = mqttEnabled ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, State`, JSON.stringify(deviceState, null, 2)) : false;
 
                 this.checkDeviceInfo();

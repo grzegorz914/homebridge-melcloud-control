@@ -58,7 +58,7 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                 const lastServiceDate = deviceInfo.LastServiceDate;
 
                 //presets
-                const devicePresets = Array.isArray(deviceInfo.Presets) ? deviceInfo.Presets : [];
+                const devicePresets = deviceInfo.Presets;
                 const devicePresetsCount = devicePresets.length;
 
                 const ownerID = deviceInfo.OwnerID;

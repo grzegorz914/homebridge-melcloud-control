@@ -2,7 +2,7 @@
     "DeviceType": [
         "Air Conditioner",
         "Heat Pump",
-        "",
+        "Curtain",
         "Energy Recovery Ventilation"
     ],
     "TemperatureDisplayUnits": [
@@ -10,32 +10,6 @@
         "°F"
     ],
     "AirConditioner": {
-        "CurrentHeaterCoolerThermostat": [
-            [
-                "INACTIVE",
-                "IDLE",
-                "HEAT",
-                "COOL"
-            ],
-            [
-                "OFF",
-                "HEAT",
-                "COOL"
-            ]
-        ],
-        "TargetHeaterCoolerThermostat": [
-            [
-                "AUTO",
-                "HEAT",
-                "COOL"
-            ],
-            [
-                "OFF",
-                "HEAT",
-                "COOL",
-                "AUTO"
-            ]
-        ],
         "OperationMode": [
             "0",
             "HEAT",
@@ -149,32 +123,6 @@
         }
     },
     "Ventilation": {
-        "CurrentHeaterCoolerThermostat": [
-            [
-                "INACTIVE",
-                "IDLE",
-                "HEAT",
-                "COOL"
-            ],
-            [
-                "OFF",
-                "HEAT",
-                "COOL"
-            ]
-        ],
-        "TargetHeaterCoolerThermostat": [
-            [
-                "AUTO",
-                "HEAT",
-                "COOL"
-            ],
-            [
-                "OFF",
-                "HEAT",
-                "COOL",
-                "AUTO"
-            ]
-        ],
         "OperationMode": [
             "RECOVERY",
             "BYPAS",

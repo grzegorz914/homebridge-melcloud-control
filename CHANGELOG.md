@@ -10,7 +10,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Important changes v0.4.0 and above!!!
   * Main control mode, buttons and presets need to be configured again!!!
 
-  ## [0.4.1] - (21.09.2022)
+## [0.4.2] - (15.10.2022)
+## Changes
+- code cleanup
+- fixed display wrong current state for Heat Pump in log
+- fixed display presets as accessory button
+- bump dependencies
+- added new functions for buttons control:
+  * Air Conditioner:
+    * hide DRY mode control
+    * hide VANE H/V conttrols
+  * Energy Recovery Ventilation:
+    * hide ROOM temperature
+    * hide SUPPLY temperature
+    * hide OUTDOOR temperature  
+
+## [0.4.1] - (21.09.2022)
 ## Changes
 - removed mode AUTO for Energy Recovery Ventilation if device not support it
 - removed mode AUTO for Air Conditioner if device not support it
