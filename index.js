@@ -213,8 +213,16 @@ class melCloudDevice {
 					//account info
 					const useFahrenheit = this.useFahrenheit;
 					this.targetTempSetPropsMinValue = useFahrenheit ? 50 : 10;
-					this.targetTempSetPropsMaxValue = useFahrenheit ? 95 : 35;
+					this.targetTempSetPropsMaxValue = useFahrenheit ? 88 : 31;
 					this.targetTempSetPropsMinStep = useFahrenheit ? 1 : 0.5
+
+					this.targetHeatingTempSetPropsMinValue = useFahrenheit ? 32 : 0;
+					this.targetHeatingTempSetPropsMaxValue = useFahrenheit ? 88 : 31;
+					this.targetHeatingTempSetPropsMinStep = useFahrenheit ? 1 : 0.5
+
+					this.targetCoolingTempSetPropsMinValue = useFahrenheit ? 50 : 10;
+					this.targetCoolingTempSetPropsMaxValue = useFahrenheit ? 88 : 31;
+					this.targetCoolingTempSetPropsMinStep = useFahrenheit ? 1 : 0.5
 
 					//device info
 					const displayMode = this.ataDisplayMode;
@@ -757,7 +765,7 @@ class melCloudDevice {
 							let targetOperationModeSetPropsMaxValue = 3;
 							let targetOperationModeSetPropsValidValues = [0, 1, 2, 3];
 							let roomTemperature = 0;
-							let setTemperature = 0;
+							let setTemperature = 10;
 							let targetTemperatureSetPropsMinValue = useFahrenheit ? 50 : 10;
 							let targetTemperatureSetPropsMaxValue = useFahrenheit ? 149 : 65;
 							let targetTemperatureSetPropsMinStep = useFahrenheit ? 1 : 0.5;
@@ -1123,8 +1131,16 @@ class melCloudDevice {
 					//account info
 					const useFahrenheit = this.useFahrenheit;
 					this.targetTempSetPropsMinValue = useFahrenheit ? 50 : 10;
-					this.targetTempSetPropsMaxValue = useFahrenheit ? 95 : 35;
+					this.targetTempSetPropsMaxValue = useFahrenheit ? 88 : 31;
 					this.targetTempSetPropsMinStep = useFahrenheit ? 1 : 0.5
+
+					this.targetHeatingTempSetPropsMinValue = useFahrenheit ? 32 : 0;
+					this.targetHeatingTempSetPropsMaxValue = useFahrenheit ? 88 : 31;
+					this.targetHeatingTempSetPropsMinStep = useFahrenheit ? 1 : 0.5
+
+					this.targetCoolingTempSetPropsMinValue = useFahrenheit ? 50 : 10;
+					this.targetCoolingTempSetPropsMaxValue = useFahrenheit ? 88 : 31;
+					this.targetCoolingTempSetPropsMinStep = useFahrenheit ? 1 : 0.5
 
 					//device info
 					const displayMode = this.ervDisplayMode;
@@ -1718,9 +1734,9 @@ class melCloudDevice {
 				};
 				this.ataMelCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
 					.setProps({
-						minValue: this.targetTempSetPropsMinValue,
-						maxValue: this.targetTempSetPropsMaxValue,
-						minStep: this.targetTempSetPropsMinStep
+						minValue: this.targetHeatingTempSetPropsMinValue,
+						maxValue: this.targetHeatingTempSetPropsMaxValue,
+						minStep: this.targetHeatingTempSetPropsMinStep
 					})
 					.onGet(async () => {
 						const value = this.setTemperature;
@@ -1741,9 +1757,9 @@ class melCloudDevice {
 					});
 				this.ataMelCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
 					.setProps({
-						minValue: this.targetTempSetPropsMinValue,
-						maxValue: this.targetTempSetPropsMaxValue,
-						minStep: this.targetTempSetPropsMinStep
+						minValue: this.targetCoolingTempSetPropsMinValue,
+						maxValue: this.targetCoolingTempSetPropsMaxValue,
+						minStep: this.targetCoolingTempSetPropsMinStep
 					})
 					.onGet(async () => {
 						const value = this.setTemperature;
@@ -2795,9 +2811,9 @@ class melCloudDevice {
 				};
 				this.ervMelCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
 					.setProps({
-						minValue: this.targetTempSetPropsMinValue,
-						maxValue: this.targetTempSetPropsMaxValue,
-						minStep: this.targetTempSetPropsMinStep
+						minValue: this.targetHeatingTempSetPropsMinValue,
+						maxValue: this.targetHeatingTempSetPropsMaxValue,
+						minStep: this.targetHeatingTempSetPropsMinStep
 					})
 					.onGet(async () => {
 						const value = this.setTemperature;
@@ -2817,9 +2833,9 @@ class melCloudDevice {
 					});
 				this.ervMelCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
 					.setProps({
-						minValue: this.targetTempSetPropsMinValue,
-						maxValue: this.targetTempSetPropsMaxValue,
-						minStep: this.targetTempSetPropsMinStep
+						minValue: this.targetCoolingTempSetPropsMinValue,
+						maxValue: this.targetCoolingTempSetPropsMaxValue,
+						minStep: this.targetCoolingTempSetPropsMinStep
 					})
 					.onGet(async () => {
 						const value = this.setTemperature;

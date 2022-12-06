@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Important changes v0.4.0 and above!!!
   * Main control mode, buttons and presets need to be configured again!!!
 
+## [0.4.3] - (06.12.2022)
+## Changes Homebridge >= 1.6
+- fix characteristic was supplied illegal value: number 0 exceeded minimum of 10
+- bump dependencies
+
 ## [0.4.2] - (15.10.2022)
 ## Changes
 - code cleanup
