@@ -327,7 +327,7 @@ class melCloudDevice {
 								fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 8 : 7;
 								break;
 							case 8: //Fan speed mode 8
-								fanSpeed = hasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 6, 7, 8, 0][setFanSpeed] : [1, 1, 2, 3, 4, 5, 6, 7, 8][setFanSpeed]
+								fanSpeed = hasAutomaticFanSpeed ? [9, 1, 2, 3, 4, 5, 6, 7, 8][setFanSpeed] : [0, 1, 2, 3, 4, 5, 6, 7, 8][setFanSpeed]
 								fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 9 : 8;
 								break;
 						};
@@ -1243,7 +1243,7 @@ class melCloudDevice {
 							fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 8 : 7;
 							break;
 						case 8: //Fan speed mode 8
-							fanSpeed = hasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 6, 7, 8, 0][setFanSpeed] : [1, 1, 2, 3, 4, 5, 6, 7, 8][setFanSpeed]
+							fanSpeed = hasAutomaticFanSpeed ? [9, 1, 2, 3, 4, 5, 6, 7, 8][setFanSpeed] : [0, 1, 2, 3, 4, 5, 6, 7, 8][setFanSpeed]
 							fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 9 : 8;
 							break;
 					};

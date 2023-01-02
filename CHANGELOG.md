@@ -10,7 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Important changes v0.4.0 and above!!!
   * Main control mode, buttons and presets need to be configured again!!!
 
-  ## [0.4.4] - (31.12.2022)
+  ## [0.4.5] - (02.01.2023)
+## Changes
+- code refactor
+- small fixes in fan speeds
+
+## [0.4.4] - (31.12.2022)
 ## Changes
 - bump dependencies
 
