@@ -32,52 +32,51 @@ class melCloudPlatform {
 		this.log = log;
 		this.api = api;
 		const accounts = config.accounts;
-		const accountsCount = accounts.length;
 		this.accessories = [];
 
 		this.api.on('didFinishLaunching', () => {
 			this.log.debug('didFinishLaunching');
-			for (let i = 0; i < accountsCount; i++) {
-				const account = accounts[i];
+			for (const account of accounts) {
 				const accountName = account.name;
 				const user = account.user;
 				const passwd = account.passwd;
 				const language = account.language;
+				const enableDebugMode = account.enableDebugMode;
+				
+				//check mandatory properties
 				if (!accountName || !user || !passwd || !language) {
 					this.log(`Name, user, password or language in config missing.`);
 					return;
-				} else {
-					const enableDebugMode = account.enableDebugMode;
-					const prefDir = path.join(api.user.storagePath(), 'melcloud');
-
-					//check if the directory exists, if not then create it
-					if (fs.existsSync(prefDir) == false) {
-						fs.mkdirSync(prefDir);
-					};
-
-					//melcloud client
-					this.melCloud = new MelCloud({
-						name: accountName,
-						user: user,
-						passwd: passwd,
-						language: language,
-						debugLog: enableDebugMode,
-						prefDir: prefDir
-					});
-
-					this.melCloud.on('checkDevicesListComplete', (melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit) => {
-						new melCloudDevice(this.log, this.api, account, prefDir, melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit);
-					})
-						.on('message', (message) => {
-							this.log(message);
-						})
-						.on('error', (error) => {
-							this.log.error(error);
-						})
-						.on('debug', (message) => {
-							this.log(message);
-						});
+				}
+				
+				//check if the directory exists, if not then create it
+				const prefDir = path.join(api.user.storagePath(), 'melcloud');
+				if (fs.existsSync(prefDir) == false) {
+					fs.mkdirSync(prefDir);
 				};
+
+				//melcloud client
+				this.melCloud = new MelCloud({
+				        name: accountName,
+					user: user,
+					passwd: passwd,
+					language: language,
+					debugLog: enableDebugMode,
+					prefDir: prefDir
+				});
+
+				this.melCloud.on('checkDevicesListComplete', (melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit) => {
+					new melCloudDevice(this.log, this.api, account, prefDir, melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit);
+				})
+					.on('message', (message) => {
+						this.log(message);
+					})
+					.on('error', (error) => {
+						this.log.error(error);
+					})
+					.on('debug', (message) => {
+						this.log(message);
+					});
 			};
 		});
 	};
