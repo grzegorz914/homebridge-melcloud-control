@@ -1,6 +1,7 @@
 'use strict';
 const path = require('path');
 const fs = require('fs');
+const fsPromises = fs.promises;
 const Mqtt = require('./src/mqtt.js');
 const MelCloud = require('./src/melcloud.js')
 const MelCloudAta = require('./src/melcloudata.js');
@@ -42,22 +43,23 @@ class melCloudPlatform {
 				const passwd = account.passwd;
 				const language = account.language;
 				const enableDebugMode = account.enableDebugMode;
-				
+
 				//check mandatory properties
 				if (!accountName || !user || !passwd || !language) {
 					this.log(`Name, user, password or language in config missing.`);
 					return;
 				}
-				
+
 				//check if the directory exists, if not then create it
 				const prefDir = path.join(api.user.storagePath(), 'melcloud');
+				const melCloudInfoFile = `${prefDir}/${accountName}_Account`;
 				if (fs.existsSync(prefDir) == false) {
 					fs.mkdirSync(prefDir);
 				};
 
 				//melcloud client
 				this.melCloud = new MelCloud({
-				        name: accountName,
+					name: accountName,
 					user: user,
 					passwd: passwd,
 					language: language,
@@ -65,9 +67,15 @@ class melCloudPlatform {
 					prefDir: prefDir
 				});
 
-				this.melCloud.on('checkDevicesListComplete', (melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit) => {
-					new melCloudDevice(this.log, this.api, account, prefDir, melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit);
+				this.melCloud.on('connected', async (melCloudInfoData) => {
+					this.log(`Account ${accountName}, Connected.`)
+
+					//write melcloud info data
+					const writeMelCloudInfoData = await fsPromises.writeFile(melCloudInfoFile, melCloudInfoData);
 				})
+					.on('checkDevicesListComplete', (melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit) => {
+						new melCloudDevice(this.log, this.api, account, prefDir, melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit);
+					})
 					.on('message', (message) => {
 						this.log(message);
 					})

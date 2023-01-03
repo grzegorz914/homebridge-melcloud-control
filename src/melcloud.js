@@ -14,7 +14,6 @@ class MELCLOUD extends EventEmitter {
         const language = config.language;
         const debugLog = config.debugLog;
         const prefDir = config.prefDir;
-        const melCloudInfoFile = `${prefDir}/${accountName}_Account`;
         const melCloudBuildingsFile = `${prefDir}/${accountName}_Buildings`;
         const devicesId = new Array();
 
@@ -42,19 +41,19 @@ class MELCLOUD extends EventEmitter {
                 const loginData = await this.axiosInstanceLogin(CONSTANS.ApiUrls.ClientLogin, options);
                 const melCloudInfoData = JSON.stringify(loginData.data, null, 2);
                 const debug = debugLog ? this.emit('debug', `Account ${accountName}, debug MELCloud Info: ${melCloudInfoData}`) : false;
-                const debug1 = debugLog ? this.emit('debug', `Account ${accountName}, Connected.`) : false;
-                const writeMelCloudInfoData = await fsPromises.writeFile(melCloudInfoFile, melCloudInfoData);
                 const melCloudInfo = loginData.data.LoginData;
                 const contextKey = loginData.data.LoginData.ContextKey;
+
+                if (contextKey === undefined || contextKey === null) {
+                    this.emit('message', `Account ${accountName}, context key not found or undefined, reconnect in 60s.`)
+                    this.reconnect();
+                    return;
+                };
+
                 this.melCloudInfo = melCloudInfo;
                 this.contextKey = contextKey;
-
-                if (contextKey != undefined && contextKey != null) {
-                    this.emit('checkDevicesList')
-                } else {
-                    this.emit('message', `Account ${accountName}, context key not found, reconnect in 60s.`)
-                    this.reconnect();
-                };
+                this.emit('connected', melCloudInfoData);
+                this.emit('checkDevicesList');
             } catch (error) {
                 this.emit('error', `Account: ${accountName}, login error, ${error}, reconnect in 60s.`);
                 this.reconnect();
