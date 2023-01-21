@@ -202,14 +202,14 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 //units info
                 const units = Array.isArray(deviceInfo.Device.Units) ? deviceInfo.Device.Units : [];
                 const unitsCount = units.length;
-                const serialsNumberIndoor = new Array();
-                const serialsNumberOutdoor = new Array();
-                const modelsNumberIndoor = new Array();
-                const modelsNumberOutdoor = new Array();
-                const modelsIndoor = new Array();
-                const modelsOutdoor = new Array();
-                const typesIndoor = new Array();
-                const typesOutdoor = new Array();
+                const serialsNumberIndoor = [];
+                const serialsNumberOutdoor = [];
+                const modelsNumberIndoor = [];
+                const modelsNumberOutdoor = [];
+                const modelsIndoor = [];
+                const modelsOutdoor = [];
+                const typesIndoor = [];
+                const typesOutdoor = [];
                 if (unitsCount > 0) {
                     for (let i = 0; i < unitsCount; i++) {
                         const unit = units[i];

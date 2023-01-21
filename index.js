@@ -383,10 +383,10 @@ class melCloudDevice {
 					};
 
 					if (buttonsCount > 0) {
-						this.ataButtonsStates = new Array();
-						this.ataButtonsModes = new Array();
-						this.ataButtonsNames = new Array();
-						this.ataButtonsDisplayType = new Array();
+						this.ataButtonsStates = [];
+						this.ataButtonsModes = [];
+						this.ataButtonsNames = [];
+						this.ataButtonsDisplayType = [];
 
 						for (let i = 0; i < buttonsCount; i++) {
 							const button = this.ataButtons[i];
@@ -663,7 +663,7 @@ class melCloudDevice {
 					};
 
 					if (presetsCount > 0) {
-						this.ataPresetsStates = new Array();
+						this.ataPresetsStates = [];
 
 						for (let i = 0; i < presetsCount; i++) {
 							//get preset
@@ -753,17 +753,17 @@ class melCloudDevice {
 					this.power = power;
 
 					if (zonesCount > 0) {
-						this.currentOperationModes = new Array();
-						this.targetOperationModes = new Array();
-						this.targetOperationModesSetPropsMinValue = new Array();
-						this.targetOperationModesSetPropsMaxValue = new Array();
-						this.targetOperationModesSetPropsValidValues = new Array();
-						this.currentTemperatures = new Array();
-						this.setTemperatures = new Array();
-						this.targetTemperaturesSetPropsMinValue = new Array();
-						this.targetTemperaturesSetPropsMaxValue = new Array();
-						this.targetTemperaturesSetPropsMinStep = new Array();
-						this.lockPhysicalsControls = new Array();
+						this.currentOperationModes = [];
+						this.targetOperationModes = [];
+						this.targetOperationModesSetPropsMinValue = [];
+						this.targetOperationModesSetPropsMaxValue = [];
+						this.targetOperationModesSetPropsValidValues = [];
+						this.currentTemperatures = [];
+						this.setTemperatures = [];
+						this.targetTemperaturesSetPropsMinValue = [];
+						this.targetTemperaturesSetPropsMaxValue = [];
+						this.targetTemperaturesSetPropsMinStep = [];
+						this.lockPhysicalsControls = [];
 
 						for (let i = 0; i < zonesCount; i++) {
 							let currentOperationMode = 0;
@@ -915,10 +915,10 @@ class melCloudDevice {
 						};
 
 						if (buttonsCount > 0) {
-							this.atwButtonsStates = new Array();
-							this.atwButtonsModes = new Array();
-							this.atwButtonsNames = new Array();
-							this.atwButtonsDisplayType = new Array();
+							this.atwButtonsStates = [];
+							this.atwButtonsModes = [];
+							this.atwButtonsNames = [];
+							this.atwButtonsDisplayType = [];
 
 							for (let i = 0; i < buttonsCount; i++) {
 								const button = this.atwButtons[i];
@@ -1061,7 +1061,7 @@ class melCloudDevice {
 						};
 
 						if (presetsCount > 0) {
-							this.atwPresetsStates = new Array();
+							this.atwPresetsStates = [];
 
 							for (let i = 0; i < presetsCount; i++) {
 								//get preset
@@ -1291,10 +1291,10 @@ class melCloudDevice {
 					};
 
 					if (buttonsCount > 0) {
-						this.ervButtonsStates = new Array();
-						this.ervButtonsModes = new Array();
-						this.ervButtonsNames = new Array();
-						this.ervButtonsDisplayType = new Array();
+						this.ervButtonsStates = [];
+						this.ervButtonsModes = [];
+						this.ervButtonsNames = [];
+						this.ervButtonsDisplayType = [];
 
 						for (let i = 0; i < buttonsCount; i++) {
 							const button = this.ervButtons[i];
@@ -1444,7 +1444,7 @@ class melCloudDevice {
 					};
 
 					if (presetsCount > 0) {
-						this.ervPresetsStates = new Array();
+						this.ervPresetsStates = [];
 
 						for (let i = 0; i < presetsCount; i++) {
 							//get preset
@@ -1476,7 +1476,7 @@ class melCloudDevice {
 	};
 
 	//prepare accessory
-	async prepareAccessory() {
+	prepareAccessory() {
 		this.log.debug('prepareAccessory');
 		const melCloudInfo = this.melCloudInfo;
 		const deviceId = this.deviceId;
@@ -1828,7 +1828,7 @@ class melCloudDevice {
 				//buttons services
 				if (ataButtonsCount > 0) {
 					this.log.debug('prepareButtonsService');
-					this.ataButtonsServices = new Array();
+					this.ataButtonsServices = [];
 
 					for (let i = 0; i < ataButtonsCount; i++) {
 						//get button mode
@@ -2040,7 +2040,7 @@ class melCloudDevice {
 				if (ataPresetsCount > 0) {
 					this.log.debug('preparePresetsService');
 
-					this.ataPresetsServices = new Array();
+					this.ataPresetsServices = [];
 					for (let i = 0; i < ataPresetsCount; i++) {
 						//get preset
 						const preset = this.ataPresets[i];
@@ -2085,7 +2085,7 @@ class melCloudDevice {
 				const zonesCount = this.atwZonesCount;
 				if (zonesCount > 0) {
 					this.log.debug('prepareMelCloudServiceAtw');
-					this.atwMelCloudServices = new Array();
+					this.atwMelCloudServices = [];
 					const atwDisplayMode = this.atwDisplayMode;
 					const atwButtonsCount = this.atwButtonsCount;
 					const atwPresetsCount = this.atwPresetsCount;
@@ -2444,7 +2444,7 @@ class melCloudDevice {
 					//buttons services
 					if (atwButtonsCount > 0) {
 						this.log.debug('prepareButtonsService');
-						this.atwButtonsServices = new Array();
+						this.atwButtonsServices = [];
 
 						for (let i = 0; i < atwButtonsCount; i++) {
 							//get button mode
@@ -2562,7 +2562,7 @@ class melCloudDevice {
 					//presets services
 					if (atwPresetsCount > 0) {
 						this.log.debug('preparePresetsService');
-						this.atwPresetsServices = new Array();
+						this.atwPresetsServices = [];
 
 						for (let i = 0; i < atwPresetsCount; i++) {
 							//get preset
@@ -2903,7 +2903,7 @@ class melCloudDevice {
 				//buttons services
 				if (ervButtonsCount > 0) {
 					this.log.debug('prepareButtonsService');
-					this.ervButtonsServices = new Array();
+					this.ervButtonsServices = [];
 
 					for (let i = 0; i < ervButtonsCount; i++) {
 						//get button mode
@@ -3024,7 +3024,7 @@ class melCloudDevice {
 				//presets services
 				if (ervPresetsCount > 0) {
 					this.log.debug('preparePresetsService');
-					this.ervPresetsServices = new Array();
+					this.ervPresetsServices = [];
 
 					for (let i = 0; i < ervPresetsCount; i++) {
 						//get preset
