@@ -39,6 +39,22 @@ class MELCLOUDDEVICEERV extends EventEmitter {
             }
         });
 
+        //store variable to compare
+        this.roomTemperature = 0;
+        this.setTemperature = 0;
+        this.setFanSpeed = 0;
+        this.operationMode = 0;
+        this.supplyTemperature = 0;
+        this.outdoorTemperature = 0;
+        this.nightPurgeMode = 0;
+        this.power = false;
+        this.roomCO2Level = 0;
+        this.ventilationMode = 0;
+        this.actualVentilationMode = 0;
+        this.hideRoomTemperature = false;
+        this.hideSupplyTemperature = false;
+        this.hideOutdoorTemperature = false;
+
         this.on('checkDeviceInfo', async () => {
             try {
                 const readDeviceInfoData = await fsPromises.readFile(melCloudBuildingDeviceFile);
@@ -58,7 +74,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const lastServiceDate = deviceInfo.LastServiceDate;
 
                 //presets
-                const devicePresets =  deviceInfo.Presets;
+                const devicePresets = deviceInfo.Presets;
                 const devicePresetsCount = devicePresets.length;
 
                 const ownerID = deviceInfo.OwnerID;
@@ -152,7 +168,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const deviceModelCode = deviceInfo.Device.ModelCode;
                 const deviceDeviceID = deviceInfo.Device.DeviceID;
                 const deviceMacAddress = deviceInfo.Device.MacAddress;
-                const deviceSerialNumber = (deviceInfo.Device.SerialNumber != null) ? deviceInfo.Device.SerialNumber.toString() : 'Undefined';
+                const deviceSerialNumber = deviceInfo.Device.SerialNumber != null ? deviceInfo.Device.SerialNumber.toString() : 'Undefined';
                 const deviceTimeZoneID = deviceInfo.Device.TimeZoneID;
                 const deviceDiagnosticMode = deviceInfo.Device.DiagnosticMode;
                 const deviceDiagnosticEndDate = deviceInfo.Device.DiagnosticEndDate;
@@ -190,7 +206,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const deviceRate2StartTime = deviceInfo.Device.Rate2StartTime;
                 const deviceProtocolVersion = deviceInfo.Device.ProtocolVersion;
                 const deviceUnitVersion = deviceInfo.Device.UnitVersion;
-                const deviceFirmwareAppVersion = (deviceInfo.Device.FirmwareAppVersion != null) ? deviceInfo.Device.FirmwareAppVersion.toString() : 'Undefined';
+                const deviceFirmwareAppVersion = deviceInfo.Device.FirmwareAppVersion != null ? deviceInfo.Device.FirmwareAppVersion.toString() : 'Undefined';
                 const deviceFirmwareWebVersion = deviceInfo.Device.FirmwareWebVersion;
                 const deviceFirmwareWlanVersion = deviceInfo.Device.FirmwareWlanVersion;
                 const deviceMqttFlags = deviceInfo.Device.MqttFlags;
@@ -201,7 +217,6 @@ class MELCLOUDDEVICEERV extends EventEmitter {
 
                 //units info
                 const units = Array.isArray(deviceInfo.Device.Units) ? deviceInfo.Device.Units : [];
-                const unitsCount = units.length;
                 const serialsNumberIndoor = [];
                 const serialsNumberOutdoor = [];
                 const modelsNumberIndoor = [];
@@ -210,26 +225,24 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const modelsOutdoor = [];
                 const typesIndoor = [];
                 const typesOutdoor = [];
-                if (unitsCount > 0) {
-                    for (let i = 0; i < unitsCount; i++) {
-                        const unit = units[i];
-                        const unitId = unit.ID;
-                        const unitDevice = unit.Device;
-                        const unitSerialNumber = (unit.SerialNumber != null) ? (unit.SerialNumber.length > 1) ? unit.SerialNumber.toString() : 'Serial to short' : 'Undefined';
-                        const unitModelNumber = unit.ModelNumber;
-                        const unitModel = (unit.Model != null) ? unit.Model.toString() : 'Undefined';
-                        const unitType = unit.UnitType;
-                        const unitIsIndoor = (unit.IsIndoor == true);
+                for (const unit of units) {
+                    const unitId = unit.ID;
+                    const unitDevice = unit.Device;
+                    const unitSerialNumber = unit.SerialNumber != null ? (unit.SerialNumber.length > 1 ? unit.SerialNumber.toString() : 'Serial to short') : 'Undefined';
+                    const unitModelNumber = unit.ModelNumber;
+                    const unitModel = unit.Model != null ? unit.Model.toString() : 'Undefined';
+                    const unitType = unit.UnitType;
+                    const unitIsIndoor = (unit.IsIndoor == true);
 
-                        const pushSerial = unitIsIndoor ? serialsNumberIndoor.push(unitSerialNumber) : serialsNumberOutdoor.push(unitSerialNumber);
-                        const pushModelNumber = unitIsIndoor ? modelsNumberIndoor.push(unitModelNumber) : modelsNumberOutdoor.push(unitModelNumber);
-                        const pushUnitModel = unitIsIndoor ? modelsIndoor.push(unitModel) : modelsOutdoor.push(unitModel);
-                        const pushUnitTypel = unitIsIndoor ? typesIndoor.push(unitType) : typesOutdoor.push(unitType);
-                    }
+                    const pushSerial = unitIsIndoor ? serialsNumberIndoor.push(unitSerialNumber) : serialsNumberOutdoor.push(unitSerialNumber);
+                    const pushModelNumber = unitIsIndoor ? modelsNumberIndoor.push(unitModelNumber) : modelsNumberOutdoor.push(unitModelNumber);
+                    const pushUnitModel = unitIsIndoor ? modelsIndoor.push(unitModel) : modelsOutdoor.push(unitModel);
+                    const pushUnitTypel = unitIsIndoor ? typesIndoor.push(unitType) : typesOutdoor.push(unitType);
                 }
+
                 const manufacturer = 'Mitsubishi';
-                const modelIndoor = (modelsIndoor.length > 0) ? modelsIndoor[0] : 'Undefined';
-                const modelOutdoor = (modelsOutdoor.length > 0) ? modelsOutdoor[0] : 'Undefined'
+                const modelIndoor = modelsIndoor.length > 0 ? modelsIndoor[0] : 'Undefined';
+                const modelOutdoor = modelsOutdoor.length > 0 ? modelsOutdoor[0] : 'Undefined'
 
                 //diagnostic
                 const diagnosticMode = deviceInfo.DiagnosticMode;
@@ -305,6 +318,42 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const scene = deviceState.Scene;
                 const sceneOwner = deviceState.SceneOwner;
 
+                const deviceStateHasNotChanged =
+                    roomTemperature === this.roomTemperature
+                    && setTemperature === this.setTemperature
+                    && setFanSpeed === this.setFanSpeed
+                    && operationMode === this.operationMode
+                    && supplyTemperature === this.supplyTemperature
+                    && outdoorTemperature === this.outdoorTemperature
+                    && nightPurgeMode === this.nightPurgeMode
+                    && power === this.power
+                    && roomCO2Level === this.roomCO2Level
+                    && ventilationMode === this.ventilationMode
+                    && actualVentilationMode === this.actualVentilationMode
+                    && hideRoomTemperature === this.hideRoomTemperature
+                    && hideSupplyTemperature === this.hideSupplyTemperature
+                    && hideOutdoorTemperature === this.hideOutdoorTemperature;
+
+                if (deviceStateHasNotChanged) {
+                    this.checkDeviceInfo();
+                    return;
+                }
+
+                this.roomTemperature = roomTemperature;
+                this.setTemperature = setTemperature;
+                this.setFanSpeed = setFanSpeed;
+                this.operationMode = operationMode;
+                this.supplyTemperature = supplyTemperature;
+                this.outdoorTemperature = outdoorTemperature;
+                this.nightPurgeMode = nightPurgeMode;
+                this.power = power;
+                this.roomCO2Level = roomCO2Level;
+                this.ventilationMode = ventilationMode;
+                this.actualVentilationMode = actualVentilationMode;
+                this.hideRoomTemperature = hideRoomTemperature;
+                this.hideSupplyTemperature = hideSupplyTemperature;
+                this.hideOutdoorTemperature = hideOutdoorTemperature;
+
                 this.emit('deviceState', deviceState, power, roomTemperature, supplyTemperature, outdoorTemperature, nightPurgeMode, roomCO2Level, setTemperature, setFanSpeed, operationMode, ventilationMode, actualVentilationMode, hideRoomTemperature, hideSupplyTemperature, hideOutdoorTemperature);
                 const mqtt = mqttEnabled ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, State`, JSON.stringify(deviceState, null, 2)) : false;
 
@@ -318,10 +367,9 @@ class MELCLOUDDEVICEERV extends EventEmitter {
         this.emit('checkDeviceInfo');
     };
 
-    checkDeviceInfo() {
-        setTimeout(() => {
-            this.emit('checkDeviceInfo');
-        }, 65000);
+    async checkDeviceInfo() {
+        await new Promise(resolve => setTimeout(resolve, 65000));
+        this.emit('checkDeviceInfo');
     };
 
     send(url, newData, type) {
@@ -334,11 +382,10 @@ class MELCLOUDDEVICEERV extends EventEmitter {
             };
 
             try {
-                const newState = await this.axiosInstancePost(url, options);
+                await this.axiosInstancePost(url, options);
                 this.emit('checkDeviceInfo');
                 resolve(true);
             } catch (error) {
-                this.emit('error', `Send command error: ${error}`);
                 reject(error);
             };
         });

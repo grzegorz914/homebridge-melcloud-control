@@ -15,7 +15,7 @@ class MELCLOUD extends EventEmitter {
         const debugLog = config.debugLog;
         const prefDir = config.prefDir;
         const melCloudBuildingsFile = `${prefDir}/${accountName}_Buildings`;
-        const devicesId = new Array();
+        const devicesId = [];
 
         this.axiosInstanceLogin = axios.create({
             method: 'POST',
@@ -30,7 +30,7 @@ class MELCLOUD extends EventEmitter {
                     Email: user,
                     Password: passwd,
                     Language: language,
-                    AppVersion: '1.22.10.0',
+                    AppVersion: '1.25.0',
                     CaptchaChallenge: '',
                     CaptchaResponse: '',
                     Persist: true
@@ -45,7 +45,7 @@ class MELCLOUD extends EventEmitter {
                 const contextKey = loginData.data.LoginData.ContextKey;
 
                 if (contextKey === undefined || contextKey === null) {
-                    this.emit('message', `Account ${accountName}, context key not found or undefined, reconnect in 60s.`)
+                    this.emit('message', `Account ${accountName}, context key not found or undefined, reconnect in 65s.`)
                     this.reconnect();
                     return;
                 };
@@ -55,7 +55,7 @@ class MELCLOUD extends EventEmitter {
                 this.emit('connected', melCloudInfoData);
                 this.emit('checkDevicesList');
             } catch (error) {
-                this.emit('error', `Account: ${accountName}, login error, ${error}, reconnect in 60s.`);
+                this.emit('error', `Account: ${accountName}, login error, ${error}, reconnect in 65s.`);
                 this.reconnect();
             };
         }).on('checkDevicesList', async () => {
@@ -81,16 +81,14 @@ class MELCLOUD extends EventEmitter {
 
                 //read building structure and get the devices
                 const buildingsList = listDevicesData.data;
-                const buildingsCount = buildingsList.length;
-
-                if (buildingsCount === 0) {
+                if (!buildingsList) {
                     this.emit('message', `Account ${accountName}, no building found, check again in 90s.`);
                     this.checkDevicesList();
                     return;
                 }
 
                 // Check available devices
-                const devices = new Array();
+                const devices = [];
                 for (const building of buildingsList) {
                     const buildingStructure = building.Structure;
 
@@ -105,13 +103,13 @@ class MELCLOUD extends EventEmitter {
                     devices.push(...allDevices);
                 }
 
-                const devicesCount = devices.length;
-                if (devicesCount === 0) {
+                if (!devices) {
                     this.emit('message', `Account ${accountName}, no devices found, check again in 90s.`);
                     this.checkDevicesList();
                     return;
                 }
 
+                const devicesCount = devices.length;
                 const useFahrenheit = (melCloudInfo.UseFahrenheit === true) ? 1 : 0;
                 const temperatureDisplayUnit = CONSTANS.TemperatureDisplayUnits[useFahrenheit];
                 const debug2 = debugLog ? this.emit('debug', `Account ${accountName}, Found: ${devicesCount} devices.`) : false;
@@ -144,16 +142,14 @@ class MELCLOUD extends EventEmitter {
         this.emit('connect');
     };
 
-    reconnect() {
-        setTimeout(() => {
-            this.emit('connect');
-        }, 60000);
+    async reconnect() {
+        await new Promise(resolve => setTimeout(resolve, 65000));
+        this.emit('connect');
     };
 
-    checkDevicesList() {
-        setTimeout(() => {
-            this.emit('checkDevicesList');
-        }, 90000);
+    async checkDevicesList() {
+        await new Promise(resolve => setTimeout(resolve, 90000));
+        this.emit('checkDevicesList');
     };
 };
 module.exports = MELCLOUD;

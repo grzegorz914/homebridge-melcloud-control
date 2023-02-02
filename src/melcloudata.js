@@ -21,6 +21,21 @@ class MELCLOUDDEVICEATA extends EventEmitter {
         const prefDir = config.prefDir;
         const melCloudBuildingDeviceFile = `${prefDir}/${accountName}_Device_${deviceId}`;
 
+        //store variable to compare
+        this.roomTemperature = 0;
+        this.setTemperature = 0;
+        this.setFanSpeed = 0;
+        this.operationMode = 0;
+        this.vaneHorizontal = 0;
+        this.vaneVertical = 0;
+        this.inStandbyMode = false;
+        this.power = false;
+        this.hideVaneControls = false;
+        this.hideDryModeControl = false;
+        this.prohibitSetTemperature = false;
+        this.prohibitOperationMode = 0;
+        this.prohibitPower = false;
+
         this.axiosInstanceGet = axios.create({
             method: 'GET',
             baseURL: CONSTANS.ApiUrls.BaseURL,
@@ -82,7 +97,7 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 const linkedDevice = deviceInfo.LinkedDevice;
                 const type = deviceInfo.Type;
                 const macAddress = deviceInfo.MacAddress;
-                const serialNumber = (deviceInfo.SerialNumber != null) ? deviceInfo.SerialNumber.toString() : 'Undefined';
+                const serialNumber = deviceInfo.SerialNumber != null ? deviceInfo.SerialNumber.toString() : 'Undefined';
 
                 //device
                 const devicePCycleActual = deviceInfo.Device.PCycleActual;
@@ -167,7 +182,7 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 const deviceModelCode = deviceInfo.Device.ModelCode;
                 const deviceDeviceID = deviceInfo.Device.DeviceID;
                 const deviceMacAddress = deviceInfo.Device.MacAddress;
-                const deviceSerialNumber = (deviceInfo.Device.SerialNumber != null) ? deviceInfo.Device.SerialNumber.toString() : 'Undefined';
+                const deviceSerialNumber = deviceInfo.Device.SerialNumber != null ? deviceInfo.Device.SerialNumber.toString() : 'Undefined';
                 const deviceTimeZoneID = deviceInfo.Device.TimeZoneID;
                 const deviceDiagnosticMode = deviceInfo.Device.DiagnosticMode;
                 const deviceDiagnosticEndDate = deviceInfo.Device.DiagnosticEndDate;
@@ -205,7 +220,7 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 const deviceRate2StartTime = deviceInfo.Device.Rate2StartTime;
                 const deviceProtocolVersion = deviceInfo.Device.ProtocolVersion;
                 const deviceUnitVersion = deviceInfo.Device.UnitVersion;
-                const deviceFirmwareAppVersion = (deviceInfo.Device.FirmwareAppVersion != null) ? deviceInfo.Device.FirmwareAppVersion.toString() : 'Undefined';
+                const deviceFirmwareAppVersion = deviceInfo.Device.FirmwareAppVersion != null ? deviceInfo.Device.FirmwareAppVersion.toString() : 'Undefined';
                 const deviceFirmwareWebVersion = deviceInfo.Device.FirmwareWebVersion;
                 const deviceFirmwareWlanVersion = deviceInfo.Device.FirmwareWlanVersion;
                 const deviceMqttFlags = deviceInfo.Device.MqttFlags;
@@ -216,7 +231,6 @@ class MELCLOUDDEVICEATA extends EventEmitter {
 
                 //units info
                 const units = Array.isArray(deviceInfo.Device.Units) ? deviceInfo.Device.Units : [];
-                const unitsCount = units.length;
                 const serialsNumberIndoor = [];
                 const serialsNumberOutdoor = [];
                 const modelsNumberIndoor = [];
@@ -225,26 +239,24 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 const modelsOutdoor = [];
                 const typesIndoor = [];
                 const typesOutdoor = [];
-                if (unitsCount > 0) {
-                    for (let i = 0; i < unitsCount; i++) {
-                        const unit = units[i];
-                        const unitId = unit.ID;
-                        const unitDevice = unit.Device;
-                        const unitSerialNumber = (unit.SerialNumber != null) ? (unit.SerialNumber.length > 1) ? unit.SerialNumber.toString() : 'Serial to short' : 'Undefined';
-                        const unitModelNumber = unit.ModelNumber;
-                        const unitModel = (unit.Model != null) ? unit.Model.toString() : 'Undefined';
-                        const unitType = unit.UnitType;
-                        const unitIsIndoor = (unit.IsIndoor == true);
+                for (const unit of units) {
+                    const unitId = unit.ID;
+                    const unitDevice = unit.Device;
+                    const unitSerialNumber = unit.SerialNumber != null ? (unit.SerialNumber.length > 1 ? unit.SerialNumber.toString() : 'Serial to short') : 'Undefined';
+                    const unitModelNumber = unit.ModelNumber;
+                    const unitModel = unit.Model != null ? unit.Model.toString() : 'Undefined';
+                    const unitType = unit.UnitType;
+                    const unitIsIndoor = (unit.IsIndoor == true);
 
-                        const pushSerial = unitIsIndoor ? serialsNumberIndoor.push(unitSerialNumber) : serialsNumberOutdoor.push(unitSerialNumber);
-                        const pushModelNumber = unitIsIndoor ? modelsNumberIndoor.push(unitModelNumber) : modelsNumberOutdoor.push(unitModelNumber);
-                        const pushUnitModel = unitIsIndoor ? modelsIndoor.push(unitModel) : modelsOutdoor.push(unitModel);
-                        const pushUnitTypel = unitIsIndoor ? typesIndoor.push(unitType) : typesOutdoor.push(unitType);
-                    }
+                    const pushSerial = unitIsIndoor ? serialsNumberIndoor.push(unitSerialNumber) : serialsNumberOutdoor.push(unitSerialNumber);
+                    const pushModelNumber = unitIsIndoor ? modelsNumberIndoor.push(unitModelNumber) : modelsNumberOutdoor.push(unitModelNumber);
+                    const pushUnitModel = unitIsIndoor ? modelsIndoor.push(unitModel) : modelsOutdoor.push(unitModel);
+                    const pushUnitTypel = unitIsIndoor ? typesIndoor.push(unitType) : typesOutdoor.push(unitType);
                 }
+
                 const manufacturer = 'Mitsubishi';
-                const modelIndoor = (modelsIndoor.length > 0) ? modelsIndoor[0] : 'Undefined';
-                const modelOutdoor = (modelsOutdoor.length > 0) ? modelsOutdoor[0] : 'Undefined';
+                const modelIndoor = modelsIndoor.length > 0 ? modelsIndoor[0] : 'Undefined';
+                const modelOutdoor = modelsOutdoor.length > 0 ? modelsOutdoor[0] : 'Undefined';
 
                 //diagnostic
                 const diagnosticMode = deviceInfo.DiagnosticMode;
@@ -320,10 +332,43 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 const scene = deviceState.Scene;
                 const sceneOwner = deviceState.SceneOwner;
 
-                this.emit('deviceState', deviceState, roomTemperature, setTemperature, setFanSpeed, operationMode, vaneHorizontal, vaneVertical, inStandbyMode, power, hideVaneControls, hideDryModeControl, prohibitSetTemperature, prohibitOperationMode, prohibitPower);
-                const mqtt = mqttEnabled ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, State`, JSON.stringify(deviceState, null, 2)) : false;
+                const deviceStateHasNotChanged =
+                    roomTemperature === this.roomTemperature
+                    && setTemperature === this.setTemperature
+                    && setFanSpeed === this.setFanSpeed
+                    && operationMode === this.operationMode
+                    && vaneHorizontal === this.vaneHorizontal
+                    && vaneVertical === this.vaneVertical
+                    && inStandbyMode === this.inStandbyMode
+                    && power === this.power
+                    && hideVaneControls === this.hideVaneControls
+                    && hideDryModeControl === this.hideDryModeControl
+                    && prohibitSetTemperature === this.prohibitSetTemperature
+                    && prohibitOperationMode === this.prohibitOperationMode
+                    && prohibitPower === this.prohibitPower;
 
+                if (deviceStateHasNotChanged) {
+                    this.checkDeviceInfo();
+                    return;
+                }
+
+                this.roomTemperature = roomTemperature;
+                this.setTemperature = setTemperature;
+                this.setFanSpeed = setFanSpeed;
+                this.operationMode = operationMode;
+                this.vaneHorizontal = vaneHorizontal;
+                this.vaneVertical = vaneVertical;
+                this.inStandbyMode = inStandbyMode;
+                this.power = power;
+                this.hideVaneControls = hideVaneControls;
+                this.hideDryModeControl = hideDryModeControl;
+                this.prohibitSetTemperature = prohibitSetTemperature;
+                this.prohibitOperationMode = prohibitOperationMode;
+                this.prohibitPower = prohibitPower;
+
+                this.emit('deviceState', deviceState, roomTemperature, setTemperature, setFanSpeed, operationMode, vaneHorizontal, vaneVertical, inStandbyMode, power, hideVaneControls, hideDryModeControl, prohibitSetTemperature, prohibitOperationMode, prohibitPower);
                 this.checkDeviceInfo();
+                const mqtt = mqttEnabled ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, State`, JSON.stringify(deviceState, null, 2)) : false;
             } catch (error) {
                 this.emit('error', `${deviceTypeText} ${deviceName}, check state error, ${error}, check again in 60s.`);
                 this.checkDeviceInfo();
@@ -333,10 +378,9 @@ class MELCLOUDDEVICEATA extends EventEmitter {
         this.emit('checkDeviceInfo');
     };
 
-    checkDeviceInfo() {
-        setTimeout(() => {
-            this.emit('checkDeviceInfo');
-        }, 65000);
+    async checkDeviceInfo() {
+        await new Promise(resolve => setTimeout(resolve, 65000));
+        this.emit('checkDeviceInfo');
     };
 
     send(url, newData, type) {
@@ -349,11 +393,10 @@ class MELCLOUDDEVICEATA extends EventEmitter {
             };
 
             try {
-                const newState = await this.axiosInstancePost(url, options);
+                await this.axiosInstancePost(url, options);
                 this.emit('checkDeviceInfo');
                 resolve(true);
             } catch (error) {
-                this.emit('error', `Send command error: ${error}`);
                 reject(error);
             };
         });

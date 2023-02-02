@@ -30,8 +30,10 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * Support control device *Presets*.
 * Support automations, shortcuts and siri.
 * Support MQTT protocol, publisch topic *Info*, *State* as payload JSON data.
+* Support direct device controll creating extra *Buttons* (appiled for all devices of same type in account).
+* Support identify all states of device creating *Sensors* and lather use with automations (appiled for all devices of same type in account).
+
 * Main control mode, *Heater/Cooler*, *Thermostat*.
-* Additional control mode, *Buttons*.
 * Controls of Air Conditioner:
   * Heater Cooler:
     * Power *ON/OFF*.
@@ -45,13 +47,23 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
     * Operating mode *POWER OFF/HEAT/COOL/AUTO*.
     * Heating/Cooling temperature.
   * Buttons:
-    * Power *ON/OFF*.
-    * Operating mode *HEAT/DRY/COOL/FAN/AUTO*.
-    * Physical lock controls *LOCK/UNLOCK*.
-    * Vane H mode *AUTO/1/2/3/4/5/SWING*.
-    * Vane V mode *AUTO/1/2/3/4/5/SWING*.
-    * Fan speed mode *AUTO/1/2/3/4/5*.
-    * Set device presets.
+    * Use to direct control device.
+      * Power *ON/OFF*.
+      * Operating mode *HEAT/DRY/COOL/FAN/AUTO*.
+      * Physical lock controls *LOCK/UNLOCK*.
+      * Vane H mode *AUTO/1/2/3/4/5/SWING*.
+      * Vane V mode *AUTO/1/2/3/4/5/SWING*.
+      * Fan speed mode *AUTO/1/2/3/4/5*.
+      * Set device presets.
+  * Sensors:
+    * Use with automations in HomeKit app.
+      * Identify Power *ON/OFF*.
+      * Identify operating mode *HEAT/DRY/COOL/FAN/AUTO*.
+      * Identify physical lock controls *LOCK/UNLOCK*.
+      * Identify vane H mode *AUTO/1/2/3/4/5/SWING*.
+      * Identify vane V mode *AUTO/1/2/3/4/5/SWING*.
+      * Identify fan speed mode *AUTO/1/2/3/4/5/*.
+      * Identify device presets. 
 * Control of Heat Pump:
   * Heater Cooler:
     * Heat Pump:
@@ -79,10 +91,17 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Operating mode *HEAT/AUTO* (HEAT NOW, AUTO).
       * Water temperature.
   * Buttons:
-    * Power *ON/OFF*.
-    * Operating mode *HEAT/COOL/CURVE/HOLIDAY/AUTO HOT WATER/ECO HOT WATER/FORCE HOT WATER*.
-    * Physical lock controls *LOCK/UNLOCK* Zone 1, 2 und Hot Water.
-    * Set device presets.    
+    * Use to direct control device.  
+      * Power *ON/OFF*.
+      * Operating mode *HEAT/COOL/CURVE/HOLIDAY/AUTO HOT WATER/ECO HOT WATER/FORCE HOT WATER*.
+      * Physical lock controls *LOCK/UNLOCK* Zone 1, 2 und Hot Water.
+      * Set device presets. 
+  * Sensors:
+    * Use with automations in HomeKit app. 
+      * Identify Power *ON/OFF*.
+      * Identify operating mode *HEAT/COOL/CURVE/HOLIDAY/AUTO HOT WATER/ECO HOT WATER/FORCE HOT WATER*.
+      * Identify physical lock controls *LOCK/UNLOCK* Zone 1, 2 und Hot Water.
+      * Identify device presets. 
 * Control of Energy Recovery Ventilation:
   * Heater Cooler:
     * Power *ON/OFF*.
@@ -93,11 +112,19 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
     * Power *ON/OFF*.
     * Operating mode *POWER OFF/HEAT/COOL/AUTO* (POWER OFF, RECOVERY, BYPAS, AUTO).
   * Buttons:
-    * Power *ON/OFF*.
-    * Operating mode *RECOVERY/BYPAS/AUTO/NIGHT PURGE*.
-    * Physical lock controls *LOCK/UNLOCK*.
-    * Fan speed mode *AUTO/1/2/3/4/5*.
-    * Set device presets.
+    * Use to direct control device.
+      * Power *ON/OFF*.
+      * Operating mode *RECOVERY/BYPAS/AUTO/NIGHT PURGE*.
+      * Physical lock controls *LOCK/UNLOCK*.
+      * Fan speed mode *AUTO/1/2/3/4/5/6/7*.
+      * Set device presets.
+  * Sensors:
+    * Use with automations in HomeKit app.
+      * Identify Power *ON/OFF*.
+      * Identify operating mode *RECOVERY/BYPAS/AUTO/NIGHT PURGE*.
+      * Identify physical lock controls *LOCK/UNLOCK*.
+      * Identify fan speed mode *AUTO/1/2/3/4/5/6/7*.
+      * Identify device presets. 
 
 <p align="left">
   <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/homekit.png" width="382"></a> 
@@ -126,17 +153,17 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ataPresets` | This enable display Air Conditioner presets in HomeKit app. |
 | `ataButtons.name` | Here set `Button Name` which You want expose to the *Homebridge/HomeKit*. | 
 | `ataButtons.mode` | Here select button mode, VH - Vane Horizontal, VV - Vane Horizontal. |
-| `ataButtons.displayType` | Here select HomeKit display type, `Switch`, `Button` - selectable in HomeKit app as `Light`, `Fan`, `Outlet`. |
+| `ataButtons.displayType` | Here select display type in HomeKit app, possible `None`, `Button`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`.|
 | `atwDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
 | `atwPresets` | This enable display Heat Pump presets in HomeKit app. |
 | `atwButtons.name` | Here set `Button Name` which You want expose to the *Homebridge/HomeKit*. | 
 | `atwButtons.mode` | Here select button mode. |
-| `atwButtons.displayType` | Here select HomeKit display type, `Switch`, `Button` - selectable in HomeKit app as `Light`, `Fan`, `Outlet`. |
+| `atwButtons.displayType` | Here select display type in HomeKit app, possible `None`, `Button`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`.|
 | `ervDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
 | `ervPresets` | This enable display EnergyRecovery Ventilation presets in HomeKit app. |
 | `ervButtons.name` | Here set `Button Name` which You want expose to the *Homebridge/HomeKit*. | 
 | `ervButtons.mode` | Here select button mode. |
-| `ervButtons.displayType` | Here select HomeKit display type, `Switch`, `Button` - selectable in HomeKit app as `Light`, `Fan`, `Outlet`. |
+| `ervButtons.displayType` | Here select display type in HomeKit app, possible `None`, `Button`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`.|
 | `enableDebugMode` | This enable deep log in homebridge console. |
 | `disableLogInfo` | This disable display log values and states on every it change. |
 | `disableLogDeviceInfo` | This disable display log device info on plugin start. |

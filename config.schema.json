@@ -233,7 +233,7 @@
               "required": false
             },
             "ataButtons": {
-              "title": "Button",
+              "title": "Button / Sensor",
               "type": "array",
               "items": {
                 "type": "object",
@@ -243,7 +243,7 @@
                     "type": "string",
                     "placeholder": "Button name",
                     "description": "Here set Your own name displayed in Homebridge/HomeKit app.",
-                    "required": false
+                    "required": true
                   },
                   "mode": {
                     "title": "Mode",
@@ -469,14 +469,18 @@
                         ]
                       }
                     ],
-                    "required": false
+                    "required": true
                   },
                   "displayType": {
                     "title": "Type",
                     "type": "integer",
-                    "minimum": 0,
-                    "maximum": 1,
                     "oneOf": [
+                      {
+                        "title": "None",
+                        "enum": [
+                          -1
+                        ]
+                      },
                       {
                         "title": "Button",
                         "enum": [
@@ -488,10 +492,28 @@
                         "enum": [
                           1
                         ]
+                      },
+                      {
+                        "title": "Motion Sensor",
+                        "enum": [
+                          2
+                        ]
+                      },
+                      {
+                        "title": "Occupancy Sensor",
+                        "enum": [
+                          3
+                        ]
+                      },
+                      {
+                        "title": "Contact Sensor",
+                        "enum": [
+                          4
+                        ]
                       }
                     ],
-                    "description": "Here select display type in HomeKit app.",
-                    "required": false
+                    "description": "Here select extra function/tile to be exposed in HomeKit app.",
+                    "required": true
                   }
                 }
               }
@@ -537,7 +559,7 @@
                     "type": "string",
                     "placeholder": "Button name",
                     "description": "Here set Your own name displayed in Homebridge/HomeKit app.",
-                    "required": false
+                    "required": true
                   },
                   "mode": {
                     "title": "Mode",
@@ -649,14 +671,18 @@
                         ]
                       }
                     ],
-                    "required": false
+                    "required": true
                   },
                   "displayType": {
                     "title": "Type",
                     "type": "integer",
-                    "minimum": 0,
-                    "maximum": 1,
                     "oneOf": [
+                      {
+                        "title": "None",
+                        "enum": [
+                          -1
+                        ]
+                      },
                       {
                         "title": "Button",
                         "enum": [
@@ -668,10 +694,28 @@
                         "enum": [
                           1
                         ]
+                      },
+                      {
+                        "title": "Motion Sensor",
+                        "enum": [
+                          2
+                        ]
+                      },
+                      {
+                        "title": "Occupancy Sensor",
+                        "enum": [
+                          3
+                        ]
+                      },
+                      {
+                        "title": "Contact Sensor",
+                        "enum": [
+                          4
+                        ]
                       }
                     ],
-                    "description": "Here select display type in HomeKit app.",
-                    "required": false
+                    "description": "Here select extra function/tile to be exposed in HomeKit app.",
+                    "required": true
                   }
                 }
               }
@@ -717,7 +761,7 @@
                     "type": "string",
                     "placeholder": "Button name",
                     "description": "Here set Your own name displayed in Homebridge/HomeKit app.",
-                    "required": false
+                    "required": true
                   },
                   "mode": {
                     "title": "Mode",
@@ -835,14 +879,18 @@
                         ]
                       }
                     ],
-                    "required": false
+                    "required": true
                   },
                   "displayType": {
                     "title": "Type",
                     "type": "integer",
-                    "minimum": 0,
-                    "maximum": 1,
                     "oneOf": [
+                      {
+                        "title": "None",
+                        "enum": [
+                          -1
+                        ]
+                      },
                       {
                         "title": "Button",
                         "enum": [
@@ -854,10 +902,28 @@
                         "enum": [
                           1
                         ]
+                      },
+                      {
+                        "title": "Motion Sensor",
+                        "enum": [
+                          2
+                        ]
+                      },
+                      {
+                        "title": "Occupancy Sensor",
+                        "enum": [
+                          3
+                        ]
+                      },
+                      {
+                        "title": "Contact Sensor",
+                        "enum": [
+                          4
+                        ]
                       }
                     ],
-                    "description": "Here select display type in HomeKit app",
-                    "required": false
+                    "description": "Here select extra function/tile to be exposed in HomeKit app.",
+                    "required": true
                   }
                 }
               }
@@ -988,7 +1054,7 @@
             {
               "key": "accounts[].ataButtons",
               "type": "tabarray",
-              "title": "{{ value.name || 'new button' }}",
+              "title": "{{ value.name || 'new button/sensor' }}",
               "items": [
                 "accounts[].ataButtons[].name",
                 "accounts[].ataButtons[].mode",
@@ -1009,7 +1075,7 @@
             {
               "key": "accounts[].atwButtons",
               "type": "tabarray",
-              "title": "{{ value.name || 'new button' }}",
+              "title": "{{ value.name || 'new button/sensor' }}",
               "items": [
                 "accounts[].atwButtons[].name",
                 "accounts[].atwButtons[].mode",
@@ -1030,7 +1096,7 @@
             {
               "key": "accounts[].ervButtons",
               "type": "tabarray",
-              "title": "{{ value.name || 'new button' }}",
+              "title": "{{ value.name || 'new button/sensor' }}",
               "items": [
                 "accounts[].ervButtons[].name",
                 "accounts[].ervButtons[].mode",
