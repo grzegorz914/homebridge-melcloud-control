@@ -53,7 +53,7 @@ class melCloudPlatform {
 				//check if the directory exists, if not then create it
 				const prefDir = path.join(api.user.storagePath(), 'melcloud');
 				const melCloudInfoFile = `${prefDir}/${accountName}_Account`;
-				if (fs.existsSync(prefDir) == false) {
+				if (fs.existsSync(prefDir) === false) {
 					fs.mkdirSync(prefDir);
 				};
 
@@ -111,15 +111,15 @@ class melCloudDevice {
 		this.ataDisplayMode = account.ataDisplayMode || 0;
 		this.ataPresetsEnabled = account.ataPresets || false;
 		this.ataButtons = account.ataButtons || [];
-		this.ataButtonsCount = this.ataButtons.length;
+		this.ataButtonsCount = this.ataButtons.length || 0;
 		this.atwDisplayMode = account.atwDisplayMode || 0;
 		this.atwPresetsEnabled = account.atwPresets || false;
 		this.atwButtons = account.atwButtons || [];
-		this.atwButtonsCount = this.atwButtons.length;
+		this.atwButtonsCount = this.atwButtons.length || 0;
 		this.ervDisplayMode = account.ervDisplayMode || 0;
 		this.ervPresetsEnabled = account.ervPresets || false;
 		this.ervButtons = account.ervButtons || [];
-		this.ervButtonsCount = this.ervButtons.length;
+		this.ervButtonsCount = this.ervButtons.length || 0;
 		this.disableLogInfo = account.disableLogInfo || false;
 		this.disableLogDeviceInfo = account.disableLogDeviceInfo || false;
 		this.enableDebugMode = account.enableDebugMode || false;
@@ -195,7 +195,7 @@ class melCloudDevice {
 						this.log(`Model: ${modelIndoor}`);
 						this.log(`Serial: ${serialNumber}`);
 						this.log(`Firmware: ${firmwareRevision}`);
-						const outdoorDevice = (modelOutdoor != 'Undefined') ? this.log(`Outdoor: ${modelOutdoor}`) : false;
+						const outdoorDevice = (modelOutdoor !== 'Undefined') ? this.log(`Outdoor: ${modelOutdoor}`) : false;
 						this.log(`Manufacturer: ${manufacturer}`);
 						this.log('----------------------------------');
 						this.displayDeviceInfo = false;
@@ -344,13 +344,13 @@ class melCloudDevice {
 					this.setFanSpeed = setFanSpeed;
 
 					//swing and vane mode
-					const swingMode = swingFunction ? (vaneHorizontal == 12 && vaneVertical == 7) ? 1 : 0 : false;
+					const swingMode = swingFunction ? (vaneHorizontal === 12 && vaneVertical === 7) ? 1 : 0 : false;
 					this.swingMode = swingMode;
 					this.vaneHorizontal = vaneHorizontal;
 					this.vaneVertical = vaneVertical;
 
 					//lock physical controls
-					const lockPhysicalControls = (prohibitSetTemperature == true || prohibitOperationMode == true || prohibitPower == true) ? 1 : 0;
+					const lockPhysicalControls = (prohibitSetTemperature === true || prohibitOperationMode === true || prohibitPower === true) ? 1 : 0;
 					this.lockPhysicalControls = lockPhysicalControls;
 
 					if (this.ataMelCloudService) {
@@ -388,271 +388,272 @@ class melCloudDevice {
 						this.ataButtonsNames = [];
 						this.ataButtonsDisplayType = [];
 
-						for (let i = 0; i < buttonsCount; i++) {
-							const button = this.ataButtons[i];
-							const buttonMode = button.mode;
-							const buttonName = button.name;
-							const buttonDisplayType = button.displayType;
+						for (const button of this.ataButtons) {
+							const buttonMode = button.mode || 0;
+							const buttonName = button.name || 'Not configured';
+							const buttonDisplayType = button.displayType || -1;
 
-							let buttonState = false;
-							switch (buttonMode) {
-								case 0: //POWER ON,OFF
-									buttonState = (power == true);
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 1: //OPERATING MODE HEAT
-									buttonState = power ? (operationMode == 1) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 2: //OPERATING MODE DRY
-									buttonState = power ? (operationMode == 2) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break
-								case 3: //OPERATING MODE COOL
-									buttonState = power ? (operationMode == 3) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 4: //OPERATING MODE FAN
-									buttonState = power ? (operationMode == 7) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 5: //OPERATING MODE AUTO
-									buttonState = power ? (operationMode == 8) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 6: //OPERATING MODE PURIFY
-									buttonState = power ? (operationMode == 9) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 7: //OPERATING MODE DRY CONTROL HIDE
-									buttonState = power ? (hideDryModeControl == true) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 10: //WANE H SWING MODE AUTO
-									buttonState = power ? (vaneHorizontal == 0) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 11: //WANE H SWING MODE 1
-									buttonState = power ? (vaneHorizontal == 1) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 12: //WANE H SWING MODE 2
-									buttonState = power ? (vaneHorizontal == 2) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 13: //WANE H SWING MODE 3
-									buttonState = power ? (vaneHorizontal == 3) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 14: //WANE H SWING MODE 4
-									buttonState = power ? (vaneHorizontal == 4) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 15: //WANE H SWING MODE 5
-									buttonState = power ? (vaneHorizontal == 5) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 16: //WANE H SWING MODE SWING
-									buttonState = power ? (vaneHorizontal == 12) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 20: //VANE V SWING MODE AUTO
-									buttonState = power ? (vaneVertical == 0) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 21: //VANE V SWING MODE 1
-									buttonState = power ? (vaneVertical == 1) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 22: //VANE V SWING MODE 2
-									buttonState = power ? (vaneVertical == 2) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 23: //VANE V SWING MODE 3
-									buttonState = power ? (vaneVertical == 3) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 24: //VANE V SWING MODE 4
-									buttonState = power ? (vaneVertical == 4) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 25: //VANE V SWING MODE 5
-									buttonState = power ? (vaneVertical == 5) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 26: //VANE V SWING MODE SWING
-									buttonState = power ? (vaneVertical == 7) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 27: //VANE H/V CONTROLS HIDE
-									buttonState = power ? (hideVaneControls == true) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 30: //FAN SPEED MODE AUTO
-									buttonState = power ? (setFanSpeed == 0) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 31: //FAN SPEED MODE 1
-									buttonState = power ? (setFanSpeed == 1) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 32: //FAN SPEED MODE 2
-									buttonState = power ? (setFanSpeed == 2) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 33: //FAN SPEED MODE 3
-									buttonState = power ? (setFanSpeed == 3) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 34: //FAN SPEED MODE 4
-									buttonState = power ? (setFanSpeed == 4) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 35: //FAN SPEED  MODE 5
-									buttonState = power ? (setFanSpeed == 5) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 36: //FAN SPEED  MODE 6
-									buttonState = power ? (setFanSpeed == 6) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 37: //FAN SPEED  MODE 7
-									buttonState = power ? (setFanSpeed == 7) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 38: //FAN SPEED  MODE 8
-									buttonState = power ? (setFanSpeed == 8) : false;
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 40: //PHYSICAL LOCK CONTROLS ALL
-									buttonState = (lockPhysicalControls == 1);
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 41: //PHYSICAL LOCK CONTROLS POWER
-									buttonState = (prohibitPower == true);
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 42: //PHYSICAL LOCK CONTROLS MODE
-									buttonState = (prohibitOperationMode == true);
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 43: //PHYSICAL LOCK CONTROLS TEMP
-									buttonState = (prohibitSetTemperature == true);
-									this.ataButtonsStates.push(buttonState);
-									this.ataButtonsModes.push(buttonMode);
-									this.ataButtonsNames.push(buttonName);
-									this.ataButtonsDisplayType.push(buttonDisplayType);
-									break;
+							if (buttonDisplayType >= 0) {
+								let buttonState = false;
+								switch (buttonMode) {
+									case 0: //POWER ON,OFF
+										buttonState = (power === true);
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 1: //OPERATING MODE HEAT
+										buttonState = power ? (operationMode === 1) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 2: //OPERATING MODE DRY
+										buttonState = power ? (operationMode === 2) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break
+									case 3: //OPERATING MODE COOL
+										buttonState = power ? (operationMode === 3) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 4: //OPERATING MODE FAN
+										buttonState = power ? (operationMode === 7) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 5: //OPERATING MODE AUTO
+										buttonState = power ? (operationMode === 8) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 6: //OPERATING MODE PURIFY
+										buttonState = power ? (operationMode === 9) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 7: //OPERATING MODE DRY CONTROL HIDE
+										buttonState = power ? (hideDryModeControl === true) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 10: //WANE H SWING MODE AUTO
+										buttonState = power ? (vaneHorizontal === 0) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 11: //WANE H SWING MODE 1
+										buttonState = power ? (vaneHorizontal === 1) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 12: //WANE H SWING MODE 2
+										buttonState = power ? (vaneHorizontal === 2) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 13: //WANE H SWING MODE 3
+										buttonState = power ? (vaneHorizontal === 3) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 14: //WANE H SWING MODE 4
+										buttonState = power ? (vaneHorizontal === 4) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 15: //WANE H SWING MODE 5
+										buttonState = power ? (vaneHorizontal === 5) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 16: //WANE H SWING MODE SWING
+										buttonState = power ? (vaneHorizontal === 12) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 20: //VANE V SWING MODE AUTO
+										buttonState = power ? (vaneVertical === 0) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 21: //VANE V SWING MODE 1
+										buttonState = power ? (vaneVertical === 1) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 22: //VANE V SWING MODE 2
+										buttonState = power ? (vaneVertical === 2) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 23: //VANE V SWING MODE 3
+										buttonState = power ? (vaneVertical === 3) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 24: //VANE V SWING MODE 4
+										buttonState = power ? (vaneVertical === 4) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 25: //VANE V SWING MODE 5
+										buttonState = power ? (vaneVertical === 5) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 26: //VANE V SWING MODE SWING
+										buttonState = power ? (vaneVertical === 7) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 27: //VANE H/V CONTROLS HIDE
+										buttonState = power ? (hideVaneControls === true) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 30: //FAN SPEED MODE AUTO
+										buttonState = power ? (setFanSpeed === 0) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 31: //FAN SPEED MODE 1
+										buttonState = power ? (setFanSpeed === 1) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 32: //FAN SPEED MODE 2
+										buttonState = power ? (setFanSpeed === 2) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 33: //FAN SPEED MODE 3
+										buttonState = power ? (setFanSpeed === 3) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 34: //FAN SPEED MODE 4
+										buttonState = power ? (setFanSpeed === 4) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 35: //FAN SPEED  MODE 5
+										buttonState = power ? (setFanSpeed === 5) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 36: //FAN SPEED  MODE 6
+										buttonState = power ? (setFanSpeed === 6) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 37: //FAN SPEED  MODE 7
+										buttonState = power ? (setFanSpeed === 7) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 38: //FAN SPEED  MODE 8
+										buttonState = power ? (setFanSpeed === 8) : false;
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 40: //PHYSICAL LOCK CONTROLS ALL
+										buttonState = (lockPhysicalControls === 1);
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 41: //PHYSICAL LOCK CONTROLS POWER
+										buttonState = (prohibitPower === true);
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 42: //PHYSICAL LOCK CONTROLS MODE
+										buttonState = (prohibitOperationMode === true);
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 43: //PHYSICAL LOCK CONTROLS TEMP
+										buttonState = (prohibitSetTemperature === true);
+										this.ataButtonsStates.push(buttonState);
+										this.ataButtonsModes.push(buttonMode);
+										this.ataButtonsNames.push(buttonName);
+										this.ataButtonsDisplayType.push(buttonDisplayType);
+										break;
+								};
 							};
 						};
 
-						this.ataButtonsCount = this.ataButtonsStates.length;
-						for (let i = 0; i < this.ataButtonsCount; i++) {
+						this.ataButtonsConfiguredCount = this.ataButtonsStates.length;
+						for (let i = 0; i < this.ataButtonsConfiguredCount; i++) {
 							const buttonState = this.ataButtonsStates[i];
 							const buttonDisplayType = this.ataButtonsDisplayType[i];
 							const characteristicType = [Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
@@ -666,11 +667,10 @@ class melCloudDevice {
 
 					if (presetsCount > 0) {
 						this.ataPresetsStates = [];
-
 						for (let i = 0; i < presetsCount; i++) {
 							//get preset
 							const preset = presets[i];
-							const presetState = (preset.Power = power && preset.SetTemperature == setTemperature && preset.OperationMode == operationMode && preset.VaneHorizontal == vaneHorizontal && preset.VaneVertical == vaneVertical && preset.FanSpeed == setFanSpeed) ? true : false;
+							const presetState = (preset.Power = power && preset.SetTemperature === setTemperature && preset.OperationMode === operationMode && preset.VaneHorizontal === vaneHorizontal && preset.VaneVertical === vaneVertical && preset.FanSpeed === setFanSpeed) ? true : false;
 							this.ataPresetsStates.push(presetState);
 
 							if (this.ataPresetsServices) {
@@ -715,7 +715,7 @@ class melCloudDevice {
 						this.log(`Model: ${modelOutdoor}`);
 						this.log(`Serial: ${serialNumber}`);
 						this.log(`Firmware: ${firmwareRevision}`);
-						const indoorDevice = (modelIndoor != 'Undefined') ? this.log(`Indoor: ${modelIndoor}`) : false;
+						const indoorDevice = (modelIndoor !== 'Undefined') ? this.log(`Indoor: ${modelIndoor}`) : false;
 						this.log(`Hot Water Tank: ${hasHotWaterTank ? 'Yes' : 'No'}`);
 						this.log(`Zone 2: ${hasZone2 ? 'Yes' : 'No'}`);
 						this.log(`Manufacturer: ${manufacturer}`);
@@ -788,7 +788,7 @@ class melCloudDevice {
 											targetOperationModeSetPropsMinValue = 1;
 											targetOperationModeSetPropsMaxValue = 2;
 											targetOperationModeSetPropsValidValues = [1, 2];
-											lockPhysicalControls = (prohibitZone1 == true && prohibitHotWater == true && prohibitZone2 == true) ? 1 : 0;
+											lockPhysicalControls = (prohibitZone1 === true && prohibitHotWater === true && prohibitZone2 === true) ? 1 : 0;
 											break;
 										case 1: //Thermostat - OFF, HEAT, COOL /// OFF, HEAT, COOL, AUTO
 											currentOperationMode = power ? [1, 1, 1, 2, 2, 0, 1][unitStatus] : 0;
@@ -812,7 +812,7 @@ class melCloudDevice {
 											targetOperationModeSetPropsMinValue = 0;
 											targetOperationModeSetPropsMaxValue = 2;
 											targetOperationModeSetPropsValidValues = [0, 1, 2];
-											lockPhysicalControls = (prohibitZone1 == true) ? 1 : 0;
+											lockPhysicalControls = (prohibitZone1 === true) ? 1 : 0;
 											break;
 										case 1: //Thermostat - OFF, HEAT, COOL /// OFF, HEAT, COOL, AUTO
 											currentOperationMode = power ? idleZone1 ? 0 : [1, 2, 2, 1, 2][operationModeZone1] : 0;
@@ -836,7 +836,7 @@ class melCloudDevice {
 											targetOperationModeSetPropsMinValue = 0;
 											targetOperationModeSetPropsMaxValue = 1;
 											targetOperationModeSetPropsValidValues = [0, 1];
-											lockPhysicalControls = (prohibitHotWater == true) ? 1 : 0;
+											lockPhysicalControls = (prohibitHotWater === true) ? 1 : 0;
 											break;
 										case 1: //Thermostat - OFF, HEAT, COOL /// OFF, HEAT, COOL, AUTO
 											currentOperationMode = forcedHotWaterMode ? 1 : 1;
@@ -860,7 +860,7 @@ class melCloudDevice {
 											targetOperationModeSetPropsMinValue = 0;
 											targetOperationModeSetPropsMaxValue = 2;
 											targetOperationModeSetPropsValidValues = [0, 1, 2];
-											lockPhysicalControls = (prohibitZone2 == true) ? 1 : 0;
+											lockPhysicalControls = (prohibitZone2 === true) ? 1 : 0;
 											break;
 										case 1: //Thermostat - OFF, HEAT, COOL /// OFF, HEAT, COOL, AUTO
 											currentOperationMode = power ? idleZone2 ? 0 : [1, 2, 2, 1, 2][operationModeZone2] : 0;
@@ -922,138 +922,139 @@ class melCloudDevice {
 							this.atwButtonsNames = [];
 							this.atwButtonsDisplayType = [];
 
-							for (let i = 0; i < buttonsCount; i++) {
-								const button = this.atwButtons[i];
-								const buttonMode = button.mode;
-								const buttonName = button.name;
+							for (const button of this.atwButtons) {
+								const buttonMode = button.mode || 0;
+								const buttonName = button.name || 'Not configured';
 								const buttonDisplayType = button.displayType;
 
-								let buttonState = false;
-								switch (buttonMode) {
-									case 0: //POWER ON,OFF
-										buttonState = (power == true);
-										this.atwButtonsStates.push(buttonState);
-										this.atwButtonsModes.push(buttonMode);
-										this.atwButtonsNames.push(buttonName);
-										this.atwButtonsDisplayType.push(buttonDisplayType);
-										break;
-									case 1: //HEAT PUMP HEAT
-										buttonState = power ? (operationMode == 0) : false;
-										this.atwButtonsStates.push(buttonState);
-										this.atwButtonsModes.push(buttonMode);
-										this.atwButtonsNames.push(buttonName);
-										this.atwButtonsDisplayType.push(buttonDisplayType);
-										break;
-									case 2: //COOL
-										buttonState = power ? (operationMode == 1) : false;
-										this.atwButtonsStates.push(buttonState);
-										this.atwButtonsModes.push(buttonMode);
-										this.atwButtonsNames.push(buttonName);
-										this.atwButtonsDisplayType.push(buttonDisplayType);
-										break;
-									case 53: //HOLIDAY
-										buttonState = power ? (holidayMode == true) : false;
-										this.atwButtonsStates.push(buttonState);
-										this.atwButtonsModes.push(buttonMode);
-										this.atwButtonsNames.push(buttonName);
-										this.atwButtonsDisplayType.push(buttonDisplayType);
-										break;
-									case 10: //ALL ZONES PHYSICAL LOCK CONTROL
-										buttonState = power ? (prohibitZone1 == true && prohibitHotWater == true && prohibitZone2 == true) : false;
-										this.atwButtonsStates.push(buttonState);
-										this.atwButtonsModes.push(buttonMode);
-										this.atwButtonsNames.push(buttonName);
-										this.atwButtonsDisplayType.push(buttonDisplayType);
-										break;
-									case 20: //HOT WATER AUTO
-										buttonState = power ? (forcedHotWaterMode == false) : false;
-										this.atwButtonsStates.push(buttonState);
-										this.atwButtonsModes.push(buttonMode);
-										this.atwButtonsNames.push(buttonName);
-										this.atwButtonsDisplayType.push(buttonDisplayType);
-										break;
-									case 21: //ECO
-										buttonState = power ? (ecoHotWater == true) : false;
-										this.atwButtonsStates.push(buttonState);
-										this.atwButtonsModes.push(buttonMode);
-										this.atwButtonsNames.push(buttonName);
-										this.atwButtonsDisplayType.push(buttonDisplayType);
-										break;
-									case 22: //FORCE HEAT
-										buttonState = power ? (forcedHotWaterMode == true) : false;
-										this.atwButtonsStates.push(buttonState);
-										this.atwButtonsModes.push(buttonMode);
-										this.atwButtonsNames.push(buttonName);
-										this.atwButtonsDisplayType.push(buttonDisplayType);
-										break;
-									case 30: //PHYSICAL LOCK CONTROL
-										buttonState = (prohibitHotWater == true);
-										this.atwButtonsStates.push(buttonState);
-										this.atwButtonsModes.push(buttonMode);
-										this.atwButtonsNames.push(buttonName);
-										this.atwButtonsDisplayType.push(buttonDisplayType);
-										break;
-									case 40: //ZONE 1 ROOM
-										buttonState = power ? (operationModeZone1 == 0) : false;
-										this.atwButtonsStates.push(buttonState);
-										this.atwButtonsModes.push(buttonMode);
-										this.atwButtonsNames.push(buttonName);
-										this.atwButtonsDisplayType.push(buttonDisplayType);
-										break;
-									case 41: //FLOW
-										buttonState = power ? (operationModeZone1 == 1) : false;
-										this.atwButtonsStates.push(buttonState);
-										this.atwButtonsModes.push(buttonMode);
-										this.atwButtonsNames.push(buttonName);
-										this.atwButtonsDisplayType.push(buttonDisplayType);
-										break;
-									case 42: //CURVE
-										buttonState = power ? (operationModeZone1 == 2) : false;
-										this.atwButtonsStates.push(buttonState);
-										this.atwButtonsModes.push(buttonMode);
-										this.atwButtonsNames.push(buttonName);
-										this.atwButtonsDisplayType.push(buttonDisplayType);
-										break;
-									case 50: //PHYSICAL LOCK CONTROL
-										buttonState = (prohibitZone1 == true);
-										this.atwButtonsStates.push(buttonState);
-										this.atwButtonsModes.push(buttonMode);
-										this.atwButtonsNames.push(buttonName);
-										this.atwButtonsDisplayType.push(buttonDisplayType);
-										break;
-									case 60: //ZONE 2 ROOM
-										buttonState = power ? (operationModeZone2 == 0) : false;
-										this.atwButtonsStates.push(buttonState);
-										this.atwButtonsModes.push(buttonMode);
-										this.atwButtonsNames.push(buttonName);
-										this.atwButtonsDisplayType.push(buttonDisplayType);
-										break;
-									case 61: //FLOW
-										buttonState = power ? (operationModeZone2 == 1) : false;
-										this.atwButtonsStates.push(buttonState);
-										this.atwButtonsModes.push(buttonMode);
-										this.atwButtonsNames.push(buttonName);
-										this.atwButtonsDisplayType.push(buttonDisplayType);
-										break;
-									case 62: //CURVE
-										buttonState = power ? (operationModeZone2 == 2) : false;
-										this.atwButtonsStates.push(buttonState);
-										this.atwButtonsModes.push(buttonMode);
-										this.atwButtonsNames.push(buttonName);
-										this.atwButtonsDisplayType.push(buttonDisplayType);
-										break;
-									case 70: //PHYSICAL LOCK CONTROL
-										buttonState = (prohibitZone2 == true);
-										this.atwButtonsStates.push(buttonState);
-										this.atwButtonsModes.push(buttonMode);
-										this.atwButtonsNames.push(buttonName);
-										this.atwButtonsDisplayType.push(buttonDisplayType);
-										break;
+								if (buttonDisplayType >= 0) {
+									let buttonState = false;
+									switch (buttonMode) {
+										case 0: //POWER ON,OFF
+											buttonState = (power === true);
+											this.atwButtonsStates.push(buttonState);
+											this.atwButtonsModes.push(buttonMode);
+											this.atwButtonsNames.push(buttonName);
+											this.atwButtonsDisplayType.push(buttonDisplayType);
+											break;
+										case 1: //HEAT PUMP HEAT
+											buttonState = power ? (operationMode === 0) : false;
+											this.atwButtonsStates.push(buttonState);
+											this.atwButtonsModes.push(buttonMode);
+											this.atwButtonsNames.push(buttonName);
+											this.atwButtonsDisplayType.push(buttonDisplayType);
+											break;
+										case 2: //COOL
+											buttonState = power ? (operationMode === 1) : false;
+											this.atwButtonsStates.push(buttonState);
+											this.atwButtonsModes.push(buttonMode);
+											this.atwButtonsNames.push(buttonName);
+											this.atwButtonsDisplayType.push(buttonDisplayType);
+											break;
+										case 53: //HOLIDAY
+											buttonState = power ? (holidayMode === true) : false;
+											this.atwButtonsStates.push(buttonState);
+											this.atwButtonsModes.push(buttonMode);
+											this.atwButtonsNames.push(buttonName);
+											this.atwButtonsDisplayType.push(buttonDisplayType);
+											break;
+										case 10: //ALL ZONES PHYSICAL LOCK CONTROL
+											buttonState = power ? (prohibitZone1 === true && prohibitHotWater === true && prohibitZone2 === true) : false;
+											this.atwButtonsStates.push(buttonState);
+											this.atwButtonsModes.push(buttonMode);
+											this.atwButtonsNames.push(buttonName);
+											this.atwButtonsDisplayType.push(buttonDisplayType);
+											break;
+										case 20: //HOT WATER AUTO
+											buttonState = power ? (forcedHotWaterMode === false) : false;
+											this.atwButtonsStates.push(buttonState);
+											this.atwButtonsModes.push(buttonMode);
+											this.atwButtonsNames.push(buttonName);
+											this.atwButtonsDisplayType.push(buttonDisplayType);
+											break;
+										case 21: //ECO
+											buttonState = power ? (ecoHotWater === true) : false;
+											this.atwButtonsStates.push(buttonState);
+											this.atwButtonsModes.push(buttonMode);
+											this.atwButtonsNames.push(buttonName);
+											this.atwButtonsDisplayType.push(buttonDisplayType);
+											break;
+										case 22: //FORCE HEAT
+											buttonState = power ? (forcedHotWaterMode === true) : false;
+											this.atwButtonsStates.push(buttonState);
+											this.atwButtonsModes.push(buttonMode);
+											this.atwButtonsNames.push(buttonName);
+											this.atwButtonsDisplayType.push(buttonDisplayType);
+											break;
+										case 30: //PHYSICAL LOCK CONTROL
+											buttonState = (prohibitHotWater === true);
+											this.atwButtonsStates.push(buttonState);
+											this.atwButtonsModes.push(buttonMode);
+											this.atwButtonsNames.push(buttonName);
+											this.atwButtonsDisplayType.push(buttonDisplayType);
+											break;
+										case 40: //ZONE 1 ROOM
+											buttonState = power ? (operationModeZone1 === 0) : false;
+											this.atwButtonsStates.push(buttonState);
+											this.atwButtonsModes.push(buttonMode);
+											this.atwButtonsNames.push(buttonName);
+											this.atwButtonsDisplayType.push(buttonDisplayType);
+											break;
+										case 41: //FLOW
+											buttonState = power ? (operationModeZone1 === 1) : false;
+											this.atwButtonsStates.push(buttonState);
+											this.atwButtonsModes.push(buttonMode);
+											this.atwButtonsNames.push(buttonName);
+											this.atwButtonsDisplayType.push(buttonDisplayType);
+											break;
+										case 42: //CURVE
+											buttonState = power ? (operationModeZone1 === 2) : false;
+											this.atwButtonsStates.push(buttonState);
+											this.atwButtonsModes.push(buttonMode);
+											this.atwButtonsNames.push(buttonName);
+											this.atwButtonsDisplayType.push(buttonDisplayType);
+											break;
+										case 50: //PHYSICAL LOCK CONTROL
+											buttonState = (prohibitZone1 === true);
+											this.atwButtonsStates.push(buttonState);
+											this.atwButtonsModes.push(buttonMode);
+											this.atwButtonsNames.push(buttonName);
+											this.atwButtonsDisplayType.push(buttonDisplayType);
+											break;
+										case 60: //ZONE 2 ROOM
+											buttonState = power ? (operationModeZone2 === 0) : false;
+											this.atwButtonsStates.push(buttonState);
+											this.atwButtonsModes.push(buttonMode);
+											this.atwButtonsNames.push(buttonName);
+											this.atwButtonsDisplayType.push(buttonDisplayType);
+											break;
+										case 61: //FLOW
+											buttonState = power ? (operationModeZone2 === 1) : false;
+											this.atwButtonsStates.push(buttonState);
+											this.atwButtonsModes.push(buttonMode);
+											this.atwButtonsNames.push(buttonName);
+											this.atwButtonsDisplayType.push(buttonDisplayType);
+											break;
+										case 62: //CURVE
+											buttonState = power ? (operationModeZone2 === 2) : false;
+											this.atwButtonsStates.push(buttonState);
+											this.atwButtonsModes.push(buttonMode);
+											this.atwButtonsNames.push(buttonName);
+											this.atwButtonsDisplayType.push(buttonDisplayType);
+											break;
+										case 70: //PHYSICAL LOCK CONTROL
+											buttonState = (prohibitZone2 === true);
+											this.atwButtonsStates.push(buttonState);
+											this.atwButtonsModes.push(buttonMode);
+											this.atwButtonsNames.push(buttonName);
+											this.atwButtonsDisplayType.push(buttonDisplayType);
+											break;
+									};
 								};
 							};
 
-							this.atwButtonsCount = this.atwButtonsStates.length;
-							for (let i = 0; i < this.atwButtonsCount; i++) {
+							this.atwButtonsConfiguredCount = this.atwButtonsStates.length;
+							for (let i = 0; i < this.atwButtonsConfiguredCount; i++) {
 								const buttonState = this.atwButtonsStates[i];
 								const buttonDisplayType = this.atwButtonsDisplayType[i];
 								const characteristicType = [Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
@@ -1070,7 +1071,7 @@ class melCloudDevice {
 							for (let i = 0; i < presetsCount; i++) {
 								//get preset
 								const preset = presets[i];
-								const presetState = (preset.Power = power && preset.EcoHotWater == ecoHotWater && preset.OperationModeZone1 == operationModeZone1 && preset.OperationModeZone2 == operationModeZone2 && preset.SetTankWaterTemperature == setTankWaterTemperature && preset.SetTemperatureZone1 == setTemperatureZone1 && preset.SetTemperatureZone2 == setTemperatureZone2 && preset.ForcedHotWaterMode == forcedHotWaterMode && preset.SetHeatFlowTemperatureZone1 == setHeatFlowTemperatureZone1 && preset.SetHeatFlowTemperatureZone2 == setHeatFlowTemperatureZone2 && preset.SetCoolFlowTemperatureZone1 == setCoolFlowTemperatureZone1 && preset.SetCoolFlowTemperatureZone2 == setCoolFlowTemperatureZone2) ? true : false;
+								const presetState = (preset.Power = power && preset.EcoHotWater === ecoHotWater && preset.OperationModeZone1 === operationModeZone1 && preset.OperationModeZone2 === operationModeZone2 && preset.SetTankWaterTemperature === setTankWaterTemperature && preset.SetTemperatureZone1 === setTemperatureZone1 && preset.SetTemperatureZone2 === setTemperatureZone2 && preset.ForcedHotWaterMode === forcedHotWaterMode && preset.SetHeatFlowTemperatureZone1 === setHeatFlowTemperatureZone1 && preset.SetHeatFlowTemperatureZone2 === setHeatFlowTemperatureZone2 && preset.SetCoolFlowTemperatureZone1 === setCoolFlowTemperatureZone1 && preset.SetCoolFlowTemperatureZone2 === setCoolFlowTemperatureZone2) ? true : false;
 								this.atwPresetsStates.push(presetState);
 
 								if (this.atwPresetsServices) {
@@ -1119,7 +1120,7 @@ class melCloudDevice {
 						this.log(`Model: ${modelOutdoor}`);
 						this.log(`Serial: ${serialNumber}`);
 						this.log(`Firmware: ${firmwareRevision}`);
-						const indoorDevice = (modelIndoor != 'Undefined') ? this.log(`Indoor: ${modelIndoor}`) : false;
+						const indoorDevice = (modelIndoor !== 'Undefined') ? this.log(`Indoor: ${modelIndoor}`) : false;
 						this.log(`Manufacturer: ${manufacturer}`);
 						this.log('----------------------------------');
 						this.displayDeviceInfo = false;
@@ -1300,145 +1301,146 @@ class melCloudDevice {
 						this.ervButtonsNames = [];
 						this.ervButtonsDisplayType = [];
 
-						for (let i = 0; i < buttonsCount; i++) {
-							const button = this.ervButtons[i];
-							const buttonMode = button.mode;
-							const buttonName = button.name;
-							const buttonDisplayType = button.displayType;
+						for (const button of this.ervButtons) {
+							const buttonMode = button.mode || 0;
+							const buttonName = button.name || 'Not configured';
+							const buttonDisplayType = button.displayType || -1;
 
-							let buttonState = false;
-							switch (buttonMode) {
-								case 0: //POWER ON,OFF
-									buttonState = (power == true);
-									this.ervButtonsStates.push(buttonState);
-									this.ervButtonsModes.push(buttonMode);
-									this.ervButtonsNames.push(buttonName);
-									this.ervButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 1: //OPERATION MODE RECOVERY
-									buttonState = power ? (ventilationMode == 0) : false;
-									this.ervButtonsStates.push(buttonState);
-									this.ervButtonsModes.push(buttonMode);
-									this.ervButtonsNames.push(buttonName);
-									this.ervButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 2: //OPERATION MODE BYPAS
-									buttonState = power ? (ventilationMode == 1) : false;
-									this.ervButtonsStates.push(buttonState);
-									this.ervButtonsModes.push(buttonMode);
-									this.ervButtonsNames.push(buttonName);
-									this.ervButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 3: //OPERATION MODE AUTO
-									buttonState = power ? (ventilationMode == 2) : false;
-									this.ervButtonsStates.push(buttonState);
-									this.ervButtonsModes.push(buttonMode);
-									this.ervButtonsNames.push(buttonName);
-									this.ervButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 4: //NIGHT PURGE MODE
-									buttonState = power ? (nightPurgeMode == true) : false;
-									this.ervButtonsStates.push(buttonState);
-									this.ervButtonsModes.push(buttonMode);
-									this.ervButtonsNames.push(buttonName);
-									this.ervButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 10: //FAN SPEED MODE AUTO
-									buttonState = power ? (setFanSpeed == 0) : false;
-									this.ervButtonsStates.push(buttonState);
-									this.ervButtonsModes.push(buttonMode);
-									this.ervButtonsNames.push(buttonName);
-									this.ervButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 11: //FAN SPEED MODE 1
-									buttonState = power ? (setFanSpeed == 1) : false;
-									this.ervButtonsStates.push(buttonState);
-									this.ervButtonsModes.push(buttonMode);
-									this.ervButtonsNames.push(buttonName);
-									this.ervButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 12: //FAN SPEED MODE 2
-									buttonState = power ? (setFanSpeed == 2) : false;
-									this.ervButtonsStates.push(buttonState);
-									this.ervButtonsModes.push(buttonMode);
-									this.ervButtonsNames.push(buttonName);
-									this.ervButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 13: //FAN SPEED MODE 3
-									buttonState = power ? (setFanSpeed == 3) : false;
-									this.ervButtonsStates.push(buttonState);
-									this.ervButtonsModes.push(buttonMode);
-									this.ervButtonsNames.push(buttonName);
-									this.ervButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 14: //FAN SPEED MODE 4
-									buttonState = power ? (setFanSpeed == 4) : false;
-									this.ervButtonsStates.push(buttonState);
-									this.ervButtonsModes.push(buttonMode);
-									this.ervButtonsNames.push(buttonName);
-									this.ervButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 15: //FAN SPEED  MODE 5
-									buttonState = power ? (setFanSpeed == 5) : false;
-									this.ervButtonsStates.push(buttonState);
-									this.ervButtonsModes.push(buttonMode);
-									this.ervButtonsNames.push(buttonName);
-									this.ervButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 16: //FAN SPEED  MODE 6
-									buttonState = power ? (setFanSpeed == 6) : false;
-									this.ervButtonsStates.push(buttonState);
-									this.ervButtonsModes.push(buttonMode);
-									this.ervButtonsNames.push(buttonName);
-									this.ervButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 17: //FAN SPEED  MODE 7
-									buttonState = power ? (setFanSpeed == 7) : false;
-									this.ervButtonsStates.push(buttonState);
-									this.ervButtonsModes.push(buttonMode);
-									this.ervButtonsNames.push(buttonName);
-									this.ervButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 18: //FAN SPEED  MODE 8
-									buttonState = power ? (setFanSpeed == 8) : false;
-									this.ervButtonsStates.push(buttonState);
-									this.ervButtonsModes.push(buttonMode);
-									this.ervButtonsNames.push(buttonName);
-									this.ervButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 20: //PHYSICAL LOCK CONTROLS
-									buttonState = (lockPhysicalControls == 1);
-									this.ervButtonsStates.push(buttonState);
-									this.ervButtonsModes.push(buttonMode);
-									this.ervButtonsNames.push(buttonName);
-									this.ervButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 21: //ROOM TEMP HIDE
-									buttonState = (hideRoomTemperature == true);
-									this.ervButtonsStates.push(buttonState);
-									this.ervButtonsModes.push(buttonMode);
-									this.ervButtonsNames.push(buttonName);
-									this.ervButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 22: //SUPPLY TEMP HIDE
-									buttonState = (hideSupplyTemperature == true);
-									this.ervButtonsStates.push(buttonState);
-									this.ervButtonsModes.push(buttonMode);
-									this.ervButtonsNames.push(buttonName);
-									this.ervButtonsDisplayType.push(buttonDisplayType);
-									break;
-								case 23: //OUTDOOR TEMP HIDE
-									buttonState = (hideOutdoorTemperature == true);
-									this.ervButtonsStates.push(buttonState);
-									this.ervButtonsModes.push(buttonMode);
-									this.ervButtonsNames.push(buttonName);
-									this.ervButtonsDisplayType.push(buttonDisplayType);
-									break;
+							if (buttonDisplayType >= 0) {
+								let buttonState = false;
+								switch (buttonMode) {
+									case 0: //POWER ON,OFF
+										buttonState = (power === true);
+										this.ervButtonsStates.push(buttonState);
+										this.ervButtonsModes.push(buttonMode);
+										this.ervButtonsNames.push(buttonName);
+										this.ervButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 1: //OPERATION MODE RECOVERY
+										buttonState = power ? (ventilationMode === 0) : false;
+										this.ervButtonsStates.push(buttonState);
+										this.ervButtonsModes.push(buttonMode);
+										this.ervButtonsNames.push(buttonName);
+										this.ervButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 2: //OPERATION MODE BYPAS
+										buttonState = power ? (ventilationMode === 1) : false;
+										this.ervButtonsStates.push(buttonState);
+										this.ervButtonsModes.push(buttonMode);
+										this.ervButtonsNames.push(buttonName);
+										this.ervButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 3: //OPERATION MODE AUTO
+										buttonState = power ? (ventilationMode === 2) : false;
+										this.ervButtonsStates.push(buttonState);
+										this.ervButtonsModes.push(buttonMode);
+										this.ervButtonsNames.push(buttonName);
+										this.ervButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 4: //NIGHT PURGE MODE
+										buttonState = power ? (nightPurgeMode === true) : false;
+										this.ervButtonsStates.push(buttonState);
+										this.ervButtonsModes.push(buttonMode);
+										this.ervButtonsNames.push(buttonName);
+										this.ervButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 10: //FAN SPEED MODE AUTO
+										buttonState = power ? (setFanSpeed === 0) : false;
+										this.ervButtonsStates.push(buttonState);
+										this.ervButtonsModes.push(buttonMode);
+										this.ervButtonsNames.push(buttonName);
+										this.ervButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 11: //FAN SPEED MODE 1
+										buttonState = power ? (setFanSpeed === 1) : false;
+										this.ervButtonsStates.push(buttonState);
+										this.ervButtonsModes.push(buttonMode);
+										this.ervButtonsNames.push(buttonName);
+										this.ervButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 12: //FAN SPEED MODE 2
+										buttonState = power ? (setFanSpeed === 2) : false;
+										this.ervButtonsStates.push(buttonState);
+										this.ervButtonsModes.push(buttonMode);
+										this.ervButtonsNames.push(buttonName);
+										this.ervButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 13: //FAN SPEED MODE 3
+										buttonState = power ? (setFanSpeed === 3) : false;
+										this.ervButtonsStates.push(buttonState);
+										this.ervButtonsModes.push(buttonMode);
+										this.ervButtonsNames.push(buttonName);
+										this.ervButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 14: //FAN SPEED MODE 4
+										buttonState = power ? (setFanSpeed === 4) : false;
+										this.ervButtonsStates.push(buttonState);
+										this.ervButtonsModes.push(buttonMode);
+										this.ervButtonsNames.push(buttonName);
+										this.ervButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 15: //FAN SPEED  MODE 5
+										buttonState = power ? (setFanSpeed === 5) : false;
+										this.ervButtonsStates.push(buttonState);
+										this.ervButtonsModes.push(buttonMode);
+										this.ervButtonsNames.push(buttonName);
+										this.ervButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 16: //FAN SPEED  MODE 6
+										buttonState = power ? (setFanSpeed === 6) : false;
+										this.ervButtonsStates.push(buttonState);
+										this.ervButtonsModes.push(buttonMode);
+										this.ervButtonsNames.push(buttonName);
+										this.ervButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 17: //FAN SPEED  MODE 7
+										buttonState = power ? (setFanSpeed === 7) : false;
+										this.ervButtonsStates.push(buttonState);
+										this.ervButtonsModes.push(buttonMode);
+										this.ervButtonsNames.push(buttonName);
+										this.ervButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 18: //FAN SPEED  MODE 8
+										buttonState = power ? (setFanSpeed === 8) : false;
+										this.ervButtonsStates.push(buttonState);
+										this.ervButtonsModes.push(buttonMode);
+										this.ervButtonsNames.push(buttonName);
+										this.ervButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 20: //PHYSICAL LOCK CONTROLS
+										buttonState = (lockPhysicalControls === 1);
+										this.ervButtonsStates.push(buttonState);
+										this.ervButtonsModes.push(buttonMode);
+										this.ervButtonsNames.push(buttonName);
+										this.ervButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 21: //ROOM TEMP HIDE
+										buttonState = (hideRoomTemperature === true);
+										this.ervButtonsStates.push(buttonState);
+										this.ervButtonsModes.push(buttonMode);
+										this.ervButtonsNames.push(buttonName);
+										this.ervButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 22: //SUPPLY TEMP HIDE
+										buttonState = (hideSupplyTemperature === true);
+										this.ervButtonsStates.push(buttonState);
+										this.ervButtonsModes.push(buttonMode);
+										this.ervButtonsNames.push(buttonName);
+										this.ervButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 23: //OUTDOOR TEMP HIDE
+										buttonState = (hideOutdoorTemperature === true);
+										this.ervButtonsStates.push(buttonState);
+										this.ervButtonsModes.push(buttonMode);
+										this.ervButtonsNames.push(buttonName);
+										this.ervButtonsDisplayType.push(buttonDisplayType);
+										break;
+								};
 							};
 						};
 
-						this.ervButtonsCount = this.ervButtonsStates.length;
-						for (let i = 0; i < this.ervButtonsCount; i++) {
+						this.ervButtonsConfiguredCount = this.ervButtonsStates.length;
+						for (let i = 0; i < this.ervButtonsConfiguredCount; i++) {
 							const buttonState = this.ervButtonsStates[i];
 							const buttonDisplayType = this.ervButtonsDisplayType[i];
 							const characteristicType = [Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
@@ -1455,7 +1457,7 @@ class melCloudDevice {
 						for (let i = 0; i < presetsCount; i++) {
 							//get preset
 							const preset = presets[i];
-							const presetState = (preset.Power = power && preset.VentilationMode == ventilationMode && preset.FanSpeed == setFanSpeed) ? true : false;
+							const presetState = (preset.Power = power && preset.VentilationMode === ventilationMode && preset.FanSpeed === setFanSpeed) ? true : false;
 							this.ervPresetsStates.push(presetState);
 
 							if (this.ervPresetsServices) {
@@ -1521,12 +1523,12 @@ class melCloudDevice {
 				const ataModelSupportsAuto = this.ataModelSupportsAuto;
 				const ataNumberOfFanSpeeds = this.ataNumberOfFanSpeeds;
 				const ataSwingFunction = this.ataSwingFunction;
-				const ataButtonsCount = this.ataButtonsCount;
+				const ataButtonsCount = this.ataButtonsConfiguredCount;
 				const ataPresetsCount = this.ataPresetsCount;
 
 				const ataServiceName = `${accessoryName} ${deviceTypeText}`;
 				this.ataMelCloudService = ataDisplayMode ? accessory.addService(Service.Thermostat, ataServiceName) : accessory.addService(Service.HeaterCooler, ataServiceName);
-				if (ataDisplayMode == 0) {
+				if (ataDisplayMode === 0) {
 					//Only for Heater Cooler
 					this.ataMelCloudService.getCharacteristic(Characteristic.Active)
 						.onGet(async () => {
@@ -1624,7 +1626,7 @@ class melCloudDevice {
 							this.log.error(`${deviceTypeText}: ${accessoryName}, Set target heating cooling mode error: ${error}`);
 						};
 					});
-				if (ataDisplayMode == 0) {
+				if (ataDisplayMode === 0) {
 					//Only for Heater Cooler
 					if (ataModelSupportsFanSpeed) {
 						this.ataMelCloudService.getCharacteristic(Characteristic.RotationSpeed)
@@ -1719,7 +1721,7 @@ class melCloudDevice {
 						const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Room temperature: ${value}${temperatureUnit}`);
 						return value;
 					});
-				if (ataDisplayMode == 1) {
+				if (ataDisplayMode === 1) {
 					//Only for Thermostat
 					this.ataMelCloudService.getCharacteristic(Characteristic.TargetTemperature)
 						.setProps({
@@ -1791,7 +1793,7 @@ class melCloudDevice {
 							this.log.error(`${deviceTypeText}: ${accessoryName}, Set cooling threshold temperature error: ${error}`);
 						};
 					});
-				if (ataDisplayMode == 0) {
+				if (ataDisplayMode === 0) {
 					//Only for Heater Cooler
 					this.ataMelCloudService.getCharacteristic(Characteristic.LockPhysicalControls)
 						.onGet(async () => {
@@ -1838,212 +1840,210 @@ class melCloudDevice {
 
 					for (let i = 0; i < ataButtonsCount; i++) {
 						//get button mode
-						const buttonMode = this.ataButtonsModes[i] || 'Not set in config';
+						const buttonMode = this.ataButtonsModes[i];
 
 						//get button name
-						const buttonName = this.ataButtonsNames[i] || buttonMode;
+						const buttonName = this.ataButtonsNames[i];
 
 						//get button display type
-						const buttonDisplayType = this.ataButtonsDisplayType[i] || -1;
+						const buttonDisplayType = this.ataButtonsDisplayType[i];
 
-						if (buttonDisplayType >= 0) {
-							const buttonServiceType = [Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][buttonDisplayType];
-							const characteristicType = [Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
-							const buttonService = new buttonServiceType(`${accessoryName} ${buttonName}`, `Button ${i}`);
-							buttonService.getCharacteristic(characteristicType)
-								.onGet(async () => {
-									const state = this.ataButtonsStates[i];
-									return state;
-								})
-								.onSet(async (state) => {
-									if (buttonDisplayType <= 1) {
-										try {
-											switch (buttonMode) {
-												case 0: //POWER ON,OFF
-													deviceState.Power = state;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power;
-													break;
-												case 1: //OPERATING MODE HEAT
-													deviceState.Power = true;
-													deviceState.OperationMode = 1;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
-													break;
-												case 2: //OPERATING MODE DRY
-													deviceState.Power = true;
-													deviceState.OperationMode = 2;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
-													break
-												case 3: //OPERATING MODE COOL
-													deviceState.Power = true;
-													deviceState.OperationMode = 3;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
-													break;
-												case 4: //OPERATING MODE FAN
-													deviceState.Power = true;
-													deviceState.OperationMode = 7;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
-													break;
-												case 5: //OPERATING MODE AUTO
-													deviceState.Power = true;
-													deviceState.OperationMode = 8;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
-													break;
-												case 6: //OPERATING MODE PURIFY
-													deviceState.Power = true;
-													deviceState.OperationMode = 9;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
-													break;
-												case 7: //OPERATING MODE DRY CONTROL HIDE
-													deviceState.HideDryModeControl = state;
-													break;
-												case 10: //WANE H SWING MODE AUTO
-													deviceState.Power = true;
-													deviceState.VaneHorizontal = 0;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal;
-													break;
-												case 11: //WANE H SWING MODE 1
-													deviceState.Power = true;
-													deviceState.VaneHorizontal = 1;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal;
-													break;
-												case 12: //WANE H SWING MODE 2
-													deviceState.Power = true;
-													deviceState.VaneHorizontal = 2;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal;
-													break;
-												case 13: //WANE H SWING MODE 3
-													deviceState.Power = true;
-													deviceState.VaneHorizontal = 3;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal;
-													break;
-												case 14: //WANE H SWING MODE 4
-													deviceState.Power = true;
-													deviceState.VaneHorizontal = 4;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal;
-													break;
-												case 15: //WANE H SWING MODE 5
-													deviceState.Power = true;
-													deviceState.VaneHorizontal = 5;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal;
-													break;
-												case 16: //WANE H SWING MODE SWING
-													deviceState.Power = true;
-													deviceState.VaneHorizontal = 12;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal;
-													break;
-												case 17: //VANE V SWING MODE AUTO
-													deviceState.Power = true;
-													deviceState.VaneVertical = 0;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
-													break;
-												case 20: //VANE V SWING MODE 1
-													deviceState.Power = true;
-													deviceState.VaneVertical = 1;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
-													break;
-												case 21: //VANE V SWING MODE 2
-													deviceState.Power = true;
-													deviceState.VaneVertical = 2;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
-													break;
-												case 22: //VANE V SWING MODE 3
-													deviceState.Power = true;
-													deviceState.VaneVertical = 3;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
-													break;
-												case 23: //VANE V SWING MODE 4
-													deviceState.Power = true;
-													deviceState.VaneVertical = 4;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
-													break;
-												case 24: //VANE V SWING MODE 5
-													deviceState.Power = true;
-													deviceState.VaneVertical = 5;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
-													break;
-												case 25: //VANE V SWING MODE SWING
-													deviceState.Power = true;
-													deviceState.VaneVertical = 7;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
-													break;
-												case 27: //VANE H/V CONTROLS HIDE
-													deviceState.HideVaneControls = state;
-													break;
-												case 30: //FAN SPEED MODE AUTO
-													deviceState.Power = true;
-													deviceState.SetFanSpeed = 0;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
-													break;
-												case 31: //FAN SPEED MODE 1
-													deviceState.Power = true;
-													deviceState.SetFanSpeed = 1;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
-													break;
-												case 32: //FAN SPEED MODE 2
-													deviceState.Power = true;
-													deviceState.SetFanSpeed = 2;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
-													break;
-												case 33: //FAN SPEED MODE 3
-													deviceState.Power = true;
-													deviceState.SetFanSpeed = 3;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
-													break;
-												case 34: //FAN MODE 4
-													deviceState.Power = true;
-													deviceState.SetFanSpeed = 4;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
-													break;
-												case 35: //FAN SPEED MODE 5
-													deviceState.Power = true;
-													deviceState.SetFanSpeed = 5;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
-													break;
-												case 36: //FAN SPEED MODE 6
-													deviceState.Power = true;
-													deviceState.SetFanSpeed = 6;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
-													break;
-												case 37: //FAN SPEED MODE 7
-													deviceState.Power = true;
-													deviceState.SetFanSpeed = 7;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
-													break;
-												case 38: //FAN SPEED MODE 8
-													deviceState.Power = true;
-													deviceState.SetFanSpeed = 8;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
-													break
-												case 40: //PHYSICAL LOCK CONTROLS
-													deviceState.ProhibitSetTemperature = state;
-													deviceState.ProhibitOperationMode = state;
-													deviceState.ProhibitPower = state;
-													break;
-												case 41: //PHYSICAL LOCK CONTROLS POWER
-													deviceState.ProhibitPower = state;
-													break;
-												case 42: //PHYSICAL LOCK CONTROLS MODE
-													deviceState.ProhibitOperationMode = state;
-													break;
-												case 43: //PHYSICAL LOCK CONTROLS TTEMP
-													deviceState.ProhibitSetTemperature = state;
-													break;
-												default:
-													deviceState = deviceState;
-													break;
-											};
-
-											const newState = await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState, 0);
-											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set: ${buttonName}`);
-										} catch (error) {
-											this.log.error(`${deviceTypeText}: ${accessoryName}, Set button error: ${error}`);
+						const buttonServiceType = [Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][buttonDisplayType];
+						const characteristicType = [Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
+						const buttonService = new buttonServiceType(`${accessoryName} ${buttonName}`, `Button ${i}`);
+						buttonService.getCharacteristic(characteristicType)
+							.onGet(async () => {
+								const state = this.ataButtonsStates[i];
+								return state;
+							})
+							.onSet(async (state) => {
+								if (buttonDisplayType <= 1) {
+									try {
+										switch (buttonMode) {
+											case 0: //POWER ON,OFF
+												deviceState.Power = state;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power;
+												break;
+											case 1: //OPERATING MODE HEAT
+												deviceState.Power = true;
+												deviceState.OperationMode = 1;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
+												break;
+											case 2: //OPERATING MODE DRY
+												deviceState.Power = true;
+												deviceState.OperationMode = 2;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
+												break
+											case 3: //OPERATING MODE COOL
+												deviceState.Power = true;
+												deviceState.OperationMode = 3;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
+												break;
+											case 4: //OPERATING MODE FAN
+												deviceState.Power = true;
+												deviceState.OperationMode = 7;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
+												break;
+											case 5: //OPERATING MODE AUTO
+												deviceState.Power = true;
+												deviceState.OperationMode = 8;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
+												break;
+											case 6: //OPERATING MODE PURIFY
+												deviceState.Power = true;
+												deviceState.OperationMode = 9;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
+												break;
+											case 7: //OPERATING MODE DRY CONTROL HIDE
+												deviceState.HideDryModeControl = state;
+												break;
+											case 10: //WANE H SWING MODE AUTO
+												deviceState.Power = true;
+												deviceState.VaneHorizontal = 0;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal;
+												break;
+											case 11: //WANE H SWING MODE 1
+												deviceState.Power = true;
+												deviceState.VaneHorizontal = 1;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal;
+												break;
+											case 12: //WANE H SWING MODE 2
+												deviceState.Power = true;
+												deviceState.VaneHorizontal = 2;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal;
+												break;
+											case 13: //WANE H SWING MODE 3
+												deviceState.Power = true;
+												deviceState.VaneHorizontal = 3;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal;
+												break;
+											case 14: //WANE H SWING MODE 4
+												deviceState.Power = true;
+												deviceState.VaneHorizontal = 4;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal;
+												break;
+											case 15: //WANE H SWING MODE 5
+												deviceState.Power = true;
+												deviceState.VaneHorizontal = 5;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal;
+												break;
+											case 16: //WANE H SWING MODE SWING
+												deviceState.Power = true;
+												deviceState.VaneHorizontal = 12;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal;
+												break;
+											case 17: //VANE V SWING MODE AUTO
+												deviceState.Power = true;
+												deviceState.VaneVertical = 0;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
+												break;
+											case 20: //VANE V SWING MODE 1
+												deviceState.Power = true;
+												deviceState.VaneVertical = 1;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
+												break;
+											case 21: //VANE V SWING MODE 2
+												deviceState.Power = true;
+												deviceState.VaneVertical = 2;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
+												break;
+											case 22: //VANE V SWING MODE 3
+												deviceState.Power = true;
+												deviceState.VaneVertical = 3;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
+												break;
+											case 23: //VANE V SWING MODE 4
+												deviceState.Power = true;
+												deviceState.VaneVertical = 4;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
+												break;
+											case 24: //VANE V SWING MODE 5
+												deviceState.Power = true;
+												deviceState.VaneVertical = 5;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
+												break;
+											case 25: //VANE V SWING MODE SWING
+												deviceState.Power = true;
+												deviceState.VaneVertical = 7;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
+												break;
+											case 27: //VANE H/V CONTROLS HIDE
+												deviceState.HideVaneControls = state;
+												break;
+											case 30: //FAN SPEED MODE AUTO
+												deviceState.Power = true;
+												deviceState.SetFanSpeed = 0;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
+												break;
+											case 31: //FAN SPEED MODE 1
+												deviceState.Power = true;
+												deviceState.SetFanSpeed = 1;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
+												break;
+											case 32: //FAN SPEED MODE 2
+												deviceState.Power = true;
+												deviceState.SetFanSpeed = 2;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
+												break;
+											case 33: //FAN SPEED MODE 3
+												deviceState.Power = true;
+												deviceState.SetFanSpeed = 3;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
+												break;
+											case 34: //FAN MODE 4
+												deviceState.Power = true;
+												deviceState.SetFanSpeed = 4;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
+												break;
+											case 35: //FAN SPEED MODE 5
+												deviceState.Power = true;
+												deviceState.SetFanSpeed = 5;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
+												break;
+											case 36: //FAN SPEED MODE 6
+												deviceState.Power = true;
+												deviceState.SetFanSpeed = 6;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
+												break;
+											case 37: //FAN SPEED MODE 7
+												deviceState.Power = true;
+												deviceState.SetFanSpeed = 7;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
+												break;
+											case 38: //FAN SPEED MODE 8
+												deviceState.Power = true;
+												deviceState.SetFanSpeed = 8;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
+												break
+											case 40: //PHYSICAL LOCK CONTROLS
+												deviceState.ProhibitSetTemperature = state;
+												deviceState.ProhibitOperationMode = state;
+												deviceState.ProhibitPower = state;
+												break;
+											case 41: //PHYSICAL LOCK CONTROLS POWER
+												deviceState.ProhibitPower = state;
+												break;
+											case 42: //PHYSICAL LOCK CONTROLS MODE
+												deviceState.ProhibitOperationMode = state;
+												break;
+											case 43: //PHYSICAL LOCK CONTROLS TTEMP
+												deviceState.ProhibitSetTemperature = state;
+												break;
+											default:
+												deviceState = deviceState;
+												break;
 										};
-									};
-								});
 
-							this.ataButtonsServices.push(buttonService);
-							accessory.addService(this.ataButtonsServices[i])
-						};
+										const newState = await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState, 0);
+										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set: ${buttonName}`);
+									} catch (error) {
+										this.log.error(`${deviceTypeText}: ${accessoryName}, Set button error: ${error}`);
+									};
+								};
+							});
+
+						this.ataButtonsServices.push(buttonService);
+						accessory.addService(this.ataButtonsServices[i])
 					};
 				};
 
@@ -2098,18 +2098,18 @@ class melCloudDevice {
 					this.log.debug('prepareMelCloudServiceAtw');
 					this.atwMelCloudServices = [];
 					const atwDisplayMode = this.atwDisplayMode;
-					const atwButtonsCount = this.atwButtonsCount;
+					const atwButtonsCount = this.atwButtonsConfiguredCount;
 					const atwPresetsCount = this.atwPresetsCount;
 
 					for (let i = 0; i < zonesCount; i++) {
-						const heatPump = (i == 0) ? true : false;
-						const zone1i2 = (i == 1 || i == 3) ? true : false;
-						const hotWater = (i == 2) ? true : false;
+						const heatPump = (i === 0) ? true : false;
+						const zone1i2 = (i === 1 || i === 3) ? true : false;
+						const hotWater = (i === 2) ? true : false;
 						const zoneName = [this.atwHeatPumpName, this.atwZone1Name, this.atwHotWaterName, this.atwZone2Name][i];
 
 						const atwServiceName = `${accessoryName}: ${zoneName}`;
 						const atwMelCloudService = atwDisplayMode ? new Service.Thermostat(atwServiceName, atwServiceName + i) : new Service.HeaterCooler(atwServiceName, atwServiceName + i);
-						if (atwDisplayMode == 0) {
+						if (atwDisplayMode === 0) {
 							//Only for Heater Cooler
 							atwMelCloudService.getCharacteristic(Characteristic.Active)
 								.onGet(async () => {
@@ -2165,7 +2165,7 @@ class melCloudDevice {
 								return value;
 							})
 							.onSet(async (value) => {
-								const heatPumpOperationModeHeat = (deviceState.OperationMode == 0);
+								const heatPumpOperationModeHeat = (deviceState.OperationMode === 0);
 								switch (i) {
 									case 0: //Heat Pump - HEAT, COOL
 										switch (value) {
@@ -2279,7 +2279,7 @@ class melCloudDevice {
 								const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Temperature: ${value}${temperatureUnit}`);
 								return value;
 							});
-						if (atwDisplayMode == 1) {
+						if (atwDisplayMode === 1) {
 							//Only for Thermostat
 							atwMelCloudService.getCharacteristic(Characteristic.TargetTemperature)
 								.setProps({
@@ -2396,7 +2396,7 @@ class melCloudDevice {
 									this.log.error(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Set cooling threshold temperature error: ${error}`);
 								};
 							});
-						if (atwDisplayMode == 0) {
+						if (atwDisplayMode === 0) {
 							//Only for Heater Cooler
 							atwMelCloudService.getCharacteristic(Characteristic.LockPhysicalControls)
 								.onGet(async () => {
@@ -2459,119 +2459,117 @@ class melCloudDevice {
 
 						for (let i = 0; i < atwButtonsCount; i++) {
 							//get button mode
-							const buttonMode = this.atwButtonsModes[i] || 'Not set in config';
+							const buttonMode = this.atwButtonsModes[i];
 
 							//get button name
-							const buttonName = this.atwButtonsNames[i] || buttonMode;
+							const buttonName = this.atwButtonsNames[i];
 
 							//get button display type
-							const buttonDisplayType = this.atwButtonsDisplayType[i] || -1;
+							const buttonDisplayType = this.atwButtonsDisplayType[i];
 
-							if (buttonDisplayType >= 0) {
-								const buttonServiceType = [Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][buttonDisplayType];
-								const characteristicType = [Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
-								const buttonService = new buttonServiceType(`${accessoryName} ${buttonName}`, `Button ${i}`);
-								buttonService.getCharacteristic(characteristicType)
-									.onGet(async () => {
-										const state = this.atwButtonsStates[i];
-										return state;
-									})
-									.onSet(async (state) => {
-										if (inputDisplayType <= 1) {
-											try {
-												switch (buttonMode) {
-													case 0: //ALL POWER ON,OFF
-														deviceState.Power = state;
-														deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power;
-														break;
-													case 1: //HEAT PUMP HEAT
-														deviceState.Power = true;
-														deviceState.OperationMode = 0;
-														deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationMode;
-														break;
-													case 2: //COOL
-														deviceState.Power = true;
-														deviceState.OperationMode = 1;
-														deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationMode;
-														break;
-													case 3: //HOLIDAY
-														deviceState.HolidayMode = state;
-														break;
-													case 10: //ALL ZONES PHYSICAL LOCK CONTROL
-														deviceState.ProhibitZone1 = state;
-														deviceState.ProhibitHotWater = state;
-														deviceState.ProhibitZone2 = state;
-														break;
-													case 20: //ZONE 1 ROOM
-														deviceState.Power = true;
-														deviceState.OperationModeZone1 = 0;
-														deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationModeZone1;
-														break;
-													case 21: //FLOW
-														deviceState.Power = true;
-														deviceState.OperationModeZone1 = 1;
-														deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationModeZone1;
-														break;
-													case 22: //CURVE
-														deviceState.Power = true;
-														deviceState.OperationModeZone1 = 2;
-														deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationModeZone1;
-														break;
-													case 30: //PHYSICAL LOCK CONTROL
-														deviceState.ProhibitZone1 = state;
-														break;
-													case 40: //HOT WATER AUTO
-														deviceState.Power = true;
-														deviceState.ForcedHotWaterMode = false;
-														deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.ForcedHotWaterMode;
-														break;
-													case 41: //ECO
-														deviceState.Power = true;
-														deviceState.EcoHotWater = state;
-														deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power;
-														break;
-													case 42: //HEAT FORCE
-														deviceState.Power = true;
-														deviceState.ForcedHotWaterMode = true;
-														deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.ForcedHotWaterMode;
-														break;
-													case 50: //PHYSICAL LOCK CONTROL
-														deviceState.ProhibitHotWater = state;
-														break;
-													case 60: //ZONE 2 ROOM
-														deviceState.Power = true;
-														deviceState.OperationModeZone2 = 0;
-														deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationModeZone2;
-														break;
-													case 61: //FLOW
-														deviceState.Power = true;
-														deviceState.OperationModeZone2 = 1;
-														deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationModeZone2;
-														break;
-													case 62: //CURVE
-														deviceState.Power = true;
-														deviceState.OperationModeZone2 = 2;
-														deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationModeZone2;
-														break;
-													case 70: //PHYSICAL LOCK CONTROL
-														deviceState.ProhibitZone2 = state;
-														break;
-													default:
-														deviceState = deviceState;
-														break;
-												};
-
-												const newState = await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState, 0);
-												const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set: ${buttonName}`);
-											} catch (error) {
-												this.log.error(`${deviceTypeText}: ${accessoryName}, Set button error: ${error}`);
+							const buttonServiceType = [Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][buttonDisplayType];
+							const characteristicType = [Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
+							const buttonService = new buttonServiceType(`${accessoryName} ${buttonName}`, `Button ${i}`);
+							buttonService.getCharacteristic(characteristicType)
+								.onGet(async () => {
+									const state = this.atwButtonsStates[i];
+									return state;
+								})
+								.onSet(async (state) => {
+									if (buttonDisplayType <= 1) {
+										try {
+											switch (buttonMode) {
+												case 0: //ALL POWER ON,OFF
+													deviceState.Power = state;
+													deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power;
+													break;
+												case 1: //HEAT PUMP HEAT
+													deviceState.Power = true;
+													deviceState.OperationMode = 0;
+													deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationMode;
+													break;
+												case 2: //COOL
+													deviceState.Power = true;
+													deviceState.OperationMode = 1;
+													deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationMode;
+													break;
+												case 3: //HOLIDAY
+													deviceState.HolidayMode = state;
+													break;
+												case 10: //ALL ZONES PHYSICAL LOCK CONTROL
+													deviceState.ProhibitZone1 = state;
+													deviceState.ProhibitHotWater = state;
+													deviceState.ProhibitZone2 = state;
+													break;
+												case 20: //ZONE 1 ROOM
+													deviceState.Power = true;
+													deviceState.OperationModeZone1 = 0;
+													deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationModeZone1;
+													break;
+												case 21: //FLOW
+													deviceState.Power = true;
+													deviceState.OperationModeZone1 = 1;
+													deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationModeZone1;
+													break;
+												case 22: //CURVE
+													deviceState.Power = true;
+													deviceState.OperationModeZone1 = 2;
+													deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationModeZone1;
+													break;
+												case 30: //PHYSICAL LOCK CONTROL
+													deviceState.ProhibitZone1 = state;
+													break;
+												case 40: //HOT WATER AUTO
+													deviceState.Power = true;
+													deviceState.ForcedHotWaterMode = false;
+													deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.ForcedHotWaterMode;
+													break;
+												case 41: //ECO
+													deviceState.Power = true;
+													deviceState.EcoHotWater = state;
+													deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power;
+													break;
+												case 42: //HEAT FORCE
+													deviceState.Power = true;
+													deviceState.ForcedHotWaterMode = true;
+													deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.ForcedHotWaterMode;
+													break;
+												case 50: //PHYSICAL LOCK CONTROL
+													deviceState.ProhibitHotWater = state;
+													break;
+												case 60: //ZONE 2 ROOM
+													deviceState.Power = true;
+													deviceState.OperationModeZone2 = 0;
+													deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationModeZone2;
+													break;
+												case 61: //FLOW
+													deviceState.Power = true;
+													deviceState.OperationModeZone2 = 1;
+													deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationModeZone2;
+													break;
+												case 62: //CURVE
+													deviceState.Power = true;
+													deviceState.OperationModeZone2 = 2;
+													deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationModeZone2;
+													break;
+												case 70: //PHYSICAL LOCK CONTROL
+													deviceState.ProhibitZone2 = state;
+													break;
+												default:
+													deviceState = deviceState;
+													break;
 											};
-										};
-									});
 
-								this.atwButtonsServices.push(buttonService);
-								accessory.addService(this.atwButtonsServices[i])
-							};
+											const newState = await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState, 0);
+											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set: ${buttonName}`);
+										} catch (error) {
+											this.log.error(`${deviceTypeText}: ${accessoryName}, Set button error: ${error}`);
+										};
+									};
+								});
+
+							this.atwButtonsServices.push(buttonService);
+							accessory.addService(this.atwButtonsServices[i])
 						};
 					};
 
@@ -2636,12 +2634,12 @@ class melCloudDevice {
 				const ervHasAutoVentilationMode = this.ervHasAutoVentilationMode;
 				const ervHasAutomaticFanSpeed = this.ervHasAutomaticFanSpeed;
 				const ervNumberOfFanSpeeds = this.ervNumberOfFanSpeeds
-				const ervButtonsCount = this.ervButtonsCount;
+				const ervButtonsCount = this.ervButtonsConfiguredCount;
 				const ervPresetsCount = this.ervPresetsCount;
 
 				const ervServiceName = `${accessoryName} ${deviceTypeText}`;
 				this.ervMelCloudService = ervDisplayMode ? accessory.addService(Service.Thermostat, ervServiceName) : accessory.addService(Service.HeaterCooler, ervServiceName);
-				if (ervDisplayMode == 0) {
+				if (ervDisplayMode === 0) {
 					//Only for Heater Cooler
 					this.ervMelCloudService.getCharacteristic(Characteristic.Active)
 						.onGet(async () => {
@@ -2739,7 +2737,7 @@ class melCloudDevice {
 							this.log.error(`${deviceTypeText}: ${accessoryName}, Set target ventilation mode error: ${error}`);
 						};
 					});
-				if (ervDisplayMode == 0) {
+				if (ervDisplayMode === 0) {
 					//Only for Heater Cooler
 					this.ervMelCloudService.getCharacteristic(Characteristic.RotationSpeed)
 						.setProps({
@@ -2807,7 +2805,7 @@ class melCloudDevice {
 						const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Room temperature: ${value}${temperatureUnit}`);
 						return value;
 					});
-				if (ervDisplayMode == 1) {
+				if (ervDisplayMode === 1) {
 					//Only for Thermostat
 					this.ervMelCloudService.getCharacteristic(Characteristic.TargetTemperature)
 						.setProps({
@@ -2876,7 +2874,7 @@ class melCloudDevice {
 							this.log.error(`${deviceTypeText}: ${accessoryName}, Set cooling threshold temperature error: ${error}`);
 						};
 					});
-				if (ervDisplayMode == 0) {
+				if (ervDisplayMode === 0) {
 					//Only for Heater Cooler
 					this.ervMelCloudService.getCharacteristic(Characteristic.LockPhysicalControls)
 						.onGet(async () => {
@@ -2923,121 +2921,119 @@ class melCloudDevice {
 
 					for (let i = 0; i < ervButtonsCount; i++) {
 						//get button mode
-						const buttonMode = this.ervButtonsModes[i] || 'Not set in config';
+						const buttonMode = this.ervButtonsModes[i];
 
 						//get button name
-						const buttonName = this.ervButtonsNames[i] || buttonMode;
+						const buttonName = this.ervButtonsNames[i];
 
 						//get button display type
-						const buttonDisplayType = this.ervButtonsDisplayType[i] || -1;
+						const buttonDisplayType = this.ervButtonsDisplayType[i];
 
-						if (buttonDisplayType >= 0) {
-							const buttonServiceType = [Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][buttonDisplayType];
-							const characteristicType = [Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
-							const buttonService = new buttonServiceType(`${accessoryName} ${buttonName}`, `Button ${i}`);
-							buttonService.getCharacteristic(characteristicType)
-								.onGet(async () => {
-									const state = this.ervButtonsStates[i];
-									return state;
-								})
-								.onSet(async (state) => {
-									if (inputDisplayType <= 1) {
-										try {
-											switch (buttonMode) {
-												case 0: //POWER ON,OFF
-													deviceState.Power = state;
-													deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power;
-													break;
-												case 1: //OPERATING MODE RECOVERY
-													deviceState.Power = true;
-													deviceState.OperationMode = 0;
-													deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.VentilationMode;
-													break;
-												case 2: //OPERATING MODE BYPAS
-													deviceState.Power = true;
-													deviceState.OperationMode = 1;
-													deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.VentilationMode;
-													break
-												case 3: //OPERATING MODE AUTO
-													deviceState.Power = true;
-													deviceState.OperationMode = 2;
-													deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.VentilationMode;
-													break;
-												case 4: //NIGHT PURGE MODE
-													deviceState.NightPurgeMode = state;
-													break;
-												case 10: //FAN SPEED MODE AUTO
-													deviceState.Power = true;
-													deviceState.SetFanSpeed = 0;
-													deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
-													break;
-												case 11: //FAN SPEED MODE 1
-													deviceState.Power = true;
-													deviceState.SetFanSpeed = 1;
-													deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
-													break;
-												case 12: //FAN SPEED MODE 2
-													deviceState.Power = true;
-													deviceState.SetFanSpeed = 2;
-													deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
-													break;
-												case 13: //FAN SPEED MODE 3
-													deviceState.Power = true;
-													deviceState.SetFanSpeed = 3;
-													deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
-													break;
-												case 14: //FAN MODE 4
-													deviceState.Power = true;
-													deviceState.SetFanSpeed = 4;
-													deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
-													break;
-												case 15: //FAN SPEED MODE 5
-													deviceState.Power = true;
-													deviceState.SetFanSpeed = 5;
-													deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
-													break;
-												case 16: //FAN SPEED MODE 6
-													deviceState.Power = true;
-													deviceState.SetFanSpeed = 6;
-													deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
-													break;
-												case 17: //FAN SPEED MODE 7
-													deviceState.Power = true;
-													deviceState.SetFanSpeed = 7;
-													deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
-													break;
-												case 18: //FAN SPEED MODE 8
-													deviceState.Power = true;
-													deviceState.SetFanSpeed = 8;
-													deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
-													break;
-												case 20: //PHYSICAL LOCK CONTROLS
-													deviceState = deviceState;
-													break;
-												case 21: //ROOM TEMP HIDE
-													deviceState.HideRoomTemperature = state;
-													break;
-												case 22: //SUPPLY TEMP HIDE
-													deviceState.HideSupplyTemperature = state;
-													break;
-												case 23: //OUTDOOR EMP HIDE
-													deviceState.hideOutdoorTemperature = state;
-													break;
-												default:
-													deviceState = deviceState;
-													break;
-											};
-											const newState = await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState, 0);
-											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set: ${buttonName}`);
-										} catch (error) {
-											this.log.error(`${deviceTypeText}: ${accessoryName}, Set button error: ${error}`);
+						const buttonServiceType = [Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][buttonDisplayType];
+						const characteristicType = [Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
+						const buttonService = new buttonServiceType(`${accessoryName} ${buttonName}`, `Button ${i}`);
+						buttonService.getCharacteristic(characteristicType)
+							.onGet(async () => {
+								const state = this.ervButtonsStates[i];
+								return state;
+							})
+							.onSet(async (state) => {
+								if (buttonDisplayType <= 1) {
+									try {
+										switch (buttonMode) {
+											case 0: //POWER ON,OFF
+												deviceState.Power = state;
+												deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power;
+												break;
+											case 1: //OPERATING MODE RECOVERY
+												deviceState.Power = true;
+												deviceState.OperationMode = 0;
+												deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.VentilationMode;
+												break;
+											case 2: //OPERATING MODE BYPAS
+												deviceState.Power = true;
+												deviceState.OperationMode = 1;
+												deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.VentilationMode;
+												break
+											case 3: //OPERATING MODE AUTO
+												deviceState.Power = true;
+												deviceState.OperationMode = 2;
+												deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.VentilationMode;
+												break;
+											case 4: //NIGHT PURGE MODE
+												deviceState.NightPurgeMode = state;
+												break;
+											case 10: //FAN SPEED MODE AUTO
+												deviceState.Power = true;
+												deviceState.SetFanSpeed = 0;
+												deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
+												break;
+											case 11: //FAN SPEED MODE 1
+												deviceState.Power = true;
+												deviceState.SetFanSpeed = 1;
+												deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
+												break;
+											case 12: //FAN SPEED MODE 2
+												deviceState.Power = true;
+												deviceState.SetFanSpeed = 2;
+												deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
+												break;
+											case 13: //FAN SPEED MODE 3
+												deviceState.Power = true;
+												deviceState.SetFanSpeed = 3;
+												deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
+												break;
+											case 14: //FAN MODE 4
+												deviceState.Power = true;
+												deviceState.SetFanSpeed = 4;
+												deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
+												break;
+											case 15: //FAN SPEED MODE 5
+												deviceState.Power = true;
+												deviceState.SetFanSpeed = 5;
+												deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
+												break;
+											case 16: //FAN SPEED MODE 6
+												deviceState.Power = true;
+												deviceState.SetFanSpeed = 6;
+												deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
+												break;
+											case 17: //FAN SPEED MODE 7
+												deviceState.Power = true;
+												deviceState.SetFanSpeed = 7;
+												deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
+												break;
+											case 18: //FAN SPEED MODE 8
+												deviceState.Power = true;
+												deviceState.SetFanSpeed = 8;
+												deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
+												break;
+											case 20: //PHYSICAL LOCK CONTROLS
+												deviceState = deviceState;
+												break;
+											case 21: //ROOM TEMP HIDE
+												deviceState.HideRoomTemperature = state;
+												break;
+											case 22: //SUPPLY TEMP HIDE
+												deviceState.HideSupplyTemperature = state;
+												break;
+											case 23: //OUTDOOR EMP HIDE
+												deviceState.hideOutdoorTemperature = state;
+												break;
+											default:
+												deviceState = deviceState;
+												break;
 										};
+										const newState = await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState, 0);
+										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set: ${buttonName}`);
+									} catch (error) {
+										this.log.error(`${deviceTypeText}: ${accessoryName}, Set button error: ${error}`);
 									};
-								});
+								};
+							});
 
-							this.ervButtonsServices.push(buttonService);
-							accessory.addService(this.ervButtonsServices[i]);
-						};
+						this.ervButtonsServices.push(buttonService);
+						accessory.addService(this.ervButtonsServices[i]);
 					};
 				};
 
