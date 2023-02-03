@@ -34,7 +34,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * Support identify all states of device creating *Sensors* and lather use with automations (appiled for all devices of same type in account).
 
 * Main control mode, *Heater/Cooler*, *Thermostat*.
-* Controls of Air Conditioner:
+* Air Conditioner:
   * Heater Cooler:
     * Power *ON/OFF*.
     * Operating mode *AUTO/HEAT/COOL/POWER OFF*.
@@ -64,7 +64,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Identify vane V mode *AUTO/1/2/3/4/5/SWING*.
       * Identify fan speed mode *AUTO/1/2/3/4/5/*.
       * Identify device presets. 
-* Control of Heat Pump:
+* Heat Pump:
   * Heater Cooler:
     * Heat Pump:
       * Power *ON/OFF*.
@@ -102,7 +102,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Identify operating mode *HEAT/COOL/CURVE/HOLIDAY/AUTO HOT WATER/ECO HOT WATER/FORCE HOT WATER*.
       * Identify physical lock controls *LOCK/UNLOCK* Zone 1, 2 und Hot Water.
       * Identify device presets. 
-* Control of Energy Recovery Ventilation:
+* Energy Recovery Ventilation:
   * Heater Cooler:
     * Power *ON/OFF*.
     * Operating mode *AUTO/HEAT/COOL/POWER OFF* (AUTO, RECOVERY, BYPAS, POWER OFF).
