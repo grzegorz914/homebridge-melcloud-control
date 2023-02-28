@@ -317,11 +317,11 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                 for (const unit of units) {
                     const unitId = unit.ID;
                     const unitDevice = unit.Device;
-                    const unitSerialNumber = unit.SerialNumber !== null ? (unit.SerialNumber.length > 1 ? unit.SerialNumber.toString() : 'Serial to short') : 'Undefined';
-                    const unitModelNumber = unit.ModelNumber;
-                    const unitModel = unit.Model !== null ? unit.Model.toString() : 'Undefined';
+                    const unitSerialNumber = unit.SerialNumber.toString() || 'unknown';
+                    const unitModelNumber = unit.ModelNumber || 'unknown';
+                    const unitModel = unit.Model.toString() || 'unknown';
                     const unitType = unit.UnitType;
-                    const unitIsIndoor = (unit.IsIndoor === true);
+                    const unitIsIndoor = unit.IsIndoor || false;
 
                     const pushSerial = unitIsIndoor ? serialsNumberIndoor.push(unitSerialNumber) : serialsNumberOutdoor.push(unitSerialNumber);
                     const pushModelNumber = unitIsIndoor ? modelsNumberIndoor.push(unitModelNumber) : modelsNumberOutdoor.push(unitModelNumber);
