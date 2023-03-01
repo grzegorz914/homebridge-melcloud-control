@@ -242,10 +242,10 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 for (const unit of units) {
                     const unitId = unit.ID;
                     const unitDevice = unit.Device;
-                    const unitSerialNumber = unit.SerialNumber.toString() || 'unknown';
-                    const unitModelNumber = unit.ModelNumber || 'unknown';
-                    const unitModel = unit.Model.toString() || 'unknown';
-                    const unitType = unit.UnitType;
+                    const unitSerialNumber = unit.SerialNumber && unit.SerialNumber !== null ? unit.SerialNumber.toString() : 'unknown';
+                    const unitModelNumber = unit.ModelNumber && unit.ModelNumber !== null ? unit.ModelNumber : 'unknown';
+                    const unitModel = unit.Model && unit.Model !== null ? unit.Model.toString() : 'unknown';
+                    const unitType = unit.UnitType && unit.UnitType !== null ? unit.UnitType : 'unknown';
                     const unitIsIndoor = unit.IsIndoor || false;
 
                     const pushSerial = unitIsIndoor ? serialsNumberIndoor.push(unitSerialNumber) : serialsNumberOutdoor.push(unitSerialNumber);
