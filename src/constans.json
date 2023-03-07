@@ -109,7 +109,7 @@
         ],
         "EffectiveFlags": {
             "Power": 1,
-            "OperationMode": 4,
+            "OperationMode": 2,
             "OperationModeZone1": 8,
             "OperationModeZone2": 16,
             "ForcedHotWaterMode": 65536,
