@@ -9,10 +9,7 @@ const CONSTANS = require('./constans.json');
 class MELCLOUDDEVICEATW extends EventEmitter {
     constructor(config) {
         super();
-        const accountName = config.name;
-        //const deviceInfo = config.deviceInfo;
-        const deviceName = config.deviceName;
-        const deviceTypeText = config.deviceTypeText;
+        const accountName = config.accountName;
         const contextKey = config.contextKey;
         const buildingId = config.buildingId;
         const deviceId = config.deviceId;
@@ -24,7 +21,7 @@ class MELCLOUDDEVICEATW extends EventEmitter {
         this.axiosInstanceGet = axios.create({
             method: 'GET',
             baseURL: CONSTANS.ApiUrls.BaseURL,
-            timeout: 10000,
+            timeout: 15000,
             headers: {
                 'X-MitsContextKey': contextKey,
             }
@@ -32,7 +29,7 @@ class MELCLOUDDEVICEATW extends EventEmitter {
         this.axiosInstancePost = axios.create({
             method: 'POST',
             baseURL: CONSTANS.ApiUrls.BaseURL,
-            timeout: 10000,
+            timeout: 15000,
             headers: {
                 'X-MitsContextKey': contextKey,
                 'content-type': 'application/json'
@@ -41,15 +38,15 @@ class MELCLOUDDEVICEATW extends EventEmitter {
 
         //store variable to compare
         this.unitStatus = 0;
-        this.outdoorTemperature = 0;
-        this.power = false;
         this.holidayMode = false;
         this.forcedHotWaterMode = false;
+        this.operationMode = 0;
         this.ecoHotWater = false;
+        this.outdoorTemperature = 0;
         this.tankWaterTemperature = 0;
         this.setTankWaterTemperature = 0;
         this.prohibitHotWater = false;
-        this.operationMode = 0;
+        this.power = false;
         this.operationModeZone1 = 0;
         this.roomTemperatureZone1 = 0;
         this.setTemperatureZone1 = 0;
@@ -69,7 +66,7 @@ class MELCLOUDDEVICEATW extends EventEmitter {
             try {
                 const readDeviceInfoData = await fsPromises.readFile(melCloudBuildingDeviceFile);
                 const deviceInfo = JSON.parse(readDeviceInfoData);
-                const debug = debugLog ? this.emit('debug', `${deviceTypeText} ${deviceName}, debug Info: ${JSON.stringify(deviceInfo, null, 2)}`) : false;
+                const debug = debugLog ? this.emit('debug', `debug Info: ${JSON.stringify(deviceInfo, null, 2)}`) : false;
 
                 //deviceInfo
                 //const deviceID = deviceInfo.DeviceID;
@@ -319,7 +316,7 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                     const unitDevice = unit.Device;
                     const unitSerialNumber = unit.SerialNumber && unit.SerialNumber !== null ? unit.SerialNumber.toString() : 'unknown';
                     const unitModelNumber = unit.ModelNumber && unit.ModelNumber !== null ? unit.ModelNumber : 'unknown';
-                    const unitModel = unit.Model && unit.Model !== null ? unit.Model.toString() : 'unknown';
+                    const unitModel = unit.Model && unit.Model !== null ? unit.Model : 'unknown';
                     const unitType = unit.UnitType && unit.UnitType !== null ? unit.UnitType : 'unknown';
                     const unitIsIndoor = unit.IsIndoor || false;
 
@@ -357,22 +354,26 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                 const canSetFlowTemperature = deviceInfo.Permissions.CanSetFlowTemperature;
                 const canSetTemperatureIncrementOverride = deviceInfo.Permissions.CanSetTemperatureIncrementOverride;
 
-                const zonesCount = 4;
-                this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, deviceFirmwareAppVersion, devicePresets, devicePresetsCount, zonesCount, deviceHasHotWaterTank, deviceHasZone2, zone1Name, zone2Name);
+                const hotWater = deviceHasHotWaterTank ? 1 : 0;
+                const zone2 = deviceHasZone2 ? 1 : 0;
+                const zonesCount = 2 + hotWater + zone2;
+                this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, deviceFirmwareAppVersion, devicePresets, devicePresetsCount, zonesCount, deviceHasHotWaterTank, deviceHasZone2, zone1Name, zone2Name, deviceCanHeat, deviceCanCool);
+                const mqtt = mqttEnabled ? this.emit('mqtt', `Info`, JSON.stringify(deviceInfo, null, 2)) : false;
+
+                //check device state
+                await new Promise(resolve => setTimeout(resolve, 2000));
                 this.emit('checkDeviceState');
-                const mqtt = mqttEnabled ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, Info`, JSON.stringify(deviceInfo, null, 2)) : false;
             } catch (error) {
-                this.emit('error', `${deviceTypeText} ${deviceName}, check info, ${error}, check again in 60s.`);
+                this.emit('error', `check info, ${error}, check again in 60s.`);
                 this.checkDeviceInfo();
             };
         }).on('checkDeviceState', async () => {
-            //deviceState
             try {
                 const deviceUrl = CONSTANS.ApiUrls.DeviceState.replace("DID", deviceId).replace("BID", buildingId);
                 const responseData = await this.axiosInstanceGet(deviceUrl);
                 const deviceState = responseData.data;
                 const deviceStateData = JSON.stringify(deviceState, null, 2);
-                const debug = debugLog ? this.emit('debug', `${deviceTypeText} ${deviceName}, debug State: ${deviceStateData}`) : false;
+                const debug = debugLog ? this.emit('debug', `debug State: ${deviceStateData}`) : false;
 
                 // device state
                 const effectiveFlags = deviceState.EffectiveFlags;
@@ -450,15 +451,15 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                 }
 
                 this.unitStatus = unitStatus;
-                this.outdoorTemperature = outdoorTemperature;
-                this.power = power;
                 this.holidayMode = holidayMode;
                 this.forcedHotWaterMode = forcedHotWaterMode;
+                this.operationMode = operationMode;
                 this.ecoHotWater = ecoHotWater;
+                this.outdoorTemperature = outdoorTemperature;
                 this.tankWaterTemperature = tankWaterTemperature;
                 this.setTankWaterTemperature = setTankWaterTemperature;
                 this.prohibitHotWater = prohibitHotWater;
-                this.operationMode = operationMode;
+                this.power = power;
                 this.operationModeZone1 = operationModeZone1;
                 this.roomTemperatureZone1 = roomTemperatureZone1;
                 this.setTemperatureZone1 = setTemperatureZone1;
@@ -475,11 +476,11 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                 this.idleZone2 = idleZone2;
 
                 this.emit('deviceState', deviceState, unitStatus, outdoorTemperature, power, operationMode, holidayMode, operationModeZone1, roomTemperatureZone1, setTemperatureZone1, setHeatFlowTemperatureZone1, setCoolFlowTemperatureZone1, prohibitZone1, idleZone1, forcedHotWaterMode, ecoHotWater, tankWaterTemperature, setTankWaterTemperature, prohibitHotWater, operationModeZone2, roomTemperatureZone2, setTemperatureZone2, setHeatFlowTemperatureZone2, setCoolFlowTemperatureZone2, prohibitZone2, idleZone2);
-                const mqtt = mqttEnabled ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, State`, JSON.stringify(deviceState, null, 2)) : false;
+                const mqtt = mqttEnabled ? this.emit('mqtt', `State`, JSON.stringify(deviceState, null, 2)) : false;
 
                 this.checkDeviceInfo();
             } catch (error) {
-                this.emit('error', `${deviceTypeText} ${deviceName}, check state error, ${error}, check again in 60s.`);
+                this.emit('error', `check state error, ${error}, check again in 60s.`);
                 this.checkDeviceInfo();
             };
         });
@@ -497,14 +498,16 @@ class MELCLOUDDEVICEATW extends EventEmitter {
             if (type === 0) {
                 newData.HasPendingCommand = true;
             };
-            const options = {
-                data: newData
-            };
 
             try {
+                const options = {
+                    data: newData
+                };
+
                 await this.axiosInstancePost(url, options);
                 this.emit('checkDeviceInfo');
-                resolve(true);
+                await new Promise(resolve => setTimeout(resolve, 3000));
+                resolve();
             } catch (error) {
                 reject(error);
             };

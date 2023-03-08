@@ -9,10 +9,7 @@ const CONSTANS = require('./constans.json');
 class MELCLOUDDEVICEERV extends EventEmitter {
     constructor(config) {
         super();
-        const accountName = config.name;
-        //const deviceInfo = config.deviceInfo;
-        const deviceName = config.deviceName;
-        const deviceTypeText = config.deviceTypeText;
+        const accountName = config.accountName;
         const contextKey = config.contextKey;
         const buildingId = config.buildingId;
         const deviceId = config.deviceId;
@@ -24,7 +21,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
         this.axiosInstanceGet = axios.create({
             method: 'GET',
             baseURL: CONSTANS.ApiUrls.BaseURL,
-            timeout: 10000,
+            timeout: 15000,
             headers: {
                 'X-MitsContextKey': contextKey,
             }
@@ -32,7 +29,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
         this.axiosInstancePost = axios.create({
             method: 'POST',
             baseURL: CONSTANS.ApiUrls.BaseURL,
-            timeout: 10000,
+            timeout: 15000,
             headers: {
                 'X-MitsContextKey': contextKey,
                 'content-type': 'application/json'
@@ -59,7 +56,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
             try {
                 const readDeviceInfoData = await fsPromises.readFile(melCloudBuildingDeviceFile);
                 const deviceInfo = JSON.parse(readDeviceInfoData);
-                const debug = debugLog ? this.emit('debug', `${deviceTypeText} ${deviceName}, debug Info: ${JSON.stringify(deviceInfo, null, 2)}`) : false;
+                const debug = debugLog ? this.emit('debug', `debug Info: ${JSON.stringify(deviceInfo, null, 2)}`) : false;
 
                 //deviceInfo
                 //const deviceID = deviceInfo.DeviceID;
@@ -268,20 +265,22 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const CanDisableLocalController = deviceInfo.Permissions.CanDisableLocalController;
 
                 this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, deviceFirmwareAppVersion, devicePresets, devicePresetsCount, deviceHasAutoVentilationMode, deviceHasBypassVentilationMode, deviceHasAutomaticFanSpeed, deviceNumberOfFanSpeeds);
+                const mqtt = mqttEnabled ? this.emit('mqtt', `Info`, JSON.stringify(deviceInfo, null, 2)) : false;
+
+                //check device state
+                await new Promise(resolve => setTimeout(resolve, 2000));
                 this.emit('checkDeviceState');
-                const mqtt = mqttEnabled ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, Info`, JSON.stringify(deviceInfo, null, 2)) : false;
             } catch (error) {
-                this.emit('error', `${deviceTypeText} ${deviceName}, check info, ${error}, check again in 60s.`);
+                this.emit('error', `check info, ${error}, check again in 60s.`);
                 this.checkDeviceInfo();
             };
         }).on('checkDeviceState', async () => {
-            //deviceState
             try {
                 const deviceUrl = CONSTANS.ApiUrls.DeviceState.replace("DID", deviceId).replace("BID", buildingId);
                 const responseData = await this.axiosInstanceGet(deviceUrl);
                 const deviceState = responseData.data;
                 const deviceStateData = JSON.stringify(deviceState, null, 2);
-                const debug = debugLog ? this.emit('debug', `${deviceTypeText} ${deviceName}, debug State: ${deviceStateData}`) : false;
+                const debug = debugLog ? this.emit('debug', `debug State: ${deviceStateData}`) : false;
 
                 // device ata state
                 const effectiveFlags = deviceState.EffectiveFlags;
@@ -355,11 +354,11 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 this.hideOutdoorTemperature = hideOutdoorTemperature;
 
                 this.emit('deviceState', deviceState, power, roomTemperature, supplyTemperature, outdoorTemperature, nightPurgeMode, roomCO2Level, setTemperature, setFanSpeed, operationMode, ventilationMode, actualVentilationMode, hideRoomTemperature, hideSupplyTemperature, hideOutdoorTemperature);
-                const mqtt = mqttEnabled ? this.emit('mqtt', `${deviceTypeText} ${deviceName}, State`, JSON.stringify(deviceState, null, 2)) : false;
+                const mqtt = mqttEnabled ? this.emit('mqtt', `State`, JSON.stringify(deviceState, null, 2)) : false;
 
                 this.checkDeviceInfo();
             } catch (error) {
-                this.emit('error', `${deviceTypeText} ${deviceName}, check state error, ${error}, check again in 60s.`);
+                this.emit('error', `check state error, ${error}, check again in 60s.`);
                 this.checkDeviceInfo();
             };
         });
@@ -377,14 +376,16 @@ class MELCLOUDDEVICEERV extends EventEmitter {
             if (type === 0) {
                 newData.HasPendingCommand = true;
             };
-            const options = {
-                data: newData
-            };
 
             try {
+                const options = {
+                    data: newData
+                };
+
                 await this.axiosInstancePost(url, options);
                 this.emit('checkDeviceInfo');
-                resolve(true);
+                await new Promise(resolve => setTimeout(resolve, 3000));
+                resolve();
             } catch (error) {
                 reject(error);
             };

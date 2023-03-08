@@ -71,7 +71,18 @@
         }
     },
     "HeatPump": {
-        "Status": [
+        "ZoneName": [
+            "Heat Pump",
+            "Zone 1",
+            "Hot Water",
+            "Zone 2"
+        ],
+        "UnitStatus": [
+            "HEAT",
+            "COOL",
+            "HEAT PUMP OFF"
+        ],
+        "OperationMode": [
             "IDLE",
             "HEAT WATER",
             "HEAT ZONES",
@@ -80,36 +91,21 @@
             "STANDBY",
             "LEGIONELLA"
         ],
-        "OperationMode": [
-            "HEAT",
-            "COOL"
-        ],
         "ZoneOperation": [
             "HEAT THERMOSTAT",
-            "COOL THERMOSTAT",
-            "CURVE",
             "HEAT FLOW",
-            "COOL FLOW",
-            "HEAT PUMP OFF"
+            "CURVE",
+            "COOL THERMOSTAT",
+            "COOL FLOW"
         ],
-        "ZoneStatus": [
-            "HEAT",
-            "IDLE",
-            "COOL"
-        ],
-        "ZoneName": [
-            "Heat Pump",
-            "Zone 1",
-            "Hot Water",
-            "Zone 2"
-        ],
-        "OperationHotWater": [
+        "HotWaterOperation": [
             "AUTO",
             "HEAT NOW"
         ],
         "EffectiveFlags": {
             "Power": 1,
             "OperationMode": 2,
+            "SetTemperature": 4,
             "OperationModeZone1": 8,
             "OperationModeZone2": 16,
             "ForcedHotWaterMode": 65536,

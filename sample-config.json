@@ -53,14 +53,14 @@
           "disableLogInfo": false,
           "disableLogDeviceInfo": false,
           "enableDebugMode": false,
+          "mqttDebug": false,
           "enableMqtt": false,
           "mqttHost": "192.168.1.33",
           "mqttPort": 1883,
           "mqttPrefix": "home/My House",
           "mqttAuth": false,
           "mqttUser": "user",
-          "mqttPass": "password",
-          "mqttDebug": false
+          "mqttPass": "password"
         }
       ]
     }

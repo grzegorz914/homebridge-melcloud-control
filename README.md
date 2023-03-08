@@ -27,11 +27,12 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * All devices are detected automatically.
 * Support multiple MELCloud accounts, buildings, flors, areas.
 * Support temperature display units *Celsius/Fahrenheit*.
-* Support control device *Presets*.
+* Support control device `Presets`.
 * Support automations, shortcuts and siri.
-* Support MQTT protocol, publisch topic *Info*, *State* as payload JSON data.
-* Support direct device controll creating extra *Buttons* (appiled for all devices of same type in account).
-* Support identify all states of device creating *Sensors* and lather use with automations (appiled for all devices of same type in account).
+* Support direct device controll creating extra `Buttons` (appiled for all devices of same type in account).
+* Support identify all states of device creating `Sensors` and lather use with automations (appiled for all devices of same type in account).
+* MQTT:
+  *  publisch topic *Info*, *State* as payload JSON data.
 
 * Main control mode, *Heater/Cooler*, *Thermostat*.
 * Air Conditioner:
@@ -68,28 +69,30 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
   * Heater Cooler:
     * Heat Pump:
       * Power *ON/OFF*.
-      * Operating mode *HEAT/COOL/POWER OFF* (HEAT, COOL, HEAT PUMP OFF).
-      * Display outdoor temperature.
+      * Operating mode *HEAT/COOL*.
+      * Outdoor temperature *GET*.
       * Lock physical controls all Zones and Hot Water *LOCK/UNLOCK*.
     * Zone 1 and 2:
-      * Operating mode *AUTO/HEAT/COOL* (CURVE, ROOM, FLOW).
-      * Heating/Cooling temperature zone 1 an 2.
+      * Operating Mode Heat *AUTO/HEAT/COOL* - *CURVE / HEAT THERMOSTAT / HEAT FLOW*.
+      * Operating Mode Cool *HEAT/COOL* - *COOL THERMOSTAT / COOL FLOW*.
+      * Heating/Cooling *SET/GET* temperature zone 1 and 2.
       * Lock physical controls *LOCK/UNLOCK*.
     * Hot Water Tank:
-      * Operating mode *AUTO/HEAT* (AUTO, HEAT NOW).
-      * Water temperature.
+      * Operating mode *AUTO/HEAT* - *AUTO/HEAT NOW*.
+      * Water temperature *SET/GET*.
       * Lock physical controls *LOCK/UNLOCK*.
   * Thermostat:
     * Heat Pump:
       * Power *ON/OFF*.
-      * Operating mode *OFF/HEAT/COOL* (HEAT PUMP OFF, HEAT, COOL).
-      * Display outdoor temperature.
+      * Operating mode *HEAT/COOL*.
+      * Outdoor temperature *GET*.
     * Zone 1 and 2:
-      * Operating mode *HEAT/COOL/AUTO* (ROOM, FLOW, CURVE).
-      * Heating/Cooling temperature zone 1 an 2.
+      * Operating Mode Heat *HEAT/COOL/AUTO* - *HEAT THERMOSTAT / HEAT FLOW / CURVE*.
+      * Operating Mode Cool *HEAT/COOL* - *COOL THERMOSTAT / COOL FLOW*.
+      * Heating/Cooling *SET/GET* temperature zone 1 and 2.
     * Hot Water Tank:
-      * Operating mode *HEAT/AUTO* (HEAT NOW, AUTO).
-      * Water temperature.
+      * Operating mode *HEAT/AUTO* - *HEAT NOW, AUTO*.
+      * Water temperature *SET/GET*.
   * Buttons:
     * Use to direct control device.  
       * Power *ON/OFF*.
@@ -168,13 +171,13 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `disableLogInfo` | This disable display log values and states on every it change. |
 | `disableLogDeviceInfo` | This disable display log device info on plugin start. |
 | `enableMqtt` | This enabled MQTT Broker and publish to it all awailable data. |
+| `mqttDebug` | This enabled deep log in homebridge console for MQTT. |
 | `mqttHost` | Here set the *IP Address* or *Hostname* for MQTT Broker. |
 | `mqttPort` | Here set the *Port* for MQTT Broker, default 1883. |
 | `mqttPrefix` | Here set the *Prefix* for *Topic* or leave empty. |
 | `mqttAuth` | This enabled MQTT Broker authorization credentials. |
 | `mqttUser` | Here set the MQTT Broker user. |
 | `mqttPasswd` | Here set the MQTT Broker password. |
-| `mqttDebug` | This enabled deep log in homebridge console for MQTT. |
 | `Display Type Buttons` | -1 - `None`, 0 - `Outlet`, 1 - `Switch`, 2 - `Motion Sensor`, 3 - `Occupancy Sensor`, 4 - `Contact Sensor`.|
 
 ```json
@@ -211,13 +214,13 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
                     "disableLogDeviceInfo": false,
                     "enableDebugMode": false,
                     "enableMqtt": false,
+                    "mqttDebug": false,
                     "mqttHost": "192.168.1.33",
                     "mqttPort": 1883,
                     "mqttPrefix": "home/My House",
                     "mqttAuth": false,
                     "mqttUser": "user",
                     "mqttPass": "password",
-                    "mqttDebug": false,
                 }
             ]
         }

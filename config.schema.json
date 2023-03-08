@@ -476,7 +476,7 @@
                     "type": "integer",
                     "oneOf": [
                       {
-                        "title": "None",
+                        "title": "None/Disabled",
                         "enum": [
                           -1
                         ]
@@ -678,7 +678,7 @@
                     "type": "integer",
                     "oneOf": [
                       {
-                        "title": "None",
+                        "title": "None/Disabled",
                         "enum": [
                           -1
                         ]
@@ -886,7 +886,7 @@
                     "type": "integer",
                     "oneOf": [
                       {
-                        "title": "None",
+                        "title": "None/Disabled",
                         "enum": [
                           -1
                         ]
@@ -956,6 +956,16 @@
               "required": false,
               "description": "This enable MQTT client."
             },
+            "mqttDebug": {
+              "title": "Debug",
+              "type": "boolean",
+              "default": false,
+              "required": false,
+              "description": "This enable debug mode for MQTT.",
+              "condition": {
+                "functionBody": "return model.devices[arrayIndices].enableMqtt === true;"
+              }
+            },
             "mqttHost": {
               "title": "IP/Hostname",
               "type": "string",
@@ -1016,16 +1026,6 @@
               "condition": {
                 "functionBody": "return model.accounts[arrayIndices].enableMqtt === true && model.accounts[arrayIndices].mqttAuth === true;"
               }
-            },
-            "mqttDebug": {
-              "title": "Debug",
-              "type": "boolean",
-              "default": false,
-              "required": false,
-              "description": "This enable debug mode for MQTT.",
-              "condition": {
-                "functionBody": "return model.accounts[arrayIndices].enableMqtt === true;"
-              }
             }
           }
         }
@@ -1036,7 +1036,7 @@
     {
       "key": "accounts",
       "type": "tabarray",
-      "title": "{{ value.name || 'new account' }}",
+      "title": "{{ value.name || 'account' }}",
       "items": [
         "accounts[].name",
         "accounts[].user",
@@ -1054,7 +1054,7 @@
             {
               "key": "accounts[].ataButtons",
               "type": "tabarray",
-              "title": "{{ value.name || 'new button/sensor' }}",
+              "title": "{{ value.name || 'button/sensor' }}",
               "items": [
                 "accounts[].ataButtons[].name",
                 "accounts[].ataButtons[].mode",
@@ -1075,7 +1075,7 @@
             {
               "key": "accounts[].atwButtons",
               "type": "tabarray",
-              "title": "{{ value.name || 'new button/sensor' }}",
+              "title": "{{ value.name || 'button/sensor' }}",
               "items": [
                 "accounts[].atwButtons[].name",
                 "accounts[].atwButtons[].mode",
@@ -1096,7 +1096,7 @@
             {
               "key": "accounts[].ervButtons",
               "type": "tabarray",
-              "title": "{{ value.name || 'new button/sensor' }}",
+              "title": "{{ value.name || 'button/sensor' }}",
               "items": [
                 "accounts[].ervButtons[].name",
                 "accounts[].ervButtons[].mode",

@@ -13,14 +13,13 @@ class MELCLOUD extends EventEmitter {
         const passwd = config.passwd;
         const language = config.language;
         const debugLog = config.debugLog;
-        const prefDir = config.prefDir;
-        const melCloudBuildingsFile = `${prefDir}/${accountName}_Buildings`;
+        const prefDir = config.prefDir
         const devicesId = [];
 
         this.axiosInstanceLogin = axios.create({
             method: 'POST',
             baseURL: CONSTANS.ApiUrls.BaseURL,
-            timeout: 10000
+            timeout: 15000
         });
 
 
@@ -40,12 +39,12 @@ class MELCLOUD extends EventEmitter {
             try {
                 const loginData = await this.axiosInstanceLogin(CONSTANS.ApiUrls.ClientLogin, options);
                 const melCloudInfoData = JSON.stringify(loginData.data, null, 2);
-                const debug = debugLog ? this.emit('debug', `Account ${accountName}, debug MELCloud Info: ${melCloudInfoData}`) : false;
+                const debug = debugLog ? this.emit('debug', `debug MELCloud Info: ${melCloudInfoData}`) : false;
                 const melCloudInfo = loginData.data.LoginData;
                 const contextKey = loginData.data.LoginData.ContextKey;
 
                 if (contextKey === undefined || contextKey === null) {
-                    this.emit('message', `Account ${accountName}, context key not found or undefined, reconnect in 65s.`)
+                    this.emit('message', `context key not found or undefined, reconnect in 65s.`)
                     this.reconnect();
                     return;
                 };
@@ -53,20 +52,22 @@ class MELCLOUD extends EventEmitter {
                 this.melCloudInfo = melCloudInfo;
                 this.contextKey = contextKey;
                 this.emit('connected', melCloudInfoData);
+
+                await new Promise(resolve => setTimeout(resolve, 500));
                 this.emit('checkDevicesList');
             } catch (error) {
-                this.emit('error', `Account: ${accountName}, login error, ${error}, reconnect in 65s.`);
+                this.emit('error', `login error, ${error}, reconnect in 65s.`);
                 this.reconnect();
             };
         }).on('checkDevicesList', async () => {
-            const debug = debugLog ? this.emit('debug', `Account ${accountName}, Scanning for devices.`) : false;
+            const debug = debugLog ? this.emit('debug', `scanning for devices.`) : false;
             const melCloudInfo = this.melCloudInfo;
             const contextKey = this.contextKey;
 
             this.axiosInstanceGet = axios.create({
                 method: 'GET',
                 baseURL: CONSTANS.ApiUrls.BaseURL,
-                timeout: 10000,
+                timeout: 15000,
                 headers: {
                     'X-MitsContextKey': contextKey
                 }
@@ -75,19 +76,26 @@ class MELCLOUD extends EventEmitter {
             try {
                 const listDevicesData = await this.axiosInstanceGet(CONSTANS.ApiUrls.ListDevices);
                 const buildingsData = JSON.stringify(listDevicesData.data, null, 2);
-                const debug1 = debugLog ? this.emit('debug', `Account ${accountName}, debug Buildings: ${buildingsData}`) : false;
-                const writeDevicesData = await fsPromises.writeFile(melCloudBuildingsFile, buildingsData);
-
+                const debug1 = debugLog ? this.emit('debug', `debug Buildings: ${buildingsData}`) : false;
 
                 //read building structure and get the devices
                 const buildingsList = listDevicesData.data;
                 if (!buildingsList) {
-                    this.emit('message', `Account ${accountName}, no building found, check again in 90s.`);
+                    this.emit('message', `no building found, check again in 90s.`);
                     this.checkDevicesList();
                     return;
                 }
 
-                // Check available devices
+                //write buildings to the file
+                try {
+                    const melCloudBuildingsFile = `${prefDir}/${accountName}_Buildings`;
+                    await fsPromises.writeFile(melCloudBuildingsFile, buildingsData);
+                } catch (error) {
+                    this.emit('error', `write buildings error, ${error}, check again in 90s.`);
+                    this.checkDevicesList();
+                };
+
+                //check available devices in buildings
                 const devices = [];
                 for (const building of buildingsList) {
                     const buildingStructure = building.Structure;
@@ -99,20 +107,20 @@ class MELCLOUD extends EventEmitter {
                         ...buildingStructure.Devices
                     ];
 
-                    // Add all devices to the devices array
+                    //add all devices to the devices array
                     devices.push(...allDevices);
                 }
 
                 if (!devices) {
-                    this.emit('message', `Account ${accountName}, no devices found, check again in 90s.`);
+                    this.emit('message', `no devices found, check again in 90s.`);
                     this.checkDevicesList();
                     return;
                 }
 
                 const devicesCount = devices.length;
-                const useFahrenheit = (melCloudInfo.UseFahrenheit === true) ? 1 : 0;
+                const useFahrenheit = melCloudInfo.UseFahrenheit ? 1 : 0;
                 const temperatureDisplayUnit = CONSTANS.TemperatureDisplayUnits[useFahrenheit];
-                const debug2 = debugLog ? this.emit('debug', `Account ${accountName}, Found: ${devicesCount} devices.`) : false;
+                const debug2 = debugLog ? this.emit('debug', `found: ${devicesCount} devices.`) : false;
 
                 for (const deviceInfo of devices) {
                     const buildingId = deviceInfo.BuildingID.toString();
@@ -121,21 +129,26 @@ class MELCLOUD extends EventEmitter {
                     const deviceName = deviceInfo.DeviceName;
                     const deviceTypeText = CONSTANS.DeviceType[deviceType];
 
-                    //write device info
-                    const deviceData = JSON.stringify(deviceInfo, null, 2);
-                    const melCloudBuildingDeviceFile = `${prefDir}/${accountName}_Device_${deviceId}`;
-                    const writeDeviceInfoData = await fsPromises.writeFile(melCloudBuildingDeviceFile, deviceData);
+                    //write every device to the filr
+                    try {
+                        const deviceData = JSON.stringify(deviceInfo, null, 2);
+                        const melCloudBuildingDeviceFile = `${prefDir}/${accountName}_Device_${deviceId}`;
+                        await fsPromises.writeFile(melCloudBuildingDeviceFile, deviceData);
+                    } catch (error) {
+                        this.emit('error', `write device info error, ${error}, check again in 90s.`);
+                        this.checkDevicesList();
+                    };
 
                     //prepare device if not in devices array
                     if (!devicesId.includes(deviceId)) {
                         devicesId.push(deviceId);
-                        this.emit('checkDevicesListComplete', melCloudInfo, contextKey, buildingId, deviceInfo, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit);
+                        this.emit('checkDevicesListComplete', melCloudInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit);
                     }
                 }
 
                 this.checkDevicesList();
             } catch (error) {
-                this.emit('error', `Account ${accountName}, check devices list error, ${error}, check again in 90s.`);
+                this.emit('error', `check devices list error, ${error}, check again in 90s.`);
                 this.checkDevicesList();
             };
         })
