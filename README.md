@@ -75,7 +75,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
     * Zone 1 and 2:
       * Operating Mode Heat *AUTO/HEAT/COOL* - *CURVE / HEAT THERMOSTAT / HEAT FLOW*.
       * Operating Mode Cool *HEAT/COOL* - *COOL THERMOSTAT / COOL FLOW*.
-      * Heating/Cooling *SET/GET* temperature zone 1 and 2.
+      * Heating/Cooling temperature *SET/GET* for zone 1 and 2.
       * Lock physical controls *LOCK/UNLOCK*.
     * Hot Water Tank:
       * Operating mode *AUTO/HEAT* - *AUTO/HEAT NOW*.
@@ -89,7 +89,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
     * Zone 1 and 2:
       * Operating Mode Heat *HEAT/COOL/AUTO* - *HEAT THERMOSTAT / HEAT FLOW / CURVE*.
       * Operating Mode Cool *HEAT/COOL* - *COOL THERMOSTAT / COOL FLOW*.
-      * Heating/Cooling *SET/GET* temperature zone 1 and 2.
+      * Heating/Cooling temperature *SET/GET* for zone 1 and 2.
     * Hot Water Tank:
       * Operating mode *HEAT/AUTO* - *HEAT NOW, AUTO*.
       * Water temperature *SET/GET*.
