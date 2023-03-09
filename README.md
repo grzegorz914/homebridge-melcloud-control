@@ -39,10 +39,10 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
   * Heater Cooler:
     * Power *ON/OFF*.
     * Operating mode *AUTO/HEAT/COOL/POWER OFF*.
-    * Heating/Cooling temperature.
+    * Heating/Cooling temperature. 
     * Fan speed *OFF/1/2/3/4/5/AUTO*.
     * Swing mode *AUTO/SWING*.
-    * Lock physical controls *LOCK/UNLOCK*.
+    * Physical lock controls *LOCK/UNLOCK*.
   * Thermostat:
     * Power *ON/OFF*.
     * Operating mode *POWER OFF/HEAT/COOL/AUTO*.
@@ -71,16 +71,16 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Power *ON/OFF*.
       * Operating mode *HEAT/COOL*.
       * Outdoor temperature *GET*.
-      * Lock physical controls all Zones and Hot Water *LOCK/UNLOCK*.
+      * Physical lock controls all Zones and Hot Water Tank *LOCK/UNLOCK*.
     * Zone 1 and 2:
       * Operating Mode Heat *AUTO/HEAT/COOL* - *CURVE / HEAT THERMOSTAT / HEAT FLOW*.
       * Operating Mode Cool *HEAT/COOL* - *COOL THERMOSTAT / COOL FLOW*.
-      * Heating/Cooling temperature *SET/GET* for zone 1 and 2.
-      * Lock physical controls *LOCK/UNLOCK*.
+      * Heating/Cooling temperature.
+      * Physical lock controls *LOCK/UNLOCK*.
     * Hot Water Tank:
       * Operating mode *AUTO/HEAT* - *AUTO/HEAT NOW*.
-      * Water temperature *SET/GET*.
-      * Lock physical controls *LOCK/UNLOCK*.
+      * Current/Target temperature.
+      * Physical lock controls *LOCK/UNLOCK*.
   * Thermostat:
     * Heat Pump:
       * Power *ON/OFF*.
@@ -89,15 +89,15 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
     * Zone 1 and 2:
       * Operating Mode Heat *HEAT/COOL/AUTO* - *HEAT THERMOSTAT / HEAT FLOW / CURVE*.
       * Operating Mode Cool *HEAT/COOL* - *COOL THERMOSTAT / COOL FLOW*.
-      * Heating/Cooling temperature *SET/GET* for zone 1 and 2.
+      * Heating/Cooling temperature.
     * Hot Water Tank:
       * Operating mode *HEAT/AUTO* - *HEAT NOW, AUTO*.
-      * Water temperature *SET/GET*.
+      * Current/Target temperature.
   * Buttons:
     * Use to direct control device.  
       * Power *ON/OFF*.
       * Operating mode *HEAT/COOL/CURVE/HOLIDAY/AUTO HOT WATER/ECO HOT WATER/FORCE HOT WATER*.
-      * Physical lock controls *LOCK/UNLOCK* Zone 1, 2 und Hot Water.
+      * Physical lock controls *LOCK/UNLOCK* Zone 1, 2 und Hot Water Tank.
       * Set device presets. 
   * Sensors:
     * Use with automations in HomeKit app. 
@@ -108,12 +108,12 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * Energy Recovery Ventilation:
   * Heater Cooler:
     * Power *ON/OFF*.
-    * Operating mode *AUTO/HEAT/COOL/POWER OFF* (AUTO, RECOVERY, BYPAS, POWER OFF).
+    * Operating mode *AUTO/HEAT/COOL/POWER OFF* - *AUTO, RECOVERY, BYPAS, POWER OFF*.
     * Fan speed *OFF/1/2/3/4/5/AUTO*.
-    * Lock physical controls *LOCK/UNLOCK*.
+    * Physical lock controls *LOCK/UNLOCK*.
   * Thermostat:
     * Power *ON/OFF*.
-    * Operating mode *POWER OFF/HEAT/COOL/AUTO* (POWER OFF, RECOVERY, BYPAS, AUTO).
+    * Operating mode *POWER OFF/HEAT/COOL/AUTO* - *POWER OFF, RECOVERY, BYPAS, AUTO*.
   * Buttons:
     * Use to direct control device.
       * Power *ON/OFF*.
