@@ -191,7 +191,7 @@ class melCloudDevice {
 					prefDir: prefDir
 				});
 
-				this.melCloudAta.on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareRevision, presets, presetsCount, hasAutomaticFanSpeed, swingFunction, numberOfFanSpeeds, modelSupportsFanSpeed, modelSupportsAuto, modelSupportsStandbyMode) => {
+				this.melCloudAta.on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareRevision, presets, presetsCount, hasAutomaticFanSpeed, swingFunction, numberOfFanSpeeds, modelSupportsFanSpeed, modelSupportsAuto) => {
 					if (!this.disableLogDeviceInfo && this.displayDeviceInfo) {
 						this.log(`---- ${this.deviceTypeText}: ${this.deviceName} ----`);
 						this.log(`Account: ${this.accountName}`);
@@ -215,137 +215,92 @@ class melCloudDevice {
 					this.ataSwingFunction = swingFunction;
 					this.ataNumberOfFanSpeeds = numberOfFanSpeeds;
 					this.ataModelSupportsFanSpeed = modelSupportsFanSpeed;
-					this.ataModelSupportsAuto = modelSupportsAuto ? 1 : 0;
-					this.ataModelSupportsStandbyMode = modelSupportsStandbyMode;
+					this.ataModelSupportsOperationAuto = modelSupportsAuto;
 					this.ataPresets = presets;
 					this.ataPresetsCount = this.ataPresetsEnabled ? presetsCount : 0;
-				}).on('deviceState', async (deviceState, roomTemperature, setTemperature, setFanSpeed, operationMode, vaneHorizontal, vaneVertical, inStandbyMode, power, hideVaneControls, hideDryModeControl, prohibitSetTemperature, prohibitOperationMode, prohibitPower) => {
+				}).on('deviceState', async (deviceState, roomTemperature, setTemperature, setFanSpeed, operationMode, vaneHorizontal, vaneVertical, hideVaneControls, hideDryModeControl, inStandbyMode, prohibitSetTemperature, prohibitOperationMode, prohibitPower, power, offline) => {
 					//device info
 					const displayMode = this.ataDisplayMode;
 					const hasAutomaticFanSpeed = this.ataHasAutomaticFanSpeed;
 					const swingFunction = this.ataSwingFunction;
 					const numberOfFanSpeeds = this.ataNumberOfFanSpeeds;
 					const modelSupportsFanSpeed = this.ataModelSupportsFanSpeed;
-					const modelSupportsAuto = this.ataModelSupportsAuto
-					const modelSupportsStandbyMode = this.ataModelSupportsStandbyMode;
+					const modelSupportsOperationAuto = this.ataModelSupportsOperationAuto
 					const buttonsCount = this.ataButtonsCount;
 					const presets = this.ataPresets;
 					const presetsCount = this.ataPresetsCount;
 
 					//device state
-					this.deviceState = deviceState;
-					this.power = power;
-					const inStandby = modelSupportsStandbyMode ? inStandbyMode : false;
-					this.inStandbyMode = inStandby;
+					this.deviceState = deviceState || {};
+					this.power = power || false;
+					this.offline = offline || false;
 
 					//operating mode
 					let currentOperationMode = 0;
 					let targetOperationMode = 0;
-					let targetOperationModeSetPropsMinValue = 0;
-					let targetOperationModeSetPropsMaxValue = 3;
-					let targetOperationModeSetPropsValidValues = [0, 1, 2, 3];
-					switch (modelSupportsAuto) {
-						case 0: //AUTO MODE NOT SUPPORTED - 0, HEAT, DRY, COOL, 4, 5, 6, FAN
-							switch (displayMode) {
-								case 0: //Heater Cooler INACTIVE, IDLE, HEATING, COOLING - current, AUTO, HEAT, COOL - target
-									currentOperationMode = power ? inStandby ? 1 : [1, 2, 2, 3, 2, 2, 2, 2][operationMode] : 0;
-									targetOperationMode = [1, 1, 1, 2, 2, 2, 2, 2][operationMode];
-									targetOperationModeSetPropsMinValue = 1;
-									targetOperationModeSetPropsMaxValue = 2;
-									targetOperationModeSetPropsValidValues = [1, 2];
-									break;
-								case 1: //Thermostat //OFF, HEAT, COOL - current, //OFF, HEAT, COOL, AUTO - target
-									currentOperationMode = power ? inStandby ? 0 : [0, 1, 2, 1, 1, 1, 1, 1][operationMode] : 0;
-									targetOperationMode = [1, 1, 1, 2, 2, 2, 2, 2][operationMode];
-									targetOperationModeSetPropsMinValue = 0;
-									targetOperationModeSetPropsMaxValue = 2;
-									targetOperationModeSetPropsValidValues = [0, 1, 2];
-									break;
-							};
-							break;
-						case 1: //AUTO MODE SUPPORTED - 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO
-							const heatCoolInAuto = (setTemperature < roomTemperature) ? 2 : 3
-							switch (displayMode) {
-								case 0: //Heater Cooler INACTIVE, IDLE, HEATING, COOLING - current, AUTO, HEAT, COOL - target
-									currentOperationMode = power ? inStandby ? 1 : [1, 2, 2, 3, 2, 2, 2, 2, (setTemperature < roomTemperature) ? 2 : 3][operationMode] : 0;
-									targetOperationMode = [0, 1, 1, 2, 2, 2, 2, 2, 0][operationMode];
-									targetOperationModeSetPropsMinValue = 0;
-									targetOperationModeSetPropsMaxValue = 2;
-									targetOperationModeSetPropsValidValues = [0, 1, 2];
-									break;
-								case 1: //Thermostat //OFF, HEAT, COOL - current, //OFF, HEAT, COOL, AUTO - target
-									currentOperationMode = power ? inStandby ? 0 : [0, 1, 2, 1, 1, 1, 1, 1, (setTemperature < roomTemperature) ? 1 : 2][operationMode] : 0;
-									targetOperationMode = [3, 1, 1, 2, 2, 2, 2, 2, 3][operationMode];
-									targetOperationModeSetPropsMinValue = 0;
-									targetOperationModeSetPropsMaxValue = 3;
-									targetOperationModeSetPropsValidValues = [0, 1, 2, 3];
-									break;
-							};
-							break;
-					};
-					this.currentOperationMode = currentOperationMode;
-					this.targetOperationMode = targetOperationMode;
-					this.targetOperationModeSetPropsMinValue = targetOperationModeSetPropsMinValue;
-					this.targetOperationModeSetPropsMaxValue = targetOperationModeSetPropsMaxValue;
-					this.targetOperationModeSetPropsValidValues = targetOperationModeSetPropsValidValues;
-
-					//temperature
-					this.roomTemperature = roomTemperature;
-					this.setTemperature = setTemperature;
-
-					//fan speed mode
 					let fanSpeed = 0;
-					let fanSpeedSetPropsMaxValue = 0;
-					if (modelSupportsFanSpeed) {
-						switch (numberOfFanSpeeds) {
-							case 2: //Fan speed mode 2
-								fanSpeed = hasAutomaticFanSpeed ? [3, 1, 2][setFanSpeed] : [0, 1, 2][setFanSpeed];
-								fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 3 : 2;
-								break;
-							case 3: //Fan speed mode 3
-								fanSpeed = hasAutomaticFanSpeed ? [4, 1, 2, 3][setFanSpeed] : [0, 1, 2, 3][setFanSpeed];
-								fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 4 : 3;
-								break;
-							case 4: //Fan speed mode 4
-								fanSpeed = hasAutomaticFanSpeed ? [5, 1, 2, 3, 4][setFanSpeed] : [0, 1, 2, 3, 4][setFanSpeed];
-								fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 5 : 4;
-								break;
-							case 5: //Fan speed mode 5
-								fanSpeed = hasAutomaticFanSpeed ? [6, 1, 2, 3, 4, 5][setFanSpeed] : [0, 1, 2, 3, 4, 5][setFanSpeed];
-								fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 6 : 5;
-								break;
-							case 6: //Fan speed mode 6
-								fanSpeed = hasAutomaticFanSpeed ? [7, 1, 2, 3, 4, 5, 6][setFanSpeed] : [0, 1, 2, 3, 4, 5, 6][setFanSpeed];
-								fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 7 : 6;
-								break;
-							case 7: //Fan speed mode 7
-								fanSpeed = hasAutomaticFanSpeed ? [8, 1, 2, 3, 4, 5, 6, 7][setFanSpeed] : [0, 1, 2, 3, 4, 5, 6, 7][setFanSpeed];
-								fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 8 : 7;
-								break;
-							case 8: //Fan speed mode 8
-								fanSpeed = hasAutomaticFanSpeed ? [9, 1, 2, 3, 4, 5, 6, 7, 8][setFanSpeed] : [0, 1, 2, 3, 4, 5, 6, 7, 8][setFanSpeed]
-								fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 9 : 8;
-								break;
-						};
-					};
-					this.fanSpeed = fanSpeed;
-					this.fanSpeedSetPropsMaxValue = fanSpeedSetPropsMaxValue;
-					this.setFanSpeed = setFanSpeed;
+					let swingMode = 0;
+					let lockPhysicalControls = 0;
 
-					//swing and vane mode
-					const swingMode = swingFunction ? (vaneHorizontal === 12 && vaneVertical === 7) ? 1 : 0 : false;
-					this.swingMode = swingMode;
-					this.vaneHorizontal = vaneHorizontal;
-					this.vaneVertical = vaneVertical;
+					let operationModeSetPropsMinValue = 0;
+					let operationModeSetPropsMaxValue = 3;
+					let operationModeSetPropsValidValues = [0, 1, 2, 3];
+					let fanSpeedSetPropsMaxValue = 2;
 
-					//lock physical controls
-					const lockPhysicalControls = (prohibitSetTemperature === true || prohibitOperationMode === true || prohibitPower === true) ? 1 : 0;
-					this.lockPhysicalControls = lockPhysicalControls;
+					switch (displayMode) {
+						case 0: //Heater Cooler
+							switch (modelSupportsOperationAuto) {
+								case false: //AUTO MODE NOT SUPPORTED- 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
+									currentOperationMode = !power ? 0 : inStandbyMode ? 1 : [0, 2, 2, 3, 3, 3, 3, 3, (setTemperature < roomTemperature) ? 3 : 2, 2, 2, 3][operationMode]; //INACTIVE, IDLE, HEATING, COOLING
+									targetOperationMode = [1, 1, 1, 2, 2, 2, 2, 2][operationMode]; //AUTO, HEAT, COOL
+									operationModeSetPropsMinValue = 1;
+									operationModeSetPropsMaxValue = 2;
+									operationModeSetPropsValidValues = [1, 2];
+									break;
+								case true: //AUTO MODE SUPPORTED - 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
+									currentOperationMode = !power ? 0 : inStandbyMode ? 1 : [0, 2, 2, 3, 3, 3, 3, 3, (setTemperature < roomTemperature) ? 3 : 2, 1, 2, 2, 3][operationMode]; //INACTIVE, IDLE, HEATING, COOLING
+									targetOperationMode = [0, 1, 1, 2, 2, 2, 2, 2, 0][operationMode]; //AUTO, HEAT, COOL
+									operationModeSetPropsMinValue = 0;
+									operationModeSetPropsMaxValue = 2;
+									operationModeSetPropsValidValues = [0, 1, 2];
+									break;
+							};
 
-					if (this.ataMelCloudService) {
-						switch (displayMode) {
-							case 0: //heater/cooler
-								this.ataMelCloudService
+							//fan speed mode
+							if (modelSupportsFanSpeed) {
+								switch (numberOfFanSpeeds) {
+									case 2: //Fan speed mode 2
+										fanSpeed = hasAutomaticFanSpeed ? [3, 1, 2][setFanSpeed] : [0, 1, 2][setFanSpeed];
+										fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 3 : 2;
+										break;
+									case 3: //Fan speed mode 3
+										fanSpeed = hasAutomaticFanSpeed ? [4, 1, 2, 3][setFanSpeed] : [0, 1, 2, 3][setFanSpeed];
+										fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 4 : 3;
+										break;
+									case 4: //Fan speed mode 4
+										fanSpeed = hasAutomaticFanSpeed ? [5, 1, 2, 3, 4][setFanSpeed] : [0, 1, 2, 3, 4][setFanSpeed];
+										fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 5 : 4;
+										break;
+									case 5: //Fan speed mode 5
+										fanSpeed = hasAutomaticFanSpeed ? [6, 1, 2, 3, 4, 5][setFanSpeed] : [0, 1, 2, 3, 4, 5][setFanSpeed];
+										fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 6 : 5;
+										break;
+									case 6: //Fan speed mode 6
+										fanSpeed = hasAutomaticFanSpeed ? [7, 1, 2, 3, 4, 5, 6][setFanSpeed] : [0, 1, 2, 3, 4, 5, 6][setFanSpeed];
+										fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 7 : 6;
+										break;
+								};
+							};
+
+							//swing and vane mode
+							swingMode = swingFunction && vaneHorizontal === 12 && vaneVertical === 7 ? 1 : 0;
+
+							//lock physical controls
+							lockPhysicalControls = prohibitSetTemperature || prohibitOperationMode || prohibitPower ? 1 : 0;
+
+							//update characteristics
+							if (this.ataMelCloudServices) {
+								this.ataMelCloudServices[0]
 									.updateCharacteristic(Characteristic.Active, power)
 									.updateCharacteristic(Characteristic.CurrentHeaterCoolerState, currentOperationMode)
 									.updateCharacteristic(Characteristic.TargetHeaterCoolerState, targetOperationMode)
@@ -354,23 +309,51 @@ class melCloudDevice {
 									.updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature)
 									.updateCharacteristic(Characteristic.LockPhysicalControls, lockPhysicalControls)
 									.updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.useFahrenheit);
-								const updateRotationSpeed = modelSupportsFanSpeed ? this.ataMelCloudService.updateCharacteristic(Characteristic.RotationSpeed, fanSpeed) : false;
-								const updateSwingMode = swingFunction ? this.ataMelCloudService.updateCharacteristic(Characteristic.SwingMode, swingMode) : false;
-								break;
-							case 1: //thermostat
-								this.ataMelCloudService
+								const updateRotationSpeed = modelSupportsFanSpeed ? this.ataMelCloudServices[0].updateCharacteristic(Characteristic.RotationSpeed, fanSpeed) : false;
+								const updateSwingMode = swingFunction ? this.ataMelCloudServices[0].updateCharacteristic(Characteristic.SwingMode, swingMode) : false;
+							};
+							break;
+						case 1: //Thermostat
+							switch (modelSupportsOperationAuto) {
+								case 0: //AUTO MODE NOT SUPPORTED - 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
+									currentOperationMode = !power || inStandbyMode ? 0 : [0, 1, 1, 2, 2, 2, 2, 2, (setTemperature < roomTemperature) ? 2 : 1, 1, 1, 2][operationMode]; //OFF, HEAT, COOL
+									targetOperationMode = !power || inStandbyMode ? 0 : [0, 1, 1, 2, 2, 2, 2, 2, 3, 1, 1, 2][operationMode]; //OFF, HEAT, COOL, AUTO
+									operationModeSetPropsMinValue = 0;
+									operationModeSetPropsMaxValue = 2;
+									operationModeSetPropsValidValues = [0, 1, 2];
+									break;
+								case 1: //AUTO MODE SUPPORTED - 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
+									currentOperationMode = !power || inStandbyMode ? 0 : [0, 1, 1, 2, 2, 2, 2, 2, (setTemperature < roomTemperature) ? 2 : 1, 1, 1, 2][operationMode]; //OFF, HEAT, COOL
+									targetOperationMode = !power || inStandbyMode ? 0 : [0, 1, 1, 2, 2, 2, 2, 2, 3, 1, 1, 2][operationMode]; //OFF, HEAT, COOL, AUTO
+									operationModeSetPropsMinValue = 0;
+									operationModeSetPropsMaxValue = 3;
+									operationModeSetPropsValidValues = [0, 1, 2, 3];
+									break;
+							};
+
+							//update characteristics
+							if (this.ataMelCloudServices) {
+								this.ataMelCloudServices[0]
 									.updateCharacteristic(Characteristic.CurrentHeatingCoolingState, currentOperationMode)
 									.updateCharacteristic(Characteristic.TargetHeatingCoolingState, targetOperationMode)
 									.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
 									.updateCharacteristic(Characteristic.TargetTemperature, setTemperature)
-									.updateCharacteristic(Characteristic.HeatingThresholdTemperature, setTemperature)
-									.updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature)
 									.updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.useFahrenheit);
-								break;
-						};
-
+							};
+							break;
 					};
 
+					this.currentOperationMode = currentOperationMode;
+					this.targetOperationMode = targetOperationMode;
+					this.roomTemperature = roomTemperature;
+					this.setTemperature = setTemperature;
+					this.fanSpeed = fanSpeed;
+					this.swingMode = swingMode;
+					this.vaneHorizontal = vaneHorizontal;
+					this.vaneVertical = vaneVertical;
+					this.lockPhysicalControls = lockPhysicalControls;
+
+					//update buttons state
 					if (buttonsCount > 0) {
 						this.ataButtonsStates = [];
 						this.ataButtonsModes = [];
@@ -595,42 +578,28 @@ class melCloudDevice {
 										this.ataButtonsNames.push(buttonName);
 										this.ataButtonsDisplayType.push(buttonDisplayType);
 										break;
-									case 37: //FAN SPEED  MODE 7
-										buttonState = power ? (setFanSpeed === 7) : false;
-										this.ataButtonsStates.push(buttonState);
-										this.ataButtonsModes.push(buttonMode);
-										this.ataButtonsNames.push(buttonName);
-										this.ataButtonsDisplayType.push(buttonDisplayType);
-										break;
-									case 38: //FAN SPEED  MODE 8
-										buttonState = power ? (setFanSpeed === 8) : false;
-										this.ataButtonsStates.push(buttonState);
-										this.ataButtonsModes.push(buttonMode);
-										this.ataButtonsNames.push(buttonName);
-										this.ataButtonsDisplayType.push(buttonDisplayType);
-										break;
-									case 40: //PHYSICAL LOCK CONTROLS ALL
+									case 37: //PHYSICAL LOCK CONTROLS ALL
 										buttonState = (lockPhysicalControls === 1);
 										this.ataButtonsStates.push(buttonState);
 										this.ataButtonsModes.push(buttonMode);
 										this.ataButtonsNames.push(buttonName);
 										this.ataButtonsDisplayType.push(buttonDisplayType);
 										break;
-									case 41: //PHYSICAL LOCK CONTROLS POWER
+									case 38: //PHYSICAL LOCK CONTROLS POWER
 										buttonState = (prohibitPower === true);
 										this.ataButtonsStates.push(buttonState);
 										this.ataButtonsModes.push(buttonMode);
 										this.ataButtonsNames.push(buttonName);
 										this.ataButtonsDisplayType.push(buttonDisplayType);
 										break;
-									case 42: //PHYSICAL LOCK CONTROLS MODE
+									case 39: //PHYSICAL LOCK CONTROLS MODE
 										buttonState = (prohibitOperationMode === true);
 										this.ataButtonsStates.push(buttonState);
 										this.ataButtonsModes.push(buttonMode);
 										this.ataButtonsNames.push(buttonName);
 										this.ataButtonsDisplayType.push(buttonDisplayType);
 										break;
-									case 43: //PHYSICAL LOCK CONTROLS TEMP
+									case 40: //PHYSICAL LOCK CONTROLS TEMP
 										buttonState = (prohibitSetTemperature === true);
 										this.ataButtonsStates.push(buttonState);
 										this.ataButtonsModes.push(buttonMode);
@@ -654,12 +623,19 @@ class melCloudDevice {
 
 					};
 
+					//update presets state
 					if (presetsCount > 0) {
 						this.ataPresetsStates = [];
 						for (let i = 0; i < presetsCount; i++) {
 							//get preset
 							const preset = presets[i];
-							const presetState = (preset.Power = power && preset.SetTemperature === setTemperature && preset.OperationMode === operationMode && preset.VaneHorizontal === vaneHorizontal && preset.VaneVertical === vaneVertical && preset.FanSpeed === setFanSpeed) ? true : false;
+							const presetState =
+								preset.Power === power
+								&& preset.SetTemperature === setTemperature
+								&& preset.OperationMode === operationMode
+								&& preset.VaneHorizontal === vaneHorizontal
+								&& preset.VaneVertical === vaneVertical
+								&& preset.FanSpeed === setFanSpeed;
 							this.ataPresetsStates.push(presetState);
 
 							if (this.ataPresetsServices) {
@@ -672,6 +648,11 @@ class melCloudDevice {
 					//start prepare accessory
 					if (this.startPrepareAccessory) {
 						try {
+							this.operationModeSetPropsMinValue = operationModeSetPropsMinValue;
+							this.operationModeSetPropsMaxValue = operationModeSetPropsMaxValue;
+							this.operationModeSetPropsValidValues = operationModeSetPropsValidValues;
+							this.fanSpeedSetPropsMaxValue = fanSpeedSetPropsMaxValue;
+
 							await this.prepareAccessory();
 						} catch (error) {
 							this.log.error(`${deviceTypeText} ${deviceName}, prepare accessory error: ${error}`);
@@ -698,7 +679,7 @@ class melCloudDevice {
 					prefDir: prefDir
 				});
 
-				this.melCloudAtw.on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareRevision, presets, presetsCount, zonesCount, hasHotWaterTank, hasZone2, zone1Name, zone2Name, canHeat, canCool) => {
+				this.melCloudAtw.on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareRevision, presets, presetsCount, zonesCount, hasHotWaterTank, maxTankTemperature, hasZone2, zone1Name, zone2Name, heatCoolModes, caseHotWater, caseZone2) => {
 					if (!this.disableLogDeviceInfo && this.displayDeviceInfo) {
 						this.log(`---- ${this.deviceTypeText}: ${this.deviceName} ----`);
 						this.log(`Account: ${this.accountName}`);
@@ -723,22 +704,28 @@ class melCloudDevice {
 					this.atwHeatPumpName = 'Heat Pump';
 					this.atwZone1Name = zone1Name || 'Zone 1';
 					this.atwHasHotWaterTank = hasHotWaterTank || false;
+					this.atwMaxTankTemperature = maxTankTemperature;
 					this.atwHotWaterName = 'Hot Water';
 					this.atwHasZone2 = hasZone2 || false;
 					this.atwZone2Name = zone2Name || 'Zone 2';
-					this.atwCanHeat = canHeat || false;
-					this.atwCanCool = canCool || false;
-					this.atwHeatCoolModes = canHeat && canCool ? 0 : canHeat ? 1 : canCool ? 2 : 3;
+					this.atwHeatCoolModes = heatCoolModes;
+					this.atwCaseHotWater = caseHotWater;
+					this.atwCaseZone2 = caseZone2;
 					this.atwPresets = presets;
 					this.atwPresetsCount = this.atwPresetsEnabled ? presetsCount : 0;
-					this.atwCaseHotWater = hasHotWaterTank ? 2 : -1;
-					this.atwCaseZone2 = hasZone2 ? (hasHotWaterTank ? 3 : 2) : -1;
-				}).on('deviceState', async (deviceState, unitStatus, outdoorTemperature, power, operationMode, holidayMode, operationModeZone1, roomTemperatureZone1, setTemperatureZone1, setHeatFlowTemperatureZone1, setCoolFlowTemperatureZone1, prohibitZone1, idleZone1, forcedHotWaterMode, ecoHotWater, tankWaterTemperature, setTankWaterTemperature, prohibitHotWater, operationModeZone2, roomTemperatureZone2, setTemperatureZone2, setHeatFlowTemperatureZone2, setCoolFlowTemperatureZone2, prohibitZone2, idleZone2) => {
+				}).on('deviceState', async (deviceState, setTemperatureZone1, setTemperatureZone2, roomTemperatureZone1, roomTemperatureZone2, operationMode, operationModeZone1, operationModeZone2, setHeatFlowTemperatureZone1, setHeatFlowTemperatureZone2, setCoolFlowTemperatureZone1, setCoolFlowTemperatureZone2, tankWaterTemperature, setTankWaterTemperature, forcedHotWaterMode, unitStatus, outdoorTemperature, ecoHotWater, holidayMode, prohibitZone1, prohibitZone2, prohibitHotWater, idleZone1, idleZone2, power, offline) => {
+					//check device and zones count
+					const zonesCount = this.atwZonesCount;
+					if (zonesCount === 0) {
+						this.log(`${deviceTypeText} ${deviceName}, No device or zones found.`);
+						return;
+					};
+
 					//device info
 					const displayMode = this.atwDisplayMode;
 					const buttonsCount = this.atwButtonsCount;
-					const zonesCount = this.atwZonesCount;
 					const hasHotWaterTank = this.atwHasHotWaterTank;
+					const maxTankTemperature = this.atwMaxTankTemperature;
 					const hasZone2 = this.atwHasZone2;
 					const heatCoolModes = this.atwHeatCoolModes;
 					const presets = this.atwPresets;
@@ -747,338 +734,379 @@ class melCloudDevice {
 					const caseZone2 = this.atwCaseZone2;
 
 					//device state
-					this.deviceState = deviceState;
-					this.power = power;
-					this.unitStatus = unitStatus;
+					this.deviceState = deviceState || {};
+					this.power = power || false;
+					this.offline = offline || false
+					this.unitStatus = unitStatus || false;
+					this.idleZone1 = idleZone1 || false;
+					this.idleZone2 = idleZone2 || false;
 
-					if (zonesCount > 0) {
-						this.currentOperationModes = [];
-						this.targetOperationModes = [];
-						this.targetOperationModesSetPropsMinValue = [];
-						this.targetOperationModesSetPropsMaxValue = [];
-						this.targetOperationModesSetPropsValidValues = [];
-						this.roomTemperatures = [];
-						this.setTemperatures = [];
-						this.targetTemperaturesSetPropsMinValue = [];
-						this.targetTemperaturesSetPropsMaxValue = [];
-						this.lockPhysicalsControls = [];
+					//zones array
+					this.currentOperationModes = [];
+					this.targetOperationModes = [];
+					this.roomTemperatures = [];
+					this.setTemperatures = [];
+					this.lockPhysicalsControls = [];
 
-						let currentOperationMode = 0;
-						let targetOperationMode = 0;
-						let targetOperationModeSetPropsMinValue = 0;
-						let targetOperationModeSetPropsMaxValue = 3;
-						let targetOperationModeSetPropsValidValues = [0, 1, 2];
-						let lockPhysicalControls = 0;
-						let roomTemperature = 20;
-						let setTemperature = 20;
-						let targetTemperatureSetPropsMinValue = 0;
-						let targetTemperatureSetPropsMaxValue = 149;
+					this.operationModesSetPropsMinValue = [];
+					this.operationModesSetPropsMaxValue = [];
+					this.operationModesSetPropsValidValues = [];
+					this.temperaturesSetPropsMinValue = [];
+					this.temperaturesSetPropsMaxValue = [];
 
-						for (let i = 0; i < zonesCount; i++) {
-							switch (i) {
-								case 0: //Heat Pump Operation Mode - IDLE, HEAT WATER, HEAT ZONES, COOL, DEFROST, STANDBY, LEGIONELLA /// Unit Status - HEAT, COOL
-									switch (displayMode) {
-										case 0: //Heater Cooler
-											currentOperationMode = power ? [1, 2, 2, 3, 1, 1, 1][operationMode] : 0; //INACTIVE, IDLE, HEATING, COOLING 
-											targetOperationMode = [1, 2][unitStatus]; //AUTO, HEAT, COOL
-											targetOperationModeSetPropsMinValue = [1, 1, 2][heatCoolModes];
-											targetOperationModeSetPropsMaxValue = [2, 1, 2][heatCoolModes];
-											targetOperationModeSetPropsValidValues = [[1, 2], [1], [2]][heatCoolModes];
-											lockPhysicalControls = hasHotWaterTank && hasZone2 ? (prohibitZone1 && prohibitHotWater && prohibitZone2 ? 1 : 0) : hasHotWaterTank ? (prohibitZone1 && prohibitHotWater ? 1 : 0) : hasZone2 ? (prohibitZone1 && prohibitZone2 ? 1 : 0) : 0;
-											break;
-										case 1: //Thermostat
-											currentOperationMode = power ? [0, 1, 1, 2, 0, 0, 0][operationMode] : 0; //OFF, HEAT, COOL
-											targetOperationMode = power ? [1, 2][unitStatus] : 0; //OFF, HEAT, COOL, AUTO
-											targetOperationModeSetPropsMinValue = [0, 0, 0][heatCoolModes];
-											targetOperationModeSetPropsMaxValue = [2, 1, 2][heatCoolModes];
-											targetOperationModeSetPropsValidValues = [[0, 1, 2], [0, 1], [0, 2]][heatCoolModes];
-											break;
-									};
-									roomTemperature = outdoorTemperature;
-									setTemperature = outdoorTemperature;
-									targetTemperatureSetPropsMinValue = [-35, -31][this.useFahrenheit];
-									targetTemperatureSetPropsMaxValue = [50, 122][this.useFahrenheit];
-									break;
-								case 1: //Zone 1 - HEAT THERMOSTAT, HEAT FLOW, CURVE, COOL THERMOSTAT, COOL FLOW
-									switch (displayMode) {
-										case 0: //Heater Cooler
-											currentOperationMode = power ? idleZone1 ? 1 : [2, 2, [2, 3][unitStatus], 3, 3][operationModeZone1] : 0; //INACTIVE, IDLE, HEATING, COOLING
-											targetOperationMode = [1, 2, 0, 1, 2][operationModeZone1]; //AUTO, HEAT, COOL
-											targetOperationModeSetPropsMinValue = [0, 0, 1][heatCoolModes];
-											targetOperationModeSetPropsMaxValue = [2, 2, 2][heatCoolModes];
-											targetOperationModeSetPropsValidValues = [[0, 1, 2], [0, 1, 2], [1, 2]][heatCoolModes];
-											lockPhysicalControls = prohibitZone1 ? 1 : 0;
-											break;
-										case 1: //Thermostat 
-											currentOperationMode = power ? idleZone1 ? 0 : [1, 2, [1, 2][unitStatus], 1, 2][operationModeZone1] : 0; //OFF, HEAT, COOL
-											targetOperationMode = [1, 2, 3, 1, 2][operationModeZone1]; //OFF, HEAT, COOL, AUTO
-											targetOperationModeSetPropsMinValue = [1, 1, 1][heatCoolModes];
-											targetOperationModeSetPropsMaxValue = [3, 3, 2][heatCoolModes];
-											targetOperationModeSetPropsValidValues = [[1, 2, 3], [1, 2, 3], [1, 2]][heatCoolModes];
-											break;
-									};
-									roomTemperature = roomTemperatureZone1;
-									setTemperature = setTemperatureZone1;
-									targetTemperatureSetPropsMinValue = [10, 50][this.useFahrenheit];
-									targetTemperatureSetPropsMaxValue = [35, 95][this.useFahrenheit];
-									break;
-								case caseHotWater: //Hot Water - AUTO, HEAT NOW
-									switch (displayMode) {
-										case 0: //Heater Cooler
-											currentOperationMode = power ? operationMode === 1 ? 2 : [1, 2][forcedHotWaterMode] : 0 //INACTIVE, IDLE, HEATING, COOLING
-											targetOperationMode = [0, 1][forcedHotWaterMode] //AUTO, HEAT, COOL
-											targetOperationModeSetPropsMinValue = 0;
-											targetOperationModeSetPropsMaxValue = 1;
-											targetOperationModeSetPropsValidValues = [0, 1];
-											lockPhysicalControls = prohibitHotWater ? 1 : 0;
-											break;
-										case 1: //Thermostat
-											currentOperationMode = power ? operationMode === 1 ? 1 : [0, 1][forcedHotWaterMode] : 0 //OFF, HEAT, COOL
-											targetOperationMode = [3, 1][forcedHotWaterMode] //OFF, HEAT, COOL, AUTO
-											targetOperationModeSetPropsMinValue = 1;
-											targetOperationModeSetPropsMaxValue = 3;
-											targetOperationModeSetPropsValidValues = [1, 3];
-											break;
-									};
-									roomTemperature = tankWaterTemperature;
-									setTemperature = setTankWaterTemperature;
-									targetTemperatureSetPropsMinValue = [10, 50][this.useFahrenheit];
-									targetTemperatureSetPropsMaxValue = [60, 140][this.useFahrenheit];
-									break;
-								case caseZone2: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, CURVE, COOL THERMOSTAT, COOL FLOW
-									switch (displayMode) {
-										case 0: //Heater Cooler
-											currentOperationMode = power ? idleZone2 ? 1 : [2, 2, [2, 3][unitStatus], 3, 3][operationModeZone2] : 0; //INACTIVE, IDLE, HEATING, COOLING
-											targetOperationMode = [1, 2, 0, 1, 2][operationModeZone2]; //AUTO, HEAT, COOL
-											targetOperationModeSetPropsMinValue = [0, 0, 1][heatCoolModes];
-											targetOperationModeSetPropsMaxValue = [2, 2, 2][heatCoolModes];
-											targetOperationModeSetPropsValidValues = [[0, 1, 2], [0, 1, 2], [1, 2]][heatCoolModes];
-											lockPhysicalControls = prohibitZone2 ? 1 : 0;
-											break;
-										case 1: //Thermostat
-											currentOperationMode = power ? idleZone2 ? 0 : [1, 2, [1, 2][unitStatus], 1, 2][operationModeZone2] : 0; //OFF, HEAT, COOL
-											targetOperationMode = [1, 2, 3, 1, 2][operationModeZone2]; //OFF, HEAT, COOL, AUTO
-											targetOperationModeSetPropsMinValue = [1, 1, 1][heatCoolModes];
-											targetOperationModeSetPropsMaxValue = [3, 3, 2][heatCoolModes];
-											targetOperationModeSetPropsValidValues = [[1, 2, 3], [1, 2, 3], [1, 2]][heatCoolModes];
-											break;
-									};
-									roomTemperature = roomTemperatureZone2;
-									setTemperature = setTemperatureZone2;
-									targetTemperatureSetPropsMinValue = [10, 10][this.useFahrenheit];
-									targetTemperatureSetPropsMaxValue = [35, 95][this.useFahrenheit];
-									break;
-							};
-							this.currentOperationModes.push(currentOperationMode);
-							this.targetOperationModes.push(targetOperationMode);
-							this.targetOperationModesSetPropsMinValue.push(targetOperationModeSetPropsMinValue);
-							this.targetOperationModesSetPropsMaxValue.push(targetOperationModeSetPropsMaxValue);
-							this.targetOperationModesSetPropsValidValues.push(targetOperationModeSetPropsValidValues);
-							this.lockPhysicalsControls.push(lockPhysicalControls);
-							this.roomTemperatures.push(roomTemperature);
-							this.setTemperatures.push(setTemperature);
-							this.targetTemperaturesSetPropsMinValue.push(targetTemperatureSetPropsMinValue);
-							this.targetTemperaturesSetPropsMaxValue.push(targetTemperatureSetPropsMaxValue);
+					//default values
+					let currentOperationMode = 0;
+					let targetOperationMode = 0;
+					let roomTemperature = 20;
+					let setTemperature = 20;
+					let lockPhysicalControls = 0;
 
-							if (this.atwMelCloudServices) {
-								switch (displayMode) {
-									case 0: //heater/cooler
-										this.atwMelCloudServices[i]
-											.updateCharacteristic(Characteristic.Active, power)
-											.updateCharacteristic(Characteristic.CurrentHeaterCoolerState, currentOperationMode)
-											.updateCharacteristic(Characteristic.TargetHeaterCoolerState, targetOperationMode)
-											.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-											.updateCharacteristic(Characteristic.HeatingThresholdTemperature, setTemperature)
-											.updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature)
-											.updateCharacteristic(Characteristic.LockPhysicalControls, lockPhysicalControls)
-											.updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.useFahrenheit);
+					let operationModeSetPropsMinValue = 0;
+					let operationModeSetPropsMaxValue = 3;
+					let operationModeSetPropsValidValues = [];
+					let temperatureSetPropsMinValue = -35;
+					let temperatureSetPropsMaxValue = 140;
+
+					for (let i = 0; i < zonesCount; i++) {
+						switch (displayMode) {
+							case 0: //Heater Cooler
+								switch (i) {
+									case 0: //Heat Pump Operation Mode - IDLE, HOT WATER, HEATING ZONES, COOLING, HOT WATER STORAGE, FREZE STAT, LEGIONELLA, HEATING ECO, MODE 1, MODE 2, MODE 3, HEATING UP /// Unit Status - HEAT, COOL
+										currentOperationMode = !power ? 0 : [1, 2, 2, 3, 2, 1, 1, 2, 1, 1, 1, 2][operationMode]; //INACTIVE, IDLE, HEATING, COOLING 
+										targetOperationMode = [1, 2][unitStatus]; //AUTO, HEAT, COOL
+										roomTemperature = outdoorTemperature;
+										setTemperature = outdoorTemperature;
+										lockPhysicalControls = hasHotWaterTank && hasZone2 ? (prohibitZone1 && prohibitHotWater && prohibitZone2 ? 1 : 0) : hasHotWaterTank ? (prohibitZone1 && prohibitHotWater ? 1 : 0) : hasZone2 ? (prohibitZone1 && prohibitZone2 ? 1 : 0) : 0;
+
+										operationModeSetPropsMinValue = [1, 1, 2][heatCoolModes];
+										operationModeSetPropsMaxValue = [2, 1, 2][heatCoolModes];
+										operationModeSetPropsValidValues = [[1, 2], [1], [2]][heatCoolModes];
+										temperatureSetPropsMinValue = [-35, -31][this.useFahrenheit];
+										temperatureSetPropsMaxValue = [50, 122][this.useFahrenheit];
 										break;
-									case 1: //thermostat
-										this.atwMelCloudServices[i]
-											.updateCharacteristic(Characteristic.CurrentHeatingCoolingState, currentOperationMode)
-											.updateCharacteristic(Characteristic.TargetHeatingCoolingState, targetOperationMode)
-											.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-											.updateCharacteristic(Characteristic.TargetTemperature, setTemperature)
-											.updateCharacteristic(Characteristic.HeatingThresholdTemperature, setTemperature)
-											.updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature)
-											.updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.useFahrenheit);
+									case 1: //Zone 1 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRYUP
+										currentOperationMode = !power ? 0 : idleZone1 ? 1 : [2, 2, 2, 3, 3, 2][operationModeZone1]; //INACTIVE, IDLE, HEATING, COOLING
+										targetOperationMode = [1, 2, 0, 1, 2, 1][operationModeZone1]; //AUTO, HEAT, COOL
+										roomTemperature = roomTemperatureZone1;
+										setTemperature = setTemperatureZone1;
+										lockPhysicalControls = prohibitZone1 ? 1 : 0;
+
+										operationModeSetPropsMinValue = [0, 0, 1][heatCoolModes];
+										operationModeSetPropsMaxValue = [2, 2, 2][heatCoolModes];
+										operationModeSetPropsValidValues = [[0, 1, 2], [0, 1, 2], [1, 2]][heatCoolModes];
+										temperatureSetPropsMinValue = [10, 50][this.useFahrenheit];
+										temperatureSetPropsMaxValue = [35, 95][this.useFahrenheit];
+										break;
+									case caseHotWater: //Hot Water - AUTO, HEAT NOW
+										currentOperationMode = !power ? 0 : operationMode === 1 ? 2 : [1, 2][forcedHotWaterMode]; //INACTIVE, IDLE, HEATING, COOLING
+										targetOperationMode = [0, 1][forcedHotWaterMode] //AUTO, HEAT, COOL
+										roomTemperature = tankWaterTemperature;
+										setTemperature = setTankWaterTemperature;
+										lockPhysicalControls = prohibitHotWater ? 1 : 0;
+
+										operationModeSetPropsMinValue = 0;
+										operationModeSetPropsMaxValue = 1;
+										operationModeSetPropsValidValues = [0, 1];
+										temperatureSetPropsMinValue = [30, 86][this.useFahrenheit];
+										temperatureSetPropsMaxValue = [60, 140][this.useFahrenheit];;
+										break;
+									case caseZone2: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRYUP
+										currentOperationMode = !power ? 0 : idleZone2 ? 1 : [2, 2, 2, 3, 3, 2][operationModeZone2]; //INACTIVE, IDLE, HEATING, COOLING
+										targetOperationMode = [1, 2, 0, 1, 2, 1][operationModeZone2]; //AUTO, HEAT, COOL
+										roomTemperature = roomTemperatureZone2;
+										setTemperature = setTemperatureZone2;
+										lockPhysicalControls = prohibitZone2 ? 1 : 0;
+
+										operationModeSetPropsMinValue = [0, 0, 1][heatCoolModes];
+										operationModeSetPropsMaxValue = [2, 2, 2][heatCoolModes];
+										operationModeSetPropsValidValues = [[0, 1, 2], [0, 1, 2], [1, 2]][heatCoolModes];
+										temperatureSetPropsMinValue = [10, 10][this.useFahrenheit];
+										temperatureSetPropsMaxValue = [35, 95][this.useFahrenheit];
 										break;
 								};
-							};
+
+								//update characteristics
+								if (this.atwMelCloudServices && currentOperationMode != undefined && targetOperationMode != undefined) {
+									this.atwMelCloudServices[i]
+										.updateCharacteristic(Characteristic.Active, power)
+										.updateCharacteristic(Characteristic.CurrentHeaterCoolerState, currentOperationMode)
+										.updateCharacteristic(Characteristic.TargetHeaterCoolerState, targetOperationMode)
+										.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+										.updateCharacteristic(Characteristic.LockPhysicalControls, lockPhysicalControls)
+										.updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.useFahrenheit)
+									if (this.atwHeatCoolModes === 0 || this.atwHeatCoolModes === 1) {
+										this.atwMelCloudServices[i].updateCharacteristic(Characteristic.HeatingThresholdTemperature, setTemperature)
+									}
+									if ((this.atwHeatCoolModes === 0 || this.atwHeatCoolModes === 2) && i !== this.atwCaseHotWate) {
+										this.atwMelCloudServices[i].updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature)
+									}
+								}
+								break;
+							case 1: //Thermostat
+								switch (i) {
+									case 0: //Heat Pump Operation Mode - IDLE, HOT WATER, HEATING ZONES, COOLING, HOT WATER STORAGE, FREZE STAT, LEGIONELLA, HEATING ECO, MODE 1, MODE 2, MODE 3, HEATING UP /// Unit Status - HEAT, COOL
+										currentOperationMode = !power ? 0 : [0, 1, 1, 2, 1, 0, 0, 1, 0, 0, 0, 1][operationMode]; //OFF, HEAT, COOL
+										targetOperationMode = !power ? 0 : [1, 2][unitStatus]; //OFF, HEAT, COOL, AUTO
+										roomTemperature = outdoorTemperature;
+										setTemperature = outdoorTemperature;
+
+										operationModeSetPropsMinValue = [0, 0, 0][heatCoolModes];
+										operationModeSetPropsMaxValue = [2, 1, 2][heatCoolModes];
+										operationModeSetPropsValidValues = [[0, 1, 2], [0, 1], [0, 2]][heatCoolModes];
+										temperatureSetPropsMinValue = [-35, -31][this.useFahrenheit];
+										temperatureSetPropsMaxValue = [50, 122][this.useFahrenheit];
+										break;
+									case 1: //Zone 1 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRYUP
+										currentOperationMode = !power ? 0 : idleZone1 ? 0 : [1, 1, 1, 2, 2, 1][operationModeZone1]; //OFF, HEAT, COOL
+										targetOperationMode = [1, 2, 3, 1, 2, 1][operationModeZone1]; //OFF, HEAT, COOL, AUTO
+										roomTemperature = roomTemperatureZone1;
+										setTemperature = setTemperatureZone1;
+
+										operationModeSetPropsMinValue = [1, 1, 1][heatCoolModes];
+										operationModeSetPropsMaxValue = [3, 3, 2][heatCoolModes];
+										operationModeSetPropsValidValues = [[1, 2, 3], [1, 2, 3], [1, 2]][heatCoolModes];
+										temperatureSetPropsMinValue = [10, 50][this.useFahrenheit];
+										temperatureSetPropsMaxValue = [35, 95][this.useFahrenheit];
+										break;
+									case caseHotWater: //Hot Water - AUTO, HEAT NOW
+										currentOperationMode = !power ? 0 : operationMode === 1 ? 1 : [0, 1][forcedHotWaterMode]; //OFF, HEAT, COOL
+										targetOperationMode = [3, 1][forcedHotWaterMode] //OFF, HEAT, COOL, AUTO
+										roomTemperature = tankWaterTemperature;
+										setTemperature = setTankWaterTemperature;
+
+										operationModeSetPropsMinValue = 1;
+										operationModeSetPropsMaxValue = 3;
+										operationModeSetPropsValidValues = [1, 3];
+										temperatureSetPropsMinValue = [30, 86][this.useFahrenheit];
+										temperatureSetPropsMaxValue = [60, 140][this.useFahrenheit];
+										break;
+									case caseZone2: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRYUP
+										currentOperationMode = !power ? 0 : idleZone2 ? 0 : [1, 1, 1, 2, 2, 1][operationModeZone2]; //OFF, HEAT, COOL
+										targetOperationMode = [1, 2, 3, 1, 2, 1][operationModeZone2]; //OFF, HEAT, COOL, AUTO
+										roomTemperature = roomTemperatureZone2;
+										setTemperature = setTemperatureZone2;
+
+										operationModeSetPropsMinValue = [1, 1, 1][heatCoolModes];
+										operationModeSetPropsMaxValue = [3, 3, 2][heatCoolModes];
+										operationModeSetPropsValidValues = [[1, 2, 3], [1, 2, 3], [1, 2]][heatCoolModes];
+										temperatureSetPropsMinValue = [10, 10][this.useFahrenheit];
+										temperatureSetPropsMaxValue = [35, 95][this.useFahrenheit];
+										break;
+								};
+
+								//update characteristics
+								if (this.atwMelCloudServices) {
+									this.atwMelCloudServices[i]
+										.updateCharacteristic(Characteristic.CurrentHeaterCoolerState, currentOperationMode)
+										.updateCharacteristic(Characteristic.TargetHeaterCoolerState, targetOperationMode)
+										.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+										.updateCharacteristic(Characteristic.TargetTemperature, setTemperature)
+										.updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.useFahrenheit)
+								}
+								break;
 						};
 
-						if (buttonsCount > 0) {
-							this.atwButtonsStates = [];
-							this.atwButtonsModes = [];
-							this.atwButtonsNames = [];
-							this.atwButtonsDisplayType = [];
+						//push value to arrays
+						this.currentOperationModes.push(currentOperationMode);
+						this.targetOperationModes.push(targetOperationMode);
+						this.roomTemperatures.push(roomTemperature);
+						this.setTemperatures.push(setTemperature);
+						this.lockPhysicalsControls.push(lockPhysicalControls);
 
-							for (const button of this.atwButtons) {
-								const buttonMode = button.mode || 0;
-								const buttonName = button.name || 'Not configured';
-								const buttonDisplayType = button.displayType || -1;
-
-								if (buttonDisplayType >= 0) {
-									let buttonState = false;
-									switch (buttonMode) {
-										case 0: //POWER ON,OFF
-											buttonState = (power === true);
-											this.atwButtonsStates.push(buttonState);
-											this.atwButtonsModes.push(buttonMode);
-											this.atwButtonsNames.push(buttonName);
-											this.atwButtonsDisplayType.push(buttonDisplayType);
-											break;
-										case 1: //HEAT PUMP HEAT
-											buttonState = power ? (operationMode === 0) : false;
-											this.atwButtonsStates.push(buttonState);
-											this.atwButtonsModes.push(buttonMode);
-											this.atwButtonsNames.push(buttonName);
-											this.atwButtonsDisplayType.push(buttonDisplayType);
-											break;
-										case 2: //COOL
-											buttonState = power ? (operationMode === 1) : false;
-											this.atwButtonsStates.push(buttonState);
-											this.atwButtonsModes.push(buttonMode);
-											this.atwButtonsNames.push(buttonName);
-											this.atwButtonsDisplayType.push(buttonDisplayType);
-											break;
-										case 53: //HOLIDAY
-											buttonState = power ? (holidayMode === true) : false;
-											this.atwButtonsStates.push(buttonState);
-											this.atwButtonsModes.push(buttonMode);
-											this.atwButtonsNames.push(buttonName);
-											this.atwButtonsDisplayType.push(buttonDisplayType);
-											break;
-										case 10: //ALL ZONES PHYSICAL LOCK CONTROL
-											buttonState = power ? (prohibitZone1 === true && prohibitHotWater === true && prohibitZone2 === true) : false;
-											this.atwButtonsStates.push(buttonState);
-											this.atwButtonsModes.push(buttonMode);
-											this.atwButtonsNames.push(buttonName);
-											this.atwButtonsDisplayType.push(buttonDisplayType);
-											break;
-										case 20: //HOT WATER AUTO
-											buttonState = power ? (forcedHotWaterMode === false) : false;
-											this.atwButtonsStates.push(buttonState);
-											this.atwButtonsModes.push(buttonMode);
-											this.atwButtonsNames.push(buttonName);
-											this.atwButtonsDisplayType.push(buttonDisplayType);
-											break;
-										case 21: //ECO
-											buttonState = power ? (ecoHotWater === true) : false;
-											this.atwButtonsStates.push(buttonState);
-											this.atwButtonsModes.push(buttonMode);
-											this.atwButtonsNames.push(buttonName);
-											this.atwButtonsDisplayType.push(buttonDisplayType);
-											break;
-										case 22: //FORCE HEAT
-											buttonState = power ? (forcedHotWaterMode === true) : false;
-											this.atwButtonsStates.push(buttonState);
-											this.atwButtonsModes.push(buttonMode);
-											this.atwButtonsNames.push(buttonName);
-											this.atwButtonsDisplayType.push(buttonDisplayType);
-											break;
-										case 30: //PHYSICAL LOCK CONTROL
-											buttonState = (prohibitHotWater === true);
-											this.atwButtonsStates.push(buttonState);
-											this.atwButtonsModes.push(buttonMode);
-											this.atwButtonsNames.push(buttonName);
-											this.atwButtonsDisplayType.push(buttonDisplayType);
-											break;
-										case 40: //ZONE 1 ROOM
-											buttonState = power ? (operationModeZone1 === 0) : false;
-											this.atwButtonsStates.push(buttonState);
-											this.atwButtonsModes.push(buttonMode);
-											this.atwButtonsNames.push(buttonName);
-											this.atwButtonsDisplayType.push(buttonDisplayType);
-											break;
-										case 41: //FLOW
-											buttonState = power ? (operationModeZone1 === 1) : false;
-											this.atwButtonsStates.push(buttonState);
-											this.atwButtonsModes.push(buttonMode);
-											this.atwButtonsNames.push(buttonName);
-											this.atwButtonsDisplayType.push(buttonDisplayType);
-											break;
-										case 42: //CURVE
-											buttonState = power ? (operationModeZone1 === 2) : false;
-											this.atwButtonsStates.push(buttonState);
-											this.atwButtonsModes.push(buttonMode);
-											this.atwButtonsNames.push(buttonName);
-											this.atwButtonsDisplayType.push(buttonDisplayType);
-											break;
-										case 50: //PHYSICAL LOCK CONTROL
-											buttonState = (prohibitZone1 === true);
-											this.atwButtonsStates.push(buttonState);
-											this.atwButtonsModes.push(buttonMode);
-											this.atwButtonsNames.push(buttonName);
-											this.atwButtonsDisplayType.push(buttonDisplayType);
-											break;
-										case 60: //ZONE 2 ROOM
-											buttonState = power ? (operationModeZone2 === 0) : false;
-											this.atwButtonsStates.push(buttonState);
-											this.atwButtonsModes.push(buttonMode);
-											this.atwButtonsNames.push(buttonName);
-											this.atwButtonsDisplayType.push(buttonDisplayType);
-											break;
-										case 61: //FLOW
-											buttonState = power ? (operationModeZone2 === 1) : false;
-											this.atwButtonsStates.push(buttonState);
-											this.atwButtonsModes.push(buttonMode);
-											this.atwButtonsNames.push(buttonName);
-											this.atwButtonsDisplayType.push(buttonDisplayType);
-											break;
-										case 62: //CURVE
-											buttonState = power ? (operationModeZone2 === 2) : false;
-											this.atwButtonsStates.push(buttonState);
-											this.atwButtonsModes.push(buttonMode);
-											this.atwButtonsNames.push(buttonName);
-											this.atwButtonsDisplayType.push(buttonDisplayType);
-											break;
-										case 70: //PHYSICAL LOCK CONTROL
-											buttonState = (prohibitZone2 === true);
-											this.atwButtonsStates.push(buttonState);
-											this.atwButtonsModes.push(buttonMode);
-											this.atwButtonsNames.push(buttonName);
-											this.atwButtonsDisplayType.push(buttonDisplayType);
-											break;
-									};
-								};
-							};
-
-							this.atwButtonsConfiguredCount = this.atwButtonsStates.length;
-							for (let i = 0; i < this.atwButtonsConfiguredCount; i++) {
-								const buttonState = this.atwButtonsStates[i];
-								const buttonDisplayType = this.atwButtonsDisplayType[i];
-								const characteristicType = [Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
-								if (this.atwButtonsServices) {
-									this.atwButtonsServices[i]
-										.updateCharacteristic(characteristicType, buttonState)
-								};
-							};
-						};
-
-						if (presetsCount > 0) {
-							this.atwPresetsStates = [];
-
-							for (let i = 0; i < presetsCount; i++) {
-								//get preset
-								const preset = presets[i];
-								const presetState = (preset.Power = power && preset.EcoHotWater === ecoHotWater && preset.OperationModeZone1 === operationModeZone1 && preset.OperationModeZone2 === operationModeZone2 && preset.SetTankWaterTemperature === setTankWaterTemperature && preset.SetTemperatureZone1 === setTemperatureZone1 && preset.SetTemperatureZone2 === setTemperatureZone2 && preset.ForcedHotWaterMode === forcedHotWaterMode && preset.SetHeatFlowTemperatureZone1 === setHeatFlowTemperatureZone1 && preset.SetHeatFlowTemperatureZone2 === setHeatFlowTemperatureZone2 && preset.SetCoolFlowTemperatureZone1 === setCoolFlowTemperatureZone1 && preset.SetCoolFlowTemperatureZone2 === setCoolFlowTemperatureZone2) ? true : false;
-								this.atwPresetsStates.push(presetState);
-
-								if (this.atwPresetsServices) {
-									this.atwPresetsServices[i]
-										.updateCharacteristic(Characteristic.On, presetState)
-								};
-							};
-						};
-
-						//start prepare accessory
 						if (this.startPrepareAccessory) {
-							try {
-								await this.prepareAccessory();
-							} catch (error) {
-								this.log.error(`${deviceTypeText} ${deviceName}, prepare accessory error: ${error}`);
+							this.operationModesSetPropsMinValue.push(operationModeSetPropsMinValue);
+							this.operationModesSetPropsMaxValue.push(operationModeSetPropsMaxValue);
+							this.operationModesSetPropsValidValues.push(operationModeSetPropsValidValues);
+							this.temperaturesSetPropsMinValue.push(temperatureSetPropsMinValue);
+							this.temperaturesSetPropsMaxValue.push(temperatureSetPropsMaxValue);
+						};
+					};
+
+					//update buttons state
+					if (buttonsCount > 0) {
+						this.atwButtonsStates = [];
+						this.atwButtonsModes = [];
+						this.atwButtonsNames = [];
+						this.atwButtonsDisplayType = [];
+
+						for (const button of this.atwButtons) {
+							const buttonMode = button.mode || 0;
+							const buttonName = button.name || 'Not configured';
+							const buttonDisplayType = button.displayType || -1;
+
+							if (buttonDisplayType >= 0) {
+								let buttonState = false;
+								switch (buttonMode) {
+									case 0: //POWER ON,OFF
+										buttonState = (power === true);
+										this.atwButtonsStates.push(buttonState);
+										this.atwButtonsModes.push(buttonMode);
+										this.atwButtonsNames.push(buttonName);
+										this.atwButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 1: //HEAT PUMP HEAT
+										buttonState = power ? (operationMode === 0) : false;
+										this.atwButtonsStates.push(buttonState);
+										this.atwButtonsModes.push(buttonMode);
+										this.atwButtonsNames.push(buttonName);
+										this.atwButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 2: //COOL
+										buttonState = power ? (operationMode === 1) : false;
+										this.atwButtonsStates.push(buttonState);
+										this.atwButtonsModes.push(buttonMode);
+										this.atwButtonsNames.push(buttonName);
+										this.atwButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 53: //HOLIDAY
+										buttonState = power ? (holidayMode === true) : false;
+										this.atwButtonsStates.push(buttonState);
+										this.atwButtonsModes.push(buttonMode);
+										this.atwButtonsNames.push(buttonName);
+										this.atwButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 10: //ALL ZONES PHYSICAL LOCK CONTROL
+										buttonState = power ? (prohibitZone1 === true && prohibitHotWater === true && prohibitZone2 === true) : false;
+										this.atwButtonsStates.push(buttonState);
+										this.atwButtonsModes.push(buttonMode);
+										this.atwButtonsNames.push(buttonName);
+										this.atwButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 20: //HOT WATER AUTO
+										buttonState = power ? (forcedHotWaterMode === false) : false;
+										this.atwButtonsStates.push(buttonState);
+										this.atwButtonsModes.push(buttonMode);
+										this.atwButtonsNames.push(buttonName);
+										this.atwButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 21: //ECO
+										buttonState = power ? (ecoHotWater === true) : false;
+										this.atwButtonsStates.push(buttonState);
+										this.atwButtonsModes.push(buttonMode);
+										this.atwButtonsNames.push(buttonName);
+										this.atwButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 22: //FORCE HEAT
+										buttonState = power ? (forcedHotWaterMode === true) : false;
+										this.atwButtonsStates.push(buttonState);
+										this.atwButtonsModes.push(buttonMode);
+										this.atwButtonsNames.push(buttonName);
+										this.atwButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 30: //PHYSICAL LOCK CONTROL
+										buttonState = (prohibitHotWater === true);
+										this.atwButtonsStates.push(buttonState);
+										this.atwButtonsModes.push(buttonMode);
+										this.atwButtonsNames.push(buttonName);
+										this.atwButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 40: //ZONE 1 ROOM
+										buttonState = power ? (operationModeZone1 === 0) : false;
+										this.atwButtonsStates.push(buttonState);
+										this.atwButtonsModes.push(buttonMode);
+										this.atwButtonsNames.push(buttonName);
+										this.atwButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 41: //FLOW
+										buttonState = power ? (operationModeZone1 === 1) : false;
+										this.atwButtonsStates.push(buttonState);
+										this.atwButtonsModes.push(buttonMode);
+										this.atwButtonsNames.push(buttonName);
+										this.atwButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 42: //CURVE
+										buttonState = power ? (operationModeZone1 === 2) : false;
+										this.atwButtonsStates.push(buttonState);
+										this.atwButtonsModes.push(buttonMode);
+										this.atwButtonsNames.push(buttonName);
+										this.atwButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 50: //PHYSICAL LOCK CONTROL
+										buttonState = (prohibitZone1 === true);
+										this.atwButtonsStates.push(buttonState);
+										this.atwButtonsModes.push(buttonMode);
+										this.atwButtonsNames.push(buttonName);
+										this.atwButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 60: //ZONE 2 ROOM
+										buttonState = power ? (operationModeZone2 === 0) : false;
+										this.atwButtonsStates.push(buttonState);
+										this.atwButtonsModes.push(buttonMode);
+										this.atwButtonsNames.push(buttonName);
+										this.atwButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 61: //FLOW
+										buttonState = power ? (operationModeZone2 === 1) : false;
+										this.atwButtonsStates.push(buttonState);
+										this.atwButtonsModes.push(buttonMode);
+										this.atwButtonsNames.push(buttonName);
+										this.atwButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 62: //CURVE
+										buttonState = power ? (operationModeZone2 === 2) : false;
+										this.atwButtonsStates.push(buttonState);
+										this.atwButtonsModes.push(buttonMode);
+										this.atwButtonsNames.push(buttonName);
+										this.atwButtonsDisplayType.push(buttonDisplayType);
+										break;
+									case 70: //PHYSICAL LOCK CONTROL
+										buttonState = (prohibitZone2 === true);
+										this.atwButtonsStates.push(buttonState);
+										this.atwButtonsModes.push(buttonMode);
+										this.atwButtonsNames.push(buttonName);
+										this.atwButtonsDisplayType.push(buttonDisplayType);
+										break;
+								};
 							};
+						};
+
+						this.atwButtonsConfiguredCount = this.atwButtonsStates.length;
+						for (let i = 0; i < this.atwButtonsConfiguredCount; i++) {
+							const buttonState = this.atwButtonsStates[i];
+							const buttonDisplayType = this.atwButtonsDisplayType[i];
+							const characteristicType = [Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
+							if (this.atwButtonsServices) {
+								this.atwButtonsServices[i]
+									.updateCharacteristic(characteristicType, buttonState)
+							};
+						};
+					};
+
+					//update presets state
+					if (presetsCount > 0) {
+						this.atwPresetsStates = [];
+
+						for (let i = 0; i < presetsCount; i++) {
+							//get preset
+							const preset = presets[i];
+							const presetState =
+								preset.Power === power
+								&& preset.EcoHotWater === ecoHotWater
+								&& preset.OperationModeZone1 === operationModeZone1
+								&& preset.OperationModeZone2 === operationModeZone2
+								&& preset.SetTankWaterTemperature === setTankWaterTemperature
+								&& preset.SetTemperatureZone1 === setTemperatureZone1
+								&& preset.SetTemperatureZone2 === setTemperatureZone2
+								&& preset.ForcedHotWaterMode === forcedHotWaterMode
+								&& preset.SetHeatFlowTemperatureZone1 === setHeatFlowTemperatureZone1
+								&& preset.SetHeatFlowTemperatureZone2 === setHeatFlowTemperatureZone2
+								&& preset.SetCoolFlowTemperatureZone1 === setCoolFlowTemperatureZone1
+								&& preset.SetCoolFlowTemperatureZone2 === setCoolFlowTemperatureZone2;
+							this.atwPresetsStates.push(presetState);
+
+							if (this.atwPresetsServices) {
+								this.atwPresetsServices[i]
+									.updateCharacteristic(Characteristic.On, presetState)
+							};
+						};
+					};
+
+					//start prepare accessory
+					if (this.startPrepareAccessory) {
+						try {
+							await this.prepareAccessory();
+						} catch (error) {
+							this.log.error(`${deviceTypeText} ${deviceName}, prepare accessory error: ${error}`);
 						};
 					};
 				}).on('message', (message) => {
@@ -1091,10 +1119,7 @@ class melCloudDevice {
 					this.mqtt.send(topic, message);
 				});
 				break;
-			case 2: //curtain
-
-				break;
-			case 3: //energy recovery ventilation
+			case 2: //energy recovery ventilation
 				this.melCloudErv = new MelCloudErv({
 					accountName: this.accountName,
 					contextKey: contextKey,
@@ -1105,7 +1130,7 @@ class melCloudDevice {
 					prefDir: prefDir
 				});
 
-				this.melCloudErv.on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareRevision, presets, presetsCount, hasAutoVentilationMode, hasBypassVentilationMode, hasAutomaticFanSpeed, numberOfFanSpeeds) => {
+				this.melCloudErv.on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareRevision, presets, presetsCount, hasAutoVentilationMode, hasBypassVentilationMode, hasAutomaticFanSpeed, numberOfFanSpeeds, heatCoolModes) => {
 					if (!this.disableLogDeviceInfo && this.displayDeviceInfo) {
 						this.log(`---- ${this.deviceTypeText}: ${this.deviceName} ----`);
 						this.log(`Account: ${this.accountName}`);
@@ -1129,126 +1154,78 @@ class melCloudDevice {
 					this.ervHasBypassVentilationMode = hasBypassVentilationMode;
 					this.ervHasAutomaticFanSpeed = hasAutomaticFanSpeed;
 					this.ervNumberOfFanSpeeds = numberOfFanSpeeds;
+					this.ervHeatCoolModes = heatCoolModes;
 					this.ervPresets = presets;
 					this.ervPresetsCount = this.ervPresetsEnabled ? presetsCount : 0;
-				}).on('deviceState', async (deviceState, power, roomTemperature, supplyTemperature, outdoorTemperature, nightPurgeMode, roomCO2Level, setTemperature, setFanSpeed, operationMode, ventilationMode, actualVentilationMode, hideRoomTemperature, hideSupplyTemperature, hideOutdoorTemperature) => {
+				}).on('deviceState', async (deviceState, roomTemperature, supplyTemperature, outdoorTemperature, roomCO2Level, nightPurgeMode, setTemperature, setFanSpeed, operationMode, ventilationMode, actualVentilationMode, hideRoomTemperature, hideSupplyTemperature, hideOutdoorTemperature, power, offline) => {
 					//device info
 					const displayMode = this.ervDisplayMode;
 					const hasAutoVentilationMode = this.ervHasAutoVentilationMode;
 					const hasBypassVentilationMode = this.ervHasBypassVentilationMode;
 					const hasAutomaticFanSpeed = this.ervHasAutomaticFanSpeed;
 					const numberOfFanSpeeds = this.ervNumberOfFanSpeeds;
+					const heatCoolModes = this.ervHeatCoolModes;
 					const buttonsCount = this.ervButtonsCount;
 					const presets = this.ervPresets;
 					const presetsCount = this.ervPresetsCount;
 
 					//device state
-					this.deviceState = deviceState;
-					this.power = power;
+					this.deviceState = deviceState || {};
+					this.power = power || false;
+					this.offline = offline || false
 
 					//operating mode
 					let currentOperationMode = 0;
 					let targetOperationMode = 0;
-					let targetOperationModeSetPropsMinValue = 0;
-					let targetOperationModeSetPropsMaxValue = 3;
-					let targetOperationModeSetPropsValidValues = [0, 1, 2, 3];
-					switch (hasAutoVentilationMode) {
-						case 0: //AUTO MODE NOT SUPPORTED - RECOVERY, BYPAS
-							switch (displayMode) {
-								case 0: //Heater Cooler INACTIVE, IDLE, HEATING, COOLING - current, AUTO, HEAT, COOL - target
-									currentOperationMode = power ? [2, 3][ventilationMode] : 0;
-									targetOperationMode = [1, 2][ventilationMode];
-									targetOperationModeSetPropsMinValue = 1;
-									targetOperationModeSetPropsMaxValue = 2;
-									targetOperationModeSetPropsValidValues = [1, 2];
+					let fanSpeed = 0;
+					let lockPhysicalControls = 0;
+
+					let operationModeSetPropsMinValue = 0;
+					let operationModeSetPropsMaxValue = 3;
+					let operationModeSetPropsValidValues = [0, 1, 2, 3];
+					let fanSpeedSetPropsMaxValue = 2;
+
+					switch (displayMode) {
+						case 0: //Heater Cooler
+							switch (hasAutoVentilationMode) {
+								case 0: //AUTO MODE NOT SUPPORTED - LOSSNAY, BYPAS
+									currentOperationMode = !power ? 0 : [2, 3, [2, 3][actualVentilationMode]][ventilationMode]; //INACTIVE, IDLE, HEATING, COOLING
+									targetOperationMode = [1, 2, 0][ventilationMode]; //AUTO, HEAT, COOL
+									operationModeSetPropsMinValue = 1;
+									operationModeSetPropsMaxValue = 2;
+									operationModeSetPropsValidValues = [1, 2];
 									break;
-								case 1: //Thermostat //OFF, HEAT, COOL - current, //OFF, HEAT, COOL, AUTO - target
-									currentOperationMode = power ? [1, 2][ventilationMode] : 0;
-									targetOperationMode = [1, 2][ventilationMode];
-									targetOperationModeSetPropsMinValue = 0;
-									targetOperationModeSetPropsMaxValue = 2;
-									targetOperationModeSetPropsValidValues = [0, 1, 2];
-									break;
-							};
-							break;
-						case 1://AUTO MODE SUPPORTED - RECOVERY, BYPAS, AUTO
-							switch (displayMode) {
-								case 0: //Heater Cooler INACTIVE, IDLE, HEATING, COOLING - current, AUTO, HEAT, COOL - target
-									currentOperationMode = power ? [2, 3, (setTemperature < roomTemperature) ? 2 : 3][ventilationMode] : 0;
-									targetOperationMode = [1, 2, 0][ventilationMode];
-									targetOperationModeSetPropsMinValue = 0;
-									targetOperationModeSetPropsMaxValue = 2;
-									targetOperationModeSetPropsValidValues = [0, 1, 2];
-									break;
-								case 1: //Thermostat //OFF, HEAT, COOL - current, //OFF, HEAT, COOL, AUTO - target
-									currentOperationMode = power ? [1, 2, (setTemperature < roomTemperature) ? 1 : 2][ventilationMode] : 0;
-									targetOperationMode = [1, 2, 3][ventilationMode];
-									targetOperationModeSetPropsMinValue = 0;
-									targetOperationModeSetPropsMaxValue = 3;
-									targetOperationModeSetPropsValidValues = [0, 1, 2, 3];
+								case 1://AUTO MODE SUPPORTED - LOSSNAY, BYPAS, AUTO
+									currentOperationMode = !power ? 0 : [2, 3, [2, 3][actualVentilationMode]][ventilationMode]; //INACTIVE, IDLE, HEATING, COOLING
+									targetOperationMode = [1, 2, 0][ventilationMode]; //AUTO, HEAT, COOL
+									operationModeSetPropsMinValue = 0;
+									operationModeSetPropsMaxValue = 2;
+									operationModeSetPropsValidValues = [0, 1, 2];
 									break;
 							};
-							break;
-					};
-					this.currentOperationMode = currentOperationMode;
-					this.targetOperationMode = targetOperationMode;
-					this.targetOperationModeSetPropsMinValue = targetOperationModeSetPropsMinValue;
-					this.targetOperationModeSetPropsMaxValue = targetOperationModeSetPropsMaxValue;
-					this.targetOperationModeSetPropsValidValues = targetOperationModeSetPropsValidValues;
 
-					//roomTemperature
-					this.roomTemperature = roomTemperature;
-					this.supplyTemperature = supplyTemperature;
-					this.outdoorTemperature = outdoorTemperature;
-					this.roomCO2Level = roomCO2Level;
-					this.setTemperature = setTemperature;
+							//fan speed mode
+							switch (numberOfFanSpeeds) {
+								case 2: //Fan speed mode 2
+									fanSpeed = hasAutomaticFanSpeed ? [3, 1, 2][setFanSpeed] : [0, 1, 2][setFanSpeed];
+									fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 3 : 2;
+									break;
+								case 3: //Fan speed mode 3
+									fanSpeed = hasAutomaticFanSpeed ? [4, 1, 2, 3][setFanSpeed] : [0, 1, 2, 3][setFanSpeed];
+									fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 4 : 3;
+									break;
+								case 4: //Fan speed mode 4
+									fanSpeed = hasAutomaticFanSpeed ? [5, 1, 2, 3, 4][setFanSpeed] : [0, 1, 2, 3, 4][setFanSpeed];
+									fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 5 : 4;
+									break;
+							};
 
-					//fan speed mode
-					let fanSpeed = 0; //STOPPED
-					let fanSpeedSetPropsMaxValue = 0;
+							//lock physical controls
+							lockPhysicalControls = 0;
 
-					switch (numberOfFanSpeeds) {
-						case 2: //Fan speed mode 2
-							fanSpeed = hasAutomaticFanSpeed ? [3, 1, 2][setFanSpeed] : [0, 1, 2][setFanSpeed];
-							fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 3 : 2;
-							break;
-						case 3: //Fan speed mode 3
-							fanSpeed = hasAutomaticFanSpeed ? [4, 1, 2, 3][setFanSpeed] : [0, 1, 2, 3][setFanSpeed];
-							fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 4 : 3;
-							break;
-						case 4: //Fan speed mode 4
-							fanSpeed = hasAutomaticFanSpeed ? [5, 1, 2, 3, 4][setFanSpeed] : [0, 1, 2, 3, 4][setFanSpeed];
-							fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 5 : 4;
-							break;
-						case 5: //Fan speed mode 5
-							fanSpeed = hasAutomaticFanSpeed ? [6, 1, 2, 3, 4, 5][setFanSpeed] : [0, 1, 2, 3, 4, 5][setFanSpeed];
-							fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 6 : 5;
-							break;
-						case 6: //Fan speed mode 6
-							fanSpeed = hasAutomaticFanSpeed ? [7, 1, 2, 3, 4, 5, 6][setFanSpeed] : [0, 1, 2, 3, 4, 5, 6][setFanSpeed];
-							fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 7 : 6;
-							break;
-						case 7: //Fan speed mode 7
-							fanSpeed = hasAutomaticFanSpeed ? [8, 1, 2, 3, 4, 5, 6, 7][setFanSpeed] : [0, 1, 2, 3, 4, 5, 6, 7][setFanSpeed];
-							fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 8 : 7;
-							break;
-						case 8: //Fan speed mode 8
-							fanSpeed = hasAutomaticFanSpeed ? [9, 1, 2, 3, 4, 5, 6, 7, 8][setFanSpeed] : [0, 1, 2, 3, 4, 5, 6, 7, 8][setFanSpeed]
-							fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 9 : 8;
-							break;
-					};
-					this.fanSpeed = fanSpeed;
-					this.fanSpeedSetPropsMaxValue = fanSpeedSetPropsMaxValue;
-					this.setFanSpeed = setFanSpeed;
-
-					//lock physical controls
-					const lockPhysicalControls = 0;
-					this.lockPhysicalControls = lockPhysicalControls;
-
-					if (this.ervMelCloudService) {
-						switch (displayMode) {
-							case 0: //heater/cooler
-								this.ervMelCloudService
+							//update characteristics
+							if (this.ervMelCloudServices) {
+								this.ervMelCloudServices[0]
 									.updateCharacteristic(Characteristic.Active, power)
 									.updateCharacteristic(Characteristic.CurrentHeaterCoolerState, currentOperationMode)
 									.updateCharacteristic(Characteristic.TargetHeaterCoolerState, targetOperationMode)
@@ -1258,21 +1235,49 @@ class melCloudDevice {
 									.updateCharacteristic(Characteristic.RotationSpeed, fanSpeed)
 									.updateCharacteristic(Characteristic.LockPhysicalControls, lockPhysicalControls)
 									.updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.useFahrenheit);
-								break;
-							case 1: //thermostat
-								this.ervMelCloudService
+							};
+							break;
+						case 1: //Thermostat
+							switch (hasAutoVentilationMode) {
+								case 0: //AUTO MODE NOT SUPPORTED - LOSSNAY, BYPAS
+									currentOperationMode = !power ? 0 : [1, 2, [1, 2][actualVentilationMode]][ventilationMode]; //OFF, HEAT, COOL
+									targetOperationMode = !power ? 0 : [1, 2, 3][ventilationMode]; //OFF, HEAT, COOL, AUTO
+									operationModeSetPropsMinValue = 0;
+									operationModeSetPropsMaxValue = 2;
+									operationModeSetPropsValidValues = [0, 1, 2];
+									break;
+								case 1://AUTO MODE SUPPORTED - LOSSNAY, BYPAS, AUTO
+									currentOperationMode = !power ? 0 : [1, 2, [1, 2][actualVentilationMode]][ventilationMode]; //OFF, HEAT, COOL
+									targetOperationMode = !power ? 0 : [1, 2, 3][ventilationMode]; //OFF, HEAT, COOL, AUTO
+									operationModeSetPropsMinValue = 0;
+									operationModeSetPropsMaxValue = 3;
+									operationModeSetPropsValidValues = [0, 1, 2, 3];
+									break;
+							};
+
+							//update characteristics
+							if (this.ervMelCloudServices) {
+								this.ervMelCloudServices[0]
 									.updateCharacteristic(Characteristic.CurrentHeatingCoolingState, currentOperationMode)
 									.updateCharacteristic(Characteristic.TargetHeatingCoolingState, targetOperationMode)
 									.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
 									.updateCharacteristic(Characteristic.TargetTemperature, setTemperature)
-									.updateCharacteristic(Characteristic.HeatingThresholdTemperature, setTemperature)
-									.updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature)
 									.updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.useFahrenheit);
-								break;
-						};
-
+							};
+							break;
 					};
 
+					this.currentOperationMode = currentOperationMode;
+					this.targetOperationMode = targetOperationMode;
+					this.roomTemperature = roomTemperature;
+					this.supplyTemperature = supplyTemperature;
+					this.outdoorTemperature = outdoorTemperature;
+					this.roomCO2Level = roomCO2Level;
+					this.setTemperature = setTemperature;
+					this.fanSpeed = fanSpeed;
+					this.lockPhysicalControls = lockPhysicalControls;
+
+					//update buttons state
 					if (buttonsCount > 0) {
 						this.ervButtonsStates = [];
 						this.ervButtonsModes = [];
@@ -1357,56 +1362,28 @@ class melCloudDevice {
 										this.ervButtonsNames.push(buttonName);
 										this.ervButtonsDisplayType.push(buttonDisplayType);
 										break;
-									case 15: //FAN SPEED  MODE 5
-										buttonState = power ? (setFanSpeed === 5) : false;
-										this.ervButtonsStates.push(buttonState);
-										this.ervButtonsModes.push(buttonMode);
-										this.ervButtonsNames.push(buttonName);
-										this.ervButtonsDisplayType.push(buttonDisplayType);
-										break;
-									case 16: //FAN SPEED  MODE 6
-										buttonState = power ? (setFanSpeed === 6) : false;
-										this.ervButtonsStates.push(buttonState);
-										this.ervButtonsModes.push(buttonMode);
-										this.ervButtonsNames.push(buttonName);
-										this.ervButtonsDisplayType.push(buttonDisplayType);
-										break;
-									case 17: //FAN SPEED  MODE 7
-										buttonState = power ? (setFanSpeed === 7) : false;
-										this.ervButtonsStates.push(buttonState);
-										this.ervButtonsModes.push(buttonMode);
-										this.ervButtonsNames.push(buttonName);
-										this.ervButtonsDisplayType.push(buttonDisplayType);
-										break;
-									case 18: //FAN SPEED  MODE 8
-										buttonState = power ? (setFanSpeed === 8) : false;
-										this.ervButtonsStates.push(buttonState);
-										this.ervButtonsModes.push(buttonMode);
-										this.ervButtonsNames.push(buttonName);
-										this.ervButtonsDisplayType.push(buttonDisplayType);
-										break;
-									case 20: //PHYSICAL LOCK CONTROLS
+									case 15: //PHYSICAL LOCK CONTROLS
 										buttonState = (lockPhysicalControls === 1);
 										this.ervButtonsStates.push(buttonState);
 										this.ervButtonsModes.push(buttonMode);
 										this.ervButtonsNames.push(buttonName);
 										this.ervButtonsDisplayType.push(buttonDisplayType);
 										break;
-									case 21: //ROOM TEMP HIDE
+									case 16: //ROOM TEMP HIDE
 										buttonState = (hideRoomTemperature === true);
 										this.ervButtonsStates.push(buttonState);
 										this.ervButtonsModes.push(buttonMode);
 										this.ervButtonsNames.push(buttonName);
 										this.ervButtonsDisplayType.push(buttonDisplayType);
 										break;
-									case 22: //SUPPLY TEMP HIDE
+									case 17: //SUPPLY TEMP HIDE
 										buttonState = (hideSupplyTemperature === true);
 										this.ervButtonsStates.push(buttonState);
 										this.ervButtonsModes.push(buttonMode);
 										this.ervButtonsNames.push(buttonName);
 										this.ervButtonsDisplayType.push(buttonDisplayType);
 										break;
-									case 23: //OUTDOOR TEMP HIDE
+									case 18: //OUTDOOR TEMP HIDE
 										buttonState = (hideOutdoorTemperature === true);
 										this.ervButtonsStates.push(buttonState);
 										this.ervButtonsModes.push(buttonMode);
@@ -1429,13 +1406,17 @@ class melCloudDevice {
 						};
 					};
 
+					//update presets state
 					if (presetsCount > 0) {
 						this.ervPresetsStates = [];
 
 						for (let i = 0; i < presetsCount; i++) {
 							//get preset
 							const preset = presets[i];
-							const presetState = (preset.Power = power && preset.VentilationMode === ventilationMode && preset.FanSpeed === setFanSpeed) ? true : false;
+							const presetState =
+								preset.Power === power
+								&& preset.VentilationMode === ventilationMode
+								&& preset.FanSpeed === setFanSpeed;
 							this.ervPresetsStates.push(presetState);
 
 							if (this.ervPresetsServices) {
@@ -1444,9 +1425,15 @@ class melCloudDevice {
 							};
 						};
 					};
+
 					//start prepare accessory
 					if (this.startPrepareAccessory) {
 						try {
+							this.operationModeSetPropsMinValue = operationModeSetPropsMinValue;
+							this.operationModeSetPropsMaxValue = operationModeSetPropsMaxValue;
+							this.operationModeSetPropsValidValues = operationModeSetPropsValidValues;
+							this.fanSpeedSetPropsMaxValue = fanSpeedSetPropsMaxValue;
+
 							await this.prepareAccessory();
 						} catch (error) {
 							this.log.error(`${deviceTypeText} ${deviceName}, prepare accessory error: ${error}`);
@@ -1461,6 +1448,9 @@ class melCloudDevice {
 				}).on('mqtt', (topic, message) => {
 					this.mqtt.send(topic, message);
 				});
+				break;
+			default: //unknown system detected
+				this.log(`${deviceTypeText}: ${deviceName}, Unknown system detected.`);
 				break;
 		};
 	};
@@ -1500,7 +1490,6 @@ class melCloudDevice {
 						const ataDisplayMode = this.ataDisplayMode;
 						const ataHasAutomaticFanSpeed = this.ataHasAutomaticFanSpeed;
 						const ataModelSupportsFanSpeed = this.ataModelSupportsFanSpeed;
-						const ataModelSupportsAuto = this.ataModelSupportsAuto;
 						const ataNumberOfFanSpeeds = this.ataNumberOfFanSpeeds;
 						const ataSwingFunction = this.ataSwingFunction;
 						const ataButtonsCount = this.ataButtonsConfiguredCount;
@@ -1511,317 +1500,340 @@ class melCloudDevice {
 						const ataTargetHeatingTempSetPropsMaxValue = [31, 88][this.useFahrenheit];
 						const ataTargetCoolingTempSetPropsMinValue = [10, 50][this.useFahrenheit];
 						const ataTargetCoolingTempSetPropsMaxValue = [31, 88][this.useFahrenheit];
-
 						const ataServiceName = `${accessoryName} ${deviceTypeText}`;
-						this.ataMelCloudService = ataDisplayMode ? accessory.addService(Service.Thermostat, ataServiceName) : accessory.addService(Service.HeaterCooler, ataServiceName);
-						//Only for Heater Cooler
-						if (ataDisplayMode === 0) {
-							this.ataMelCloudService.getCharacteristic(Characteristic.Active)
-								.onGet(async () => {
-									const state = this.power;
-									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Power: ${state ? 'ON' : 'OFF'}`);
-									return state;
-								})
-								.onSet(async (state) => {
-									try {
-										deviceState.Power = state;
-										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power;
 
-										await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState);
-										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set power: ${state ? 'ON' : 'OFF'}`);
-									} catch (error) {
-										this.log.error(`${deviceTypeText}: ${accessoryName}, Set power error: ${error}`);
-									};
-								});
-						};
-						this.ataMelCloudService.getCharacteristic(ataDisplayMode ? Characteristic.CurrentHeatingCoolingState : Characteristic.CurrentHeaterCoolerState)
-							.onGet(async () => {
-								const value = this.currentOperationMode;
-								const operationModeText = CONSTANS.AirConditioner.OperationMode[deviceState.OperationMode];
-								const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Heating cooling mode: ${operationModeText}`);
-								return value;
-							});
-						this.ataMelCloudService.getCharacteristic(ataDisplayMode ? Characteristic.TargetHeatingCoolingState : Characteristic.TargetHeaterCoolerState)
-							.setProps({
-								minValue: this.targetOperationModeSetPropsMinValue,
-								maxValue: this.targetOperationModeSetPropsMaxValue,
-								validValues: this.targetOperationModeSetPropsValidValues
-							})
-							.onGet(async () => {
-								//1 = HEAT, 2 = DRY 3 = COOL, 7 = FAN, 8 = AUTO
-								const value = this.targetOperationMode;
-								return value;
-							})
-							.onSet(async (value) => {
-								try {
-									switch (ataModelSupportsAuto) {
-										case 0: //AUTO MODE NOT SUPPORTED
-											switch (value) {
-												case 0: //OFF, AUTO
-													deviceState.Power = ataDisplayMode ? false : true;
-													deviceState.OperationMode = deviceState.OperationMode;
-													deviceState.EffectiveFlags = ataDisplayMode ? CONSTANS.AirConditioner.EffectiveFlags.Power : CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
-													break;
-												case 1: //HEAT
-													deviceState.Power = true;
-													deviceState.OperationMode = 1;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
-													break;
-												case 2: //COOL
-													deviceState.Power = true;
-													deviceState.OperationMode = 3;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
-													break;
-												case 3: //AUTO, OFF
-													deviceState.Power = ataDisplayMode ? true : false;
-													deviceState.OperationMode = deviceState.OperationMode;
-													deviceState.EffectiveFlags = ataDisplayMode ? CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode : CONSTANS.AirConditioner.EffectiveFlags.Power;
-													break;
-											};
-											break;
-										case 1: //AUTO MODE SUPPORTED
-											switch (value) {
-												case 0: //OFF, AUTO
-													deviceState.Power = ataDisplayMode ? false : true;
-													deviceState.OperationMode = ataDisplayMode ? deviceState.OperationMode : 8;
-													deviceState.EffectiveFlags = ataDisplayMode ? CONSTANS.AirConditioner.EffectiveFlags.Power : CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
-													break;
-												case 1: //HEAT
-													deviceState.Power = true;
-													deviceState.OperationMode = 1;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
-													break;
-												case 2: //COOL
-													deviceState.Power = true;
-													deviceState.OperationMode = 3;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
-													break;
-												case 3: //AUTO, OFF
-													deviceState.Power = ataDisplayMode ? true : false;
-													deviceState.OperationMode = ataDisplayMode ? 8 : deviceState.OperationMode;
-													deviceState.EffectiveFlags = ataDisplayMode ? CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode : CONSTANS.AirConditioner.EffectiveFlags.Power;
-													break;
-											};
-											break;
-									};
-
-									await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState);
-									const operationModeText = CONSTANS.AirConditioner.OperationMode[deviceState.OperationMode];
-									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set target heating cooling mode: ${operationModeText}`);
-								} catch (error) {
-									this.log.error(`${deviceTypeText}: ${accessoryName}, Set target heating cooling mode error: ${error}`);
-								};
-							});
-						//Only for Heater Cooler
-						if (ataDisplayMode === 0) {
-							if (ataModelSupportsFanSpeed) {
-								this.ataMelCloudService.getCharacteristic(Characteristic.RotationSpeed)
+						this.ataMelCloudServices = [];
+						switch (ataDisplayMode) {
+							case 0: //Heater Cooler
+								const ataMelCloudService = new Service.HeaterCooler(ataServiceName, 'HeaterCooler');
+								ataMelCloudService.getCharacteristic(Characteristic.Active)
+									.onGet(async () => {
+										const state = this.power;
+										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Power: ${state ? 'ON' : 'OFF'}`);
+										return state;
+									})
+									.onSet(async (state) => {
+										try {
+											deviceState.Power = state;
+											deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power;
+											await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState);
+											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set power: ${state ? 'ON' : 'OFF'}`);
+										} catch (error) {
+											this.log.error(`${deviceTypeText}: ${accessoryName}, Set power error: ${error}`);
+											ataMelCloudService.updateCharacteristic(Characteristic.Active, false)
+										};
+									});
+								ataMelCloudService.getCharacteristic(Characteristic.CurrentHeaterCoolerState)
+									.onGet(async () => {
+										const value = this.currentOperationMode;
+										const operationModeText = !this.power ? CONSTANS.AirConditioner.System[0] : CONSTANS.AirConditioner.DriveMode[deviceState.OperationMode];
+										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Operation mode: ${operationModeText}`);
+										return value;
+									});
+								ataMelCloudService.getCharacteristic(Characteristic.TargetHeaterCoolerState)
 									.setProps({
-										minValue: 0,
-										maxValue: this.fanSpeedSetPropsMaxValue,
-										minStep: 1
+										minValue: this.operationModeSetPropsMinValue,
+										maxValue: this.operationModeSetPropsMaxValue,
+										validValues: this.operationModeSetPropsValidValues
 									})
 									.onGet(async () => {
-										//AUTO, 1, 2, 3, 4, 5
-										const value = this.fanSpeed;
-										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Fan speed mode: ${CONSTANS.AirConditioner.SetFanSpeed[this.setFanSpeed]}`);
+										const value = this.targetOperationMode; //1 = HEAT, 2 = DRY 3 = COOL, 7 = FAN, 8 = AUTO
 										return value;
 									})
 									.onSet(async (value) => {
-										//fan speed mode
 										try {
-											let fanSpeedMode = 0;
-											let fanSpeedModeInfo = 0;
-
-											switch (ataNumberOfFanSpeeds) {
-												case 2: //Fan speed mode 2
-													fanSpeedMode = ataHasAutomaticFanSpeed ? [0, 1, 2, 0][value] : [1, 1, 2][value];
-													fanSpeedModeInfo = ataHasAutomaticFanSpeed ? [8, 1, 2, 0][value] : [8, 1, 2][value];
+											switch (value) {
+												case 0: //AUTO - AUTO
+													deviceState.Power = true;
+													deviceState.OperationMode = 8;
+													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
 													break;
-												case 3: //Fan speed mode 3
-													fanSpeedMode = ataHasAutomaticFanSpeed ? [0, 1, 2, 3, 0][value] : [1, 1, 2, 3][value];
-													fanSpeedModeInfo = ataHasAutomaticFanSpeed ? [8, 1, 2, 3, 0][value] : [8, 1, 2, 3][value];
+												case 1: //HEAT - HEAT
+													deviceState.Power = true;
+													deviceState.OperationMode = 1;
+													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
 													break;
-												case 4: //Fan speed mode 4
-													fanSpeedMode = ataHasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 0][value] : [1, 1, 2, 3, 4][value];
-													fanSpeedModeInfo = ataHasAutomaticFanSpeed ? [8, 1, 2, 3, 4, 0][value] : [8, 1, 2, 3, 4][value];
-													break;
-												case 5: //Fan speed mode 5
-													fanSpeedMode = ataHasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 0][value] : [1, 1, 2, 3, 4, 5][value];
-													fanSpeedModeInfo = ataHasAutomaticFanSpeed ? [8, 1, 2, 3, 4, 5, 0][value] : [8, 1, 2, 3, 4, 5][value];
-													break;
-												case 6: //Fan speed mode 6
-													fanSpeedMode = ataHasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 6, 0][value] : [1, 1, 2, 3, 4, 5, 6][value];
-													fanSpeedModeInfo = ataHasAutomaticFanSpeed ? [8, 1, 2, 3, 4, 5, 6, 0][value] : [8, 1, 2, 3, 4, 5, 6][value];
-													break;
-												case 7: //Fan speed mode 7
-													fanSpeedMode = ataHasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 6, 7, 0][value] : [1, 1, 2, 3, 4, 5, 6, 7][value];
-													fanSpeedModeInfo = ataHasAutomaticFanSpeed ? [8, 1, 2, 3, 4, 5, 6, 7, 0][value] : [8, 1, 2, 3, 4, 5, 6, 7][value];
-													break;
-												case 8: //Fan speed mode 8
-													fanSpeedMode = ataHasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 6, 7, 8, 0][value] : [1, 1, 2, 3, 4, 5, 6, 7, 8][value];
-													fanSpeedModeInfo = ataHasAutomaticFanSpeed ? [8, 1, 2, 3, 4, 5, 6, 7, 8, 0][value] : [8, 1, 2, 3, 4, 5, 6, 7, 8][value];
+												case 2: //COOL - COOL
+													deviceState.Power = true;
+													deviceState.OperationMode = 3;
+													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
 													break;
 											};
 
-											deviceState.Power = true;
-											deviceState.SetFanSpeed = fanSpeedMode;
-											deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
-
 											await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState);
-											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set fan speed mode: ${CONSTANS.AirConditioner.SetFanSpeed[fanSpeedModeInfo]}`);
+											const operationModeText = CONSTANS.AirConditioner.DriveMode[deviceState.OperationMode];
+											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set operation mode: ${operationModeText}`);
 										} catch (error) {
-											this.log.error(`${deviceTypeText}: ${accessoryName}, Set fan speed mode error: ${error}`);
+											this.log.error(`${deviceTypeText}: ${accessoryName}, Set operation mode error: ${error}`);
 										};
 									});
-							};
-							if (ataSwingFunction) {
-								this.ataMelCloudService.getCharacteristic(Characteristic.SwingMode)
+								if (ataModelSupportsFanSpeed) {
+									ataMelCloudService.getCharacteristic(Characteristic.RotationSpeed)
+										.setProps({
+											minValue: 0,
+											maxValue: this.fanSpeedSetPropsMaxValue,
+											minStep: 1
+										})
+										.onGet(async () => {
+											const value = this.fanSpeed; //AUTO, 1, 2, 3, 4, 5, 6
+											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Fan speed mode: ${CONSTANS.AirConditioner.FanSpeed[this.setFanSpeed]}`);
+											return value;
+										})
+										.onSet(async (value) => {
+											try {
+												let fanSpeedMode = 0;
+												let fanSpeedModeInfo = 0;
+												switch (ataNumberOfFanSpeeds) {
+													case 2: //Fan speed mode 2
+														fanSpeedMode = ataHasAutomaticFanSpeed ? [0, 1, 2, 0][value] : [1, 1, 2][value];
+														fanSpeedModeInfo = ataHasAutomaticFanSpeed ? [8, 1, 2, 0][value] : [8, 1, 2][value];
+														break;
+													case 3: //Fan speed mode 3
+														fanSpeedMode = ataHasAutomaticFanSpeed ? [0, 1, 2, 3, 0][value] : [1, 1, 2, 3][value];
+														fanSpeedModeInfo = ataHasAutomaticFanSpeed ? [8, 1, 2, 3, 0][value] : [8, 1, 2, 3][value];
+														break;
+													case 4: //Fan speed mode 4
+														fanSpeedMode = ataHasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 0][value] : [1, 1, 2, 3, 4][value];
+														fanSpeedModeInfo = ataHasAutomaticFanSpeed ? [8, 1, 2, 3, 4, 0][value] : [8, 1, 2, 3, 4][value];
+														break;
+													case 5: //Fan speed mode 5
+														fanSpeedMode = ataHasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 0][value] : [1, 1, 2, 3, 4, 5][value];
+														fanSpeedModeInfo = ataHasAutomaticFanSpeed ? [8, 1, 2, 3, 4, 5, 0][value] : [8, 1, 2, 3, 4, 5][value];
+														break;
+													case 6: //Fan speed mode 6
+														fanSpeedMode = ataHasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 6, 0][value] : [1, 1, 2, 3, 4, 5, 6][value];
+														fanSpeedModeInfo = ataHasAutomaticFanSpeed ? [8, 1, 2, 3, 4, 5, 6, 0][value] : [8, 1, 2, 3, 4, 5, 6][value];
+														break;
+												};
+
+												deviceState.Power = true;
+												deviceState.SetFanSpeed = fanSpeedMode;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
+
+												await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState);
+												const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set fan speed mode: ${CONSTANS.AirConditioner.FanSpeed[fanSpeedModeInfo]}`);
+											} catch (error) {
+												this.log.error(`${deviceTypeText}: ${accessoryName}, Set fan speed mode error: ${error}`);
+											};
+										});
+								};
+								if (ataSwingFunction) {
+									ataMelCloudService.getCharacteristic(Characteristic.SwingMode)
+										.onGet(async () => {
+											//Vane Horizontal: Auto, 1, 2, 3, 4, 5, 12 = Swing
+											//Vane Vertical: Auto, 1, 2, 3, 4, 5, 7 = Swing
+											const value = this.swingMode;
+											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Vane swing mode: ${CONSTANS.AirConditioner.AirDirection[value ? 6 : 0]}`);
+											return value;
+										})
+										.onSet(async (value) => {
+											try {
+												deviceState.Power = true;
+												deviceState.VaneHorizontal = value ? 12 : 0;
+												deviceState.VaneVertical = value ? 7 : 0;
+												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
+												await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState);
+												const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set vane swing mode: ${CONSTANS.AirConditioner.AirDirection[value ? 6 : 0]}`);
+											} catch (error) {
+												this.log.error(`${deviceTypeText}: ${accessoryName}, Set vane swing mode error: ${error}`);
+											};
+										});
+								};
+								ataMelCloudService.getCharacteristic(Characteristic.CurrentTemperature)
+									.setProps({
+										minValue: -35,
+										maxValue: 150,
+										minStep: 0.5
+									})
 									.onGet(async () => {
-										//Vane Horizontal: Auto, 1, 2, 3, 4, 5, 12 = Swing
-										//Vane Vertical: Auto, 1, 2, 3, 4, 5, 7 = Swing
-										const value = this.swingMode;
-										const swingMode = value ? 6 : 0;
-										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Vane swing mode: ${CONSTANS.AirConditioner.SwingMode[swingMode]}`);
+										const value = this.roomTemperature;
+										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Room temperature: ${value}${temperatureUnit}`);
+										return value;
+									});
+								ataMelCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
+									.setProps({
+										minValue: ataTargetHeatingTempSetPropsMinValue,
+										maxValue: ataTargetHeatingTempSetPropsMaxValue,
+										minStep: tempSetPropsMinStep
+									})
+									.onGet(async () => {
+										const value = this.setTemperature;
+										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Heating threshold temperature: ${value}${temperatureUnit}`);
 										return value;
 									})
 									.onSet(async (value) => {
 										try {
-											const swingMode = value ? 6 : 0;
 											deviceState.Power = true;
-											deviceState.VaneHorizontal = value ? 12 : 0;
-											deviceState.VaneVertical = value ? 7 : 0;
-											deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
-
+											deviceState.SetTemperature = value;
+											deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.SetTemperature;
 											await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState);
-											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set vane swing mode: ${CONSTANS.AirConditioner.SwingMode[swingMode]}`);
+											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set heating threshold temperature: ${value}${temperatureUnit}`);
 										} catch (error) {
-											this.log.error(`${deviceTypeText}: ${accessoryName}, Set vane swing mode error: ${error}`);
+											this.log.error(`${deviceTypeText}: ${accessoryName}, Set heating threshold temperature error: ${error}`);
 										};
 									});
-							};
+								ataMelCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
+									.setProps({
+										minValue: ataTargetCoolingTempSetPropsMinValue,
+										maxValue: ataTargetCoolingTempSetPropsMaxValue,
+										minStep: tempSetPropsMinStep
+									})
+									.onGet(async () => {
+										const value = this.setTemperature;
+										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Cooling threshold temperature: ${value}${temperatureUnit}`);
+										return value;
+									})
+									.onSet(async (value) => {
+										try {
+											deviceState.Power = true;
+											deviceState.SetTemperature = value;
+											deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.SetTemperature;
+											await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState);
+											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set cooling threshold temperature: ${value}${temperatureUnit}`);
+										} catch (error) {
+											this.log.error(`${deviceTypeText}: ${accessoryName}, Set cooling threshold temperature error: ${error}`);
+										};
+									});
+								ataMelCloudService.getCharacteristic(Characteristic.LockPhysicalControls)
+									.onGet(async () => {
+										const value = this.lockPhysicalControls;
+										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Lock physical controls: ${value ? 'LOCKED' : 'UNLOCKED'}`);
+										return value;
+									})
+									.onSet(async (value) => {
+										try {
+											value = value ? true : false;
+											deviceState.ProhibitSetTemperature = value;
+											deviceState.ProhibitOperationMode = value;
+											deviceState.ProhibitPower = value;
+											await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState);
+											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set locl physical controls: ${value ? 'LOCK' : 'UNLOCK'}`);
+										} catch (error) {
+											this.log.error(`${deviceTypeText}: ${accessoryName}, Set lock physical controls error: ${error}`);
+										};
+									});
+								ataMelCloudService.getCharacteristic(Characteristic.TemperatureDisplayUnits)
+									.onGet(async () => {
+										const value = this.useFahrenheit;
+										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Temperature display unit: ${temperatureUnit}`);
+										return value;
+									})
+									.onSet(async (value) => {
+										try {
+											melCloudInfo.UseFahrenheit = value ? true : false;
+											await this.melCloudAta.send(CONSTANS.ApiUrls.UpdateApplicationOptions, melCloudInfo, true);
+											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
+											this.melCloudInfo = melCloudInfo;
+										} catch (error) {
+											this.log.error(`${deviceTypeText}: ${accessoryName}, Set temperature display unit error: ${error}`);
+										};
+									});
+								this.ataMelCloudServices.push(ataMelCloudService);
+								accessory.addService(this.ataMelCloudServices[0]);
+								break;
+							case 1: //Thermostat
+								const ataMelCloudServiceT = new Service.Thermostat(ataServiceName, 'Thermostat');
+								ataMelCloudServiceT.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
+									.onGet(async () => {
+										const value = this.currentOperationMode;
+										const operationModeText = !this.power ? CONSTANS.HeatPump.ControlType[2] : CONSTANS.HeatPump.OperationMode[deviceState.OperationMode];
+										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Operation mode: ${operationModeText}`);
+										return value;
+									});
+								ataMelCloudServiceT.getCharacteristic(Characteristic.TargetHeatingCoolingState)
+									.setProps({
+										minValue: this.operationModeSetPropsMinValue,
+										maxValue: this.operationModeSetPropsMaxValue,
+										validValues: this.operationModeSetPropsValidValues
+									})
+									.onGet(async () => {
+										const value = this.targetOperationMode; //1 = HEAT, 2 = DRY 3 = COOL, 7 = FAN, 8 = AUTO
+										return value;
+									})
+									.onSet(async (value) => {
+										try {
+											switch (value) {
+												case 0: //OFF - POWER OFF
+													deviceState.Power = false;
+													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power;
+													break;
+												case 1: //HEAT - HEAT
+													deviceState.Power = true;
+													deviceState.OperationMode = 1;
+													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
+													break;
+												case 2: //COOL - COOL
+													deviceState.Power = true;
+													deviceState.OperationMode = 3;
+													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
+													break;
+												case 3: //AUTO - AUTO
+													deviceState.Power = true;
+													deviceState.OperationMode = 8;
+													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
+													break;
+											};
+
+											await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState);
+											const operationModeText = CONSTANS.AirConditioner.DriveMode[deviceState.OperationMode];
+											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set operation mode: ${operationModeText}`);
+										} catch (error) {
+											this.log.error(`${deviceTypeText}: ${accessoryName}, Set operation mode error: ${error}`);
+										};
+									});
+								ataMelCloudServiceT.getCharacteristic(Characteristic.CurrentTemperature)
+									.setProps({
+										minValue: -35,
+										maxValue: 150,
+										minStep: 0.5
+									})
+									.onGet(async () => {
+										const value = this.roomTemperature;
+										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Room temperature: ${value}${temperatureUnit}`);
+										return value;
+									});
+								ataMelCloudServiceT.getCharacteristic(Characteristic.TargetTemperature)
+									.setProps({
+										minValue: ataTargetTempSetPropsMinValue,
+										maxValue: ataTargetTempSetPropsMaxValue,
+										minStep: tempSetPropsMinStep
+									})
+									.onGet(async () => {
+										const value = this.setTemperature;
+										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Target temperature: ${value}${temperatureUnit}`);
+										return value;
+									})
+									.onSet(async (value) => {
+										try {
+											deviceState.Power = true;
+											deviceState.SetTemperature = value;
+											deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.SetTemperature;
+											await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState);
+											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set temperature: ${value}${temperatureUnit}`);
+										} catch (error) {
+											this.log.error(`${deviceTypeText}: ${accessoryName}, Set temperature error: ${error}`);
+										};
+									});
+								ataMelCloudServiceT.getCharacteristic(Characteristic.TemperatureDisplayUnits)
+									.onGet(async () => {
+										const value = this.useFahrenheit;
+										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Temperature display unit: ${temperatureUnit}`);
+										return value;
+									})
+									.onSet(async (value) => {
+										try {
+											melCloudInfo.UseFahrenheit = value ? true : false;
+											await this.melCloudAta.send(CONSTANS.ApiUrls.UpdateApplicationOptions, melCloudInfo, true);
+											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
+											this.melCloudInfo = melCloudInfo;
+										} catch (error) {
+											this.log.error(`${deviceTypeText}: ${accessoryName}, Set temperature display unit error: ${error}`);
+										};
+									});
+								this.ataMelCloudServices.push(ataMelCloudServiceT);
+								accessory.addService(this.ataMelCloudServices[0]);
+								break;
 						};
-						this.ataMelCloudService.getCharacteristic(Characteristic.CurrentTemperature)
-							.setProps({
-								minValue: -35,
-								maxValue: 150,
-								minStep: 0.5
-							})
-							.onGet(async () => {
-								const value = this.roomTemperature;
-								const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Room temperature: ${value}${temperatureUnit}`);
-								return value;
-							});
-						//Only for Thermostat
-						if (ataDisplayMode === 1) {
-							this.ataMelCloudService.getCharacteristic(Characteristic.TargetTemperature)
-								.setProps({
-									minValue: ataTargetTempSetPropsMinValue,
-									maxValue: ataTargetTempSetPropsMaxValue,
-									minStep: tempSetPropsMinStep
-								})
-								.onGet(async () => {
-									const value = this.setTemperature;
-									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Target temperature: ${value}${temperatureUnit}`);
-									return value;
-								})
-								.onSet(async (value) => {
-									try {
-										deviceState.Power = true;
-										deviceState.SetTemperature = value;
-										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.SetTemperature;
-
-										await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState);
-										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set target temperature: ${value}${temperatureUnit}`);
-									} catch (error) {
-										this.log.error(`${deviceTypeText}: ${accessoryName}, Set target temperature error: ${error}`);
-									};
-								});
-						};
-						//Only for Heater Cooler
-						if (ataDisplayMode === 0) {
-							this.ataMelCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
-								.setProps({
-									minValue: ataTargetHeatingTempSetPropsMinValue,
-									maxValue: ataTargetHeatingTempSetPropsMaxValue,
-									minStep: tempSetPropsMinStep
-								})
-								.onGet(async () => {
-									const value = this.setTemperature;
-									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Heating threshold temperature: ${value}${temperatureUnit}`);
-									return value;
-								})
-								.onSet(async (value) => {
-									try {
-										deviceState.Power = true;
-										deviceState.SetTemperature = value;
-										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.SetTemperature;
-
-										await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState);
-										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set heating threshold temperature: ${value}${temperatureUnit}`);
-									} catch (error) {
-										this.log.error(`${deviceTypeText}: ${accessoryName}, Set heating threshold temperature error: ${error}`);
-									};
-								});
-							this.ataMelCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
-								.setProps({
-									minValue: ataTargetCoolingTempSetPropsMinValue,
-									maxValue: ataTargetCoolingTempSetPropsMaxValue,
-									minStep: tempSetPropsMinStep
-								})
-								.onGet(async () => {
-									const value = this.setTemperature;
-									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Cooling threshold temperature: ${value}${temperatureUnit}`);
-									return value;
-								})
-								.onSet(async (value) => {
-									try {
-										deviceState.Power = true;
-										deviceState.SetTemperature = value;
-										deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.SetTemperature;
-
-										await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState);
-										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set cooling threshold temperature: ${value}${temperatureUnit}`);
-									} catch (error) {
-										this.log.error(`${deviceTypeText}: ${accessoryName}, Set cooling threshold temperature error: ${error}`);
-									};
-								});
-							this.ataMelCloudService.getCharacteristic(Characteristic.LockPhysicalControls)
-								.onGet(async () => {
-									const value = this.lockPhysicalControls;
-									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Lock physical controls: ${value ? 'LOCKED' : 'UNLOCKED'}`);
-									return value;
-								})
-								.onSet(async (value) => {
-									try {
-										value = value ? true : false;
-										deviceState.ProhibitSetTemperature = value;
-										deviceState.ProhibitOperationMode = value;
-										deviceState.ProhibitPower = value;
-
-										await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState);
-										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set locl physical controls: ${value ? 'LOCK' : 'UNLOCK'}`);
-									} catch (error) {
-										this.log.error(`${deviceTypeText}: ${accessoryName}, Set lock physical controls error: ${error}`);
-									};
-								});
-						};
-						this.ataMelCloudService.getCharacteristic(Characteristic.TemperatureDisplayUnits)
-							.onGet(async () => {
-								const value = this.useFahrenheit;
-								const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Temperature display unit: ${temperatureUnit}`);
-								return value;
-							})
-							.onSet(async (value) => {
-								try {
-									melCloudInfo.UseFahrenheit = value ? true : false;
-									await this.melCloudAta.send(CONSTANS.ApiUrls.UpdateApplicationOptions, melCloudInfo, 1);
-									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
-									this.melCloudInfo = melCloudInfo;
-								} catch (error) {
-									this.log.error(`${deviceTypeText}: ${accessoryName}, Set temperature display unit error: ${error}`);
-								};
-							});
 
 						//buttons services
 						if (ataButtonsCount > 0) {
@@ -1995,28 +2007,18 @@ class melCloudDevice {
 														deviceState.SetFanSpeed = 6;
 														deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
 														break;
-													case 37: //FAN SPEED MODE 7
-														deviceState.Power = true;
-														deviceState.SetFanSpeed = 7;
-														deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
-														break;
-													case 38: //FAN SPEED MODE 8
-														deviceState.Power = true;
-														deviceState.SetFanSpeed = 8;
-														deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
-														break
-													case 40: //PHYSICAL LOCK CONTROLS
+													case 37: //PHYSICAL LOCK CONTROLS
 														deviceState.ProhibitSetTemperature = state;
 														deviceState.ProhibitOperationMode = state;
 														deviceState.ProhibitPower = state;
 														break;
-													case 41: //PHYSICAL LOCK CONTROLS POWER
+													case 38: //PHYSICAL LOCK CONTROLS POWER
 														deviceState.ProhibitPower = state;
 														break;
-													case 42: //PHYSICAL LOCK CONTROLS MODE
+													case 39: //PHYSICAL LOCK CONTROLS MODE
 														deviceState.ProhibitOperationMode = state;
 														break;
-													case 43: //PHYSICAL LOCK CONTROLS TTEMP
+													case 40: //PHYSICAL LOCK CONTROLS TTEMP
 														deviceState.ProhibitSetTemperature = state;
 														break;
 													default:
@@ -2082,241 +2084,455 @@ class melCloudDevice {
 						};
 						break;
 					case 1: //heat pump
+						this.log.debug('prepareMelCloudServiceAtw');
+						this.atwMelCloudServices = [];
 						const atwZonesCount = this.atwZonesCount;
 						if (atwZonesCount > 0) {
-							this.log.debug('prepareMelCloudServiceAtw');
-							this.atwMelCloudServices = [];
 							const atwDisplayMode = this.atwDisplayMode;
-							const atwButtonsCount = this.atwButtonsConfiguredCount;
-							const atwPresetsCount = this.atwPresetsCount;
 							const atwCaseHotWater = this.atwCaseHotWater;
 							const atwCaseZone2 = this.atwCaseZone2;
+							const atwButtonsCount = this.atwButtonsConfiguredCount;
+							const atwPresetsCount = this.atwPresetsCount;
 
 							for (let i = 0; i < atwZonesCount; i++) {
 								const zoneName = [this.atwHeatPumpName, this.atwZone1Name, this.atwHotWaterName, this.atwZone2Name][i];
 								const atwServiceName = `${accessoryName}: ${zoneName}`;
-								const atwMelCloudService = atwDisplayMode ? new Service.Thermostat(atwServiceName, atwServiceName + i) : new Service.HeaterCooler(atwServiceName, atwServiceName + i);
-								//Only for Heater Cooler
-								if (atwDisplayMode === 0) {
-									atwMelCloudService.getCharacteristic(Characteristic.Active)
-										.onGet(async () => {
-											const state = this.power;
-											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Power: ${state ? 'ON' : 'OFF'}`);
-											return state;
-										})
-										.onSet(async (state) => {
-											try {
-												switch (i) {
-													case 0: //Heat Pump
-														deviceState.Power = state;
-														deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power
-														break;
-													default:
-														break;
+								switch (atwDisplayMode) {
+									case 0: //Heater Cooler
+										const atwMelCloudService = new Service.HeaterCooler(atwServiceName, 'HeaterCooler' + i);
+										atwMelCloudService.getCharacteristic(Characteristic.Active)
+											.onGet(async () => {
+												const state = this.power;
+												const logInfo = this.disableLogInfo || i > 0 ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Power: ${state ? 'ON' : 'OFF'}`);
+												return state;
+											})
+											.onSet(async (state) => {
+												try {
+													switch (i) {
+														case 0: //Heat Pump
+															deviceState.Power = state;
+															deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power;
+															await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState);
+															const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Set power: ${state ? 'ON' : 'OFF'}`);
+															break;
+													};
+												} catch (error) {
+													this.log.error(`${deviceTypeText}: ${accessoryName}, Set power error: ${error}`);
+													atwMelCloudService.updateCharacteristic(Characteristic.Active, false)
 												};
-												const set = i === 0 ? await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState) : false;
-												const logInfo = this.disableLogInfo || i > 0 ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Set power: ${state ? 'ON' : 'OFF'}`);
-											} catch (error) {
-												this.log.error(`${deviceTypeText}: ${accessoryName}, Set power error: ${error}`);
-											};
-										});
-								};
-								atwMelCloudService.getCharacteristic(atwDisplayMode ? Characteristic.CurrentHeatingCoolingState : Characteristic.CurrentHeaterCoolerState)
-									.onGet(async () => {
-										let operationModeText = '';
-										switch (i) {
-											case 0: //Heat Pump - IDLE, HEAT WATER, HEAT ZONES, COOL, DEFROST, STANDBY, LEGIONELLA
-												operationModeText = this.power ? CONSTANS.HeatPump.UnitStatus[deviceState.UnitStatus] : CONSTANS.HeatPump.UnitStatus[2];
-												break;
-											case 1: //Zone 1 - HEAT THERMOSTAT, HEAT FLOW, CURVE, COOL THERMOSTAT, COOL FLOW
-												operationModeText = CONSTANS.HeatPump.ZoneOperation[deviceState.OperationModeZone1];
-												break;
-											case atwCaseHotWater: //Hot Water - AUTO, HEAT NOW
-												operationModeText = deviceState.OperationMode === 1 ? CONSTANS.HeatPump.HotWaterOperation[1] : CONSTANS.HeatPump.HotWaterOperation[deviceState.ForcedHotWaterMode ? 1 : 0];
-												break;
-											case atwCaseZone2: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, CURVE, COOL THERMOSTAT, COOL FLOW
-												operationModeText = CONSTANS.HeatPump.ZoneOperation[deviceState.OperationModeZone2];
-												break;
-										};
-
-										const value = this.currentOperationModes[i] || 0;
-										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Operation mode: ${operationModeText}`);
-										return value;
-									});
-								atwMelCloudService.getCharacteristic(atwDisplayMode ? Characteristic.TargetHeatingCoolingState : Characteristic.TargetHeaterCoolerState)
-									.setProps({
-										minValue: this.targetOperationModesSetPropsMinValue[i],
-										maxValue: this.targetOperationModesSetPropsMaxValue[i],
-										validValues: this.targetOperationModesSetPropsValidValues[i]
-									})
-									.onGet(async () => {
-										const value = this.targetOperationModes[i] || 1;
-										return value;
-									})
-									.onSet(async (value) => {
-										try {
-											let operationModeText = '';
-											switch (i) {
-												case 0: //Heat Pump - HEAT, COOL
-													switch (value) {
-														case 0: //AUTO HC, OFF TH
-															deviceState.Power = atwDisplayMode ? false : true;
-															deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power;
-															break;
-														case 1: //HEAT
-															deviceState.Power = true;
-															deviceState.UnitStatus = 0;
-															deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationMode;
-															break;
-														case 2: //COOL
-															deviceState.Power = true;
-															deviceState.UnitStatus = 1;
-															deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationMode;
-															break;
-														case 3: //AUTO TH
-															deviceState.Power = atwDisplayMode ? true : false;
-															deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power;
-															break;
-													};
-													operationModeText = this.power ? CONSTANS.HeatPump.UnitStatus[deviceState.UnitStatus] : CONSTANS.HeatPump.UnitStatus[2];
-													break;
-												case 1: //Zone 1 - HEAT THERMOSTAT, HEAT FLOW, CURVE, COOL THERMOSTAT, COOL FLOW
-													switch (value) {
-														case 0: //AUTO HC - HEAT CURVE
-															deviceState.OperationModeZone1 = 2;
-															deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.OperationModeZone1;
-															break;
-														case 1: //HEAT - HEAT THERMOSTAT / COOL THERMOSTAT
-															deviceState.OperationModeZone1 = [0, 3][this.unitStatus];
-															deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.OperationModeZone1;
-															break;
-														case 2: //COOL - HEAT FLOOW / COOL FLOW
-															deviceState.OperationModeZone1 = [1, 4][this.unitStatus];
-															deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.OperationModeZone1;
-															break;
-														case 3: //AUTO TH - HEAT CURVE
-															deviceState.OperationModeZone1 = 2;
-															deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.OperationModeZone1;
-															break;
-													};
-													operationModeText = CONSTANS.HeatPump.ZoneOperation[deviceState.OperationModeZone1];
-													break;
-												case atwCaseHotWater: //Hot Water - AUTO, HEAT NOW
-													switch (value) {
-														case 0: //AUTO HC
-															deviceState.ForcedHotWaterMode = false;
-															deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.ForcedHotWaterMode;
-															break;
-														case 1: //HEAT
-															deviceState.ForcedHotWaterMode = true;
-															deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.ForcedHotWaterMode;
-															break;
-														case 2: //COOL
-															deviceState.ForcedHotWaterMode = false;
-															deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.ForcedHotWaterMode;
-															break;
-														case 3: //AUTO TH
-															deviceState.ForcedHotWaterMode = false;
-															deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.ForcedHotWaterMode;
-															break;
-													};
-													operationModeText = deviceState.OperationMode === 1 ? CONSTANS.HeatPump.HotWaterOperation[1] : CONSTANS.HeatPump.HotWaterOperation[deviceState.ForcedHotWaterMode ? 1 : 0];
-													break;
-												case atwCaseZone2: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, CURVE, COOL THERMOSTAT, COOL FLOW
-													switch (value) {
-														case 0: //AUTO HC - HEAT CURVE
-															deviceState.OperationModeZone2 = 2;
-															deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.OperationModeZone2;
-															break;
-														case 1: //HEAT - HEAT THERMOSTAT / COOL THERMOSTAT
-															deviceState.OperationModeZone2 = [0, 3][this.unitStatus];
-															deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.OperationModeZone2;
-															break;
-														case 2: //COOL - HEAT FLOOW / COOL FLOW
-															deviceState.OperationModeZone2 = [1, 4][this.unitStatus];
-															deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.OperationModeZone2;
-															break;
-														case 3: //AUTO TH - HEAT CURVE
-															deviceState.OperationModeZone2 = 2;
-															deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.OperationModeZone2;
-															break;
-													};
-													operationModeText = CONSTANS.HeatPump.ZoneOperation[deviceState.OperationModeZone2];
-													break;
-											};
-
-											await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState);
-											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Set operation mode: ${operationModeText}`);
-										} catch (error) {
-											this.log.error(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Set operation mode error: ${error}`);
-										};
-									});
-								atwMelCloudService.getCharacteristic(Characteristic.CurrentTemperature)
-									.setProps({
-										minValue: -35,
-										maxValue: 150,
-										minStep: 0.5
-									})
-									.onGet(async () => {
-										const value = this.roomTemperatures[i];
-										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Temperature: ${value}${temperatureUnit}`);
-										return value;
-									});
-								//Only for Thermostat
-								if (atwDisplayMode === 1) {
-									atwMelCloudService.getCharacteristic(Characteristic.TargetTemperature)
-										.setProps({
-											minValue: this.targetTemperaturesSetPropsMinValue[i],
-											maxValue: this.targetTemperaturesSetPropsMaxValue[i],
-											minStep: tempSetPropsMinStep
-										})
-										.onGet(async () => {
-											const value = this.setTemperatures[i];
-											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Target temperature: ${value}${temperatureUnit}`);
-											return value;
-										})
-										.onSet(async (value) => {
-											try {
+											});
+										atwMelCloudService.getCharacteristic(Characteristic.CurrentHeaterCoolerState)
+											.onGet(async () => {
+												const value = this.currentOperationModes[i];
+												let operationModeText = '';
 												switch (i) {
-													case 0: //Heat Pump
-														//deviceState.SetTemperatureZone1 = value;
-														//deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.SetTemperatureZone1;
+													case 0: //Heat Pump - HEAT, COOL, OFF
+														operationModeText = CONSTANS.HeatPump.ControlType[deviceState.UnitStatus];
 														break;
-													case 1: //Zone 1
-														deviceState.SetTemperatureZone1 = value;
-														deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.SetTemperatureZone1;
+													case 1: //Zone 1 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRYUP
+														operationModeText = this.idleZone1 ? CONSTANS.HeatPump.ZoneOperation[6] : CONSTANS.HeatPump.ZoneOperation[deviceState.OperationModeZone1];
 														break;
-													case atwCaseHotWater: //Hot Water
-														deviceState.SetTankWaterTemperature = value;
-														deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.SetTankWaterTemperature;
+													case atwCaseHotWater: //Hot Water - AUTO, HEAT NOW
+														operationModeText = deviceState.OperationMode === 1 ? CONSTANS.HeatPump.ForceDhw[1] : CONSTANS.HeatPump.ForceDhw[deviceState.ForcedHotWaterMode ? 1 : 0];
 														break;
-													case atwCaseZone2: //Zone 2
-														deviceState.SetTemperatureZone2 = value;
-														deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.SetTemperatureZone2;
+													case atwCaseZone2: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRYUP
+														operationModeText = this.idleZone2 ? CONSTANS.HeatPump.ZoneOperation[6] : CONSTANS.HeatPump.ZoneOperation[deviceState.OperationModeZone2];
 														break;
 												};
 
-												const set = i > 0 ? await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState) : false;
-												const logInfo = this.disableLogInfo || i === 0 ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Set target temperature: ${value}${temperatureUnit}`);
-											} catch (error) {
-												this.log.error(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Set target temperature error: ${error}`);
-											};
-										});
-								};
-
-								//only for Heater/Cooler
-								if (atwDisplayMode === 0) {
-									//device can heat/cool or only heat
-									if (this.atwHeatCoolModes === 0 || this.atwHeatCoolModes === 1) {
-										atwMelCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
+												operationModeText = !this.power ? CONSTANS.HeatPump.ControlType[2] : operationModeText;
+												const logInfo = this.disableLogInfo && i >= atwZonesCount ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Operation mode: ${operationModeText}`);
+												return value;
+											});
+										atwMelCloudService.getCharacteristic(Characteristic.TargetHeaterCoolerState)
 											.setProps({
-												minValue: this.targetTemperaturesSetPropsMinValue[i],
-												maxValue: this.targetTemperaturesSetPropsMaxValue[i],
+												minValue: this.operationModesSetPropsMinValue[i],
+												maxValue: this.operationModesSetPropsMaxValue[i],
+												validValues: this.operationModesSetPropsValidValues[i]
+											})
+											.onGet(async () => {
+												const value = this.targetOperationModes[i];
+												return value;
+											})
+											.onSet(async (value) => {
+												try {
+													let operationModeText = '';
+													switch (i) {
+														case 0: //Heat Pump - ON, HEAT, COOL
+															switch (value) {
+																case 0: //AUTO
+																	deviceState.Power = true;
+																	deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power;
+																	break;
+																case 1: //HEAT
+																	deviceState.Power = true;
+																	deviceState.UnitStatus = 0;
+																	deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationMode;
+																	break;
+																case 2: //COOL
+																	deviceState.Power = true;
+																	deviceState.UnitStatus = 1;
+																	deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationMode;
+																	break;
+															};
+															operationModeText = this.power ? CONSTANS.HeatPump.ControlType[deviceState.UnitStatus] : CONSTANS.HeatPump.ControlType[2];
+															break;
+														case 1: //Zone 1 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRYUP
+															switch (value) {
+																case 0: //AUTO - HEAT CURVE
+																	deviceState.OperationModeZone1 = 2;
+																	deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.OperationModeZone1;
+																	break;
+																case 1: //HEAT - HEAT THERMOSTAT / COOL THERMOSTAT
+																	deviceState.OperationModeZone1 = [0, 3][this.unitStatus];
+																	deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.OperationModeZone1;
+																	break;
+																case 2: //COOL - HEAT FLOOW / COOL FLOW
+																	deviceState.OperationModeZone1 = [1, 4][this.unitStatus];
+																	deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.OperationModeZone1;
+																	break;
+															};
+															operationModeText = CONSTANS.HeatPump.ZoneOperation[deviceState.OperationModeZone1];
+															break;
+														case atwCaseHotWater: //Hot Water - AUTO, HEAT NOW
+															switch (value) {
+																case 0: //AUTO
+																	deviceState.ForcedHotWaterMode = false;
+																	deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.ForcedHotWaterMode;
+																	break;
+																case 1: //HEAT
+																	deviceState.ForcedHotWaterMode = true;
+																	deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.ForcedHotWaterMode;
+																	break;
+																case 2: //COOL
+																	deviceState.ForcedHotWaterMode = false;
+																	deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.ForcedHotWaterMode;
+																	break
+															};
+															operationModeText = deviceState.OperationMode === 1 ? CONSTANS.HeatPump.ForceDhw[1] : CONSTANS.HeatPump.ForceDhw[deviceState.ForcedHotWaterMode ? 1 : 0];
+															break;
+														case atwCaseZone2: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRYUP
+															switch (value) {
+																case 0: //AUTO
+																	deviceState.OperationModeZone2 = 2;
+																	deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.OperationModeZone2;
+																	break;
+																case 1: //HEAT - HEAT THERMOSTAT / COOL THERMOSTAT
+																	deviceState.OperationModeZone2 = [0, 3][this.unitStatus];
+																	deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.OperationModeZone2;
+																	break;
+																case 2: //COOL - HEAT FLOOW / COOL FLOW
+																	deviceState.OperationModeZone2 = [1, 4][this.unitStatus];
+																	deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.OperationModeZone2;
+																	break;
+															};
+															operationModeText = CONSTANS.HeatPump.ZoneOperation[deviceState.OperationModeZone2];
+															break;
+													};
+
+													await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState);
+													const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Set operation mode: ${operationModeText}`);
+												} catch (error) {
+													this.log.error(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Set operation mode error: ${error}`);
+												};
+											});
+										atwMelCloudService.getCharacteristic(Characteristic.CurrentTemperature)
+											.setProps({
+												minValue: -35,
+												maxValue: 150,
+												minStep: 0.5
+											})
+											.onGet(async () => {
+												const value = this.roomTemperatures[i];
+												const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, ${i === 0 ? 'Outdoor temperature:' : 'Temperature:'} ${value}${temperatureUnit}`);
+												return value;
+											});
+										//device can heat/cool or only heat
+										if (this.atwHeatCoolModes === 0 || this.atwHeatCoolModes === 1) {
+											atwMelCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
+												.setProps({
+													minValue: this.temperaturesSetPropsMinValue[i],
+													maxValue: this.temperaturesSetPropsMaxValue[i],
+													minStep: tempSetPropsMinStep
+												})
+												.onGet(async () => {
+													const value = this.setTemperatures[i];
+													const logInfo = this.disableLogInfo || i === 0 ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Heating threshold temperature: ${value}${temperatureUnit}`);
+													return value;
+												})
+												.onSet(async (value) => {
+													try {
+														switch (i) {
+															case 0: //Heat Pump
+																//deviceState.SetTemperatureZone1 = value;
+																//deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.SetTemperatureZone1;
+																break;
+															case 1: //Zone 1
+																deviceState.SetTemperatureZone1 = value;
+																deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.SetTemperatureZone1;
+																break;
+															case atwCaseHotWater: //Hot Water
+																deviceState.SetTankWaterTemperature = value;
+																deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.SetTankWaterTemperature;
+																break;
+															case atwCaseZone2: //Zone 2
+																deviceState.SetTemperatureZone2 = value;
+																deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.SetTemperatureZone2;
+																break;
+														};
+
+														const set = i > 0 ? await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState) : false;
+														const logInfo = this.disableLogInfo || i === 0 ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Set heating threshold temperature: ${value}${temperatureUnit}`);
+													} catch (error) {
+														this.log.error(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Set heating threshold temperature error: ${error}`);
+													};
+												});
+										};
+										//only for heat/cool, only cool and not for hot water tank
+										if ((this.atwHeatCoolModes === 0 || this.atwHeatCoolModes === 2) && i !== atwCaseHotWater) {
+											atwMelCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
+												.setProps({
+													minValue: this.temperaturesSetPropsMinValue[i],
+													maxValue: this.temperaturesSetPropsMaxValue[i],
+													minStep: tempSetPropsMinStep
+												})
+												.onGet(async () => {
+													const value = this.setTemperatures[i];
+													const logInfo = this.disableLogInfo || i === 0 ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Cooling threshold temperature: ${value}${temperatureUnit}`);
+													return value;
+												})
+												.onSet(async (value) => {
+													try {
+														switch (i) {
+															case 0: //Heat Pump
+																//deviceState.SetTemperatureZone1 = value;
+																//deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.SetTemperatureZone1;
+																break;
+															case 1: //Zone 1
+																deviceState.SetTemperatureZone1 = value;
+																deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.SetTemperatureZone1;
+																break;
+															case atwCaseHotWater: //Hot Water
+																deviceState.SetTankWaterTemperature = value;
+																deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.SetTankWaterTemperature;
+																break;
+															case atwCaseZone2: //Zone 2
+																deviceState.SetTemperatureZone2 = value;
+																deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.SetTemperatureZone2;
+																break;
+														};
+
+														const set = i > 0 ? await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState) : false;
+														const logInfo = this.disableLogInfo || i === 0 ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Set cooling threshold temperature: ${value}${temperatureUnit}`);
+													} catch (error) {
+														this.log.error(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Set cooling threshold temperature error: ${error}`);
+													};
+												});
+										};
+										atwMelCloudService.getCharacteristic(Characteristic.LockPhysicalControls)
+											.onGet(async () => {
+												const value = this.lockPhysicalsControls[i];
+												const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Lock physical controls: ${value ? 'LOCKED' : 'UNLOCKED'}`);
+												return value;
+											})
+											.onSet(async (value) => {
+												try {
+													value = value ? true : false;
+													switch (i) {
+														case 0: //Heat Pump
+															deviceState.ProhibitZone1 = value;
+															deviceState.ProhibitHotWater = value;
+															deviceState.ProhibitZone2 = value;
+															break;
+														case 1: //Zone 1
+															deviceState.ProhibitZone1 = value;
+															break;
+														case atwCaseHotWater: //Hot Water
+															deviceState.ProhibitHotWater = value;
+															break;
+														case atwCaseZone2: //Zone 2
+															deviceState.ProhibitZone2 = value;
+															break;
+													};
+
+													await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState);
+													const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Set lock physical controls: ${value ? 'LOCK' : 'UNLOCK'}`);
+												} catch (error) {
+													this.log.error(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Set lock physical controls error: ${error}`);
+												};
+											});
+										atwMelCloudService.getCharacteristic(Characteristic.TemperatureDisplayUnits)
+											.onGet(async () => {
+												const value = this.useFahrenheit;
+												const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Temperature display unit: ${temperatureUnit}`);
+												return value;
+											})
+											.onSet(async (value) => {
+												try {
+													melCloudInfo.UseFahrenheit = value ? true : false;
+													await this.melCloudAtw.send(CONSTANS.ApiUrls.UpdateApplicationOptions, melCloudInfo, true);
+													const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
+													this.melCloudInfo = melCloudInfo;
+												} catch (error) {
+													this.log.error(`${deviceTypeText}: ${accessoryName}, Set temperature display unit error: ${error}`);
+												};
+											});
+										this.atwMelCloudServices.push(atwMelCloudService);
+										accessory.addService(this.atwMelCloudServices[i]);
+										break;
+									case 1: //Thermostat
+										const atwMelCloudServiceT = new Service.Thermostat(atwServiceName, 'Thermostat' + i);
+										atwMelCloudServiceT.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
+											.onGet(async () => {
+												let operationModeText = '';
+												switch (i) {
+													case 0: //Heat Pump - IDLE, HOT WATER, HEATING ZONES, COOLING, "FREZE STAT, LEGIONELLA, HEATING ECO, MODE 1, MODE 2, MODE 3, HEATING UP
+														operationModeText = CONSTANS.HeatPump.ControlType[deviceState.UnitStatus];
+														break;
+													case 1: //Zone 1 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRYUP
+														operationModeText = CONSTANS.HeatPump.ZoneOperation[deviceState.OperationModeZone1];
+														break;
+													case atwCaseHotWater: //Hot Water - AUTO, HEAT NOW
+														operationModeText = deviceState.OperationMode === 1 ? CONSTANS.HeatPump.ForceDhw[1] : CONSTANS.HeatPump.ForceDhw[deviceState.ForcedHotWaterMode ? 1 : 0];
+														break;
+													case atwCaseZone2: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRYUP
+														operationModeText = CONSTANS.HeatPump.ZoneOperation[deviceState.OperationModeZone2];
+														break;
+												};
+
+												const value = this.currentOperationModes[i];
+												operationModeText = !this.power ? CONSTANS.HeatPump.ControlType[2] : operationModeText;
+												const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Operation mode: ${operationModeText}`);
+												return value;
+											});
+										atwMelCloudServiceT.getCharacteristic(Characteristic.TargetHeatingCoolingState)
+											.setProps({
+												minValue: this.operationModesSetPropsMinValue[i],
+												maxValue: this.operationModesSetPropsMaxValue[i],
+												validValues: this.operationModesSetPropsValidValues[i]
+											})
+											.onGet(async () => {
+												const value = this.targetOperationModes[i];
+												return value;
+											})
+											.onSet(async (value) => {
+												try {
+													let operationModeText = '';
+													switch (i) {
+														case 0: //Heat Pump - HEAT, COOL
+															switch (value) {
+																case 0: //OFF
+																	deviceState.Power = false;
+																	deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power;
+																	break;
+																case 1: //HEAT
+																	deviceState.Power = true;
+																	deviceState.UnitStatus = 0;
+																	deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationMode;
+																	break;
+																case 2: //COOL
+																	deviceState.Power = true;
+																	deviceState.UnitStatus = 1;
+																	deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power + CONSTANS.HeatPump.EffectiveFlags.OperationMode;
+																	break;
+																case 3: //AUTO
+																	deviceState.Power = true;
+																	deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power;
+																	break;
+															};
+															operationModeText = this.power ? CONSTANS.HeatPump.ControlType[deviceState.UnitStatus] : CONSTANS.HeatPump.ControlType[2];
+															break;
+														case 1: //Zone 1 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRYUP
+															switch (value) {
+																case 0: //OFF - HEAT CURVE
+																	deviceState.OperationModeZone1 = 2;
+																	deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.OperationModeZone1;
+																	break;
+																case 1: //HEAT - HEAT THERMOSTAT / COOL THERMOSTAT
+																	deviceState.OperationModeZone1 = [0, 3][this.unitStatus];
+																	deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.OperationModeZone1;
+																	break;
+																case 2: //COOL - HEAT FLOOW / COOL FLOW
+																	deviceState.OperationModeZone1 = [1, 4][this.unitStatus];
+																	deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.OperationModeZone1;
+																	break;
+																case 3: //AUTO - HEAT CURVE
+																	deviceState.OperationModeZone1 = 2;
+																	deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.OperationModeZone1;
+																	break;
+															};
+															operationModeText = CONSTANS.HeatPump.ZoneOperation[deviceState.OperationModeZone1];
+															break;
+														case atwCaseHotWater: //Hot Water - AUTO, HEAT NOW
+															switch (value) {
+																case 0: //OFF
+																	deviceState.ForcedHotWaterMode = false;
+																	deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.ForcedHotWaterMode;
+																	break;
+																case 1: //HEAT
+																	deviceState.ForcedHotWaterMode = true;
+																	deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.ForcedHotWaterMode;
+																	break;
+																case 2: //COOL
+																	deviceState.ForcedHotWaterMode = false;
+																	deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.ForcedHotWaterMode;
+																	break;
+																case 3: //AUTO
+																	deviceState.ForcedHotWaterMode = false;
+																	deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.ForcedHotWaterMode;
+																	break;
+															};
+															operationModeText = deviceState.OperationMode === 1 ? CONSTANS.HeatPump.ForceDhw[1] : CONSTANS.HeatPump.ForceDhw[deviceState.ForcedHotWaterMode ? 1 : 0];
+															break;
+														case atwCaseZone2: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRYUP
+															switch (value) {
+																case 0: //OFF - HEAT CURVE
+																	deviceState.OperationModeZone2 = 2;
+																	deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.OperationModeZone2;
+																	break;
+																case 1: //HEAT - HEAT THERMOSTAT / COOL THERMOSTAT
+																	deviceState.OperationModeZone2 = [0, 3][this.unitStatus];
+																	deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.OperationModeZone2;
+																	break;
+																case 2: //COOL - HEAT FLOOW / COOL FLOW
+																	deviceState.OperationModeZone2 = [1, 4][this.unitStatus];
+																	deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.OperationModeZone2;
+																	break;
+																case 3: //AUTO - HEAT CURVE
+																	deviceState.OperationModeZone2 = 2;
+																	deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.OperationModeZone2;
+																	break;
+															};
+															operationModeText = CONSTANS.HeatPump.ZoneOperation[deviceState.OperationModeZone2];
+															break;
+													};
+
+													await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState);
+													const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Set operation mode: ${operationModeText}`);
+												} catch (error) {
+													this.log.error(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Set operation mode error: ${error}`);
+												};
+											});
+										atwMelCloudServiceT.getCharacteristic(Characteristic.CurrentTemperature)
+											.setProps({
+												minValue: -35,
+												maxValue: 150,
+												minStep: 0.5
+											})
+											.onGet(async () => {
+												const value = this.roomTemperatures[i];
+												const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, ${i === 0 ? 'Outdoor temperature:' : 'Temperature:'} ${value}${temperatureUnit}`);
+												return value;
+											});
+										atwMelCloudServiceT.getCharacteristic(Characteristic.TargetTemperature)
+											.setProps({
+												minValue: this.temperaturesSetPropsMinValue[i],
+												maxValue: this.temperaturesSetPropsMaxValue[i],
 												minStep: tempSetPropsMinStep
 											})
 											.onGet(async () => {
 												const value = this.setTemperatures[i];
-												const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Heating threshold temperature: ${value}${temperatureUnit}`);
+												const logInfo = this.disableLogInfo || i === 0 ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Target temperature: ${value}${temperatureUnit}`);
 												return value;
 											})
 											.onSet(async (value) => {
@@ -2341,104 +2557,31 @@ class melCloudDevice {
 													};
 
 													const set = i > 0 ? await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState) : false;
-													const logInfo = this.disableLogInfo || i === 0 ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Set heating threshold temperature: ${value}${temperatureUnit}`);
+													const logInfo = this.disableLogInfo || i === 0 ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Set temperature: ${value}${temperatureUnit}`);
 												} catch (error) {
-													this.log.error(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Set heating threshold temperature error: ${error}`);
+													this.log.error(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Set temperature error: ${error}`);
 												};
 											});
-									};
-									//device can heat/cool or only cool
-									if (this.atwHeatCoolModes === 0 || this.atwHeatCoolModes === 2) {
-										atwMelCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
-											.setProps({
-												minValue: this.targetTemperaturesSetPropsMinValue[i],
-												maxValue: this.targetTemperaturesSetPropsMaxValue[i],
-												minStep: tempSetPropsMinStep
-											})
+										atwMelCloudServiceT.getCharacteristic(Characteristic.TemperatureDisplayUnits)
 											.onGet(async () => {
-												const value = this.setTemperatures[i];
-												const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Cooling threshold temperature: ${value}${temperatureUnit}`);
+												const value = this.useFahrenheit;
+												const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Temperature display unit: ${temperatureUnit}`);
 												return value;
 											})
 											.onSet(async (value) => {
 												try {
-													switch (i) {
-														case 0: //Heat Pump
-															//deviceState.SetTemperatureZone1 = value;
-															//deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.SetTemperatureZone1;
-															break;
-														case 1: //Zone 1
-															deviceState.SetTemperatureZone1 = value;
-															deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.SetTemperatureZone1;
-															break;
-														case atwCaseHotWater: //Hot Water
-															deviceState.SetTankWaterTemperature = value;
-															deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.SetTankWaterTemperature;
-															break;
-														case atwCaseZone2: //Zone 2
-															deviceState.SetTemperatureZone2 = value;
-															deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.SetTemperatureZone2;
-															break;
-													};
-
-													const set = i > 0 ? await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState) : false;
-													const logInfo = this.disableLogInfo || i === 0 ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Set cooling threshold temperature: ${value}${temperatureUnit}`);
+													melCloudInfo.UseFahrenheit = value ? true : false;
+													await this.melCloudAtw.send(CONSTANS.ApiUrls.UpdateApplicationOptions, melCloudInfo, true);
+													const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
+													this.melCloudInfo = melCloudInfo;
 												} catch (error) {
-													this.log.error(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Set cooling threshold temperature error: ${error}`);
+													this.log.error(`${deviceTypeText}: ${accessoryName}, Set temperature display unit error: ${error}`);
 												};
 											});
-									};
-									atwMelCloudService.getCharacteristic(Characteristic.LockPhysicalControls)
-										.onGet(async () => {
-											const value = this.lockPhysicalsControls[i];
-											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Lock physical controls: ${value ? 'LOCKED' : 'UNLOCKED'}`);
-											return value;
-										})
-										.onSet(async (value) => {
-											try {
-												value = value ? true : false;
-												switch (i) {
-													case 0: //Heat Pump
-														deviceState.ProhibitZone1 = value;
-														deviceState.ProhibitHotWater = value;
-														deviceState.ProhibitZone2 = value;
-														break;
-													case 1: //Zone 1
-														deviceState.ProhibitZone1 = value;
-														break;
-													case atwCaseHotWater: //Hot Water
-														deviceState.ProhibitHotWater = value;
-														break;
-													case atwCaseZone2: //Zone 2
-														deviceState.ProhibitZone2 = value;
-														break;
-												};
-
-												await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState);
-												const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Set lock physical controls: ${value ? 'LOCK' : 'UNLOCK'}`);
-											} catch (error) {
-												this.log.error(`${deviceTypeText}: ${accessoryName}, ${zoneName}, Set lock physical controls error: ${error}`);
-											};
-										});
+										this.atwMelCloudServices.push(atwMelCloudServiceT);
+										accessory.addService(this.atwMelCloudServices[i]);
+										break;
 								};
-								atwMelCloudService.getCharacteristic(Characteristic.TemperatureDisplayUnits)
-									.onGet(async () => {
-										const value = this.useFahrenheit;
-										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Temperature display unit: ${temperatureUnit}`);
-										return value;
-									})
-									.onSet(async (value) => {
-										try {
-											melCloudInfo.UseFahrenheit = value ? true : false;
-											await this.melCloudAtw.send(CONSTANS.ApiUrls.UpdateApplicationOptions, melCloudInfo, 1);
-											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
-											this.melCloudInfo = melCloudInfo;
-										} catch (error) {
-											this.log.error(`${deviceTypeText}: ${accessoryName}, Set temperature display unit error: ${error}`);
-										};
-									});
-								this.atwMelCloudServices.push(atwMelCloudService);
-								accessory.addService(this.atwMelCloudServices[i]);
 							};
 
 							//buttons services
@@ -2614,10 +2757,7 @@ class melCloudDevice {
 							};
 						};
 						break;
-					case 2: //curtain
-
-						break;
-					case 3: //ventilation
+					case 2: //energy recovery ventilation
 						this.log.debug('prepareMelCloudServiceErv');
 						const ervDisplayMode = this.ervDisplayMode;
 						const ervHasAutoVentilationMode = this.ervHasAutoVentilationMode;
@@ -2631,287 +2771,304 @@ class melCloudDevice {
 						const ervTargetHeatingTempSetPropsMaxValue = [31, 88][this.useFahrenheit];
 						const ervTargetCoolingTempSetPropsMinValue = [10, 50][this.useFahrenheit];
 						const ervTargetCoolingTempSetPropsMaxValue = [31, 88][this.useFahrenheit];
-
 						const ervServiceName = `${accessoryName} ${deviceTypeText}`;
-						this.ervMelCloudService = ervDisplayMode ? accessory.addService(Service.Thermostat, ervServiceName) : accessory.addService(Service.HeaterCooler, ervServiceName);
-						if (ervDisplayMode === 0) {
-							//Only for Heater Cooler
-							this.ervMelCloudService.getCharacteristic(Characteristic.Active)
-								.onGet(async () => {
-									const state = this.power;
-									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Power: ${state ? 'ON' : 'OFF'}`);
-									return state;
-								})
-								.onSet(async (state) => {
-									try {
-										deviceState.Power = state;
-										deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power;
 
-										await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState);
-										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set power: ${state ? 'ON' : 'OFF'}`);
-									} catch (error) {
-										this.log.error(`${deviceTypeText}: ${accessoryName}, Set power error: ${error}`);
-									};
-								});
-						};
-						this.ervMelCloudService.getCharacteristic(ervDisplayMode ? Characteristic.CurrentHeatingCoolingState : Characteristic.CurrentHeaterCoolerState)
-							.onGet(async () => {
-								const value = this.currentOperationMode;
-								const operationModeText = CONSTANS.Ventilation.OperationMode[deviceState.VentilationMode];
-								const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Ventilation mode: ${operationModeText}`);
-								return value;
-							});
-						this.ervMelCloudService.getCharacteristic(ervDisplayMode ? Characteristic.TargetHeatingCoolingState : Characteristic.TargetHeaterCoolerState)
-							.setProps({
-								minValue: this.targetOperationModeSetPropsMinValue,
-								maxValue: this.targetOperationModeSetPropsMaxValue,
-								validValues: this.targetOperationModeSetPropsValidValues
-							})
-							.onGet(async () => {
-								//0 = RECOVERY, 1 = BYPAS 2 = AUTO
-								const value = this.targetOperationMode;
-								return value;
-							})
-							.onSet(async (value) => {
-								try {
-									switch (ervHasAutoVentilationMode) {
-										case 0: //AUTO MODE NOT SUPPORTED - RECOVERY, BYPAS
-											switch (value) {
-												case 0: //OFF, AUTO
-													deviceState.Power = ervDisplayMode ? false : true;
-													deviceState.VentilationMode = deviceState.VentilationMode;
-													deviceState.EffectiveFlags = ervDisplayMode ? CONSTANS.Ventilation.EffectiveFlags.Power : CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.VentilationMode;
-													break;
-												case 1: //HEAT - RECOVERY
-													deviceState.Power = true;
-													deviceState.VentilationMode = 0;
-													deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.VentilationMode;
-													break;
-												case 2: //COOL - BYPAS
-													deviceState.Power = true;
-													deviceState.VentilationMode = 1;
-													deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.VentilationMode;
-													break;
-												case 3: //AUTO, OFF
-													deviceState.Power = ervDisplayMode ? true : false;
-													deviceState.VentilationMode = deviceState.VentilationMode;
-													deviceState.EffectiveFlags = ervDisplayMode ? CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.VentilationMode : CONSTANS.Ventilation.EffectiveFlags.Power;
-													break;
-											};
-											break;
-										case 1: //AUTO MODE SUPPORTED - RECOVERY, BYPAS, AUTO
-											switch (value) {
-												case 0: //OFF, AUTO
-													deviceState.Power = ervDisplayMode ? false : true;
-													deviceState.VentilationMode = ervDisplayMode ? deviceState.VentilationMode : 2;
-													deviceState.EffectiveFlags = ervDisplayMode ? CONSTANS.Ventilation.EffectiveFlags.Power : CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.VentilationMode;
-													break;
-												case 1: //HEAT - RECOVERY
-													deviceState.Power = true;
-													deviceState.VentilationMode = 0;
-													deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.VentilationMode;
-													break;
-												case 2: //COOL - BYPAS
-													deviceState.Power = true;
-													deviceState.VentilationMode = 1;
-													deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.VentilationMode;
-													break;
-												case 3: //AUTO, OFF
-													deviceState.Power = ervDisplayMode ? true : false;
-													deviceState.VentilationMode = ervDisplayMode ? 2 : deviceState.VentilationMode;
-													deviceState.EffectiveFlags = ervDisplayMode ? CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.VentilationMode : CONSTANS.Ventilation.EffectiveFlags.Power;
-													break;
-											};
-											break;
-									};
-
-									await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState);
-									const operationModeText = CONSTANS.Ventilation.OperationMode[deviceState.VentilationMode];
-									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set target ventilation mode: ${operationModeText}`);
-								} catch (error) {
-									this.log.error(`${deviceTypeText}: ${accessoryName}, Set target ventilation mode error: ${error}`);
-								};
-							});
-						if (ervDisplayMode === 0) {
-							//Only for Heater Cooler
-							this.ervMelCloudService.getCharacteristic(Characteristic.RotationSpeed)
-								.setProps({
-									minValue: 0,
-									maxValue: this.fanSpeedSetPropsMaxValue,
-									minStep: 1
-								})
-								.onGet(async () => {
-									//AUTO, 1, 2, 3, 4, 5, 6, 7, 8
-									const value = this.fanSpeed;
-									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Fan speed mode: ${CONSTANS.Ventilation.SetFanSpeed[this.setFanSpeed]}`);
-									return value;
-								})
-								.onSet(async (value) => {
-									//fan speed mode
-									try {
-										let fanSpeedMode = 0;
-										let fanSpeedModeInfo = 0;
-
-										switch (ervNumberOfFanSpeeds) {
-											case 2: //Fan speed mode 2
-												fanSpeedMode = ervHasAutomaticFanSpeed ? [0, 1, 2, 0][value] : [1, 1, 2][value];
-												fanSpeedModeInfo = ervHasAutomaticFanSpeed ? [8, 1, 2, 0][value] : [8, 1, 2][value];
-												break;
-											case 3: //Fan speed mode 3
-												fanSpeedMode = ervHasAutomaticFanSpeed ? [0, 1, 2, 3, 0][value] : [1, 1, 2, 3][value];
-												fanSpeedModeInfo = ervHasAutomaticFanSpeed ? [8, 1, 2, 3, 0][value] : [8, 1, 2, 3][value];
-												break;
-											case 4: //Fan speed mode 4
-												fanSpeedMode = ervHasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 0][value] : [1, 1, 2, 3, 4][value];
-												fanSpeedModeInfo = ervHasAutomaticFanSpeed ? [8, 1, 2, 3, 4, 0][value] : [8, 1, 2, 3, 4][value];
-												break;
-											case 5: //Fan speed mode 5
-												fanSpeedMode = ervHasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 0][value] : [1, 1, 2, 3, 4, 5][value];
-												fanSpeedModeInfo = ervHasAutomaticFanSpeed ? [8, 1, 2, 3, 4, 5, 0][value] : [8, 1, 2, 3, 4, 5][value];
-												break;
-											case 6: //Fan speed mode 6
-												fanSpeedMode = ervHasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 6, 0][value] : [1, 1, 2, 3, 4, 5, 6][value];
-												fanSpeedModeInfo = ervHasAutomaticFanSpeed ? [8, 1, 2, 3, 4, 5, 6, 0][value] : [8, 1, 2, 3, 4, 5, 6][value];
-												break;
-											case 7: //Fan speed mode 7
-												fanSpeedMode = ervHasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 6, 7, 0][value] : [1, 1, 2, 3, 4, 5, 6, 7][value];
-												fanSpeedModeInfo = ervHasAutomaticFanSpeed ? [8, 1, 2, 3, 4, 5, 6, 7, 0][value] : [8, 1, 2, 3, 4, 5, 6, 7][value];
-												break;
-											case 8: //Fan speed mode 8
-												fanSpeedMode = ervHasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 6, 7, 8, 0][value] : [1, 1, 2, 3, 4, 5, 6, 7, 8][value];
-												fanSpeedModeInfo = ervHasAutomaticFanSpeed ? [8, 1, 2, 3, 4, 5, 6, 7, 8, 0][value] : [8, 1, 2, 3, 4, 5, 6, 7, 8][value];
-												break;
+						this.ervMelCloudServices = [];
+						switch (ervDisplayMode) {
+							case 0: //Heater Cooler
+								const ervMelCloudService = new Service.HeaterCooler(ervServiceName, 'HeaterCooler');
+								ervMelCloudService.getCharacteristic(Characteristic.Active)
+									.onGet(async () => {
+										const state = this.power;
+										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Power: ${state ? 'ON' : 'OFF'}`);
+										return state;
+									})
+									.onSet(async (state) => {
+										try {
+											deviceState.Power = state;
+											deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power;
+											await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState);
+											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set power: ${state ? 'ON' : 'OFF'}`);
+										} catch (error) {
+											this.log.error(`${deviceTypeText}: ${accessoryName}, Set power error: ${error}`);
+											ervMelCloudService.updateCharacteristic(Characteristic.Active, false)
 										};
+									});
+								ervMelCloudService.getCharacteristic(Characteristic.CurrentHeaterCoolerState)
+									.onGet(async () => {
+										const value = this.currentOperationMode;
+										const operationModeText = !this.power ? CONSTANS.Ventilation.System[0] : CONSTANS.Ventilation.OperationMode[deviceState.VentilationMode];
+										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Operation mode: ${operationModeText}`);
+										return value;
+									});
+								ervMelCloudService.getCharacteristic(Characteristic.TargetHeaterCoolerState)
+									.setProps({
+										minValue: this.operationModeSetPropsMinValue,
+										maxValue: this.operationModeSetPropsMaxValue,
+										validValues: this.operationModeSetPropsValidValues
+									})
+									.onGet(async () => {
+										const value = this.targetOperationMode; //LOSSNAY, BYPAS, AUTO
+										return value;
+									})
+									.onSet(async (value) => {
+										try {
+											switch (value) {
+												case 0: //AUTO - AUTO
+													deviceState.Power = true;
+													deviceState.VentilationMode = 2;
+													deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.VentilationMode;
+													break;
+												case 1: //HEAT - LOSSNAY
+													deviceState.Power = true;
+													deviceState.VentilationMode = 0;
+													deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.VentilationMode;
+													break;
+												case 2: //COOL - BYPASS
+													deviceState.Power = true;
+													deviceState.VentilationMode = 1;
+													deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.VentilationMode;
+													break;
+											};
 
-										deviceState.Power = true;
-										deviceState.SetFanSpeed = fanSpeedMode;
-										deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
+											await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState);
+											const operationModeText = CONSTANS.Ventilation.VentilationMode[deviceState.VentilationMode];
+											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set operation mode: ${operationModeText}`);
+										} catch (error) {
+											this.log.error(`${deviceTypeText}: ${accessoryName}, Set operation mode error: ${error}`);
+										};
+									});
+								ervMelCloudService.getCharacteristic(Characteristic.RotationSpeed)
+									.setProps({
+										minValue: 0,
+										maxValue: this.fanSpeedSetPropsMaxValue,
+										minStep: 1
+									})
+									.onGet(async () => {
+										const value = this.fanSpeed; //STOP, 1, 2, 3, 4
+										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Fan speed mode: ${CONSTANS.Ventilation.AktualSupplyFanSpeed[this.setFanSpeed]}`);
+										return value;
+									})
+									.onSet(async (value) => {
+										//fan speed mode
+										try {
+											let fanSpeedMode = 0;
+											let fanSpeedModeInfo = 0;
+											switch (ervNumberOfFanSpeeds) {
+												case 2: //Fan speed mode 2
+													fanSpeedMode = ervHasAutomaticFanSpeed ? [0, 1, 2, 0][value] : [1, 1, 2][value];
+													fanSpeedModeInfo = ervHasAutomaticFanSpeed ? [8, 1, 2, 0][value] : [8, 1, 2][value];
+													break;
+												case 3: //Fan speed mode 3
+													fanSpeedMode = ervHasAutomaticFanSpeed ? [0, 1, 2, 3, 0][value] : [1, 1, 2, 3][value];
+													fanSpeedModeInfo = ervHasAutomaticFanSpeed ? [8, 1, 2, 3, 0][value] : [8, 1, 2, 3][value];
+													break;
+												case 4: //Fan speed mode 4
+													fanSpeedMode = ervHasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 0][value] : [1, 1, 2, 3, 4][value];
+													fanSpeedModeInfo = ervHasAutomaticFanSpeed ? [8, 1, 2, 3, 4, 0][value] : [8, 1, 2, 3, 4][value];
+													break;
+											};
+											deviceState.Power = true;
+											deviceState.SetFanSpeed = fanSpeedMode;
+											deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
 
-										await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState);
-										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set fan speed mode: ${CONSTANS.Ventilation.SetFanSpeed[fanSpeedModeInfo]}`);
-									} catch (error) {
-										this.log.error(`${deviceTypeText}: ${accessoryName}, Set fan speed mode error: ${error}`);
-									};
-								});
+											await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState);
+											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set fan speed mode: ${CONSTANS.Ventilation.AktualSupplyFanSpeed[fanSpeedModeInfo]}`);
+										} catch (error) {
+											this.log.error(`${deviceTypeText}: ${accessoryName}, Set fan speed mode error: ${error}`);
+										};
+									});
+								ervMelCloudService.getCharacteristic(Characteristic.CurrentTemperature)
+									.setProps({
+										minValue: -35,
+										maxValue: 150,
+										minStep: 0.5
+									})
+									.onGet(async () => {
+										const value = this.roomTemperature;
+										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Room temperature: ${value}${temperatureUnit}`);
+										return value;
+									});
+								ervMelCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
+									.setProps({
+										minValue: ervTargetHeatingTempSetPropsMinValue,
+										maxValue: ervTargetHeatingTempSetPropsMaxValue,
+										minStep: tempSetPropsMinStep
+									})
+									.onGet(async () => {
+										const value = this.setTemperature;
+										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Heating threshold temperature: ${value}${temperatureUnit}`);
+										return value;
+									})
+									.onSet(async (value) => {
+										try {
+											deviceState.SetTemperature = value;
+											deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.SetTemperature;
+											await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState);
+											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set heating threshold temperature: ${value}${temperatureUnit}`);
+										} catch (error) {
+											this.log.error(`${deviceTypeText}: ${accessoryName}, Set heating threshold temperature error: ${error}`);
+										};
+									});
+								ervMelCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
+									.setProps({
+										minValue: ervTargetCoolingTempSetPropsMinValue,
+										maxValue: ervTargetCoolingTempSetPropsMaxValue,
+										minStep: tempSetPropsMinStep
+									})
+									.onGet(async () => {
+										const value = this.setTemperature;
+										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Cooling threshold temperature: ${value}${temperatureUnit}`);
+										return value;
+									})
+									.onSet(async (value) => {
+										try {
+											deviceState.SetTemperature = value;
+											deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.SetTemperature;
+											await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState);
+											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set cooling threshold temperature: ${value}${temperatureUnit}`);
+										} catch (error) {
+											this.log.error(`${deviceTypeText}: ${accessoryName}, Set cooling threshold temperature error: ${error}`);
+										};
+									});
+								ervMelCloudService.getCharacteristic(Characteristic.LockPhysicalControls)
+									.onGet(async () => {
+										const value = this.lockPhysicalControls;
+										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Lock physical controls: ${value ? 'LOCKED' : 'UNLOCKED'}`);
+										return value;
+									})
+									.onSet(async (value) => {
+										try {
+											value = value ? true : false;
+											deviceState.ProhibitSetTemperature = value;
+											deviceState.ProhibitOperationMode = value;
+											deviceState.ProhibitPower = value;
+											await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState);
+											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set locl physical controls: ${value ? 'LOCK' : 'UNLOCK'}`);
+										} catch (error) {
+											this.log.error(`${deviceTypeText}: ${accessoryName}, Set lock physical controls error: ${error}`);
+										};
+									});
+								ervMelCloudService.getCharacteristic(Characteristic.TemperatureDisplayUnits)
+									.onGet(async () => {
+										const value = this.useFahrenheit;
+										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Temperature display unit: ${temperatureUnit}`);
+										return value;
+									})
+									.onSet(async (value) => {
+										try {
+											melCloudInfo.UseFahrenheit = value ? true : false;
+											await this.melCloudErv.send(CONSTANS.ApiUrls.UpdateApplicationOptions, melCloudInfo, true);
+											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
+											this.melCloudInfo = melCloudInfo;
+										} catch (error) {
+											this.log.error(`${deviceTypeText}: ${accessoryName}, Set temperature display unit error: ${error}`);
+										};
+									});
+								this.ataMelCloudServices.push(ervMelCloudService);
+								accessory.addService(this.ervMelCloudServices[0]);
+							case 1: //Thermostat
+								const ervMelCloudServiceT = new Service.Thermostat(ervServiceName, 'Thermostat');
+								ervMelCloudServiceT.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
+									.onGet(async () => {
+										const value = this.currentOperationMode;
+										const operationModeText = !this.power ? CONSTANS.Ventilation.System[0] : CONSTANS.Ventilation.OperationMode[deviceState.OperationMode];
+										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Operation mode: ${operationModeText}`);
+										return value;
+									});
+								ervMelCloudServiceT.getCharacteristic(Characteristic.TargetHeatingCoolingState)
+									.setProps({
+										minValue: this.operationModeSetPropsMinValue,
+										maxValue: this.operationModeSetPropsMaxValue,
+										validValues: this.operationModeSetPropsValidValues
+									})
+									.onGet(async () => {
+										const value = this.targetOperationMode; //LOSSNAY, BYPASS, AUTO
+										return value;
+									})
+									.onSet(async (value) => {
+										try {
+											switch (value) {
+												case 0: //OFF - POWER OFF
+													deviceState.Power = false;
+													deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power;
+													break;
+												case 1: //HEAT - LOSSNAY
+													deviceState.Power = true;
+													deviceState.VentilationMode = 0;
+													deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.VentilationMode;
+													break;
+												case 2: //COOL - BYPASS
+													deviceState.Power = true;
+													deviceState.VentilationMode = 1;
+													deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.VentilationMode;
+													break;
+												case 3: //AUTO - AUTO
+													deviceState.Power = true;
+													deviceState.VentilationMode = 2;
+													deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.VentilationMode;
+													break;
+											};
+
+											await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState);
+											const operationModeText = CONSTANS.Ventilation.VentilationMode[deviceState.VentilationMode];
+											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set operation mode: ${operationModeText}`);
+										} catch (error) {
+											this.log.error(`${deviceTypeText}: ${accessoryName}, Set operation mode error: ${error}`);
+										};
+									});
+								ervMelCloudServiceT.getCharacteristic(Characteristic.CurrentTemperature)
+									.setProps({
+										minValue: -35,
+										maxValue: 150,
+										minStep: 0.5
+									})
+									.onGet(async () => {
+										const value = this.roomTemperature;
+										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Room temperature: ${value}${temperatureUnit}`);
+										return value;
+									});
+								ervMelCloudServiceT.getCharacteristic(Characteristic.TargetTemperature)
+									.setProps({
+										minValue: ervTargetTempSetPropsMinValue,
+										maxValue: ervTargetTempSetPropsMaxValue,
+										minStep: tempSetPropsMinStep
+									})
+									.onGet(async () => {
+										const value = this.setTemperature;
+										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Target temperature: ${value}${temperatureUnit}`);
+										return value;
+									})
+									.onSet(async (value) => {
+										try {
+											deviceState.SetTemperature = value;
+											deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.SetTemperature;
+											await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState);
+											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set temperature: ${value}${temperatureUnit}`);
+										} catch (error) {
+											this.log.error(`${deviceTypeText}: ${accessoryName}, Set temperature error: ${error}`);
+										};
+									});
+								ervMelCloudServiceT.getCharacteristic(Characteristic.TemperatureDisplayUnits)
+									.onGet(async () => {
+										const value = this.useFahrenheit;
+										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Temperature display unit: ${temperatureUnit}`);
+										return value;
+									})
+									.onSet(async (value) => {
+										try {
+											melCloudInfo.UseFahrenheit = value ? true : false;
+											await this.melCloudErv.send(CONSTANS.ApiUrls.UpdateApplicationOptions, melCloudInfo, true);
+											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
+											this.melCloudInfo = melCloudInfo;
+										} catch (error) {
+											this.log.error(`${deviceTypeText}: ${accessoryName}, Set temperature display unit error: ${error}`);
+										};
+									});
+								this.ataMelCloudServices.push(ervMelCloudServiceT);
+								accessory.addService(this.ervMelCloudServices[i]);
+								break;
 						};
-						this.ervMelCloudService.getCharacteristic(Characteristic.CurrentTemperature)
-							.setProps({
-								minValue: -35,
-								maxValue: 150,
-								minStep: 0.5
-							})
-							.onGet(async () => {
-								const value = this.roomTemperature;
-								const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Room temperature: ${value}${temperatureUnit}`);
-								return value;
-							});
-						if (ervDisplayMode === 1) {
-							//Only for Thermostat
-							this.ervMelCloudService.getCharacteristic(Characteristic.TargetTemperature)
-								.setProps({
-									minValue: ervTargetTempSetPropsMinValue,
-									maxValue: ervTargetTempSetPropsMaxValue,
-									minStep: tempSetPropsMinStep
-								})
-								.onGet(async () => {
-									const value = this.setTemperature;
-									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Target temperature: ${value}${temperatureUnit}`);
-									return value;
-								})
-								.onSet(async (value) => {
-									try {
-										deviceState.SetTemperature = value;
-										deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.SetTemperature;
-
-										await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState);
-										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set target temperature: ${value}${temperatureUnit}`);
-									} catch (error) {
-										this.log.error(`${deviceTypeText}: ${accessoryName}, Set target temperature error: ${error}`);
-									};
-								});
-						};
-						//Only for Heater Cooler
-						if (ervDisplayMode === 0) {
-							this.ervMelCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
-								.setProps({
-									minValue: ervTargetHeatingTempSetPropsMinValue,
-									maxValue: ervTargetHeatingTempSetPropsMaxValue,
-									minStep: tempSetPropsMinStep
-								})
-								.onGet(async () => {
-									const value = this.setTemperature;
-									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Heating threshold temperature: ${value}${temperatureUnit}`);
-									return value;
-								})
-								.onSet(async (value) => {
-									try {
-										deviceState.SetTemperature = value;
-										deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.SetTemperature;
-
-										await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState);
-										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set heating threshold temperature: ${value}${temperatureUnit}`);
-									} catch (error) {
-										this.log.error(`${deviceTypeText}: ${accessoryName}, Set heating threshold temperature error: ${error}`);
-									};
-								});
-							this.ervMelCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
-								.setProps({
-									minValue: ervTargetCoolingTempSetPropsMinValue,
-									maxValue: ervTargetCoolingTempSetPropsMaxValue,
-									minStep: tempSetPropsMinStep
-								})
-								.onGet(async () => {
-									const value = this.setTemperature;
-									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Cooling threshold temperature: ${value}${temperatureUnit}`);
-									return value;
-								})
-								.onSet(async (value) => {
-									try {
-										deviceState.SetTemperature = value;
-										deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.SetTemperature;
-
-										await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState);
-										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set cooling threshold temperature: ${value}${temperatureUnit}`);
-									} catch (error) {
-										this.log.error(`${deviceTypeText}: ${accessoryName}, Set cooling threshold temperature error: ${error}`);
-									};
-								});
-							this.ervMelCloudService.getCharacteristic(Characteristic.LockPhysicalControls)
-								.onGet(async () => {
-									const value = this.lockPhysicalControls;
-									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Lock physical controls: ${value ? 'LOCKED' : 'UNLOCKED'}`);
-									return value;
-								})
-								.onSet(async (value) => {
-									try {
-										value = value ? true : false;
-										deviceState.ProhibitSetTemperature = value;
-										deviceState.ProhibitOperationMode = value;
-										deviceState.ProhibitPower = value;
-
-										await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState);
-										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set locl physical controls: ${value ? 'LOCK' : 'UNLOCK'}`);
-									} catch (error) {
-										this.log.error(`${deviceTypeText}: ${accessoryName}, Set lock physical controls error: ${error}`);
-									};
-								});
-						};
-						this.ervMelCloudService.getCharacteristic(Characteristic.TemperatureDisplayUnits)
-							.onGet(async () => {
-								const value = this.useFahrenheit;
-								const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Temperature display unit: ${temperatureUnit}`);
-								return value;
-							})
-							.onSet(async (value) => {
-								try {
-									melCloudInfo.UseFahrenheit = value ? true : false;
-									await this.melCloudErv.send(CONSTANS.ApiUrls.UpdateApplicationOptions, melCloudInfo, 1);
-									const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText}: ${accessoryName}, Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
-									this.melCloudInfo = melCloudInfo;
-								} catch (error) {
-									this.log.error(`${deviceTypeText}: ${accessoryName}, Set temperature display unit error: ${error}`);
-								};
-							});
 
 						//buttons services
 						if (ervButtonsCount > 0) {
@@ -2946,17 +3103,17 @@ class melCloudDevice {
 														break;
 													case 1: //OPERATING MODE RECOVERY
 														deviceState.Power = true;
-														deviceState.OperationMode = 0;
+														deviceState.VentilationMode = 0;
 														deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.VentilationMode;
 														break;
 													case 2: //OPERATING MODE BYPAS
 														deviceState.Power = true;
-														deviceState.OperationMode = 1;
+														deviceState.VentilationMode = 1;
 														deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.VentilationMode;
 														break
 													case 3: //OPERATING MODE AUTO
 														deviceState.Power = true;
-														deviceState.OperationMode = 2;
+														deviceState.VentilationMode = 2;
 														deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.VentilationMode;
 														break;
 													case 4: //NIGHT PURGE MODE
@@ -2987,36 +3144,16 @@ class melCloudDevice {
 														deviceState.SetFanSpeed = 4;
 														deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
 														break;
-													case 15: //FAN SPEED MODE 5
-														deviceState.Power = true;
-														deviceState.SetFanSpeed = 5;
-														deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
-														break;
-													case 16: //FAN SPEED MODE 6
-														deviceState.Power = true;
-														deviceState.SetFanSpeed = 6;
-														deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
-														break;
-													case 17: //FAN SPEED MODE 7
-														deviceState.Power = true;
-														deviceState.SetFanSpeed = 7;
-														deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
-														break;
-													case 18: //FAN SPEED MODE 8
-														deviceState.Power = true;
-														deviceState.SetFanSpeed = 8;
-														deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
-														break;
-													case 20: //PHYSICAL LOCK CONTROLS
+													case 15: //PHYSICAL LOCK CONTROLS
 														deviceState = deviceState;
 														break;
-													case 21: //ROOM TEMP HIDE
+													case 16: //ROOM TEMP HIDE
 														deviceState.HideRoomTemperature = state;
 														break;
-													case 22: //SUPPLY TEMP HIDE
+													case 17: //SUPPLY TEMP HIDE
 														deviceState.HideSupplyTemperature = state;
 														break;
-													case 23: //OUTDOOR EMP HIDE
+													case 18: //OUTDOOR EMP HIDE
 														deviceState.hideOutdoorTemperature = state;
 														break;
 													default:
@@ -3075,9 +3212,12 @@ class melCloudDevice {
 									});
 
 								this.ervPresetsServices.push(presetService);
-								accessory.addService(this.ervPresetsServices[i]);
+								accessory.addService(this.ervPresetsServices[0]);
 							};
 						};
+						break;
+					default: //unknown system detected
+						this.log(`${deviceTypeText}: ${accessoryName}, Unknown system detected.`);
 						break;
 				};
 

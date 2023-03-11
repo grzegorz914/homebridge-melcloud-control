@@ -2,26 +2,34 @@
     "DeviceType": [
         "Air Conditioner",
         "Heat Pump",
-        "Curtain",
-        "Energy Recovery Ventilation"
+        "Energy Recovery Ventilation",
+        "Unknown"
     ],
     "TemperatureDisplayUnits": [
         "°C",
         "°F"
     ],
     "AirConditioner": {
-        "OperationMode": [
+        "System": [
+            "AIR CONDITIONER OFF",
+            "AIR CONDITIONER ON",
+            "AIR CONDITIONER OFFLINE"
+        ],
+        "DriveMode": [
             "0",
-            "HEAT",
+            "HEATING",
             "DRY",
-            "COOL",
+            "COOLING",
             "4",
             "5",
             "6",
             "FAN",
-            "AUTO"
+            "AUTO",
+            "ISEE HEATING",
+            "ISEE DRY",
+            "ISEE COOLING"
         ],
-        "CurrentVerticalVane": [
+        "VerticalVane": [
             "AUTO",
             "1",
             "2",
@@ -30,7 +38,7 @@
             "5",
             "SWING"
         ],
-        "CurrentHorizontalVane": [
+        "HorizontalVane": [
             "AUTO",
             "1",
             "2",
@@ -40,7 +48,7 @@
             "SPLIT",
             "SWING"
         ],
-        "SwingMode": [
+        "AirDirection": [
             "AUTO",
             "1",
             "2",
@@ -49,17 +57,14 @@
             "5",
             "SWING"
         ],
-        "SetFanSpeed": [
+        "FanSpeed": [
             "AUTO",
             "1",
-            "2",
-            "3",
+            "QUIET",
+            "WEAK",
             "4",
-            "5",
-            "6",
-            "7",
-            "8",
-            "OFF"
+            "STRONG",
+            "VERY STRONG"
         ],
         "EffectiveFlags": {
             "Power": 1,
@@ -77,70 +82,150 @@
             "Hot Water",
             "Zone 2"
         ],
-        "UnitStatus": [
-            "HEAT",
-            "COOL",
-            "HEAT PUMP OFF"
+        "System": [
+            "SYSTEM OFF",
+            "SYSTEM ON",
+            "EMERGENCY RUN",
+            "TEST RUN"
+        ],
+        "ControlType": [
+            "HEATING",
+            "COOLING",
+            "HEAT PUMP OFF",
+            "HEAT PUMP OFFLINE"
+        ],
+        "Defrost": [
+            "NORMAL",
+            "STANDBY",
+            "DEFROST",
+            "WAITING RESTART"
         ],
         "OperationMode": [
             "IDLE",
-            "HEAT WATER",
-            "HEAT ZONES",
-            "COOL",
-            "DEFROST",
-            "STANDBY",
-            "LEGIONELLA"
+            "HOT WATER",
+            "HEATING ZONES",
+            "COOLING",
+            "HOT WATER STORAGE",
+            "FREZE STAT",
+            "LEGIONELLA",
+            "HEATING ECO",
+            "MODE 1",
+            "MODE 2",
+            "MODE 3",
+            "HEATING UP"
+        ],
+        "OperationModeDhw": [
+            "NORMAL",
+            "ECO"
+        ],
+        "ForceDhw": [
+            "AUTO",
+            "HEAT NOW"
+        ],
+        "Holiday": [
+            "NORMAL",
+            "HOLIDAY"
         ],
         "ZoneOperation": [
             "HEAT THERMOSTAT",
             "HEAT FLOW",
-            "CURVE",
+            "HEAT CURVE",
             "COOL THERMOSTAT",
-            "COOL FLOW"
-        ],
-        "HotWaterOperation": [
-            "AUTO",
-            "HEAT NOW"
+            "COOL FLOW",
+            "FLOOR DRYUP",
+            "IDLE"
         ],
         "EffectiveFlags": {
             "Power": 1,
             "OperationMode": 2,
-            "SetTemperature": 4,
+            "EcoHotWater": 4,
             "OperationModeZone1": 8,
             "OperationModeZone2": 16,
+            "SetTankWaterTemperature": 32,
+            "TargetHCTemperatureZone1": 128,
+            "TargetHCTemperatureZone2": 512,
             "ForcedHotWaterMode": 65536,
+            "HolidayMode": 131072,
+            "ProhibitHotWater": 262144,
+            "ProhibitHeatingZone1": 524288,
+            "ProhibitCoolingZone1": 1048576,
+            "ProhibitHeatingZone2": 2097152,
+            "ProhibitCoolingZone2": 4194304,
+            "Demand": 67108864,
             "SetTemperatureZone1": 8589934720,
             "SetTemperatureZone2": 34359738880,
+            "ThermostatTemperatureZone1": 8589934592,
+            "ThermostatTemperatureZone2": 34359738368,
             "SetHeatFlowTemperatureZone1": 281474976710656,
             "SetHeatFlowTemperatureZone2": 281474976710656,
             "SetCoolFlowTemperatureZone1": 281474976710656,
-            "SetCoolFlowTemperatureZone2": 281474976710656,
-            "SetTankWaterTemperature": 281474976710688
+            "SetCoolFlowTemperatureZone2": 281474976710656
         }
     },
     "Ventilation": {
+        "System": [
+            "VENTILATION OFF",
+            "VENTILATION ON",
+            "VENTILATION OFFLINE"
+        ],
         "OperationMode": [
-            "RECOVERY",
+            "0",
+            "HEAT",
+            "2",
+            "COOL",
+            "4",
+            "5",
+            "6",
+            "FAN",
+            "AUTO"
+        ],
+        "AktualOperationMode": [
+            "NOT AUTO",
+            "DETERMINING",
+            "HEATING",
+            "COOLING"
+        ],
+        "AutoFanSpeedControl": [
+            "NOT AVAILABLE",
+            "AVAILABLE"
+        ],
+        "NightPurge": [
+            "NORMAL",
+            "NIGHT PURGE"
+        ],
+        "VentilationMode": [
+            "LOSSNAY",
             "BYPAS",
             "AUTO"
         ],
-        "CurrentFanSpeed": [
-            "STOPPED"
-        ],
-        "SetFanSpeed": [
+        "FanSpeedA": [
             "AUTO",
             "1",
             "2",
             "3",
-            "4",
-            "5",
-            "6",
-            "7",
-            "8",
-            "OFF"
+            "4"
+        ],
+        "AktualVentilationMode": [
+            "LOSSNAY",
+            "BYPAS"
+        ],
+        "AktualSupplyFanSpeed": [
+            "STOP",
+            "1",
+            "2",
+            "3",
+            "4"
+        ],
+        "AktualExtractFanSpeed": [
+            "STOP",
+            "1",
+            "2",
+            "3",
+            "4"
         ],
         "EffectiveFlags": {
             "Power": 1,
+            "OperationMode": 2,
             "VentilationMode": 4,
             "SetFanSpeed": 8
         }

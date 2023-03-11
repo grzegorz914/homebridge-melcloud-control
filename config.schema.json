@@ -249,7 +249,7 @@
                     "title": "Mode",
                     "type": "integer",
                     "minimum": 0,
-                    "maximum": 43,
+                    "maximum": 40,
                     "description": "Here select the function, VH - Vane Horizontal, VV - Vane Veretical.",
                     "oneOf": [
                       {
@@ -433,39 +433,27 @@
                         ]
                       },
                       {
-                        "title": "FAN MODE 7",
+                        "title": "LOCK CONTROL All",
                         "enum": [
                           37
                         ]
                       },
                       {
-                        "title": "FAN MODE 8",
+                        "title": "LOCK CONTROL POWER",
                         "enum": [
                           38
                         ]
                       },
                       {
-                        "title": "LOCK CONTROL All",
-                        "enum": [
-                          40
-                        ]
-                      },
-                      {
-                        "title": "LOCK CONTROL POWER",
-                        "enum": [
-                          41
-                        ]
-                      },
-                      {
                         "title": "LOCK CONTROL MODE",
                         "enum": [
-                          42
+                          39
                         ]
                       },
                       {
                         "title": "LOCK CONTROL TEMPERATURE",
                         "enum": [
-                          43
+                          40
                         ]
                       }
                     ],
@@ -767,7 +755,7 @@
                     "title": "Mode",
                     "type": "integer",
                     "minimum": 0,
-                    "maximum": 23,
+                    "maximum": 18,
                     "description": "Here select the function.",
                     "oneOf": [
                       {
@@ -831,51 +819,27 @@
                         ]
                       },
                       {
-                        "title": "FAN MODE 5",
+                        "title": "LOCK CONTROL",
                         "enum": [
                           15
                         ]
                       },
                       {
-                        "title": "FAN MODE 6",
+                        "title": "ROOM TEMP HIDE",
                         "enum": [
                           16
                         ]
                       },
                       {
-                        "title": "FAN MODE 7",
+                        "title": "SUPPLY TEMP HIDE",
                         "enum": [
                           17
                         ]
                       },
                       {
-                        "title": "FAN MODE 8",
-                        "enum": [
-                          18
-                        ]
-                      },
-                      {
-                        "title": "LOCK CONTROL",
-                        "enum": [
-                          20
-                        ]
-                      },
-                      {
-                        "title": "ROOM TEMP HIDE",
-                        "enum": [
-                          21
-                        ]
-                      },
-                      {
-                        "title": "SUPPLY TEMP HIDE",
-                        "enum": [
-                          22
-                        ]
-                      },
-                      {
                         "title": "OUTDOOR TEMP HIDE",
                         "enum": [
-                          23
+                          18
                         ]
                       }
                     ],

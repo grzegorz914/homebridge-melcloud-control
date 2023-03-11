@@ -12,7 +12,7 @@
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/grzegorz914/homebridge-melcloud-control.svg)](https://github.com/grzegorz914/homebridge-melcloud-control/pulls)
 [![GitHub issues](https://img.shields.io/github/issues/grzegorz914/homebridge-melcloud-control.svg)](https://github.com/grzegorz914/homebridge-melcloud-control/issues)
 
-Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation manufactured by Mistsubishi and connected to MELCloud.                                           
+Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation Lossnay manufactured by Mistsubishi and connected to MELCloud.                                           
 
 </span>
 
@@ -105,28 +105,28 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Identify operating mode *HEAT/COOL/CURVE/HOLIDAY/AUTO HOT WATER/ECO HOT WATER/FORCE HOT WATER*.
       * Identify physical lock controls *LOCK/UNLOCK* Zone 1, 2 und Hot Water.
       * Identify device presets. 
-* Energy Recovery Ventilation:
+* Energy Recovery Ventilation Lossnay:
   * Heater Cooler:
     * Power *ON/OFF*.
-    * Operating mode *AUTO/HEAT/COOL/POWER OFF* - *AUTO, RECOVERY, BYPAS, POWER OFF*.
-    * Fan speed *OFF/1/2/3/4/5/AUTO*.
+    * Operating mode *AUTO/HEAT/COOL/POWER OFF* - *AUTO, LOSSNAY, BYPAS, POWER OFF*.
+    * Fan speed *OFF/1/2/3/4/AUTO*.
     * Physical lock controls *LOCK/UNLOCK*.
   * Thermostat:
     * Power *ON/OFF*.
-    * Operating mode *POWER OFF/HEAT/COOL/AUTO* - *POWER OFF, RECOVERY, BYPAS, AUTO*.
+    * Operating mode *POWER OFF/HEAT/COOL/AUTO* - *POWER OFF, LOSSNAY, BYPAS, AUTO*.
   * Buttons:
     * Use to direct control device.
       * Power *ON/OFF*.
-      * Operating mode *RECOVERY/BYPAS/AUTO/NIGHT PURGE*.
+      * Operating mode *LOSSNAY/BYPAS/AUTO/NIGHT PURGE*.
       * Physical lock controls *LOCK/UNLOCK*.
-      * Fan speed mode *AUTO/1/2/3/4/5/6/7*.
+      * Fan speed mode *AUTO/1/2/3/4*.
       * Set device presets.
   * Sensors:
     * Use with automations in HomeKit app.
       * Identify Power *ON/OFF*.
-      * Identify operating mode *RECOVERY/BYPAS/AUTO/NIGHT PURGE*.
+      * Identify operating mode *LOSSNAY/BYPAS/AUTO/NIGHT PURGE*.
       * Identify physical lock controls *LOCK/UNLOCK*.
-      * Identify fan speed mode *AUTO/1/2/3/4/5/6/7*.
+      * Identify fan speed mode *AUTO/1/2/3/4*.
       * Identify device presets. 
 
 <p align="left">
