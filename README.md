@@ -156,17 +156,17 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ataPresets` | This enable display Air Conditioner presets in HomeKit app. |
 | `ataButtons.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. | 
 | `ataButtons.mode` | Here select button mode, VH - Vane Horizontal, VV - Vane Horizontal. |
-| `ataButtons.displayType` | Here select display type in HomeKit app, possible `None`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`.|
+| `ataButtons.displayType` | Here select display type in HomeKit app, possible `None/Disabled`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`.|
 | `atwDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
 | `atwPresets` | This enable display Heat Pump presets in HomeKit app. |
 | `atwButtons.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. | 
 | `atwButtons.mode` | Here select button mode. |
-| `atwButtons.displayType` | Here select display type in HomeKit app, possible `None`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`.|
+| `atwButtons.displayType` | Here select display type in HomeKit app, possible `None/Disabled`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`.|
 | `ervDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
 | `ervPresets` | This enable display EnergyRecovery Ventilation presets in HomeKit app. |
 | `ervButtons.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. | 
 | `ervButtons.mode` | Here select button mode. |
-| `ervButtons.displayType` | Here select display type in HomeKit app, possible `None`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`.|
+| `ervButtons.displayType` | Here select display type in HomeKit app, possible `None/Disabled`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`.|
 | `enableDebugMode` | This enable deep log in homebridge console. |
 | `disableLogInfo` | This disable display log values and states on every it change. |
 | `disableLogDeviceInfo` | This disable display log device info on plugin start. |
@@ -178,7 +178,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `mqttAuth` | This enabled MQTT Broker authorization credentials. |
 | `mqttUser` | Here set the MQTT Broker user. |
 | `mqttPasswd` | Here set the MQTT Broker password. |
-| `Display Type Buttons` | -1 - `None`, 0 - `Outlet`, 1 - `Switch`, 2 - `Motion Sensor`, 3 - `Occupancy Sensor`, 4 - `Contact Sensor`.|
+| `Display Type Buttons` | -1 - `None/Disabled`, 0 - `Outlet`, 1 - `Switch`, 2 - `Motion Sensor`, 3 - `Occupancy Sensor`, 4 - `Contact Sensor`.|
 
 ```json
         {
