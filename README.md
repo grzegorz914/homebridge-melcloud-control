@@ -26,107 +26,107 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 ### About The Plugin
 * All devices are detected automatically.
 * Support multiple MELCloud accounts, buildings, flors, areas.
-* Support temperature display units *Celsius/Fahrenheit*.
+* Support temperature display units `Celsius/Fahrenheit`.
 * Support control device `Presets`.
 * Support automations, shortcuts and siri.
 * Support direct device controll creating extra `Buttons` (appiled for all devices of same type in account).
 * Support identify all states of device creating `Sensors` and lather use with automations (appiled for all devices of same type in account).
 * MQTT:
-  *  publisch topic *Info*, *State* as payload JSON data.
+  * Publisch topic `Info`, `State` as payload JSON data.
 
 ### Control Mode
 * Air Conditioner:
   * Heater Cooler:
-    * Power *ON/OFF*.
-    * Operating mode *AUTO/HEAT/COOL/POWER OFF*.
+    * Power `ON/OFF`.
+    * Operating mode `AUTO/HEAT/COOL/POWER OFF`.
     * Heating/Cooling temperature. 
-    * Fan speed *OFF/1/2/3/4/5/AUTO*.
-    * Swing mode *AUTO/SWING*.
-    * Physical lock controls *LOCK/UNLOCK*.
+    * Fan speed `OFF/1/2/3/4/5/AUTO`.
+    * Swing mode `AUTO/SWING`.
+    * Physical lock controls `LOCK/UNLOCK`.
   * Thermostat:
-    * Power *ON/OFF*.
-    * Operating mode *POWER OFF/HEAT/COOL/AUTO*.
+    * Power `ON/OFF`.
+    * Operating mode `POWER OFF/HEAT/COOL/AUTO`.
     * Heating/Cooling temperature.
   * Buttons:
     * Use to direct control device.
-      * Power *ON/OFF*.
-      * Operating mode *HEAT/DRY/COOL/FAN/AUTO*.
-      * Physical lock controls *LOCK/UNLOCK*.
-      * Vane H mode *AUTO/1/2/3/4/5/SWING*.
-      * Vane V mode *AUTO/1/2/3/4/5/SWING*.
-      * Fan speed mode *AUTO/1/2/3/4/5*.
+      * Power `ON/OFF`.
+      * Operating mode `HEAT/DRY/COOL/FAN/AUTO`.
+      * Physical lock controls `LOCK/UNLOCK`.
+      * Vane H mode `AUTO/1/2/3/4/5/SWING`.
+      * Vane V mode `AUTO/1/2/3/4/5/SWING`.
+      * Fan speed mode `AUTO/1/2/3/4/5`.
       * Set device presets.
   * Sensors:
     * Use with automations in HomeKit app.
-      * Identify Power *ON/OFF*.
-      * Identify operating mode *HEAT/DRY/COOL/FAN/AUTO*.
-      * Identify physical lock controls *LOCK/UNLOCK*.
-      * Identify vane H mode *AUTO/1/2/3/4/5/SWING*.
-      * Identify vane V mode *AUTO/1/2/3/4/5/SWING*.
-      * Identify fan speed mode *AUTO/1/2/3/4/5/*.
+      * Identify Power `ON/OFF`.
+      * Identify operating mode `HEAT/DRY/COOL/FAN/AUTO`.
+      * Identify physical lock controls `LOCK/UNLOCK`.
+      * Identify vane H mode `AUTO/1/2/3/4/5/SWING`.
+      * Identify vane V mode `AUTO/1/2/3/4/5/SWING`.
+      * Identify fan speed mode `AUTO/1/2/3/4/5/`.
       * Identify device presets. 
 * Heat Pump:
   * Heater Cooler:
     * Heat Pump:
-      * Power *ON/OFF*.
-      * Operating mode *HEAT/COOL*.
-      * Outdoor temperature *GET*.
-      * Physical lock controls all Zones and Hot Water Tank *LOCK/UNLOCK*.
+      * Power `ON/OFF`.
+      * Operating mode `HEAT/COOL`.
+      * Outdoor temperature `GET`.
+      * Physical lock controls all Zones and Hot Water Tank `LOCK/UNLOCK`.
     * Zone 1 and 2:
-      * Operating Mode Heat *AUTO/HEAT/COOL* - *CURVE / HEAT THERMOSTAT / HEAT FLOW*.
-      * Operating Mode Cool *HEAT/COOL* - *COOL THERMOSTAT / COOL FLOW*.
+      * Operating Mode Heat `AUTO/HEAT/COOL` - `CURVE / HEAT THERMOSTAT / HEAT FLOW`.
+      * Operating Mode Cool `HEAT/COOL` - `COOL THERMOSTAT / COOL FLOW`.
       * Heating/Cooling temperature.
-      * Physical lock controls *LOCK/UNLOCK*.
+      * Physical lock controls `LOCK/UNLOCK`.
     * Hot Water Tank:
-      * Operating mode *AUTO/HEAT* - *AUTO/HEAT NOW*.
+      * Operating mode `AUTO/HEAT` - `AUTO/HEAT NOW`.
       * Current/Target temperature.
-      * Physical lock controls *LOCK/UNLOCK*.
+      * Physical lock controls `LOCK/UNLOCK`.
   * Thermostat:
     * Heat Pump:
-      * Power *ON/OFF*.
-      * Operating mode *HEAT/COOL*.
-      * Outdoor temperature *GET*.
+      * Power `ON/OFF`.
+      * Operating mode `HEAT/COOL`.
+      * Outdoor temperature `GET`.
     * Zone 1 and 2:
-      * Operating Mode Heat *HEAT/COOL/AUTO* - *HEAT THERMOSTAT / HEAT FLOW / CURVE*.
-      * Operating Mode Cool *HEAT/COOL* - *COOL THERMOSTAT / COOL FLOW*.
+      * Operating Mode Heat `HEAT/COOL/AUTO` - `HEAT THERMOSTAT / HEAT FLOW / CURVE`.
+      * Operating Mode Cool `HEAT/COOL` - `COOL THERMOSTAT / COOL FLOW`.
       * Heating/Cooling temperature.
     * Hot Water Tank:
-      * Operating mode *HEAT/AUTO* - *HEAT NOW, AUTO*.
+      * Operating mode `HEAT/AUTO` - `HEAT NOW, AUTO`.
       * Current/Target temperature.
   * Buttons:
     * Use to direct control device.  
-      * Power *ON/OFF*.
-      * Operating mode *HEAT/COOL/CURVE/HOLIDAY/AUTO HOT WATER/ECO HOT WATER/FORCE HOT WATER*.
-      * Physical lock controls *LOCK/UNLOCK* Zone 1, 2 und Hot Water Tank.
+      * Power `ON/OFF`.
+      * Operating mode `HEAT/COOL/CURVE/HOLIDAY/AUTO HOT WATER/ECO HOT WATER/FORCE HOT WATER`.
+      * Physical lock controls `LOCK/UNLOCK` Zone 1, 2 und Hot Water Tank.
       * Set device presets. 
   * Sensors:
     * Use with automations in HomeKit app. 
-      * Identify Power *ON/OFF*.
-      * Identify operating mode *HEAT/COOL/CURVE/HOLIDAY/AUTO HOT WATER/ECO HOT WATER/FORCE HOT WATER*.
-      * Identify physical lock controls *LOCK/UNLOCK* Zone 1, 2 und Hot Water.
+      * Identify Power `ON/OFF`.
+      * Identify operating mode `HEAT/COOL/CURVE/HOLIDAY/AUTO HOT WATER/ECO HOT WATER/FORCE HOT WATER`.
+      * Identify physical lock controls `LOCK/UNLOCK` Zone 1, 2 und Hot Water.
       * Identify device presets. 
 * Energy Recovery Ventilation Lossnay:
   * Heater Cooler:
-    * Power *ON/OFF*.
-    * Operating mode *AUTO/HEAT/COOL/POWER OFF* - *AUTO, LOSSNAY, BYPAS, POWER OFF*.
-    * Fan speed *OFF/1/2/3/4/AUTO*.
-    * Physical lock controls *LOCK/UNLOCK*.
+    * Power `ON/OFF`.
+    * Operating mode `AUTO/HEAT/COOL/POWER OFF` - `AUTO, LOSSNAY, BYPAS, POWER OFF`.
+    * Fan speed `OFF/1/2/3/4/AUTO`.
+    * Physical lock controls `LOCK/UNLOCK`.
   * Thermostat:
-    * Power *ON/OFF*.
-    * Operating mode *POWER OFF/HEAT/COOL/AUTO* - *POWER OFF, LOSSNAY, BYPAS, AUTO*.
+    * Power `ON/OFF`.
+    * Operating mode `POWER OFF/HEAT/COOL/AUTO` - `POWER OFF, LOSSNAY, BYPAS, AUTO`.
   * Buttons:
     * Use to direct control device.
-      * Power *ON/OFF*.
-      * Operating mode *LOSSNAY/BYPAS/AUTO/NIGHT PURGE*.
-      * Physical lock controls *LOCK/UNLOCK*.
-      * Fan speed mode *AUTO/1/2/3/4*.
+      * Power `ON/OFF`.
+      * Operating mode `LOSSNAY/BYPAS/AUTO/NIGHT PURGE`.
+      * Physical lock controls `LOCK/UNLOCK`.
+      * Fan speed mode `AUTO/1/2/3/4`.
       * Set device presets.
   * Sensors:
     * Use with automations in HomeKit app.
-      * Identify Power *ON/OFF*.
-      * Identify operating mode *LOSSNAY/BYPAS/AUTO/NIGHT PURGE*.
-      * Identify physical lock controls *LOCK/UNLOCK*.
-      * Identify fan speed mode *AUTO/1/2/3/4*.
+      * Identify Power `ON/OFF`.
+      * Identify operating mode `LOSSNAY/BYPAS/AUTO/NIGHT PURGE`.
+      * Identify physical lock controls `LOCK/UNLOCK`.
+      * Identify fan speed mode `AUTO/1/2/3/4`.
       * Identify device presets. 
 
 <p align="left">
@@ -154,17 +154,17 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `language` | Here select the MELCloud language. |
 | `ataDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
 | `ataPresets` | This enable display Air Conditioner presets in HomeKit app. |
-| `ataButtons.name` | Here set `Button Name` which You want expose to the *Homebridge/HomeKit*. | 
+| `ataButtons.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. | 
 | `ataButtons.mode` | Here select button mode, VH - Vane Horizontal, VV - Vane Horizontal. |
 | `ataButtons.displayType` | Here select display type in HomeKit app, possible `None`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`.|
 | `atwDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
 | `atwPresets` | This enable display Heat Pump presets in HomeKit app. |
-| `atwButtons.name` | Here set `Button Name` which You want expose to the *Homebridge/HomeKit*. | 
+| `atwButtons.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. | 
 | `atwButtons.mode` | Here select button mode. |
 | `atwButtons.displayType` | Here select display type in HomeKit app, possible `None`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`.|
 | `ervDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
 | `ervPresets` | This enable display EnergyRecovery Ventilation presets in HomeKit app. |
-| `ervButtons.name` | Here set `Button Name` which You want expose to the *Homebridge/HomeKit*. | 
+| `ervButtons.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. | 
 | `ervButtons.mode` | Here select button mode. |
 | `ervButtons.displayType` | Here select display type in HomeKit app, possible `None`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`.|
 | `enableDebugMode` | This enable deep log in homebridge console. |
@@ -172,9 +172,9 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `disableLogDeviceInfo` | This disable display log device info on plugin start. |
 | `enableMqtt` | This enabled MQTT Broker and publish to it all awailable data. |
 | `mqttDebug` | This enabled deep log in homebridge console for MQTT. |
-| `mqttHost` | Here set the *IP Address* or *Hostname* for MQTT Broker. |
-| `mqttPort` | Here set the *Port* for MQTT Broker, default 1883. |
-| `mqttPrefix` | Here set the *Prefix* for *Topic* or leave empty. |
+| `mqttHost` | Here set the `IP Address` or `Hostname` for MQTT Broker. |
+| `mqttPort` | Here set the `Port` for MQTT Broker, default 1883. |
+| `mqttPrefix` | Here set the `Prefix` for `Topic` or leave empty. |
 | `mqttAuth` | This enabled MQTT Broker authorization credentials. |
 | `mqttUser` | Here set the MQTT Broker user. |
 | `mqttPasswd` | Here set the MQTT Broker password. |
