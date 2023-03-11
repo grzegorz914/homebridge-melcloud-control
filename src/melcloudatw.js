@@ -48,6 +48,7 @@ class MELCLOUDDEVICEATW extends EventEmitter {
         this.setHeatFlowTemperatureZone2 = 0;
         this.setCoolFlowTemperatureZone1 = 0;
         this.setCoolFlowTemperatureZone2 = 0;
+        this.hcControlType = 0;
         this.tankWaterTemperature = 0;
         this.setTankWaterTemperature = 0;
         this.forcedHotWaterMode = 0;
@@ -58,9 +59,9 @@ class MELCLOUDDEVICEATW extends EventEmitter {
         this.prohibitZone1 = false;
         this.prohibitZone2 = false;
         this.prohibitHotWater = false;
-        this.power = false;
         this.idleZone1 = false;
         this.idleZone2 = false;
+        this.power = false;
         this.offline = false;
 
         this.on('checkDeviceInfo', async () => {
@@ -387,7 +388,7 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                 const setTemperatureZone2 = deviceState.SetTemperatureZone2;
                 const roomTemperatureZone1 = deviceState.RoomTemperatureZone1;
                 const roomTemperatureZone2 = deviceState.RoomTemperatureZone2;
-                const operationMode = deviceState.OperationMode || this.operationMode;
+                const operationMode = deviceState.OperationMode;
                 const operationModeZone1 = deviceState.OperationModeZone1;
                 const operationModeZone2 = deviceState.OperationModeZone2;
                 const weatherObservations = deviceState.WeatherObservations;
@@ -425,30 +426,31 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                 const sceneOwner = deviceState.SceneOwner;
 
                 const deviceStateHasNotChanged =
-                    unitStatus === this.unitStatus
-                    && holidayMode === this.holidayMode
-                    && forcedHotWaterMode === this.forcedHotWaterMode
+                    setTemperatureZone1 === this.setTemperatureZone1
+                    && setTemperatureZone2 === this.setTemperatureZone2
+                    && roomTemperatureZone1 === this.roomTemperatureZone1
+                    && roomTemperatureZone2 === this.roomTemperatureZone2
                     && operationMode === this.operationMode
-                    && ecoHotWater === this.ecoHotWater
-                    && outdoorTemperature === this.outdoorTemperature
+                    && operationModeZone1 === this.operationModeZone1
+                    && operationModeZone2 === this.operationModeZone2
+                    && setHeatFlowTemperatureZone1 === this.setHeatFlowTemperatureZone1
+                    && setHeatFlowTemperatureZone2 === this.setHeatFlowTemperatureZone2
+                    && setCoolFlowTemperatureZone1 === this.setCoolFlowTemperatureZone1
+                    && setCoolFlowTemperatureZone2 === this.setCoolFlowTemperatureZone2
+                    && hcControlType === this.hcControlType
                     && tankWaterTemperature === this.tankWaterTemperature
                     && setTankWaterTemperature === this.setTankWaterTemperature
-                    && prohibitHotWater === this.prohibitHotWater
-                    && power === this.power
-                    && operationModeZone1 === this.operationModeZone1
-                    && roomTemperatureZone1 === this.roomTemperatureZone1
-                    && setTemperatureZone1 === this.setTemperatureZone1
-                    && setHeatFlowTemperatureZone1 === this.setHeatFlowTemperatureZone1
-                    && setCoolFlowTemperatureZone1 === this.setCoolFlowTemperatureZone1
+                    && forcedHotWaterMode === this.forcedHotWaterMode
+                    && unitStatus === this.unitStatus
+                    && outdoorTemperature === this.outdoorTemperature
+                    && ecoHotWater === this.ecoHotWater
+                    && holidayMode === this.holidayMode
                     && prohibitZone1 === this.prohibitZone1
-                    && idleZone1 === this.idleZone1
-                    && operationModeZone2 === this.operationModeZone2
-                    && roomTemperatureZone2 === this.roomTemperatureZone2
-                    && setTemperatureZone2 === this.setTemperatureZone2
-                    && setHeatFlowTemperatureZone2 === this.setHeatFlowTemperatureZone2
-                    && setCoolFlowTemperatureZone2 === this.setCoolFlowTemperatureZone2
                     && prohibitZone2 === this.prohibitZone2
-                    && idleZone2 === this.idleZone2;
+                    && prohibitHotWater === this.prohibitHotWater
+                    && idleZone1 === this.idleZone1
+                    && idleZone2 === this.idleZone2
+                    && power === this.power;
 
                 if (deviceStateHasNotChanged) {
                     this.checkDeviceInfo();
@@ -466,6 +468,7 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                 this.setHeatFlowTemperatureZone2 = setHeatFlowTemperatureZone2;
                 this.setCoolFlowTemperatureZone1 = setCoolFlowTemperatureZone1;
                 this.setCoolFlowTemperatureZone2 = setCoolFlowTemperatureZone2;
+                this.hcControlType = hcControlType;
                 this.tankWaterTemperature = tankWaterTemperature;
                 this.setTankWaterTemperature = setTankWaterTemperature;
                 this.forcedHotWaterMode = forcedHotWaterMode;
@@ -476,12 +479,12 @@ class MELCLOUDDEVICEATW extends EventEmitter {
                 this.prohibitZone1 = prohibitZone1;
                 this.prohibitZone2 = prohibitZone2;
                 this.prohibitHotWater = prohibitHotWater;
-                this.power = power;
                 this.idleZone1 = idleZone1;
                 this.idleZone2 = idleZone2;
+                this.power = power;
                 this.offline = offline;
 
-                this.emit('deviceState', deviceState, setTemperatureZone1, setTemperatureZone2, roomTemperatureZone1, roomTemperatureZone2, operationMode, operationModeZone1, operationModeZone2, setHeatFlowTemperatureZone1, setHeatFlowTemperatureZone2, setCoolFlowTemperatureZone1, setCoolFlowTemperatureZone2, tankWaterTemperature, setTankWaterTemperature, forcedHotWaterMode, unitStatus, outdoorTemperature, ecoHotWater, holidayMode, prohibitZone1, prohibitZone2, prohibitHotWater, idleZone1, idleZone2, power, offline);
+                this.emit('deviceState', deviceState, setTemperatureZone1, setTemperatureZone2, roomTemperatureZone1, roomTemperatureZone2, operationMode, operationModeZone1, operationModeZone2, setHeatFlowTemperatureZone1, setHeatFlowTemperatureZone2, setCoolFlowTemperatureZone1, setCoolFlowTemperatureZone2, hcControlType, tankWaterTemperature, setTankWaterTemperature, forcedHotWaterMode, unitStatus, outdoorTemperature, ecoHotWater, holidayMode, prohibitZone1, prohibitZone2, prohibitHotWater, idleZone1, idleZone2, power, offline);
                 const mqtt = mqttEnabled ? this.emit('mqtt', `State`, JSON.stringify(deviceState, null, 2)) : false;
 
                 this.checkDeviceInfo();

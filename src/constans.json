@@ -90,9 +90,7 @@
         ],
         "ControlType": [
             "HEATING",
-            "COOLING",
-            "HEAT PUMP OFF",
-            "HEAT PUMP OFFLINE"
+            "COOLING"
         ],
         "Defrost": [
             "NORMAL",

@@ -587,21 +587,39 @@
                         ]
                       },
                       {
-                        "title": "Z1 MODE ROOM",
+                        "title": "Z1 MODE HEAT THERMOSTAT",
                         "enum": [
                           20
                         ]
                       },
                       {
-                        "title": "Z1 MODE FLOW",
+                        "title": "Z1 MODE HEAT FLOW",
                         "enum": [
                           21
                         ]
                       },
                       {
-                        "title": "Z1 MODE CURVE",
+                        "title": "Z1 MODE HEAT CURVE",
                         "enum": [
                           22
+                        ]
+                      },
+                      {
+                        "title": "Z1 MODE COOL THERMOSTAT",
+                        "enum": [
+                          23
+                        ]
+                      },
+                      {
+                        "title": "Z1 MODE COOL FLOW",
+                        "enum": [
+                          24
+                        ]
+                      },
+                      {
+                        "title": "Z1 MODE FLOOR DRYUP",
+                        "enum": [
+                          25
                         ]
                       },
                       {
@@ -611,7 +629,7 @@
                         ]
                       },
                       {
-                        "title": "HW MODE AUTO",
+                        "title": "HW MODE FORCE",
                         "enum": [
                           40
                         ]
@@ -623,33 +641,45 @@
                         ]
                       },
                       {
-                        "title": "HW MODE HEAT",
-                        "enum": [
-                          42
-                        ]
-                      },
-                      {
                         "title": "HW LOCK CONTROL",
                         "enum": [
                           50
                         ]
                       },
                       {
-                        "title": "Z2 MODE ROOM",
+                        "title": "Z2 MODE HEAT THERMOSTAT",
                         "enum": [
                           60
                         ]
                       },
                       {
-                        "title": "Z2 MODE FLOW",
+                        "title": "Z2 MODE HEAT FLOW",
                         "enum": [
                           61
                         ]
                       },
                       {
-                        "title": "Z2 MODE CURVE",
+                        "title": "Z2 MODE HEAT CURVE",
                         "enum": [
                           62
+                        ]
+                      },
+                      {
+                        "title": "Z2 MODE COOL THERMOSTAT",
+                        "enum": [
+                          63
+                        ]
+                      },
+                      {
+                        "title": "Z2 MODE COOL FLOW",
+                        "enum": [
+                          64
+                        ]
+                      },
+                      {
+                        "title": "Z2 MODE FLOOR DRYUP",
+                        "enum": [
+                          65
                         ]
                       },
                       {
