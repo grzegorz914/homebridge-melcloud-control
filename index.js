@@ -798,7 +798,7 @@ class melCloudDevice {
 										temperatureSetPropsMinValue = [10, 50][this.useFahrenheit];
 										temperatureSetPropsMaxValue = [35, 95][this.useFahrenheit];
 										break;
-									case caseHotWater: //Hot Water - AUTO, HEAT NOW
+									case caseHotWater: //Hot Water - NORMAL, HEAT NOW
 										currentOperationMode = !power ? 0 : operationMode === 1 ? 2 : [1, 2][forcedHotWaterMode]; //INACTIVE, IDLE, HEATING, COOLING
 										targetOperationMode = [0, 1][forcedHotWaterMode] //AUTO, HEAT, COOL
 										roomTemperature = tankWaterTemperature;
@@ -869,7 +869,7 @@ class melCloudDevice {
 										temperatureSetPropsMinValue = [10, 50][this.useFahrenheit];
 										temperatureSetPropsMaxValue = [35, 95][this.useFahrenheit];
 										break;
-									case caseHotWater: //Hot Water - AUTO, HEAT NOW
+									case caseHotWater: //Hot Water - NORMAL, HEAT NOW
 										currentOperationMode = !power ? 0 : operationMode === 1 ? 1 : [0, 1][forcedHotWaterMode]; //OFF, HEAT, COOL
 										targetOperationMode = [3, 1][forcedHotWaterMode] //OFF, HEAT, COOL, AUTO
 										roomTemperature = tankWaterTemperature;
