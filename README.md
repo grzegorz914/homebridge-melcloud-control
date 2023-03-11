@@ -34,7 +34,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * MQTT:
   *  publisch topic *Info*, *State* as payload JSON data.
 
-* Main control mode, *Heater/Cooler*, *Thermostat*.
+### Main control mode, *Heater/Cooler*, *Thermostat*.
 * Air Conditioner:
   * Heater Cooler:
     * Power *ON/OFF*.
