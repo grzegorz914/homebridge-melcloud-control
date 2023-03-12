@@ -258,14 +258,14 @@ class melCloudDevice {
 							switch (modelSupportsOperationAuto) {
 								case false: //AUTO MODE NOT SUPPORTED- 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
 									currentOperationMode = !power ? 0 : inStandbyMode ? 1 : [0, 2, 2, 3, 3, 3, 3, 3, (setTemperature < roomTemperature) ? 3 : 2, 2, 2, 3][operationMode]; //INACTIVE, IDLE, HEATING, COOLING
-									targetOperationMode = [1, 1, 1, 2, 2, 2, 2, 2][operationMode]; //AUTO, HEAT, COOL
+									targetOperationMode = [1, 1, 1, 2, 2, 2, 2, 0, 1, 1, 2][operationMode]; //AUTO, HEAT, COOL
 									operationModeSetPropsMinValue = 1;
 									operationModeSetPropsMaxValue = 2;
 									operationModeSetPropsValidValues = [1, 2];
 									break;
 								case true: //AUTO MODE SUPPORTED - 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
-									currentOperationMode = !power ? 0 : inStandbyMode ? 1 : [0, 2, 2, 3, 3, 3, 3, 3, (setTemperature < roomTemperature) ? 3 : 2, 1, 2, 2, 3][operationMode]; //INACTIVE, IDLE, HEATING, COOLING
-									targetOperationMode = [0, 1, 1, 2, 2, 2, 2, 2, 0][operationMode]; //AUTO, HEAT, COOL
+									currentOperationMode = !power ? 0 : inStandbyMode ? 1 : [0, 2, 2, 3, 3, 3, 3, 3, (setTemperature < roomTemperature) ? 3 : 2, 2, 2, 3][operationMode]; //INACTIVE, IDLE, HEATING, COOLING
+									targetOperationMode = [0, 1, 1, 2, 2, 2, 2, 1, 0, 1, 1, 2][operationMode]; //AUTO, HEAT, COOL
 									operationModeSetPropsMinValue = 0;
 									operationModeSetPropsMaxValue = 2;
 									operationModeSetPropsValidValues = [0, 1, 2];
@@ -323,14 +323,14 @@ class melCloudDevice {
 							switch (modelSupportsOperationAuto) {
 								case 0: //AUTO MODE NOT SUPPORTED - 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
 									currentOperationMode = !power || inStandbyMode ? 0 : [0, 1, 1, 2, 2, 2, 2, 2, (setTemperature < roomTemperature) ? 2 : 1, 1, 1, 2][operationMode]; //OFF, HEAT, COOL
-									targetOperationMode = !power || inStandbyMode ? 0 : [0, 1, 1, 2, 2, 2, 2, 2, 3, 1, 1, 2][operationMode]; //OFF, HEAT, COOL, AUTO
+									targetOperationMode = !power || inStandbyMode ? 0 : [0, 1, 1, 2, 2, 2, 2, 1, 3, 1, 1, 2][operationMode]; //OFF, HEAT, COOL, AUTO
 									operationModeSetPropsMinValue = 0;
 									operationModeSetPropsMaxValue = 2;
 									operationModeSetPropsValidValues = [0, 1, 2];
 									break;
 								case 1: //AUTO MODE SUPPORTED - 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
 									currentOperationMode = !power || inStandbyMode ? 0 : [0, 1, 1, 2, 2, 2, 2, 2, (setTemperature < roomTemperature) ? 2 : 1, 1, 1, 2][operationMode]; //OFF, HEAT, COOL
-									targetOperationMode = !power || inStandbyMode ? 0 : [0, 1, 1, 2, 2, 2, 2, 2, 3, 1, 1, 2][operationMode]; //OFF, HEAT, COOL, AUTO
+									targetOperationMode = !power || inStandbyMode ? 0 : [0, 1, 1, 2, 2, 2, 2, 1, 3, 1, 1, 2][operationMode]; //OFF, HEAT, COOL, AUTO
 									operationModeSetPropsMinValue = 0;
 									operationModeSetPropsMaxValue = 3;
 									operationModeSetPropsValidValues = [0, 1, 2, 3];
