@@ -43,10 +43,12 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
     * Fan speed `OFF/1/2/3/4/5/AUTO`.
     * Swing mode `AUTO/SWING`.
     * Physical lock controls `LOCK/UNLOCK`.
+    * Mode `HEAT` replaced with `DRY` or `FAN` if not supported.
   * Thermostat:
     * Power `ON/OFF`.
     * Operating mode `POWER OFF/HEAT/COOL/AUTO`.
     * Heating/Cooling temperature.
+    * Mode `HEAT` replaced with `DRY` or `FAN` if not supported.
   * Buttons:
     * Use to direct control device.
       * Power `ON/OFF`.

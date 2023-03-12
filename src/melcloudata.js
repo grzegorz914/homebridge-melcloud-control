@@ -60,7 +60,8 @@ class MELCLOUDDEVICEATA extends EventEmitter {
 
                 //device info
                 //const deviceID = deviceInfo.DeviceID;
-                //const deviceName = deviceInfo.DeviceName;
+                //const name = deviceInfo.DeviceName;
+                const buildingId = deviceInfo.BuildingID;
                 const buildingName = deviceInfo.BuildingName;
                 const floorID = deviceInfo.FloorID;
                 const floorName = deviceInfo.FloorName;
@@ -71,8 +72,8 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 const lastServiceDate = deviceInfo.LastServiceDate;
 
                 //presets
-                const devicePresets = deviceInfo.Presets;
-                const devicePresetsCount = devicePresets.length;
+                const presets = deviceInfo.Presets;
+                const presetsCount = presets.length;
 
                 const ownerID = deviceInfo.OwnerID;
                 const ownerName = deviceInfo.OwnerName;
@@ -90,145 +91,147 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 const hideSupplyTemperature = deviceInfo.HideSupplyTemperature;
                 const hideOutdoorTemperature = deviceInfo.HideOutdoorTemperature;
                 const buildingCountry = deviceInfo.BuildingCountry;
-                const ownerCountry = deviceInfo.OwnerCountry;
-                const adaptorType = deviceInfo.AdaptorType;
-                const linkedDevice = deviceInfo.LinkedDevice;
-                const type = deviceInfo.Type;
-                const macAddress = deviceInfo.MacAddress;
-                const serialNumber = deviceInfo.SerialNumber !== null ? deviceInfo.SerialNumber.toString() : 'Undefined';
+                //const ownerCountry = deviceInfo.OwnerCountry;
+                //const adaptorType = deviceInfo.AdaptorType;
+                //const linkedDevice = deviceInfo.LinkedDevice;
+                //const deviceType = deviceInfo.Type;
+                //const macAddress = deviceInfo.MacAddress;
+                //const serialNumber = deviceInfo.SerialNumber !== null ? deviceInfo.SerialNumber.toString() : 'Undefined';
 
                 //device
-                const devicePCycleActual = deviceInfo.Device.PCycleActual;
-                const deviceErrorMessages = deviceInfo.Device.ErrorMessages;
-                const deviceDeviceType = deviceInfo.Device.DeviceType;
-                const deviceCanCool = deviceInfo.Device.CanCool;
-                const deviceCanHeat = deviceInfo.Device.CanHeat;
-                const deviceCanDry = deviceInfo.Device.CanDry;
-                const deviceHasAutomaticFanSpeed = deviceInfo.Device.HasAutomaticFanSpeed;
-                const deviceAirDirectionFunction = deviceInfo.Device.AirDirectionFunction;
-                const deviceSwingFunction = deviceInfo.Device.SwingFunction;
-                const deviceNumberOfFanSpeeds = deviceInfo.Device.NumberOfFanSpeeds;
-                const deviceUseTemperatureA = deviceInfo.Device.UseTemperatureA;
-                const deviceTemperatureIncrement = deviceInfo.Device.TemperatureIncrement;
-                const deviceTemperatureIncrementOverride = deviceInfo.Device.TemperatureIncrementOverride;
-                const deviceMinTempCoolDry = deviceInfo.Device.MinTempCoolDry;
-                const deviceMaxTempCoolDry = deviceInfo.Device.MaxTempCoolDry;
-                const deviceMinTempHeat = deviceInfo.Device.MinTempHeat;
-                const deviceMaxTempHeat = deviceInfo.Device.MaxTempHeat;
-                const deviceMinTempAutomatic = deviceInfo.Device.MinTempAutomatic;
-                const deviceMaxTempAutomatic = deviceInfo.Device.MaxTempAutomatic;
-                const deviceLegacyDevice = deviceInfo.Device.LegacyDevice;
-                const deviceUnitSupportsStandbyMode = deviceInfo.Device.UnitSupportsStandbyMode;
-                const deviceIsSplitSystem = deviceInfo.Device.IsSplitSystem;
-                const deviceModelIsAirCurtain = deviceInfo.Device.ModelIsAirCurtain;
-                const deviceModelSupportsFanSpeed = deviceInfo.Device.ModelSupportsFanSpeed;
-                const deviceModelSupportsAuto = deviceInfo.Device.ModelSupportsAuto;
-                const deviceModelSupportsHeat = deviceInfo.Device.ModelSupportsHeat;
-                const deviceModelSupportsDry = deviceInfo.Device.ModelSupportsDry;
-                const deviceModelSupportsVaneVertical = deviceInfo.Device.ModelSupportsVaneVertical;
-                const deviceModelSupportsVaneHorizontal = deviceInfo.Device.ModelSupportsVaneHorizontal;
-                const deviceModelSupportsWideVane = deviceInfo.Device.ModelSupportsWideVane;
-                const deviceModelDisableEnergyReport = deviceInfo.Device.ModelDisableEnergyReport;
-                const deviceModelSupportsStandbyMode = deviceInfo.Device.ModelSupportsStandbyMode;
-                const deviceModelSupportsEnergyReporting = deviceInfo.Device.ModelSupportsEnergyReporting;
-                const deviceProhibitSetTemperature = deviceInfo.Device.ProhibitSetTemperature;
-                const deviceProhibitOperationMode = deviceInfo.Device.ProhibitOperationMode;
-                const deviceProhibitPower = deviceInfo.Device.ProhibitPower;
-                const devicePower = deviceInfo.Device.Power;
-                const deviceRoomTemperature = deviceInfo.Device.RoomTemperature;
-                const deviceSetTemperature = deviceInfo.Device.SetTemperature;
-                const deviceActualFanSpeed = deviceInfo.Device.ActualFanSpeed;
-                const deviceFanSpeed = deviceInfo.Device.FanSpeed;
-                const deviceAutomaticFanSpeed = deviceInfo.Device.AutomaticFanSpeed;
-                const deviceVaneVerticalDirection = deviceInfo.Device.VaneVerticalDirection;
-                const deviceVaneVerticalSwing = deviceInfo.Device.VaneVerticalSwing;
-                const deviceVaneHorizontalDirection = deviceInfo.Device.VaneHorizontalDirection;
-                const deviceVaneHorizontalSwing = deviceInfo.Device.VaneHorizontalSwing;
-                const deviceOperationMode = deviceInfo.Device.OperationMode;
-                const deviceEffectiveFlags = deviceInfo.Device.EffectiveFlags;
-                const deviceInStandbyMode = deviceInfo.Device.InStandbyMode;
-                const deviceDemandPercentage = deviceInfo.Device.DemandPercentage;
-                const deviceConfiguredDemandPercentage = deviceInfo.Device.ConfiguredDemandPercentage;
-                const deviceHasDemandSideControl = deviceInfo.Device.HasDemandSideControl;
-                const deviceDefaultCoolingSetTemperature = deviceInfo.Device.DefaultCoolingSetTemperature;
-                const deviceDefaultHeatingSetTemperature = deviceInfo.Device.DefaultHeatingSetTemperature;
-                const deviceRoomTemperatureLabel = deviceInfo.Device.RoomTemperatureLabel;
-                const deviceHeatingEnergyConsumedRate1 = deviceInfo.Device.HeatingEnergyConsumedRate1;
-                const deviceHeatingEnergyConsumedRate2 = deviceInfo.Device.HeatingEnergyConsumedRate2;
-                const deviceCoolingEnergyConsumedRate1 = deviceInfo.Device.CoolingEnergyConsumedRate1;
-                const deviceCoolingEnergyConsumedRate2 = deviceInfo.Device.CoolingEnergyConsumedRate2;
-                const deviceAutoEnergyConsumedRate1 = deviceInfo.Device.AutoEnergyConsumedRate1;
-                const deviceAutoEnergyConsumedRate2 = deviceInfo.Device.AutoEnergyConsumedRate2;
-                const deviceDryEnergyConsumedRate1 = deviceInfo.Device.DryEnergyConsumedRate1;
-                const deviceDryEnergyConsumedRate2 = deviceInfo.Device.DryEnergyConsumedRate2;
-                const deviceFanEnergyConsumedRate1 = deviceInfo.Device.FanEnergyConsumedRate1;
-                const deviceFanEnergyConsumedRate2 = deviceInfo.Device.FanEnergyConsumedRate2;
-                const deviceOtherEnergyConsumedRate1 = deviceInfo.Device.OtherEnergyConsumedRate1;
-                const deviceOtherEnergyConsumedRate2 = deviceInfo.Device.OtherEnergyConsumedRate2;
-                const deviceHasEnergyConsumedMeter = deviceInfo.Device.HasEnergyConsumedMeter;
-                const deviceCurrentEnergyConsumed = deviceInfo.Device.CurrentEnergyConsumed;
-                const deviceCurrentEnergyMode = deviceInfo.Device.CurrentEnergyMode;
-                const deviceCoolingDisabled = deviceInfo.Device.CoolingDisabled
-                const deviceEnergyCorrectionModel = deviceInfo.Device.EnergyCorrectionModel;
-                const deviceEnergyCorrectionActive = deviceInfo.Device.EnergyCorrectionActive;
-                const deviceMinPcycle = deviceInfo.Device.MinPcycle;
-                const deviceMaxPcycle = deviceInfo.Device.MaxPcycle;
-                const deviceEffectivePCycle = deviceInfo.Device.EffectivePCycle;
-                const deviceMaxOutdoorUnits = deviceInfo.Device.MaxOutdoorUnits;
-                const deviceMaxIndoorUnits = deviceInfo.Device.MaxIndoorUnits;
-                const deviceMaxTemperatureControlUnits = deviceInfo.Device.MaxTemperatureControlUnits;
-                const deviceModelCode = deviceInfo.Device.ModelCode;
-                const deviceDeviceID = deviceInfo.Device.DeviceID;
-                const deviceMacAddress = deviceInfo.Device.MacAddress;
-                const deviceSerialNumber = deviceInfo.Device.SerialNumber !== null ? deviceInfo.Device.SerialNumber.toString() : 'Undefined';
-                const deviceTimeZoneID = deviceInfo.Device.TimeZoneID;
-                const deviceDiagnosticMode = deviceInfo.Device.DiagnosticMode;
-                const deviceDiagnosticEndDate = deviceInfo.Device.DiagnosticEndDate;
-                const deviceExpectedCommand = deviceInfo.Device.ExpectedCommand;
-                const deviceOwner = deviceInfo.Device.Owner;
-                const deviceDetectedCountry = deviceInfo.Device.DetectedCountry;
-                const deviceAdaptorType = deviceInfo.Device.AdaptorType;
-                const deviceFirmwareDeployment = deviceInfo.Device.FirmwareDeployment;
-                const deviceFirmwareUpdateAborted = deviceInfo.Device.FirmwareUpdateAborted;
-                const deviceLinkedDevice = deviceInfo.Device.LinkedDevice;
-                const deviceWifiSignalStrength = deviceInfo.Device.WifiSignalStrength;
-                const deviceWifiAdapterStatus = deviceInfo.Device.WifiAdapterStatus;
-                const devicePosition = deviceInfo.Device.Position;
-                const devicePCycle = deviceInfo.Device.PCycle;
-                const deviceRecordNumMax = deviceInfo.Device.RecordNumMax;
-                const deviceLastTimeStamp = deviceInfo.Device.LastTimeStamp;
-                const deviceErrorCode = deviceInfo.Device.ErrorCode;
-                const deviceHasError = deviceInfo.Device.HasError;
-                const deviceLastReset = deviceInfo.Device.LastReset;
-                const deviceFlashWrites = deviceInfo.Device.FlashWrites;
-                const deviceScene = deviceInfo.Device.Scene;
-                const deviceSSLExpirationDate = deviceInfo.Device.SSLExpirationDate;
-                const deviceSPTimeout = deviceInfo.Device.SPTimeout;
-                const devicePasscode = deviceInfo.Device.Passcode;
-                const deviceServerCommunicationDisabled = deviceInfo.Device.ServerCommunicationDisabled;
-                const deviceConsecutiveUploadErrors = deviceInfo.Device.ConsecutiveUploadErrors;
-                const deviceDoNotRespondAfter = deviceInfo.Device.DoNotRespondAfter;
-                const deviceOwnerRoleAccessLevel = deviceInfo.Device.OwnerRoleAccessLevel;
-                const deviceOwnerCountry = deviceInfo.Device.OwnerCountry;
-                const deviceHideEnergyReport = deviceInfo.Device.HideEnergyReport;
-                const deviceExceptionHash = deviceInfo.Device.ExceptionHash;
-                const deviceExceptionDate = deviceInfo.Device.ExceptionDate;
-                const deviceExceptionCount = deviceInfo.Device.ExceptionCount;
-                const deviceRate1StartTime = deviceInfo.Device.Rate1StartTime;
-                const deviceRate2StartTime = deviceInfo.Device.Rate2StartTime;
-                const deviceProtocolVersion = deviceInfo.Device.ProtocolVersion;
-                const deviceUnitVersion = deviceInfo.Device.UnitVersion;
-                const deviceFirmwareAppVersion = deviceInfo.Device.FirmwareAppVersion !== null ? deviceInfo.Device.FirmwareAppVersion.toString() : 'Undefined';
-                const deviceFirmwareWebVersion = deviceInfo.Device.FirmwareWebVersion;
-                const deviceFirmwareWlanVersion = deviceInfo.Device.FirmwareWlanVersion;
-                const deviceMqttFlags = deviceInfo.Device.MqttFlags;
-                const deviceHasErrorMessages = deviceInfo.Device.HasErrorMessages;
-                const deviceHasZone2 = deviceInfo.Device.HasZone2;
-                const deviceOffline = deviceInfo.Device.Offline;
-                const deviceSupportsHourlyEnergyReport = deviceInfo.Device.SupportsHourlyEnergyReport;
+                const device = deviceInfo.Device;
+                const pCycleActual = device.PCycleActual;
+                const errorMessages = device.ErrorMessages;
+                const deviceType = device.DeviceType;
+                const canCool = device.CanCool;
+                const canHeat = device.CanHeat;
+                const canDry = device.CanDry;
+                const hasAutomaticFanSpeed = device.HasAutomaticFanSpeed;
+                const airDirectionFunction = device.AirDirectionFunction;
+                const swingFunction = device.SwingFunction;
+                const numberOfFanSpeeds = device.NumberOfFanSpeeds;
+                const useTemperatureA = device.UseTemperatureA;
+                const temperatureIncrementOverride = device.TemperatureIncrementOverride; //Auto, 1, 0.5
+                const temperatureIncrement = device.TemperatureIncrement;
+                const minTempCoolDry = device.MinTempCoolDry;
+                const maxTempCoolDry = device.MaxTempCoolDry;
+                const minTempHeat = device.MinTempHeat;
+                const maxTempHeat = device.MaxTempHeat;
+                const minTempAutomatic = device.MinTempAutomatic;
+                const maxTempAutomatic = device.MaxTempAutomatic;
+                const legacyDevice = device.LegacyDevice;
+                const unitSupportsStandbyMode = device.UnitSupportsStandbyMode;
+                const isSplitSystem = device.IsSplitSystem;
+                const modelIsAirCurtain = device.ModelIsAirCurtain;
+                const modelSupportsFanSpeed = device.ModelSupportsFanSpeed;
+                const modelSupportsAuto = device.ModelSupportsAuto;
+                const modelSupportsHeat = device.ModelSupportsHeat;
+                const modelSupportsDry = device.ModelSupportsDry;
+                const modelSupportsVaneVertical = device.ModelSupportsVaneVertical;
+                const modelSupportsVaneHorizontal = device.ModelSupportsVaneHorizontal;
+                const modelSupportsWideVane = device.ModelSupportsWideVane;
+                const modelDisableEnergyReport = device.ModelDisableEnergyReport;
+                const modelSupportsStandbyMode = device.ModelSupportsStandbyMode;
+                const modelSupportsEnergyReporting = device.ModelSupportsEnergyReporting;
+                const prohibitSetTemperature = device.ProhibitSetTemperature;
+                const prohibitOperationMode = device.ProhibitOperationMode;
+                const prohibitPower = device.ProhibitPower;
+                const power = device.Power;
+                const roomTemperature = device.RoomTemperature;
+                const setTemperature = device.SetTemperature;
+                const actualFanSpeed = device.ActualFanSpeed;
+                const fanSpeed = device.FanSpeed;
+                const automaticFanSpeed = device.AutomaticFanSpeed;
+                const vaneVerticalDirection = device.VaneVerticalDirection;
+                const vaneVerticalSwing = device.VaneVerticalSwing;
+                const vaneHorizontalDirection = device.VaneHorizontalDirection;
+                const vaneHorizontalSwing = device.VaneHorizontalSwing;
+                const operationMode = device.OperationMode;
+                const effectiveFlags = device.EffectiveFlags;
+                const inStandbyMode = device.InStandbyMode;
+                const demandPercentage = device.DemandPercentage;
+                const configuredDemandPercentage = device.ConfiguredDemandPercentage;
+                const hasDemandSideControl = device.HasDemandSideControl;
+                const defaultCoolingSetTemperature = device.DefaultCoolingSetTemperature;
+                const defaultHeatingSetTemperature = device.DefaultHeatingSetTemperature;
+                const roomTemperatureLabel = device.RoomTemperatureLabel;
+                const heatingEnergyConsumedRate1 = device.HeatingEnergyConsumedRate1;
+                const heatingEnergyConsumedRate2 = device.HeatingEnergyConsumedRate2;
+                const coolingEnergyConsumedRate1 = device.CoolingEnergyConsumedRate1;
+                const coolingEnergyConsumedRate2 = device.CoolingEnergyConsumedRate2;
+                const autoEnergyConsumedRate1 = device.AutoEnergyConsumedRate1;
+                const autoEnergyConsumedRate2 = device.AutoEnergyConsumedRate2;
+                const dryEnergyConsumedRate1 = device.DryEnergyConsumedRate1;
+                const dryEnergyConsumedRate2 = device.DryEnergyConsumedRate2;
+                const fanEnergyConsumedRate1 = device.FanEnergyConsumedRate1;
+                const fanEnergyConsumedRate2 = device.FanEnergyConsumedRate2;
+                const otherEnergyConsumedRate1 = device.OtherEnergyConsumedRate1;
+                const otherEnergyConsumedRate2 = device.OtherEnergyConsumedRate2;
+                const hasEnergyConsumedMeter = device.HasEnergyConsumedMeter;
+                const currentEnergyConsumed = device.CurrentEnergyConsumed;
+                const currentEnergyMode = device.CurrentEnergyMode;
+                const coolingDisabled = device.CoolingDisabled
+                const energyCorrectionModel = device.EnergyCorrectionModel;
+                const energyCorrectionActive = device.EnergyCorrectionActive;
+                const minPcycle = device.MinPcycle;
+                const maxPcycle = device.MaxPcycle;
+                const effectivePCycle = device.EffectivePCycle;
+                const maxOutdoorUnits = device.MaxOutdoorUnits;
+                const maxIndoorUnits = device.MaxIndoorUnits;
+                const maxTemperatureControlUnits = device.MaxTemperatureControlUnits;
+                const modelCode = device.ModelCode;
+                const deviceID = device.DeviceID;
+                const macAddress = device.MacAddress;
+                const serialNumber = device.SerialNumber !== null ? device.SerialNumber.toString() : 'Undefined';
+                const timeZoneID = device.TimeZoneID;
+                const diagnosticMode = deviceInfo.DiagnosticMode;
+                const diagnosticEndDate = deviceInfo.DiagnosticEndDate;
+                const expectedCommand = deviceInfo.ExpectedCommand;
+                const owner = device.Owner;
+                const detectedCountry = deviceInfo.DetectedCountry;
+                const adaptorType = device.AdaptorType;
+                const firmwareDeployment = device.FirmwareDeployment;
+                const firmwareUpdateAborted = device.FirmwareUpdateAborted;
+                const linkedDevice = device.LinkedDevice;
+                const wifiSignalStrength = device.WifiSignalStrength;
+                const wifiAdapterStatus = device.WifiAdapterStatus;
+                const position = device.Position;
+                const pCycle = device.PCycle;
+                const pCycleConfigured = device.PCycleConfigured;
+                const recordNumMax = device.RecordNumMax;
+                const lastTimeStamp = device.LastTimeStamp;
+                const errorCode = device.ErrorCode;
+                const hasError = device.HasError;
+                const lastReset = device.LastReset;
+                const flashWrites = device.FlashWrites;
+                const scene = device.Scene;
+                const sSLExpirationDate = device.SSLExpirationDate;
+                const sPTimeout = device.SPTimeout;
+                const passcode = device.Passcode;
+                const serverCommunicationDisabled = device.ServerCommunicationDisabled;
+                const consecutiveUploadErrors = device.ConsecutiveUploadErrors;
+                const doNotRespondAfter = device.DoNotRespondAfter;
+                const ownerRoleAccessLevel = device.OwnerRoleAccessLevel;
+                const ownerCountry = device.OwnerCountry;
+                const hideEnergyReport = device.HideEnergyReport;
+                const exceptionHash = device.ExceptionHash;
+                const exceptionDate = device.ExceptionDate;
+                const exceptionCount = device.ExceptionCount;
+                const rate1StartTime = device.Rate1StartTime;
+                const rate2StartTime = device.Rate2StartTime;
+                const protocolVersion = device.ProtocolVersion;
+                const unitVersion = device.UnitVersion;
+                const firmwareAppVersion = device.FirmwareAppVersion !== null ? device.FirmwareAppVersion.toString() : 'Undefined';
+                const firmwareWebVersion = device.FirmwareWebVersion;
+                const firmwareWlanVersion = device.FirmwareWlanVersion;
+                const mqttFlags = device.MqttFlags;
+                const hasErrorMessages = device.HasErrorMessages;
+                const hasZone2 = device.HasZone2;
+                const offline = device.Offline;
+                const supportsHourlyEnergyReport = device.SupportsHourlyEnergyReport;
 
                 //units info
-                const units = Array.isArray(deviceInfo.Device.Units) ? deviceInfo.Device.Units : [];
+                const units = Array.isArray(device.Units) ? device.Units : [];
                 const serialsNumberIndoor = [];
                 const serialsNumberOutdoor = [];
                 const modelsNumberIndoor = [];
@@ -257,29 +260,29 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 const modelOutdoor = modelsOutdoor.length > 0 ? modelsOutdoor[0] : 'Undefined';
 
                 //diagnostic
-                const diagnosticMode = deviceInfo.DiagnosticMode;
-                const diagnosticEndDate = deviceInfo.DiagnosticEndDate;
+                //const diagnosticMode = deviceInfo.DiagnosticMode;
+                //const diagnosticEndDate = deviceInfo.DiagnosticEndDate;
                 const location = deviceInfo.Location;
-                const detectedCountry = deviceInfo.DetectedCountry;
+                //const detectedCountry = deviceInfo.DetectedCountry;
                 const registrations = deviceInfo.Registrations;
                 const localIPAddress = deviceInfo.LocalIPAddress;
                 const timeZone = deviceInfo.TimeZone;
                 const registReason = deviceInfo.RegistReason;
-                const expectedCommand = deviceInfo.ExpectedCommand;
+                //const expectedCommand = deviceInfo.ExpectedCommand;
                 const registRetry = deviceInfo.RegistRetry;
                 const dateCreated = deviceInfo.DateCreated;
-                const firmwareDeployment = deviceInfo.FirmwareDeployment;
-                const firmwareUpdateAborted = deviceInfo.FirmwareUpdateAborted;
+                //const firmwareDeployment = deviceInfo.FirmwareDeployment;
+                //const firmwareUpdateAborted = deviceInfo.FirmwareUpdateAborted;
 
                 //permissions
-                const CanSetOperationMode = deviceInfo.Permissions.CanSetOperationMode;
-                const CanSetFanSpeed = deviceInfo.Permissions.CanSetFanSpeed;
-                const CanSetVaneDirection = deviceInfo.Permissions.CanSetVaneDirection;
-                const CanSetPower = deviceInfo.Permissions.CanSetPower;
-                const CanSetTemperatureIncrementOverride = deviceInfo.Permissions.CanSetTemperatureIncrementOverride;
-                const CanDisableLocalController = deviceInfo.Permissions.CanDisableLocalController;
+                const permissionCanSetOperationMode = deviceInfo.Permissions.CanSetOperationMode;
+                const permissionCanSetFanSpeed = deviceInfo.Permissions.CanSetFanSpeed;
+                const permissionCanSetVaneDirection = deviceInfo.Permissions.CanSetVaneDirection;
+                const permissionCanSetPower = deviceInfo.Permissions.CanSetPower;
+                const permissionCanSetTemperatureIncrementOverride = deviceInfo.Permissions.CanSetTemperatureIncrementOverride;
+                const permissionCanDisableLocalController = deviceInfo.Permissions.CanDisableLocalController;
 
-                this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, deviceFirmwareAppVersion, devicePresets, devicePresetsCount, deviceHasAutomaticFanSpeed, deviceSwingFunction, deviceNumberOfFanSpeeds, deviceModelSupportsFanSpeed, deviceModelSupportsAuto);
+                this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, presets, presetsCount, hasAutomaticFanSpeed, airDirectionFunction, swingFunction, numberOfFanSpeeds, temperatureIncrement, modelSupportsFanSpeed, modelSupportsAuto, modelSupportsHeat, modelSupportsDry);
                 const mqtt = mqttEnabled ? this.emit('mqtt', `Info`, JSON.stringify(deviceInfo, null, 2)) : false;
 
                 //check device state
@@ -291,8 +294,8 @@ class MELCLOUDDEVICEATA extends EventEmitter {
             };
         }).on('checkDeviceState', async () => {
             try {
-                const deviceUrl = CONSTANS.ApiUrls.DeviceState.replace("DID", deviceId).replace("BID", buildingId);
-                const responseData = await this.axiosInstanceGet(deviceUrl);
+                const url = CONSTANS.ApiUrls.DeviceState.replace("DID", deviceId).replace("BID", buildingId);
+                const responseData = await this.axiosInstanceGet(url);
                 const deviceState = responseData.data;
                 const deviceStateData = JSON.stringify(deviceState, null, 2);
                 const debug = debugLog ? this.emit('debug', `debug State: ${deviceStateData}`) : false;
@@ -332,7 +335,7 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 const scene = deviceState.Scene;
                 const sceneOwner = deviceState.SceneOwner;
 
-                const deviceStateHasNotChanged =
+                const stateHasNotChanged =
                     roomTemperature === this.roomTemperature
                     && setTemperature === this.setTemperature
                     && setFanSpeed === this.setFanSpeed
@@ -348,7 +351,7 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                     && power === this.power
                     && offline === this.offline;
 
-                if (deviceStateHasNotChanged) {
+                if (stateHasNotChanged) {
                     this.checkDeviceInfo();
                     return;
                 }
@@ -372,7 +375,7 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 this.checkDeviceInfo();
                 const mqtt = mqttEnabled ? this.emit('mqtt', `State`, JSON.stringify(deviceState, null, 2)) : false;
             } catch (error) {
-                this.emit('error', `check state error, ${error}, check again in 60s.`);
+                this.emit('error', `check device state error, ${error}, check again in 60s.`);
                 this.checkDeviceInfo();
             };
         });

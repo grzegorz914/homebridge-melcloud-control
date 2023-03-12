@@ -191,7 +191,7 @@ class melCloudDevice {
 					prefDir: prefDir
 				});
 
-				this.melCloudAta.on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareRevision, presets, presetsCount, hasAutomaticFanSpeed, swingFunction, numberOfFanSpeeds, modelSupportsFanSpeed, modelSupportsAuto) => {
+				this.melCloudAta.on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareRevision, presets, presetsCount, hasAutomaticFanSpeed, airDirectionFunction, swingFunction, numberOfFanSpeeds, temperatureIncrement, modelSupportsFanSpeed, modelSupportsAuto, modelSupportsHeat, modelSupportsDry) => {
 					if (!this.disableLogDeviceInfo && this.displayDeviceInfo) {
 						this.log(`---- ${this.deviceTypeText}: ${this.deviceName} ----`);
 						this.log(`Account: ${this.accountName}`);
@@ -212,10 +212,14 @@ class melCloudDevice {
 
 					//device info
 					this.ataHasAutomaticFanSpeed = hasAutomaticFanSpeed;
+					this.ataAirDirectionFunction = airDirectionFunction;
 					this.ataSwingFunction = swingFunction;
 					this.ataNumberOfFanSpeeds = numberOfFanSpeeds;
+					this.ataTemperatureIncrement = temperatureIncrement;
 					this.ataModelSupportsFanSpeed = modelSupportsFanSpeed;
 					this.ataModelSupportsOperationAuto = modelSupportsAuto;
+					this.ataModelSupportsHeat = modelSupportsHeat;
+					this.ataModelSupportsDry = modelSupportsDry;
 					this.ataPresets = presets;
 					this.ataPresetsCount = this.ataPresetsEnabled ? presetsCount : 0;
 				}).on('deviceState', async (deviceState, roomTemperature, setTemperature, setFanSpeed, operationMode, vaneHorizontal, vaneVertical, hideVaneControls, hideDryModeControl, inStandbyMode, prohibitSetTemperature, prohibitOperationMode, prohibitPower, power, offline) => {
@@ -225,7 +229,9 @@ class melCloudDevice {
 					const swingFunction = this.ataSwingFunction;
 					const numberOfFanSpeeds = this.ataNumberOfFanSpeeds;
 					const modelSupportsFanSpeed = this.ataModelSupportsFanSpeed;
-					const modelSupportsOperationAuto = this.ataModelSupportsOperationAuto
+					const modelSupportsOperationAuto = this.ataModelSupportsOperationAuto;
+					const modelSupportsHeat = this.ataModelSupportsHeat;
+					const modelSupportsDry = this.ataModelSupportsDry;
 					const buttonsCount = this.ataButtonsCount;
 					const presets = this.ataPresets;
 					const presetsCount = this.ataPresetsCount;
@@ -679,7 +685,7 @@ class melCloudDevice {
 					prefDir: prefDir
 				});
 
-				this.melCloudAtw.on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareRevision, presets, presetsCount, zonesCount, hasHotWaterTank, maxTankTemperature, hasZone2, zone1Name, zone2Name, heatCoolModes, caseHotWater, caseZone2) => {
+				this.melCloudAtw.on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareRevision, presets, presetsCount, zonesCount, hasHotWaterTank, temperatureIncrement, maxTankTemperature, hasZone2, zone1Name, zone2Name, heatCoolModes, caseHotWater, caseZone2) => {
 					if (!this.disableLogDeviceInfo && this.displayDeviceInfo) {
 						this.log(`---- ${this.deviceTypeText}: ${this.deviceName} ----`);
 						this.log(`Account: ${this.accountName}`);
@@ -704,6 +710,7 @@ class melCloudDevice {
 					this.atwHeatPumpName = 'Heat Pump';
 					this.atwZone1Name = zone1Name || 'Zone 1';
 					this.atwHasHotWaterTank = hasHotWaterTank || false;
+					this.atwTemperatureIncrement = temperatureIncrement;
 					this.atwMaxTankTemperature = maxTankTemperature;
 					this.atwHotWaterName = 'Hot Water';
 					this.atwHasZone2 = hasZone2 || false;
@@ -725,7 +732,6 @@ class melCloudDevice {
 					const displayMode = this.atwDisplayMode;
 					const buttonsCount = this.atwButtonsCount;
 					const hasHotWaterTank = this.atwHasHotWaterTank;
-					const maxTankTemperature = this.atwMaxTankTemperature;
 					const hasZone2 = this.atwHasZone2;
 					const heatCoolModes = this.atwHeatCoolModes;
 					const presets = this.atwPresets;
@@ -1173,7 +1179,7 @@ class melCloudDevice {
 					prefDir: prefDir
 				});
 
-				this.melCloudErv.on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareRevision, presets, presetsCount, hasAutoVentilationMode, hasBypassVentilationMode, hasAutomaticFanSpeed, numberOfFanSpeeds, heatCoolModes) => {
+				this.melCloudErv.on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareRevision, presets, presetsCount, hasAutoVentilationMode, hasBypassVentilationMode, hasAutomaticFanSpeed, numberOfFanSpeeds, temperatureIncrement, heatCoolModes) => {
 					if (!this.disableLogDeviceInfo && this.displayDeviceInfo) {
 						this.log(`---- ${this.deviceTypeText}: ${this.deviceName} ----`);
 						this.log(`Account: ${this.accountName}`);
@@ -1197,6 +1203,7 @@ class melCloudDevice {
 					this.ervHasBypassVentilationMode = hasBypassVentilationMode;
 					this.ervHasAutomaticFanSpeed = hasAutomaticFanSpeed;
 					this.ervNumberOfFanSpeeds = numberOfFanSpeeds;
+					this.ervTemperatureIncrement = temperatureIncrement;
 					this.ervHeatCoolModes = heatCoolModes;
 					this.ervPresets = presets;
 					this.ervPresetsCount = this.ervPresetsEnabled ? presetsCount : 0;
@@ -1510,7 +1517,6 @@ class melCloudDevice {
 				const deviceType = this.deviceType;
 				const deviceTypeText = this.deviceTypeText;
 				const temperatureUnit = this.temperatureDisplayUnit;
-				const tempSetPropsMinStep = [0.5, 1][this.useFahrenheit];
 
 				//accessory
 				const accessoryName = deviceName;
@@ -1533,6 +1539,8 @@ class melCloudDevice {
 						const ataDisplayMode = this.ataDisplayMode;
 						const ataHasAutomaticFanSpeed = this.ataHasAutomaticFanSpeed;
 						const ataModelSupportsFanSpeed = this.ataModelSupportsFanSpeed;
+						const ataModelSupportsHeat = this.ataModelSupportsHeat;
+						const ataModelSupportsDry = this.ataModelSupportsDry;
 						const ataNumberOfFanSpeeds = this.ataNumberOfFanSpeeds;
 						const ataSwingFunction = this.ataSwingFunction;
 						const ataButtonsCount = this.ataButtonsConfiguredCount;
@@ -1593,7 +1601,7 @@ class melCloudDevice {
 													break;
 												case 1: //HEAT - HEAT
 													deviceState.Power = true;
-													deviceState.OperationMode = 1;
+													deviceState.OperationMode = ataModelSupportsHeat ? 1 : ataModelSupportsDry ? 2 : 7;
 													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
 													break;
 												case 2: //COOL - COOL
@@ -1697,7 +1705,7 @@ class melCloudDevice {
 									.setProps({
 										minValue: ataTargetHeatingTempSetPropsMinValue,
 										maxValue: ataTargetHeatingTempSetPropsMaxValue,
-										minStep: tempSetPropsMinStep
+										minStep: this.ataTemperatureIncrement
 									})
 									.onGet(async () => {
 										const value = this.setTemperature;
@@ -1719,7 +1727,7 @@ class melCloudDevice {
 									.setProps({
 										minValue: ataTargetCoolingTempSetPropsMinValue,
 										maxValue: ataTargetCoolingTempSetPropsMaxValue,
-										minStep: tempSetPropsMinStep
+										minStep: this.ataTemperatureIncrement
 									})
 									.onGet(async () => {
 										const value = this.setTemperature;
@@ -1802,7 +1810,7 @@ class melCloudDevice {
 													break;
 												case 1: //HEAT - HEAT
 													deviceState.Power = true;
-													deviceState.OperationMode = 1;
+													deviceState.OperationMode = ataModelSupportsHeat ? 1 : ataModelSupportsDry ? 2 : 7;
 													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
 													break;
 												case 2: //COOL - COOL
@@ -1828,7 +1836,7 @@ class melCloudDevice {
 									.setProps({
 										minValue: -35,
 										maxValue: 150,
-										minStep: 0.5
+										minStep: this.ataTemperatureIncrement
 									})
 									.onGet(async () => {
 										const value = this.roomTemperature;
@@ -1839,7 +1847,7 @@ class melCloudDevice {
 									.setProps({
 										minValue: ataTargetTempSetPropsMinValue,
 										maxValue: ataTargetTempSetPropsMaxValue,
-										minStep: tempSetPropsMinStep
+										minStep: this.ataTemperatureIncrement
 									})
 									.onGet(async () => {
 										const value = this.setTemperature;
@@ -2283,7 +2291,7 @@ class melCloudDevice {
 											.setProps({
 												minValue: -35,
 												maxValue: 150,
-												minStep: 0.5
+												minStep: this.atwTemperatureIncrement
 											})
 											.onGet(async () => {
 												const value = this.roomTemperatures[i];
@@ -2296,7 +2304,7 @@ class melCloudDevice {
 												.setProps({
 													minValue: this.temperaturesSetPropsMinValue[i],
 													maxValue: this.temperaturesSetPropsMaxValue[i],
-													minStep: tempSetPropsMinStep
+													minStep: this.atwTemperatureIncrement
 												})
 												.onGet(async () => {
 													const value = this.setTemperatures[i];
@@ -2337,7 +2345,7 @@ class melCloudDevice {
 												.setProps({
 													minValue: this.temperaturesSetPropsMinValue[i],
 													maxValue: this.temperaturesSetPropsMaxValue[i],
-													minStep: tempSetPropsMinStep
+													minStep: this.atwTemperatureIncrement
 												})
 												.onGet(async () => {
 													const value = this.setTemperatures[i];
@@ -2560,7 +2568,7 @@ class melCloudDevice {
 											.setProps({
 												minValue: -35,
 												maxValue: 150,
-												minStep: 0.5
+												minStep: this.atwTemperatureIncrement
 											})
 											.onGet(async () => {
 												const value = this.roomTemperatures[i];
@@ -2571,7 +2579,7 @@ class melCloudDevice {
 											.setProps({
 												minValue: this.temperaturesSetPropsMinValue[i],
 												maxValue: this.temperaturesSetPropsMaxValue[i],
-												minStep: tempSetPropsMinStep
+												minStep: this.atwTemperatureIncrement
 											})
 											.onGet(async () => {
 												const value = this.setTemperatures[i];
@@ -2950,7 +2958,7 @@ class melCloudDevice {
 									.setProps({
 										minValue: -35,
 										maxValue: 150,
-										minStep: 0.5
+										minStep: this.ervTemperatureIncrement
 									})
 									.onGet(async () => {
 										const value = this.roomTemperature;
@@ -2961,7 +2969,7 @@ class melCloudDevice {
 									.setProps({
 										minValue: ervTargetHeatingTempSetPropsMinValue,
 										maxValue: ervTargetHeatingTempSetPropsMaxValue,
-										minStep: tempSetPropsMinStep
+										minStep: this.ervTemperatureIncrement
 									})
 									.onGet(async () => {
 										const value = this.setTemperature;
@@ -2982,7 +2990,7 @@ class melCloudDevice {
 									.setProps({
 										minValue: ervTargetCoolingTempSetPropsMinValue,
 										maxValue: ervTargetCoolingTempSetPropsMaxValue,
-										minStep: tempSetPropsMinStep
+										minStep: this.ervTemperatureIncrement
 									})
 									.onGet(async () => {
 										const value = this.setTemperature;
@@ -3089,7 +3097,7 @@ class melCloudDevice {
 									.setProps({
 										minValue: -35,
 										maxValue: 150,
-										minStep: 0.5
+										minStep: this.ervTemperatureIncrement
 									})
 									.onGet(async () => {
 										const value = this.roomTemperature;
@@ -3100,7 +3108,7 @@ class melCloudDevice {
 									.setProps({
 										minValue: ervTargetTempSetPropsMinValue,
 										maxValue: ervTargetTempSetPropsMaxValue,
-										minStep: tempSetPropsMinStep
+										minStep: this.ervTemperatureIncrement
 									})
 									.onGet(async () => {
 										const value = this.setTemperature;
