@@ -1243,14 +1243,14 @@ class melCloudDevice {
 									targetOperationMode = [1, 2, 0][ventilationMode]; //AUTO, HEAT, COOL
 									operationModeSetPropsMinValue = 1;
 									operationModeSetPropsMaxValue = 2;
-									operationModeSetPropsValidValues = [1, 2];
+									operationModeSetPropsValidValues = hasBypassVentilationMode ? [1, 2] : [2]
 									break;
 								case 1://AUTO MODE SUPPORTED - LOSSNAY, BYPAS, AUTO
 									currentOperationMode = !power ? 0 : [2, 3, [2, 3][actualVentilationMode]][ventilationMode]; //INACTIVE, IDLE, HEATING, COOLING
 									targetOperationMode = [1, 2, 0][ventilationMode]; //AUTO, HEAT, COOL
 									operationModeSetPropsMinValue = 0;
 									operationModeSetPropsMaxValue = 2;
-									operationModeSetPropsValidValues = [0, 1, 2];
+									operationModeSetPropsValidValues = hasBypassVentilationMode ? [0, 1, 2] : [0, 2]
 									break;
 							};
 
