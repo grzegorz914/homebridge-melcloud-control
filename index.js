@@ -229,7 +229,7 @@ class melCloudDevice {
 					const swingFunction = this.ataSwingFunction;
 					const numberOfFanSpeeds = this.ataNumberOfFanSpeeds;
 					const modelSupportsFanSpeed = this.ataModelSupportsFanSpeed;
-					const modelSupportsOperationAuto = this.ataModelSupportsOperationAuto;
+					const modelSupportsAuto = this.ataModelSupportsOperationAuto;
 					const modelSupportsHeat = this.ataModelSupportsHeat;
 					const modelSupportsDry = this.ataModelSupportsDry;
 					const buttonsCount = this.ataButtonsCount;
@@ -255,7 +255,7 @@ class melCloudDevice {
 
 					switch (displayMode) {
 						case 0: //Heater Cooler
-							switch (modelSupportsOperationAuto) {
+							switch (modelSupportsAuto) {
 								case false: //AUTO MODE NOT SUPPORTED- 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
 									currentOperationMode = !power ? 0 : inStandbyMode ? 1 : [0, 2, 2, 3, 3, 3, 3, 3, (setTemperature < roomTemperature) ? 3 : 2, 2, 2, 3][operationMode]; //INACTIVE, IDLE, HEATING, COOLING
 									targetOperationMode = [0, 1, 1, 2, 2, 2, 2, 0, 1, 1, 2][operationMode]; //AUTO, HEAT, COOL
@@ -320,7 +320,7 @@ class melCloudDevice {
 							};
 							break;
 						case 1: //Thermostat
-							switch (modelSupportsOperationAuto) {
+							switch (modelSupportsAuto) {
 								case 0: //AUTO MODE NOT SUPPORTED - 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
 									currentOperationMode = !power || inStandbyMode ? 0 : [0, 1, 1, 2, 2, 2, 2, 2, (setTemperature < roomTemperature) ? 2 : 1, 1, 1, 2][operationMode]; //OFF, HEAT, COOL
 									targetOperationMode = !power || inStandbyMode ? 0 : [0, 1, 1, 2, 2, 2, 2, 1, 3, 1, 1, 2][operationMode]; //OFF, HEAT, COOL, AUTO
