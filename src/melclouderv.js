@@ -73,7 +73,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
 
                 //presets
                 const presets = deviceInfo.Presets;
-                const presetsCount = devicePresets.length;
+                const presetsCount = presets.length;
 
                 const ownerID = deviceInfo.OwnerID;
                 const ownerName = deviceInfo.OwnerName;
