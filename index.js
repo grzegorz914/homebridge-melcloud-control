@@ -2055,8 +2055,9 @@ class melCloudDevice {
 						if (ataPresetsCount > 0) {
 							this.log.debug('preparePresetsService');
 							this.ataPresetsServices = [];
+							const ataPreviousPresets = [];
+
 							for (let i = 0; i < ataPresetsCount; i++) {
-								//get preset
 								const preset = this.ataPresets[i];
 								const presetName = preset.NumberDescription;
 
@@ -2076,10 +2077,11 @@ class melCloudDevice {
 													deviceState.VaneHorizontal = preset.VaneHorizontal;
 													deviceState.VaneVertical = preset.VaneVertical;
 													deviceState.SetFanSpeed = preset.FanSpeed;
-													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
+													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power;
 													break;
-												default:
-													deviceState = deviceState;
+												case false:
+													deviceState = ataPreviousPresets[i];
+													ataPreviousPresets[i] = deviceState;
 													break;
 											};
 
@@ -2090,6 +2092,7 @@ class melCloudDevice {
 										};
 									});
 
+								ataPreviousPresets.push(deviceState);
 								this.ataPresetsServices.push(presetService);
 								accessory.addService(this.ataPresetsServices[i]);
 							};
@@ -2746,9 +2749,9 @@ class melCloudDevice {
 							if (atwPresetsCount > 0) {
 								this.log.debug('preparePresetsService');
 								this.atwPresetsServices = [];
+								const atwPreviousPresets = [];
 
 								for (let i = 0; i < atwPresetsCount; i++) {
-									//get preset
 									const preset = this.atwPresets[i];
 									const presetName = preset.NumberDescription;
 
@@ -2776,8 +2779,9 @@ class melCloudDevice {
 														deviceState.SetCoolFlowTemperatureZone2 = preset.SetCoolFlowTemperatureZone2;
 														deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power;
 														break;
-													default:
-														deviceState = deviceState;
+													case false:
+														deviceState = atwPreviousPresets[i];
+														atwPreviousPresets[i] = deviceState;
 														break;
 												};
 
@@ -2788,6 +2792,7 @@ class melCloudDevice {
 											};
 										});
 
+									atwPreviousPresets.push(deviceState);
 									this.atwPresetsServices.push(presetService);
 									accessory.addService(this.atwPresetsServices[i]);
 								};
@@ -3215,9 +3220,9 @@ class melCloudDevice {
 						if (ervPresetsCount > 0) {
 							this.log.debug('preparePresetsService');
 							this.ervPresetsServices = [];
+							const ervPreviousPresets = [];
 
 							for (let i = 0; i < ervPresetsCount; i++) {
-								//get preset
 								const preset = this.ervPresets[i];
 								const presetName = preset.NumberDescription;
 
@@ -3234,10 +3239,11 @@ class melCloudDevice {
 													deviceState.Power = preset.Power;
 													deviceState.VentilationMode = preset.VentilationMode;
 													deviceState.SetFanSpeed = preset.FanSpeed;
-													deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.VentilationMode;
+													deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power;
 													break;
-												default:
-													deviceState = deviceState;
+												case false:
+													deviceState = ervPreviousPresets[i];
+													ervPreviousPresets[i] = deviceState;
 													break;
 											};
 
@@ -3248,6 +3254,7 @@ class melCloudDevice {
 										};
 									});
 
+								ervPreviousPresets.push(deviceState);
 								this.ervPresetsServices.push(presetService);
 								accessory.addService(this.ervPresetsServices[0]);
 							};

@@ -101,7 +101,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 //device
                 const device = deviceInfo.Device;
                 const listHistory24Formatters = Array.isArray(device.ListHistory24Formatters) ? device.ListHistory24Formatters : [];
-                const listHistory24FormattersCount = deviceListHistory24Formatters.length;
+                const listHistory24FormattersCount = listHistory24Formatters.length;
                 const pCycleActual = device.PCycleActual;
                 const errorMessages = device.ErrorMessages;
                 const deviceType = device.DeviceType;
