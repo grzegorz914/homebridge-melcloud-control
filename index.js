@@ -2361,12 +2361,15 @@ class melCloudDevice {
 															break;
 														case 1: //Zone 1
 															deviceState.ProhibitZone1 = value;
+															CONSTANS.HeatPump.EffectiveFlags.ProhibitHeatingZone1;
 															break;
 														case atwCaseHotWater: //Hot Water
 															deviceState.ProhibitHotWater = value;
+															CONSTANS.HeatPump.EffectiveFlags.ProhibitHotWater;
 															break;
 														case atwCaseZone2: //Zone 2
 															deviceState.ProhibitZone2 = value;
+															CONSTANS.HeatPump.EffectiveFlags.ProhibitHeatingZone2;
 															break;
 													};
 
@@ -2642,6 +2645,7 @@ class melCloudDevice {
 															break;
 														case 3: //HOLIDAY
 															deviceState.HolidayMode = state;
+															deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.HolidayMode;
 															break;
 														case 10: //ALL ZONES PHYSICAL LOCK CONTROL
 															deviceState.ProhibitZone1 = state;
@@ -2680,6 +2684,7 @@ class melCloudDevice {
 															break;
 														case 30: //PHYSICAL LOCK CONTROL
 															deviceState.ProhibitZone1 = state;
+															CONSTANS.HeatPump.EffectiveFlags.ProhibitHeatingZone1;
 															break;
 														case 40: //HOT WATER NORMAL/FORCE HOT WATER
 															deviceState.Power = true;
@@ -2693,6 +2698,7 @@ class melCloudDevice {
 															break;
 														case 50: //PHYSICAL LOCK CONTROL
 															deviceState.ProhibitHotWater = state;
+															CONSTANS.HeatPump.EffectiveFlags.ProhibitHotWater;
 															break;
 														case 60: //ZONE 2 HEAT THERMOSTAT
 															deviceState.Power = true;
@@ -2726,6 +2732,7 @@ class melCloudDevice {
 															break;
 														case 70: //PHYSICAL LOCK CONTROL
 															deviceState.ProhibitZone2 = state;
+															CONSTANS.HeatPump.EffectiveFlags.ProhibitHeatingZone2;
 															break;
 														default:
 															deviceState = deviceState;

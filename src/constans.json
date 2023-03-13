@@ -1,4 +1,19 @@
 {
+    "ApiUrls": {
+        "BaseURL": "https://app.melcloud.com/Mitsubishi.Wifi.Client",
+        "ClientLogin": "/Login/ClientLogin",
+        "GetUserDetails": "/User/GetUserDetails",
+        "ListDevices": "/User/ListDevices",
+        "ListDeviceUnits": "/Device/ListDeviceUnits",
+        "DeviceState": "/Device/Get?id=DID&buildingID=BID",
+        "TileState": "/Tile/Get2?id=DID&buildingID=BID",
+        "SetAta": "/Device/SetAta",
+        "SetAtw": "/Device/SetAtw",
+        "SetErv": "/Device/SetErv",
+        "UpdateApplicationOptions": "/User/UpdateApplicationOptions",
+        "HolidayModeUpdate": "/HolidayMode/Update",
+        "EnergyCostReport": "/EnergyCost/Report"
+    },
     "DeviceType": [
         "Air Conditioner",
         "Heat Pump",
@@ -72,21 +87,23 @@
             "SetTemperature": 4,
             "SetFanSpeed": 8,
             "VaneVertical": 16,
-            "VaneHorizontal": 256
+            "VaneHorizontal": 256,
+            "HolidayMode": 131072,
+            "All": 281483566710825
         }
     },
     "HeatPump": {
-        "ZoneName": [
-            "Heat Pump",
-            "Zone 1",
-            "Hot Water",
-            "Zone 2"
-        ],
         "System": [
             "SYSTEM OFF",
             "SYSTEM ON",
             "EMERGENCY RUN",
             "TEST RUN"
+        ],
+        "ZoneName": [
+            "Heat Pump",
+            "Zone 1",
+            "Hot Water",
+            "Zone 2"
         ],
         "ControlType": [
             "HEATING",
@@ -157,7 +174,8 @@
             "SetHeatFlowTemperatureZone1": 281474976710656,
             "SetHeatFlowTemperatureZone2": 281474976710656,
             "SetCoolFlowTemperatureZone1": 281474976710656,
-            "SetCoolFlowTemperatureZone2": 281474976710656
+            "SetCoolFlowTemperatureZone2": 281474976710656,
+            "All": 281483566710825
         }
     },
     "Ventilation": {
@@ -225,26 +243,13 @@
             "Power": 1,
             "OperationMode": 2,
             "VentilationMode": 4,
-            "SetFanSpeed": 8
+            "SetFanSpeed": 8,
+            "HolidayMode": 131072,
+            "All": 281483566710825
         }
     },
     "AccessLevel": {
         "Quest": 3,
         "Owner": 4
-    },
-    "ApiUrls": {
-        "BaseURL": "https://app.melcloud.com/Mitsubishi.Wifi.Client",
-        "ClientLogin": "/Login/ClientLogin",
-        "GetUserDetails": "/User/GetUserDetails",
-        "ListDevices": "/User/ListDevices",
-        "ListDeviceUnits": "/Device/ListDeviceUnits",
-        "DeviceState": "/Device/Get?id=DID&buildingID=BID",
-        "TileState": "/Tile/Get2?id=DID&buildingID=BID",
-        "SetAta": "/Device/SetAta",
-        "SetAtw": "/Device/SetAtw",
-        "SetErv": "/Device/SetErv",
-        "UpdateApplicationOptions": "/User/UpdateApplicationOptions",
-        "HolidayModeUpdate": "/HolidayMode/Update",
-        "EnergyCostReport": "/EnergyCost/Report"
     }
 }
