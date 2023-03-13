@@ -258,7 +258,7 @@ class melCloudDevice {
 							switch (modelSupportsOperationAuto) {
 								case false: //AUTO MODE NOT SUPPORTED- 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
 									currentOperationMode = !power ? 0 : inStandbyMode ? 1 : [0, 2, 2, 3, 3, 3, 3, 3, (setTemperature < roomTemperature) ? 3 : 2, 2, 2, 3][operationMode]; //INACTIVE, IDLE, HEATING, COOLING
-									targetOperationMode = [1, 1, 1, 2, 2, 2, 2, 0, 1, 1, 2][operationMode]; //AUTO, HEAT, COOL
+									targetOperationMode = [0, 1, 1, 2, 2, 2, 2, 0, 1, 1, 2][operationMode]; //AUTO, HEAT, COOL
 									operationModeSetPropsMinValue = 1;
 									operationModeSetPropsMaxValue = 2;
 									operationModeSetPropsValidValues = [1, 2];
