@@ -114,6 +114,7 @@ class melCloudDevice {
 		this.accountName = account.name;
 		this.ataDisplayMode = account.ataDisplayMode || 0;
 		this.ataPresetsEnabled = account.ataPresets || false;
+		this.ataHeatMode = account.ataHeatMode || 0; //DRY, FAN
 		this.ataButtons = account.ataButtons || [];
 		this.ataButtonsCount = this.ataButtons.length;
 		this.atwDisplayMode = account.atwDisplayMode || 0;
@@ -217,7 +218,7 @@ class melCloudDevice {
 					this.ataNumberOfFanSpeeds = numberOfFanSpeeds;
 					this.ataTemperatureIncrement = temperatureIncrement;
 					this.ataModelSupportsFanSpeed = modelSupportsFanSpeed;
-					this.ataModelSupportsOperationAuto = modelSupportsAuto;
+					this.ataModelSupportsAuto = modelSupportsAuto;
 					this.ataModelSupportsHeat = modelSupportsHeat;
 					this.ataModelSupportsDry = modelSupportsDry;
 					this.ataPresets = presets;
@@ -229,7 +230,7 @@ class melCloudDevice {
 					const swingFunction = this.ataSwingFunction;
 					const numberOfFanSpeeds = this.ataNumberOfFanSpeeds;
 					const modelSupportsFanSpeed = this.ataModelSupportsFanSpeed;
-					const modelSupportsAuto = this.ataModelSupportsOperationAuto;
+					const modelSupportsAuto = this.ataModelSupportsAuto;
 					const modelSupportsHeat = this.ataModelSupportsHeat;
 					const modelSupportsDry = this.ataModelSupportsDry;
 					const buttonsCount = this.ataButtonsCount;
@@ -255,22 +256,12 @@ class melCloudDevice {
 
 					switch (displayMode) {
 						case 0: //Heater Cooler
-							switch (modelSupportsAuto) {
-								case false: //AUTO MODE NOT SUPPORTED- 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
-									currentOperationMode = !power ? 0 : inStandbyMode ? 1 : [0, 2, 2, 3, 3, 3, 3, 3, (setTemperature < roomTemperature) ? 3 : 2, 2, 2, 3][operationMode]; //INACTIVE, IDLE, HEATING, COOLING
-									targetOperationMode = [0, 1, 1, 2, 2, 2, 2, 0, 1, 1, 2][operationMode]; //AUTO, HEAT, COOL
-									operationModeSetPropsMinValue = 1;
-									operationModeSetPropsMaxValue = 2;
-									operationModeSetPropsValidValues = [1, 2];
-									break;
-								case true: //AUTO MODE SUPPORTED - 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
-									currentOperationMode = !power ? 0 : inStandbyMode ? 1 : [0, 2, 2, 3, 3, 3, 3, 3, (setTemperature < roomTemperature) ? 3 : 2, 2, 2, 3][operationMode]; //INACTIVE, IDLE, HEATING, COOLING
-									targetOperationMode = [0, 1, 1, 2, 2, 2, 2, 1, 0, 1, 1, 2][operationMode]; //AUTO, HEAT, COOL
-									operationModeSetPropsMinValue = 0;
-									operationModeSetPropsMaxValue = 2;
-									operationModeSetPropsValidValues = [0, 1, 2];
-									break;
-							};
+							//operating mode 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
+							currentOperationMode = !power ? 0 : inStandbyMode ? 1 : [0, 2, 3, 3, 3, 3, 3, 3, (setTemperature < roomTemperature) ? 3 : 2, 2, 2, 3][operationMode]; //INACTIVE, IDLE, HEATING, COOLING
+							targetOperationMode = [0, 1, 1, 2, 2, 2, 2, 1, 0, 1, 1, 2][operationMode]; //AUTO, HEAT, COOL
+							operationModeSetPropsMinValue = modelSupportsAuto ? 0 : 1;
+							operationModeSetPropsMaxValue = modelSupportsAuto ? 2 : 2;
+							operationModeSetPropsValidValues = modelSupportsAuto ? [0, 1, 2] : [1, 2]
 
 							//fan speed mode
 							if (modelSupportsFanSpeed) {
@@ -320,22 +311,12 @@ class melCloudDevice {
 							};
 							break;
 						case 1: //Thermostat
-							switch (modelSupportsAuto) {
-								case 0: //AUTO MODE NOT SUPPORTED - 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
-									currentOperationMode = !power || inStandbyMode ? 0 : [0, 1, 1, 2, 2, 2, 2, 2, (setTemperature < roomTemperature) ? 2 : 1, 1, 1, 2][operationMode]; //OFF, HEAT, COOL
-									targetOperationMode = !power || inStandbyMode ? 0 : [0, 1, 1, 2, 2, 2, 2, 1, 3, 1, 1, 2][operationMode]; //OFF, HEAT, COOL, AUTO
-									operationModeSetPropsMinValue = 0;
-									operationModeSetPropsMaxValue = 2;
-									operationModeSetPropsValidValues = [0, 1, 2];
-									break;
-								case 1: //AUTO MODE SUPPORTED - 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
-									currentOperationMode = !power || inStandbyMode ? 0 : [0, 1, 1, 2, 2, 2, 2, 2, (setTemperature < roomTemperature) ? 2 : 1, 1, 1, 2][operationMode]; //OFF, HEAT, COOL
-									targetOperationMode = !power || inStandbyMode ? 0 : [0, 1, 1, 2, 2, 2, 2, 1, 3, 1, 1, 2][operationMode]; //OFF, HEAT, COOL, AUTO
-									operationModeSetPropsMinValue = 0;
-									operationModeSetPropsMaxValue = 3;
-									operationModeSetPropsValidValues = [0, 1, 2, 3];
-									break;
-							};
+							//operating mode 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
+							currentOperationMode = !power || inStandbyMode ? 0 : [0, 1, 2, 2, 2, 2, 2, 2, (setTemperature < roomTemperature) ? 2 : 1, 1, 1, 2][operationMode]; //OFF, HEAT, COOL
+							targetOperationMode = !power || inStandbyMode ? 0 : [0, 1, 1, 2, 2, 2, 2, 1, 3, 1, 1, 2][operationMode]; //OFF, HEAT, COOL, AUTO
+							operationModeSetPropsMinValue = modelSupportsAuto ? 0 : 0;
+							operationModeSetPropsMaxValue = modelSupportsAuto ? 3 : 2;
+							operationModeSetPropsValidValues = modelSupportsAuto ? [0, 1, 2, 3] : [0, 1, 2];
 
 							//update characteristics
 							if (this.ataMelCloudServices) {
@@ -1237,22 +1218,12 @@ class melCloudDevice {
 
 					switch (displayMode) {
 						case 0: //Heater Cooler
-							switch (hasAutoVentilationMode) {
-								case 0: //AUTO MODE NOT SUPPORTED - LOSSNAY, BYPAS
-									currentOperationMode = !power ? 0 : [2, 3, [2, 3][actualVentilationMode]][ventilationMode]; //INACTIVE, IDLE, HEATING, COOLING
-									targetOperationMode = [1, 2, 0][ventilationMode]; //AUTO, HEAT, COOL
-									operationModeSetPropsMinValue = 1;
-									operationModeSetPropsMaxValue = 2;
-									operationModeSetPropsValidValues = hasBypassVentilationMode ? [1, 2] : [2]
-									break;
-								case 1://AUTO MODE SUPPORTED - LOSSNAY, BYPAS, AUTO
-									currentOperationMode = !power ? 0 : [2, 3, [2, 3][actualVentilationMode]][ventilationMode]; //INACTIVE, IDLE, HEATING, COOLING
-									targetOperationMode = [1, 2, 0][ventilationMode]; //AUTO, HEAT, COOL
-									operationModeSetPropsMinValue = 0;
-									operationModeSetPropsMaxValue = 2;
-									operationModeSetPropsValidValues = hasBypassVentilationMode ? [0, 1, 2] : [0, 2]
-									break;
-							};
+							//operation mode - LOSSNAY, BYPAS, AUTO
+							currentOperationMode = !power ? 0 : [2, 3, [2, 3][actualVentilationMode]][ventilationMode]; //INACTIVE, IDLE, HEATING, COOLING
+							targetOperationMode = [1, 2, 0][ventilationMode]; //AUTO, HEAT, COOL
+							operationModeSetPropsMinValue = hasAutoVentilationMode ? 0 : 1;
+							operationModeSetPropsMaxValue = hasAutoVentilationMode ? 2 : 2;
+							operationModeSetPropsValidValues = hasAutoVentilationMode ? (hasBypassVentilationMode ? [0, 1, 2] : [0, 2]) : (hasBypassVentilationMode ? [1, 2] : [2]);
 
 							//fan speed mode
 							switch (numberOfFanSpeeds) {
@@ -1288,22 +1259,12 @@ class melCloudDevice {
 							};
 							break;
 						case 1: //Thermostat
-							switch (hasAutoVentilationMode) {
-								case 0: //AUTO MODE NOT SUPPORTED - LOSSNAY, BYPAS
-									currentOperationMode = !power ? 0 : [1, 2, [1, 2][actualVentilationMode]][ventilationMode]; //OFF, HEAT, COOL
-									targetOperationMode = !power ? 0 : [1, 2, 3][ventilationMode]; //OFF, HEAT, COOL, AUTO
-									operationModeSetPropsMinValue = 0;
-									operationModeSetPropsMaxValue = 2;
-									operationModeSetPropsValidValues = hasBypassVentilationMode ? [0, 1, 2] : [0, 2]
-									break;
-								case 1://AUTO MODE SUPPORTED - LOSSNAY, BYPAS, AUTO
-									currentOperationMode = !power ? 0 : [1, 2, [1, 2][actualVentilationMode]][ventilationMode]; //OFF, HEAT, COOL
-									targetOperationMode = !power ? 0 : [1, 2, 3][ventilationMode]; //OFF, HEAT, COOL, AUTO
-									operationModeSetPropsMinValue = 0;
-									operationModeSetPropsMaxValue = 3;
-									operationModeSetPropsValidValues = hasBypassVentilationMode ? [0, 1, 2, 3] : [0, 2, 3]
-									break;
-							};
+							//operation mode - LOSSNAY, BYPAS, AUTO
+							currentOperationMode = !power ? 0 : [1, 2, [1, 2][actualVentilationMode]][ventilationMode]; //OFF, HEAT, COOL
+							targetOperationMode = !power ? 0 : [1, 2, 3][ventilationMode]; //OFF, HEAT, COOL, AUTO
+							operationModeSetPropsMinValue = hasAutoVentilationMode ? 0 : 0;
+							operationModeSetPropsMaxValue = hasAutoVentilationMode ? 3 : 2;
+							operationModeSetPropsValidValues = hasAutoVentilationMode ? (hasBypassVentilationMode ? [0, 1, 2, 3] : [0, 2, 3]) : (hasBypassVentilationMode ? [0, 1, 2] : [0, 2]);
 
 							//update characteristics
 							if (this.ervMelCloudServices) {
@@ -1601,7 +1562,7 @@ class melCloudDevice {
 													break;
 												case 1: //HEAT - HEAT
 													deviceState.Power = true;
-													deviceState.OperationMode = ataModelSupportsHeat ? 1 : ataModelSupportsDry ? 2 : 7;
+													deviceState.OperationMode = ataModelSupportsHeat ? 1 : [ataModelSupportsDry ? 2 : 7, 7][this.ataHeatMode];
 													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
 													break;
 												case 2: //COOL - COOL
@@ -1810,7 +1771,7 @@ class melCloudDevice {
 													break;
 												case 1: //HEAT - HEAT
 													deviceState.Power = true;
-													deviceState.OperationMode = ataModelSupportsHeat ? 1 : ataModelSupportsDry ? 2 : 7;
+													deviceState.OperationMode = ataModelSupportsHeat ? 1 : [ataModelSupportsDry ? 2 : 7, 7][this.ataHeatMode];
 													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
 													break;
 												case 2: //COOL - COOL

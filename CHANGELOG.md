@@ -10,7 +10,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Important changes v0.4.0 and above!!!
   * Main control mode, buttons and presets need to be configured again!!!
 
-  ## [0.7.0] - (1.03.2023)
+## [0.8.0] - (13.03.2023)
+## Changes
+- added possibility selec mode DRY/FAN for Heat if Heat not supported by device
+- config.schema updated
+- other small fixes
+
+## [0.7.1] - (13.03.2023)
+## Changes
+- cleanup
+
+## [0.7.0] - (12.03.2023)
 ## Changes
 - added for Air Conditioner DRY operating mode if HEAT not supported or FAN if DRY not supported too
 - cleanup

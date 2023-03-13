@@ -232,6 +232,26 @@
               "description": "This enable display device presets as extra buttons in HomeKit app.",
               "required": false
             },
+            "ataHeatMode": {
+              "title": "Heat Mode",
+              "type": "integer",
+              "oneOf": [
+                {
+                  "title": "Dry",
+                  "enum": [
+                    0
+                  ]
+                },
+                {
+                  "title": "Fan",
+                  "enum": [
+                    1
+                  ]
+                }
+              ],
+              "description": "Here select function for Heat if Heat mode not supported by device.",
+              "required": true
+            },
             "ataButtons": {
               "title": "Button / Sensor",
               "type": "array",
@@ -1045,6 +1065,7 @@
           "items": [
             "accounts[].ataDisplayMode",
             "accounts[].ataPresets",
+            "accounts[].ataHeatMode",
             {
               "key": "accounts[].ataButtons",
               "type": "tabarray",
