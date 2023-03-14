@@ -59,15 +59,15 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 const debug = debugLog ? this.emit('debug', `debug Info: ${JSON.stringify(deviceInfo, null, 2)}`) : false;
 
                 //device info
-                //const deviceID = deviceInfo.DeviceID;
+                //const deviceId = deviceInfo.DeviceID;
                 //const name = deviceInfo.DeviceName;
                 const buildingId = deviceInfo.BuildingID;
                 const buildingName = deviceInfo.BuildingName;
-                const floorID = deviceInfo.FloorID;
+                const floorId = deviceInfo.FloorID;
                 const floorName = deviceInfo.FloorName;
-                const areaID = deviceInfo.AreaID;
+                const areaId = deviceInfo.AreaID;
                 const areaName = deviceInfo.AreaName;
-                const imageID = deviceInfo.ImageID;
+                const imageId = deviceInfo.ImageID;
                 const installationDate = deviceInfo.InstallationDate;
                 const lastServiceDate = deviceInfo.LastServiceDate;
 
@@ -75,7 +75,7 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 const presets = deviceInfo.Presets;
                 const presetsCount = presets.length;
 
-                const ownerID = deviceInfo.OwnerID;
+                const ownerId = deviceInfo.OwnerID;
                 const ownerName = deviceInfo.OwnerName;
                 const ownerEmail = deviceInfo.OwnerEmail;
                 const accessLevel = deviceInfo.AccessLevel;
@@ -180,7 +180,7 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 const maxIndoorUnits = device.MaxIndoorUnits;
                 const maxTemperatureControlUnits = device.MaxTemperatureControlUnits;
                 const modelCode = device.ModelCode;
-                const deviceID = device.DeviceID;
+                const deviceId = device.DeviceID;
                 const macAddress = device.MacAddress;
                 const serialNumber = device.SerialNumber !== null ? device.SerialNumber.toString() : 'Undefined';
                 const timeZoneID = device.TimeZoneID;
