@@ -1077,9 +1077,9 @@
           "items": [
             "accounts[].ataDisplayMode",
             "accounts[].ataPresets",
-            "accounts[].ataAutoHeatMode",
             "accounts[].ataDisableAutoMode",
             "accounts[].ataDisableHeatMode",
+            "accounts[].ataAutoHeatMode",
             {
               "key": "accounts[].ataButtons",
               "type": "tabarray",
