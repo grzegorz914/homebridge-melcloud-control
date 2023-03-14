@@ -114,6 +114,8 @@ class melCloudDevice {
 		this.accountName = account.name;
 		this.ataDisplayMode = account.ataDisplayMode || 0;
 		this.ataPresetsEnabled = account.ataPresets || false;
+		this.ataDisableAutoMode = account.ataDisableAutoMode || false;
+		this.ataDisableHeatoMode = account.ataDisableHeatMode || false;
 		this.ataAutoHeatMode = account.ataAutoMode || 0; //DRY, FAN
 		this.ataButtons = account.ataButtons || [];
 		this.ataButtonsCount = this.ataButtons.length;
@@ -226,8 +228,8 @@ class melCloudDevice {
 					this.ataTargetTempSetPropsMinValue = [10, 50][this.useFahrenheit];
 					this.ataTargetTempSetPropsMaxValue = [31, 88][this.useFahrenheit];
 					this.ataModelSupportsFanSpeed = modelSupportsFanSpeed;
-					this.ataModelSupportsAuto = modelSupportsAuto;
-					this.ataModelSupportsHeat = modelSupportsHeat;
+					this.ataModelSupportsAuto = !this.ataDisableAutoMode && modelSupportsAuto;
+					this.ataModelSupportsHeat = !this.ataDisableHeatoMode && modelSupportsHeat;
 					this.ataModelSupportsDry = modelSupportsDry;
 					this.ataPresets = presets;
 					this.ataPresetsCount = this.ataPresetsEnabled ? presetsCount : 0;

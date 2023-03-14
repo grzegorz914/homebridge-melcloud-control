@@ -232,6 +232,18 @@
               "description": "This enable display device presets as extra buttons in HomeKit app.",
               "required": false
             },
+            "ataDisableAutoMode": {
+              "title": "Disable Auto Mode",
+              "type": "boolean",
+              "description": "This will disable Auto mode even this mode is supported by device.",
+              "required": false
+            },
+            "ataDisableHeatMode": {
+              "title": "Disable Heat Mode",
+              "type": "boolean",
+              "description": "This will disable Heat mode even this mode is supported by device.",
+              "required": false
+            },
             "ataAutoHeatMode": {
               "title": "Auto/Heat Mode",
               "type": "integer",
@@ -250,7 +262,7 @@
                 }
               ],
               "description": "Here select operation mode for Auto/Heat option, if Auto, Heat or both modes are not supported by device will be used selected modes instead.",
-              "required": true
+              "required": false
             },
             "ataButtons": {
               "title": "Button / Sensor",
@@ -1066,6 +1078,8 @@
             "accounts[].ataDisplayMode",
             "accounts[].ataPresets",
             "accounts[].ataAutoHeatMode",
+            "accounts[].ataDisableAutoMode",
+            "accounts[].ataDisableHeatMode",
             {
               "key": "accounts[].ataButtons",
               "type": "tabarray",

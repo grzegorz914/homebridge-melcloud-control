@@ -154,6 +154,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `passwd` | Here set the MELCloud password. |
 | `language` | Here select the MELCloud language. |
 | `ataDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
+| `ataDisableAutoMode` | This will disable `Auto` mode even this mode is supported by device. |
+| `ataDisableHeatMode` | This will disable `Hea`t mode even this mode is supported by device. |
 | `ataAutoHeatMode` | Here select operation mode for `Auto/Heat`, if `Auto`, `Heat` or both modes are not supported by device will be used selected modes instead. |
 | `ataPresets` | This enable display Air Conditioner presets in HomeKit app. |
 | `ataButtons.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. | 
@@ -192,6 +194,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
                     "passwd": "password",
                     "language": 0,
                     "ataDisplayMode": 0,
+                    "ataDisableAutoMode": false,
+                    "ataDisableHeatMode": false,
                     "ataAutoHeatMode": 0,
                     "ataPresets": false,
                     "ataButtons": [{
