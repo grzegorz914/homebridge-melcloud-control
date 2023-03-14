@@ -60,8 +60,8 @@ class MELCLOUDDEVICEATA extends EventEmitter {
 
                 //device info
                 //const deviceId = deviceInfo.DeviceID;
-                //const name = deviceInfo.DeviceName;
-                const buildingId = deviceInfo.BuildingID;
+                //const deviceName = deviceInfo.DeviceName;
+                //const buildingId = deviceInfo.BuildingID;
                 const buildingName = deviceInfo.BuildingName;
                 const floorId = deviceInfo.FloorID;
                 const floorName = deviceInfo.FloorName;
@@ -94,7 +94,7 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 //const ownerCountry = deviceInfo.OwnerCountry;
                 //const adaptorType = deviceInfo.AdaptorType;
                 //const linkedDevice = deviceInfo.LinkedDevice;
-                //const deviceType = deviceInfo.Type;
+                const type = deviceInfo.Type;
                 //const macAddress = deviceInfo.MacAddress;
                 //const serialNumber = deviceInfo.SerialNumber !== null ? deviceInfo.SerialNumber.toString() : 'Undefined';
 
@@ -112,7 +112,7 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 const numberOfFanSpeeds = device.NumberOfFanSpeeds;
                 const useTemperatureA = device.UseTemperatureA;
                 const temperatureIncrementOverride = device.TemperatureIncrementOverride; //Auto, 1, 0.5
-                const temperatureIncrement = device.TemperatureIncrement;
+                const temperatureIncrement = device.TemperatureIncrement; //1, 0.5
                 const minTempCoolDry = device.MinTempCoolDry;
                 const maxTempCoolDry = device.MaxTempCoolDry;
                 const minTempHeat = device.MinTempHeat;
@@ -282,11 +282,11 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 const permissionCanSetTemperatureIncrementOverride = deviceInfo.Permissions.CanSetTemperatureIncrementOverride;
                 const permissionCanDisableLocalController = deviceInfo.Permissions.CanDisableLocalController;
 
-                this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, presets, presetsCount, hasAutomaticFanSpeed, airDirectionFunction, swingFunction, numberOfFanSpeeds, temperatureIncrement, modelSupportsFanSpeed, modelSupportsAuto, modelSupportsHeat, modelSupportsDry);
+                this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, presets, presetsCount, hasAutomaticFanSpeed, airDirectionFunction, swingFunction, numberOfFanSpeeds, temperatureIncrement, minTempCoolDry, maxTempCoolDry, minTempHeat, maxTempHeat, minTempAutomatic, maxTempAutomatic, modelSupportsFanSpeed, modelSupportsAuto, modelSupportsHeat, modelSupportsDry);
                 const mqtt = mqttEnabled ? this.emit('mqtt', `Info`, JSON.stringify(deviceInfo, null, 2)) : false;
 
                 //check device state
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                await new Promise(resolve => setTimeout(resolve, 1500));
                 this.emit('checkDeviceState');
             } catch (error) {
                 this.emit('error', `check info, ${error}, check again in 60s.`);

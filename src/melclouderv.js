@@ -61,7 +61,8 @@ class MELCLOUDDEVICEERV extends EventEmitter {
 
                 //deviceInfo
                 //const deviceId = deviceInfo.DeviceID;
-                //const name = deviceInfo.DeviceName;
+                //const deviceName = deviceInfo.DeviceName;
+                //const buildingId = deviceInfo.BuildingID;
                 const buildingName = deviceInfo.BuildingName;
                 const floorId = deviceInfo.FloorID;
                 const floorName = deviceInfo.FloorName;
@@ -94,7 +95,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 //const ownerCountry = deviceInfo.OwnerCountry;
                 //const adaptorType = deviceInfo.AdaptorType;
                 //const linkedDevice = deviceInfo.LinkedDevice;
-                //const deviceType = deviceInfo.Type;
+                const type = deviceInfo.Type;
                 //const macAddress = deviceInfo.MacAddress;
                 //const serialNumber = (deviceInfo.SerialNumber !== undefined && deviceInfo.SerialNumber !== null) ? deviceInfo.SerialNumber : 'Undefined';
 
@@ -111,7 +112,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const hasAutoOperationMode = device.HasAutoOperationMode;
                 const airDirectionFunction = device.AirDirectionFunction;
                 const hasBypassVentilationMode = device.HasBypassVentilationMode;
-                const hasAutoVentilationMode = device.HasAutoVentilationMode;
+                const hasAutoVentilationMode = device.HasAutoVentilationMode ? 1 : 0;
                 const hasRoomTemperature = device.HasRoomTemperature;
                 const hasSupplyTemperature = device.HasSupplyTemperature;
                 const hasOutdoorTemperature = device.HasOutdoorTemperature;
@@ -271,7 +272,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const mqtt = mqttEnabled ? this.emit('mqtt', `Info`, JSON.stringify(deviceInfo, null, 2)) : false;
 
                 //check device state
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                await new Promise(resolve => setTimeout(resolve, 1500));
                 this.emit('checkDeviceState');
             } catch (error) {
                 this.emit('error', `check info, ${error}, check again in 60s.`);
