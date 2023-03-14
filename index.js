@@ -349,6 +349,7 @@ class melCloudDevice {
 					this.roomTemperature = roomTemperature;
 					this.setTemperature = setTemperature;
 					this.fanSpeed = fanSpeed;
+					this.setFanSpeed = setFanSpeed;
 					this.swingMode = swingMode;
 					this.vaneHorizontal = vaneHorizontal;
 					this.vaneVertical = vaneVertical;
@@ -1302,6 +1303,7 @@ class melCloudDevice {
 					this.roomCO2Level = roomCO2Level;
 					this.setTemperature = setTemperature;
 					this.fanSpeed = fanSpeed;
+					this.setFanSpeed = setFanSpeed;
 					this.lockPhysicalControls = lockPhysicalControls;
 
 					//update buttons state
@@ -1524,6 +1526,8 @@ class melCloudDevice {
 						const ataButtonsCount = this.ataButtonsConfiguredCount;
 						const ataPresetsCount = this.ataPresetsCount;
 						const ataServiceName = `${accessoryName} ${deviceTypeText}`;
+						const ataAutoDryFan = this.ataAutoHeatMode ? ataModelSupportsDry ? 2 : 7 : 7;
+						const ataHeatFanDry = this.ataAutoHeatMode ? 7 : ataModelSupportsDry ? 2 : 7;
 
 						this.ataMelCloudServices = [];
 						switch (ataDisplayMode) {
@@ -1568,12 +1572,12 @@ class melCloudDevice {
 											switch (value) {
 												case 0: //AUTO - AUTO
 													deviceState.Power = true;
-													deviceState.OperationMode = ataModelSupportsAuto ? 8 : [ataModelSupportsDry ? 2 : 7, 7][this.ataAutoHeatMode];
+													deviceState.OperationMode = ataModelSupportsAuto ? 8 : ataAutoDryFan;
 													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
 													break;
 												case 1: //HEAT - HEAT
 													deviceState.Power = true;
-													deviceState.OperationMode = ataModelSupportsHeat ? 1 : [7, ataModelSupportsDry ? 2 : 7][this.ataAutoHeatMode];
+													deviceState.OperationMode = ataModelSupportsHeat ? 1 : ataHeatFanDry;
 													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
 													break;
 												case 2: //COOL - COOL
