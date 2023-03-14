@@ -43,12 +43,12 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
     * Fan speed `OFF/1/2/3/4/5/AUTO`.
     * Swing mode `AUTO/SWING`.
     * Physical lock controls `LOCK/UNLOCK`.
-    * Mode `HEAT` configurable in plugin config between `DRY` or `FAN`.
+    * If `AUTO/HEAT` or both modes are not supported by device will use `DRY/FAN` or `FAN/DRY` modes instead.
   * Thermostat:
     * Power `ON/OFF`.
     * Operating mode `POWER OFF/HEAT/COOL/AUTO`.
     * Heating/Cooling temperature.
-    * Mode `HEAT` configurable in plugin config between `DRY` or `FAN`.
+    * If `AUTO/HEAT` or both modes are not supported by device will use `DRY/FAN` or `FAN/DRY` modes instead.
   * Buttons:
     * Use to direct control device.
       * Power `ON/OFF`.
@@ -154,6 +154,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `passwd` | Here set the MELCloud password. |
 | `language` | Here select the MELCloud language. |
 | `ataDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
+| `ataAutoHeatMode` | Here select operation mode for `Auto/Heat`, if `Auto`, `Heat` or both modes are not supported by device will be used selected modes instead. |
 | `ataPresets` | This enable display Air Conditioner presets in HomeKit app. |
 | `ataButtons.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. | 
 | `ataButtons.mode` | Here select button mode, VH - Vane Horizontal, VV - Vane Horizontal. |
@@ -191,6 +192,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
                     "passwd": "password",
                     "language": 0,
                     "ataDisplayMode": 0,
+                    "ataAutoHeatMode": 0,
                     "ataPresets": false,
                     "ataButtons": [{
                         "name": "ON/OFF",

@@ -24,6 +24,7 @@
           "passwd": "password",
           "language": 0,
           "ataDisplayMode": 0,
+          "ataAutoHeatMode": 0,
           "ataPresets": false,
           "ataButtons": [
             {

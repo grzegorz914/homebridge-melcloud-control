@@ -114,7 +114,7 @@ class melCloudDevice {
 		this.accountName = account.name;
 		this.ataDisplayMode = account.ataDisplayMode || 0;
 		this.ataPresetsEnabled = account.ataPresets || false;
-		this.ataHeatMode = account.ataHeatMode || 0; //DRY, FAN
+		this.ataAutoHeatMode = account.ataAutoMode || 0; //DRY, FAN
 		this.ataButtons = account.ataButtons || [];
 		this.ataButtonsCount = this.ataButtons.length;
 		this.atwDisplayMode = account.atwDisplayMode || 0;
@@ -245,12 +245,14 @@ class melCloudDevice {
 					const presets = this.ataPresets;
 					const presetsCount = this.ataPresetsCount;
 
+
 					//device state
 					this.deviceState = deviceState || {};
 					this.power = power || false;
 					this.offline = offline || false;
 
 					//operating mode
+					let autoHeatDryFanMode = 0;
 					let currentOperationMode = 0;
 					let targetOperationMode = 0;
 					let fanSpeed = 0;
@@ -265,11 +267,12 @@ class melCloudDevice {
 					switch (displayMode) {
 						case 0: //Heater Cooler
 							//operating mode 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
+							autoHeatDryFanMode = !modelSupportsAuto && !modelSupportsHeat ? [operationMode === 2 ? 0 : 1, operationMode === 6 ? 0 : 1][this.ataAutoHeatMode] : !modelSupportsAuto && modelSupportsHeat ? 0 : modelSupportsAuto && !modelSupportsHeat ? 1 : 1;
 							currentOperationMode = !power ? 0 : inStandbyMode ? 1 : [0, 2, 3, 3, 3, 3, 3, 3, (setTemperature < roomTemperature) ? 3 : 2, 2, 2, 3][operationMode]; //INACTIVE, IDLE, HEATING, COOLING
-							targetOperationMode = [0, 1, 1, 2, 2, 2, 2, 1, 0, 1, 1, 2][operationMode]; //AUTO, HEAT, COOL
-							operationModeSetPropsMinValue = modelSupportsAuto ? 0 : 1;
-							operationModeSetPropsMaxValue = modelSupportsAuto ? 2 : 2;
-							operationModeSetPropsValidValues = modelSupportsAuto ? [0, 1, 2] : [1, 2]
+							targetOperationMode = [0, 1, autoHeatDryFanMode, 2, 2, 2, 2, autoHeatDryFanMode, 0, 1, 1, 2][operationMode]; //AUTO, HEAT, COOL
+							operationModeSetPropsMinValue = 0;
+							operationModeSetPropsMaxValue = 2;
+							operationModeSetPropsValidValues = [0, 1, 2];
 
 							//fan speed mode
 							if (modelSupportsFanSpeed) {
@@ -320,11 +323,12 @@ class melCloudDevice {
 							break;
 						case 1: //Thermostat
 							//operating mode 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
+							autoHeatDryFanMode = !modelSupportsAuto && !modelSupportsHeat ? [operationMode === 2 ? 3 : 1, operationMode === 6 ? 3 : 1][this.ataAutoHeatMode] : !modelSupportsAuto && modelSupportsHeat ? 3 : modelSupportsAuto && !modelSupportsHeat ? 1 : 1;
 							currentOperationMode = !power || inStandbyMode ? 0 : [0, 1, 2, 2, 2, 2, 2, 2, (setTemperature < roomTemperature) ? 2 : 1, 1, 1, 2][operationMode]; //OFF, HEAT, COOL
-							targetOperationMode = !power || inStandbyMode ? 0 : [0, 1, 1, 2, 2, 2, 2, 1, 3, 1, 1, 2][operationMode]; //OFF, HEAT, COOL, AUTO
-							operationModeSetPropsMinValue = modelSupportsAuto ? 0 : 0;
-							operationModeSetPropsMaxValue = modelSupportsAuto ? 3 : 2;
-							operationModeSetPropsValidValues = modelSupportsAuto ? [0, 1, 2, 3] : [0, 1, 2];
+							targetOperationMode = !power || inStandbyMode ? 0 : [0, 1, autoHeatDryFanMode, 2, 2, 2, 2, autoHeatDryFanMode, 3, 1, 1, 2][operationMode]; //OFF, HEAT, COOL, AUTO
+							operationModeSetPropsMinValue = 0;
+							operationModeSetPropsMaxValue = 3;
+							operationModeSetPropsValidValues = [0, 1, 2, 3];
 
 							//update characteristics
 							if (this.ataMelCloudServices) {
@@ -1510,6 +1514,7 @@ class melCloudDevice {
 						const ataDisplayMode = this.ataDisplayMode;
 						const ataHasAutomaticFanSpeed = this.ataHasAutomaticFanSpeed;
 						const ataModelSupportsFanSpeed = this.ataModelSupportsFanSpeed;
+						const ataModelSupportsAuto = this.ataModelSupportsAuto;
 						const ataModelSupportsHeat = this.ataModelSupportsHeat;
 						const ataModelSupportsDry = this.ataModelSupportsDry;
 						const ataNumberOfFanSpeeds = this.ataNumberOfFanSpeeds;
@@ -1561,12 +1566,12 @@ class melCloudDevice {
 											switch (value) {
 												case 0: //AUTO - AUTO
 													deviceState.Power = true;
-													deviceState.OperationMode = 8;
+													deviceState.OperationMode = ataModelSupportsAuto ? 8 : [ataModelSupportsDry ? 2 : 7, 7][this.ataAutoHeatMode];
 													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
 													break;
 												case 1: //HEAT - HEAT
 													deviceState.Power = true;
-													deviceState.OperationMode = ataModelSupportsHeat ? 1 : [ataModelSupportsDry ? 2 : 7, 7][this.ataHeatMode];
+													deviceState.OperationMode = ataModelSupportsHeat ? 1 : [7, ataModelSupportsDry ? 2 : 7][this.ataAutoHeatMode];
 													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
 													break;
 												case 2: //COOL - COOL
@@ -1775,7 +1780,7 @@ class melCloudDevice {
 													break;
 												case 1: //HEAT - HEAT
 													deviceState.Power = true;
-													deviceState.OperationMode = ataModelSupportsHeat ? 1 : [ataModelSupportsDry ? 2 : 7, 7][this.ataHeatMode];
+													deviceState.OperationMode = ataModelSupportsHeat ? 1 : [7, ataModelSupportsDry ? 2 : 7][this.ataAutoHeatMode];
 													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
 													break;
 												case 2: //COOL - COOL
@@ -1785,7 +1790,7 @@ class melCloudDevice {
 													break;
 												case 3: //AUTO - AUTO
 													deviceState.Power = true;
-													deviceState.OperationMode = 8;
+													deviceState.OperationMode = ataModelSupportsAuto ? 8 : [ataModelSupportsDry ? 2 : 7, 7][this.ataAutoHeatMode];
 													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
 													break;
 											};
@@ -2863,7 +2868,7 @@ class melCloudDevice {
 											switch (value) {
 												case 0: //AUTO - AUTO
 													deviceState.Power = true;
-													deviceState.VentilationMode = 2;
+													deviceState.VentilationMode = ervHasAutoVentilationMode ? 2 : 0;
 													deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.VentilationMode;
 													break;
 												case 1: //HEAT - LOSSNAY

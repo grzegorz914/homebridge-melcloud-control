@@ -123,10 +123,10 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 const unitSupportsStandbyMode = device.UnitSupportsStandbyMode;
                 const isSplitSystem = device.IsSplitSystem;
                 const modelIsAirCurtain = device.ModelIsAirCurtain;
-                const modelSupportsFanSpeed = device.ModelSupportsFanSpeed;
-                const modelSupportsAuto = device.ModelSupportsAuto;
-                const modelSupportsHeat = device.ModelSupportsHeat;
-                const modelSupportsDry = device.ModelSupportsDry;
+                const modelSupportsFanSpeed = device.ModelSupportsFanSpeed || false;
+                const modelSupportsAuto = device.ModelSupportsAuto || false;
+                const modelSupportsHeat = device.ModelSupportsHeat || false;
+                const modelSupportsDry = device.ModelSupportsDry || false;
                 const modelSupportsVaneVertical = device.ModelSupportsVaneVertical;
                 const modelSupportsVaneHorizontal = device.ModelSupportsVaneHorizontal;
                 const modelSupportsWideVane = device.ModelSupportsWideVane;
