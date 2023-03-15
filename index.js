@@ -115,8 +115,6 @@ class melCloudDevice {
 		//account config
 		this.ataDisplayMode = account.ataDisplayMode || 0;
 		this.ataPresetsEnabled = account.ataPresets || false;
-		this.ataEnableSetDefHeatTemp = account.ataEnableSetDefHeatTemp || false;
-		this.ataEnableSetDefCoolTemp = account.ataEnableSetDefCoolTemp || false;
 		this.ataDisableAutoMode = account.ataDisableAutoMode || false;
 		this.ataDisableHeatMode = account.ataDisableHeatMode || false;
 		this.ataAutoHeatMode = account.ataAutoHeatMode || 0; //DRY, FAN
