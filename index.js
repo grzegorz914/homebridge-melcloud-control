@@ -2882,7 +2882,7 @@ class melCloudDevice {
 									})
 									.onGet(async () => {
 										const value = this.fanSpeed; //STOP, 1, 2, 3, 4, OFF
-										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Fan speed mode: ${CONSTANS.Ventilation.AktualSupplyFanSpeed[this.setFanSpeed]}`);
+										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Fan speed mode: ${CONSTANS.Ventilation.FanSpeed[this.setFanSpeed]}`);
 										return value;
 									})
 									.onSet(async (value) => {
@@ -2895,7 +2895,7 @@ class melCloudDevice {
 											deviceState.SetFanSpeed = fanSpeed;
 											deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
 											await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState);
-											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set fan speed mode: ${CONSTANS.Ventilation.AktualSupplyFanSpeed[fanSpeedModeText]}`);
+											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set fan speed mode: ${CONSTANS.Ventilation.FanSpeed[fanSpeedModeText]}`);
 										} catch (error) {
 											this.log.error(`${deviceTypeText} ${accessoryName}, Set fan speed mode error: ${error}`);
 										};
