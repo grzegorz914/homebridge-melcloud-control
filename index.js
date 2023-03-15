@@ -1648,7 +1648,7 @@ class melCloudDevice {
 									.setProps({
 										minValue: -35,
 										maxValue: 150,
-										minStep: 0.5
+										minStep: this.ataTemperatureIncrement
 									})
 									.onGet(async () => {
 										const value = this.roomTemperature;
