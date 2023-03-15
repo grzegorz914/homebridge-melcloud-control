@@ -262,7 +262,7 @@
                 }
               ],
               "description": "Here select operation mode for Auto/Heat option, if Auto, Heat or both modes are not supported by device will be used selected modes instead.",
-              "required": false
+              "required": true
             },
             "ataButtons": {
               "title": "Button / Sensor",
@@ -827,7 +827,7 @@
                         ]
                       },
                       {
-                        "title": "MODE RECOVERY",
+                        "title": "MODE LOSSNAY",
                         "enum": [
                           1
                         ]
