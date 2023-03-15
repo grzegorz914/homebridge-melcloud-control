@@ -229,7 +229,7 @@ class melCloudDevice {
 					this.ataTargetTempSetPropsMaxValue = [31, 88][this.useFahrenheit];
 					this.ataModelSupportsFanSpeed = modelSupportsFanSpeed;
 					this.ataModelSupportsAuto = !this.ataDisableAutoMode && modelSupportsAuto;
-					this.ataModelSupportsHeat = !this.ataDisableHeatoMode && modelSupportsHeat;
+					this.ataModelSupportsHeat = !this.ataDisableHeatMode && modelSupportsHeat;
 					this.ataModelSupportsDry = modelSupportsDry;
 					this.ataPresets = presets;
 					this.ataPresetsCount = this.ataPresetsEnabled ? presetsCount : 0;
