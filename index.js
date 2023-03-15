@@ -1613,23 +1613,23 @@ class melCloudDevice {
 												switch (ataNumberOfFanSpeeds) {
 													case 2: //Fan speed mode 2
 														fanSpeedMode = ataHasAutomaticFanSpeed ? [0, 1, 2, 0][value] : [1, 1, 2][value];
-														fanSpeedModeInfo = ataHasAutomaticFanSpeed ? [8, 1, 2, 0][value] : [8, 1, 2][value];
+														fanSpeedModeInfo = ataHasAutomaticFanSpeed ? [7, 1, 2, 0][value] : [7, 1, 2][value];
 														break;
 													case 3: //Fan speed mode 3
 														fanSpeedMode = ataHasAutomaticFanSpeed ? [0, 1, 2, 3, 0][value] : [1, 1, 2, 3][value];
-														fanSpeedModeInfo = ataHasAutomaticFanSpeed ? [8, 1, 2, 3, 0][value] : [8, 1, 2, 3][value];
+														fanSpeedModeInfo = ataHasAutomaticFanSpeed ? [7, 1, 2, 3, 0][value] : [7, 1, 2, 3][value];
 														break;
 													case 4: //Fan speed mode 4
 														fanSpeedMode = ataHasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 0][value] : [1, 1, 2, 3, 4][value];
-														fanSpeedModeInfo = ataHasAutomaticFanSpeed ? [8, 1, 2, 3, 4, 0][value] : [8, 1, 2, 3, 4][value];
+														fanSpeedModeInfo = ataHasAutomaticFanSpeed ? [7, 1, 2, 3, 4, 0][value] : [7, 1, 2, 3, 4][value];
 														break;
 													case 5: //Fan speed mode 5
 														fanSpeedMode = ataHasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 0][value] : [1, 1, 2, 3, 4, 5][value];
-														fanSpeedModeInfo = ataHasAutomaticFanSpeed ? [8, 1, 2, 3, 4, 5, 0][value] : [8, 1, 2, 3, 4, 5][value];
+														fanSpeedModeInfo = ataHasAutomaticFanSpeed ? [7, 1, 2, 3, 4, 5, 0][value] : [7, 1, 2, 3, 4, 5][value];
 														break;
 													case 6: //Fan speed mode 6
 														fanSpeedMode = ataHasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 6, 0][value] : [1, 1, 2, 3, 4, 5, 6][value];
-														fanSpeedModeInfo = ataHasAutomaticFanSpeed ? [8, 1, 2, 3, 4, 5, 6, 0][value] : [8, 1, 2, 3, 4, 5, 6][value];
+														fanSpeedModeInfo = ataHasAutomaticFanSpeed ? [7, 1, 2, 3, 4, 5, 6, 0][value] : [7, 1, 2, 3, 4, 5, 6][value];
 														break;
 												};
 
@@ -2915,15 +2915,15 @@ class melCloudDevice {
 											switch (ervNumberOfFanSpeeds) {
 												case 2: //Fan speed mode 2
 													fanSpeedMode = ervHasAutomaticFanSpeed ? [0, 1, 2, 0][value] : [1, 1, 2][value];
-													fanSpeedModeInfo = ervHasAutomaticFanSpeed ? [8, 1, 2, 0][value] : [8, 1, 2][value];
+													fanSpeedModeInfo = ervHasAutomaticFanSpeed ? [5, 1, 2, 0][value] : [5, 1, 2][value];
 													break;
 												case 3: //Fan speed mode 3
 													fanSpeedMode = ervHasAutomaticFanSpeed ? [0, 1, 2, 3, 0][value] : [1, 1, 2, 3][value];
-													fanSpeedModeInfo = ervHasAutomaticFanSpeed ? [8, 1, 2, 3, 0][value] : [8, 1, 2, 3][value];
+													fanSpeedModeInfo = ervHasAutomaticFanSpeed ? [5, 1, 2, 3, 0][value] : [5, 1, 2, 3][value];
 													break;
 												case 4: //Fan speed mode 4
 													fanSpeedMode = ervHasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 0][value] : [1, 1, 2, 3, 4][value];
-													fanSpeedModeInfo = ervHasAutomaticFanSpeed ? [8, 1, 2, 3, 4, 0][value] : [8, 1, 2, 3, 4][value];
+													fanSpeedModeInfo = ervHasAutomaticFanSpeed ? [5, 1, 2, 3, 4, 0][value] : [5, 1, 2, 3, 4][value];
 													break;
 											};
 											deviceState.Power = true;

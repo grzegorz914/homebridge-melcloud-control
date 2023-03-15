@@ -79,7 +79,8 @@
             "WEAK",
             "4",
             "STRONG",
-            "VERY STRONG"
+            "VERY STRONG",
+            "OFF"
         ],
         "EffectiveFlags": {
             "Power": 1,
@@ -219,7 +220,8 @@
             "1",
             "2",
             "3",
-            "4"
+            "4",
+            "OFF"
         ],
         "AktualVentilationMode": [
             "LOSSNAY",
