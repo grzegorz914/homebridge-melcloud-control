@@ -52,14 +52,13 @@ class melCloudPlatform {
 
 				//check if the directory exists, if not then create it
 				const prefDir = path.join(api.user.storagePath(), 'melcloud');
-				const melCloudInfoFile = `${prefDir}/${accountName}_Account`;
-				if (fs.existsSync(prefDir) === false) {
+				if (!fs.existsSync(prefDir)) {
 					fs.mkdirSync(prefDir);
 				};
 
 				//melcloud client
 				this.melCloud = new MelCloud({
-					name: accountName,
+					accountName: accountName,
 					user: user,
 					passwd: passwd,
 					language: language,
@@ -70,15 +69,18 @@ class melCloudPlatform {
 				this.melCloud.on('connected', async (melCloudInfoData) => {
 					this.log(`Account ${accountName}, Connected.`)
 
-					//write melcloud info data
+					//save melcloud info to the file
 					try {
+						const melCloudInfoFile = `${prefDir}/${accountName}_Account`;
 						await fsPromises.writeFile(melCloudInfoFile, melCloudInfoData);
 					} catch (error) {
 						this.log.error(`Account ${accountName}, write MELCloud info error: ${error}`);
 					};
 				})
-					.on('checkDevicesListComplete', (melCloudInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit) => {
-						new melCloudDevice(this.log, this.api, account, prefDir, melCloudInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit);
+					.on('checkDevicesListComplete', (melCloudInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText) => {
+						const useFahrenheit = melCloudInfo.UseFahrenheit ? 1 : 0;
+						const temperatureDisplayUnit = CONSTANS.TemperatureDisplayUnits[useFahrenheit];
+						new melCloudDevice(this.log, this.api, account, accountName, prefDir, melCloudInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit);
 					})
 					.on('message', (message) => {
 						this.log(`Account ${accountName}, ${message}`);
@@ -106,14 +108,15 @@ class melCloudPlatform {
 
 
 class melCloudDevice {
-	constructor(log, api, account, prefDir, melCloudInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit) {
+	constructor(log, api, account, accountName, prefDir, melCloudInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit) {
 		this.log = log;
 		this.api = api;
 
 		//account config
-		this.accountName = account.name;
 		this.ataDisplayMode = account.ataDisplayMode || 0;
 		this.ataPresetsEnabled = account.ataPresets || false;
+		this.ataEnableSetDefHeatTemp = account.ataEnableSetDefHeatTemp || false;
+		this.ataEnableSetDefCoolTemp = account.ataEnableSetDefCoolTemp || false;
 		this.ataDisableAutoMode = account.ataDisableAutoMode || false;
 		this.ataDisableHeatMode = account.ataDisableHeatMode || false;
 		this.ataAutoHeatMode = account.ataAutoHeatMode || 0; //DRY, FAN
@@ -132,15 +135,15 @@ class melCloudDevice {
 		this.enableDebugMode = account.enableDebugMode || false;
 
 		//variables
-		this.startPrepareAccessory = true;
-		this.displayDeviceInfo = true;
 		this.melCloudInfo = melCloudInfo;
+		this.deviceId = deviceId;
+		this.deviceType = deviceType;
+		this.deviceName = deviceName;
+		this.deviceTypeText = deviceTypeText;
 		this.useFahrenheit = useFahrenheit;
 		this.temperatureDisplayUnit = temperatureDisplayUnit;
-		this.deviceId = deviceId;
-		this.deviceName = deviceName;
-		this.deviceType = deviceType;
-		this.deviceTypeText = deviceTypeText;
+		this.startPrepareAccessory = true;
+		this.displayDeviceInfo = true;
 
 		//mqtt client
 		const mqttEnabled = account.enableMqtt || false;
@@ -158,7 +161,7 @@ class melCloudDevice {
 				host: mqttHost,
 				port: mqttPort,
 				prefix: mqttPrefix,
-				topic: this.accountName,
+				topic: accountName,
 				auth: mqttAuth,
 				user: mqttUser,
 				passwd: mqttPasswd
@@ -185,7 +188,7 @@ class melCloudDevice {
 		switch (deviceType) {
 			case 0: //air conditioner
 				this.melCloudAta = new MelCloudAta({
-					accountName: this.accountName,
+					accountName: accountName,
 					contextKey: contextKey,
 					buildingId: buildingId,
 					deviceId: deviceId,
@@ -197,7 +200,7 @@ class melCloudDevice {
 				this.melCloudAta.on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, presets, presetsCount, hasAutomaticFanSpeed, airDirectionFunction, swingFunction, numberOfFanSpeeds, temperatureIncrement, minTempCoolDry, maxTempCoolDry, minTempHeat, maxTempHeat, minTempAutomatic, maxTempAutomatic, modelSupportsFanSpeed, modelSupportsAuto, modelSupportsHeat, modelSupportsDry) => {
 					if (!this.disableLogDeviceInfo && this.displayDeviceInfo) {
 						this.log(`---- ${this.deviceTypeText}: ${this.deviceName} ----`);
-						this.log(`Account: ${this.accountName}`);
+						this.log(`Account: ${accountName}`);
 						this.log(`Model: ${modelIndoor}`);
 						this.log(`Serial: ${serialNumber}`);
 						this.log(`Firmware: ${firmwareAppVersion}`);
@@ -225,6 +228,7 @@ class melCloudDevice {
 					this.ataMaxTempHeat = maxTempHeat;
 					this.ataMinTempAutomatic = minTempAutomatic;
 					this.ataMaxTempAutomatic = maxTempAutomatic;
+					this.ataTargetCoolTempSetPropsMinValue = [16, 61][this.useFahrenheit];
 					this.ataTargetTempSetPropsMinValue = [10, 50][this.useFahrenheit];
 					this.ataTargetTempSetPropsMaxValue = [31, 88][this.useFahrenheit];
 					this.ataModelSupportsFanSpeed = modelSupportsFanSpeed;
@@ -233,7 +237,7 @@ class melCloudDevice {
 					this.ataModelSupportsDry = modelSupportsDry;
 					this.ataPresets = presets;
 					this.ataPresetsCount = this.ataPresetsEnabled ? presetsCount : 0;
-				}).on('deviceState', async (deviceState, roomTemperature, setTemperature, setFanSpeed, operationMode, vaneHorizontal, vaneVertical, hideVaneControls, hideDryModeControl, inStandbyMode, prohibitSetTemperature, prohibitOperationMode, prohibitPower, power, offline) => {
+				}).on('deviceState', async (deviceState, roomTemperature, setTemperature, setFanSpeed, operationMode, vaneHorizontal, vaneVertical, defaultHeatingSetTemperature, defaultCoolingSetTemperature, hideVaneControls, hideDryModeControl, inStandbyMode, prohibitSetTemperature, prohibitOperationMode, prohibitPower, power, offline) => {
 					//device info
 					const displayMode = this.ataDisplayMode;
 					const hasAutomaticFanSpeed = this.ataHasAutomaticFanSpeed;
@@ -252,6 +256,8 @@ class melCloudDevice {
 					this.deviceState = deviceState || {};
 					this.power = power || false;
 					this.offline = offline || false;
+					this.defaultHeatingSetTemperature = defaultHeatingSetTemperature;
+					this.defaultCoolingSetTemperature = defaultCoolingSetTemperature;
 
 					//operating mode
 					let autoHeatDryFanMode = 0;
@@ -672,7 +678,7 @@ class melCloudDevice {
 				break;
 			case 1: //heat pump
 				this.melCloudAtw = new MelCloudAtw({
-					accountName: this.accountName,
+					accountName: accountName,
 					contextKey: contextKey,
 					buildingId: buildingId,
 					deviceId: deviceId,
@@ -684,7 +690,7 @@ class melCloudDevice {
 				this.melCloudAtw.on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareRevision, presets, presetsCount, zonesCount, heatPumpZoneName, hotWaterZoneName, hasHotWaterTank, temperatureIncrement, maxTankTemperature, hasZone2, zone1Name, zone2Name, heatCoolModes, caseHotWater, caseZone2) => {
 					if (!this.disableLogDeviceInfo && this.displayDeviceInfo) {
 						this.log(`---- ${this.deviceTypeText}: ${this.deviceName} ----`);
-						this.log(`Account: ${this.accountName}`);
+						this.log(`Account: ${accountName}`);
 						this.log(`Model: ${modelIndoor}`);
 						this.log(`Serial: ${serialNumber}`);
 						this.log(`Firmware: ${firmwareRevision}`);
@@ -1166,7 +1172,7 @@ class melCloudDevice {
 				break;
 			case 2: //energy recovery ventilation
 				this.melCloudErv = new MelCloudErv({
-					accountName: this.accountName,
+					accountName: accountName,
 					contextKey: contextKey,
 					buildingId: buildingId,
 					deviceId: deviceId,
@@ -1175,10 +1181,10 @@ class melCloudDevice {
 					prefDir: prefDir
 				});
 
-				this.melCloudErv.on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareRevision, presets, presetsCount, hasAutoVentilationMode, hasBypassVentilationMode, hasAutomaticFanSpeed, numberOfFanSpeeds, temperatureIncrement, heatCoolModes) => {
+				this.melCloudErv.on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareRevision, presets, presetsCount, hasAutoVentilationMode, hasBypassVentilationMode, hasAutomaticFanSpeed, numberOfFanSpeeds, temperatureIncrement, coreMaintenanceRequired, filterMaintenanceRequired) => {
 					if (!this.disableLogDeviceInfo && this.displayDeviceInfo) {
 						this.log(`---- ${this.deviceTypeText}: ${this.deviceName} ----`);
-						this.log(`Account: ${this.accountName}`);
+						this.log(`Account: ${accountName}`);
 						this.log(`Model: ${modelOutdoor}`);
 						this.log(`Serial: ${serialNumber}`);
 						this.log(`Firmware: ${firmwareRevision}`);
@@ -1200,19 +1206,19 @@ class melCloudDevice {
 					this.ervHasAutomaticFanSpeed = hasAutomaticFanSpeed;
 					this.ervNumberOfFanSpeeds = numberOfFanSpeeds;
 					this.ervTemperatureIncrement = temperatureIncrement;
+					this.ervFilterMaintenanceRequired = filterMaintenanceRequired ? 1 : 0;
 					this.ervTargetTempSetPropsMinValue = [10, 50][this.useFahrenheit];
 					this.ervTargetTempSetPropsMaxValue = [31, 88][this.useFahrenheit];
-					this.ervHeatCoolModes = heatCoolModes;
 					this.ervPresets = presets;
 					this.ervPresetsCount = this.ervPresetsEnabled ? presetsCount : 0;
-				}).on('deviceState', async (deviceState, roomTemperature, supplyTemperature, outdoorTemperature, roomCO2Level, nightPurgeMode, setTemperature, setFanSpeed, operationMode, ventilationMode, actualVentilationMode, hideRoomTemperature, hideSupplyTemperature, hideOutdoorTemperature, power, offline) => {
+				}).on('deviceState', async (deviceState, roomTemperature, supplyTemperature, outdoorTemperature, roomCO2Level, nightPurgeMode, setTemperature, setFanSpeed, operationMode, ventilationMode, actualVentilationMode, defaultHeatingSetTemperature, defaultCoolingSetTemperature, hideRoomTemperature, hideSupplyTemperature, hideOutdoorTemperature, power, offline) => {
 					//device info
 					const displayMode = this.ervDisplayMode;
 					const hasAutoVentilationMode = this.ervHasAutoVentilationMode;
 					const hasBypassVentilationMode = this.ervHasBypassVentilationMode;
 					const hasAutomaticFanSpeed = this.ervHasAutomaticFanSpeed;
 					const numberOfFanSpeeds = this.ervNumberOfFanSpeeds;
-					const heatCoolModes = this.ervHeatCoolModes;
+					const ervFilterMaintenanceRequired = ervFilterMaintenanceRequired;
 					const buttonsCount = this.ervButtonsCount;
 					const presets = this.ervPresets;
 					const presetsCount = this.ervPresetsCount;
@@ -1305,6 +1311,12 @@ class melCloudDevice {
 					this.fanSpeed = fanSpeed;
 					this.setFanSpeed = setFanSpeed;
 					this.lockPhysicalControls = lockPhysicalControls;
+
+					//update default heating temperature set
+					if (this.ervFilterMaintenanceService) {
+						this.ervFilterMaintenanceService
+							.updateCharacteristic(Characteristic.FilterChangeIndication, this.ervFilterMaintenanceRequired)
+					}
 
 					//update buttons state
 					if (buttonsCount > 0) {
@@ -1608,7 +1620,7 @@ class melCloudDevice {
 										})
 										.onSet(async (value) => {
 											try {
-												const power = (ataHasAutomaticFanSpeed && value > 0) || (!ervHasAutomaticFanSpeed && value > 1) ? true : false;
+												const power = (ataHasAutomaticFanSpeed && value > 0) || (!ataHasAutomaticFanSpeed && value > 1) ? true : false;
 												const fanSpeed = ataHasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 6, 0][value] : [1, 1, 2, 3, 4, 5, 6][value]; //AUTO, 1, 2, 3, 4, 5, 6
 												const fanSpeedModeText = ataHasAutomaticFanSpeed ? [7, 1, 2, 3, 4, 5, 6, 0][value] : [7, 1, 2, 3, 4, 5, 6][value]; //AUTO, 1, 2, 3, 4, 5, 6, OFF
 
@@ -1625,8 +1637,7 @@ class melCloudDevice {
 								if (ataSwingFunction) {
 									ataMelCloudService.getCharacteristic(Characteristic.SwingMode)
 										.onGet(async () => {
-											//Vane Horizontal: Auto, 1, 2, 3, 4, 5, 12 = Swing
-											//Vane Vertical: Auto, 1, 2, 3, 4, 5, 7 = Swing
+											//Vane Horizontal: Auto, 1, 2, 3, 4, 5, 12 = Swing //Vertical: Auto, 1, 2, 3, 4, 5, 7 = Swing
 											const value = this.swingMode;
 											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Vane swing mode: ${CONSTANS.AirConditioner.AirDirection[value ? 6 : 0]}`);
 											return value;
@@ -3091,6 +3102,19 @@ class melCloudDevice {
 								accessory.addService(this.ervMelCloudServices[i]);
 								break;
 						};
+
+						//filter maintenance
+						this.ervFilterMaintenanceService = new Service.FilterMaintenance(`${accessoryName} Filter Maintenance`, `FilterMaintenance${deviceId}`);
+						this.ervFilterMaintenanceService.getCharacteristic(Characteristic.FilterChangeIndication)
+							.onGet(async () => {
+								const value = this.ervFilterMaintenanceRequired;
+								const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Filter maintenance: ${CONSTANS.Ventilation.FilterMaintenance[value]}`);
+								return value;
+							});
+						this.ervFilterMaintenanceService.getCharacteristic(Characteristic.ResetFilterIndication)
+							.onSet(async (state) => {
+							});
+						accessory.addService(this.ervFilterMaintenanceService);
 
 						//buttons services
 						if (ervButtonsCount > 0) {

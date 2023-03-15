@@ -989,7 +989,7 @@
               "required": false,
               "description": "This enable debug mode for MQTT.",
               "condition": {
-                "functionBody": "return model.devices[arrayIndices].enableMqtt === true;"
+                "functionBody": "return model.accounts[arrayIndices].enableMqtt === true;"
               }
             },
             "mqttHost": {
@@ -1154,13 +1154,13 @@
           "expanded": false,
           "items": [
             "accounts[].enableMqtt",
+            "accounts[].mqttDebug",
             "accounts[].mqttHost",
             "accounts[].mqttPort",
             "accounts[].mqttPrefix",
             "accounts[].mqttAuth",
             "accounts[].mqttUser",
-            "accounts[].mqttPasswd",
-            "accounts[].mqttDebug"
+            "accounts[].mqttPasswd"
           ]
         }
       ]

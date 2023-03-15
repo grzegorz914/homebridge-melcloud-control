@@ -47,6 +47,8 @@ class MELCLOUDDEVICEERV extends EventEmitter {
         this.operationMode = 0;
         this.ventilationMode = 0;
         this.actualVentilationMode = 0;
+        this.defaultHeatingSetTemperature = 0;
+        this.defaultCoolingSetTemperature = 0;
         this.hideRoomTemperature = false;
         this.hideSupplyTemperature = false;
         this.hideOutdoorTemperature = false;
@@ -111,15 +113,15 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const hasHeatOperationMode = device.HasHeatOperationMode;
                 const hasAutoOperationMode = device.HasAutoOperationMode;
                 const airDirectionFunction = device.AirDirectionFunction;
-                const hasBypassVentilationMode = device.HasBypassVentilationMode;
-                const hasAutoVentilationMode = device.HasAutoVentilationMode ? 1 : 0;
+                const hasBypassVentilationMode = device.HasBypassVentilationMode || false;
+                const hasAutoVentilationMode = device.HasAutoVentilationMode || false;
                 const hasRoomTemperature = device.HasRoomTemperature;
                 const hasSupplyTemperature = device.HasSupplyTemperature;
                 const hasOutdoorTemperature = device.HasOutdoorTemperature;
                 const hasCO2Sensor = device.HasCO2Sensor;
-                const numberOfFanSpeeds = device.NumberOfFanSpeeds;
+                const numberOfFanSpeeds = device.NumberOfFanSpeeds || 0;
                 const hasHalfDegreeIncrements = device.HasHalfDegreeIncrements;
-                const temperatureIncrement = device.TemperatureIncrement;
+                const temperatureIncrement = device.TemperatureIncrement || 1;
                 const temperatureIncrementOverride = device.TemperatureIncrementOverride;
                 const minTempCoolDry = device.MinTempCoolDry;
                 const maxTempCoolDry = device.MaxTempCoolDry;
@@ -128,9 +130,9 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const minTempAutomatic = device.MinTempAutomatic;
                 const maxTempAutomatic = device.MaxTempAutomatic;
                 const setSupplyTemperatureMode = device.SetSupplyTemperatureMode;
-                const hasAutomaticFanSpeed = device.HasAutomaticFanSpeed;
-                const coreMaintenanceRequired = device.CoreMaintenanceRequired;
-                const filterMaintenanceRequired = device.FilterMaintenanceRequired;
+                const hasAutomaticFanSpeed = device.HasAutomaticFanSpeed || false;
+                const coreMaintenanceRequired = device.CoreMaintenanceRequired || false;
+                const filterMaintenanceRequired = device.FilterMaintenanceRequired || false;
                 const power = device.Power;
                 const roomTemperature = device.RoomTemperature;
                 const supplyTemperature = device.SupplyTemperature;
@@ -266,9 +268,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 const permissionCanSetTemperatureIncrementOverride = deviceInfo.Permissions.CanSetTemperatureIncrementOverride;
                 const permissionCanDisableLocalController = deviceInfo.Permissions.CanDisableLocalController;
 
-                const heatCoolModes = hasHeatOperationMode && hasCoolOperationMode ? 0 : hasHeatOperationMode ? 1 : hasCoolOperationMode ? 2 : 3;
-
-                this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, presets, presetsCount, hasAutoVentilationMode, hasBypassVentilationMode, hasAutomaticFanSpeed, numberOfFanSpeeds, temperatureIncrement, heatCoolModes);
+                this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, presets, presetsCount, hasAutoVentilationMode, hasBypassVentilationMode, hasAutomaticFanSpeed, numberOfFanSpeeds, temperatureIncrement, coreMaintenanceRequired, filterMaintenanceRequired);
                 const mqtt = mqttEnabled ? this.emit('mqtt', `Info`, JSON.stringify(deviceInfo, null, 2)) : false;
 
                 //check device state
@@ -331,6 +331,8 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                     && operationMode === this.operationMode
                     && ventilationMode === this.ventilationMode
                     && actualVentilationMode === this.actualVentilationMode
+                    && defaultHeatingSetTemperature === this.defaultHeatingSetTemperature
+                    && defaultCoolingSetTemperature === this.defaultCoolingSetTemperature
                     && hideRoomTemperature === this.hideRoomTemperature
                     && hideSupplyTemperature === this.hideSupplyTemperature
                     && hideOutdoorTemperature === this.hideOutdoorTemperature
@@ -352,13 +354,15 @@ class MELCLOUDDEVICEERV extends EventEmitter {
                 this.operationMode = operationMode;
                 this.ventilationMode = ventilationMode;
                 this.actualVentilationMode = actualVentilationMode;
+                this.defaultHeatingSetTemperature = defaultHeatingSetTemperature;
+                this.defaultCoolingSetTemperature = defaultCoolingSetTemperature;
                 this.hideRoomTemperature = hideRoomTemperature;
                 this.hideSupplyTemperature = hideSupplyTemperature;
                 this.hideOutdoorTemperature = hideOutdoorTemperature;
                 this.power = power;
                 this.offline = offline;
 
-                this.emit('deviceState', deviceState, roomTemperature, supplyTemperature, outdoorTemperature, roomCO2Level, nightPurgeMode, setTemperature, setFanSpeed, operationMode, ventilationMode, actualVentilationMode, hideRoomTemperature, hideSupplyTemperature, hideOutdoorTemperature, power, offline);
+                this.emit('deviceState', deviceState, roomTemperature, supplyTemperature, outdoorTemperature, roomCO2Level, nightPurgeMode, setTemperature, setFanSpeed, operationMode, ventilationMode, actualVentilationMode, defaultHeatingSetTemperature, defaultCoolingSetTemperature, hideRoomTemperature, hideSupplyTemperature, hideOutdoorTemperature, power, offline);
                 const mqtt = mqttEnabled ? this.emit('mqtt', `State`, JSON.stringify(deviceState, null, 2)) : false;
 
                 this.checkDeviceInfo();
@@ -389,7 +393,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
 
                 await this.axiosInstancePost(url, options);
                 this.emit('checkDeviceInfo');
-                await new Promise(resolve => setTimeout(resolve, 2500));
+                await new Promise(resolve => setTimeout(resolve, 2000));
                 resolve();
             } catch (error) {
                 reject(error);

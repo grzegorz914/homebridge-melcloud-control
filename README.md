@@ -113,9 +113,11 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
     * Operating mode `AUTO/HEAT/COOL/POWER OFF` - `AUTO, LOSSNAY, BYPAS, POWER OFF`.
     * Fan speed `OFF/1/2/3/4/AUTO`.
     * Physical lock controls `LOCK/UNLOCK`.
+    * Filter Change Indication
   * Thermostat:
     * Power `ON/OFF`.
     * Operating mode `POWER OFF/HEAT/COOL/AUTO` - `POWER OFF, LOSSNAY, BYPAS, AUTO`.
+    * Filter Change Indication
   * Buttons:
     * Use to direct control device.
       * Power `ON/OFF`.

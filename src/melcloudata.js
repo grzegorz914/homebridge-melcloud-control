@@ -25,6 +25,8 @@ class MELCLOUDDEVICEATA extends EventEmitter {
         this.operationMode = 0;
         this.vaneHorizontal = 0;
         this.vaneVertical = 0;
+        this.defaultHeatingSetTemperature = 0;
+        this.defaultCoolingSetTemperature = 0;
         this.hideVaneControls = false;
         this.hideDryModeControl = false;
         this.inStandbyMode = false;
@@ -342,6 +344,8 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                     && operationMode === this.operationMode
                     && vaneHorizontal === this.vaneHorizontal
                     && vaneVertical === this.vaneVertical
+                    && defaultHeatingSetTemperature === this.defaultHeatingSetTemperature
+                    && defaultCoolingSetTemperature === this.defaultCoolingSetTemperature
                     && hideVaneControls === this.hideVaneControls
                     && hideDryModeControl === this.hideDryModeControl
                     && inStandbyMode === this.inStandbyMode
@@ -362,6 +366,8 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 this.operationMode = operationMode;
                 this.vaneHorizontal = vaneHorizontal;
                 this.vaneVertical = vaneVertical;
+                this.defaultHeatingSetTemperature = defaultHeatingSetTemperature;
+                this.defaultCoolingSetTemperature = defaultCoolingSetTemperature;
                 this.hideVaneControls = hideVaneControls;
                 this.hideDryModeControl = hideDryModeControl;
                 this.inStandbyMode = inStandbyMode;
@@ -371,7 +377,7 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 this.power = power;
                 this.offline = offline;
 
-                this.emit('deviceState', deviceState, roomTemperature, setTemperature, setFanSpeed, operationMode, vaneHorizontal, vaneVertical, hideVaneControls, hideDryModeControl, inStandbyMode, prohibitSetTemperature, prohibitOperationMode, prohibitPower, power, offline);
+                this.emit('deviceState', deviceState, roomTemperature, setTemperature, setFanSpeed, operationMode, vaneHorizontal, vaneVertical, defaultHeatingSetTemperature, defaultCoolingSetTemperature, hideVaneControls, hideDryModeControl, inStandbyMode, prohibitSetTemperature, prohibitOperationMode, prohibitPower, power, offline);
                 this.checkDeviceInfo();
                 const mqtt = mqttEnabled ? this.emit('mqtt', `State`, JSON.stringify(deviceState, null, 2)) : false;
             } catch (error) {
@@ -401,7 +407,7 @@ class MELCLOUDDEVICEATA extends EventEmitter {
 
                 await this.axiosInstancePost(url, options);
                 this.emit('checkDeviceInfo');
-                await new Promise(resolve => setTimeout(resolve, 2500));
+                await new Promise(resolve => setTimeout(resolve, 2000));
                 resolve();
             } catch (error) {
                 reject(error);

@@ -241,6 +241,10 @@
             "3",
             "4"
         ],
+        "FilterMaintenance": [
+            "FILTER OK",
+            "CHANGE REQUIRED"
+        ],
         "EffectiveFlags": {
             "Power": 1,
             "OperationMode": 2,

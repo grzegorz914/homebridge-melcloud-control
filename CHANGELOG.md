@@ -10,7 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Important changes v0.4.0 and above!!!
   * Main control mode, buttons and presets need to be configured again!!!
 
- ## [0.9.0] - (14.03.2023)
+## [0.10.0] - (15.03.2023)
+## Changes
+- added filter maintaice indicator for ERV LOSSNAY systems
+- config.schema updated
+- cleanup
+
+## [0.9.0] - (14.03.2023)
 ## Changes
 - changed properties in config.json from `ataHeatMode` to `ataAutoHeatMode`
 - updated selectable options for `ataAutoHeatMode` to `DRY/FAN`, `FAN/DRY`

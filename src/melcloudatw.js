@@ -520,7 +520,7 @@ class MELCLOUDDEVICEATW extends EventEmitter {
 
                 await this.axiosInstancePost(url, options);
                 this.emit('checkDeviceInfo');
-                await new Promise(resolve => setTimeout(resolve, 2500));
+                await new Promise(resolve => setTimeout(resolve, 2000));
                 resolve();
             } catch (error) {
                 reject(error);

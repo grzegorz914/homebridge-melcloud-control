@@ -8,7 +8,7 @@ const CONSTANS = require('./constans.json');
 class MELCLOUD extends EventEmitter {
     constructor(config) {
         super();
-        const accountName = config.name;
+        const accountName = config.accountName;
         const user = config.user;
         const passwd = config.passwd;
         const language = config.language;
@@ -118,8 +118,6 @@ class MELCLOUD extends EventEmitter {
                 }
 
                 const devicesCount = devices.length;
-                const useFahrenheit = melCloudInfo.UseFahrenheit ? 1 : 0;
-                const temperatureDisplayUnit = CONSTANS.TemperatureDisplayUnits[useFahrenheit];
                 const debug2 = debugLog ? this.emit('debug', `found: ${devicesCount} devices.`) : false;
 
                 for (const deviceInfo of devices) {
@@ -142,7 +140,7 @@ class MELCLOUD extends EventEmitter {
                     //prepare device if not in devices array
                     if (!devicesId.includes(deviceId)) {
                         devicesId.push(deviceId);
-                        this.emit('checkDevicesListComplete', melCloudInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit);
+                        this.emit('checkDevicesListComplete', melCloudInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText);
                     }
                 }
 
