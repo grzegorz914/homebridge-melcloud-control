@@ -115,7 +115,7 @@ class melCloudDevice {
 		this.ataDisplayMode = account.ataDisplayMode || 0;
 		this.ataPresetsEnabled = account.ataPresets || false;
 		this.ataDisableAutoMode = account.ataDisableAutoMode || false;
-		this.ataDisableHeatoMode = account.ataDisableHeatMode || false;
+		this.ataDisableHeatMode = account.ataDisableHeatMode || false;
 		this.ataAutoHeatMode = account.ataAutoHeatMode || 0; //DRY, FAN
 		this.ataButtons = account.ataButtons || [];
 		this.ataButtonsCount = this.ataButtons.length;
@@ -1526,8 +1526,8 @@ class melCloudDevice {
 						const ataButtonsCount = this.ataButtonsConfiguredCount;
 						const ataPresetsCount = this.ataPresetsCount;
 						const ataServiceName = `${accessoryName} ${deviceTypeText}`;
-						const ataAutoDryFan = this.ataAutoHeatMode ? ataModelSupportsDry ? 2 : 7 : 7;
-						const ataHeatFanDry = this.ataAutoHeatMode ? 7 : ataModelSupportsDry ? 2 : 7;
+						const ataAutoDryFan = [ataModelSupportsDry ? 2 : 7, 7][this.ataAutoHeatMode];
+						const ataHeatFanDry = [7, ataModelSupportsDry ? 2 : 7][this.ataAutoHeatMode];
 
 						this.ataMelCloudServices = [];
 						switch (ataDisplayMode) {
@@ -1786,7 +1786,7 @@ class melCloudDevice {
 													break;
 												case 1: //HEAT - HEAT
 													deviceState.Power = true;
-													deviceState.OperationMode = ataModelSupportsHeat ? 1 : [7, ataModelSupportsDry ? 2 : 7][this.ataAutoHeatMode];
+													deviceState.OperationMode = ataModelSupportsHeat ? 1 : ataHeatFanDry;
 													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
 													break;
 												case 2: //COOL - COOL
@@ -1796,7 +1796,7 @@ class melCloudDevice {
 													break;
 												case 3: //AUTO - AUTO
 													deviceState.Power = true;
-													deviceState.OperationMode = ataModelSupportsAuto ? 8 : [ataModelSupportsDry ? 2 : 7, 7][this.ataAutoHeatMode];
+													deviceState.OperationMode = ataModelSupportsAuto ? 8 : ataAutoDryFan;
 													deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.OperationMode;
 													break;
 											};
