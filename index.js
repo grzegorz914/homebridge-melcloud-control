@@ -1602,15 +1602,15 @@ class melCloudDevice {
 											minStep: 1
 										})
 										.onGet(async () => {
-											const value = this.fanSpeed; //AUTO, 1, 2, 3, 4, 5, 6
+											const value = this.fanSpeed; //AUTO, 1, 2, 3, 4, 5, 6, OFF
 											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Fan speed mode: ${CONSTANS.AirConditioner.FanSpeed[this.setFanSpeed]}`);
 											return value;
 										})
 										.onSet(async (value) => {
 											try {
 												const power = (ataHasAutomaticFanSpeed && value > 0) || (!ervHasAutomaticFanSpeed && value > 1) ? true : false;
-												const fanSpeed = ataHasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 6, 0][value] : [1, 1, 2, 3, 4, 5, 6][value];
-												const fanSpeedModeText = ataHasAutomaticFanSpeed ? [7, 1, 2, 3, 4, 5, 6, 0][value] : [7, 1, 2, 3, 4, 5, 6][value];
+												const fanSpeed = ataHasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 6, 0][value] : [1, 1, 2, 3, 4, 5, 6][value]; //AUTO, 1, 2, 3, 4, 5, 6
+												const fanSpeedModeText = ataHasAutomaticFanSpeed ? [7, 1, 2, 3, 4, 5, 6, 0][value] : [7, 1, 2, 3, 4, 5, 6][value]; //AUTO, 1, 2, 3, 4, 5, 6, OFF
 
 												deviceState.Power = power;
 												deviceState.SetFanSpeed = fanSpeed;
@@ -2881,15 +2881,14 @@ class melCloudDevice {
 										minStep: 1
 									})
 									.onGet(async () => {
-										const value = this.fanSpeed; //STOP, 1, 2, 3, 4
+										const value = this.fanSpeed; //STOP, 1, 2, 3, 4, OFF
 										const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Fan speed mode: ${CONSTANS.Ventilation.AktualSupplyFanSpeed[this.setFanSpeed]}`);
 										return value;
 									})
 									.onSet(async (value) => {
-										//fan speed mode
 										try {
 											const power = (ervHasAutomaticFanSpeed && value > 0) || (!ervHasAutomaticFanSpeed && value > 1) ? true : false;
-											const fanSpeed = ervHasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 0][value] : [1, 1, 2, 3, 4][value];
+											const fanSpeed = ervHasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 0][value] : [1, 1, 2, 3, 4][value]; //AUTO, 1, 2, 3, 4, OFF
 											const fanSpeedModeText = ervHasAutomaticFanSpeed ? [5, 1, 2, 3, 4, 0][value] : [5, 1, 2, 3, 4][value];
 
 											deviceState.Power = power;
