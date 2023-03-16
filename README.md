@@ -75,8 +75,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Outdoor temperature `GET`.
       * Physical lock controls all Zones and Hot Water Tank `LOCK/UNLOCK`.
     * Zone 1 and 2:
-      * Operating Mode Heat `AUTO/HEAT/COOL` - `CURVE / HEAT THERMOSTAT / HEAT FLOW`.
-      * Operating Mode Cool `HEAT/COOL` - `COOL THERMOSTAT / COOL FLOW`.
+      * Operating Mode Heat `AUTO/HEAT/COOL` - `CURVE/HEAT THERMOSTAT/HEAT FLOW`.
+      * Operating Mode Cool `HEAT/COOL` - `COOL THERMOSTAT/COOL FLOW`.
       * Heating/Cooling temperature.
       * Physical lock controls `LOCK/UNLOCK`.
     * Hot Water Tank:
@@ -89,8 +89,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Operating mode `HEAT/COOL`.
       * Outdoor temperature `GET`.
     * Zone 1 and 2:
-      * Operating Mode Heat `HEAT/COOL/AUTO` - `HEAT THERMOSTAT / HEAT FLOW / CURVE`.
-      * Operating Mode Cool `HEAT/COOL` - `COOL THERMOSTAT / COOL FLOW`.
+      * Operating Mode Heat `HEAT/COOL/AUTO` - `HEAT THERMOSTAT/HEAT FLOW/CURVE`.
+      * Operating Mode Cool `HEAT/COOL` - `COOL THERMOSTAT/COOL FLOW`.
       * Heating/Cooling temperature.
     * Hot Water Tank:
       * Operating mode `HEAT/AUTO` - `HEAT NOW, AUTO`.
@@ -157,7 +157,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `language` | Here select the MELCloud language. |
 | `ataDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
 | `ataDisableAutoMode` | This will disable `Auto` mode even this mode is supported by device. |
-| `ataDisableHeatMode` | This will disable `Hea`t mode even this mode is supported by device. |
+| `ataDisableHeatMode` | This will disable `Heat` mode even this mode is supported by device. |
 | `ataAutoHeatMode` | Here select operation mode for `Auto/Heat`, if `Auto`, `Heat` or both modes are not supported by device will be used selected modes instead. |
 | `ataPresets` | This enable display Air Conditioner presets in HomeKit app. |
 | `ataButtons.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. | 
