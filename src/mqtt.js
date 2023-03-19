@@ -7,6 +7,7 @@ class MQTTCLIENT extends EventEmitter {
         super();
         this.mqttHost = config.host;
         this.mqttPort = config.port;
+        this.mqttClientId = config.clientId;
         this.mqttPrefix = config.prefix;
         this.mqttTopic = config.topic;
         this.mqttAuth = config.auth;
@@ -21,6 +22,7 @@ class MQTTCLIENT extends EventEmitter {
     async connect() {
         try {
             const options = {
+                client_id: this.mqttClientId,
                 username: this.mqttUser,
                 password: this.mqttPasswd
             }

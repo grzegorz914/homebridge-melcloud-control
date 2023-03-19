@@ -149,6 +149,7 @@ class melCloudDevice {
 			const mqttDebug = account.mqttDebug || false;
 			const mqttHost = account.mqttHost;
 			const mqttPort = account.mqttPort || 1883;
+			const mqttClientId = account.mqttClientId || '1234321';
 			const mqttPrefix = account.mqttPrefix;
 			const mqttAuth = account.mqttAuth || false;
 			const mqttUser = account.mqttUser;
@@ -158,6 +159,7 @@ class melCloudDevice {
 				debug: mqttDebug,
 				host: mqttHost,
 				port: mqttPort,
+				clientId: mqttClientId,
 				prefix: mqttPrefix,
 				topic: accountName,
 				auth: mqttAuth,
