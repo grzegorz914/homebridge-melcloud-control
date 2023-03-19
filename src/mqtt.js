@@ -9,7 +9,6 @@ class MQTTCLIENT extends EventEmitter {
         this.mqttPort = config.port;
         this.mqttClientId = config.clientId;
         this.mqttPrefix = config.prefix;
-        this.mqttTopic = config.topic;
         this.mqttAuth = config.auth;
         this.mqttUser = config.user;
         this.mqttPasswd = config.passwd;
@@ -43,7 +42,7 @@ class MQTTCLIENT extends EventEmitter {
         };
 
         try {
-            const fullTopic = `${this.mqttPrefix}/${this.mqttTopic}/${topic}`;
+            const fullTopic = `${this.mqttPrefix}/${topic}`;
             await this.mqttClient.publish(fullTopic, message);
             const emitDebug = this.mqttDebug ? this.emit('debug', `MQTT publish: ${fullTopic}: ${message}`) : false;
         } catch (error) {
