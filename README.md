@@ -180,6 +180,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `mqttDebug` | This enabled deep log in homebridge console for MQTT. |
 | `mqttHost` | Here set the `IP Address` or `Hostname` for MQTT Broker. |
 | `mqttPort` | Here set the `Port` for MQTT Broker, default 1883. |
+| `mqttCientId` | Here optinal set the `clientId` for MQTT broker or leave empty. |
 | `mqttPrefix` | Here set the `Prefix` for `Topic` or leave empty. |
 | `mqttAuth` | This enabled MQTT Broker authorization credentials. |
 | `mqttUser` | Here set the MQTT Broker user. |
@@ -226,6 +227,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
                     "mqttDebug": false,
                     "mqttHost": "192.168.1.33",
                     "mqttPort": 1883,
+                    "mqttClientId": "1234321",
                     "mqttPrefix": "home/My House",
                     "mqttAuth": false,
                     "mqttUser": "user",
