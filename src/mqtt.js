@@ -22,7 +22,7 @@ class MQTTCLIENT extends EventEmitter {
     async connect() {
         try {
             const options = {
-                client_id: this.mqttClientId,
+                clientId: this.mqttClientId,
                 username: this.mqttUser,
                 password: this.mqttPasswd
             }
