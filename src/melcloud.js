@@ -143,7 +143,7 @@ class MELCLOUD extends EventEmitter {
                     const deviceName = deviceInfo.DeviceName;
                     const deviceTypeText = CONSTANS.DeviceType[deviceType];
 
-                    //write every device to the filr
+                    //write every device to the file
                     try {
                         const deviceData = JSON.stringify(deviceInfo, null, 2);
                         const melCloudBuildingDeviceFile = `${prefDir}/${accountName}_Device_${deviceId}`;
