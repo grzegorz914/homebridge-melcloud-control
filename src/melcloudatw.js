@@ -507,18 +507,15 @@ class MELCLOUDDEVICEATW extends EventEmitter {
         this.emit('checkDeviceInfo');
     };
 
-    send(url, newData, type) {
+    send(newData) {
         return new Promise(async (resolve, reject) => {
-            if (!type) {
-                newData.HasPendingCommand = true;
-            };
-
             try {
+                newData.HasPendingCommand = true;
                 const options = {
                     data: newData
                 };
 
-                await this.axiosInstancePost(url, options);
+                await this.axiosInstancePost(CONSTANS.ApiUrls.SetAtw, options);
                 this.emit('checkDeviceInfo');
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 resolve();

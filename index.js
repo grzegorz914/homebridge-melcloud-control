@@ -66,21 +66,13 @@ class melCloudPlatform {
 					prefDir: prefDir
 				});
 
-				this.melCloud.on('connected', async (melCloudInfoData) => {
+				this.melCloud.on('connected', (melCloudInfo, contextKey) => {
 					this.log(`Account ${accountName}, Connected.`)
-
-					//save melcloud info to the file
-					try {
-						const melCloudInfoFile = `${prefDir}/${accountName}_Account`;
-						await fsPromises.writeFile(melCloudInfoFile, melCloudInfoData);
-					} catch (error) {
-						this.log.error(`Account ${accountName}, write MELCloud info error: ${error}`);
-					};
+					this.melCloudInfo = melCloudInfo;
+					this.contextKey = contextKey;
 				})
-					.on('checkDevicesListComplete', (melCloudInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText) => {
-						const useFahrenheit = melCloudInfo.UseFahrenheit ? 1 : 0;
-						const temperatureDisplayUnit = CONSTANS.TemperatureDisplayUnits[useFahrenheit];
-						new melCloudDevice(this.log, this.api, account, accountName, prefDir, melCloudInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit);
+					.on('checkDevicesListComplete', (buildingId, deviceId, deviceType, deviceName, deviceTypeText) => {
+						new melCloudDevice(this.log, this.api, account, accountName, prefDir, this.melCloud, this.melCloudInfo, this.contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText);
 					})
 					.on('message', (message) => {
 						this.log(`Account ${accountName}, ${message}`);
@@ -108,7 +100,7 @@ class melCloudPlatform {
 
 
 class melCloudDevice {
-	constructor(log, api, account, accountName, prefDir, melCloudInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, temperatureDisplayUnit) {
+	constructor(log, api, account, accountName, prefDir, melCloud, melCloudInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText) {
 		this.log = log;
 		this.api = api;
 
@@ -133,13 +125,12 @@ class melCloudDevice {
 		this.enableDebugMode = account.enableDebugMode || false;
 
 		//variables
+		this.melCloud = melCloud; //function
 		this.melCloudInfo = melCloudInfo;
 		this.deviceId = deviceId;
 		this.deviceType = deviceType;
 		this.deviceName = deviceName;
 		this.deviceTypeText = deviceTypeText;
-		this.useFahrenheit = useFahrenheit;
-		this.temperatureDisplayUnit = temperatureDisplayUnit;
 		this.startPrepareAccessory = true;
 		this.displayDeviceInfo = true;
 
@@ -209,6 +200,9 @@ class melCloudDevice {
 						this.displayDeviceInfo = false;
 					};
 
+					//accout info
+					this.useFahrenheit = this.melCloudInfo.UseFahrenheit ? 1 : 0;
+
 					//accessory info 					
 					this.manufacturer = manufacturer;
 					this.modelName = modelIndoor;
@@ -249,7 +243,6 @@ class melCloudDevice {
 					const buttonsCount = this.ataButtonsCount;
 					const presets = this.ataPresets;
 					const presetsCount = this.ataPresetsCount;
-
 
 					//device state
 					this.deviceState = deviceState || {};
@@ -699,6 +692,9 @@ class melCloudDevice {
 						this.log('----------------------------------');
 						this.displayDeviceInfo = false;
 					};
+
+					//accout info
+					this.useFahrenheit = this.melCloudInfo.UseFahrenheit ? 1 : 0;
 
 					//accessory info 					
 					this.manufacturer = manufacturer;
@@ -1193,6 +1189,9 @@ class melCloudDevice {
 						this.displayDeviceInfo = false;
 					};
 
+					//accout info
+					this.useFahrenheit = this.melCloudInfo.UseFahrenheit ? 1 : 0;
+
 					//accessory info 					
 					this.manufacturer = manufacturer;
 					this.modelName = modelOutdoor;
@@ -1506,7 +1505,7 @@ class melCloudDevice {
 				const deviceName = this.deviceName;
 				const deviceType = this.deviceType;
 				const deviceTypeText = this.deviceTypeText;
-				const temperatureUnit = this.temperatureDisplayUnit;
+				const temperatureUnit = CONSTANS.TemperatureDisplayUnits[this.useFahrenheit];
 
 				//accessory
 				const accessoryName = deviceName;
@@ -1554,7 +1553,7 @@ class melCloudDevice {
 										try {
 											deviceState.Power = state;
 											deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power;
-											await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState);
+											await this.melCloudAta.send(deviceState);
 											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set power: ${state ? 'ON' : 'OFF'}`);
 										} catch (error) {
 											this.log.error(`${deviceTypeText} ${accessoryName}, Set power error: ${error}`);
@@ -1598,7 +1597,7 @@ class melCloudDevice {
 													break;
 											};
 
-											await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState);
+											await this.melCloudAta.send(deviceState);
 											const operationModeText = CONSTANS.AirConditioner.DriveMode[deviceState.OperationMode];
 											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set operation mode: ${operationModeText}`);
 										} catch (error) {
@@ -1626,7 +1625,7 @@ class melCloudDevice {
 												deviceState.Power = power;
 												deviceState.SetFanSpeed = fanSpeed;
 												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
-												await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState);
+												await this.melCloudAta.send(deviceState);
 												const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set fan speed mode: ${CONSTANS.AirConditioner.FanSpeed[fanSpeedModeText]}`);
 											} catch (error) {
 												this.log.error(`${deviceTypeText} ${accessoryName}, Set fan speed mode error: ${error}`);
@@ -1721,7 +1720,7 @@ class melCloudDevice {
 											deviceState.ProhibitSetTemperature = value;
 											deviceState.ProhibitOperationMode = value;
 											deviceState.ProhibitPower = value;
-											await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState);
+											await this.melCloudAta.send(deviceState);
 											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set locl physical controls: ${value ? 'LOCK' : 'UNLOCK'}`);
 										} catch (error) {
 											this.log.error(`${deviceTypeText} ${accessoryName}, Set lock physical controls error: ${error}`);
@@ -1736,9 +1735,9 @@ class melCloudDevice {
 									.onSet(async (value) => {
 										try {
 											melCloudInfo.UseFahrenheit = value ? true : false;
-											await this.melCloudAta.send(CONSTANS.ApiUrls.UpdateApplicationOptions, melCloudInfo, true);
-											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
+											await this.melCloud.send(melCloudInfo);
 											this.melCloudInfo = melCloudInfo;
+											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
 										} catch (error) {
 											this.log.error(`${deviceTypeText} ${accessoryName}, Set temperature display unit error: ${error}`);
 										};
@@ -1789,7 +1788,7 @@ class melCloudDevice {
 													break;
 											};
 
-											await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState);
+											await this.melCloudAta.send(deviceState);
 											const operationModeText = CONSTANS.AirConditioner.DriveMode[deviceState.OperationMode];
 											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set operation mode: ${operationModeText}`);
 										} catch (error) {
@@ -1823,7 +1822,7 @@ class melCloudDevice {
 											deviceState.Power = true;
 											deviceState.SetTemperature = value;
 											deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.SetTemperature;
-											await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState);
+											await this.melCloudAta.send(deviceState);
 											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set temperature: ${value}${temperatureUnit}`);
 										} catch (error) {
 											this.log.error(`${deviceTypeText} ${accessoryName}, Set temperature error: ${error}`);
@@ -1838,9 +1837,9 @@ class melCloudDevice {
 									.onSet(async (value) => {
 										try {
 											melCloudInfo.UseFahrenheit = value ? true : false;
-											await this.melCloudAta.send(CONSTANS.ApiUrls.UpdateApplicationOptions, melCloudInfo, true);
-											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
+											await this.melCloud.send(melCloudInfo);
 											this.melCloudInfo = melCloudInfo;
+											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
 										} catch (error) {
 											this.log.error(`${deviceTypeText} ${accessoryName}, Set temperature display unit error: ${error}`);
 										};
@@ -2041,7 +2040,7 @@ class melCloudDevice {
 														break;
 												};
 
-												await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState);
+												await this.melCloudAta.send(deviceState);
 												const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set: ${buttonName}`);
 											} catch (error) {
 												this.log.error(`${deviceTypeText} ${accessoryName}, Set button error: ${error}`);
@@ -2088,7 +2087,7 @@ class melCloudDevice {
 													break;
 											};
 
-											await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState);
+											await this.melCloudAta.send(deviceState);
 											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set: ${presetName}`);
 										} catch (error) {
 											this.log.error(`${deviceTypeText} ${accessoryName}, Set preset error: ${error}`);
@@ -2130,7 +2129,7 @@ class melCloudDevice {
 														case 0: //Heat Pump
 															deviceState.Power = state;
 															deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.Power;
-															await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState);
+															await this.melCloudAtw.send(deviceState);
 															const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, ${zoneName}, Set power: ${state ? 'ON' : 'OFF'}`);
 															break;
 													};
@@ -2248,7 +2247,7 @@ class melCloudDevice {
 															break;
 													};
 
-													await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState);
+													await this.melCloudAtw.send(deviceState);
 													const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, ${zoneName}, Set operation mode: ${operationModeText}`);
 												} catch (error) {
 													this.log.error(`${deviceTypeText} ${accessoryName}, ${zoneName}, Set operation mode error: ${error}`);
@@ -2299,7 +2298,7 @@ class melCloudDevice {
 																break;
 														};
 
-														const set = i > 0 ? await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState) : false;
+														const set = i > 0 ? await this.melCloudAtw.send(deviceState) : false;
 														const logInfo = this.disableLogInfo || i === 0 ? false : this.log(`${deviceTypeText} ${accessoryName}, ${zoneName}, Set heating threshold temperature: ${value}${temperatureUnit}`);
 													} catch (error) {
 														this.log.error(`${deviceTypeText} ${accessoryName}, ${zoneName}, Set heating threshold temperature error: ${error}`);
@@ -2340,7 +2339,7 @@ class melCloudDevice {
 																break;
 														};
 
-														const set = i > 0 ? await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState) : false;
+														const set = i > 0 ? await this.melCloudAtw.send(deviceState) : false;
 														const logInfo = this.disableLogInfo || i === 0 ? false : this.log(`${deviceTypeText} ${accessoryName}, ${zoneName}, Set cooling threshold temperature: ${value}${temperatureUnit}`);
 													} catch (error) {
 														this.log.error(`${deviceTypeText} ${accessoryName}, ${zoneName}, Set cooling threshold temperature error: ${error}`);
@@ -2376,7 +2375,7 @@ class melCloudDevice {
 															break;
 													};
 
-													await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState);
+													await this.melCloudAtw.send(deviceState);
 													const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, ${zoneName}, Set lock physical controls: ${value ? 'LOCK' : 'UNLOCK'}`);
 												} catch (error) {
 													this.log.error(`${deviceTypeText} ${accessoryName}, ${zoneName}, Set lock physical controls error: ${error}`);
@@ -2391,9 +2390,9 @@ class melCloudDevice {
 											.onSet(async (value) => {
 												try {
 													melCloudInfo.UseFahrenheit = value ? true : false;
-													await this.melCloudAtw.send(CONSTANS.ApiUrls.UpdateApplicationOptions, melCloudInfo, true);
-													const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
+													await this.melCloud.send(melCloudInfo);
 													this.melCloudInfo = melCloudInfo;
+													const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
 												} catch (error) {
 													this.log.error(`${deviceTypeText} ${accessoryName}, Set temperature display unit error: ${error}`);
 												};
@@ -2528,7 +2527,7 @@ class melCloudDevice {
 															break;
 													};
 
-													await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState);
+													await this.melCloudAtw.send(deviceState);
 													const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, ${zoneName}, Set operation mode: ${operationModeText}`);
 												} catch (error) {
 													this.log.error(`${deviceTypeText} ${accessoryName}, ${zoneName}, Set operation mode error: ${error}`);
@@ -2577,7 +2576,7 @@ class melCloudDevice {
 															break;
 													};
 
-													const set = i > 0 ? await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState) : false;
+													const set = i > 0 ? await this.melCloudAtw.send(deviceState) : false;
 													const logInfo = this.disableLogInfo || i === 0 ? false : this.log(`${deviceTypeText} ${accessoryName}, ${zoneName}, Set temperature: ${value}${temperatureUnit}`);
 												} catch (error) {
 													this.log.error(`${deviceTypeText} ${accessoryName}, ${zoneName}, Set temperature error: ${error}`);
@@ -2592,9 +2591,9 @@ class melCloudDevice {
 											.onSet(async (value) => {
 												try {
 													melCloudInfo.UseFahrenheit = value ? true : false;
-													await this.melCloudAtw.send(CONSTANS.ApiUrls.UpdateApplicationOptions, melCloudInfo, true);
-													const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
+													await this.melCloud.send(melCloudInfo);
 													this.melCloudInfo = melCloudInfo;
+													const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
 												} catch (error) {
 													this.log.error(`${deviceTypeText} ${accessoryName}, Set temperature display unit error: ${error}`);
 												};
@@ -2742,7 +2741,7 @@ class melCloudDevice {
 															break;
 													};
 
-													await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState);
+													await this.melCloudAtw.send(deviceState);
 													const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set: ${buttonName}`);
 												} catch (error) {
 													this.log.error(`${deviceTypeText} ${accessoryName}, Set button error: ${error}`);
@@ -2795,7 +2794,7 @@ class melCloudDevice {
 														break;
 												};
 
-												await this.melCloudAtw.send(CONSTANS.ApiUrls.SetAtw, deviceState);
+												await this.melCloudAtw.send(deviceState);
 												const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set: ${presetName}`);
 											} catch (error) {
 												this.log.error(`${deviceTypeText} ${accessoryName}, Set preset error: ${error}`);
@@ -2833,7 +2832,7 @@ class melCloudDevice {
 										try {
 											deviceState.Power = state;
 											deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power;
-											await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState);
+											await this.melCloudErv.send(deviceState);
 											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set power: ${state ? 'ON' : 'OFF'}`);
 										} catch (error) {
 											this.log.error(`${deviceTypeText} ${accessoryName}, Set power error: ${error}`);
@@ -2877,7 +2876,7 @@ class melCloudDevice {
 													break;
 											};
 
-											await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState);
+											await this.melCloudErv.send(deviceState);
 											const operationModeText = CONSTANS.Ventilation.VentilationMode[deviceState.VentilationMode];
 											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set operation mode: ${operationModeText}`);
 										} catch (error) {
@@ -2904,7 +2903,7 @@ class melCloudDevice {
 											deviceState.Power = power;
 											deviceState.SetFanSpeed = fanSpeed;
 											deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
-											await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState);
+											await this.melCloudErv.send(deviceState);
 											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set fan speed mode: ${CONSTANS.Ventilation.FanSpeed[fanSpeedModeText]}`);
 										} catch (error) {
 											this.log.error(`${deviceTypeText} ${accessoryName}, Set fan speed mode error: ${error}`);
@@ -2936,7 +2935,7 @@ class melCloudDevice {
 										try {
 											deviceState.SetTemperature = value;
 											deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.SetTemperature;
-											await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState);
+											await this.melCloudErv.send(deviceState);
 											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set heating threshold temperature: ${value}${temperatureUnit}`);
 										} catch (error) {
 											this.log.error(`${deviceTypeText} ${accessoryName}, Set heating threshold temperature error: ${error}`);
@@ -2957,7 +2956,7 @@ class melCloudDevice {
 										try {
 											deviceState.SetTemperature = value;
 											deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.SetTemperature;
-											await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState);
+											await this.melCloudErv.send(deviceState);
 											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set cooling threshold temperature: ${value}${temperatureUnit}`);
 										} catch (error) {
 											this.log.error(`${deviceTypeText} ${accessoryName}, Set cooling threshold temperature error: ${error}`);
@@ -2975,7 +2974,7 @@ class melCloudDevice {
 											deviceState.ProhibitSetTemperature = value;
 											deviceState.ProhibitOperationMode = value;
 											deviceState.ProhibitPower = value;
-											await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState);
+											await this.melCloudErv.send(deviceState);
 											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set locl physical controls: ${value ? 'LOCK' : 'UNLOCK'}`);
 										} catch (error) {
 											this.log.error(`${deviceTypeText} ${accessoryName}, Set lock physical controls error: ${error}`);
@@ -2990,9 +2989,9 @@ class melCloudDevice {
 									.onSet(async (value) => {
 										try {
 											melCloudInfo.UseFahrenheit = value ? true : false;
-											await this.melCloudErv.send(CONSTANS.ApiUrls.UpdateApplicationOptions, melCloudInfo, true);
-											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
+											await this.melCloud.send(melCloudInfo);
 											this.melCloudInfo = melCloudInfo;
+											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
 										} catch (error) {
 											this.log.error(`${deviceTypeText} ${accessoryName}, Set temperature display unit error: ${error}`);
 										};
@@ -3042,7 +3041,7 @@ class melCloudDevice {
 													break;
 											};
 
-											await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState);
+											await this.melCloudErv.send(deviceState);
 											const operationModeText = CONSTANS.Ventilation.VentilationMode[deviceState.VentilationMode];
 											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set operation mode: ${operationModeText}`);
 										} catch (error) {
@@ -3075,7 +3074,7 @@ class melCloudDevice {
 										try {
 											deviceState.SetTemperature = value;
 											deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.SetTemperature;
-											await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState);
+											await this.melCloudErv.send(deviceState);
 											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set temperature: ${value}${temperatureUnit}`);
 										} catch (error) {
 											this.log.error(`${deviceTypeText} ${accessoryName}, Set temperature error: ${error}`);
@@ -3090,9 +3089,9 @@ class melCloudDevice {
 									.onSet(async (value) => {
 										try {
 											melCloudInfo.UseFahrenheit = value ? true : false;
-											await this.melCloudErv.send(CONSTANS.ApiUrls.UpdateApplicationOptions, melCloudInfo, true);
-											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
+											await this.melCloud.send(melCloudInfo);
 											this.melCloudInfo = melCloudInfo;
+											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
 										} catch (error) {
 											this.log.error(`${deviceTypeText} ${accessoryName}, Set temperature display unit error: ${error}`);
 										};
@@ -3206,7 +3205,7 @@ class melCloudDevice {
 														break;
 												};
 
-												await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState);
+												await this.melCloudErv.send(deviceState);
 												const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set: ${buttonName}`);
 											} catch (error) {
 												this.log.error(`${deviceTypeText} ${accessoryName}, Set button error: ${error}`);
@@ -3250,7 +3249,7 @@ class melCloudDevice {
 													break;
 											};
 
-											await this.melCloudErv.send(CONSTANS.ApiUrls.SetErv, deviceState);
+											await this.melCloudErv.send(deviceState);
 											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set: ${presetName}`);
 										} catch (error) {
 											this.log.error(`${deviceTypeText} ${accessoryName}, Set preset error: ${error}`);
