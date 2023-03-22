@@ -1646,7 +1646,7 @@ class melCloudDevice {
 												deviceState.VaneHorizontal = value ? 12 : 0;
 												deviceState.VaneVertical = value ? 7 : 0;
 												deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
-												await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState);
+												await this.melCloudAta.send(deviceState);
 												const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set vane swing mode: ${CONSTANS.AirConditioner.AirDirection[value ? 6 : 0]}`);
 											} catch (error) {
 												this.log.error(`${deviceTypeText} ${accessoryName}, Set vane swing mode error: ${error}`);
@@ -1680,7 +1680,7 @@ class melCloudDevice {
 											deviceState.Power = true;
 											deviceState.SetTemperature = value;
 											deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.SetTemperature;
-											await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState);
+											await this.melCloudAta.send(deviceState);
 											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set heating threshold temperature: ${value}${temperatureUnit}`);
 										} catch (error) {
 											this.log.error(`${deviceTypeText} ${accessoryName}, Set heating threshold temperature error: ${error}`);
@@ -1702,7 +1702,7 @@ class melCloudDevice {
 											deviceState.Power = true;
 											deviceState.SetTemperature = value;
 											deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.SetTemperature;
-											await this.melCloudAta.send(CONSTANS.ApiUrls.SetAta, deviceState);
+											await this.melCloudAta.send(deviceState);
 											const logInfo = this.disableLogInfo ? false : this.log(`${deviceTypeText} ${accessoryName}, Set cooling threshold temperature: ${value}${temperatureUnit}`);
 										} catch (error) {
 											this.log.error(`${deviceTypeText} ${accessoryName}, Set cooling threshold temperature error: ${error}`);

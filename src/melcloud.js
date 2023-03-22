@@ -32,7 +32,7 @@ class MELCLOUD extends EventEmitter {
                     Email: user,
                     Password: passwd,
                     Language: language,
-                    AppVersion: '1.25.0',
+                    AppVersion: '1.26.2',
                     CaptchaChallenge: '',
                     CaptchaResponse: '',
                     Persist: true
