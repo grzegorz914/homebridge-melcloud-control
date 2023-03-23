@@ -6,7 +6,7 @@ const EventEmitter = require('events');
 const CONSTANS = require('./constans.json');
 
 
-class MELCLOUDDEVICEERV extends EventEmitter {
+class MelCloudErv extends EventEmitter {
     constructor(config) {
         super();
         const accountName = config.accountName;
@@ -16,7 +16,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
         const debugLog = config.debugLog;
         const mqttEnabled = config.mqttEnabled;
         const prefDir = config.prefDir;
-        const melCloudBuildingDeviceFile = `${prefDir}/${accountName}_Device_${deviceId}`;
+        const deviceInfoFile = `${prefDir}/${accountName}_Device_${deviceId}`;
 
         this.axiosInstanceGet = axios.create({
             method: 'GET',
@@ -57,7 +57,7 @@ class MELCLOUDDEVICEERV extends EventEmitter {
 
         this.on('checkDeviceInfo', async () => {
             try {
-                const readDeviceInfoData = await fsPromises.readFile(melCloudBuildingDeviceFile);
+                const readDeviceInfoData = await fsPromises.readFile(deviceInfoFile);
                 const deviceInfo = JSON.parse(readDeviceInfoData);
                 const debug = debugLog ? this.emit('debug', `debug Info: ${JSON.stringify(deviceInfo, null, 2)}`) : false;
 
@@ -364,7 +364,6 @@ class MELCLOUDDEVICEERV extends EventEmitter {
 
                 this.emit('deviceState', deviceState, roomTemperature, supplyTemperature, outdoorTemperature, roomCO2Level, nightPurgeMode, setTemperature, setFanSpeed, operationMode, ventilationMode, actualVentilationMode, defaultHeatingSetTemperature, defaultCoolingSetTemperature, hideRoomTemperature, hideSupplyTemperature, hideOutdoorTemperature, power, offline);
                 const mqtt = mqttEnabled ? this.emit('mqtt', `State`, JSON.stringify(deviceState, null, 2)) : false;
-
                 this.checkDeviceInfo();
             } catch (error) {
                 this.emit('error', `check device state error, ${error}, check again in 60s.`);
@@ -398,4 +397,4 @@ class MELCLOUDDEVICEERV extends EventEmitter {
         });
     };
 };
-module.exports = MELCLOUDDEVICEERV;
+module.exports = MelCloudErv;

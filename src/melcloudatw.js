@@ -6,7 +6,7 @@ const EventEmitter = require('events');
 const CONSTANS = require('./constans.json');
 
 
-class MELCLOUDDEVICEATW extends EventEmitter {
+class MelCloudAtw extends EventEmitter {
     constructor(config) {
         super();
         const accountName = config.accountName;
@@ -16,7 +16,7 @@ class MELCLOUDDEVICEATW extends EventEmitter {
         const debugLog = config.debugLog;
         const mqttEnabled = config.mqttEnabled;
         const prefDir = config.prefDir;
-        const melCloudBuildingDeviceFile = `${prefDir}/${accountName}_Device_${deviceId}`;
+        const deviceInfoFile = `${prefDir}/${accountName}_Device_${deviceId}`;
 
         this.axiosInstanceGet = axios.create({
             method: 'GET',
@@ -66,7 +66,7 @@ class MELCLOUDDEVICEATW extends EventEmitter {
 
         this.on('checkDeviceInfo', async () => {
             try {
-                const readDeviceInfoData = await fsPromises.readFile(melCloudBuildingDeviceFile);
+                const readDeviceInfoData = await fsPromises.readFile(deviceInfoFile);
                 const deviceInfo = JSON.parse(readDeviceInfoData);
                 const debug = debugLog ? this.emit('debug', `debug Info: ${JSON.stringify(deviceInfo, null, 2)}`) : false;
 
@@ -491,7 +491,6 @@ class MELCLOUDDEVICEATW extends EventEmitter {
 
                 this.emit('deviceState', deviceState, setTemperatureZone1, setTemperatureZone2, roomTemperatureZone1, roomTemperatureZone2, operationMode, operationModeZone1, operationModeZone2, setHeatFlowTemperatureZone1, setHeatFlowTemperatureZone2, setCoolFlowTemperatureZone1, setCoolFlowTemperatureZone2, hcControlType, tankWaterTemperature, setTankWaterTemperature, forcedHotWaterMode, unitStatus, outdoorTemperature, ecoHotWater, holidayMode, prohibitZone1, prohibitZone2, prohibitHotWater, idleZone1, idleZone2, power, offline);
                 const mqtt = mqttEnabled ? this.emit('mqtt', `State`, JSON.stringify(deviceState, null, 2)) : false;
-
                 this.checkDeviceInfo();
             } catch (error) {
                 this.emit('error', `check device state error, ${error}, check again in 60s.`);
@@ -525,4 +524,4 @@ class MELCLOUDDEVICEATW extends EventEmitter {
         });
     };
 };
-module.exports = MELCLOUDDEVICEATW;
+module.exports = MelCloudAtw;

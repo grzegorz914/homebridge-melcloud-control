@@ -1,15 +1,11 @@
 'use strict';
 const path = require('path');
 const fs = require('fs');
-const fsPromises = fs.promises;
 const Mqtt = require('./src/mqtt.js');
 const MelCloud = require('./src/melcloud.js')
 const MelCloudAta = require('./src/melcloudata.js');
 const MelCloudAtw = require('./src/melcloudatw.js');
 const MelCloudErv = require('./src/melclouderv.js');
-
-const PLUGIN_NAME = 'homebridge-melcloud-control';
-const PLATFORM_NAME = 'melcloudcontrol';
 const CONSTANS = require('./src/constans.json');
 
 let Accessory, Characteristic, Service, Categories, UUID;
@@ -20,14 +16,14 @@ module.exports = (api) => {
 	Service = api.hap.Service;
 	Categories = api.hap.Categories;
 	UUID = api.hap.uuid;
-	api.registerPlatform(PLUGIN_NAME, PLATFORM_NAME, melCloudPlatform, true);
+	api.registerPlatform(CONSTANS.PluginName, CONSTANS.PlatformName, melCloudPlatform, true);
 };
 
 class melCloudPlatform {
 	constructor(log, config, api) {
 		// only load if configured
 		if (!config || !Array.isArray(config.accounts)) {
-			log(`No configuration found for ${PLUGIN_NAME}`);
+			log(`No configuration found for ${CONSTANS.PluginName}`);
 			return;
 		}
 		this.log = log;
@@ -94,7 +90,7 @@ class melCloudPlatform {
 
 	removeAccessory(accessory) {
 		this.log.debug('removeAccessory');
-		this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+		this.api.unregisterPlatformAccessories(CONSTANS.PluginName, CONSTANS.PlatformName, [accessory]);
 	};
 };
 
@@ -3267,7 +3263,7 @@ class melCloudDevice {
 						break;
 				};
 
-				this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
+				this.api.publishExternalAccessories(CONSTANS.PluginName, [accessory]);
 				const debug = this.enableDebugMode ? this.log(`${deviceTypeText} ${accessoryName}, published as external accessory.`) : false;
 				this.startPrepareAccessory = false;
 				resolve();

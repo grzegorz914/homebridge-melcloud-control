@@ -6,7 +6,7 @@ const EventEmitter = require('events');
 const CONSTANS = require('./constans.json');
 
 
-class MELCLOUDDEVICEATA extends EventEmitter {
+class MelCloudAta extends EventEmitter {
     constructor(config) {
         super();
         const accountName = config.accountName;
@@ -16,7 +16,7 @@ class MELCLOUDDEVICEATA extends EventEmitter {
         const debugLog = config.debugLog;
         const mqttEnabled = config.mqttEnabled;
         const prefDir = config.prefDir;
-        const melCloudBuildingDeviceFile = `${prefDir}/${accountName}_Device_${deviceId}`;
+        const deviceInfoFile = `${prefDir}/${accountName}_Device_${deviceId}`;
 
         //set default values
         this.roomTemperature = 0;
@@ -56,7 +56,7 @@ class MELCLOUDDEVICEATA extends EventEmitter {
 
         this.on('checkDeviceInfo', async () => {
             try {
-                const readDeviceInfoData = await fsPromises.readFile(melCloudBuildingDeviceFile);
+                const readDeviceInfoData = await fsPromises.readFile(deviceInfoFile);
                 const deviceInfo = JSON.parse(readDeviceInfoData);
                 const debug = debugLog ? this.emit('debug', `debug Info: ${JSON.stringify(deviceInfo, null, 2)}`) : false;
 
@@ -378,8 +378,8 @@ class MELCLOUDDEVICEATA extends EventEmitter {
                 this.offline = offline;
 
                 this.emit('deviceState', deviceState, roomTemperature, setTemperature, setFanSpeed, operationMode, vaneHorizontal, vaneVertical, defaultHeatingSetTemperature, defaultCoolingSetTemperature, hideVaneControls, hideDryModeControl, inStandbyMode, prohibitSetTemperature, prohibitOperationMode, prohibitPower, power, offline);
-                this.checkDeviceInfo();
                 const mqtt = mqttEnabled ? this.emit('mqtt', `State`, JSON.stringify(deviceState, null, 2)) : false;
+                this.checkDeviceInfo();
             } catch (error) {
                 this.emit('error', `check device state error, ${error}, check again in 60s.`);
                 this.checkDeviceInfo();
@@ -412,4 +412,4 @@ class MELCLOUDDEVICEATA extends EventEmitter {
         });
     };
 };
-module.exports = MELCLOUDDEVICEATA;
+module.exports = MelCloudAta;

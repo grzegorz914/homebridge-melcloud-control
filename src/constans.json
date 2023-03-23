@@ -1,4 +1,6 @@
 {
+    "PlatformName": "melcloudcontrol",
+    "PluginName": "homebridge-melcloud-control",
     "ApiUrls": {
         "BaseURL": "https://app.melcloud.com/Mitsubishi.Wifi.Client",
         "ClientLogin": "/Login/ClientLogin",
