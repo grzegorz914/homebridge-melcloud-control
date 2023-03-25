@@ -1412,8 +1412,8 @@ class melCloudDevice {
 			this.log.debug('prepareAccessory');
 			try {
 				const accountInfo = this.accountInfo;
-				const deviceId = this.deviceId;
 				const deviceState = this.deviceState;
+				const deviceId = this.deviceId;
 				const deviceName = this.deviceName;
 				const deviceType = this.deviceType;
 				const deviceTypeText = this.deviceTypeText;
@@ -3260,7 +3260,7 @@ class melCloudDevice {
 				this.startPrepareAccessory = false;
 				resolve();
 			} catch (error) {
-				reject(error)
+				reject(error);
 			};
 		});
 	};
