@@ -201,7 +201,7 @@ class melCloudDevice {
 
 					//accessory info 					
 					this.manufacturer = manufacturer;
-					this.modelName = modelIndoor ?? modelOutdoor ?? 'Undefined';
+					this.model = modelIndoor ?? modelOutdoor ?? 'Undefined';
 					this.serialNumber = serialNumber;
 					this.firmwareRevision = firmwareAppVersion;
 
@@ -626,7 +626,7 @@ class melCloudDevice {
 
 					//accessory info 					
 					this.manufacturer = manufacturer;
-					this.modelName = modelIndoor ?? modelOutdoor ?? 'Undefined';
+					this.model = modelIndoor ?? modelOutdoor ?? 'Undefined';
 					this.serialNumber = serialNumber;
 					this.firmwareRevision = firmwareAppVersion;
 
@@ -1075,7 +1075,7 @@ class melCloudDevice {
 
 					//accessory info 					
 					this.manufacturer = manufacturer;
-					this.modelName = modelIndoor ?? modelOutdoor ?? 'Undefined';
+					this.model = modelIndoor ?? modelOutdoor ?? 'Undefined';
 					this.serialNumber = serialNumber;
 					this.firmwareRevision = firmwareAppVersion;
 
@@ -1429,7 +1429,7 @@ class melCloudDevice {
 				this.log.debug('prepareInformationService');
 				accessory.getService(Service.AccessoryInformation)
 					.setCharacteristic(Characteristic.Manufacturer, this.manufacturer)
-					.setCharacteristic(Characteristic.Model, this.modelName)
+					.setCharacteristic(Characteristic.Model, this.model)
 					.setCharacteristic(Characteristic.SerialNumber, this.serialNumber)
 					.setCharacteristic(Characteristic.FirmwareRevision, this.firmwareRevision);
 

@@ -232,7 +232,7 @@ class MelCloudAta extends EventEmitter {
                 const offline = device.Offline;
                 const supportsHourlyEnergyReport = device.SupportsHourlyEnergyReport;
 
-                //units info
+                //units
                 const units = Array.isArray(device.Units) ? device.Units : [];
                 const manufacturer = 'Mitsubishi';
 
@@ -251,12 +251,14 @@ class MelCloudAta extends EventEmitter {
                 let modelNumberOutdoor = 0;
                 let modelOutdoor = 'Undefined';
                 let typeOutdoor = 0;
+
+                //units array
                 for (const unit of units) {
                     const unitId = unit.ID;
                     const unitDevice = unit.Device;
-                    const unitSerialNumber = unit.SerialNumber;
+                    const unitSerialNumber = unit.SerialNumber ?? 'Undefined';
                     const unitModelNumber = unit.ModelNumber;
-                    const unitModel = unit.Model;
+                    const unitModel = unit.Model ?? 'Undefined';
                     const unitType = unit.UnitType;
                     const unitIsIndoor = unit.IsIndoor || false;
 
@@ -264,17 +266,17 @@ class MelCloudAta extends EventEmitter {
                         case true:
                             idIndoor = unitId;
                             deviceIndoor = unitDevice;
-                            serialNumberIndoor = unitSerialNumber ?? 'Undefined';
+                            serialNumberIndoor = unitSerialNumber;
                             modelNumberIndoor = unitModelNumber;
-                            modelIndoor = unitModel ?? 'Undefined';
+                            modelIndoor = unitModel;
                             typeIndoor = unitType;
                             break;
                         case false:
                             idOutdoor = unitId;
                             deviceOutdoor = unitDevice;
-                            serialNumberOutdoor = unitSerialNumber ?? 'Undefined';
+                            serialNumberOutdoor = unitSerialNumber;
                             modelNumberOutdoor = unitModelNumber;
-                            modelOutdoor = unitModel ?? 'Undefined';
+                            modelOutdoor = unitModel;
                             typeOutdoor = unitType;
                             break;
                     }

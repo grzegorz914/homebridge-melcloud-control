@@ -305,7 +305,7 @@ class MelCloudAtw extends EventEmitter {
                 const supportsHourlyEnergyReport = device.SupportsHourlyEnergyReport;
                 const hasZone2 = device.HasZone2 || false;
 
-                //units info
+                //units
                 const units = Array.isArray(device.Units) ? device.Units : [];
                 const manufacturer = 'Mitsubishi';
 
@@ -315,7 +315,7 @@ class MelCloudAtw extends EventEmitter {
                 let serialNumberIndoor = 'Undefined';
                 let modelNumberIndoor = 0;
                 let modelIndoor = 'Undefined';
-                let typeIndoor =  0;
+                let typeIndoor = 0;
 
                 //outdoor
                 let idOutdoor = 0;
@@ -324,12 +324,14 @@ class MelCloudAtw extends EventEmitter {
                 let modelNumberOutdoor = 0;
                 let modelOutdoor = 'Undefined';
                 let typeOutdoor = 0;
+
+                //units array
                 for (const unit of units) {
                     const unitId = unit.ID;
                     const unitDevice = unit.Device;
-                    const unitSerialNumber = unit.SerialNumber;
+                    const unitSerialNumber = unit.SerialNumber ?? 'Undefined';
                     const unitModelNumber = unit.ModelNumber;
-                    const unitModel = unit.Model;
+                    const unitModel = unit.Model ?? 'Undefined';
                     const unitType = unit.UnitType;
                     const unitIsIndoor = unit.IsIndoor || false;
 
@@ -337,17 +339,17 @@ class MelCloudAtw extends EventEmitter {
                         case true:
                             idIndoor = unitId;
                             deviceIndoor = unitDevice;
-                            serialNumberIndoor = unitSerialNumber ?? 'Undefined';
+                            serialNumberIndoor = unitSerialNumber;
                             modelNumberIndoor = unitModelNumber;
-                            modelIndoor = unitModel ?? 'Undefined';
+                            modelIndoor = unitModel;
                             typeIndoor = unitType;
                             break;
                         case false:
                             idOutdoor = unitId;
                             deviceOutdoor = unitDevice;
-                            serialNumberOutdoor = unitSerialNumber ?? 'Undefined';
+                            serialNumberOutdoor = unitSerialNumber;
                             modelNumberOutdoor = unitModelNumber;
-                            modelOutdoor = unitModel ?? 'Undefined';
+                            modelOutdoor = unitModel;
                             typeOutdoor = unitType;
                             break;
                     }
