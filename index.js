@@ -2034,7 +2034,7 @@ class melCloudDevice {
 								const atwServiceName = `${accessoryName}: ${zoneName}`;
 								switch (atwDisplayMode) {
 									case 0: //Heater Cooler
-										const atwMelCloudService = new Service.HeaterCooler(atwServiceName, 'HeaterCooler' + i);
+										const atwMelCloudService = new Service.HeaterCooler(atwServiceName, `HeaterCooler ${i}`);
 										atwMelCloudService.getCharacteristic(Characteristic.Active)
 											.onGet(async () => {
 												const state = this.power;
@@ -2319,7 +2319,7 @@ class melCloudDevice {
 										accessory.addService(this.atwMelCloudServices[i]);
 										break;
 									case 1: //Thermostat
-										const atwMelCloudServiceT = new Service.Thermostat(atwServiceName, 'Thermostat' + i);
+										const atwMelCloudServiceT = new Service.Thermostat(atwServiceName, `Thermostat ${i}`);
 										atwMelCloudServiceT.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
 											.onGet(async () => {
 												let operationModeText = '';
@@ -3039,7 +3039,7 @@ class melCloudDevice {
 						};
 
 						//core maintenance
-						this.ervCoreMaintenanceService = new Service.FilterMaintenance(`${accessoryName} Core Maintenance`, `CoreMaintenance${deviceId}`);
+						this.ervCoreMaintenanceService = new Service.FilterMaintenance(`${accessoryName} Core Maintenance`, `CoreMaintenance ${deviceId}`);
 						this.ervCoreMaintenanceService.getCharacteristic(Characteristic.FilterChangeIndication)
 							.onGet(async () => {
 								const value = this.ervCoreMaintenanceRequired;
@@ -3052,7 +3052,7 @@ class melCloudDevice {
 						accessory.addService(this.ervCoreMaintenanceService);
 
 						//filter maintenance
-						this.ervFilterMaintenanceService = new Service.FilterMaintenance(`${accessoryName} Filter Maintenance`, `FilterMaintenance${deviceId}`);
+						this.ervFilterMaintenanceService = new Service.FilterMaintenance(`${accessoryName} Filter Maintenance`, `FilterMaintenance ${deviceId}`);
 						this.ervFilterMaintenanceService.getCharacteristic(Characteristic.FilterChangeIndication)
 							.onGet(async () => {
 								const value = this.ervFilterMaintenanceRequired;
@@ -3066,7 +3066,7 @@ class melCloudDevice {
 
 						//room CO2 sensor
 						if (ervHasCO2Sensor) {
-							this.ervCarbonDioxideSensorService = new Service.CarbonDioxideSensor(`${accessoryName} Carbon Dioxide Sensor`, `CarbonDioxideSensor${deviceId}`);
+							this.ervCarbonDioxideSensorService = new Service.CarbonDioxideSensor(`${accessoryName} CO2 Sensor`, `CO2Sensor ${deviceId}`);
 							this.ervCarbonDioxideSensorService.getCharacteristic(Characteristic.CarbonDioxideDetected)
 								.onGet(async () => {
 									const value = this.ervRoomCO2Detected;
@@ -3084,7 +3084,7 @@ class melCloudDevice {
 
 						//room PM2.5 sensor
 						if (ervHasPM25Sensor) {
-							this.ervAirQualitySensorService = new Service.AirQualitySensor(`${accessoryName} PM2.5 Sensor`, `PM25Sensor${deviceId}`);
+							this.ervAirQualitySensorService = new Service.AirQualitySensor(`${accessoryName} PM2.5 Sensor`, `PM25Sensor ${deviceId}`);
 							this.ervAirQualitySensorService.getCharacteristic(Characteristic.AirQuality)
 								.onGet(async () => {
 									const value = this.ervPM25AirQuality;
