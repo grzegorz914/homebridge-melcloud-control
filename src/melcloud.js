@@ -40,9 +40,9 @@ class MelCloud extends EventEmitter {
             };
 
             try {
-                const loginData = await this.axiosInstanceLogin(CONSTANS.ApiUrls.ClientLogin, options);
-                const debug = debugLog ? this.emit('debug', `debug MELCloud Info: ${JSON.stringify(loginData.data, null, 2)}`) : false;
-                const accountInfo = loginData.data.LoginData;
+                const accountData = await this.axiosInstanceLogin(CONSTANS.ApiUrls.ClientLogin, options);
+                const debug = debugLog ? this.emit('debug', `debug MELCloud Info: ${JSON.stringify(accountData.data, null, 2)}`) : false;
+                const accountInfo = accountData.data.LoginData;
                 const contextKey = accountInfo.ContextKey;
 
                 if (contextKey === undefined || contextKey === null) {
@@ -176,18 +176,17 @@ class MelCloud extends EventEmitter {
         this.emit('checkDevicesList');
     };
 
-    send(newData) {
+    send(accountInfo) {
         return new Promise(async (resolve, reject) => {
             try {
                 const options = {
-                    data: newData
+                    data: accountInfo
                 };
 
                 await this.axiosInstancePost(CONSTANS.ApiUrls.UpdateApplicationOptions, options);
 
                 try {
-                    const accountInfo = JSON.stringify(newData, null, 2);
-                    await fsPromises.writeFile(this.accountInfoFile, accountInfo);
+                    await fsPromises.writeFile(this.accountInfoFile, JSON.stringify(accountInfo, null, 2));
                 } catch (error) {
                     this.emit('error', `save MELCloud info error: ${error}`);
                 };

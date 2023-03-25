@@ -56,8 +56,8 @@ class MelCloudAta extends EventEmitter {
 
         this.on('checkDeviceInfo', async () => {
             try {
-                const readDeviceInfoData = await fsPromises.readFile(deviceInfoFile);
-                const deviceInfo = JSON.parse(readDeviceInfoData);
+                const deviceInfoData = await fsPromises.readFile(deviceInfoFile);
+                const deviceInfo = JSON.parse(deviceInfoData);
                 const debug = debugLog ? this.emit('debug', `debug Info: ${JSON.stringify(deviceInfo, null, 2)}`) : false;
 
                 //device info
@@ -184,13 +184,13 @@ class MelCloudAta extends EventEmitter {
                 const modelCode = device.ModelCode;
                 const deviceId = device.DeviceID;
                 const macAddress = device.MacAddress;
-                const serialNumber = device.SerialNumber !== null ? device.SerialNumber.toString() : 'Undefined';
+                const serialNumber = device.SerialNumber ?? 'Undefined';
                 const timeZoneID = device.TimeZoneID;
-                const diagnosticMode = deviceInfo.DiagnosticMode;
-                const diagnosticEndDate = deviceInfo.DiagnosticEndDate;
-                const expectedCommand = deviceInfo.ExpectedCommand;
+                const diagnosticMode = device.DiagnosticMode;
+                const diagnosticEndDate = device.DiagnosticEndDate;
+                const expectedCommand = device.ExpectedCommand;
                 const owner = device.Owner;
-                const detectedCountry = deviceInfo.DetectedCountry;
+                const detectedCountry = device.DetectedCountry;
                 const adaptorType = device.AdaptorType;
                 const firmwareDeployment = device.FirmwareDeployment;
                 const firmwareUpdateAborted = device.FirmwareUpdateAborted;
@@ -223,7 +223,7 @@ class MelCloudAta extends EventEmitter {
                 const rate2StartTime = device.Rate2StartTime;
                 const protocolVersion = device.ProtocolVersion;
                 const unitVersion = device.UnitVersion;
-                const firmwareAppVersion = device.FirmwareAppVersion !== null ? device.FirmwareAppVersion.toString() : 'Undefined';
+                const firmwareAppVersion = device.FirmwareAppVersion?.toString() ?? 'Undefined';
                 const firmwareWebVersion = device.FirmwareWebVersion;
                 const firmwareWlanVersion = device.FirmwareWlanVersion;
                 const mqttFlags = device.MqttFlags;
@@ -234,32 +234,51 @@ class MelCloudAta extends EventEmitter {
 
                 //units info
                 const units = Array.isArray(device.Units) ? device.Units : [];
-                const serialsNumberIndoor = [];
-                const serialsNumberOutdoor = [];
-                const modelsNumberIndoor = [];
-                const modelsNumberOutdoor = [];
-                const modelsIndoor = [];
-                const modelsOutdoor = [];
-                const typesIndoor = [];
-                const typesOutdoor = [];
+                const manufacturer = 'Mitsubishi';
+
+                //indoor
+                let idIndoor = 0;
+                let deviceIndoor = 0;
+                let serialNumberIndoor = '';
+                let modelNumberIndoor = 0;
+                let modelIndoor = '';
+                let typeIndoor = '';
+
+                //outdoor
+                let idOutdoor = 0;
+                let deviceOutdoor = 0;
+                let serialNumberOutdoor = '';
+                let modelNumberOutdoor = 0;
+                let modelOutdoor = '';
+                let typeOutdoor = 0;
                 for (const unit of units) {
                     const unitId = unit.ID;
                     const unitDevice = unit.Device;
-                    const unitSerialNumber = unit.SerialNumber && unit.SerialNumber !== null ? unit.SerialNumber.toString() : 'unknown';
-                    const unitModelNumber = unit.ModelNumber && unit.ModelNumber !== null ? unit.ModelNumber : 'unknown';
-                    const unitModel = unit.Model && unit.Model !== null ? unit.Model.toString() : 'unknown';
-                    const unitType = unit.UnitType && unit.UnitType !== null ? unit.UnitType : 'unknown';
+                    const unitSerialNumber = unit.SerialNumber;
+                    const unitModelNumber = unit.ModelNumber;
+                    const unitModel = unit.Model;
+                    const unitType = unit.UnitType;
                     const unitIsIndoor = unit.IsIndoor || false;
 
-                    const pushSerial = unitIsIndoor ? serialsNumberIndoor.push(unitSerialNumber) : serialsNumberOutdoor.push(unitSerialNumber);
-                    const pushModelNumber = unitIsIndoor ? modelsNumberIndoor.push(unitModelNumber) : modelsNumberOutdoor.push(unitModelNumber);
-                    const pushUnitModel = unitIsIndoor ? modelsIndoor.push(unitModel) : modelsOutdoor.push(unitModel);
-                    const pushUnitTypel = unitIsIndoor ? typesIndoor.push(unitType) : typesOutdoor.push(unitType);
+                    switch (unitIsIndoor) {
+                        case true:
+                            idIndoor = unitId;
+                            deviceIndoor = unitDevice;
+                            serialNumberIndoor = unitSerialNumber ?? 'Undefined';
+                            modelNumberIndoor = unitModelNumber;
+                            modelIndoor = unitModel ?? 'Undefined';
+                            typeIndoor = unitType;
+                            break;
+                        case false:
+                            idOutdoor = unitId;
+                            deviceOutdoor = unitDevice;
+                            serialNumberOutdoor = unitSerialNumber ?? 'Undefined';
+                            modelNumberOutdoor = unitModelNumber;
+                            modelOutdoor = unitModel ?? 'Undefined';
+                            typeOutdoor = unitType;
+                            break;
+                    }
                 }
-
-                const manufacturer = 'Mitsubishi';
-                const modelIndoor = modelsIndoor.length > 0 ? modelsIndoor[0] : 'Undefined';
-                const modelOutdoor = modelsOutdoor.length > 0 ? modelsOutdoor[0] : 'Undefined';
 
                 //diagnostic
                 //const diagnosticMode = deviceInfo.DiagnosticMode;
@@ -394,12 +413,12 @@ class MelCloudAta extends EventEmitter {
         this.emit('checkDeviceInfo');
     };
 
-    send(newData) {
+    send(deviceState) {
         return new Promise(async (resolve, reject) => {
             try {
-                newData.HasPendingCommand = true;
+                deviceState.HasPendingCommand = true;
                 const options = {
-                    data: newData
+                    data: deviceState
                 };
 
                 await this.axiosInstancePost(CONSTANS.ApiUrls.SetAta, options);

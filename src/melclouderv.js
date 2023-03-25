@@ -40,13 +40,11 @@ class MelCloudErv extends EventEmitter {
         this.roomTemperature = 0;
         this.supplyTemperature = 0;
         this.outdoorTemperature = 0;
-        this.roomCO2Level = 0;
         this.nightPurgeMode = 0;
         this.setTemperature = 0;
         this.setFanSpeed = 0;
         this.operationMode = 0;
         this.ventilationMode = 0;
-        this.actualVentilationMode = 0;
         this.defaultHeatingSetTemperature = 0;
         this.defaultCoolingSetTemperature = 0;
         this.hideRoomTemperature = false;
@@ -57,8 +55,8 @@ class MelCloudErv extends EventEmitter {
 
         this.on('checkDeviceInfo', async () => {
             try {
-                const readDeviceInfoData = await fsPromises.readFile(deviceInfoFile);
-                const deviceInfo = JSON.parse(readDeviceInfoData);
+                const deviceInfoData = await fsPromises.readFile(deviceInfoFile);
+                const deviceInfo = JSON.parse(deviceInfoData);
                 const debug = debugLog ? this.emit('debug', `debug Info: ${JSON.stringify(deviceInfo, null, 2)}`) : false;
 
                 //deviceInfo
@@ -103,26 +101,37 @@ class MelCloudErv extends EventEmitter {
 
                 //device
                 const device = deviceInfo.Device;
-                const listHistory24Formatters = Array.isArray(device.ListHistory24Formatters) ? device.ListHistory24Formatters : [];
-                const listHistory24FormattersCount = listHistory24Formatters.length;
                 const pCycleActual = device.PCycleActual;
                 const errorMessages = device.ErrorMessages;
                 const deviceType = device.DeviceType;
+                const ervFlags = device.ErvFlags;
+                const ervModel = device.ErvModel;
+                const labelControls = device.LabelControls;
+                const devicePowerDisabled = device.DevicePowerDisabled;
+                const silentMode = device.SilentMode;
+                const deviceHolidayModde = device.DeviceHolidayMode;
+                const externalControl = device.ExternalControl;
+                const bypassVentilationSkipped = device.BypassVentilationSkipped;
+                const autoVentilationSkipped = device.AutoVentilationSkipped;
+                const fanSpeedSkipped = device.FanSpeedSkipped;
+                const fanSpeedRestricted = device.FanSpeedRestricted;
                 const hasTemperatureControlUnit = device.HasTemperatureControlUnit;
                 const hasCoolOperationMode = device.HasCoolOperationMode;
                 const hasHeatOperationMode = device.HasHeatOperationMode;
                 const hasAutoOperationMode = device.HasAutoOperationMode;
-                const airDirectionFunction = device.AirDirectionFunction;
                 const hasBypassVentilationMode = device.HasBypassVentilationMode || false;
                 const hasAutoVentilationMode = device.HasAutoVentilationMode || false;
                 const hasRoomTemperature = device.HasRoomTemperature;
                 const hasSupplyTemperature = device.HasSupplyTemperature;
                 const hasOutdoorTemperature = device.HasOutdoorTemperature;
                 const hasCO2Sensor = device.HasCO2Sensor;
+                const hasPM25Sensor = device.HasPM25Sensor;
+                const pM25SensorStatus = device.PM25SensorStatus;
+                const pM25Level = device.PM25Level;
                 const numberOfFanSpeeds = device.NumberOfFanSpeeds || 0;
                 const hasHalfDegreeIncrements = device.HasHalfDegreeIncrements;
-                const temperatureIncrement = device.TemperatureIncrement || 1;
                 const temperatureIncrementOverride = device.TemperatureIncrementOverride;
+                const temperatureIncrement = device.TemperatureIncrement || 1;
                 const minTempCoolDry = device.MinTempCoolDry;
                 const maxTempCoolDry = device.MaxTempCoolDry;
                 const minTempHeat = device.MinTempHeat;
@@ -145,31 +154,25 @@ class MelCloudErv extends EventEmitter {
                 const actualExhaustFanSpeed = device.ActualExhaustFanSpeed;
                 const setFanSpeed = device.SetFanSpeed;
                 const automaticFanSpeed = device.AutomaticFanSpeed;
-                const operationMode = device.OperationMode;
+                const operationMode = device.OperationMode; //0, Heat, 2, Cool, 4, 5, 6, Fan, Auto
                 const actualOperationMode = device.ActualOperationMode;
-                const ventilationMode = device.VentilationMode;
-                const actualVentilationMode = device.ActualVentilationMode;
+                const ventilationMode = device.VentilationMode; //Lossnay, Bypass, Auto
+                const actualVentilationMode = device.ActualVentilationMode; //Lossnay, Bypass
                 const effectiveFlags = device.EffectiveFlags;
-                const inStandbyMode = device.InStandbyMode;
-                const demandPercentage = device.DemandPercentage;
-                const configuredDemandPercentage = device.ConfiguredDemandPercentage;
-                const hasDemandSideControl = device.HasDemandSideControl;
+                const lastEffectiveFlags = device.LastEffectiveFlags;
                 const defaultCoolingSetTemperature = device.DefaultCoolingSetTemperature;
                 const defaultHeatingSetTemperature = device.DefaultHeatingSetTemperature;
                 const hasEnergyConsumedMeter = device.HasEnergyConsumedMeter;
-                const currentEnergyConsumed = device.CurrentEnergyConsumed;
+                const currentEnergyConsumed = device.CurrentEnergyConsumed
                 const currentEnergyAssignment = device.CurrentEnergyAssignment;
                 const coolingDisabled = device.CoolingDisabled
-                const minPcycle = device.MinPcycle;
-                const maxPcycle = device.MaxPcycle;
-                const effectivePCycle = device.EffectivePCycle;
                 const maxOutdoorUnits = device.MaxOutdoorUnits;
                 const maxIndoorUnits = device.MaxIndoorUnits;
                 const maxTemperatureControlUnits = device.MaxTemperatureControlUnits;
                 const modelCode = device.ModelCode;
                 //const deviceId = device.DeviceID;
                 const macAddress = device.MacAddress;
-                const serialNumber = device.SerialNumber !== null ? device.SerialNumber.toString() : 'Undefined';
+                const serialNumber = device.SerialNumber ?? 'Undefined';
                 const timeZoneId = device.TimeZoneID;
                 const diagnosticMode = device.DiagnosticMode;
                 const diagnosticEndDate = device.DiagnosticEndDate;
@@ -184,6 +187,7 @@ class MelCloudErv extends EventEmitter {
                 const wifiAdapterStatus = device.WifiAdapterStatus;
                 const position = device.Position;
                 const pCycle = device.PCycle;
+                const pCycleConfigured = device.PCycleConfigured;
                 const recordNumMax = device.RecordNumMax;
                 const lastTimeStamp = device.LastTimeStamp;
                 const errorCode = device.ErrorCode;
@@ -207,43 +211,65 @@ class MelCloudErv extends EventEmitter {
                 const rate2StartTime = device.Rate2StartTime;
                 const protocolVersion = device.ProtocolVersion;
                 const unitVersion = device.UnitVersion;
-                const firmwareAppVersion = device.FirmwareAppVersion !== null ? device.FirmwareAppVersion.toString() : 'Undefined';
+                const firmwareAppVersion = device.FirmwareAppVersion?.toString() ?? 'Undefined';
                 const firmwareWebVersion = device.FirmwareWebVersion;
                 const firmwareWlanVersion = device.FirmwareWlanVersion;
+                const effectivePCycle = device.EffectivePCycle;
                 const mqttFlags = device.MqttFlags;
                 const hasErrorMessages = device.HasErrorMessages;
                 const hasZone2 = device.HasZone2;
                 const offline = device.Offline;
+                const minPcycle = device.MinPcycle;
+                const maxPcycle = device.MaxPcycle;
                 const supportsHourlyEnergyReport = device.SupportsHourlyEnergyReport;
 
                 //units info
                 const units = Array.isArray(device.Units) ? device.Units : [];
-                const serialsNumberIndoor = [];
-                const serialsNumberOutdoor = [];
-                const modelsNumberIndoor = [];
-                const modelsNumberOutdoor = [];
-                const modelsIndoor = [];
-                const modelsOutdoor = [];
-                const typesIndoor = [];
-                const typesOutdoor = [];
+                const manufacturer = 'Mitsubishi';
+
+                //indoor
+                let idIndoor = 0;
+                let deviceIndoor = 0;
+                let serialNumberIndoor = '';
+                let modelNumberIndoor = 0;
+                let modelIndoor = '';
+                let typeIndoor = '';
+
+                //outdoor
+                let idOutdoor = 0;
+                let deviceOutdoor = 0;
+                let serialNumberOutdoor = '';
+                let modelNumberOutdoor = 0;
+                let modelOutdoor = '';
+                let typeOutdoor = 0;
                 for (const unit of units) {
                     const unitId = unit.ID;
                     const unitDevice = unit.Device;
-                    const unitSerialNumber = unit.SerialNumber && unit.SerialNumber !== null ? unit.SerialNumber.toString() : 'unknown';
-                    const unitModelNumber = unit.ModelNumber && unit.ModelNumber !== null ? unit.ModelNumber : 'unknown';
-                    const unitModel = unit.Model && unit.Model !== null ? unit.Model.toString() : 'unknown';
-                    const unitType = unit.UnitType && unit.UnitType !== null ? unit.UnitType : 'unknown';
+                    const unitSerialNumber = unit.SerialNumber;
+                    const unitModelNumber = unit.ModelNumber;
+                    const unitModel = unit.Model;
+                    const unitType = unit.UnitType;
                     const unitIsIndoor = unit.IsIndoor || false;
 
-                    const pushSerial = unitIsIndoor ? serialsNumberIndoor.push(unitSerialNumber) : serialsNumberOutdoor.push(unitSerialNumber);
-                    const pushModelNumber = unitIsIndoor ? modelsNumberIndoor.push(unitModelNumber) : modelsNumberOutdoor.push(unitModelNumber);
-                    const pushUnitModel = unitIsIndoor ? modelsIndoor.push(unitModel) : modelsOutdoor.push(unitModel);
-                    const pushUnitTypel = unitIsIndoor ? typesIndoor.push(unitType) : typesOutdoor.push(unitType);
+                    switch (unitIsIndoor) {
+                        case true:
+                            idIndoor = unitId;
+                            deviceIndoor = unitDevice;
+                            serialNumberIndoor = unitSerialNumber ?? 'Undefined';
+                            modelNumberIndoor = unitModelNumber;
+                            modelIndoor = unitModel ?? 'Undefined';
+                            typeIndoor = unitType;
+                            break;
+                        case false:
+                            idOutdoor = unitId;
+                            deviceOutdoor = unitDevice;
+                            serialNumberOutdoor = unitSerialNumber ?? 'Undefined';
+                            modelNumberOutdoor = unitModelNumber;
+                            modelOutdoor = unitModel ?? 'Undefined';
+                            typeOutdoor = unitType;
+                            break;
+                    }
                 }
-
-                const manufacturer = 'Mitsubishi';
-                const modelIndoor = modelsIndoor.length > 0 ? modelsIndoor[0] : 'Undefined';
-                const modelOutdoor = modelsOutdoor.length > 0 ? modelsOutdoor[0] : 'Undefined'
 
                 //diagnostic
                 //const diagnosticMode = deviceInfo.DiagnosticMode;
@@ -268,7 +294,7 @@ class MelCloudErv extends EventEmitter {
                 const permissionCanSetTemperatureIncrementOverride = deviceInfo.Permissions.CanSetTemperatureIncrementOverride;
                 const permissionCanDisableLocalController = deviceInfo.Permissions.CanDisableLocalController;
 
-                this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, presets, presetsCount, hasAutoVentilationMode, hasBypassVentilationMode, hasAutomaticFanSpeed, numberOfFanSpeeds, temperatureIncrement, coreMaintenanceRequired, filterMaintenanceRequired);
+                this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, presets, presetsCount, hasCoolOperationMode, hasHeatOperationMode, hasAutoOperationMode, hasRoomTemperature, hasSupplyTemperature, hasOutdoorTemperature, hasCO2Sensor, hasPM25Sensor, pM25SensorStatus, pM25Level, hasAutoVentilationMode, hasBypassVentilationMode, hasAutomaticFanSpeed, coreMaintenanceRequired, filterMaintenanceRequired, roomCO2Level, actualVentilationMode, numberOfFanSpeeds, temperatureIncrement);
                 const mqtt = mqttEnabled ? this.emit('mqtt', `Info`, JSON.stringify(deviceInfo, null, 2)) : false;
 
                 //check device state
@@ -294,11 +320,12 @@ class MelCloudErv extends EventEmitter {
                 const outdoorTemperature = deviceState.OutdoorTemperature;
                 const roomCO2Level = deviceState.RoomCO2Level;
                 const nightPurgeMode = deviceState.NightPurgeMode;
+                const coreMaintenanceRequired = deviceState.CoreMaintenanceRequired;
+                const filterMaintenanceRequired = deviceState.FilterMaintenanceRequired;
                 const setTemperature = deviceState.SetTemperature;
                 const setFanSpeed = deviceState.SetFanSpeed;
                 const operationMode = deviceState.OperationMode;
                 const ventilationMode = deviceState.VentilationMode;
-                const actualVentilationMode = deviceState.ActualVentilationMode;
                 const name = deviceState.Name;
                 const numberOfFanSpeeds = deviceState.NumberOfFanSpeeds;
                 const weatherObservations = deviceState.WeatherObservations;
@@ -310,6 +337,7 @@ class MelCloudErv extends EventEmitter {
                 const hideRoomTemperature = deviceState.HideRoomTemperature;
                 const hideSupplyTemperature = deviceState.HideSupplyTemperature;
                 const hideOutdoorTemperature = deviceState.HideOutdoorTemperature;
+                const ervFlags = deviceState.ErvFlags;
                 //const deviceId = deviceState.DeviceID;
                 const deviceType = deviceState.DeviceType;
                 const lastCommunication = deviceState.LastCommunication;
@@ -324,13 +352,11 @@ class MelCloudErv extends EventEmitter {
                     roomTemperature === this.roomTemperature
                     && supplyTemperature === this.supplyTemperature
                     && outdoorTemperature === this.outdoorTemperature
-                    && roomCO2Level === this.roomCO2Level
                     && nightPurgeMode === this.nightPurgeMode
                     && setTemperature === this.setTemperature
                     && setFanSpeed === this.setFanSpeed
                     && operationMode === this.operationMode
                     && ventilationMode === this.ventilationMode
-                    && actualVentilationMode === this.actualVentilationMode
                     && defaultHeatingSetTemperature === this.defaultHeatingSetTemperature
                     && defaultCoolingSetTemperature === this.defaultCoolingSetTemperature
                     && hideRoomTemperature === this.hideRoomTemperature
@@ -347,13 +373,11 @@ class MelCloudErv extends EventEmitter {
                 this.roomTemperature = roomTemperature;
                 this.supplyTemperature = supplyTemperature;
                 this.outdoorTemperature = outdoorTemperature;
-                this.roomCO2Level = roomCO2Level;
                 this.nightPurgeMode = nightPurgeMode;
                 this.setTemperature = setTemperature;
                 this.setFanSpeed = setFanSpeed;
                 this.operationMode = operationMode;
                 this.ventilationMode = ventilationMode;
-                this.actualVentilationMode = actualVentilationMode;
                 this.defaultHeatingSetTemperature = defaultHeatingSetTemperature;
                 this.defaultCoolingSetTemperature = defaultCoolingSetTemperature;
                 this.hideRoomTemperature = hideRoomTemperature;
@@ -362,7 +386,7 @@ class MelCloudErv extends EventEmitter {
                 this.power = power;
                 this.offline = offline;
 
-                this.emit('deviceState', deviceState, roomTemperature, supplyTemperature, outdoorTemperature, roomCO2Level, nightPurgeMode, setTemperature, setFanSpeed, operationMode, ventilationMode, actualVentilationMode, defaultHeatingSetTemperature, defaultCoolingSetTemperature, hideRoomTemperature, hideSupplyTemperature, hideOutdoorTemperature, power, offline);
+                this.emit('deviceState', deviceState, roomTemperature, supplyTemperature, outdoorTemperature, nightPurgeMode, setTemperature, setFanSpeed, operationMode, ventilationMode, defaultHeatingSetTemperature, defaultCoolingSetTemperature, hideRoomTemperature, hideSupplyTemperature, hideOutdoorTemperature, power, offline);
                 const mqtt = mqttEnabled ? this.emit('mqtt', `State`, JSON.stringify(deviceState, null, 2)) : false;
                 this.checkDeviceInfo();
             } catch (error) {
@@ -379,12 +403,12 @@ class MelCloudErv extends EventEmitter {
         this.emit('checkDeviceInfo');
     };
 
-    send(newData) {
+    send(deviceState) {
         return new Promise(async (resolve, reject) => {
             try {
-                newData.HasPendingCommand = true;
+                deviceState.HasPendingCommand = true;
                 const options = {
-                    data: newData
+                    data: deviceState
                 };
 
                 await this.axiosInstancePost(CONSTANS.ApiUrls.SetErv, options);

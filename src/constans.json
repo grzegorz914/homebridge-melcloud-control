@@ -19,8 +19,8 @@
     "DeviceType": [
         "Air Conditioner",
         "Heat Pump",
-        "Energy Recovery Ventilation",
-        "Unknown"
+        "Unknown",
+        "Energy Recovery Ventilation"
     ],
     "TemperatureDisplayUnits": [
         "°C",
@@ -242,6 +242,22 @@
             "2",
             "3",
             "4"
+        ],
+        "Co2Detected": [
+            "NO",
+            "YES"
+        ],
+        "PM25AirQuality": [
+            "UNKNOWN",
+            "EXCELLENT",
+            "GOOD",
+            "FAIR",
+            "INFERIOR",
+            "POOR"
+        ],
+        "CoreMaintenance": [
+            "CORE OK",
+            "CHANGE REQUIRED"
         ],
         "FilterMaintenance": [
             "FILTER OK",

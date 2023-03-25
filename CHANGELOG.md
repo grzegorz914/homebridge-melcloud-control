@@ -10,9 +10,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Important changes v0.4.0 and above!!!
   * Main control mode, buttons and presets need to be configured again!!!
 
+## [0.11.0] - (25.03.2023)
+## Changes
+- full support of ERV Lossnay, fix [#37](https://github.com/grzegorz914/homebridge-melcloud-control/issues/37)
+- added core maintenance indicator for ERV LOSSNAY
+- added CO2 sensor for ERV LOSSNAY
+- added PM2.5 sensor for ERV LOSSNAY
+- config.schema updated
+- cleanup
+
 ## [0.10.0] - (15.03.2023)
 ## Changes
-- added filter maintaice indicator for ERV LOSSNAY systems
+- added filter maintenance indicator for ERV LOSSNAY
 - config.schema updated
 - cleanup
 
