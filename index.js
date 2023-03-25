@@ -3147,7 +3147,9 @@ class melCloudDevice {
 														deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power + CONSTANS.Ventilation.EffectiveFlags.VentilationMode;
 														break;
 													case 4: //NIGHT PURGE MODE
+														deviceState.Power = true;
 														deviceState.NightPurgeMode = state;
+														deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Power
 														break;
 													case 10: //FAN SPEED MODE AUTO
 														deviceState.Power = true;

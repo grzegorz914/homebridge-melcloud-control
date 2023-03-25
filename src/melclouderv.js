@@ -40,7 +40,7 @@ class MelCloudErv extends EventEmitter {
         this.roomTemperature = 0;
         this.supplyTemperature = 0;
         this.outdoorTemperature = 0;
-        this.nightPurgeMode = 0;
+        this.nightPurgeMode = false;
         this.setTemperature = 0;
         this.setFanSpeed = 0;
         this.operationMode = 0;
