@@ -138,7 +138,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Core Change Indication
       * Filter Change Indication
       * CO2 Detected and Level
-      * PM2.5 Detected and Level
+      * PM2.5 Air Quality and Level
 
 <p align="left">
   <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/homekit.png" width="382"></a> 
