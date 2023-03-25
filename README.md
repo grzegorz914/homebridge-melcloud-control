@@ -130,15 +130,15 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Presets `SET/UNSET`.
   * Sensors:
     * Use with automations in HomeKit app.
-      * Identify Power `ON/OFF`.
+      * Identify power `ON/OFF`.
       * Identify operating mode `LOSSNAY/BYPAS/AUTO/NIGHT PURGE`.
       * Identify physical lock controls `LOCK/UNLOCK`.
       * Identify fan speed mode `AUTO/1/2/3/4`.
       * Identify device presets. 
-      * Core Maintenance Indication
-      * Filter Maintenance Indication
-      * CO2 Detected and Level
-      * PM2.5 Air Quality and Level
+      * Core maintenance indication
+      * Filter maintenance indication
+      * CO2 detected and level
+      * PM2.5 air quality and level
 
 <p align="left">
   <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/homekit.png" width="382"></a> 
