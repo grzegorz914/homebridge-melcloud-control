@@ -2934,7 +2934,7 @@ class melCloudDevice {
 										};
 									});
 								this.ervMelCloudServices.push(ervMelCloudService);
-								accessory.addService(this.ervMelCloudServices[i]);
+								accessory.addService(this.ervMelCloudServices[0]);
 							case 1: //Thermostat
 								const ervMelCloudServiceT = new Service.Thermostat(ervServiceName, 'Thermostat');
 								ervMelCloudServiceT.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
@@ -3034,7 +3034,7 @@ class melCloudDevice {
 										};
 									});
 								this.ervMelCloudServices.push(ervMelCloudServiceT);
-								accessory.addService(this.ervMelCloudServices[i]);
+								accessory.addService(this.ervMelCloudServices[0]);
 								break;
 						};
 

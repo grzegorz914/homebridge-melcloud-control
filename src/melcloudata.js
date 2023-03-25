@@ -239,17 +239,17 @@ class MelCloudAta extends EventEmitter {
                 //indoor
                 let idIndoor = 0;
                 let deviceIndoor = 0;
-                let serialNumberIndoor = '';
+                let serialNumberIndoor = 'Undefined';
                 let modelNumberIndoor = 0;
-                let modelIndoor = '';
-                let typeIndoor = '';
+                let modelIndoor = 'Undefined';
+                let typeIndoor = 0;
 
                 //outdoor
                 let idOutdoor = 0;
                 let deviceOutdoor = 0;
-                let serialNumberOutdoor = '';
+                let serialNumberOutdoor = 'Undefined';
                 let modelNumberOutdoor = 0;
-                let modelOutdoor = '';
+                let modelOutdoor = 'Undefined';
                 let typeOutdoor = 0;
                 for (const unit of units) {
                     const unitId = unit.ID;
