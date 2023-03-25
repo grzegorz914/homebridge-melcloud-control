@@ -135,8 +135,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Identify physical lock controls `LOCK/UNLOCK`.
       * Identify fan speed mode `AUTO/1/2/3/4`.
       * Identify device presets. 
-      * Core Change Indication
-      * Filter Change Indication
+      * Core Maintenance Indication
+      * Filter Maintenance Indication
       * CO2 Detected and Level
       * PM2.5 Air Quality and Level
 
