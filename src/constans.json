@@ -256,12 +256,12 @@
             "POOR"
         ],
         "CoreMaintenance": [
-            "CORE OK",
-            "CHANGE REQUIRED"
+            "ALL OK",
+            "REQUIRED"
         ],
         "FilterMaintenance": [
-            "FILTER OK",
-            "CHANGE REQUIRED"
+            "ALL OK",
+            "REQUIRED"
         ],
         "EffectiveFlags": {
             "Power": 1,

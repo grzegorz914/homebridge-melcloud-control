@@ -185,7 +185,7 @@ class melCloudDevice {
 
 				this.melCloudAta.on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, presets, presetsCount, hasAutomaticFanSpeed, airDirectionFunction, swingFunction, numberOfFanSpeeds, temperatureIncrement, minTempCoolDry, maxTempCoolDry, minTempHeat, maxTempHeat, minTempAutomatic, maxTempAutomatic, modelSupportsFanSpeed, modelSupportsAuto, modelSupportsHeat, modelSupportsDry) => {
 					if (!this.disableLogDeviceInfo && this.displayDeviceInfo) {
-						this.log(`---- ${this.deviceTypeText}: ${this.deviceName} ----`);
+						this.log(`---- ${deviceTypeText}: ${deviceName} ----`);
 						this.log(`Account: ${accountName}`);
 						const indoor = modelIndoor !== 'Undefined' ? this.log(`Indoor: ${modelIndoor}`) : false;
 						const outdoor = modelOutdoor !== 'Undefined' ? this.log(`Outdoor: ${modelOutdoor}`) : false
@@ -201,7 +201,7 @@ class melCloudDevice {
 
 					//accessory info 					
 					this.manufacturer = manufacturer;
-					this.model = modelIndoor ?? modelOutdoor ?? 'Undefined';
+					this.model = modelIndoor ?? modelOutdoor ?? `${deviceTypeText} ${deviceId}`;
 					this.serialNumber = serialNumber;
 					this.firmwareRevision = firmwareAppVersion;
 
@@ -607,7 +607,7 @@ class melCloudDevice {
 
 				this.melCloudAtw.on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, presets, presetsCount, zonesCount, heatPumpZoneName, hotWaterZoneName, hasHotWaterTank, temperatureIncrement, maxTankTemperature, hasZone2, zone1Name, zone2Name, heatCoolModes, caseHotWater, caseZone2) => {
 					if (!this.disableLogDeviceInfo && this.displayDeviceInfo) {
-						this.log(`---- ${this.deviceTypeText}: ${this.deviceName} ----`);
+						this.log(`---- ${deviceTypeText}: ${deviceName} ----`);
 						this.log(`Account: ${accountName}`);
 						const indoor = modelIndoor !== 'Undefined' ? this.log(`Indoor: ${modelIndoor}`) : false;
 						const outdoor = modelOutdoor !== 'Undefined' ? this.log(`Outdoor: ${modelOutdoor}`) : false
@@ -626,7 +626,7 @@ class melCloudDevice {
 
 					//accessory info 					
 					this.manufacturer = manufacturer;
-					this.model = modelIndoor ?? modelOutdoor ?? 'Undefined';
+					this.model = modelIndoor ?? modelOutdoor ?? `${deviceTypeText} ${deviceId}`;
 					this.serialNumber = serialNumber;
 					this.firmwareRevision = firmwareAppVersion;
 
@@ -1059,7 +1059,7 @@ class melCloudDevice {
 
 				this.melCloudErv.on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, presets, presetsCount, hasCoolOperationMode, hasHeatOperationMode, hasAutoOperationMode, hasRoomTemperature, hasSupplyTemperature, hasOutdoorTemperature, hasCO2Sensor, hasPM25Sensor, pM25SensorStatus, pM25Level, hasAutoVentilationMode, hasBypassVentilationMode, hasAutomaticFanSpeed, coreMaintenanceRequired, filterMaintenanceRequired, roomCO2Level, actualVentilationMode, numberOfFanSpeeds, temperatureIncrement) => {
 					if (!this.disableLogDeviceInfo && this.displayDeviceInfo) {
-						this.log(`---- ${this.deviceTypeText}: ${this.deviceName} ----`);
+						this.log(`---- ${deviceTypeText}: ${deviceName} ----`);
 						this.log(`Account: ${accountName}`);
 						const indoor = modelIndoor !== 'Undefined' ? this.log(`Indoor: ${modelIndoor}`) : false;
 						const outdoor = modelOutdoor !== 'Undefined' ? this.log(`Outdoor: ${modelOutdoor}`) : false;
@@ -1075,7 +1075,7 @@ class melCloudDevice {
 
 					//accessory info 					
 					this.manufacturer = manufacturer;
-					this.model = modelIndoor ?? modelOutdoor ?? 'Undefined';
+					this.model = modelIndoor ?? modelOutdoor ?? `${deviceTypeText} ${deviceId}`;
 					this.serialNumber = serialNumber;
 					this.firmwareRevision = firmwareAppVersion;
 
@@ -1422,7 +1422,7 @@ class melCloudDevice {
 				//accessory
 				const accessoryName = deviceName;
 				const accessoryUUID = UUID.generate(deviceId);
-				const accessoryCategory = [Categories.AIR_CONDITIONER, Categories.AIR_HEATER, Categories.OTHER, Categories.FAN][deviceType];
+				const accessoryCategory = [Categories.AIR_CONDITIONER, Categories.AIR_HEATER, Categories.OTHER, Categories.AIR_PURIFIER][deviceType];
 				const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 
 				//information service
@@ -1449,14 +1449,14 @@ class melCloudDevice {
 						const ataModelSupportsDry = this.ataModelSupportsDry;
 						const ataNumberOfFanSpeeds = this.ataNumberOfFanSpeeds;
 						const ataSwingFunction = this.ataSwingFunction;
-						const ataServiceName = `${accessoryName} ${deviceTypeText}`;
 						const ataAutoDryFan = [ataModelSupportsDry ? 2 : 7, 7][this.ataAutoHeatMode];
 						const ataHeatFanDry = [7, ataModelSupportsDry ? 2 : 7][this.ataAutoHeatMode];
+						const ataServiceName = `${accessoryName} ${deviceTypeText}`;
 
 						this.ataMelCloudServices = [];
 						switch (ataDisplayMode) {
 							case 0: //Heater Cooler
-								const ataMelCloudService = new Service.HeaterCooler(ataServiceName, 'HeaterCooler');
+								const ataMelCloudService = new Service.HeaterCooler(ataServiceName, `HeaterCooler ${deviceId}`);
 								ataMelCloudService.getCharacteristic(Characteristic.Active)
 									.onGet(async () => {
 										const state = this.power;
@@ -1660,7 +1660,7 @@ class melCloudDevice {
 								accessory.addService(this.ataMelCloudServices[0]);
 								break;
 							case 1: //Thermostat
-								const ataMelCloudServiceT = new Service.Thermostat(ataServiceName, 'Thermostat');
+								const ataMelCloudServiceT = new Service.Thermostat(ataServiceName, `Thermostat ${deviceId}`);
 								ataMelCloudServiceT.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
 									.onGet(async () => {
 										const value = this.currentOperationMode;
@@ -1782,7 +1782,7 @@ class melCloudDevice {
 
 								const buttonServiceType = [Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][buttonDisplayType];
 								const characteristicType = [Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
-								const buttonService = new buttonServiceType(`${accessoryName} ${buttonName}`, `Button ${i}`);
+								const buttonService = new buttonServiceType(`${accessoryName} ${buttonName}`, `Button ${deviceId} ${i}`);
 								buttonService.getCharacteristic(characteristicType)
 									.onGet(async () => {
 										const state = this.ataButtonsStates[i];
@@ -1979,7 +1979,7 @@ class melCloudDevice {
 								const preset = ataPresets[i];
 								const presetName = preset.NumberDescription;
 
-								const presetService = new Service.Outlet(`${accessoryName} ${presetName}`, `Preset ${i}`);
+								const presetService = new Service.Outlet(`${accessoryName} ${presetName}`, `Preset ${deviceId} ${i}`);
 								presetService.getCharacteristic(Characteristic.On)
 									.onGet(async () => {
 										const state = this.ataPresetsStates[i];
@@ -2033,7 +2033,7 @@ class melCloudDevice {
 							const atwServiceName = `${accessoryName}: ${zoneName}`;
 							switch (atwDisplayMode) {
 								case 0: //Heater Cooler
-									const atwMelCloudService = new Service.HeaterCooler(atwServiceName, `HeaterCooler ${i}`);
+									const atwMelCloudService = new Service.HeaterCooler(atwServiceName, `HeaterCooler ${deviceId} ${i}`);
 									atwMelCloudService.getCharacteristic(Characteristic.Active)
 										.onGet(async () => {
 											const state = this.power;
@@ -2318,7 +2318,7 @@ class melCloudDevice {
 									accessory.addService(this.atwMelCloudServices[i]);
 									break;
 								case 1: //Thermostat
-									const atwMelCloudServiceT = new Service.Thermostat(atwServiceName, `Thermostat ${i}`);
+									const atwMelCloudServiceT = new Service.Thermostat(atwServiceName, `Thermostat ${deviceId} ${i}`);
 									atwMelCloudServiceT.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
 										.onGet(async () => {
 											let operationModeText = '';
@@ -2540,7 +2540,7 @@ class melCloudDevice {
 
 								const buttonServiceType = [Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][buttonDisplayType];
 								const characteristicType = [Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
-								const buttonService = new buttonServiceType(`${accessoryName} ${buttonName}`, `Button ${i}`);
+								const buttonService = new buttonServiceType(`${accessoryName} ${buttonName}`, `Button ${deviceId} ${i}`);
 								buttonService.getCharacteristic(characteristicType)
 									.onGet(async () => {
 										const state = this.atwButtonsStates[i];
@@ -2683,7 +2683,7 @@ class melCloudDevice {
 								const preset = atwPresets[i];
 								const presetName = preset.NumberDescription;
 
-								const presetService = new Service.Outlet(`${accessoryName} ${presetName}`, `Preset ${i}`);
+								const presetService = new Service.Outlet(`${accessoryName} ${presetName}`, `Preset${deviceId}  ${i}`);
 								presetService.getCharacteristic(Characteristic.On)
 									.onGet(async () => {
 										const state = this.atwPresetsStates[i];
@@ -2750,7 +2750,7 @@ class melCloudDevice {
 						this.ervMelCloudServices = [];
 						switch (ervDisplayMode) {
 							case 0: //Heater Cooler
-								const ervMelCloudService = new Service.HeaterCooler(ervServiceName, 'HeaterCooler');
+								const ervMelCloudService = new Service.HeaterCooler(ervServiceName, `HeaterCooler ${deviceId}`);
 								ervMelCloudService.getCharacteristic(Characteristic.Active)
 									.onGet(async () => {
 										const state = this.power;
@@ -2933,8 +2933,9 @@ class melCloudDevice {
 									});
 								this.ervMelCloudServices.push(ervMelCloudService);
 								accessory.addService(this.ervMelCloudServices[0]);
+								break;
 							case 1: //Thermostat
-								const ervMelCloudServiceT = new Service.Thermostat(ervServiceName, 'Thermostat');
+								const ervMelCloudServiceT = new Service.Thermostat(ervServiceName, `Thermostat ${deviceId}`);
 								ervMelCloudServiceT.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
 									.onGet(async () => {
 										const value = this.currentOperationMode;
@@ -3117,7 +3118,7 @@ class melCloudDevice {
 
 								const buttonServiceType = [Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][buttonDisplayType];
 								const characteristicType = [Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
-								const buttonService = new buttonServiceType(`${accessoryName} ${buttonName}`, `Button ${i}`);
+								const buttonService = new buttonServiceType(`${accessoryName} ${buttonName}`, `Button ${deviceId} ${i}`);
 								buttonService.getCharacteristic(characteristicType)
 									.onGet(async () => {
 										const state = this.ervButtonsStates[i];
@@ -3216,7 +3217,7 @@ class melCloudDevice {
 								const preset = ervPresets[i];
 								const presetName = preset.NumberDescription;
 
-								const presetService = new Service.Outlet(`${accessoryName} ${presetName}`, `Preset ${i}`);
+								const presetService = new Service.Outlet(`${accessoryName} ${presetName}`, `Preset ${deviceId} ${i}`);
 								presetService.getCharacteristic(Characteristic.On)
 									.onGet(async () => {
 										const state = this.ervPresetsStates[i];
