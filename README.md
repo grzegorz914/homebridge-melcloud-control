@@ -29,8 +29,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * Support temperature display units `Celsius/Fahrenheit`.
 * Support control device `Presets`.
 * Support automations, shortcuts and siri.
-* Support direct device controll creating extra `Buttons` (appiled for all devices of same type in account).
-* Support identify all states of device creating `Sensors` and lather use with automations (appiled for all devices of same type in account).
+* Support direct device controll creating extra `Buttons`, appiled for all devices of same type in account.
+* Support identify all states of device creating `Sensors`, appiled for all devices of same type in account.
 * MQTT:
   * Publisch topic `Info`, `State` as payload JSON data.
 
