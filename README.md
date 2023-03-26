@@ -43,13 +43,13 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
     * Fan speed `OFF/1/2/3/4/5/AUTO`.
     * Swing mode `AUTO/SWING`.
     * Physical lock controls `LOCK/UNLOCK`.
-    * Change Temperature Unit `°F/°C`.
+    * Change temperature unit `°F/°C`.
     * If `AUTO/HEAT` or both modes are not supported by device will use `DRY/FAN` or `FAN/DRY` modes instead.
   * Thermostat:
     * Power `ON/OFF`.
     * Operating mode `POWER OFF/HEAT/COOL/AUTO`.
     * Heating/Cooling temperature.
-    * Change Temperature Unit `°F/°C`.
+    * Change temperature unit `°F/°C`.
     * If `AUTO/HEAT` or both modes are not supported by device will use `DRY/FAN` or `FAN/DRY` modes instead.
   * Buttons:
     * Use to direct device control.
@@ -62,7 +62,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Presets `SET/UNSET`.
   * Sensors:
     * Use with automations in HomeKit app.
-      * Identify Power `ON/OFF`.
+      * Identify power `ON/OFF`.
       * Identify operating mode `HEAT/DRY/COOL/FAN/AUTO`.
       * Identify physical lock controls `LOCK/UNLOCK`.
       * Identify vane H mode `AUTO/1/2/3/4/5/SWING`.
@@ -76,10 +76,10 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Operating mode `HEAT/COOL`.
       * Outdoor temperature `GET`.
       * Physical lock controls all Zones and Hot Water Tank `LOCK/UNLOCK`.
-      * Change Temperature Unit `°F/°C`.
+      * Change temperature unit `°F/°C`.
     * Zone 1 and 2:
-      * Operating Mode Heat `AUTO/HEAT/COOL` - `CURVE/HEAT THERMOSTAT/HEAT FLOW`.
-      * Operating Mode Cool `HEAT/COOL` - `COOL THERMOSTAT/COOL FLOW`.
+      * Operating mode heat `AUTO/HEAT/COOL` - `CURVE/HEAT THERMOSTAT/HEAT FLOW`.
+      * Operating mode cool `HEAT/COOL` - `COOL THERMOSTAT/COOL FLOW`.
       * Heating/Cooling temperature.
       * Physical lock controls `LOCK/UNLOCK`.
     * Hot Water Tank:
@@ -92,8 +92,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Operating mode `HEAT/COOL`.
       * Outdoor temperature `GET`.
     * Zone 1 and 2:
-      * Operating Mode Heat `HEAT/COOL/AUTO` - `HEAT THERMOSTAT/HEAT FLOW/CURVE`.
-      * Operating Mode Cool `HEAT/COOL` - `COOL THERMOSTAT/COOL FLOW`.
+      * Operating mode heat `HEAT/COOL/AUTO` - `HEAT THERMOSTAT/HEAT FLOW/CURVE`.
+      * Operating mode cool `HEAT/COOL` - `COOL THERMOSTAT/COOL FLOW`.
       * Heating/Cooling temperature.
     * Hot Water Tank:
       * Operating mode `HEAT/AUTO` - `HEAT NOW, AUTO`.
@@ -102,13 +102,13 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
     * Use to direct device control.  
       * Power `ON/OFF`.
       * Operating mode `HEAT/COOL/CURVE/HOLIDAY/AUTO HOT WATER/ECO HOT WATER/FORCE HOT WATER`.
-      * Physical lock controls `LOCK/UNLOCK` Zone 1, 2 und Hot Water Tank.
+      * Physical lock controls `LOCK/UNLOCK`.
       * Presets `SET/UNSET`. 
   * Sensors:
     * Use with automations in HomeKit app. 
-      * Identify Power `ON/OFF`.
+      * Identify power `ON/OFF`.
       * Identify operating mode `HEAT/COOL/CURVE/HOLIDAY/AUTO HOT WATER/ECO HOT WATER/FORCE HOT WATER`.
-      * Identify physical lock controls `LOCK/UNLOCK` Zone 1, 2 und Hot Water.
+      * Identify physical lock controls `LOCK/UNLOCK`.
       * Identify device presets. 
 * Energy Recovery Ventilation Lossnay:
   * Heater Cooler:
@@ -116,11 +116,11 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
     * Operating mode `AUTO/HEAT/COOL/POWER OFF` - `AUTO, LOSSNAY, BYPAS, POWER OFF`.
     * Fan speed `OFF/1/2/3/4/AUTO`.
     * Physical lock controls `LOCK/UNLOCK`.
-    * Change Temperature Unit `°F/°C`.
+    * Change temperature unit `°F/°C`.
   * Thermostat:
     * Power `ON/OFF`.
     * Operating mode `POWER OFF/HEAT/COOL/AUTO` - `POWER OFF, LOSSNAY, BYPAS, AUTO`.
-    * Change Temperature Unit `°F/°C`.
+    * Change temperature unit `°F/°C`.
   * Buttons:
     * Use to direct device control.
       * Power `ON/OFF`.
@@ -135,10 +135,10 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Identify physical lock controls `LOCK/UNLOCK`.
       * Identify fan speed mode `AUTO/1/2/3/4`.
       * Identify device presets. 
-      * Core maintenance indication
-      * Filter maintenance indication
-      * CO2 detected and level
-      * PM2.5 air quality and level
+      * Core maintenance indication.
+      * Filter maintenance indication.
+      * CO2 detected and level.
+      * PM2.5 air quality and level.
 
 <p align="left">
   <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/homekit.png" width="382"></a> 
