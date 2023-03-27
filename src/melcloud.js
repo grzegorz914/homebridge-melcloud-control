@@ -6,15 +6,8 @@ const EventEmitter = require('events');
 const CONSTANS = require('./constans.json');
 
 class MelCloud extends EventEmitter {
-    constructor(config) {
+    constructor(accountName, user, passwd, language, enableDebugMode, prefDir) {
         super();
-        const accountName = config.accountName;
-        const user = config.user;
-        const passwd = config.passwd;
-        const language = config.language;
-        const debugLog = config.debugLog;
-        const prefDir = config.prefDir
-
         this.accountInfoFile = `${prefDir}/${accountName}_Account`;
         const buildingsFile = `${prefDir}/${accountName}_Buildings`;
         const devicesId = [];
@@ -41,7 +34,7 @@ class MelCloud extends EventEmitter {
 
             try {
                 const accountData = await this.axiosInstanceLogin(CONSTANS.ApiUrls.ClientLogin, options);
-                const debug = debugLog ? this.emit('debug', `debug MELCloud Info: ${JSON.stringify(accountData.data, null, 2)}`) : false;
+                const debug = enableDebugMode ? this.emit('debug', `debug MELCloud Info: ${JSON.stringify(accountData.data, null, 2)}`) : false;
                 const accountInfo = accountData.data.LoginData;
                 const contextKey = accountInfo.ContextKey;
 
@@ -50,8 +43,6 @@ class MelCloud extends EventEmitter {
                     this.reconnect();
                     return;
                 };
-
-                this.emit('connected', accountInfo, contextKey);
 
                 //create axios instance get
                 this.axiosInstanceGet = axios.create({
@@ -74,6 +65,9 @@ class MelCloud extends EventEmitter {
                     }
                 });
 
+                this.accountInfo = accountInfo;
+                this.contextKey = contextKey;
+
                 //save melcloud info to the file
                 try {
                     await fsPromises.writeFile(this.accountInfoFile, JSON.stringify(accountInfo, null, 2));
@@ -82,18 +76,18 @@ class MelCloud extends EventEmitter {
                 };
 
                 await new Promise(resolve => setTimeout(resolve, 500));
-                this.emit('checkDevicesList');
+                this.emit('checkDevicesList', accountInfo, contextKey);
             } catch (error) {
                 this.emit('error', `login error, ${error}, reconnect in 65s.`);
                 this.reconnect();
             };
         }).on('checkDevicesList', async () => {
-            const debug = debugLog ? this.emit('debug', `scanning for devices.`) : false;
+            const debug = enableDebugMode ? this.emit('debug', `scanning for devices.`) : false;
 
             try {
                 const listDevicesData = await this.axiosInstanceGet(CONSTANS.ApiUrls.ListDevices);
                 const buildingsData = JSON.stringify(listDevicesData.data, null, 2);
-                const debug1 = debugLog ? this.emit('debug', `debug Buildings: ${buildingsData}`) : false;
+                const debug1 = enableDebugMode ? this.emit('debug', `debug Buildings: ${buildingsData}`) : false;
 
                 //read building structure and get the devices
                 const buildingsList = listDevicesData.data;
@@ -133,7 +127,7 @@ class MelCloud extends EventEmitter {
                 }
 
                 const devicesCount = devices.length;
-                const debug2 = debugLog ? this.emit('debug', `found: ${devicesCount} devices.`) : false;
+                const debug2 = enableDebugMode ? this.emit('debug', `found: ${devicesCount} devices.`) : false;
 
                 for (const deviceInfo of devices) {
                     const buildingId = deviceInfo.BuildingID.toString();
@@ -153,7 +147,7 @@ class MelCloud extends EventEmitter {
                     //prepare device if not in devices array
                     if (!devicesId.includes(deviceId)) {
                         devicesId.push(deviceId);
-                        this.emit('checkDevicesListComplete', buildingId, deviceId, deviceType, deviceName, deviceTypeText);
+                        this.emit('checkDevicesListComplete', this.accountInfo, this.contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText);
                     }
                 }
 
