@@ -39,7 +39,7 @@ class MelCloudPlatform {
 				melCloud.on('checkDevicesListComplete', (accountInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText) => {
 
 					//prepare devices
-					const melCloudDevice = new MelCloudDevice(log, api, account, accountName, prefDir, melCloud, accountInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText)
+					const melCloudDevice = new MelCloudDevice(api, account, accountName, prefDir, melCloud, accountInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText)
 					melCloudDevice.on('publishAccessory', (accessory) => {
 
 						//publish devices
@@ -48,17 +48,29 @@ class MelCloudPlatform {
 					})
 						.on('removeAccessory', (accessory) => {
 							api.unregisterPlatformAccessories(CONSTANS.PluginName, CONSTANS.PlatformName, [accessory]);
-							const debug = enableDebugMode ? log(`${deviceTypeText} ${deviceName}, removed.`) : false;
+							const debug = enableDebugMode ? log(`${deviceTypeText} ${accessory}, removed.`) : false;
+						})
+						.on('devInfo', (devInfo) => {
+							log(devInfo);
+						})
+						.on('message', (message) => {
+							log(deviceTypeText, deviceName, message);
+						})
+						.on('debug', (debug) => {
+							log(deviceTypeText, deviceName, debug);
+						})
+						.on('error', (error) => {
+							log(deviceTypeText, deviceName, error);
 						});
 				})
 					.on('message', (message) => {
 						log(`Account ${accountName}, ${message}`);
 					})
-					.on('error', (error) => {
-						log.error(`Account ${accountName}, ${error}`);
-					})
 					.on('debug', (debug) => {
 						log(`Account ${accountName}, ${debug}`);
+					})
+					.on('error', (error) => {
+						log.error(`Account ${accountName}, ${error}`);
 					});
 			};
 		});
