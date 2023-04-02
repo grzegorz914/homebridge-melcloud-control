@@ -46,10 +46,6 @@ class MelCloudPlatform {
 						api.publishExternalAccessories(CONSTANS.PluginName, [accessory]);
 						const debug = enableDebugMode ? log(`${deviceTypeText} ${deviceName}, published as external accessory.`) : false;
 					})
-						.on('removeAccessory', (accessory) => {
-							api.unregisterPlatformAccessories(CONSTANS.PluginName, CONSTANS.PlatformName, [accessory]);
-							const debug = enableDebugMode ? log(`${deviceTypeText} ${accessory}, removed.`) : false;
-						})
 						.on('devInfo', (devInfo) => {
 							log(devInfo);
 						})

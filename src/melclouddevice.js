@@ -492,6 +492,7 @@ class MelCloudDevice extends EventEmitter {
 
                             const accessory = await this.prepareAccessory();
                             this.emit('publishAccessory', accessory);
+                            this.startPrepareAccessory = false;
                         } catch (error) {
                             this.emit('error', `prepare accessory error: ${error}`);
                         };
@@ -1942,6 +1943,7 @@ class MelCloudDevice extends EventEmitter {
                                 accessory.addService(this.ataPresetsServices[i]);
                             };
                         };
+                        resolve(accessory);
                         break;
                     case 1: //heat pump
                         const debug1 = this.enableDebugMode ? this.emit('debug', `Prepare atw service`) : false;
@@ -2652,6 +2654,8 @@ class MelCloudDevice extends EventEmitter {
                                 accessory.addService(this.atwPresetsServices[i]);
                             };
                         };
+
+                        resolve(accessory);
                         break;
                     case 3: //energy recovery ventilation
                         const debug3 = this.enableDebugMode ? this.emit('debug', `Prepare erv service`) : false;
@@ -3183,11 +3187,9 @@ class MelCloudDevice extends EventEmitter {
                         resolve(accessory);
                         break;
                     default: //unknown system detected
-                        this.emit('message', `Unknown system type: ${deviceType} detected.`);
+                        reject(`Unknown system type: ${deviceType} detected.`);
                         break;
                 };
-
-                resolve(accessory);
             } catch (error) {
                 reject(error);
             };
