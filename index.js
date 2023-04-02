@@ -8,13 +8,18 @@ class MelCloudPlatform {
 	constructor(log, config, api) {
 		// only load if configured
 		if (!config || !Array.isArray(config.accounts)) {
-			log(`No configuration found for ${CONSTANS.PluginName}`);
+			log.warn(`No configuration found for ${CONSTANS.PluginName}`);
 			return;
 		}
 		this.accessories = [];
 
+		//check if the directory exists, if not then create it
+		const prefDir = path.join(api.user.storagePath(), 'melcloud');
+		if (!fs.existsSync(prefDir)) {
+			fs.mkdirSync(prefDir);
+		};
+
 		api.on('didFinishLaunching', () => {
-			log.debug('didFinishLaunching');
 			for (const account of config.accounts) {
 				const accountName = account.name;
 				const user = account.user;
@@ -22,23 +27,18 @@ class MelCloudPlatform {
 				const language = account.language;
 				const enableDebugMode = account.enableDebugMode;
 
-				//check if the directory exists, if not then create it
-				const prefDir = path.join(api.user.storagePath(), 'melcloud');
-				if (!fs.existsSync(prefDir)) {
-					fs.mkdirSync(prefDir);
-				};
-
 				//check mandatory properties
 				if (!accountName || !user || !passwd || !language) {
 					this.log(`Name, user, password or language in config missing.`);
 					return;
 				}
+				const debug = enableDebugMode ? log(`Account ${accountName}, did finish launching.`) : false;
 
-				//connect to melcloud
+				//melcloud account
 				const melCloud = new MelCloud(accountName, user, passwd, language, enableDebugMode, prefDir);
 				melCloud.on('checkDevicesListComplete', (accountInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText) => {
 
-					//prepare devices
+					//melcloud devices
 					const melCloudDevice = new MelCloudDevice(api, account, accountName, prefDir, melCloud, accountInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText)
 					melCloudDevice.on('publishAccessory', (accessory) => {
 
