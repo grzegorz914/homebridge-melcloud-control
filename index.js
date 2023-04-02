@@ -56,7 +56,7 @@ class MelCloudPlatform {
 							log(`${deviceTypeText}, ${deviceName}, debug: ${debug}`);
 						})
 						.on('error', (error) => {
-							log(deviceTypeText, deviceName, error);
+							log.error(deviceTypeText, deviceName, error);
 						});
 				})
 					.on('message', (message) => {
