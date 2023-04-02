@@ -29,7 +29,7 @@ class MelCloudPlatform {
 
 				//check mandatory properties
 				if (!accountName || !user || !passwd || !language) {
-					this.log(`Name, user, password or language in config missing.`);
+					log.warn(`Name, user, password or language in config missing.`);
 					return;
 				}
 				const debug = enableDebugMode ? log(`Account ${accountName}, did finish launching.`) : false;
