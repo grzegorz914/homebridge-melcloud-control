@@ -72,11 +72,13 @@ class MelCloudDevice extends EventEmitter {
 
             this.mqtt.on('connected', (message) => {
                 this.emit('message', message);
-            }).on('debug', (debug) => {
-                this.emit('debug', debug);
-            }).on('error', (error) => {
-                this.emit('error', error);
-            });
+            })
+                .on('debug', (debug) => {
+                    this.emit('debug', debug);
+                })
+                .on('error', (error) => {
+                    this.emit('error', error);
+                });
         }
 
         //melcloud device
@@ -488,21 +490,25 @@ class MelCloudDevice extends EventEmitter {
                             this.operationModeSetPropsValidValues = operationModeSetPropsValidValues;
                             this.fanSpeedSetPropsMaxValue = fanSpeedSetPropsMaxValue;
 
-                            await this.prepareAccessory();
-                            this.startPrepareAccessory = false;
+                            const accessory = await this.prepareAccessory();
+                            this.emit('publishAccessory', accessory);
                         } catch (error) {
                             this.emit('error', `prepare accessory error: ${error}`);
                         };
                     };
-                }).on('message', (message) => {
-                    this.emit('message', message);
-                }).on('debug', (debug) => {
-                    this.emit('debug', debug);
-                }).on('error', (error) => {
-                    this.emit('error', error);
-                }).on('mqtt', (topic, message) => {
-                    this.mqtt.send(topic, message);
-                });
+                })
+                    .on('message', (message) => {
+                        this.emit('message', message);
+                    })
+                    .on('debug', (debug) => {
+                        this.emit('debug', debug);
+                    })
+                    .on('error', (error) => {
+                        this.emit('error', error);
+                    })
+                    .on('mqtt', (topic, message) => {
+                        this.mqtt.send(topic, message);
+                    });
                 break;
             case 1: //heat pump
                 this.melCloudAtw = new MelCloudAtw({
@@ -941,21 +947,26 @@ class MelCloudDevice extends EventEmitter {
                     //start prepare accessory
                     if (this.startPrepareAccessory) {
                         try {
-                            await this.prepareAccessory();
+                            const accessory = await this.prepareAccessory();
+                            this.emit('publishAccessory', accessory);
                             this.startPrepareAccessory = false;
                         } catch (error) {
                             this.emit('error', `prepare accessory error: ${error}`);
                         };
                     };
-                }).on('message', (message) => {
-                    this.emit('message', message);
-                }).on('debug', (debug) => {
-                    this.emit('debug', debug);
-                }).on('error', (error) => {
-                    this.emit('error', error);
-                }).on('mqtt', (topic, message) => {
-                    this.mqtt.send(topic, message);
-                });
+                })
+                    .on('message', (message) => {
+                        this.emit('message', message);
+                    })
+                    .on('debug', (debug) => {
+                        this.emit('debug', debug);
+                    })
+                    .on('error', (error) => {
+                        this.emit('error', error);
+                    })
+                    .on('mqtt', (topic, message) => {
+                        this.mqtt.send(topic, message);
+                    });
                 break;
             case 3: //energy recovery ventilation
                 this.melCloudErv = new MelCloudErv({
@@ -1296,21 +1307,26 @@ class MelCloudDevice extends EventEmitter {
                             this.operationModeSetPropsValidValues = operationModeSetPropsValidValues;
                             this.fanSpeedSetPropsMaxValue = fanSpeedSetPropsMaxValue;
 
-                            await this.prepareAccessory();
+                            const accessory = await this.prepareAccessory();
+                            this.emit('publishAccessory', accessory);
                             this.startPrepareAccessory = false;
                         } catch (error) {
                             this.emit('error', `prepare accessory error: ${error}`);
                         };
                     };
-                }).on('message', (message) => {
-                    this.emit('message', message);
-                }).on('debug', (debug) => {
-                    this.emit('debug', debug);
-                }).on('error', (error) => {
-                    this.emit('error', error);
-                }).on('mqtt', (topic, message) => {
-                    this.mqtt.send(topic, message);
-                });
+                })
+                    .on('message', (message) => {
+                        this.emit('message', message);
+                    })
+                    .on('debug', (debug) => {
+                        this.emit('debug', debug);
+                    })
+                    .on('error', (error) => {
+                        this.emit('error', error);
+                    })
+                    .on('mqtt', (topic, message) => {
+                        this.mqtt.send(topic, message);
+                    });
                 break;
             default: //unknown system detected
                 this.emit('message', `Unknown system type: ${deviceType} detected.`);
@@ -1323,14 +1339,14 @@ class MelCloudDevice extends EventEmitter {
         return new Promise((resolve, reject) => {
             try {
                 //accessory
-                const debug = this.enableDebugMode ? this.emit('debug', `prepare accessory`) : false;
+                const debug = this.enableDebugMode ? this.emit('debug', `Prepare accessory`) : false;
                 const accessoryName = this.deviceName;
                 const accessoryUUID = UUID.generate(this.deviceId);
                 const accessoryCategory = [Categories.AIR_CONDITIONER, Categories.AIR_HEATER, Categories.OTHER, Categories.AIR_PURIFIER][this.deviceType];
                 const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 
                 //information service
-                const debug1 = this.enableDebugMode ? this.emit('debug', `prepare information service`) : false;
+                const debug1 = this.enableDebugMode ? this.emit('debug', `Prepare information service`) : false;
                 accessory.getService(Service.AccessoryInformation)
                     .setCharacteristic(Characteristic.Manufacturer, this.manufacturer)
                     .setCharacteristic(Characteristic.Model, this.model)
@@ -1347,7 +1363,7 @@ class MelCloudDevice extends EventEmitter {
 
                 switch (deviceType) {
                     case 0: //air conditioner
-                        const debug0 = this.enableDebugMode ? this.emit('debug', `prepare ata service`) : false;
+                        const debug0 = this.enableDebugMode ? this.emit('debug', `Prepare ata service`) : false;
                         const ataDisplayMode = this.ataDisplayMode;
                         const ataButtons = this.ataButtonsConfigured;
                         const ataButtonsCount = this.ataButtonsConfiguredCount;
@@ -1676,7 +1692,7 @@ class MelCloudDevice extends EventEmitter {
 
                         //buttons services
                         if (ataButtonsCount > 0) {
-                            const debug = this.enableDebugMode ? this.emit('debug', `prepare buttons service`) : false;
+                            const debug = this.enableDebugMode ? this.emit('debug', `Prepare buttons service`) : false;
                             this.ataButtonsServices = [];
 
                             for (let i = 0; i < ataButtonsCount; i++) {
@@ -1882,7 +1898,7 @@ class MelCloudDevice extends EventEmitter {
 
                         //presets services
                         if (ataPresetsCount > 0) {
-                            const debug = this.enableDebugMode ? this.emit('debug', `prepare presets service`) : false;
+                            const debug = this.enableDebugMode ? this.emit('debug', `Prepare presets service`) : false;
                             this.ataPresetsServices = [];
                             const ataPreviousPresets = [];
 
@@ -1928,7 +1944,7 @@ class MelCloudDevice extends EventEmitter {
                         };
                         break;
                     case 1: //heat pump
-                        const debug1 = this.enableDebugMode ? this.emit('debug', `prepare atw service`) : false;
+                        const debug1 = this.enableDebugMode ? this.emit('debug', `Prepare atw service`) : false;
                         const atwZonesCount = this.atwZonesCount;
                         const atwButtons = this.atwButtonsConfigured;
                         const atwButtonsCount = this.atwButtonsConfiguredCount;
@@ -2434,7 +2450,7 @@ class MelCloudDevice extends EventEmitter {
 
                         //buttons services
                         if (atwButtonsCount > 0) {
-                            const debug = this.enableDebugMode ? this.emit('debug', `prepare buttons service`) : false;
+                            const debug = this.enableDebugMode ? this.emit('debug', `Prepare buttons service`) : false;
                             this.atwButtonsServices = [];
 
                             for (let i = 0; i < atwButtonsCount; i++) {
@@ -2586,7 +2602,7 @@ class MelCloudDevice extends EventEmitter {
 
                         //presets services
                         if (atwPresetsCount > 0) {
-                            const debug = this.enableDebugMode ? this.emit('debug', `prepare presets service`) : false;
+                            const debug = this.enableDebugMode ? this.emit('debug', `Prepare presets service`) : false;
                             this.atwPresetsServices = [];
                             const atwPreviousPresets = [];
 
@@ -2638,7 +2654,7 @@ class MelCloudDevice extends EventEmitter {
                         };
                         break;
                     case 3: //energy recovery ventilation
-                        const debug3 = this.enableDebugMode ? this.emit('debug', `prepare erv service`) : false;
+                        const debug3 = this.enableDebugMode ? this.emit('debug', `Prepare erv service`) : false;
                         const ervDisplayMode = this.ervDisplayMode;
                         const ervButtons = this.ervButtonsConfigured;
                         const ervButtonsCount = this.ervButtonsConfiguredCount;
@@ -3012,7 +3028,7 @@ class MelCloudDevice extends EventEmitter {
 
                         //buttons services
                         if (ervButtonsCount > 0) {
-                            const debug = this.enableDebugMode ? this.emit('debug', `prepare buttons service`) : false;
+                            const debug = this.enableDebugMode ? this.emit('debug', `Prepare buttons service`) : false;
                             this.ervButtonsServices = [];
 
                             for (let i = 0; i < ervButtonsCount; i++) {
@@ -3120,7 +3136,7 @@ class MelCloudDevice extends EventEmitter {
 
                         //presets services
                         if (ervPresetsCount > 0) {
-                            const debug = this.enableDebugMode ? this.emit('debug', `prepare presets service`) : false;
+                            const debug = this.enableDebugMode ? this.emit('debug', `Prepare presets service`) : false;
                             this.ervPresetsServices = [];
                             const ervPreviousPresets = [];
 
@@ -3163,14 +3179,15 @@ class MelCloudDevice extends EventEmitter {
                                 accessory.addService(this.ervPresetsServices[i]);
                             };
                         };
+
+                        resolve(accessory);
                         break;
                     default: //unknown system detected
                         this.emit('message', `Unknown system type: ${deviceType} detected.`);
                         break;
                 };
 
-                this.emit('publishAccessory', accessory)
-                resolve();
+                resolve(accessory);
             } catch (error) {
                 reject(error);
             };

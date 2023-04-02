@@ -57,7 +57,7 @@ class MelCloudPlatform {
 							log(deviceTypeText, deviceName, message);
 						})
 						.on('debug', (debug) => {
-							log(deviceTypeText, deviceName, debug);
+							log(`${deviceTypeText}, ${deviceName}, debug: ${debug}`);
 						})
 						.on('error', (error) => {
 							log(deviceTypeText, deviceName, error);
@@ -67,7 +67,7 @@ class MelCloudPlatform {
 						log(`Account ${accountName}, ${message}`);
 					})
 					.on('debug', (debug) => {
-						log(`Account ${accountName}, ${debug}`);
+						log(`Account ${accountName}, debug: ${debug}`);
 					})
 					.on('error', (error) => {
 						log.error(`Account ${accountName}, ${error}`);

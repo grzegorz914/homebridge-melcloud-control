@@ -57,7 +57,7 @@ class MelCloudErv extends EventEmitter {
             try {
                 const deviceInfoData = await fsPromises.readFile(deviceInfoFile);
                 const deviceInfo = JSON.parse(deviceInfoData);
-                const debug = debugLog ? this.emit('debug', `debug Info: ${JSON.stringify(deviceInfo, null, 2)}`) : false;
+                const debug = debugLog ? this.emit('debug', `Info: ${JSON.stringify(deviceInfo, null, 2)}`) : false;
 
                 //deviceInfo
                 //const deviceId = deviceInfo.DeviceID;
@@ -312,7 +312,7 @@ class MelCloudErv extends EventEmitter {
                 const responseData = await this.axiosInstanceGet(url);
                 const deviceState = responseData.data;
                 const deviceStateData = JSON.stringify(deviceState, null, 2);
-                const debug = debugLog ? this.emit('debug', `debug State: ${deviceStateData}`) : false;
+                const debug = debugLog ? this.emit('debug', `State: ${deviceStateData}`) : false;
 
                 // device ata state
                 const effectiveFlags = deviceState.EffectiveFlags;

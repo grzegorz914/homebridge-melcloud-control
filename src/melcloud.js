@@ -34,7 +34,7 @@ class MelCloud extends EventEmitter {
 
             try {
                 const accountData = await this.axiosInstanceLogin(CONSTANS.ApiUrls.ClientLogin, options);
-                const debug = enableDebugMode ? this.emit('debug', `debug MELCloud Info: ${JSON.stringify(accountData.data, null, 2)}`) : false;
+                const debug = enableDebugMode ? this.emit('debug', `MELCloud Info: ${JSON.stringify(accountData.data, null, 2)}`) : false;
                 const accountInfo = accountData.data.LoginData;
                 const contextKey = accountInfo.ContextKey;
 
@@ -82,12 +82,12 @@ class MelCloud extends EventEmitter {
                 this.reconnect();
             };
         }).on('checkDevicesList', async () => {
-            const debug = enableDebugMode ? this.emit('debug', `scanning for devices.`) : false;
+            const debug = enableDebugMode ? this.emit('debug', `Scanning for devices.`) : false;
 
             try {
                 const listDevicesData = await this.axiosInstanceGet(CONSTANS.ApiUrls.ListDevices);
                 const buildingsData = JSON.stringify(listDevicesData.data, null, 2);
-                const debug1 = enableDebugMode ? this.emit('debug', `debug Buildings: ${buildingsData}`) : false;
+                const debug1 = enableDebugMode ? this.emit('debug', `Buildings: ${buildingsData}`) : false;
 
                 //read building structure and get the devices
                 const buildingsList = listDevicesData.data;
@@ -127,7 +127,7 @@ class MelCloud extends EventEmitter {
                 }
 
                 const devicesCount = devices.length;
-                const debug2 = enableDebugMode ? this.emit('debug', `found: ${devicesCount} devices.`) : false;
+                const debug2 = enableDebugMode ? this.emit('debug', `Found: ${devicesCount} devices.`) : false;
 
                 for (const deviceInfo of devices) {
                     const buildingId = deviceInfo.BuildingID.toString();
