@@ -18,7 +18,6 @@ class MelCloud extends EventEmitter {
             timeout: 15000
         });
 
-
         this.on('connect', async () => {
             const options = {
                 data: {
