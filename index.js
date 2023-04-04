@@ -35,11 +35,11 @@ class MelCloudPlatform {
 				const debug = enableDebugMode ? log(`Account ${accountName}, did finish launching.`) : false;
 
 				//melcloud account
-				const melCloud = new MelCloud(accountName, user, passwd, language, enableDebugMode, prefDir);
+				const melCloud = new MelCloud(prefDir, accountName, user, passwd, language, enableDebugMode);
 				melCloud.on('checkDevicesListComplete', (accountInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText) => {
 
 					//melcloud devices
-					const melCloudDevice = new MelCloudDevice(api, account, accountName, prefDir, melCloud, accountInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText)
+					const melCloudDevice = new MelCloudDevice(api, prefDir, account, accountName, melCloud, accountInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText)
 					melCloudDevice.on('publishAccessory', (accessory) => {
 
 						//publish devices

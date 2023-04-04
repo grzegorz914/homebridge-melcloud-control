@@ -9,13 +9,12 @@ const CONSTANS = require('./constans.json');
 class MelCloudAtw extends EventEmitter {
     constructor(config) {
         super();
+        const prefDir = config.prefDir;
         const accountName = config.accountName;
         const contextKey = config.contextKey;
         const buildingId = config.buildingId;
         const deviceId = config.deviceId;
         const debugLog = config.debugLog;
-        const mqttEnabled = config.mqttEnabled;
-        const prefDir = config.prefDir;
         const deviceInfoFile = `${prefDir}/${accountName}_Device_${deviceId}`;
 
         this.axiosInstanceGet = axios.create({
@@ -390,7 +389,7 @@ class MelCloudAtw extends EventEmitter {
                 const caseZone2 = hasHotWaterTank ? (hasZone2 ? 3 : 2) : -1;
 
                 this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, presets, presetsCount, zonesCount, heatPumpZoneName, hotWaterZoneName, hasHotWaterTank, temperatureIncrement, maxTankTemperature, hasZone2, zone1Name, zone2Name, heatCoolModes, caseHotWater, caseZone2);
-                const mqtt = mqttEnabled ? this.emit('mqtt', `Info`, JSON.stringify(deviceInfo, null, 2)) : false;
+                this.emit('mqtt', `Info`, JSON.stringify(deviceInfo, null, 2));
 
                 //check device state
                 await new Promise(resolve => setTimeout(resolve, 1500));
@@ -511,7 +510,7 @@ class MelCloudAtw extends EventEmitter {
                 this.offline = offline;
 
                 this.emit('deviceState', deviceState, setTemperatureZone1, setTemperatureZone2, roomTemperatureZone1, roomTemperatureZone2, operationMode, operationModeZone1, operationModeZone2, setHeatFlowTemperatureZone1, setHeatFlowTemperatureZone2, setCoolFlowTemperatureZone1, setCoolFlowTemperatureZone2, hcControlType, tankWaterTemperature, setTankWaterTemperature, forcedHotWaterMode, unitStatus, outdoorTemperature, ecoHotWater, holidayMode, prohibitZone1, prohibitZone2, prohibitHotWater, idleZone1, idleZone2, power, offline);
-                const mqtt = mqttEnabled ? this.emit('mqtt', `State`, JSON.stringify(deviceState, null, 2)) : false;
+                this.emit('mqtt', `State`, JSON.stringify(deviceState, null, 2));
                 this.checkDeviceInfo();
             } catch (error) {
                 this.emit('error', `check device state error, ${error}, check again in 60s.`);

@@ -8,7 +8,7 @@ const CONSTANS = require('./constans.json');
 let Accessory, Characteristic, Service, Categories, UUID;
 
 class MelCloudDevice extends EventEmitter {
-    constructor(api, account, accountName, prefDir, melCloud, accountInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText) {
+    constructor(api, prefDir, account, accountName, melCloud, accountInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText) {
         super();
 
         Accessory = api.platformAccessory;
@@ -85,13 +85,12 @@ class MelCloudDevice extends EventEmitter {
         switch (deviceType) {
             case 0: //air conditioner
                 this.melCloudAta = new MelCloudAta({
+                    prefDir: prefDir,
                     accountName: accountName,
                     contextKey: contextKey,
                     buildingId: buildingId,
                     deviceId: deviceId,
-                    debugLog: this.enableDebugMode,
-                    mqttEnabled: mqttEnabled,
-                    prefDir: prefDir
+                    debugLog: this.enableDebugMode
                 });
 
                 this.melCloudAta.on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, presets, presetsCount, hasAutomaticFanSpeed, airDirectionFunction, swingFunction, numberOfFanSpeeds, temperatureIncrement, minTempCoolDry, maxTempCoolDry, minTempHeat, maxTempHeat, minTempAutomatic, maxTempAutomatic, modelSupportsFanSpeed, modelSupportsAuto, modelSupportsHeat, modelSupportsDry) => {
@@ -508,18 +507,17 @@ class MelCloudDevice extends EventEmitter {
                         this.emit('error', error);
                     })
                     .on('mqtt', (topic, message) => {
-                        this.mqtt.send(topic, message);
+                        const mqtt = mqttEnabled ? this.mqtt.send(topic, message) : false;
                     });
                 break;
             case 1: //heat pump
                 this.melCloudAtw = new MelCloudAtw({
+                    prefDir: prefDir,
                     accountName: accountName,
                     contextKey: contextKey,
                     buildingId: buildingId,
                     deviceId: deviceId,
-                    debugLog: this.enableDebugMode,
-                    mqttEnabled: mqttEnabled,
-                    prefDir: prefDir
+                    debugLog: this.enableDebugMode
                 });
 
                 this.melCloudAtw.on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, presets, presetsCount, zonesCount, heatPumpZoneName, hotWaterZoneName, hasHotWaterTank, temperatureIncrement, maxTankTemperature, hasZone2, zone1Name, zone2Name, heatCoolModes, caseHotWater, caseZone2) => {
@@ -966,18 +964,17 @@ class MelCloudDevice extends EventEmitter {
                         this.emit('error', error);
                     })
                     .on('mqtt', (topic, message) => {
-                        this.mqtt.send(topic, message);
+                        const mqtt = mqttEnabled ? this.mqtt.send(topic, message) : false;
                     });
                 break;
             case 3: //energy recovery ventilation
                 this.melCloudErv = new MelCloudErv({
+                    prefDir: prefDir,
                     accountName: accountName,
                     contextKey: contextKey,
                     buildingId: buildingId,
                     deviceId: deviceId,
-                    debugLog: this.enableDebugMode,
-                    mqttEnabled: mqttEnabled,
-                    prefDir: prefDir
+                    debugLog: this.enableDebugMode
                 });
 
                 this.melCloudErv.on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, presets, presetsCount, hasCoolOperationMode, hasHeatOperationMode, hasAutoOperationMode, hasRoomTemperature, hasSupplyTemperature, hasOutdoorTemperature, hasCO2Sensor, hasPM25Sensor, pM25SensorStatus, pM25Level, hasAutoVentilationMode, hasBypassVentilationMode, hasAutomaticFanSpeed, coreMaintenanceRequired, filterMaintenanceRequired, roomCO2Level, actualVentilationMode, numberOfFanSpeeds, temperatureIncrement) => {
@@ -1326,7 +1323,7 @@ class MelCloudDevice extends EventEmitter {
                         this.emit('error', error);
                     })
                     .on('mqtt', (topic, message) => {
-                        this.mqtt.send(topic, message);
+                        const mqtt = mqttEnabled ? this.mqtt.send(topic, message) : false;
                     });
                 break;
             default: //unknown system detected

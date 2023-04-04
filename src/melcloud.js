@@ -6,7 +6,7 @@ const EventEmitter = require('events');
 const CONSTANS = require('./constans.json');
 
 class MelCloud extends EventEmitter {
-    constructor(accountName, user, passwd, language, enableDebugMode, prefDir) {
+    constructor(prefDir, accountName, user, passwd, language, enableDebugMode) {
         super();
         this.accountInfoFile = `${prefDir}/${accountName}_Account`;
         const buildingsFile = `${prefDir}/${accountName}_Buildings`;
