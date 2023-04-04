@@ -4,6 +4,7 @@ const fs = require('fs');
 const MelCloud = require('./src/melcloud.js')
 const MelCloudDevice = require('./src/melclouddevice.js')
 const CONSTANS = require('./src/constans.json');
+
 class MelCloudPlatform {
 	constructor(log, config, api) {
 		// only load if configured
