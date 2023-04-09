@@ -5,7 +5,6 @@ const axios = require('axios');
 const EventEmitter = require('events');
 const CONSTANS = require('./constans.json');
 
-
 class MelCloudAta extends EventEmitter {
     constructor(config) {
         super();
@@ -308,7 +307,7 @@ class MelCloudAta extends EventEmitter {
                 this.emit('mqtt', `Info`, JSON.stringify(deviceInfo, null, 2));
 
                 //check device state
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                await new Promise(resolve => setTimeout(resolve, 1000));
                 this.emit('checkDeviceState');
             } catch (error) {
                 this.emit('error', `check info, ${error}, check again in 60s.`);

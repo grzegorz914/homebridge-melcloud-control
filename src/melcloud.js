@@ -145,8 +145,8 @@ class MelCloud extends EventEmitter {
 
                     //prepare device if not in devices array
                     if (!devicesId.includes(deviceId)) {
-                        devicesId.push(deviceId);
                         this.emit('checkDevicesListComplete', this.accountInfo, this.contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText);
+                        devicesId.push(deviceId);
                     }
                 }
 

@@ -49,6 +49,7 @@ class MelCloudDevice extends EventEmitter {
 
         //mqtt client
         const mqttEnabled = account.enableMqtt || false;
+        this.mqttConnected = false;
         if (mqttEnabled) {
             const mqttDebug = account.mqttDebug || false;
             const mqttHost = account.mqttHost;
@@ -72,6 +73,7 @@ class MelCloudDevice extends EventEmitter {
 
             this.mqtt.on('connected', (message) => {
                 this.emit('message', message);
+                this.mqttConnected = true;
             })
                 .on('debug', (debug) => {
                     this.emit('debug', debug);
@@ -507,7 +509,7 @@ class MelCloudDevice extends EventEmitter {
                         this.emit('error', error);
                     })
                     .on('mqtt', (topic, message) => {
-                        const mqtt = mqttEnabled ? this.mqtt.send(topic, message) : false;
+                        const mqtt = this.mqttConnected ? this.mqtt.send(topic, message) : false;
                     });
                 break;
             case 1: //heat pump
@@ -561,13 +563,6 @@ class MelCloudDevice extends EventEmitter {
                     this.atwPresets = presets;
                     this.atwPresetsCount = this.atwPresetsEnabled ? presetsCount : 0;
                 }).on('deviceState', async (deviceState, setTemperatureZone1, setTemperatureZone2, roomTemperatureZone1, roomTemperatureZone2, operationMode, operationModeZone1, operationModeZone2, setHeatFlowTemperatureZone1, setHeatFlowTemperatureZone2, setCoolFlowTemperatureZone1, setCoolFlowTemperatureZone2, hcControlType, tankWaterTemperature, setTankWaterTemperature, forcedHotWaterMode, unitStatus, outdoorTemperature, ecoHotWater, holidayMode, prohibitZone1, prohibitZone2, prohibitHotWater, idleZone1, idleZone2, power, offline) => {
-                    //check device and zones count
-                    const zonesCount = this.atwZonesCount;
-                    if (zonesCount === 0) {
-                        this.emit('message', `No device or zones found.`);
-                        return;
-                    };
-
                     //device info
                     const displayMode = this.atwDisplayMode;
                     const buttonsCount = this.atwButtonsCount;
@@ -964,7 +959,7 @@ class MelCloudDevice extends EventEmitter {
                         this.emit('error', error);
                     })
                     .on('mqtt', (topic, message) => {
-                        const mqtt = mqttEnabled ? this.mqtt.send(topic, message) : false;
+                        const mqtt = this.mqttConnected ? this.mqtt.send(topic, message) : false;
                     });
                 break;
             case 3: //energy recovery ventilation
@@ -1323,7 +1318,7 @@ class MelCloudDevice extends EventEmitter {
                         this.emit('error', error);
                     })
                     .on('mqtt', (topic, message) => {
-                        const mqtt = mqttEnabled ? this.mqtt.send(topic, message) : false;
+                        const mqtt = this.mqttConnected ? this.mqtt.send(topic, message) : false;
                     });
                 break;
             default: //unknown system detected

@@ -5,7 +5,6 @@ const axios = require('axios');
 const EventEmitter = require('events');
 const CONSTANS = require('./constans.json');
 
-
 class MelCloudAtw extends EventEmitter {
     constructor(config) {
         super();
@@ -388,11 +387,17 @@ class MelCloudAtw extends EventEmitter {
                 const caseHotWater = hasHotWaterTank ? 2 : -1;
                 const caseZone2 = hasHotWaterTank ? (hasZone2 ? 3 : 2) : -1;
 
+                if (zonesCount === 0) {
+                    this.emit('message', `No device or zones found.`);
+                    this.checkDeviceInfo();
+                    return;
+                };
+
                 this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, presets, presetsCount, zonesCount, heatPumpZoneName, hotWaterZoneName, hasHotWaterTank, temperatureIncrement, maxTankTemperature, hasZone2, zone1Name, zone2Name, heatCoolModes, caseHotWater, caseZone2);
                 this.emit('mqtt', `Info`, JSON.stringify(deviceInfo, null, 2));
 
                 //check device state
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                await new Promise(resolve => setTimeout(resolve, 1000));
                 this.emit('checkDeviceState');
             } catch (error) {
                 this.emit('error', `check info, ${error}, check again in 60s.`);
