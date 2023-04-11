@@ -1452,11 +1452,32 @@ class MelCloudDevice extends EventEmitter {
                                         })
                                         .onSet(async (value) => {
                                             try {
-                                                const power = (ataHasAutomaticFanSpeed && value > 0) || (!ataHasAutomaticFanSpeed && value > 1) ? true : false;
-                                                const fanSpeed = ataHasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 6, 0][value] : [1, 1, 2, 3, 4, 5, 6][value]; //AUTO, 1, 2, 3, 4, 5, 6
-                                                const fanSpeedModeText = ataHasAutomaticFanSpeed ? [7, 1, 2, 3, 4, 5, 6, 0][value] : [7, 1, 2, 3, 4, 5, 6][value]; //AUTO, 1, 2, 3, 4, 5, 6, OFF
+                                                let fanSpeed = 0; //AUTO, 1, 2, 3, 4, 5, 6
+                                                let fanSpeedModeText = 0; //AUTO, 1, 2, 3, 4, 5, 6, OFF
+                                                switch (ataNumberOfFanSpeeds) {
+                                                    case 2: //Fan speed mode 2
+                                                        fanSpeed = ataHasAutomaticFanSpeed ? [0, 1, 2, 0][value] : [1, 1, 2][value];
+                                                        fanSpeedModeText = ataHasAutomaticFanSpeed ? [7, 1, 2, 0][value] : [7, 1, 2][value];
+                                                        break;
+                                                    case 3: //Fan speed mode 3
+                                                        fanSpeed = ataHasAutomaticFanSpeed ? [0, 1, 2, 3, 0][value] : [1, 1, 2, 3][value];
+                                                        fanSpeedModeText = ataHasAutomaticFanSpeed ? [7, 1, 2, 3, 0][value] : [7, 1, 2, 3][value];
+                                                        break;
+                                                    case 4: //Fan speed mode 4
+                                                        fanSpeed = ataHasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 0][value] : [1, 1, 2, 3, 4][value];
+                                                        fanSpeedModeText = ataHasAutomaticFanSpeed ? [7, 1, 2, 3, 4, 0][value] : [7, 1, 2, 3, 4][value];
+                                                        break;
+                                                    case 5: //Fan speed mode 5
+                                                        fanSpeed = ataHasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 0][value] : [1, 1, 2, 3, 4, 5][value];
+                                                        fanSpeedModeText = ataHasAutomaticFanSpeed ? [7, 1, 2, 3, 4, 5, 0][value] : [7, 1, 2, 3, 4, 5][value];
+                                                        break;
+                                                    case 6: //Fan speed mode 6
+                                                        fanSpeed = ataHasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 6, 0][value] : [1, 1, 2, 3, 4, 5, 6][value];
+                                                        fanSpeedModeText = ataHasAutomaticFanSpeed ? [7, 1, 2, 3, 4, 5, 6, 0][value] : [7, 1, 2, 3, 4, 5, 6][value];
+                                                        break;
+                                                };
 
-                                                deviceState.Power = power;
+                                                deviceState.Power = (ataHasAutomaticFanSpeed && value > 0) || (!ataHasAutomaticFanSpeed && value > 1) ? true : false;
                                                 deviceState.SetFanSpeed = fanSpeed;
                                                 deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
                                                 await this.melCloudAta.send(deviceState);
@@ -2748,11 +2769,24 @@ class MelCloudDevice extends EventEmitter {
                                     })
                                     .onSet(async (value) => {
                                         try {
-                                            const power = (ervHasAutomaticFanSpeed && value > 0) || (!ervHasAutomaticFanSpeed && value > 1) ? true : false;
-                                            const fanSpeed = ervHasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 0][value] : [1, 1, 2, 3, 4][value]; //AUTO, 1, 2, 3, 4, OFF
-                                            const fanSpeedModeText = ervHasAutomaticFanSpeed ? [5, 1, 2, 3, 4, 0][value] : [5, 1, 2, 3, 4][value];
+                                            let fanSpeed = 0; //AUTO, 1, 2, 3, 4
+                                            let fanSpeedModeText = 0; //AUTO, 1, 2, 3, 4, OFF
+                                            switch (ataNumberOfFanSpeeds) {
+                                                case 2: //Fan speed mode 2
+                                                    fanSpeed = ataHasAutomaticFanSpeed ? [0, 1, 2, 0][value] : [1, 1, 2][value];
+                                                    fanSpeedModeText = ataHasAutomaticFanSpeed ? [5, 1, 2, 0][value] : [5, 1, 2][value];
+                                                    break;
+                                                case 3: //Fan speed mode 3
+                                                    fanSpeed = ataHasAutomaticFanSpeed ? [0, 1, 2, 3, 0][value] : [1, 1, 2, 3][value];
+                                                    fanSpeedModeText = ataHasAutomaticFanSpeed ? [5, 1, 2, 3, 0][value] : [5, 1, 2, 3][value];
+                                                    break;
+                                                case 4: //Fan speed mode 4
+                                                    fanSpeed = ataHasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 0][value] : [1, 1, 2, 3, 4][value];
+                                                    fanSpeedModeText = ataHasAutomaticFanSpeed ? [5, 1, 2, 3, 4, 0][value] : [5, 1, 2, 3, 4][value];
+                                                    break;
+                                            };
 
-                                            deviceState.Power = power;
+                                            deviceState.Power = (ervHasAutomaticFanSpeed && value > 0) || (!ervHasAutomaticFanSpeed && value > 1) ? true : false;;
                                             deviceState.SetFanSpeed = fanSpeed;
                                             deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
                                             await this.melCloudErv.send(deviceState);
