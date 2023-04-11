@@ -315,9 +315,9 @@ class MelCloudErv extends EventEmitter {
                 // device ata state
                 const effectiveFlags = deviceState.EffectiveFlags;
                 const localIPAddress = deviceState.LocalIPAddress;
-                const roomTemperature = deviceState.RoomTemperature;
-                const supplyTemperature = deviceState.SupplyTemperature;
-                const outdoorTemperature = deviceState.OutdoorTemperature;
+                const roomTemperature = deviceState.RoomTemperature.toFixed(1);
+                const supplyTemperature = deviceState.SupplyTemperature.toFixed(1);
+                const outdoorTemperature = deviceState.OutdoorTemperature.toFixed(1);
                 const roomCO2Level = deviceState.RoomCO2Level;
                 const nightPurgeMode = deviceState.NightPurgeMode;
                 const coreMaintenanceRequired = deviceState.CoreMaintenanceRequired;

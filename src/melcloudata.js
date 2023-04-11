@@ -324,7 +324,7 @@ class MelCloudAta extends EventEmitter {
                 // device state
                 const effectiveFlags = deviceState.EffectiveFlags;
                 const localIPAddress = deviceState.LocalIPAddress;
-                const roomTemperature = deviceState.RoomTemperature;
+                const roomTemperature = deviceState.RoomTemperature.toFixed(1);
                 const setTemperature = deviceState.SetTemperature;
                 const setFanSpeed = deviceState.SetFanSpeed;
                 const operationMode = deviceState.OperationMode;
