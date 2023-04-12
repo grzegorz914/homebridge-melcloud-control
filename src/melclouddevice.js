@@ -566,6 +566,7 @@ class MelCloudDevice extends EventEmitter {
                     //device info
                     const displayMode = this.atwDisplayMode;
                     const buttonsCount = this.atwButtonsCount;
+                    const zonesCount = this.atwZonesCount;
                     const hasHotWaterTank = this.atwHasHotWaterTank;
                     const hasZone2 = this.atwHasZone2;
                     const heatCoolModes = this.atwHeatCoolModes;
