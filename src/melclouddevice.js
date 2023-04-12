@@ -1513,7 +1513,7 @@ class MelCloudDevice extends EventEmitter {
                                     .setProps({
                                         minValue: -35,
                                         maxValue: 150,
-                                        minStep: this.ataTemperatureIncrement
+                                        minStep: 0.5
                                     })
                                     .onGet(async () => {
                                         const value = this.roomTemperature;
@@ -1655,7 +1655,7 @@ class MelCloudDevice extends EventEmitter {
                                     .setProps({
                                         minValue: -35,
                                         maxValue: 150,
-                                        minStep: this.ataTemperatureIncrement
+                                        minStep: 0.5
                                     })
                                     .onGet(async () => {
                                         const value = this.roomTemperature;
@@ -2117,7 +2117,7 @@ class MelCloudDevice extends EventEmitter {
                                         .setProps({
                                             minValue: -35,
                                             maxValue: 150,
-                                            minStep: this.atwTemperatureIncrement
+                                            minStep: 0.5
                                         })
                                         .onGet(async () => {
                                             const value = this.roomTemperatures[i];
@@ -2397,7 +2397,7 @@ class MelCloudDevice extends EventEmitter {
                                         .setProps({
                                             minValue: -35,
                                             maxValue: 150,
-                                            minStep: this.atwTemperatureIncrement
+                                            minStep: 0.5
                                         })
                                         .onGet(async () => {
                                             const value = this.roomTemperatures[i];
@@ -2800,7 +2800,7 @@ class MelCloudDevice extends EventEmitter {
                                     .setProps({
                                         minValue: -35,
                                         maxValue: 150,
-                                        minStep: this.ervTemperatureIncrement
+                                        minStep: 0.5
                                     })
                                     .onGet(async () => {
                                         const value = this.roomTemperature;
@@ -2946,7 +2946,7 @@ class MelCloudDevice extends EventEmitter {
                                     .setProps({
                                         minValue: -35,
                                         maxValue: 150,
-                                        minStep: this.ervTemperatureIncrement
+                                        minStep: 0.5
                                     })
                                     .onGet(async () => {
                                         const value = this.roomTemperature;

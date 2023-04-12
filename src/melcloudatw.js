@@ -416,8 +416,8 @@ class MelCloudAtw extends EventEmitter {
                 const localIpAddress = deviceState.LocalIpAddress;
                 const setTemperatureZone1 = deviceState.SetTemperatureZone1;
                 const setTemperatureZone2 = deviceState.SetTemperatureZone2;
-                const roomTemperatureZone1 = deviceState.RoomTemperatureZone1.toFixed(1);
-                const roomTemperatureZone2 = deviceState.RoomTemperatureZone2.toFixed(1);
+                const roomTemperatureZone1 = deviceState.RoomTemperatureZone1;
+                const roomTemperatureZone2 = deviceState.RoomTemperatureZone2;
                 const operationMode = deviceState.OperationMode;
                 const operationModeZone1 = deviceState.OperationModeZone1;
                 const operationModeZone2 = deviceState.OperationModeZone2;
@@ -429,11 +429,11 @@ class MelCloudAtw extends EventEmitter {
                 const setCoolFlowTemperatureZone1 = deviceState.SetCoolFlowTemperatureZone1;
                 const setCoolFlowTemperatureZone2 = deviceState.SetCoolFlowTemperatureZone2;
                 const hcControlType = deviceState.HcControlType;
-                const tankWaterTemperature = deviceState.TankWaterTemperature.toFixed(1);
+                const tankWaterTemperature = deviceState.TankWaterTemperature;
                 const setTankWaterTemperature = deviceState.SetTankWaterTemperature;
                 const forcedHotWaterMode = deviceState.ForcedHotWaterMode ? 1 : 0;
                 const unitStatus = deviceState.UnitStatus;
-                const outdoorTemperature = deviceState.OutdoorTemperature.toFixed(1);
+                const outdoorTemperature = deviceState.OutdoorTemperature;
                 const ecoHotWater = deviceState.EcoHotWater;
                 const zone1Name = deviceState.Zone1Name;
                 const zone2Name = deviceState.Zone2Name;
