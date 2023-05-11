@@ -1,6 +1,7 @@
 "use strict";
 const fs = require('fs');
 const fsPromises = fs.promises;
+const https = require('https');
 const axios = require('axios');
 const EventEmitter = require('events');
 const CONSTANS = require('./constans.json');
@@ -19,19 +20,29 @@ class MelCloudAtw extends EventEmitter {
         this.axiosInstanceGet = axios.create({
             method: 'GET',
             baseURL: CONSTANS.ApiUrls.BaseURL,
-            timeout: 15000,
+            timeout: 25000,
             headers: {
                 'X-MitsContextKey': contextKey,
-            }
+            },
+            withCredentials: true,
+            httpsAgent: new https.Agent({
+                keepAlive: true,
+                rejectUnauthorized: false
+            })
         });
         this.axiosInstancePost = axios.create({
             method: 'POST',
             baseURL: CONSTANS.ApiUrls.BaseURL,
-            timeout: 15000,
+            timeout: 25000,
             headers: {
                 'X-MitsContextKey': contextKey,
                 'content-type': 'application/json'
-            }
+            },
+            withCredentials: true,
+            httpsAgent: new https.Agent({
+                keepAlive: true,
+                rejectUnauthorized: false
+            })
         });
 
         //set default values
