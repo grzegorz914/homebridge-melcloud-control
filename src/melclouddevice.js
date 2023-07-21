@@ -19,6 +19,7 @@ class MelCloudDevice extends EventEmitter {
 
         //account config
         this.ataDisplayMode = account.ataDisplayMode || 0;
+        this.ataTemperatureSensor = account.ataTemperatureSensor || false;
         this.ataPresetsEnabled = account.ataPresets || false;
         this.ataDisableAutoMode = account.ataDisableAutoMode || false;
         this.ataDisableHeatMode = account.ataDisableHeatMode || false;
@@ -26,10 +27,12 @@ class MelCloudDevice extends EventEmitter {
         this.ataButtons = account.ataButtons || [];
         this.ataButtonsCount = this.ataButtons.length;
         this.atwDisplayMode = account.atwDisplayMode || 0;
+        this.atwTemperatureSensor = account.atwTemperatureSensor || false;
         this.atwPresetsEnabled = account.atwPresets || false;
         this.atwButtons = account.atwButtons || [];
         this.atwButtonsCount = this.atwButtons.length;
         this.ervDisplayMode = account.ervDisplayMode || 0;
+        this.ervTemperatureSensor = account.ervTemperatureSensor || false;
         this.ervPresetsEnabled = account.ervPresets || false;
         this.ervButtons = account.ervButtons || [];
         this.ervButtonsCount = this.ervButtons.length;
@@ -225,6 +228,11 @@ class MelCloudDevice extends EventEmitter {
                                     .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.useFahrenheit);
                                 const updateRotationSpeed = modelSupportsFanSpeed ? this.ataMelCloudServices[0].updateCharacteristic(Characteristic.RotationSpeed, fanSpeed) : false;
                                 const updateSwingMode = swingFunction ? this.ataMelCloudServices[0].updateCharacteristic(Characteristic.SwingMode, swingMode) : false;
+                            };
+
+                            if (this.ataTemperatureSensorService) {
+                                this.ataTemperatureSensorService
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                             };
                             break;
                         case 1: //Thermostat
@@ -684,6 +692,11 @@ class MelCloudDevice extends EventEmitter {
                                         this.atwMelCloudServices[i].updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature)
                                     }
                                 }
+
+                                if (this.atwTemperatureSensorServices) {
+                                    this.atwTemperatureSensorServices[i]
+                                        .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+                                };
                                 break;
                             case 1: //Thermostat
                                 switch (i) {
@@ -1112,6 +1125,11 @@ class MelCloudDevice extends EventEmitter {
                                     this.ervMelCloudServices[0].updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature)
                                 }
                             };
+
+                            if (this.ervTemperatureSensorService) {
+                                this.ervTemperatureSensorService
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+                            };
                             break;
                         case 1: //Thermostat
                             //operation mode - 0, HEAT, 2, COOL, 4, 5, 6, FAN, AUTO
@@ -1359,6 +1377,7 @@ class MelCloudDevice extends EventEmitter {
                     case 0: //air conditioner
                         const debug0 = this.enableDebugMode ? this.emit('debug', `Prepare ata service`) : false;
                         const ataDisplayMode = this.ataDisplayMode;
+                        const ataTemperatureSensor = this.ataTemperatureSensor;
                         const ataButtons = this.ataButtonsConfigured;
                         const ataButtonsCount = this.ataButtonsConfiguredCount;
                         const ataPresets = this.ataPresets;
@@ -1600,6 +1619,20 @@ class MelCloudDevice extends EventEmitter {
                                     });
                                 this.ataMelCloudServices.push(ataMelCloudService);
                                 accessory.addService(this.ataMelCloudServices[0]);
+
+                                //temperature sensor services
+                                if (ataTemperatureSensor) {
+                                    const debug = this.enableDebugMode ? this.emit('debug', `Prepare temperature sensor service`) : false;
+                                    this.ataTemperatureSensorService = new Service.TemperatureSensor(ataServiceName, `Temperature Sensor`);
+                                    this.ataTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                    this.ataTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, ataServiceName);
+                                    this.ataTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                        .onGet(async () => {
+                                            const state = this.roomTemperature;
+                                            return state;
+                                        })
+                                    accessory.addService(this.ataTemperatureSensorService);
+                                };
                                 break;
                             case 1: //Thermostat
                                 const ataMelCloudServiceT = new Service.Thermostat(ataServiceName, `Thermostat ${deviceId}`);
@@ -1966,6 +1999,7 @@ class MelCloudDevice extends EventEmitter {
                     case 1: //heat pump
                         const debug1 = this.enableDebugMode ? this.emit('debug', `Prepare atw service`) : false;
                         const atwZonesCount = this.atwZonesCount;
+                        const atwTemperatureSensor = this.atwTemperatureSensor;
                         const atwButtons = this.atwButtonsConfigured;
                         const atwButtonsCount = this.atwButtonsConfiguredCount;
                         const atwPresets = this.atwPresets;
@@ -1975,6 +2009,7 @@ class MelCloudDevice extends EventEmitter {
                         const atwCaseZone2 = this.atwCaseZone2;
 
                         this.atwMelCloudServices = [];
+                        this.atwTemperatureSensorServices = [];
                         for (let i = 0; i < atwZonesCount; i++) {
                             const zoneName = [this.atwHeatPumpName, this.atwZone1Name, this.atwHotWaterName, this.atwZone2Name][i];
                             const atwServiceName = `${accessoryName}: ${zoneName}`;
@@ -2263,6 +2298,21 @@ class MelCloudDevice extends EventEmitter {
                                         });
                                     this.atwMelCloudServices.push(atwMelCloudService);
                                     accessory.addService(this.atwMelCloudServices[i]);
+
+                                    //temperature sensor services
+                                    if (atwTemperatureSensor) {
+                                        const debug = this.enableDebugMode ? this.emit('debug', `Prepare temperature sensor service`) : false;
+                                        const atwTemperatureSensorService = new Service.TemperatureSensor(atwServiceName, `Temperature Sensor`);
+                                        atwTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                        atwTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, atwServiceName);
+                                        atwTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                            .onGet(async () => {
+                                                const state = this.roomTemperatures[i];
+                                                return state;
+                                            })
+                                        this.atwTemperatureSensorServices.push(atwTemperatureSensorService);
+                                        accessory.addService(this.atwTemperatureSensorServices[i]);
+                                    };
                                     break;
                                 case 1: //Thermostat
                                     const atwMelCloudServiceT = new Service.Thermostat(atwServiceName, `Thermostat ${deviceId} ${i}`);
@@ -2682,6 +2732,7 @@ class MelCloudDevice extends EventEmitter {
                     case 3: //energy recovery ventilation
                         const debug3 = this.enableDebugMode ? this.emit('debug', `Prepare erv service`) : false;
                         const ervDisplayMode = this.ervDisplayMode;
+                        const ervTemperatureSensor = this.ervTemperatureSensor;
                         const ervButtons = this.ervButtonsConfigured;
                         const ervButtonsCount = this.ervButtonsConfiguredCount;
                         const ervPresets = this.ervPresets;
@@ -2899,6 +2950,20 @@ class MelCloudDevice extends EventEmitter {
                                     });
                                 this.ervMelCloudServices.push(ervMelCloudService);
                                 accessory.addService(this.ervMelCloudServices[0]);
+
+                                //temperature sensor services
+                                if (ervTemperatureSensor) {
+                                    const debug = this.enableDebugMode ? this.emit('debug', `Prepare temperature sensor service`) : false;
+                                    this.ervTemperatureSensorService = new Service.TemperatureSensor(ervServiceName, `Temperature Sensor`);
+                                    this.ervTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                    this.ervTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, ervServiceName);
+                                    this.ervTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                        .onGet(async () => {
+                                            const state = this.roomTemperature;
+                                            return state;
+                                        })
+                                    accessory.addService(this.ervTemperatureSensorService);
+                                };
                                 break;
                             case 1: //Thermostat
                                 const ervMelCloudServiceT = new Service.Thermostat(ervServiceName, `Thermostat ${deviceId}`);

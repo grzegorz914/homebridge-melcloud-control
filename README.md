@@ -68,6 +68,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Identify vane H mode `AUTO/1/2/3/4/5/SWING`.
       * Identify vane V mode `AUTO/1/2/3/4/5/SWING`.
       * Identify fan speed mode `AUTO/1/2/3/4/5/`.
+      * Identify temperature change for `Heater/Cooler`.
       * Identify device presets. 
 * Heat Pump:
   * Heater Cooler:
@@ -109,6 +110,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Identify power `ON/OFF`.
       * Identify operating mode `HEAT/COOL/CURVE/HOLIDAY/AUTO HOT WATER/ECO HOT WATER/FORCE HOT WATER`.
       * Identify physical lock controls `LOCK/UNLOCK`.
+      * Identify temperature change for `Heater/Cooler`.
       * Identify device presets. 
 * Energy Recovery Ventilation Lossnay:
   * Heater Cooler:
@@ -134,6 +136,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Identify operating mode `LOSSNAY/BYPAS/AUTO/NIGHT PURGE`.
       * Identify physical lock controls `LOCK/UNLOCK`.
       * Identify fan speed mode `AUTO/1/2/3/4`.
+      * Identify temperature change for `Heater/Cooler`.
       * Identify device presets. 
       * Core maintenance indication.
       * Filter maintenance indication.
@@ -163,6 +166,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `passwd` | Here set the MELCloud password. |
 | `language` | Here select the MELCloud language. |
 | `ataDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
+| `ataTemperatureSensore` | This enable extra temperature sensor for Heater/Cooler control mode to use with automations in HomeKit app. |
 | `ataDisableAutoMode` | This will disable `Auto` mode even this mode is supported by device. |
 | `ataDisableHeatMode` | This will disable `Heat` mode even this mode is supported by device. |
 | `ataAutoHeatMode` | Here select operation mode for `Auto/Heat`, if `Auto`, `Heat` or both modes are not supported by device will be used selected modes instead. |
@@ -171,11 +175,13 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ataButtons.mode` | Here select button mode, VH - Vane Horizontal, VV - Vane Horizontal. |
 | `ataButtons.displayType` | Here select display type in HomeKit app, possible `None/Disabled`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`.|
 | `atwDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
+| `atwTemperatureSensore` | This enable extra temperature sensor for Heater/Cooler control mode to use with automations in HomeKit app. |
 | `atwPresets` | This enable display Heat Pump presets in HomeKit app. |
 | `atwButtons.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. | 
 | `atwButtons.mode` | Here select button mode. |
 | `atwButtons.displayType` | Here select display type in HomeKit app, possible `None/Disabled`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`.|
 | `ervDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
+| `ervTemperatureSensore` | This enable extra temperature sensor for Heater/Cooler control mode to use with automations in HomeKit app. |
 | `ervPresets` | This enable display EnergyRecovery Ventilation presets in HomeKit app. |
 | `ervButtons.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. | 
 | `ervButtons.mode` | Here select button mode. |

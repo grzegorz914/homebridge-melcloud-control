@@ -24,6 +24,7 @@
           "passwd": "password",
           "language": 0,
           "ataDisplayMode": 0,
+          "ataTemperatureSensor": false,
           "ataDisableAutoMode": false,
           "ataDisableHeatMode": false,
           "ataAutoHeatMode": 0,
@@ -36,6 +37,7 @@
             }
           ],
           "atwDisplayMode": 0,
+          "atwTemperatureSensor": false,
           "atwPresets": false,
           "atwButtons": [
             {
@@ -45,6 +47,7 @@
             }
           ],
           "ervDisplayMode": 0,
+          "ervTemperatureSensor": false,
           "ervPresets": false,
           "ervButtons": [
             {
