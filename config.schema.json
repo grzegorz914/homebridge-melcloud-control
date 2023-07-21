@@ -275,16 +275,6 @@
               "description": "Here select operation mode for Auto/Heat option, if Auto, Heat or both modes are not supported by device will be used selected modes instead.",
               "required": true
             },
-            "atwTemperatureSensor": {
-              "title": "Temperature Sensor",
-              "type": "boolean",
-              "default": false,
-              "description": "This enable extra temperature sensor for Heater/Cooler control mode to use with automations in HomeKit app.",
-              "required": false,
-              "condition": {
-                "functionBody": "return  model.accounts[arrayIndices].ataAutoHeatMode === 0;"
-              }
-            },
             "ataButtons": {
               "title": "Button / Sensor",
               "type": "array",
@@ -581,6 +571,16 @@
               ],
               "description": "Here select main control mode.",
               "required": true
+            },
+            "atwTemperatureSensor": {
+              "title": "Temperature Sensor",
+              "type": "boolean",
+              "default": false,
+              "description": "This enable extra temperature sensor for Heater/Cooler control mode to use with automations in HomeKit app.",
+              "required": false,
+              "condition": {
+                "functionBody": "return  model.accounts[arrayIndices].atwDisplayMode === 0;"
+              }
             },
             "atwPresets": {
               "title": "Presets",
