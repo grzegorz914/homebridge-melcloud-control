@@ -152,7 +152,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 ### Configuration
 * Run this plugin as a [Child Bridge](https://github.com/homebridge/homebridge/wiki/Child-Bridges) (Highly Recommended), this prevent crash Homebridge if plugin crashes.
 * Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) to configure this plugin (Highly Recommended). 
-* The config below can be copy/paste in to the config.json file, making the apporpriate changes before saving it.
+* The `sample-config.json` can be edited and used manually as an alternative. 
 * Be sure to always make a backup copy of your config.json file before making any changes to it.
 
 <p align="left">
@@ -199,53 +199,3 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `mqttUser` | Here set the MQTT Broker user. |
 | `mqttPasswd` | Here set the MQTT Broker password. |
 | `Display Type Buttons` | -1 - `None/Disabled`, 0 - `Outlet`, 1 - `Switch`, 2 - `Motion Sensor`, 3 - `Occupancy Sensor`, 4 - `Contact Sensor`.|
-
-```json
-        {
-            "platform": "melcloudcontrol",
-            "accounts": [
-                {
-                    "name": "My House",
-                    "user": "user",
-                    "passwd": "password",
-                    "language": 0,
-                    "ataDisplayMode": 0,
-                    "ataDisableAutoMode": false,
-                    "ataDisableHeatMode": false,
-                    "ataAutoHeatMode": 0,
-                    "ataPresets": false,
-                    "ataButtons": [{
-                        "name": "ON/OFF",
-                        "mode": 0,
-                        "displayType": 0
-                    }],
-                    "atwDisplayMode": 0,
-                    "atwPresets": false,
-                    "atwButtons": [{
-                        "name": "ON/OFF",
-                        "mode": 0,
-                        "displayType": 0
-                    }],
-                    "ervDisplayMode": 0,
-                    "ervPresets": false,
-                    "ervButtons": [{
-                        "name": "ON/OFF",
-                        "mode": 0,
-                        "displayType": 0
-                    }],
-                    "disableLogInfo": false,
-                    "disableLogDeviceInfo": false,
-                    "enableDebugMode": false,
-                    "enableMqtt": false,
-                    "mqttDebug": false,
-                    "mqttHost": "192.168.1.33",
-                    "mqttPort": 1883,
-                    "mqttClientId": "1234321",
-                    "mqttPrefix": "home/My House",
-                    "mqttAuth": false,
-                    "mqttUser": "user",
-                    "mqttPass": "password",
-                }
-            ]
-        }
-```
