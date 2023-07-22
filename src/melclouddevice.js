@@ -1529,11 +1529,6 @@ class MelCloudDevice extends EventEmitter {
                                         });
                                 };
                                 ataMelCloudService.getCharacteristic(Characteristic.CurrentTemperature)
-                                    .setProps({
-                                        minValue: -35,
-                                        maxValue: 150,
-                                        minStep: 0.5
-                                    })
                                     .onGet(async () => {
                                         const value = this.roomTemperature;
                                         const info = this.disableLogInfo ? false : this.emit('message', `Room temperature: ${value}${temperatureUnit}`);
@@ -1563,7 +1558,7 @@ class MelCloudDevice extends EventEmitter {
                                     });
                                 ataMelCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
                                     .setProps({
-                                        minValue: this.ataTargetTempSetPropsMinValue,
+                                        minValue: this.ataTargetCoolTempSetPropsMinValue,
                                         maxValue: this.ataTargetTempSetPropsMaxValue,
                                         minStep: this.ataTemperatureIncrement
                                     })
@@ -1617,6 +1612,7 @@ class MelCloudDevice extends EventEmitter {
                                             this.emit('error', `Set temperature display unit error: ${error}`);
                                         };
                                     });
+
                                 this.ataMelCloudServices.push(ataMelCloudService);
                                 accessory.addService(this.ataMelCloudServices[0]);
 
@@ -1685,11 +1681,6 @@ class MelCloudDevice extends EventEmitter {
                                         };
                                     });
                                 ataMelCloudServiceT.getCharacteristic(Characteristic.CurrentTemperature)
-                                    .setProps({
-                                        minValue: -35,
-                                        maxValue: 150,
-                                        minStep: 0.5
-                                    })
                                     .onGet(async () => {
                                         const value = this.roomTemperature;
                                         const info = this.disableLogInfo ? false : this.emit('message', `Room temperature: ${value}${temperatureUnit}`);
@@ -2448,11 +2439,6 @@ class MelCloudDevice extends EventEmitter {
                                             };
                                         });
                                     atwMelCloudServiceT.getCharacteristic(Characteristic.CurrentTemperature)
-                                        .setProps({
-                                            minValue: -35,
-                                            maxValue: 150,
-                                            minStep: 0.5
-                                        })
                                         .onGet(async () => {
                                             const value = this.roomTemperatures[i];
                                             const info = this.disableLogInfo ? false : this.emit('message', `${zoneName}, ${i === 0 ? 'Outdoor temperature:' : 'Temperature:'} ${value}${temperatureUnit}`);
@@ -2856,11 +2842,6 @@ class MelCloudDevice extends EventEmitter {
                                         };
                                     });
                                 ervMelCloudService.getCharacteristic(Characteristic.CurrentTemperature)
-                                    .setProps({
-                                        minValue: -35,
-                                        maxValue: 150,
-                                        minStep: 0.5
-                                    })
                                     .onGet(async () => {
                                         const value = this.roomTemperature;
                                         const info = this.disableLogInfo ? false : this.emit('message', `Room temperature: ${value}${temperatureUnit}`);
@@ -3016,11 +2997,6 @@ class MelCloudDevice extends EventEmitter {
                                         };
                                     });
                                 ervMelCloudServiceT.getCharacteristic(Characteristic.CurrentTemperature)
-                                    .setProps({
-                                        minValue: -35,
-                                        maxValue: 150,
-                                        minStep: 0.5
-                                    })
                                     .onGet(async () => {
                                         const value = this.roomTemperature;
                                         const info = this.disableLogInfo ? false : this.emit('message', `Room temperature: ${value}${temperatureUnit}`);

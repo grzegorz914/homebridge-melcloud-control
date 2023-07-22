@@ -433,9 +433,10 @@ class MelCloudAta extends EventEmitter {
                 };
 
                 await this.axiosInstancePost(CONSTANS.ApiUrls.SetAta, options);
-                this.emit('checkDeviceInfo');
-                await new Promise(resolve => setTimeout(resolve, 2000));
                 resolve();
+
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                this.emit('checkDeviceInfo');
             } catch (error) {
                 reject(error);
             };

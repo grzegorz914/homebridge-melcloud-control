@@ -423,9 +423,10 @@ class MelCloudErv extends EventEmitter {
                 };
 
                 await this.axiosInstancePost(CONSTANS.ApiUrls.SetErv, options);
-                this.emit('checkDeviceInfo');
-                await new Promise(resolve => setTimeout(resolve, 2000));
                 resolve();
+
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                this.emit('checkDeviceInfo');
             } catch (error) {
                 reject(error);
             };
