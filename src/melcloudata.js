@@ -65,8 +65,8 @@ class MelCloudAta extends EventEmitter {
 
         this.on('checkDeviceInfo', async () => {
             try {
-                const deviceInfoData = await fsPromises.readFile(deviceInfoFile);
-                const deviceInfo = JSON.parse(deviceInfoData);
+                //read device info from file
+                const deviceInfo = await this.readData(deviceInfoFile);
                 const debug = debugLog ? this.emit('debug', `Info: ${JSON.stringify(deviceInfo, null, 2)}`) : false;
 
                 //device info
@@ -423,6 +423,18 @@ class MelCloudAta extends EventEmitter {
         await new Promise(resolve => setTimeout(resolve, 65000));
         this.emit('checkDeviceInfo');
     };
+
+    readData(path) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const savedData = await fsPromises.readFile(path)
+                const data = JSON.parse(savedData);
+                resolve(data);
+            } catch (error) {
+                reject(`read data from path: ${path}, error: ${error}`);
+            }
+        });
+    }
 
     send(deviceState) {
         return new Promise(async (resolve, reject) => {
