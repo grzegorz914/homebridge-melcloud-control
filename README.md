@@ -39,17 +39,17 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
   * Heater Cooler:
     * Power `ON/OFF`.
     * Operating mode `AUTO/HEAT/COOL/POWER OFF`.
-    * Heating/Cooling temperature. 
+    * Temperature `HEATING/COOLING`. 
     * Fan speed `OFF/1/2/3/4/5/AUTO`.
     * Swing mode `AUTO/SWING`.
     * Physical lock controls `LOCK/UNLOCK`.
-    * Change temperature unit `°F/°C`.
+    * Temperature display unit `°F/°C`.
     * If `AUTO/HEAT` or both modes are not supported by device will use `DRY/FAN` or `FAN/DRY` modes instead.
   * Thermostat:
     * Power `ON/OFF`.
     * Operating mode `POWER OFF/HEAT/COOL/AUTO`.
-    * Heating/Cooling temperature.
-    * Change temperature unit `°F/°C`.
+    * Temperature `HEATING/COOLING`.
+    * Temperature display unit `°F/°C`.
     * If `AUTO/HEAT` or both modes are not supported by device will use `DRY/FAN` or `FAN/DRY` modes instead.
   * Buttons:
     * Use to direct device control.
@@ -77,28 +77,29 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Operating mode `HEAT/COOL`.
       * Outdoor temperature `GET`.
       * Physical lock controls all Zones and Hot Water Tank `LOCK/UNLOCK`.
-      * Change temperature unit `°F/°C`.
+      * Temperature display unit `°F/°C`.
     * Zone 1 and 2:
       * Operating mode heat `AUTO/HEAT/COOL` - `CURVE/HEAT THERMOSTAT/HEAT FLOW`.
       * Operating mode cool `HEAT/COOL` - `COOL THERMOSTAT/COOL FLOW`.
-      * Heating/Cooling temperature.
+      * Temperature `HEATING/COOLING`.
       * Physical lock controls `LOCK/UNLOCK`.
     * Hot Water Tank:
       * Operating mode `AUTO/HEAT` - `AUTO/HEAT NOW`.
-      * Current/Target temperature.
+      * Temperature `SET/GET`.
       * Physical lock controls `LOCK/UNLOCK`.
   * Thermostat:
     * Heat Pump:
       * Power `ON/OFF`.
       * Operating mode `HEAT/COOL`.
       * Outdoor temperature `GET`.
+      * Temperature display unit `°F/°C`.
     * Zone 1 and 2:
       * Operating mode heat `HEAT/COOL/AUTO` - `HEAT THERMOSTAT/HEAT FLOW/CURVE`.
       * Operating mode cool `HEAT/COOL` - `COOL THERMOSTAT/COOL FLOW`.
-      * Heating/Cooling temperature.
+      * Temperature `HEATING/COOLING`.
     * Hot Water Tank:
       * Operating mode `HEAT/AUTO` - `HEAT NOW, AUTO`.
-      * Current/Target temperature.
+      * Temperature `SET/GET`.
   * Buttons:
     * Use to direct device control.  
       * Power `ON/OFF`.
@@ -118,11 +119,11 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
     * Operating mode `AUTO/HEAT/COOL/POWER OFF` - `AUTO, LOSSNAY, BYPAS, POWER OFF`.
     * Fan speed `OFF/1/2/3/4/AUTO`.
     * Physical lock controls `LOCK/UNLOCK`.
-    * Change temperature unit `°F/°C`.
+    * Temperature display unit `°F/°C`.
   * Thermostat:
     * Power `ON/OFF`.
     * Operating mode `POWER OFF/HEAT/COOL/AUTO` - `POWER OFF, LOSSNAY, BYPAS, AUTO`.
-    * Change temperature unit `°F/°C`.
+    * Temperature display unit `°F/°C`.
   * Buttons:
     * Use to direct device control.
       * Power `ON/OFF`.
