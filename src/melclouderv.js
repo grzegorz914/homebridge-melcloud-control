@@ -306,7 +306,7 @@ class MelCloudErv extends EventEmitter {
                 const permissionCanDisableLocalController = deviceInfo.Permissions.CanDisableLocalController;
 
                 this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, presets, presetsCount, hasCoolOperationMode, hasHeatOperationMode, hasAutoOperationMode, hasRoomTemperature, hasSupplyTemperature, hasOutdoorTemperature, hasCO2Sensor, hasPM25Sensor, pM25SensorStatus, pM25Level, hasAutoVentilationMode, hasBypassVentilationMode, hasAutomaticFanSpeed, coreMaintenanceRequired, filterMaintenanceRequired, roomCO2Level, actualVentilationMode, numberOfFanSpeeds, temperatureIncrement);
-                this.emit('mqtt', `Info`, JSON.stringify(deviceInfo, null, 2));
+                this.emit('mqtt', `Info`, deviceInfo);
 
                 //check device state
                 await new Promise(resolve => setTimeout(resolve, 1000));
@@ -320,8 +320,7 @@ class MelCloudErv extends EventEmitter {
                 const url = CONSTANS.ApiUrls.DeviceState.replace("DID", deviceId).replace("BID", buildingId);
                 const responseData = await this.axiosInstanceGet(url);
                 const deviceState = responseData.data;
-                const deviceStateData = JSON.stringify(deviceState, null, 2);
-                const debug = debugLog ? this.emit('debug', `State: ${deviceStateData}`) : false;
+                const debug = debugLog ? this.emit('debug', `State: ${JSON.stringify(deviceState, null, 2)}`) : false;
 
                 // device ata state
                 const effectiveFlags = deviceState.EffectiveFlags;
@@ -398,7 +397,7 @@ class MelCloudErv extends EventEmitter {
                 this.offline = offline;
 
                 this.emit('deviceState', deviceState, roomTemperature, supplyTemperature, outdoorTemperature, nightPurgeMode, setTemperature, setFanSpeed, operationMode, ventilationMode, defaultHeatingSetTemperature, defaultCoolingSetTemperature, hideRoomTemperature, hideSupplyTemperature, hideOutdoorTemperature, power, offline);
-                this.emit('mqtt', `State`, JSON.stringify(deviceState, null, 2));
+                this.emit('mqtt', `State`, deviceState);
                 this.checkDeviceInfo();
             } catch (error) {
                 this.emit('error', `check device state error, ${error}, check again in 60s.`);

@@ -405,7 +405,7 @@ class MelCloudAtw extends EventEmitter {
                 };
 
                 this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, presets, presetsCount, zonesCount, heatPumpZoneName, hotWaterZoneName, hasHotWaterTank, temperatureIncrement, maxTankTemperature, hasZone2, zone1Name, zone2Name, heatCoolModes, caseHotWater, caseZone2);
-                this.emit('mqtt', `Info`, JSON.stringify(deviceInfo, null, 2));
+                this.emit('mqtt', `Info`, deviceInfo);
 
                 //check device state
                 await new Promise(resolve => setTimeout(resolve, 1000));
@@ -419,8 +419,7 @@ class MelCloudAtw extends EventEmitter {
                 const url = CONSTANS.ApiUrls.DeviceState.replace("DID", deviceId).replace("BID", buildingId);
                 const responseData = await this.axiosInstanceGet(url);
                 const deviceState = responseData.data;
-                const deviceStateData = JSON.stringify(deviceState, null, 2);
-                const debug = debugLog ? this.emit('debug', `State: ${deviceStateData}`) : false;
+                const debug = debugLog ? this.emit('debug', `State: ${JSON.stringify(deviceState, null, 2)}`) : false;
 
                 // device state
                 const effectiveFlags = deviceState.EffectiveFlags;
@@ -526,7 +525,7 @@ class MelCloudAtw extends EventEmitter {
                 this.offline = offline;
 
                 this.emit('deviceState', deviceState, setTemperatureZone1, setTemperatureZone2, roomTemperatureZone1, roomTemperatureZone2, operationMode, operationModeZone1, operationModeZone2, setHeatFlowTemperatureZone1, setHeatFlowTemperatureZone2, setCoolFlowTemperatureZone1, setCoolFlowTemperatureZone2, hcControlType, tankWaterTemperature, setTankWaterTemperature, forcedHotWaterMode, unitStatus, outdoorTemperature, ecoHotWater, holidayMode, prohibitZone1, prohibitZone2, prohibitHotWater, idleZone1, idleZone2, power, offline);
-                this.emit('mqtt', `State`, JSON.stringify(deviceState, null, 2));
+                this.emit('mqtt', `State`, deviceState);
                 this.checkDeviceInfo();
             } catch (error) {
                 this.emit('error', `check device state error, ${error}, check again in 60s.`);

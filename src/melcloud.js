@@ -44,7 +44,7 @@ class MelCloud extends EventEmitter {
                 const contextKey = accountInfo.ContextKey;
 
                 if (contextKey === undefined || contextKey === null) {
-                    this.emit('message', `context key not found or undefined, reconnect in 65s.`)
+                    this.emit('message', `context key: ${contextKey}, missing, reconnect in 65s.`)
                     this.reconnect();
                     return;
                 };
@@ -98,11 +98,9 @@ class MelCloud extends EventEmitter {
 
             try {
                 const listDevicesData = await this.axiosInstanceGet(CONSTANS.ApiUrls.ListDevices);
-                const buildingsData = listDevicesData.data;
-                const debug1 = enableDebugMode ? this.emit('debug', `Buildings: ${JSON.stringify(listDevicesData.data, null, 2)}`) : false;
-
-                //read building structure and get the devices
                 const buildingsList = listDevicesData.data;
+                const debug1 = enableDebugMode ? this.emit('debug', `Buildings: ${JSON.stringify(buildingsList, null, 2)}`) : false;
+
                 if (!buildingsList) {
                     this.emit('message', `no building found, check again in 90s.`);
                     this.checkDevicesList();
@@ -110,14 +108,14 @@ class MelCloud extends EventEmitter {
                 }
 
                 //save buildings to the file
-                await this.saveData(buildingsFile, buildingsData);
+                await this.saveData(buildingsFile, buildingsList);
 
-                //check available devices in buildings
+                //read buildings structure and get the devices
                 const devices = [];
                 for (const building of buildingsList) {
                     const buildingStructure = building.Structure;
 
-                    // Get all devices from the building structure
+                    //get all devices from the building structure
                     const allDevices = [
                         ...buildingStructure.Floors.flatMap(floor => [...floor.Areas.flatMap(area => area.Devices), ...floor.Devices]),
                         ...buildingStructure.Areas.flatMap(area => area.Devices),
@@ -128,15 +126,15 @@ class MelCloud extends EventEmitter {
                     devices.push(...allDevices);
                 }
 
-                if (!devices) {
+                const devicesCount = devices.length;
+                if (devicesCount === 0) {
                     this.emit('message', `no devices found, check again in 90s.`);
                     this.checkDevicesList();
                     return;
                 }
-
-                const devicesCount = devices.length;
                 const debug2 = enableDebugMode ? this.emit('debug', `Found: ${devicesCount} devices.`) : false;
 
+                //get device info fom devices
                 for (const deviceInfo of devices) {
                     const buildingId = deviceInfo.BuildingID.toString();
                     const deviceId = deviceInfo.DeviceID.toString();
@@ -144,7 +142,7 @@ class MelCloud extends EventEmitter {
                     const deviceName = deviceInfo.DeviceName;
                     const deviceTypeText = CONSTANS.DeviceType[deviceType];
 
-                    //save every device to the file
+                    //save every device info to the file
                     const deviceInfoFile = `${prefDir}/${accountName}_Device_${deviceId}`;
                     await this.saveData(deviceInfoFile, deviceInfo);
 
