@@ -31,8 +31,9 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * Support automations, shortcuts and siri.
 * Support direct device controll creating extra `Buttons`, appiled for all devices of same type in account.
 * Support identify all states of device creating `Sensors`, appiled for all devices of same type in account.
-* MQTT:
-  * Publisch topic `Info`, `State` as payload JSON data.
+* MQTT client:
+  * Topic: `Info`, `State` as payload JSON data.
+  * Publish as JSON data.
 
 ### Control Mode
 * Air Conditioner:
