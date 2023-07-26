@@ -69,7 +69,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Identify vane H mode `AUTO/1/2/3/4/5/SWING`.
       * Identify vane V mode `AUTO/1/2/3/4/5/SWING`.
       * Identify fan speed mode `AUTO/1/2/3/4/5/`.
-      * Identify temperature change for `Heater/Cooler`.
+      * Identify temperature change for `HEATER/COOLER`.
       * Identify device presets. 
 * Heat Pump:
   * Heater Cooler:
@@ -112,7 +112,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Identify power `ON/OFF`.
       * Identify operating mode `HEAT/COOL/CURVE/HOLIDAY/AUTO HOT WATER/ECO HOT WATER/FORCE HOT WATER`.
       * Identify physical lock controls `LOCK/UNLOCK`.
-      * Identify temperature change for `Heater/Cooler`.
+      * Identify temperature change for `HEATER/COOLER`.
       * Identify device presets. 
 * Energy Recovery Ventilation Lossnay:
   * Heater Cooler:
@@ -138,7 +138,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Identify operating mode `LOSSNAY/BYPAS/AUTO/NIGHT PURGE`.
       * Identify physical lock controls `LOCK/UNLOCK`.
       * Identify fan speed mode `AUTO/1/2/3/4`.
-      * Identify temperature change for `Heater/Cooler`.
+      * Identify temperature change for `HEATER/COOLER`.
       * Identify device presets. 
       * Core maintenance indication.
       * Filter maintenance indication.
