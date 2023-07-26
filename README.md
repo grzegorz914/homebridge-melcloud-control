@@ -62,7 +62,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Fan speed mode `AUTO/1/2/3/4/5`.
       * Presets `SET/UNSET`.
   * Sensors:
-    * Use with automations and identify.
+    * Use for automations and identify.
       * Power `ON/OFF`.
       * Operating mode `HEAT/DRY/COOL/FAN/AUTO`.
       * Physical lock controls `LOCK/UNLOCK`.
@@ -108,7 +108,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Physical lock controls `LOCK/UNLOCK`.
       * Presets `SET/UNSET`. 
   * Sensors:
-    * Use with automations and identify.
+    * Use for automations and identify.
       * Power `ON/OFF`.
       * Operating mode `HEAT/COOL/CURVE/HOLIDAY/AUTO HOT WATER/ECO HOT WATER/FORCE HOT WATER`.
       * Physical lock controls `LOCK/UNLOCK`.
@@ -133,7 +133,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Fan speed mode `AUTO/1/2/3/4`.
       * Presets `SET/UNSET`.
   * Sensors:
-    * Use with automations and identify.
+    * Use for automations and identify.
       * Power `ON/OFF`.
       * Operating mode `LOSSNAY/BYPAS/AUTO/NIGHT PURGE`.
       * Physical lock controls `LOCK/UNLOCK`.
