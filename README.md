@@ -62,15 +62,15 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Fan speed mode `AUTO/1/2/3/4/5`.
       * Presets `SET/UNSET`.
   * Sensors:
-    * Use with automations in HomeKit app.
-      * Identify power `ON/OFF`.
-      * Identify operating mode `HEAT/DRY/COOL/FAN/AUTO`.
-      * Identify physical lock controls `LOCK/UNLOCK`.
-      * Identify vane H mode `AUTO/1/2/3/4/5/SWING`.
-      * Identify vane V mode `AUTO/1/2/3/4/5/SWING`.
-      * Identify fan speed mode `AUTO/1/2/3/4/5/`.
-      * Identify temperature change for `HEATER/COOLER`.
-      * Identify device presets. 
+    * Use with automations and identify.
+      * Power `ON/OFF`.
+      * Operating mode `HEAT/DRY/COOL/FAN/AUTO`.
+      * Physical lock controls `LOCK/UNLOCK`.
+      * Vane H mode `AUTO/1/2/3/4/5/SWING`.
+      * Vane V mode `AUTO/1/2/3/4/5/SWING`.
+      * Fan speed mode `AUTO/1/2/3/4/5/`.
+      * Temperature change for `HEATER/COOLER`.
+      * Device presets. 
 * Heat Pump:
   * Heater Cooler:
     * Heat Pump:
@@ -108,12 +108,12 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Physical lock controls `LOCK/UNLOCK`.
       * Presets `SET/UNSET`. 
   * Sensors:
-    * Use with automations in HomeKit app. 
-      * Identify power `ON/OFF`.
-      * Identify operating mode `HEAT/COOL/CURVE/HOLIDAY/AUTO HOT WATER/ECO HOT WATER/FORCE HOT WATER`.
-      * Identify physical lock controls `LOCK/UNLOCK`.
-      * Identify temperature change for `HEATER/COOLER`.
-      * Identify device presets. 
+    * Use with automations and identify.
+      * Power `ON/OFF`.
+      * Operating mode `HEAT/COOL/CURVE/HOLIDAY/AUTO HOT WATER/ECO HOT WATER/FORCE HOT WATER`.
+      * Physical lock controls `LOCK/UNLOCK`.
+      * Temperature change for `HEATER/COOLER`.
+      * Device presets. 
 * Energy Recovery Ventilation Lossnay:
   * Heater Cooler:
     * Power `ON/OFF`.
@@ -133,15 +133,15 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Fan speed mode `AUTO/1/2/3/4`.
       * Presets `SET/UNSET`.
   * Sensors:
-    * Use with automations in HomeKit app.
-      * Identify power `ON/OFF`.
-      * Identify operating mode `LOSSNAY/BYPAS/AUTO/NIGHT PURGE`.
-      * Identify physical lock controls `LOCK/UNLOCK`.
-      * Identify fan speed mode `AUTO/1/2/3/4`.
-      * Identify temperature change for `HEATER/COOLER`.
-      * Identify device presets. 
-      * Core maintenance indication.
-      * Filter maintenance indication.
+    * Use with automations and identify.
+      * Power `ON/OFF`.
+      * Operating mode `LOSSNAY/BYPAS/AUTO/NIGHT PURGE`.
+      * Physical lock controls `LOCK/UNLOCK`.
+      * Fan speed mode `AUTO/1/2/3/4`.
+      * Temperature change for `HEATER/COOLER`.
+      * Device presets. 
+      * Core maintenance.
+      * Filter maintenance.
       * CO2 detected and level.
       * PM2.5 air quality and level.
 
