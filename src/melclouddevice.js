@@ -213,7 +213,7 @@ class MelCloudDevice extends EventEmitter {
                             swingMode = swingFunction && vaneHorizontal === 12 && vaneVertical === 7 ? 1 : 0;
 
                             //lock physical controls
-                            lockPhysicalControls = prohibitSetTemperature || prohibitOperationMode || prohibitPower ? 1 : 0;
+                            lockPhysicalControls = prohibitSetTemperature && prohibitOperationMode && prohibitPower ? 1 : 0;
 
                             //update characteristics
                             if (this.ataMelCloudServices) {
