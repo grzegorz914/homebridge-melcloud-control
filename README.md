@@ -33,7 +33,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * Support automations, shortcuts and siri.
 * RESTful server:
   * Request: `http//homebridge_ip_address:port/path`.
-  * Port is based on last 4 numbers of `device Id`, displayed in HB log during start.
+  * Port: last 4 numbers of `device Id`, displayed in HB log during start.
   * Path: `info`, `state`.
   * Respone as JSON data.
 * MQTT client:
