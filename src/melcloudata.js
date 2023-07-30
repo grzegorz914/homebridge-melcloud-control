@@ -15,6 +15,8 @@ class MelCloudAta extends EventEmitter {
         const buildingId = config.buildingId;
         const deviceId = config.deviceId;
         const debugLog = config.debugLog;
+        const restFulEnabled = config.restFulEnabled;
+        const mqttEnabled = config.mqttEnabled;
         const deviceInfoFile = `${prefDir}/${accountName}_Device_${deviceId}`;
 
         //set default values
@@ -315,7 +317,12 @@ class MelCloudAta extends EventEmitter {
                 const permissionCanDisableLocalController = deviceInfo.Permissions.CanDisableLocalController;
 
                 this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, presets, presetsCount, hasAutomaticFanSpeed, airDirectionFunction, swingFunction, numberOfFanSpeeds, temperatureIncrement, minTempCoolDry, maxTempCoolDry, minTempHeat, maxTempHeat, minTempAutomatic, maxTempAutomatic, modelSupportsFanSpeed, modelSupportsAuto, modelSupportsHeat, modelSupportsDry);
-                this.emit('mqtt', `Info`, deviceInfo);
+                
+                //restFul
+                const restFul = restFulEnabled ? this.emit('restFul', 'info', deviceInfo) : false;
+
+                //mqtt
+                const mqtt = mqttEnabled ? this.emit('mqtt', `Info`, deviceInfo) : false;
 
                 //check device state
                 await new Promise(resolve => setTimeout(resolve, 1000));
@@ -407,7 +414,13 @@ class MelCloudAta extends EventEmitter {
                 this.offline = offline;
 
                 this.emit('deviceState', deviceState, roomTemperature, setTemperature, setFanSpeed, operationMode, vaneHorizontal, vaneVertical, defaultHeatingSetTemperature, defaultCoolingSetTemperature, hideVaneControls, hideDryModeControl, inStandbyMode, prohibitSetTemperature, prohibitOperationMode, prohibitPower, power, offline);
-                this.emit('mqtt', `State`, deviceState);
+
+                //restFul
+                const restFul = restFulEnabled ? this.emit('restFul', 'state', deviceState) : false;
+
+                //mqtt
+                const mqtt = mqttEnabled ? this.emit('mqtt', `State`, deviceState) : false;
+
                 this.checkDeviceInfo();
             } catch (error) {
                 this.emit('error', `check device state error, ${error}, check again in 60s.`);

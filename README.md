@@ -31,6 +31,11 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * Support direct device controll creating extra `Buttons`, appiled for all devices of same type in account.
 * Support identify all states of device creating `Sensors`, appiled for all devices of same type in account.
 * Support automations, shortcuts and siri.
+* RESTful server:
+  * Request: `http//homebridge_ip_address:port/path`.
+  * Port is based on last 4 numbers of `device Id`, displayed in HB log during start.
+  * Path: `info`, `state`.
+  * Respone as JSON data.
 * MQTT client:
   * Topic: `Info`, `State`.
   * Publish as JSON data.
@@ -191,6 +196,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `enableDebugMode` | This enable deep log in homebridge console. |
 | `disableLogInfo` | This disable display log values and states on every it change. |
 | `disableLogDeviceInfo` | This disable display log device info on plugin start. |
+| `enableRestFul` | If enabled, RESTful server will start automatically and respond to any path request. |
+| `restFulDebug` | If enabled, deep log will be present in homebridge console for RESTFul server. |
 | `enableMqtt` | This enabled MQTT Broker and publish to it all awailable data. |
 | `mqttDebug` | This enabled deep log in homebridge console for MQTT. |
 | `mqttHost` | Here set the `IP Address` or `Hostname` for MQTT Broker. |

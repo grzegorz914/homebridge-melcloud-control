@@ -15,6 +15,8 @@ class MelCloudErv extends EventEmitter {
         const buildingId = config.buildingId;
         const deviceId = config.deviceId;
         const debugLog = config.debugLog;
+        const restFulEnabled = config.restFulEnabled;
+        const mqttEnabled = config.mqttEnabled;
         const deviceInfoFile = `${prefDir}/${accountName}_Device_${deviceId}`;
 
         this.axiosInstanceGet = axios.create({
@@ -306,7 +308,12 @@ class MelCloudErv extends EventEmitter {
                 const permissionCanDisableLocalController = deviceInfo.Permissions.CanDisableLocalController;
 
                 this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, presets, presetsCount, hasCoolOperationMode, hasHeatOperationMode, hasAutoOperationMode, hasRoomTemperature, hasSupplyTemperature, hasOutdoorTemperature, hasCO2Sensor, hasPM25Sensor, pM25SensorStatus, pM25Level, hasAutoVentilationMode, hasBypassVentilationMode, hasAutomaticFanSpeed, coreMaintenanceRequired, filterMaintenanceRequired, roomCO2Level, actualVentilationMode, numberOfFanSpeeds, temperatureIncrement);
-                this.emit('mqtt', `Info`, deviceInfo);
+
+                //restFul
+                const restFul = restFulEnabled ? this.emit('restFul', 'info', deviceInfo) : false;
+
+                //mqtt
+                const mqtt = mqttEnabled ? this.emit('mqtt', `Info`, deviceInfo) : false;
 
                 //check device state
                 await new Promise(resolve => setTimeout(resolve, 1000));
@@ -397,7 +404,13 @@ class MelCloudErv extends EventEmitter {
                 this.offline = offline;
 
                 this.emit('deviceState', deviceState, roomTemperature, supplyTemperature, outdoorTemperature, nightPurgeMode, setTemperature, setFanSpeed, operationMode, ventilationMode, defaultHeatingSetTemperature, defaultCoolingSetTemperature, hideRoomTemperature, hideSupplyTemperature, hideOutdoorTemperature, power, offline);
-                this.emit('mqtt', `State`, deviceState);
+
+                //restFul
+                const restFul = restFulEnabled ? this.emit('restFul', 'state', deviceState) : false;
+
+                //mqtt
+                const mqtt = mqttEnabled ? this.emit('mqtt', `State`, deviceState) : false;
+
                 this.checkDeviceInfo();
             } catch (error) {
                 this.emit('error', `check device state error, ${error}, check again in 60s.`);

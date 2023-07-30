@@ -1006,6 +1006,23 @@
               "description": "This enable debug mode.",
               "required": false
             },
+            "enableRestFul": {
+              "title": "Enable",
+              "type": "boolean",
+              "default": false,
+              "required": false,
+              "description": "This enable RESTful server."
+            },
+            "restFulDebug": {
+              "title": "Debug",
+              "type": "boolean",
+              "default": false,
+              "required": false,
+              "description": "This enable debug mode for RESTFul.",
+              "condition": {
+                "functionBody": "return model.accounts[arrayIndices].enableRestFul === true;"
+              }
+            },
             "enableMqtt": {
               "title": "Enable",
               "type": "boolean",
@@ -1188,6 +1205,17 @@
             "accounts[].enableDebugMode",
             "accounts[].disableLogInfo",
             "accounts[].disableLogDeviceInfo"
+          ]
+        },
+        {
+          "key": "accounts[]",
+          "type": "section",
+          "title": "RESTful",
+          "expandable": true,
+          "expanded": false,
+          "items": [
+            "accounts[].enableRestFul",
+            "accounts[].restFulDebug"
           ]
         },
         {

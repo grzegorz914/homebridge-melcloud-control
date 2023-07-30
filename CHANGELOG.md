@@ -10,7 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Important changes v0.4.0 and above!!!
   * Main control mode, buttons and presets need to be configured again!!!
 
-  ## [0.12.0] - (21.07.2023)
+ ## [0.13.0] - (30.07.2023)
+  ## Changes
+- added RESTFul server
+- code refactor and cleanup
+- config.schema updated
+
+## [0.12.0] - (21.07.2023)
 ## Changes
 - added extra temperature sensor for Heater/Cooler control mode to use with automations
 - config.schema updeted
