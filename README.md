@@ -5,7 +5,6 @@
 <span align="center">
 
 # Homebridge MELCloud Control
-
 [![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
 [![npm](https://badgen.net/npm/dt/homebridge-melcloud-control?color=purple)](https://www.npmjs.com/package/homebridge-melcloud-control)
 [![npm](https://badgen.net/npm/v/homebridge-melcloud-control?color=purple)](https://www.npmjs.com/package/homebridge-melcloud-control)
@@ -18,7 +17,6 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 </span>
 
 ## Package Requirements
-
 | Package | Installation | Role | Required |
 | --- | --- | --- | --- |
 | [Homebridge](https://github.com/homebridge/homebridge) | [Homebridge Wiki](https://github.com/homebridge/homebridge/wiki) | HomeKit Bridge | Required |
@@ -26,7 +24,6 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | [MELCloud](https://www.npmjs.com/package/homebridge-melcloud-control) | [Plug-In Wiki](https://github.com/grzegorz914/homebridge-melcloud-control/wiki) | Homebridge Plug-In | Required |
 
 ### About The Plugin
-
 * All devices are detected automatically.
 * Support multiple MELCloud accounts, buildings, flors, areas.
 * Support temperature display units `Celsius/Fahrenheit`.
@@ -44,7 +41,6 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
   * Publish as JSON data.
 
 ### Control Mode
-
 * Air Conditioner:
   * Heater Cooler:
     * Power `ON/OFF`.
@@ -158,7 +154,6 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 </p>
 
 ### Configuration
-
 * Run this plugin as a [Child Bridge](https://github.com/homebridge/homebridge/wiki/Child-Bridges) (Highly Recommended), this prevent crash Homebridge if plugin crashes.
 * Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) to configure this plugin (Highly Recommended).
 * The `sample-config.json` can be edited and used as an alternative.
