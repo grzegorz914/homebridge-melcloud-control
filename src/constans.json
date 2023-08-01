@@ -90,6 +90,7 @@
             "SetTemperature": 4,
             "SetFanSpeed": 8,
             "VaneVertical": 16,
+            "Prohibit": 64,
             "VaneHorizontal": 256,
             "HolidayMode": 131072,
             "All": 281483566710825
@@ -160,6 +161,7 @@
             "OperationModeZone1": 8,
             "OperationModeZone2": 16,
             "SetTankWaterTemperature": 32,
+            "Prohibit": 64,
             "TargetHCTemperatureZone1": 128,
             "TargetHCTemperatureZone2": 512,
             "ForcedHotWaterMode": 65536,
@@ -268,6 +270,7 @@
             "OperationMode": 2,
             "VentilationMode": 4,
             "SetFanSpeed": 8,
+            "Prohibit": 64,
             "HolidayMode": 131072,
             "All": 281483566710825
         }

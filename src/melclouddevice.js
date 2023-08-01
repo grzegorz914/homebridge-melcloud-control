@@ -1535,7 +1535,6 @@ class MelCloudDevice extends EventEmitter {
                                                         break;
                                                 };
 
-                                                deviceState.Power = (ataHasAutomaticFanSpeed && value > 0) || (!ataHasAutomaticFanSpeed && value > 1) ? true : false;
                                                 deviceState.SetFanSpeed = fanSpeed;
                                                 deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.SetFanSpeed;
                                                 await this.melCloudAta.send(deviceState);
@@ -1555,7 +1554,6 @@ class MelCloudDevice extends EventEmitter {
                                         })
                                         .onSet(async (value) => {
                                             try {
-                                                deviceState.Power = true;
                                                 deviceState.VaneHorizontal = value ? 12 : 0;
                                                 deviceState.VaneVertical = value ? 7 : 0;
                                                 deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
@@ -1585,7 +1583,6 @@ class MelCloudDevice extends EventEmitter {
                                     })
                                     .onSet(async (value) => {
                                         try {
-                                            deviceState.Power = true;
                                             deviceState.SetTemperature = value;
                                             deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.SetTemperature;
                                             await this.melCloudAta.send(deviceState);
@@ -1607,7 +1604,6 @@ class MelCloudDevice extends EventEmitter {
                                     })
                                     .onSet(async (value) => {
                                         try {
-                                            deviceState.Power = true;
                                             deviceState.SetTemperature = value;
                                             deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.SetTemperature;
                                             await this.melCloudAta.send(deviceState);
@@ -1628,6 +1624,7 @@ class MelCloudDevice extends EventEmitter {
                                             deviceState.ProhibitSetTemperature = value;
                                             deviceState.ProhibitOperationMode = value;
                                             deviceState.ProhibitPower = value;
+                                            deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Prohibit;
                                             await this.melCloudAta.send(deviceState);
                                             const info = this.disableLogInfo ? false : this.emit('message', `Set locl physical controls: ${value ? 'LOCK' : 'UNLOCK'}`);
                                         } catch (error) {
@@ -1737,7 +1734,6 @@ class MelCloudDevice extends EventEmitter {
                                     })
                                     .onSet(async (value) => {
                                         try {
-                                            deviceState.Power = true;
                                             deviceState.SetTemperature = value;
                                             deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.SetTemperature;
                                             await this.melCloudAta.send(deviceState);
@@ -1947,15 +1943,19 @@ class MelCloudDevice extends EventEmitter {
                                                         deviceState.ProhibitSetTemperature = state;
                                                         deviceState.ProhibitOperationMode = state;
                                                         deviceState.ProhibitPower = state;
+                                                        deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Prohibit;
                                                         break;
                                                     case 38: //PHYSICAL LOCK CONTROLS POWER
                                                         deviceState.ProhibitPower = state;
+                                                        deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Prohibit;
                                                         break;
                                                     case 39: //PHYSICAL LOCK CONTROLS MODE
                                                         deviceState.ProhibitOperationMode = state;
+                                                        deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Prohibit;
                                                         break;
                                                     case 40: //PHYSICAL LOCK CONTROLS TTEMP
                                                         deviceState.ProhibitSetTemperature = state;
+                                                        deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Prohibit;
                                                         break;
                                                     default:
                                                         deviceState = deviceState;
@@ -2288,6 +2288,7 @@ class MelCloudDevice extends EventEmitter {
                                                         deviceState.ProhibitZone1 = value;
                                                         deviceState.ProhibitHotWater = value;
                                                         deviceState.ProhibitZone2 = value;
+                                                        CONSTANS.HeatPump.EffectiveFlags.ProhibitHeatingZone1 + CONSTANS.HeatPump.EffectiveFlags.ProhibitHotWater + CONSTANS.HeatPump.EffectiveFlags.ProhibitHeatingZone2;
                                                         break;
                                                     case 1: //Zone 1
                                                         deviceState.ProhibitZone1 = value;
@@ -2595,6 +2596,7 @@ class MelCloudDevice extends EventEmitter {
                                                         deviceState.ProhibitZone1 = state;
                                                         deviceState.ProhibitHotWater = state;
                                                         deviceState.ProhibitZone2 = state;
+                                                        deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.ProhibitHeatingZone1 + CONSTANS.HeatPump.EffectiveFlags.ProhibitHotWater + CONSTANS.HeatPump.EffectiveFlags.ProhibitHeatingZone2;
                                                         break;
                                                     case 20: //ZONE 1 HEAT THERMOSTAT
                                                         deviceState.Power = true;
@@ -2870,7 +2872,6 @@ class MelCloudDevice extends EventEmitter {
                                                     break;
                                             };
 
-                                            deviceState.Power = (ervHasAutomaticFanSpeed && value > 0) || (!ervHasAutomaticFanSpeed && value > 1) ? true : false;;
                                             deviceState.SetFanSpeed = fanSpeed;
                                             deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.SetFanSpeed;
                                             await this.melCloudErv.send(deviceState);
@@ -2933,24 +2934,23 @@ class MelCloudDevice extends EventEmitter {
                                             };
                                         });
                                 };
-                                ervMelCloudService.getCharacteristic(Characteristic.LockPhysicalControls)
-                                    .onGet(async () => {
-                                        const value = this.lockPhysicalControls;
-                                        const info = this.disableLogInfo ? false : this.emit('message', `Lock physical controls: ${value ? 'LOCKED' : 'UNLOCKED'}`);
-                                        return value;
-                                    })
-                                    .onSet(async (value) => {
-                                        try {
-                                            value = value ? true : false;
-                                            deviceState.ProhibitSetTemperature = value;
-                                            deviceState.ProhibitOperationMode = value;
-                                            deviceState.ProhibitPower = value;
-                                            await this.melCloudErv.send(deviceState);
-                                            const info = this.disableLogInfo ? false : this.emit('message', `Set locl physical controls: ${value ? 'LOCK' : 'UNLOCK'}`);
-                                        } catch (error) {
-                                            this.emit('error', `Set lock physical controls error: ${error}`);
-                                        };
-                                    });
+                                //ervMelCloudService.getCharacteristic(Characteristic.LockPhysicalControls)
+                                //    .onGet(async () => {
+                                //        const value = this.lockPhysicalControls;
+                                //        const info = this.disableLogInfo ? false : this.emit('message', `Lock physical controls: ${value ? 'LOCKED' : 'UNLOCKED'}`);
+                                //        return value;
+                                //    })
+                                //    .onSet(async (value) => {
+                                //       try {
+                                //         value = value ? true : false;
+                                //         deviceState = deviceState;
+                                //         deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Prohibit;
+                                //         await this.melCloudErv.send(deviceState);
+                                //         const info = this.disableLogInfo ? false : this.emit('message', `Set locl physical controls: ${value ? 'LOCK' : 'UNLOCK'}`);
+                                //     } catch (error) {
+                                //          this.emit('error', `Set lock physical controls error: ${error}`);
+                                //      };
+                                //   });
                                 ervMelCloudService.getCharacteristic(Characteristic.TemperatureDisplayUnits)
                                     .onGet(async () => {
                                         const value = this.useFahrenheit;
@@ -3234,6 +3234,7 @@ class MelCloudDevice extends EventEmitter {
                                                         break;
                                                     case 15: //PHYSICAL LOCK CONTROLS
                                                         deviceState = deviceState;
+                                                        deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.Prohibit;
                                                         break;
                                                     case 16: //ROOM TEMP HIDE
                                                         deviceState.HideRoomTemperature = state;

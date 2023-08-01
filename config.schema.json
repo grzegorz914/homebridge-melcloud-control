@@ -912,12 +912,6 @@
                         ]
                       },
                       {
-                        "title": "LOCK CONTROL",
-                        "enum": [
-                          15
-                        ]
-                      },
-                      {
                         "title": "ROOM TEMP HIDE",
                         "enum": [
                           16
