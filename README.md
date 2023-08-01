@@ -5,18 +5,20 @@
 <span align="center">
 
 # Homebridge MELCloud Control
+
 [![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
-[![npm](https://badgen.net/npm/dt/homebridge-melcloud-control?color=purple)](https://www.npmjs.com/package/homebridge-melcloud-control) 
+[![npm](https://badgen.net/npm/dt/homebridge-melcloud-control?color=purple)](https://www.npmjs.com/package/homebridge-melcloud-control)
 [![npm](https://badgen.net/npm/v/homebridge-melcloud-control?color=purple)](https://www.npmjs.com/package/homebridge-melcloud-control)
 [![npm](https://img.shields.io/npm/v/homebridge-melcloud-control/beta.svg?style=flat-square)](https://www.npmjs.com/package/homebridge-melcloud-control)
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/grzegorz914/homebridge-melcloud-control.svg)](https://github.com/grzegorz914/homebridge-melcloud-control/pulls)
 [![GitHub issues](https://img.shields.io/github/issues/grzegorz914/homebridge-melcloud-control.svg)](https://github.com/grzegorz914/homebridge-melcloud-control/issues)
 
-Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation Lossnay, manufactured by Mistsubishi and connected to MELCloud.                                           
+Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation Lossnay, manufactured by Mistsubishi and connected to MELCloud.
 
 </span>
 
 ## Package Requirements
+
 | Package | Installation | Role | Required |
 | --- | --- | --- | --- |
 | [Homebridge](https://github.com/homebridge/homebridge) | [Homebridge Wiki](https://github.com/homebridge/homebridge/wiki) | HomeKit Bridge | Required |
@@ -24,6 +26,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | [MELCloud](https://www.npmjs.com/package/homebridge-melcloud-control) | [Plug-In Wiki](https://github.com/grzegorz914/homebridge-melcloud-control/wiki) | Homebridge Plug-In | Required |
 
 ### About The Plugin
+
 * All devices are detected automatically.
 * Support multiple MELCloud accounts, buildings, flors, areas.
 * Support temperature display units `Celsius/Fahrenheit`.
@@ -41,11 +44,12 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
   * Publish as JSON data.
 
 ### Control Mode
+
 * Air Conditioner:
   * Heater Cooler:
     * Power `ON/OFF`.
     * Operating mode `AUTO/HEAT/COOL/POWER OFF`.
-    * Temperature `HEATING/COOLING`. 
+    * Temperature `HEATING/COOLING`.
     * Fan speed `OFF/1/2/3/4/5/AUTO`.
     * Swing mode `AUTO/SWING`.
     * Physical lock controls `LOCK/UNLOCK`.
@@ -75,7 +79,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Vane V mode `AUTO/1/2/3/4/5/SWING`.
       * Fan speed mode `AUTO/1/2/3/4/5/`.
       * Temperature change for `HEATER/COOLER`.
-      * Device presets. 
+      * Device presets.
 * Heat Pump:
   * Heater Cooler:
     * Heat Pump:
@@ -111,14 +115,14 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Power `ON/OFF`.
       * Operating mode `HEAT/COOL/CURVE/HOLIDAY/AUTO HOT WATER/ECO HOT WATER/FORCE HOT WATER`.
       * Physical lock controls `LOCK/UNLOCK`.
-      * Presets `SET/UNSET`. 
+      * Presets `SET/UNSET`.
   * Sensors:
     * Use for automations and identify.
       * Power `ON/OFF`.
       * Operating mode `HEAT/COOL/CURVE/HOLIDAY/AUTO HOT WATER/ECO HOT WATER/FORCE HOT WATER`.
       * Physical lock controls `LOCK/UNLOCK`.
       * Temperature change for `HEATER/COOLER`.
-      * Device presets. 
+      * Device presets.
 * Energy Recovery Ventilation Lossnay:
   * Heater Cooler:
     * Power `ON/OFF`.
@@ -141,29 +145,30 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Operating mode `LOSSNAY/BYPAS/AUTO/NIGHT PURGE`.
       * Fan speed mode `AUTO/1/2/3/4`.
       * Temperature change for `HEATER/COOLER`.
-      * Device presets. 
+      * Device presets.
       * Core maintenance.
       * Filter maintenance.
       * CO2 detected and level.
       * PM2.5 air quality and level.
 
 <p align="left">
-  <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/homekit.png" width="382"></a> 
+  <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/homekit.png" width="382"></a>
   <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/settings.png" width="135"></a> <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/settings1.png" width="135"></a>
   <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/settings2.png" width="135"></a>
 </p>
 
 ### Configuration
+
 * Run this plugin as a [Child Bridge](https://github.com/homebridge/homebridge/wiki/Child-Bridges) (Highly Recommended), this prevent crash Homebridge if plugin crashes.
-* Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) to configure this plugin (Highly Recommended). 
-* The `sample-config.json` can be edited and used as an alternative. 
+* Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) to configure this plugin (Highly Recommended).
+* The `sample-config.json` can be edited and used as an alternative.
 * Be sure to always make a backup copy of your config.json file before making any changes to it.
 
 <p align="left">
   <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/ustawienia.png" width="840"></a>
 </p>
 
-| Key | Description | 
+| Key | Description |
 | --- | --- |
 | `name` | Here set the own account name. |
 | `user` | Here set the MELCloud username. |
@@ -175,19 +180,19 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ataDisableHeatMode` | This will disable `Heat` mode even this mode is supported by device. |
 | `ataAutoHeatMode` | Here select operation mode for `Auto/Heat`, if `Auto`, `Heat` or both modes are not supported by device will be used selected modes instead. |
 | `ataPresets` | This enable display Air Conditioner presets in HomeKit app. |
-| `ataButtons.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. | 
+| `ataButtons.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
 | `ataButtons.mode` | Here select button mode, VH - Vane Horizontal, VV - Vane Horizontal. |
 | `ataButtons.displayType` | Here select display type in HomeKit app, possible `None/Disabled`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`.|
 | `atwDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
 | `atwTemperatureSensor` | This enable extra temperature sensor for Heater/Cooler control mode to use with automations in HomeKit app. |
 | `atwPresets` | This enable display Heat Pump presets in HomeKit app. |
-| `atwButtons.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. | 
+| `atwButtons.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
 | `atwButtons.mode` | Here select button mode. |
 | `atwButtons.displayType` | Here select display type in HomeKit app, possible `None/Disabled`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`.|
 | `ervDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
 | `ervTemperatureSensor` | This enable extra temperature sensor for Heater/Cooler control mode to use with automations in HomeKit app. |
 | `ervPresets` | This enable display EnergyRecovery Ventilation presets in HomeKit app. |
-| `ervButtons.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. | 
+| `ervButtons.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
 | `ervButtons.mode` | Here select button mode. |
 | `ervButtons.displayType` | Here select display type in HomeKit app, possible `None/Disabled`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`.|
 | `enableDebugMode` | This enable deep log in homebridge console. |
