@@ -62,7 +62,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
     * Temperature display unit `°F/°C`.
     * If `AUTO/HEAT` or both modes are not supported by device will use `DRY/FAN` or `FAN/DRY` modes instead.
   * Buttons:
-    * Use to direct device control.
+    * For direct device control.
       * Power `ON/OFF`.
       * Operating mode `HEAT/DRY/COOL/FAN/AUTO`.
       * Physical lock controls `LOCK/UNLOCK`.
@@ -71,7 +71,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Fan speed mode `AUTO/1/2/3/4/5`.
       * Presets `SET/UNSET`.
   * Sensors:
-    * Use for automation and notifications.
+    * For automation and notifications.
       * Power `ON/OFF`.
       * Operating mode `HEAT/DRY/COOL/FAN/AUTO`.
       * Physical lock controls `LOCK/UNLOCK`.
@@ -111,13 +111,13 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Operating mode `HEAT/AUTO` - `HEAT NOW, AUTO`.
       * Temperature `SET/GET`.
   * Buttons:
-    * Use to direct device control.  
+    * For direct device control.  
       * Power `ON/OFF`.
       * Operating mode `HEAT/COOL/CURVE/HOLIDAY/AUTO HOT WATER/ECO HOT WATER/FORCE HOT WATER`.
       * Physical lock controls `LOCK/UNLOCK`.
       * Presets `SET/UNSET`.
   * Sensors:
-    * Use for automation and notifications.
+    * For automation and notifications.
       * Power `ON/OFF`.
       * Operating mode `HEAT/COOL/CURVE/HOLIDAY/AUTO HOT WATER/ECO HOT WATER/FORCE HOT WATER`.
       * Physical lock controls `LOCK/UNLOCK`.
@@ -134,13 +134,13 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
     * Operating mode `POWER OFF/HEAT/COOL/AUTO` - `POWER OFF, LOSSNAY, BYPAS, AUTO`.
     * Temperature display unit `°F/°C`.
   * Buttons:
-    * Use to direct device control.
+    * For direct device control.
       * Power `ON/OFF`.
       * Operating mode `LOSSNAY/BYPAS/AUTO/NIGHT PURGE`.
       * Fan speed mode `AUTO/1/2/3/4`.
       * Presets `SET/UNSET`.
   * Sensors:
-    * Use for automation and notifications.
+    * For automation and notifications.
       * Power `ON/OFF`.
       * Operating mode `LOSSNAY/BYPAS/AUTO/NIGHT PURGE`.
       * Fan speed mode `AUTO/1/2/3/4`.
