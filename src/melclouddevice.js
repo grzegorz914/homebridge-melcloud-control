@@ -1583,6 +1583,7 @@ class MelCloudDevice extends EventEmitter {
                                     })
                                     .onSet(async (value) => {
                                         try {
+                                            deviceState.Power = true;
                                             deviceState.SetTemperature = value;
                                             deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.SetTemperature;
                                             await this.melCloudAta.send(deviceState);
@@ -1604,6 +1605,7 @@ class MelCloudDevice extends EventEmitter {
                                     })
                                     .onSet(async (value) => {
                                         try {
+                                            deviceState.Power = true;
                                             deviceState.SetTemperature = value;
                                             deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.SetTemperature;
                                             await this.melCloudAta.send(deviceState);
@@ -1734,6 +1736,7 @@ class MelCloudDevice extends EventEmitter {
                                     })
                                     .onSet(async (value) => {
                                         try {
+                                            deviceState.Power = true;
                                             deviceState.SetTemperature = value;
                                             deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.SetTemperature;
                                             await this.melCloudAta.send(deviceState);
@@ -2213,14 +2216,17 @@ class MelCloudDevice extends EventEmitter {
                                                             //deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.SetTemperatureZone1;
                                                             break;
                                                         case 1: //Zone 1
+                                                            deviceState.Power = true;
                                                             deviceState.SetTemperatureZone1 = value;
                                                             deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.SetTemperatureZone1;
                                                             break;
                                                         case atwCaseHotWater: //Hot Water
+                                                            deviceState.Power = true;
                                                             deviceState.SetTankWaterTemperature = value;
                                                             deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.SetTankWaterTemperature;
                                                             break;
                                                         case atwCaseZone2: //Zone 2
+                                                            deviceState.Power = true;
                                                             deviceState.SetTemperatureZone2 = value;
                                                             deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.SetTemperatureZone2;
                                                             break;
@@ -2254,15 +2260,18 @@ class MelCloudDevice extends EventEmitter {
                                                             //deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.SetTemperatureZone1;
                                                             break;
                                                         case 1: //Zone 1
+                                                            deviceState.Power = true;
                                                             deviceState.SetTemperatureZone1 = value;
                                                             deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.SetTemperatureZone1;
                                                             break;
                                                         case atwCaseHotWater: //Hot Water
+                                                            deviceState.Power = true;
                                                             deviceState.SetTankWaterTemperature = value;
                                                             deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.SetTankWaterTemperature;
                                                             break;
                                                         case atwCaseZone2: //Zone 2
                                                             deviceState.SetTemperatureZone2 = value;
+                                                            deviceState.Power = true;
                                                             deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.SetTemperatureZone2;
                                                             break;
                                                     };
@@ -2502,14 +2511,17 @@ class MelCloudDevice extends EventEmitter {
                                                         //deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.SetTemperatureZone1;
                                                         break;
                                                     case 1: //Zone 1
+                                                        deviceState.Power = true;
                                                         deviceState.SetTemperatureZone1 = value;
                                                         deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.SetTemperatureZone1;
                                                         break;
                                                     case atwCaseHotWater: //Hot Water
+                                                        deviceState.Power = true;
                                                         deviceState.SetTankWaterTemperature = value;
                                                         deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.SetTankWaterTemperature;
                                                         break;
                                                     case atwCaseZone2: //Zone 2
+                                                        deviceState.Power = true;
                                                         deviceState.SetTemperatureZone2 = value;
                                                         deviceState.EffectiveFlags = CONSTANS.HeatPump.EffectiveFlags.SetTemperatureZone2;
                                                         break;
@@ -2901,6 +2913,7 @@ class MelCloudDevice extends EventEmitter {
                                         })
                                         .onSet(async (value) => {
                                             try {
+                                                deviceState.Power = true;
                                                 deviceState.SetTemperature = value;
                                                 deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.SetTemperature;
                                                 await this.melCloudErv.send(deviceState);
@@ -2925,6 +2938,7 @@ class MelCloudDevice extends EventEmitter {
                                         })
                                         .onSet(async (value) => {
                                             try {
+                                                deviceState.Power = true;
                                                 deviceState.SetTemperature = value;
                                                 deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.SetTemperature;
                                                 await this.melCloudErv.send(deviceState);
@@ -3053,6 +3067,7 @@ class MelCloudDevice extends EventEmitter {
                                     })
                                     .onSet(async (value) => {
                                         try {
+                                            deviceState.Power = true;
                                             deviceState.SetTemperature = value;
                                             deviceState.EffectiveFlags = CONSTANS.Ventilation.EffectiveFlags.SetTemperature;
                                             await this.melCloudErv.send(deviceState);
