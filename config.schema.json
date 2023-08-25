@@ -1204,30 +1204,40 @@
         {
           "key": "accounts[]",
           "type": "section",
-          "title": "RESTful",
+          "title": "External Integrations",
           "expandable": true,
           "expanded": false,
           "items": [
-            "accounts[].enableRestFul",
-            "accounts[].restFulDebug"
-          ]
-        },
-        {
-          "key": "accounts[]",
-          "type": "section",
-          "title": "MQTT",
-          "expandable": true,
-          "expanded": false,
-          "items": [
-            "accounts[].enableMqtt",
-            "accounts[].mqttDebug",
-            "accounts[].mqttHost",
-            "accounts[].mqttPort",
-            "accounts[].mqttClientId",
-            "accounts[].mqttPrefix",
-            "accounts[].mqttAuth",
-            "accounts[].mqttUser",
-            "accounts[].mqttPasswd"
+            {
+              "key": "accounts[]",
+              "type": "tabarray",
+              "title": "{{ value.title }}",
+              "items": [
+                {
+                  "key": "accounts[]",
+                  "title": "RESTFul",
+                  "items": [
+                    "accounts[].enableRestFul",
+                    "accounts[].restFulDebug"
+                  ]
+                },
+                {
+                  "key": "accounts[]",
+                  "title": "MQTT",
+                  "items": [
+                    "accounts[].enableMqtt",
+                    "accounts[].mqttDebug",
+                    "accounts[].mqttHost",
+                    "accounts[].mqttPort",
+                    "accounts[].mqttClientId",
+                    "accounts[].mqttPrefix",
+                    "accounts[].mqttAuth",
+                    "accounts[].mqttUser",
+                    "accounts[].mqttPasswd"
+                  ]
+                }
+              ]
+            }
           ]
         }
       ]
