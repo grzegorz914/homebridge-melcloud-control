@@ -258,7 +258,7 @@ class MelCloudAtw extends EventEmitter {
                 const canEstimateEnergyUsage = device.CanEstimateEnergyUsage;
                 const canUseRoomTemperatureCooling = device.CanUseRoomTemperatureCooling;
                 const isFtcModelSupported = device.IsFtcModelSupported;
-                const maxTankTemperature = device.MaxTankTemperature;
+                const maxTankTemperature = device.MaxTankTemperature || 0;
                 const idleZone1 = device.IdleZone1;
                 const idleZone2 = device.IdleZone2;
                 const minPcycle = device.MinPcycle;
@@ -396,9 +396,9 @@ class MelCloudAtw extends EventEmitter {
                 const heatCoolModes = canHeat && canCool ? 0 : canHeat ? 1 : canCool ? 2 : 3;
                 const hotWater = hasHotWaterTank ? 1 : 0;
                 const zone2 = hasZone2 ? 1 : 0;
-                const zonesCount = 2 + hotWater + zone2 || 0;
+                const zonesCount = 2 + hotWater + zone2;
                 const caseHotWater = hasHotWaterTank ? 2 : -1;
-                const caseZone2 = hasHotWaterTank ? (hasZone2 ? 3 : 2) : -1;
+                const caseZone2 = hasZone2 ? hasHotWaterTank ? 3 : 2 : -1;
 
                 if (zonesCount === 0) {
                     this.emit('message', `No device or zones found.`);
@@ -407,7 +407,7 @@ class MelCloudAtw extends EventEmitter {
                 };
 
                 this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, presets, presetsCount, zonesCount, heatPumpZoneName, hotWaterZoneName, hasHotWaterTank, temperatureIncrement, maxTankTemperature, hasZone2, zone1Name, zone2Name, heatCoolModes, caseHotWater, caseZone2);
-                
+
                 //restFul
                 const restFul = restFulEnabled ? this.emit('restFul', 'info', deviceInfo) : false;
 
@@ -445,7 +445,7 @@ class MelCloudAtw extends EventEmitter {
                 const setHeatFlowTemperatureZone2 = deviceState.SetHeatFlowTemperatureZone2;
                 const setCoolFlowTemperatureZone1 = deviceState.SetCoolFlowTemperatureZone1;
                 const setCoolFlowTemperatureZone2 = deviceState.SetCoolFlowTemperatureZone2;
-                const hcControlType = deviceState.HcControlType;
+                const hcControlType = deviceState.HCControlType;
                 const tankWaterTemperature = deviceState.TankWaterTemperature;
                 const setTankWaterTemperature = deviceState.SetTankWaterTemperature;
                 const forcedHotWaterMode = deviceState.ForcedHotWaterMode ? 1 : 0;
@@ -532,7 +532,7 @@ class MelCloudAtw extends EventEmitter {
                 this.offline = offline;
 
                 this.emit('deviceState', deviceState, setTemperatureZone1, setTemperatureZone2, roomTemperatureZone1, roomTemperatureZone2, operationMode, operationModeZone1, operationModeZone2, setHeatFlowTemperatureZone1, setHeatFlowTemperatureZone2, setCoolFlowTemperatureZone1, setCoolFlowTemperatureZone2, hcControlType, tankWaterTemperature, setTankWaterTemperature, forcedHotWaterMode, unitStatus, outdoorTemperature, ecoHotWater, holidayMode, prohibitZone1, prohibitZone2, prohibitHotWater, idleZone1, idleZone2, power, offline);
-                
+
                 //restFul
                 const restFul = restFulEnabled ? this.emit('restFul', 'state', deviceState) : false;
 
