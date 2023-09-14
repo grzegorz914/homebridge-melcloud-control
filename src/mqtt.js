@@ -8,10 +8,9 @@ class MQTTCLIENT extends EventEmitter {
         this.mqttHost = config.host;
         this.mqttPort = config.port;
         this.mqttClientId = config.clientId;
-        this.mqttPrefix = config.prefix;
-        this.mqttAuth = config.auth;
         this.mqttUser = config.user;
         this.mqttPasswd = config.passwd;
+        this.mqttPrefix = config.prefix;
         this.mqttDebug = config.debug;
         this.isConnected = false;
 

@@ -1240,44 +1240,41 @@
                     "accounts[].disableLogInfo",
                     "accounts[].disableLogDeviceInfo"
                   ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "key": "accounts[]",
-          "type": "section",
-          "title": "External Integrations",
-          "expandable": true,
-          "expanded": false,
-          "items": [
-            {
-              "key": "accounts[]",
-              "type": "tabarray",
-              "title": "{{ value.title }}",
-              "items": [
-                {
-                  "key": "accounts[]",
-                  "title": "RESTFul",
-                  "items": [
-                    "accounts[].enableRestFul",
-                    "accounts[].restFulDebug"
-                  ]
                 },
                 {
                   "key": "accounts[]",
-                  "title": "MQTT",
+                  "title": "External Integrations",
                   "items": [
-                    "accounts[].enableMqtt",
-                    "accounts[].mqttDebug",
-                    "accounts[].mqttHost",
-                    "accounts[].mqttPort",
-                    "accounts[].mqttClientId",
-                    "accounts[].mqttPrefix",
-                    "accounts[].mqttAuth",
-                    "accounts[].mqttUser",
-                    "accounts[].mqttPasswd"
+                    {
+                      "key": "accounts[]",
+                      "type": "tabarray",
+                      "title": "{{ value.title }}",
+                      "items": [
+                        {
+                          "key": "accounts[]",
+                          "title": "RESTFul",
+                          "items": [
+                            "accounts[].enableRestFul",
+                            "accounts[].restFulDebug"
+                          ]
+                        },
+                        {
+                          "key": "accounts[]",
+                          "title": "MQTT",
+                          "items": [
+                            "accounts[].enableMqtt",
+                            "accounts[].mqttDebug",
+                            "accounts[].mqttHost",
+                            "accounts[].mqttPort",
+                            "accounts[].mqttClientId",
+                            "accounts[].mqttPrefix",
+                            "accounts[].mqttAuth",
+                            "accounts[].mqttUser",
+                            "accounts[].mqttPasswd"
+                          ]
+                        }
+                      ]
+                    }
                   ]
                 }
               ]

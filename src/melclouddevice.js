@@ -77,24 +77,22 @@ class MelCloudDevice extends EventEmitter {
         const mqttEnabled = account.enableMqtt || false;
         this.mqttConnected = false;
         if (mqttEnabled) {
-            const mqttDebug = account.mqttDebug || false;
             const mqttHost = account.mqttHost;
             const mqttPort = account.mqttPort || 1883;
-            const mqttClientId = account.mqttClientId || '';
-            const mqttPrefix = `${account.mqttPrefix}/${deviceTypeText}/${deviceName} ${deviceId}`;
-            const mqttAuth = account.mqttAuth || false;
+            const mqttClientId = account.mqttClientId || `mqtt_${Math.random().toString(16).slice(3)}`;
             const mqttUser = account.mqttUser;
             const mqttPasswd = account.mqttPass;
+            const mqttPrefix = `${account.mqttPrefix}/${deviceTypeText}/${deviceName} ${deviceId}`;
+            const mqttDebug = account.mqttDebug || false;
 
             this.mqtt = new Mqtt({
-                debug: mqttDebug,
                 host: mqttHost,
                 port: mqttPort,
                 clientId: mqttClientId,
-                prefix: mqttPrefix,
-                auth: mqttAuth,
                 user: mqttUser,
-                passwd: mqttPasswd
+                passwd: mqttPasswd,
+                prefix: mqttPrefix,
+                debug: mqttDebug
             });
 
             this.mqtt.on('connected', (message) => {
