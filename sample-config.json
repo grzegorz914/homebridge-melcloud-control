@@ -22,7 +22,7 @@
           "name": "My House",
           "user": "user",
           "passwd": "password",
-          "language": 0,
+          "language": "0",
           "ataDisplayMode": 0,
           "ataTemperatureSensor": false,
           "ataDisableAutoMode": false,
