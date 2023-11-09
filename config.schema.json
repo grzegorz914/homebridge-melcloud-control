@@ -1134,98 +1134,85 @@
               "items": [
                 {
                   "key": "accounts[]",
-                  "title": "Devices",
+                  "title": "Air Conditioner",
                   "items": [
+                    "accounts[].ataDisplayMode",
+                    "accounts[].ataTemperatureSensor",
+                    "accounts[].ataPresets",
+                    "accounts[].ataDisableAutoMode",
+                    "accounts[].ataDisableHeatMode",
+                    "accounts[].ataAutoHeatMode",
                     {
-                      "key": "accounts[]",
-                      "type": "tabarray",
-                      "title": "{{ value.title }}",
+                      "key": "accounts[].ataButtons",
+                      "type": "section",
+                      "title": "Buttons/Sensors",
+                      "expandable": true,
+                      "expanded": false,
                       "items": [
                         {
-                          "key": "accounts[]",
-                          "title": "Air Conditioner",
+                          "key": "accounts[].ataButtons",
+                          "type": "tabarray",
+                          "title": "{{ value.name || 'button/sensor' }}",
                           "items": [
-                            "accounts[].ataDisplayMode",
-                            "accounts[].ataTemperatureSensor",
-                            "accounts[].ataPresets",
-                            "accounts[].ataDisableAutoMode",
-                            "accounts[].ataDisableHeatMode",
-                            "accounts[].ataAutoHeatMode",
-                            {
-                              "key": "accounts[].ataButtons",
-                              "type": "section",
-                              "title": "Buttons/Sensors",
-                              "expandable": true,
-                              "expanded": false,
-                              "items": [
-                                {
-                                  "key": "accounts[].ataButtons",
-                                  "type": "tabarray",
-                                  "title": "{{ value.name || 'button/sensor' }}",
-                                  "items": [
-                                    "accounts[].ataButtons[].name",
-                                    "accounts[].ataButtons[].mode",
-                                    "accounts[].ataButtons[].displayType"
-                                  ]
-                                }
-                              ]
-                            }
+                            "accounts[].ataButtons[].name",
+                            "accounts[].ataButtons[].mode",
+                            "accounts[].ataButtons[].displayType"
                           ]
-                        },
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "key": "accounts[]",
+                  "title": "Heat Pump",
+                  "items": [
+                    "accounts[].atwDisplayMode",
+                    "accounts[].atwTemperatureSensor",
+                    "accounts[].atwPresets",
+                    {
+                      "key": "accounts[].atwButtons",
+                      "type": "section",
+                      "title": "Buttons/Sensors",
+                      "expandable": true,
+                      "expanded": false,
+                      "items": [
                         {
-                          "key": "accounts[]",
-                          "title": "Heat Pump",
+                          "key": "accounts[].ataButtons",
+                          "type": "tabarray",
+                          "title": "{{ value.name || 'button/sensor' }}",
                           "items": [
-                            "accounts[].atwDisplayMode",
-                            "accounts[].atwTemperatureSensor",
-                            "accounts[].atwPresets",
-                            {
-                              "key": "accounts[].atwButtons",
-                              "type": "section",
-                              "title": "Buttons/Sensors",
-                              "expandable": true,
-                              "expanded": false,
-                              "items": [
-                                {
-                                  "key": "accounts[].ataButtons",
-                                  "type": "tabarray",
-                                  "title": "{{ value.name || 'button/sensor' }}",
-                                  "items": [
-                                    "accounts[].atwButtons[].name",
-                                    "accounts[].atwButtons[].mode",
-                                    "accounts[].atwButtons[].displayType"
-                                  ]
-                                }
-                              ]
-                            }
+                            "accounts[].atwButtons[].name",
+                            "accounts[].atwButtons[].mode",
+                            "accounts[].atwButtons[].displayType"
                           ]
-                        },
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "key": "accounts[]",
+                  "title": "Energy Recovery Ventilation",
+                  "items": [
+                    "accounts[].ervDisplayMode",
+                    "accounts[].ervTemperatureSensor",
+                    "accounts[].ervPresets",
+                    {
+                      "key": "accounts[].ervButtons",
+                      "type": "section",
+                      "title": "Buttons/Sensors",
+                      "expandable": true,
+                      "expanded": false,
+                      "items": [
                         {
-                          "key": "accounts[]",
-                          "title": "Energy Recovery Ventilation",
+                          "key": "accounts[].ervButtons",
+                          "type": "tabarray",
+                          "title": "{{ value.name || 'button/sensor' }}",
                           "items": [
-                            "accounts[].ervDisplayMode",
-                            "accounts[].ervTemperatureSensor",
-                            "accounts[].ervPresets",
-                            {
-                              "key": "accounts[].ervButtons",
-                              "type": "section",
-                              "title": "Buttons/Sensors",
-                              "expandable": true,
-                              "expanded": false,
-                              "items": [
-                                {
-                                  "key": "accounts[].ervButtons",
-                                  "type": "tabarray",
-                                  "title": "{{ value.name || 'button/sensor' }}",
-                                  "items": [
-                                    "accounts[].ervButtons[].name",
-                                    "accounts[].ervButtons[].mode",
-                                    "accounts[].ervButtons[].displayType"
-                                  ]
-                                }
-                              ]
-                            }
+                            "accounts[].ervButtons[].name",
+                            "accounts[].ervButtons[].mode",
+                            "accounts[].ervButtons[].displayType"
                           ]
                         }
                       ]

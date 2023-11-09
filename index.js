@@ -45,7 +45,7 @@ class MelCloudPlatform {
 
 						//publish devices
 						api.publishExternalAccessories(CONSTANS.PluginName, [accessory]);
-						const debug = enableDebugMode ? log(`${deviceTypeText} ${deviceName}, published as external accessory.`) : false;
+						const debug = enableDebugMode ? log(`${accountName}, ${deviceTypeText} ${deviceName}, published as external accessory.`) : false;
 					})
 						.on('devInfo', (devInfo) => {
 							log(devInfo);
