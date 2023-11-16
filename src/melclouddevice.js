@@ -1649,7 +1649,7 @@ class MelCloudDevice extends EventEmitter {
                                     });
 
                                 this.ataMelCloudServices.push(ataMelCloudService);
-                                accessory.addService(this.ataMelCloudServices[0]);
+                                accessory.addService(ataMelCloudService);
 
                                 //temperature sensor services
                                 if (ataTemperatureSensor) {
@@ -1760,7 +1760,7 @@ class MelCloudDevice extends EventEmitter {
                                         };
                                     });
                                 this.ataMelCloudServices.push(ataMelCloudServiceT);
-                                accessory.addService(this.ataMelCloudServices[0]);
+                                accessory.addService(ataMelCloudServiceT);
                                 break;
                         };
 
@@ -1972,7 +1972,7 @@ class MelCloudDevice extends EventEmitter {
                                     });
 
                                 this.ataButtonsServices.push(buttonService);
-                                accessory.addService(this.ataButtonsServices[i])
+                                accessory.addService(buttonService)
                             };
                         };
 
@@ -2021,7 +2021,7 @@ class MelCloudDevice extends EventEmitter {
 
                                 ataPreviousPresets.push(deviceState);
                                 this.ataPresetsServices.push(presetService);
-                                accessory.addService(this.ataPresetsServices[i]);
+                                accessory.addService(presetService);
                             };
                         };
                         resolve(accessory);
@@ -2334,12 +2334,12 @@ class MelCloudDevice extends EventEmitter {
                                             };
                                         });
                                     this.atwMelCloudServices.push(atwMelCloudService);
-                                    accessory.addService(this.atwMelCloudServices[i]);
+                                    accessory.addService(atwMelCloudService);
 
                                     //temperature sensor services
                                     if (atwTemperatureSensor) {
                                         const debug = this.enableDebugMode ? this.emit('debug', `Prepare temperature sensor service`) : false;
-                                        const atwTemperatureSensorService = new Service.TemperatureSensor(atwServiceName, `Temperature Sensor`);
+                                        const atwTemperatureSensorService = new Service.TemperatureSensor(atwServiceName, `Temperature Sensor ${i}`);
                                         atwTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                         atwTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, atwServiceName);
                                         atwTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
@@ -2348,7 +2348,7 @@ class MelCloudDevice extends EventEmitter {
                                                 return state;
                                             })
                                         this.atwTemperatureSensorServices.push(atwTemperatureSensorService);
-                                        accessory.addService(this.atwTemperatureSensorServices[i]);
+                                        accessory.addService(atwTemperatureSensorService);
                                     };
                                     break;
                                 case 1: //Thermostat
@@ -2548,7 +2548,7 @@ class MelCloudDevice extends EventEmitter {
                                             };
                                         });
                                     this.atwMelCloudServices.push(atwMelCloudServiceT);
-                                    accessory.addService(this.atwMelCloudServices[i]);
+                                    accessory.addService(atwMelCloudServiceT);
                                     break;
                             };
                         };
@@ -2704,7 +2704,7 @@ class MelCloudDevice extends EventEmitter {
                                     });
 
                                 this.atwButtonsServices.push(buttonService);
-                                accessory.addService(this.atwButtonsServices[i])
+                                accessory.addService(buttonService)
                             };
                         };
 
@@ -2718,7 +2718,7 @@ class MelCloudDevice extends EventEmitter {
                                 const preset = atwPresets[i];
                                 const presetName = preset.NumberDescription;
 
-                                const presetService = new Service.Outlet(`${accessoryName} ${presetName}`, `Preset${deviceId}  ${i}`);
+                                const presetService = new Service.Outlet(`${accessoryName} ${presetName}`, `Preset${deviceId} ${i}`);
                                 presetService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 presetService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${presetName}`);
                                 presetService.getCharacteristic(Characteristic.On)
@@ -2759,7 +2759,7 @@ class MelCloudDevice extends EventEmitter {
 
                                 atwPreviousPresets.push(deviceState);
                                 this.atwPresetsServices.push(presetService);
-                                accessory.addService(this.atwPresetsServices[i]);
+                                accessory.addService(presetService);
                             };
                         };
 
@@ -2980,7 +2980,7 @@ class MelCloudDevice extends EventEmitter {
                                         };
                                     });
                                 this.ervMelCloudServices.push(ervMelCloudService);
-                                accessory.addService(this.ervMelCloudServices[0]);
+                                accessory.addService(ervMelCloudService);
 
                                 //temperature sensor services
                                 if (ervTemperatureSensor) {
@@ -3091,7 +3091,7 @@ class MelCloudDevice extends EventEmitter {
                                         };
                                     });
                                 this.ervMelCloudServices.push(ervMelCloudServiceT);
-                                accessory.addService(this.ervMelCloudServices[0]);
+                                accessory.addService(ervMelCloudServiceT);
                                 break;
                         };
 
@@ -3272,7 +3272,7 @@ class MelCloudDevice extends EventEmitter {
                                     });
 
                                 this.ervButtonsServices.push(buttonService);
-                                accessory.addService(this.ervButtonsServices[i]);
+                                accessory.addService(buttonService);
                             };
                         };
 
@@ -3320,7 +3320,7 @@ class MelCloudDevice extends EventEmitter {
 
                                 ervPreviousPresets.push(deviceState);
                                 this.ervPresetsServices.push(presetService);
-                                accessory.addService(this.ervPresetsServices[i]);
+                                accessory.addService(presetService);
                             };
                         };
 
