@@ -2718,7 +2718,7 @@ class MelCloudDevice extends EventEmitter {
                                 const preset = atwPresets[i];
                                 const presetName = preset.NumberDescription;
 
-                                const presetService = new Service.Outlet(`${accessoryName} ${presetName}`, `Preset${deviceId} ${i}`);
+                                const presetService = new Service.Outlet(`${accessoryName} ${presetName}`, `Preset ${deviceId} ${i}`);
                                 presetService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 presetService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${presetName}`);
                                 presetService.getCharacteristic(Characteristic.On)
