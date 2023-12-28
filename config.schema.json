@@ -1143,7 +1143,7 @@
                     "accounts[].ataDisableHeatMode",
                     "accounts[].ataAutoHeatMode",
                     {
-                      "key": "accounts[].ataButtons",
+                      "key": "accounts[]",
                       "type": "section",
                       "title": "Buttons/Sensors",
                       "expandable": true,
@@ -1171,7 +1171,7 @@
                     "accounts[].atwTemperatureSensor",
                     "accounts[].atwPresets",
                     {
-                      "key": "accounts[].atwButtons",
+                      "key": "accounts[]",
                       "type": "section",
                       "title": "Buttons/Sensors",
                       "expandable": true,
@@ -1199,7 +1199,7 @@
                     "accounts[].ervTemperatureSensor",
                     "accounts[].ervPresets",
                     {
-                      "key": "accounts[].ervButtons",
+                      "key": "accounts[]",
                       "type": "section",
                       "title": "Buttons/Sensors",
                       "expandable": true,
