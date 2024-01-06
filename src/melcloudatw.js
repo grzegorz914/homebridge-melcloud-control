@@ -418,7 +418,7 @@ class MelCloudAtw extends EventEmitter {
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 this.emit('checkDeviceState');
             } catch (error) {
-                this.emit('error', `check info, ${error}, check again in 60s.`);
+                this.emit('error', `check info, ${error}, check again in 65s.`);
                 this.checkDeviceInfo();
             };
         }).on('checkDeviceState', async () => {
@@ -541,7 +541,7 @@ class MelCloudAtw extends EventEmitter {
 
                 this.checkDeviceInfo();
             } catch (error) {
-                this.emit('error', `check device state error, ${error}, check again in 60s.`);
+                this.emit('error', `check device state error, ${error}, check again in 65s.`);
                 this.checkDeviceInfo();
             };
         });
@@ -577,8 +577,9 @@ class MelCloudAtw extends EventEmitter {
                 await this.axiosInstancePost(CONSTANS.ApiUrls.SetAtw, options);
                 resolve();
 
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                this.emit('checkDeviceInfo');
+                await new Promise(resolve => setTimeout(resolve, 250));
+                this.emit('deviceState', deviceState, deviceState.SetTemperatureZone1, deviceState.SetTemperatureZone2, deviceState.RoomTemperatureZone1, deviceState.RoomTemperatureZone2, deviceState.OperationMode, deviceState.OperationModeZone1, deviceState.OperationModeZone2, deviceState.SetHeatFlowTemperatureZone1, deviceState.SetHeatFlowTemperatureZone2, deviceState.SetCoolFlowTemperatureZone1, deviceState.SetCoolFlowTemperatureZone2, deviceState.HcControlType, deviceState.TankWaterTemperature, deviceState.SetTankWaterTemperature, deviceState.ForcedHotWaterMode, deviceState.UnitStatus, deviceState.OutdoorTemperature, deviceState.EcoHotWater, deviceState.HolidayMode, deviceState.ProhibitZone1, deviceState.ProhibitZone2, deviceState.ProhibitHotWater, deviceState.IdleZone1, deviceState.IdleZone2, deviceState.Power, deviceState.Offline);
+                this.checkDeviceInfo();
             } catch (error) {
                 reject(error);
             };

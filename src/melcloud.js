@@ -18,6 +18,8 @@ class MelCloud extends EventEmitter {
             baseURL: CONSTANS.ApiUrls.BaseURL,
             timeout: 25000,
             withCredentials: true,
+            maxContentLength: 100000000,
+            maxBodyLength: 1000000000,
             httpsAgent: new https.Agent({
                 keepAlive: true,
                 rejectUnauthorized: false
@@ -57,6 +59,8 @@ class MelCloud extends EventEmitter {
                     headers: {
                         'X-MitsContextKey': contextKey
                     },
+                    maxContentLength: 100000000,
+                    maxBodyLength: 1000000000,
                     withCredentials: true,
                     httpsAgent: new https.Agent({
                         keepAlive: true,
@@ -73,6 +77,8 @@ class MelCloud extends EventEmitter {
                         'X-MitsContextKey': contextKey,
                         'content-type': 'application/json'
                     },
+                    maxContentLength: 100000000,
+                    maxBodyLength: 1000000000,
                     withCredentials: true,
                     httpsAgent: new https.Agent({
                         keepAlive: true,

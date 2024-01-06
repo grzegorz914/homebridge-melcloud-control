@@ -10,6 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Important changes v0.4.0 and above!!!
   * Main control mode, buttons and presets need to be configured again!!!
 
+   ## [0.14.0] - (06.01.2024)
+  ## Changes
+- added mode SPLIT to Vane V
+- fix Vane V mode assignment for buttons/sensors 
+- performance and stability improvements
+- config.schema updated
+
  ## [0.13.0] - (30.07.2023)
   ## Changes
 - added RESTFul server

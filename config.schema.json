@@ -350,7 +350,7 @@
                         ]
                       },
                       {
-                        "title": "VH MODE 1",
+                        "title": "VH MODE 1 / LEFT",
                         "enum": [
                           11
                         ]
@@ -362,7 +362,7 @@
                         ]
                       },
                       {
-                        "title": "VH MODE 3",
+                        "title": "VH MODE 3 / CENTER",
                         "enum": [
                           13
                         ]
@@ -374,15 +374,21 @@
                         ]
                       },
                       {
-                        "title": "VH MODE 5",
+                        "title": "VH MODE 5 / RIGHT",
                         "enum": [
                           15
                         ]
                       },
                       {
-                        "title": "VH MODE SWING",
+                        "title": "VH MODE SPLIT",
                         "enum": [
                           16
+                        ]
+                      },
+                      {
+                        "title": "VH MODE SWING",
+                        "enum": [
+                          17
                         ]
                       },
                       {
@@ -392,7 +398,7 @@
                         ]
                       },
                       {
-                        "title": "VV MODE 1",
+                        "title": "VV MODE 1 / UP",
                         "enum": [
                           21
                         ]
@@ -404,7 +410,7 @@
                         ]
                       },
                       {
-                        "title": "VV MODE 3",
+                        "title": "VV MODE 3 / CENTER",
                         "enum": [
                           23
                         ]
@@ -416,7 +422,7 @@
                         ]
                       },
                       {
-                        "title": "VV MODE 5",
+                        "title": "VV MODE 5 / DOWN",
                         "enum": [
                           25
                         ]

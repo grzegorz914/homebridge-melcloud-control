@@ -342,37 +342,42 @@ class MelCloudDevice extends EventEmitter {
                                         this.ataButtonsStates.push(buttonState);
                                         this.ataButtonsConfigured.push(button);
                                         break;
-                                    case 10: //WANE H SWING MODE AUTO
+                                    case 10: //VANE H SWING MODE AUTO
                                         buttonState = power ? (vaneHorizontal === 0) : false;
                                         this.ataButtonsStates.push(buttonState);
                                         this.ataButtonsConfigured.push(button);
                                         break;
-                                    case 11: //WANE H SWING MODE 1
+                                    case 11: //VANE H SWING MODE 1
                                         buttonState = power ? (vaneHorizontal === 1) : false;
                                         this.ataButtonsStates.push(buttonState);
                                         this.ataButtonsConfigured.push(button);
                                         break;
-                                    case 12: //WANE H SWING MODE 2
+                                    case 12: //VANE H SWING MODE 2
                                         buttonState = power ? (vaneHorizontal === 2) : false;
                                         this.ataButtonsStates.push(buttonState);
                                         this.ataButtonsConfigured.push(button);
                                         break;
-                                    case 13: //WANE H SWING MODE 3
+                                    case 13: //VANE H SWING MODE 3
                                         buttonState = power ? (vaneHorizontal === 3) : false;
                                         this.ataButtonsStates.push(buttonState);
                                         this.ataButtonsConfigured.push(button);
                                         break;
-                                    case 14: //WANE H SWING MODE 4
+                                    case 14: //VANE H SWING MODE 4
                                         buttonState = power ? (vaneHorizontal === 4) : false;
                                         this.ataButtonsStates.push(buttonState);
                                         this.ataButtonsConfigured.push(button);
                                         break;
-                                    case 15: //WANE H SWING MODE 5
+                                    case 15: //VANE H SWING MODE 5
                                         buttonState = power ? (vaneHorizontal === 5) : false;
                                         this.ataButtonsStates.push(buttonState);
                                         this.ataButtonsConfigured.push(button);
                                         break;
-                                    case 16: //WANE H SWING MODE SWING
+                                    case 16: //VANE H SWING MODE SPLIT
+                                        buttonState = power ? (vaneHorizontal === 8) : false;
+                                        this.ataButtonsStates.push(buttonState);
+                                        this.ataButtonsConfigured.push(button);
+                                        break;
+                                    case 17: //VANE H SWING MODE SWING
                                         buttonState = power ? (vaneHorizontal === 12) : false;
                                         this.ataButtonsStates.push(buttonState);
                                         this.ataButtonsConfigured.push(button);
@@ -1832,72 +1837,77 @@ class MelCloudDevice extends EventEmitter {
                                                     case 7: //OPERATING MODE DRY CONTROL HIDE
                                                         deviceState.HideDryModeControl = state;
                                                         break;
-                                                    case 10: //WANE H SWING MODE AUTO
+                                                    case 10: //VANE H SWING MODE AUTO
                                                         deviceState.Power = true;
                                                         deviceState.VaneHorizontal = 0;
                                                         deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal;
                                                         break;
-                                                    case 11: //WANE H SWING MODE 1
+                                                    case 11: //VANE H SWING MODE 1
                                                         deviceState.Power = true;
                                                         deviceState.VaneHorizontal = 1;
                                                         deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal;
                                                         break;
-                                                    case 12: //WANE H SWING MODE 2
+                                                    case 12: //VANE H SWING MODE 2
                                                         deviceState.Power = true;
                                                         deviceState.VaneHorizontal = 2;
                                                         deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal;
                                                         break;
-                                                    case 13: //WANE H SWING MODE 3
+                                                    case 13: //VANE H SWING MODE 3
                                                         deviceState.Power = true;
                                                         deviceState.VaneHorizontal = 3;
                                                         deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal;
                                                         break;
-                                                    case 14: //WANE H SWING MODE 4
+                                                    case 14: //VANE H SWING MODE 4
                                                         deviceState.Power = true;
                                                         deviceState.VaneHorizontal = 4;
                                                         deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal;
                                                         break;
-                                                    case 15: //WANE H SWING MODE 5
+                                                    case 15: //VANE H SWING MODE 5
                                                         deviceState.Power = true;
                                                         deviceState.VaneHorizontal = 5;
                                                         deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal;
                                                         break;
-                                                    case 16: //WANE H SWING MODE SWING
+                                                    case 16: //VANE H SWING MODE SPLIT
+                                                        deviceState.Power = true;
+                                                        deviceState.VaneHorizontal = 8;
+                                                        deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal;
+                                                        break;
+                                                    case 17: //VANE H SWING MODE SWING
                                                         deviceState.Power = true;
                                                         deviceState.VaneHorizontal = 12;
                                                         deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneHorizontal;
                                                         break;
-                                                    case 17: //VANE V SWING MODE AUTO
+                                                    case 20: //VANE V SWING MODE AUTO
                                                         deviceState.Power = true;
                                                         deviceState.VaneVertical = 0;
                                                         deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
                                                         break;
-                                                    case 20: //VANE V SWING MODE 1
+                                                    case 21: //VANE V SWING MODE 1
                                                         deviceState.Power = true;
                                                         deviceState.VaneVertical = 1;
                                                         deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
                                                         break;
-                                                    case 21: //VANE V SWING MODE 2
+                                                    case 22: //VANE V SWING MODE 2
                                                         deviceState.Power = true;
                                                         deviceState.VaneVertical = 2;
                                                         deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
                                                         break;
-                                                    case 22: //VANE V SWING MODE 3
+                                                    case 23: //VANE V SWING MODE 3
                                                         deviceState.Power = true;
                                                         deviceState.VaneVertical = 3;
                                                         deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
                                                         break;
-                                                    case 23: //VANE V SWING MODE 4
+                                                    case 24: //VANE V SWING MODE 4
                                                         deviceState.Power = true;
                                                         deviceState.VaneVertical = 4;
                                                         deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
                                                         break;
-                                                    case 24: //VANE V SWING MODE 5
+                                                    case 25: //VANE V SWING MODE 5
                                                         deviceState.Power = true;
                                                         deviceState.VaneVertical = 5;
                                                         deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;
                                                         break;
-                                                    case 25: //VANE V SWING MODE SWING
+                                                    case 26: //VANE V SWING MODE SWING
                                                         deviceState.Power = true;
                                                         deviceState.VaneVertical = 7;
                                                         deviceState.EffectiveFlags = CONSTANS.AirConditioner.EffectiveFlags.Power + CONSTANS.AirConditioner.EffectiveFlags.VaneVertical;

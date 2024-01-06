@@ -449,8 +449,9 @@ class MelCloudErv extends EventEmitter {
                 await this.axiosInstancePost(CONSTANS.ApiUrls.SetErv, options);
                 resolve();
 
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                this.emit('checkDeviceInfo');
+                await new Promise(resolve => setTimeout(resolve, 250));
+                this.emit('deviceState', deviceState, deviceState.RoomTemperature, deviceState.SupplyTemperature, deviceState.OutdoorTemperature, deviceState.NightPurgeMode, deviceState.SetTemperature, deviceState.SetFanSpeed, deviceState.OperationMode, deviceState.VentilationMode, deviceState.DefaultHeatingSetTemperature, deviceState.DefaultCoolingSetTemperature, deviceState.HideRoomTemperature, deviceState.HideSupplyTemperature, deviceState.HideOutdoorTemperature, deviceState.Power, deviceState.Offline);;
+                this.checkDeviceInfo();
             } catch (error) {
                 reject(error);
             };

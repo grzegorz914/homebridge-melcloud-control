@@ -66,7 +66,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Power `ON/OFF`.
       * Operating mode `HEAT/DRY/COOL/FAN/AUTO`.
       * Physical lock controls `LOCK/UNLOCK`.
-      * Vane H mode `AUTO/1/2/3/4/5/SWING`.
+      * Vane H mode `AUTO/1/2/3/4/5/SPLIT/SWING`.
       * Vane V mode `AUTO/1/2/3/4/5/SWING`.
       * Fan speed mode `AUTO/1/2/3/4/5`.
       * Presets `SET/UNSET`.
@@ -75,7 +75,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Power `ON/OFF`.
       * Operating mode `HEAT/DRY/COOL/FAN/AUTO`.
       * Physical lock controls `LOCK/UNLOCK`.
-      * Vane H mode `AUTO/1/2/3/4/5/SWING`.
+      * Vane H mode `AUTO/1/2/3/4/5/SPLIT/SWING`.
       * Vane V mode `AUTO/1/2/3/4/5/SWING`.
       * Fan speed mode `AUTO/1/2/3/4/5/`.
       * Temperature change for `HEATER/COOLER`.

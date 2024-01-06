@@ -328,7 +328,7 @@ class MelCloudAta extends EventEmitter {
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 this.emit('checkDeviceState');
             } catch (error) {
-                this.emit('error', `check info, ${error}, check again in 60s.`);
+                this.emit('error', `check info, ${error}, check again in 65s.`);
                 this.checkDeviceInfo();
             };
         }).on('checkDeviceState', async () => {
@@ -423,7 +423,7 @@ class MelCloudAta extends EventEmitter {
 
                 this.checkDeviceInfo();
             } catch (error) {
-                this.emit('error', `check device state error, ${error}, check again in 60s.`);
+                this.emit('error', `check device state error, ${error}, check again in 65s.`);
                 this.checkDeviceInfo();
             };
         });
@@ -459,8 +459,9 @@ class MelCloudAta extends EventEmitter {
                 await this.axiosInstancePost(CONSTANS.ApiUrls.SetAta, options);
                 resolve();
 
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                this.emit('checkDeviceInfo');
+                await new Promise(resolve => setTimeout(resolve, 250));
+                this.emit('deviceState', deviceState, deviceState.RoomTemperature, deviceState.SetTemperature, deviceState.SetFanSpeed, deviceState.OperationMode, deviceState.VaneHorizontal, deviceState.VaneVertical, deviceState.DefaultHeatingSetTemperature, deviceState.DefaultCoolingSetTemperature, deviceState.HideVaneControls, deviceState.HideDryModeControl, deviceState.InStandbyMode, deviceState.ProhibitSetTemperature, deviceState.ProhibitOperationMode, deviceState.ProhibitPower, deviceState.Power, deviceState.Offline);
+                this.checkDeviceInfo();
             } catch (error) {
                 reject(error);
             };
