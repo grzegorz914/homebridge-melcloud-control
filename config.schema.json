@@ -551,6 +551,13 @@
                     ],
                     "description": "Here select extra function/tile to be exposed in HomeKit app.",
                     "required": true
+                  },
+                  "namePrefix": {
+                    "title": "Prefix",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Here enable/disable the accessory name as a prefix for button/sensor name.",
+                    "required": true
                   }
                 }
               }
@@ -793,6 +800,13 @@
                     ],
                     "description": "Here select extra function/tile to be exposed in HomeKit app.",
                     "required": true
+                  },
+                  "namePrefix": {
+                    "title": "Prefix",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Here enable/disable the accessory name as a prefix for button/sensor name.",
+                    "required": true
                   }
                 }
               }
@@ -981,6 +995,13 @@
                     ],
                     "description": "Here select extra function/tile to be exposed in HomeKit app.",
                     "required": true
+                  },
+                  "namePrefix": {
+                    "title": "Prefix",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Here enable/disable the accessory name as a prefix for button/sensor name.",
+                    "required": true
                   }
                 }
               }
@@ -1162,7 +1183,8 @@
                           "items": [
                             "accounts[].ataButtons[].name",
                             "accounts[].ataButtons[].mode",
-                            "accounts[].ataButtons[].displayType"
+                            "accounts[].ataButtons[].displayType",
+                            "accounts[].ataButtons[].namePrefix"
                           ]
                         }
                       ]
@@ -1190,7 +1212,8 @@
                           "items": [
                             "accounts[].atwButtons[].name",
                             "accounts[].atwButtons[].mode",
-                            "accounts[].atwButtons[].displayType"
+                            "accounts[].atwButtons[].displayType",
+                            "accounts[].atwButtons[].namePrefix"
                           ]
                         }
                       ]
@@ -1218,7 +1241,8 @@
                           "items": [
                             "accounts[].ervButtons[].name",
                             "accounts[].ervButtons[].mode",
-                            "accounts[].ervButtons[].displayType"
+                            "accounts[].ervButtons[].displayType",
+                            "accounts[].ervButtons[].namePrefix"
                           ]
                         }
                       ]

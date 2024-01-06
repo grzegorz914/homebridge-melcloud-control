@@ -22,8 +22,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | Package | Installation | Role | Required |
 | --- | --- | --- | --- |
 | [Homebridge](https://github.com/homebridge/homebridge) | [Homebridge Wiki](https://github.com/homebridge/homebridge/wiki) | HomeKit Bridge | Required |
-| [Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) | [Config UI X Wiki](https://github.com/oznu/homebridge-config-ui-x/wiki) | Homebridge Web User Interface | Recommended |
-| [MELCloud](https://www.npmjs.com/package/homebridge-melcloud-control) | [Plug-In Wiki](https://github.com/grzegorz914/homebridge-melcloud-control/wiki) | Homebridge Plug-In | Required |
+| [Config UI X](https://github.com/homebridge/homebridge-config-ui-x) | [Config UI X Wiki](https://github.com/homebridge/homebridge-config-ui-x/wiki) | Homebridge Web User Interface | Recommended |
+| [MELCloud](https://github.com/grzegorz914/homebridge-melcloud-control) | [Plug-In Wiki](https://github.com/grzegorz914/homebridge-melcloud-control/wiki) | Homebridge Plug-In | Required |
 
 ### About The Plugin
 
@@ -183,18 +183,21 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ataButtons.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
 | `ataButtons.mode` | Here select button mode, VH - Vane Horizontal, VV - Vane Horizontal. |
 | `ataButtons.displayType` | Here select display type in HomeKit app, possible `None/Disabled`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`.|
+| `ataButtons.namePrefix` | Here enable/disable the accessory name as a prefix for button/sensor name.|
 | `atwDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
 | `atwTemperatureSensor` | This enable extra temperature sensor for Heater/Cooler control mode to use with automations in HomeKit app. |
 | `atwPresets` | This enable display Heat Pump presets in HomeKit app. |
 | `atwButtons.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
 | `atwButtons.mode` | Here select button mode. |
 | `atwButtons.displayType` | Here select display type in HomeKit app, possible `None/Disabled`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`.|
+| `atwButtons.namePrefix` | Here enable/disable the accessory name as a prefix for button/sensor name.|
 | `ervDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
 | `ervTemperatureSensor` | This enable extra temperature sensor for Heater/Cooler control mode to use with automations in HomeKit app. |
 | `ervPresets` | This enable display EnergyRecovery Ventilation presets in HomeKit app. |
 | `ervButtons.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
 | `ervButtons.mode` | Here select button mode. |
 | `ervButtons.displayType` | Here select display type in HomeKit app, possible `None/Disabled`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`.|
+| `ervButtons.namePrefix` | Here enable/disable the accessory name as a prefix for button/sensor name.|
 | `enableDebugMode` | This enable deep log in homebridge console. |
 | `disableLogInfo` | This disable display log values and states on every it change. |
 | `disableLogDeviceInfo` | This disable display log device info on plugin start. |

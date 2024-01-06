@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Important changes v0.4.0 and above!!!
   * Main control mode, buttons and presets need to be configured again!!!
 
+## [0.14.1] - (06.01.2024)
+## Changes
+- added possibility to enable/disable the accessory name as a prefix for button/sensor name
+- config.schema updated
+
 ## [0.14.0] - (06.01.2024)
 ## Changes
 - added mode SPLIT to Vane V [#62](https://github.com/grzegorz914/homebridge-melcloud-control/issues/62)

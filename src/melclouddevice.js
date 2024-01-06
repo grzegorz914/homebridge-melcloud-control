@@ -1771,7 +1771,7 @@ class MelCloudDevice extends EventEmitter {
 
                         //buttons services
                         if (ataButtonsCount > 0) {
-                            const debug = this.enableDebugMode ? this.emit('debug', `Prepare buttons service`) : false;
+                            const debug = this.enableDebugMode ? this.emit('debug', `Prepare buttons/sensors service`) : false;
                             this.ataButtonsServices = [];
 
                             for (let i = 0; i < ataButtonsCount; i++) {
@@ -1780,17 +1780,21 @@ class MelCloudDevice extends EventEmitter {
                                 //get button mode
                                 const buttonMode = button.mode;
 
-                                //get button name
-                                const buttonName = button.name || 'Not defined';
-
                                 //get button display type
                                 const buttonDisplayType = button.displayType;
 
+                                //get button name
+                                const buttonName = button.name || [`Button ${i}`, `Button ${i}`, `Sensor ${i}`, `Sensor ${i}`, `Sensor ${i}`][buttonDisplayType];
+
+                                //get button name prefix
+                                const buttonNamePrefix = button.namePrefix ?? false;
+
+                                const buttonServiceName = buttonNamePrefix ? `${accessoryName} ${buttonName}` : buttonName;
                                 const buttonServiceType = [Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][buttonDisplayType];
                                 const characteristicType = [Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
-                                const buttonService = new buttonServiceType(`${accessoryName} ${buttonName}`, `Button ${deviceId} ${i}`);
+                                const buttonService = new buttonServiceType(buttonServiceName, `Button ${deviceId} ${i}`);
                                 buttonService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                                buttonService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${buttonName}`);
+                                buttonService.setCharacteristic(Characteristic.ConfiguredName, buttonServiceName);
                                 buttonService.getCharacteristic(characteristicType)
                                     .onGet(async () => {
                                         const state = this.ataButtonsStates[i];
@@ -2574,15 +2578,21 @@ class MelCloudDevice extends EventEmitter {
                                 //get button mode
                                 const buttonMode = button.mode;
 
-                                //get button name
-                                const buttonName = button.name || 'Not defined';
-
                                 //get button display type
                                 const buttonDisplayType = button.displayType;
 
+                                //get button name
+                                const buttonName = button.name || [`Button ${i}`, `Button ${i}`, `Sensor ${i}`, `Sensor ${i}`, `Sensor ${i}`][buttonDisplayType];
+
+                                //get button name prefix
+                                const buttonNamePrefix = button.namePrefix ?? false;
+
+                                const buttonServiceName = buttonNamePrefix ? `${accessoryName} ${buttonName}` : buttonName;
                                 const buttonServiceType = [Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][buttonDisplayType];
                                 const characteristicType = [Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
-                                const buttonService = new buttonServiceType(`${accessoryName} ${buttonName}`, `Button ${deviceId} ${i}`);
+                                const buttonService = new buttonServiceType(buttonServiceName, `Button ${deviceId} ${i}`);
+                                buttonService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                buttonService.setCharacteristic(Characteristic.ConfiguredName, buttonServiceName);
                                 buttonService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 buttonService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${buttonName}`);
                                 buttonService.getCharacteristic(characteristicType)
@@ -3186,17 +3196,21 @@ class MelCloudDevice extends EventEmitter {
                                 //get button mode
                                 const buttonMode = button.mode;
 
-                                //get button name
-                                const buttonName = button.name || 'Not defined';
-
                                 //get button display type
                                 const buttonDisplayType = button.displayType;
 
+                                //get button name
+                                const buttonName = button.name || [`Button ${i}`, `Button ${i}`, `Sensor ${i}`, `Sensor ${i}`, `Sensor ${i}`][buttonDisplayType];
+
+                                //get button name prefix
+                                const buttonNamePrefix = button.namePrefix ?? false;
+
+                                const buttonServiceName = buttonNamePrefix ? `${accessoryName} ${buttonName}` : buttonName;
                                 const buttonServiceType = [Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][buttonDisplayType];
                                 const characteristicType = [Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
-                                const buttonService = new buttonServiceType(`${accessoryName} ${buttonName}`, `Button ${deviceId} ${i}`);
+                                const buttonService = new buttonServiceType(buttonServiceName, `Button ${deviceId} ${i}`);
                                 buttonService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                                buttonService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${buttonName}`);
+                                buttonService.setCharacteristic(Characteristic.ConfiguredName, buttonServiceName);
                                 buttonService.getCharacteristic(characteristicType)
                                     .onGet(async () => {
                                         const state = this.ervButtonsStates[i];
