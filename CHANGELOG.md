@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
    ## [0.14.0] - (06.01.2024)
   ## Changes
-- added mode SPLIT to Vane V
+- added mode SPLIT to Vane V [#62](https://github.com/grzegorz914/homebridge-melcloud-control/issues/62)
 - fix Vane V mode assignment for buttons/sensors 
 - performance and stability improvements
 - config.schema updated
