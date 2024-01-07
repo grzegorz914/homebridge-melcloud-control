@@ -35,8 +35,8 @@ class MelCloudPlatform {
 				}
 
 				//debug config
-				const debug = enableDebugMode ? log(`Device: ${accountName}, did finish launching.`) : false;
-				const debug1 = enableDebugMode ? log(`Device: ${accountName}, Config: ${JSON.stringify(account, null, 2)}`) : false;
+				const debug = enableDebugMode ? log(`Account: ${accountName}, did finish launching.`) : false;
+				const debug1 = enableDebugMode ? log(`Account: ${accountName}, Config: ${JSON.stringify(account, null, 2)}`) : false;
 
 				//melcloud account
 				const melCloud = new MelCloud(prefDir, accountName, user, passwd, language, enableDebugMode);
