@@ -563,8 +563,7 @@ class MelCloudAtw extends EventEmitter {
         return new Promise(async (resolve, reject) => {
             try {
                 const savedData = await fsPromises.readFile(path)
-                const parseData = JSON.parse(savedData);
-                const data = parseData.length > 0 ? parseData : false;
+                const data = savedData.length > 0 ? JSON.parse(savedData) : false;
                 resolve(data);
             } catch (error) {
                 reject(`read data from path: ${path}, error: ${error}`);
