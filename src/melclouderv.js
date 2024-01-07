@@ -70,6 +70,11 @@ class MelCloudErv extends EventEmitter {
                 const deviceInfo = await this.readData(deviceInfoFile);
                 const debug = debugLog ? this.emit('debug', `Info: ${JSON.stringify(deviceInfo, null, 2)}`) : false;
 
+                if (!deviceInfo) {
+                    this.checkDeviceInfo();
+                    return;
+                }
+
                 //deviceInfo
                 //const deviceId = deviceInfo.DeviceID;
                 //const deviceName = deviceInfo.DeviceName;
@@ -430,7 +435,8 @@ class MelCloudErv extends EventEmitter {
         return new Promise(async (resolve, reject) => {
             try {
                 const savedData = await fsPromises.readFile(path)
-                const data = JSON.parse(savedData);
+                const parseData = JSON.parse(savedData);
+                const data = parseData.length > 0 ? parseData : false;
                 resolve(data);
             } catch (error) {
                 reject(`read data from path: ${path}, error: ${error}`);
