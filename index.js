@@ -33,7 +33,10 @@ class MelCloudPlatform {
 					log.warn(`Name: ${accountName ? 'OK' : accountName}, user: ${user ? 'OK' : user}, password: ${passwd ? 'OK' : passwd}, language: ${language ? 'OK' : language} in config missing.`);
 					return;
 				}
-				const debug = enableDebugMode ? log(`Account ${accountName}, did finish launching.`) : false;
+
+				//debug config
+				const debug = enableDebugMode ? log(`Device: ${accountName}, did finish launching.`) : false;
+				const debug1 = enableDebugMode ? log(`Device: ${accountName}, Config: ${JSON.stringify(account, null, 2)}`) : false;
 
 				//melcloud account
 				const melCloud = new MelCloud(prefDir, accountName, user, passwd, language, enableDebugMode);
