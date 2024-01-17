@@ -160,7 +160,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 ### Configuration
 
 * Run this plugin as a [Child Bridge](https://github.com/homebridge/homebridge/wiki/Child-Bridges) (Highly Recommended), this prevent crash Homebridge if plugin crashes.
-* Install and use [Homebridge Config UI X](https://github.com/oznu/homebridge-config-ui-x/wiki) to configure this plugin (Highly Recommended).
+* Install and use [Homebridge Config UI X](https://github.com/homebridge/homebridge-config-ui-x/wiki) to configure this plugin (Highly Recommended).
 * The `sample-config.json` can be edited and used as an alternative.
 * Be sure to always make a backup copy of your config.json file before making any changes to it.
 
