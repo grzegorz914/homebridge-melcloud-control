@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Important changes v0.4.0 and above!!!
   * Main control mode, buttons and presets need to be configured again!!!
 
+## [0.15.0] - (05.02.2024)
+## Changes
+- added possibility to set indyvidual refresh time for Account Settings and ATA, ATW, ERV state, [#68](https://github.com/grzegorz914/homebridge-melcloud-control/issues/68)
+- config.schema updated
+- cleanup
+
 ## [0.14.1] - (06.01.2024)
 ## Changes
 - added possibility to enable/disable the accessory name as a prefix for button/sensor name

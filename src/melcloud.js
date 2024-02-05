@@ -7,11 +7,12 @@ const EventEmitter = require('events');
 const CONSTANS = require('./constans.json');
 
 class MelCloud extends EventEmitter {
-    constructor(prefDir, accountName, user, passwd, language, enableDebugMode) {
+    constructor(prefDir, accountName, user, passwd, language, enableDebugMode, accountRefreshInterval) {
         super();
         this.accountInfoFile = `${prefDir}/${accountName}_Account`;
         const buildingsFile = `${prefDir}/${accountName}_Buildings`;
         const devicesId = [];
+        this.accountRefreshInterval = accountRefreshInterval;
 
         this.axiosInstanceLogin = axios.create({
             method: 'POST',
@@ -96,7 +97,7 @@ class MelCloud extends EventEmitter {
                 await new Promise(resolve => setTimeout(resolve, 500));
                 this.emit('checkDevicesList', accountInfo, contextKey);
             } catch (error) {
-                this.emit('error', `login error, ${error}, reconnect in 65s.`);
+                this.emit('error', `login error, ${error}, reconnect in  ${this.accountRefreshInterval / 1000}.`);
                 this.reconnect();
             };
         }).on('checkDevicesList', async () => {
@@ -108,7 +109,7 @@ class MelCloud extends EventEmitter {
                 const debug1 = enableDebugMode ? this.emit('debug', `Buildings: ${JSON.stringify(buildingsList, null, 2)}`) : false;
 
                 if (!buildingsList) {
-                    this.emit('message', `no building found, check again in 90s.`);
+                    this.emit('message', `no building found, check again in ${this.accountRefreshInterval / 1000}s.`);
                     this.checkDevicesList();
                     return;
                 }
@@ -134,7 +135,7 @@ class MelCloud extends EventEmitter {
 
                 const devicesCount = devices.length;
                 if (devicesCount === 0) {
-                    this.emit('message', `no devices found, check again in 90s.`);
+                    this.emit('message', `no devices found, check again in  ${this.accountRefreshInterval / 1000}.`);
                     this.checkDevicesList();
                     return;
                 }
@@ -161,7 +162,7 @@ class MelCloud extends EventEmitter {
 
                 this.checkDevicesList();
             } catch (error) {
-                this.emit('error', `check devices list error, ${error}, check again in 90s.`);
+                this.emit('error', `check devices list error, ${error}, check again in  ${this.accountRefreshInterval / 1000}s.`);
                 this.checkDevicesList();
             };
         })
@@ -169,12 +170,12 @@ class MelCloud extends EventEmitter {
     };
 
     async reconnect() {
-        await new Promise(resolve => setTimeout(resolve, 65000));
+        await new Promise(resolve => setTimeout(resolve, this.accountRefreshInterval));
         this.emit('connect');
     };
 
     async checkDevicesList() {
-        await new Promise(resolve => setTimeout(resolve, 90000));
+        await new Promise(resolve => setTimeout(resolve, this.accountRefreshInterval));
         this.emit('checkDevicesList');
     };
 

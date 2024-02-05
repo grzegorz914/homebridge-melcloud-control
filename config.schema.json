@@ -203,6 +203,15 @@
               "description": "Here select the language used in MELCloud account.",
               "required": true
             },
+            "accountRefreshInterval": {
+              "title": "Account Refresh Interval",
+              "type": "integer",
+              "default": 120,
+              "minimum": 90,
+              "maximum": 300,
+              "description": "Here set the background MELCLoud account settings refresh time in (sec).",
+              "required": true
+            },
             "ataDisplayMode": {
               "title": "Control Mode",
               "type": "integer",
@@ -562,6 +571,15 @@
                 }
               }
             },
+            "ataRefreshInterval": {
+              "title": "ATA Refresh Interval",
+              "type": "integer",
+              "default": 75,
+              "minimum": 60,
+              "maximum": 300,
+              "description": "Here set the background ATA device state refresh time in (sec).",
+              "required": true
+            },
             "atwDisplayMode": {
               "title": "Control Mode",
               "type": "integer",
@@ -811,6 +829,15 @@
                 }
               }
             },
+            "atwRefreshInterval": {
+              "title": "ATW Refresh Interval",
+              "type": "integer",
+              "default": 70,
+              "minimum": 60,
+              "maximum": 300,
+              "description": "Here set the background ATW device state refresh time in (sec).",
+              "required": true
+            },
             "ervDisplayMode": {
               "title": "Control Mode",
               "type": "integer",
@@ -1006,6 +1033,15 @@
                 }
               }
             },
+            "ervRefreshInterval": {
+              "title": "Erv Refresh Interval",
+              "type": "integer",
+              "default": 75,
+              "minimum": 60,
+              "maximum": 300,
+              "description": "Here set the background ERV device state refresh time in (sec).",
+              "required": true
+            },
             "disableLogInfo": {
               "title": "Disable Log Info",
               "type": "boolean",
@@ -1169,6 +1205,7 @@
                     "accounts[].ataDisableAutoMode",
                     "accounts[].ataDisableHeatMode",
                     "accounts[].ataAutoHeatMode",
+                    "accounts[].ataRefreshInterval",
                     {
                       "key": "accounts[]",
                       "type": "section",
@@ -1198,6 +1235,7 @@
                     "accounts[].atwDisplayMode",
                     "accounts[].atwTemperatureSensor",
                     "accounts[].atwPresets",
+                    "accounts[].atwRefreshInterval",
                     {
                       "key": "accounts[]",
                       "type": "section",
@@ -1227,6 +1265,7 @@
                     "accounts[].ervDisplayMode",
                     "accounts[].ervTemperatureSensor",
                     "accounts[].ervPresets",
+                    "accounts[].ervRefreshInterval",
                     {
                       "key": "accounts[]",
                       "type": "section",
@@ -1255,7 +1294,8 @@
                   "items": [
                     "accounts[].enableDebugMode",
                     "accounts[].disableLogInfo",
-                    "accounts[].disableLogDeviceInfo"
+                    "accounts[].disableLogDeviceInfo",
+                    "accounts[].accountRefreshInterval"
                   ]
                 },
                 {

@@ -18,6 +18,7 @@ class MelCloudAta extends EventEmitter {
         const restFulEnabled = config.restFulEnabled;
         const mqttEnabled = config.mqttEnabled;
         const deviceInfoFile = `${prefDir}/${accountName}_Device_${deviceId}`;
+        this.refreshInterval = config.refreshInterval;
 
         //set default values
         this.roomTemperature = 0;
@@ -333,7 +334,7 @@ class MelCloudAta extends EventEmitter {
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 this.emit('checkDeviceState');
             } catch (error) {
-                this.emit('error', `check info, ${error}, check again in 65s.`);
+                this.emit('error', `check info, ${error}, check again in ${this.refreshInterval / 1000}s.`);
                 this.checkDeviceInfo();
             };
         }).on('checkDeviceState', async () => {
@@ -428,7 +429,7 @@ class MelCloudAta extends EventEmitter {
 
                 this.checkDeviceInfo();
             } catch (error) {
-                this.emit('error', `check device state error, ${error}, check again in 65s.`);
+                this.emit('error', `check device state error, ${error}, check again in ${this.refreshInterval / 1000}s.`);
                 this.checkDeviceInfo();
             };
         });
@@ -437,7 +438,7 @@ class MelCloudAta extends EventEmitter {
     };
 
     async checkDeviceInfo() {
-        await new Promise(resolve => setTimeout(resolve, 65000));
+        await new Promise(resolve => setTimeout(resolve, this.refreshInterval));
         this.emit('checkDeviceInfo');
     };
 

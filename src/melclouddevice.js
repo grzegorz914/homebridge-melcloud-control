@@ -9,7 +9,7 @@ const CONSTANS = require('./constans.json');
 let Accessory, Characteristic, Service, Categories, UUID;
 
 class MelCloudDevice extends EventEmitter {
-    constructor(api, prefDir, account, accountName, melCloud, accountInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText) {
+    constructor(api, prefDir, account, accountName, melCloud, accountInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText, deviceStateRefreshInterval) {
         super();
 
         Accessory = api.platformAccessory;
@@ -40,6 +40,9 @@ class MelCloudDevice extends EventEmitter {
         this.disableLogInfo = account.disableLogInfo || false;
         this.disableLogDeviceInfo = account.disableLogDeviceInfo || false;
         this.enableDebugMode = account.enableDebugMode || false;
+        const ataRefreshInterval = account.ataRefreshInterval * 1000 || 75000;
+        const atwRefreshInterval = account.atwRefreshInterval * 1000 || 75000;
+        const ervRefreshInterval = account.ervRefreshInterval * 1000 || 75000;
 
         //variables
         this.melCloud = melCloud; //function
@@ -116,6 +119,7 @@ class MelCloudDevice extends EventEmitter {
                     contextKey: contextKey,
                     buildingId: buildingId,
                     deviceId: deviceId,
+                    refreshInterval: ataRefreshInterval,
                     debugLog: this.enableDebugMode,
                     restFulEnabled: account.enableRestFul,
                     mqttEnabled: account.enableMqtt
@@ -558,6 +562,7 @@ class MelCloudDevice extends EventEmitter {
                     contextKey: contextKey,
                     buildingId: buildingId,
                     deviceId: deviceId,
+                    refreshInterval: atwRefreshInterval,
                     debugLog: this.enableDebugMode,
                     restFulEnabled: account.enableRestFul,
                     mqttEnabled: account.enableMqtt
@@ -1019,6 +1024,7 @@ class MelCloudDevice extends EventEmitter {
                     contextKey: contextKey,
                     buildingId: buildingId,
                     deviceId: deviceId,
+                    refreshInterval: ervRefreshInterval,
                     debugLog: this.enableDebugMode,
                     restFulEnabled: account.enableRestFul,
                     mqttEnabled: account.enableMqtt

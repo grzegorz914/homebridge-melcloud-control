@@ -27,6 +27,7 @@ class MelCloudPlatform {
 				const passwd = account.passwd;
 				const language = account.language;
 				const enableDebugMode = account.enableDebugMode;
+				const accountRefreshInterval = account.accountSettingRefreshInterval * 1000 || 90000;
 
 				//check mandatory properties
 				if (!accountName || !user || !passwd || !language) {
@@ -39,7 +40,7 @@ class MelCloudPlatform {
 				const debug1 = enableDebugMode ? log(`Account: ${accountName}, Config: ${JSON.stringify(account, null, 2)}`) : false;
 
 				//melcloud account
-				const melCloud = new MelCloud(prefDir, accountName, user, passwd, language, enableDebugMode);
+				const melCloud = new MelCloud(prefDir, accountName, user, passwd, language, enableDebugMode, accountRefreshInterval);
 				melCloud.on('checkDevicesListComplete', (accountInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText) => {
 
 					//melcloud devices
