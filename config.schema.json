@@ -1244,7 +1244,7 @@
                       "expanded": false,
                       "items": [
                         {
-                          "key": "accounts[].ataButtons",
+                          "key": "accounts[].atwButtons",
                           "type": "tabarray",
                           "title": "{{ value.name || 'button/sensor' }}",
                           "items": [
