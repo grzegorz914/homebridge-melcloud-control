@@ -14,7 +14,18 @@ class MelCloud extends EventEmitter {
         const devicesId = [];
         this.accountRefreshInterval = accountRefreshInterval;
 
-        this.axiosInstanceLogin = axios.create({
+        const options = {
+            data: {
+                Email: user,
+                Password: passwd,
+                Language: language,
+                AppVersion: '1.31.0',
+                CaptchaChallenge: '',
+                CaptchaResponse: '',
+                Persist: true
+            }
+        };
+        const axiosInstanceLogin = axios.create({
             method: 'POST',
             baseURL: CONSTANS.ApiUrls.BaseURL,
             timeout: 25000,
@@ -28,20 +39,8 @@ class MelCloud extends EventEmitter {
         });
 
         this.on('connect', async () => {
-            const options = {
-                data: {
-                    Email: user,
-                    Password: passwd,
-                    Language: language,
-                    AppVersion: '1.26.2',
-                    CaptchaChallenge: '',
-                    CaptchaResponse: '',
-                    Persist: true
-                }
-            };
-
             try {
-                const accountData = await this.axiosInstanceLogin(CONSTANS.ApiUrls.ClientLogin, options);
+                const accountData = await axiosInstanceLogin(CONSTANS.ApiUrls.ClientLogin, options);
                 const debug = enableDebugMode ? this.emit('debug', `MELCloud Info: ${JSON.stringify(accountData.data, null, 2)}`) : false;
                 const accountInfo = accountData.data.LoginData;
                 const contextKey = accountInfo.ContextKey;

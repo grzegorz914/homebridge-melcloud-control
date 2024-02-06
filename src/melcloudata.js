@@ -141,11 +141,13 @@ class MelCloudAta extends EventEmitter {
                 const legacyDevice = device.LegacyDevice;
                 const unitSupportsStandbyMode = device.UnitSupportsStandbyMode;
                 const isSplitSystem = device.IsSplitSystem;
+                const hasHalfDegreeIncrements = device.HasHalfDegreeIncrements ?? false;
+                const hasOutdoorTemperature = device.HasOutdoorTemperature ?? false
                 const modelIsAirCurtain = device.ModelIsAirCurtain;
-                const modelSupportsFanSpeed = device.ModelSupportsFanSpeed || false;
-                const modelSupportsAuto = device.ModelSupportsAuto || false;
-                const modelSupportsHeat = device.ModelSupportsHeat || false;
-                const modelSupportsDry = device.ModelSupportsDry || false;
+                const modelSupportsFanSpeed = device.ModelSupportsFanSpeed ?? false;
+                const modelSupportsAuto = device.ModelSupportsAuto ?? false;
+                const modelSupportsHeat = device.ModelSupportsHeat ?? false;
+                const modelSupportsDry = device.ModelSupportsDry ?? false;
                 const modelSupportsVaneVertical = device.ModelSupportsVaneVertical;
                 const modelSupportsVaneHorizontal = device.ModelSupportsVaneHorizontal;
                 const modelSupportsWideVane = device.ModelSupportsWideVane;
@@ -157,6 +159,7 @@ class MelCloudAta extends EventEmitter {
                 const prohibitPower = device.ProhibitPower;
                 const power = device.Power;
                 const roomTemperature = device.RoomTemperature;
+                const outdoorTemperature = device.OutdoorTemperature;
                 const setTemperature = device.SetTemperature;
                 const actualFanSpeed = device.ActualFanSpeed;
                 const fanSpeed = device.FanSpeed;
@@ -251,6 +254,7 @@ class MelCloudAta extends EventEmitter {
 
                 //units
                 const units = Array.isArray(device.Units) ? device.Units : [];
+                const unitsCount = units.length;
                 const manufacturer = 'Mitsubishi';
 
                 //indoor
@@ -277,7 +281,7 @@ class MelCloudAta extends EventEmitter {
                     const unitModelNumber = unit.ModelNumber;
                     const unitModel = unit.Model ?? 'Undefined';
                     const unitType = unit.UnitType;
-                    const unitIsIndoor = unit.IsIndoor || false;
+                    const unitIsIndoor = unit.IsIndoor ?? false;
 
                     switch (unitIsIndoor) {
                         case true:
@@ -321,6 +325,12 @@ class MelCloudAta extends EventEmitter {
                 const permissionCanSetPower = deviceInfo.Permissions.CanSetPower;
                 const permissionCanSetTemperatureIncrementOverride = deviceInfo.Permissions.CanSetTemperatureIncrementOverride;
                 const permissionCanDisableLocalController = deviceInfo.Permissions.CanDisableLocalController;
+
+                if (unitsCount === 0) {
+                    this.emit('message', `No device found, check again in ${this.refreshInterval / 1000}s.`);
+                    this.checkDeviceInfo();
+                    return;
+                };
 
                 this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, presets, presetsCount, hasAutomaticFanSpeed, airDirectionFunction, swingFunction, numberOfFanSpeeds, temperatureIncrement, minTempCoolDry, maxTempCoolDry, minTempHeat, maxTempHeat, minTempAutomatic, maxTempAutomatic, modelSupportsFanSpeed, modelSupportsAuto, modelSupportsHeat, modelSupportsDry);
 

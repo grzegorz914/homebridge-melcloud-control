@@ -28,6 +28,9 @@ class MelCloudPlatform {
 				const language = account.language;
 				const enableDebugMode = account.enableDebugMode;
 				const accountRefreshInterval = account.accountRefreshInterval * 1000 || 90000;
+				const ataRefreshInterval = account.ataRefreshInterval * 1000 || 75000;
+				const atwRefreshInterval = account.atwRefreshInterval * 1000 || 75000;
+				const ervRefreshInterval = account.ervRefreshInterval * 1000 || 75000;
 
 				//check mandatory properties
 				if (!accountName || !user || !passwd || !language) {
@@ -44,7 +47,8 @@ class MelCloudPlatform {
 				melCloud.on('checkDevicesListComplete', (accountInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText) => {
 
 					//melcloud devices
-					const melCloudDevice = new MelCloudDevice(api, prefDir, account, accountName, melCloud, accountInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText)
+					const deviceRefreshInterval = [ataRefreshInterval, atwRefreshInterval, 0, ervRefreshInterval][deviceType]
+					const melCloudDevice = new MelCloudDevice(api, prefDir, account, accountName, melCloud, accountInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText, deviceRefreshInterval)
 					melCloudDevice.on('publishAccessory', (accessory) => {
 
 						//publish devices

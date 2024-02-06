@@ -204,12 +204,12 @@
               "required": true
             },
             "accountRefreshInterval": {
-              "title": "Account Refresh Interval",
+              "title": "Refresh Interval",
               "type": "integer",
               "default": 120,
               "minimum": 90,
               "maximum": 300,
-              "description": "Here set the background MELCLoud account settings refresh time in (sec).",
+              "description": "Here set the background state refresh time in (sec) for Air Conditioner.",
               "required": true
             },
             "ataDisplayMode": {
@@ -572,12 +572,12 @@
               }
             },
             "ataRefreshInterval": {
-              "title": "ATA Refresh Interval",
+              "title": "Refresh Interval",
               "type": "integer",
               "default": 75,
               "minimum": 60,
               "maximum": 300,
-              "description": "Here set the background ATA device state refresh time in (sec).",
+              "description": "Here set the background state refresh time in (sec) for Heat Pump.",
               "required": true
             },
             "atwDisplayMode": {
@@ -1034,12 +1034,12 @@
               }
             },
             "ervRefreshInterval": {
-              "title": "Erv Refresh Interval",
+              "title": "Refresh Interval",
               "type": "integer",
               "default": 75,
               "minimum": 60,
               "maximum": 300,
-              "description": "Here set the background ERV device state refresh time in (sec).",
+              "description": "Here set the background state refresh time in (sec) for Energy Recovery Ventilation.",
               "required": true
             },
             "disableLogInfo": {

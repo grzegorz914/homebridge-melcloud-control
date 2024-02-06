@@ -136,8 +136,8 @@ class MelCloudErv extends EventEmitter {
                 const hasCoolOperationMode = device.HasCoolOperationMode;
                 const hasHeatOperationMode = device.HasHeatOperationMode;
                 const hasAutoOperationMode = device.HasAutoOperationMode;
-                const hasBypassVentilationMode = device.HasBypassVentilationMode || false;
-                const hasAutoVentilationMode = device.HasAutoVentilationMode || false;
+                const hasBypassVentilationMode = device.HasBypassVentilationMode ?? false;
+                const hasAutoVentilationMode = device.HasAutoVentilationMode ?? false;
                 const hasRoomTemperature = device.HasRoomTemperature;
                 const hasSupplyTemperature = device.HasSupplyTemperature;
                 const hasOutdoorTemperature = device.HasOutdoorTemperature;
@@ -145,10 +145,10 @@ class MelCloudErv extends EventEmitter {
                 const hasPM25Sensor = device.HasPM25Sensor;
                 const pM25SensorStatus = device.PM25SensorStatus;
                 const pM25Level = device.PM25Level;
-                const numberOfFanSpeeds = device.NumberOfFanSpeeds || 0;
+                const numberOfFanSpeeds = device.NumberOfFanSpeeds ?? 0;
                 const hasHalfDegreeIncrements = device.HasHalfDegreeIncrements;
                 const temperatureIncrementOverride = device.TemperatureIncrementOverride;
-                const temperatureIncrement = device.TemperatureIncrement || 1;
+                const temperatureIncrement = device.TemperatureIncrement ?? 1;
                 const minTempCoolDry = device.MinTempCoolDry;
                 const maxTempCoolDry = device.MaxTempCoolDry;
                 const minTempHeat = device.MinTempHeat;
@@ -156,9 +156,9 @@ class MelCloudErv extends EventEmitter {
                 const minTempAutomatic = device.MinTempAutomatic;
                 const maxTempAutomatic = device.MaxTempAutomatic;
                 const setSupplyTemperatureMode = device.SetSupplyTemperatureMode;
-                const hasAutomaticFanSpeed = device.HasAutomaticFanSpeed || false;
-                const coreMaintenanceRequired = device.CoreMaintenanceRequired || false;
-                const filterMaintenanceRequired = device.FilterMaintenanceRequired || false;
+                const hasAutomaticFanSpeed = device.HasAutomaticFanSpeed ?? false;
+                const coreMaintenanceRequired = device.CoreMaintenanceRequired ?? false;
+                const filterMaintenanceRequired = device.FilterMaintenanceRequired ?? false;
                 const power = device.Power;
                 const roomTemperature = device.RoomTemperature;
                 const supplyTemperature = device.SupplyTemperature;
@@ -242,6 +242,7 @@ class MelCloudErv extends EventEmitter {
 
                 //units
                 const units = Array.isArray(device.Units) ? device.Units : [];
+                const unitsCount = units.length;
                 const manufacturer = 'Mitsubishi';
 
                 //indoor
@@ -268,7 +269,7 @@ class MelCloudErv extends EventEmitter {
                     const unitModelNumber = unit.ModelNumber;
                     const unitModel = unit.Model ?? 'Undefined';
                     const unitType = unit.UnitType;
-                    const unitIsIndoor = unit.IsIndoor || false;
+                    const unitIsIndoor = unit.IsIndoor ?? false;
 
                     switch (unitIsIndoor) {
                         case true:
@@ -312,6 +313,12 @@ class MelCloudErv extends EventEmitter {
                 const permissionCanSetPower = deviceInfo.Permissions.CanSetPower;
                 const permissionCanSetTemperatureIncrementOverride = deviceInfo.Permissions.CanSetTemperatureIncrementOverride;
                 const permissionCanDisableLocalController = deviceInfo.Permissions.CanDisableLocalController;
+
+                if (unitsCount === 0) {
+                    this.emit('message', `No device found, check again in ${this.refreshInterval / 1000}s.`);
+                    this.checkDeviceInfo();
+                    return;
+                };
 
                 this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, presets, presetsCount, hasCoolOperationMode, hasHeatOperationMode, hasAutoOperationMode, hasRoomTemperature, hasSupplyTemperature, hasOutdoorTemperature, hasCO2Sensor, hasPM25Sensor, pM25SensorStatus, pM25Level, hasAutoVentilationMode, hasBypassVentilationMode, hasAutomaticFanSpeed, coreMaintenanceRequired, filterMaintenanceRequired, roomCO2Level, actualVentilationMode, numberOfFanSpeeds, temperatureIncrement);
 
