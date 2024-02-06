@@ -209,7 +209,7 @@
               "default": 120,
               "minimum": 90,
               "maximum": 300,
-              "description": "Here set the background state refresh time in (sec) for Air Conditioner.",
+              "description": "Here set the background state refresh time in (sec) for MELCloud settings.",
               "required": true
             },
             "ataDisplayMode": {
@@ -577,7 +577,7 @@
               "default": 75,
               "minimum": 60,
               "maximum": 900,
-              "description": "Here set the background state refresh time in (sec) for Heat Pump.",
+              "description": "Here set the background state refresh time in (sec) for Air Conditioner.",
               "required": true
             },
             "atwDisplayMode": {
@@ -835,7 +835,7 @@
               "default": 70,
               "minimum": 60,
               "maximum": 900,
-              "description": "Here set the background ATW device state refresh time in (sec).",
+              "description": "Here set the background state refresh time in (sec) for Heat Pump.",
               "required": true
             },
             "ervDisplayMode": {
