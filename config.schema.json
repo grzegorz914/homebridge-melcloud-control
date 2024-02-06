@@ -576,7 +576,7 @@
               "type": "integer",
               "default": 75,
               "minimum": 60,
-              "maximum": 300,
+              "maximum": 900,
               "description": "Here set the background state refresh time in (sec) for Heat Pump.",
               "required": true
             },
@@ -834,7 +834,7 @@
               "type": "integer",
               "default": 70,
               "minimum": 60,
-              "maximum": 300,
+              "maximum": 900,
               "description": "Here set the background ATW device state refresh time in (sec).",
               "required": true
             },
@@ -1038,7 +1038,7 @@
               "type": "integer",
               "default": 75,
               "minimum": 60,
-              "maximum": 300,
+              "maximum": 900,
               "description": "Here set the background state refresh time in (sec) for Energy Recovery Ventilation.",
               "required": true
             },
