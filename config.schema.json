@@ -830,7 +830,7 @@
               }
             },
             "atwRefreshInterval": {
-              "title": "ATW Refresh Interval",
+              "title": "Refresh Interval",
               "type": "integer",
               "default": 70,
               "minimum": 60,
