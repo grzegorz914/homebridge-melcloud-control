@@ -18,6 +18,7 @@ class MelCloudAtw extends EventEmitter {
         const restFulEnabled = config.restFulEnabled;
         const mqttEnabled = config.mqttEnabled;
         const deviceInfoFile = `${prefDir}/${accountName}_Device_${deviceId}`;
+        const refreshIntervalSec = config.refreshInterval / 1000;
         this.refreshInterval = config.refreshInterval;
 
         this.axiosInstanceGet = axios.create({
@@ -407,7 +408,7 @@ class MelCloudAtw extends EventEmitter {
                 const caseZone2 = hasZone2 ? hasHotWaterTank ? 3 : 2 : -1;
 
                 if (zonesCount === 0) {
-                    this.emit('message', `No device or zones found, check again in ${this.refreshInterval / 1000}s.`);
+                    this.emit('message', `No device or zones found, check again in ${refreshIntervalSec}s.`);
                     this.checkDeviceInfo();
                     return;
                 };
@@ -424,7 +425,7 @@ class MelCloudAtw extends EventEmitter {
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 this.emit('checkDeviceState');
             } catch (error) {
-                this.emit('error', `check info, ${error}, check again in ${this.refreshInterval / 1000}s.`);
+                this.emit('error', `check info, ${error}, check again in ${refreshIntervalSec}s.`);
                 this.checkDeviceInfo();
             };
         }).on('checkDeviceState', async () => {
@@ -547,7 +548,7 @@ class MelCloudAtw extends EventEmitter {
 
                 this.checkDeviceInfo();
             } catch (error) {
-                this.emit('error', `check device state error, ${error}, check again in ${this.refreshInterval / 1000}s.`);
+                this.emit('error', `check device state error, ${error}, check again in ${refreshIntervalSec}s.`);
                 this.checkDeviceInfo();
             };
         });

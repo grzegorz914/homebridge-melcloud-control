@@ -18,6 +18,7 @@ class MelCloudAta extends EventEmitter {
         const restFulEnabled = config.restFulEnabled;
         const mqttEnabled = config.mqttEnabled;
         const deviceInfoFile = `${prefDir}/${accountName}_Device_${deviceId}`;
+        const refreshIntervalSec = config.refreshInterval / 1000;
         this.refreshInterval = config.refreshInterval;
 
         //set default values
@@ -327,7 +328,7 @@ class MelCloudAta extends EventEmitter {
                 const permissionCanDisableLocalController = deviceInfo.Permissions.CanDisableLocalController;
 
                 if (unitsCount === 0) {
-                    this.emit('message', `No device found, check again in ${this.refreshInterval / 1000}s.`);
+                    this.emit('message', `No device found, check again in ${refreshIntervalSec}s.`);
                     this.checkDeviceInfo();
                     return;
                 };
@@ -344,7 +345,7 @@ class MelCloudAta extends EventEmitter {
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 this.emit('checkDeviceState');
             } catch (error) {
-                this.emit('error', `check info, ${error}, check again in ${this.refreshInterval / 1000}s.`);
+                this.emit('error', `check info, ${error}, check again in ${refreshIntervalSec}s.`);
                 this.checkDeviceInfo();
             };
         }).on('checkDeviceState', async () => {
@@ -439,7 +440,7 @@ class MelCloudAta extends EventEmitter {
 
                 this.checkDeviceInfo();
             } catch (error) {
-                this.emit('error', `check device state error, ${error}, check again in ${this.refreshInterval / 1000}s.`);
+                this.emit('error', `check device state error, ${error}, check again in ${refreshIntervalSec}s.`);
                 this.checkDeviceInfo();
             };
         });

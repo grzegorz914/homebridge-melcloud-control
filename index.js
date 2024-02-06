@@ -47,7 +47,7 @@ class MelCloudPlatform {
 				melCloud.on('checkDevicesListComplete', (accountInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText) => {
 
 					//melcloud devices
-					const deviceRefreshInterval = [ataRefreshInterval, atwRefreshInterval, 0, ervRefreshInterval][deviceType]
+					const deviceRefreshInterval = [ataRefreshInterval, atwRefreshInterval, 0, ervRefreshInterval][deviceType];
 					const melCloudDevice = new MelCloudDevice(api, prefDir, account, accountName, melCloud, accountInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText, deviceRefreshInterval)
 					melCloudDevice.on('publishAccessory', (accessory) => {
 
