@@ -47,7 +47,7 @@ class MelCloud extends EventEmitter {
                 const contextKey = accountInfo.ContextKey;
 
                 if (contextKey === undefined || contextKey === null) {
-                    this.emit('message', `context key: ${contextKey}, missing, reconnect in 65s.`)
+                    this.emit('message', `context key: ${contextKey}, missing, reconnect in ${this.accountRefreshInterval / 1000}.`)
                     this.reconnect();
                     return;
                 };
@@ -135,7 +135,7 @@ class MelCloud extends EventEmitter {
 
                 const devicesCount = devices.length;
                 if (devicesCount === 0) {
-                    this.emit('message', `no devices found, check again in  ${this.accountRefreshInterval / 1000}.`);
+                    this.emit('message', `no devices found, check again in ${this.accountRefreshInterval / 1000}.`);
                     this.checkDevicesList();
                     return;
                 }
@@ -162,7 +162,7 @@ class MelCloud extends EventEmitter {
 
                 this.checkDevicesList();
             } catch (error) {
-                this.emit('error', `check devices list error, ${error}, check again in  ${this.accountRefreshInterval / 1000}s.`);
+                this.emit('error', `check devices list error, ${error}, check again in ${this.accountRefreshInterval / 1000}s.`);
                 this.checkDevicesList();
             };
         })

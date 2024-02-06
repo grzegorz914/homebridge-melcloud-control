@@ -27,7 +27,7 @@ class MelCloudPlatform {
 				const passwd = account.passwd;
 				const language = account.language;
 				const enableDebugMode = account.enableDebugMode;
-				const accountRefreshInterval = account.accountSettingRefreshInterval * 1000 || 90000;
+				const accountRefreshInterval = account.accountRefreshInterval * 1000 || 90000;
 
 				//check mandatory properties
 				if (!accountName || !user || !passwd || !language) {
