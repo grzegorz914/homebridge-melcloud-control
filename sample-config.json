@@ -24,7 +24,6 @@
           "passwd": "password",
           "language": "0",
           "ataDisplayMode": 0,
-          "accountRefreshInterval": 9,
           "ataTemperatureSensor": false,
           "ataDisableAutoMode": false,
           "ataDisableHeatMode": false,
@@ -38,7 +37,6 @@
               "namePrefix": false
             }
           ],
-          "ataRefreshInterval": 7,
           "atwDisplayMode": 0,
           "atwTemperatureSensor": false,
           "atwPresets": false,
@@ -50,7 +48,6 @@
               "namePrefix": false
             }
           ],
-          "atwRefreshInterval": 7,
           "ervDisplayMode": 0,
           "ervTemperatureSensor": false,
           "ervPresets": false,
@@ -62,7 +59,7 @@
               "namePrefix": false
             }
           ],
-          "ervRefreshInterval": 7,
+          "refreshInterval": 120,
           "disableLogInfo": false,
           "disableLogDeviceInfo": false,
           "enableDebugMode": false,

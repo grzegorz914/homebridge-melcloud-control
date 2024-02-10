@@ -203,15 +203,6 @@
               "description": "Here select the language used in MELCloud account.",
               "required": true
             },
-            "accountRefreshInterval": {
-              "title": "Refresh Interval",
-              "type": "integer",
-              "default": 120,
-              "minimum": 90,
-              "maximum": 300,
-              "description": "Here set the background state refresh time in (sec) for MELCloud settings.",
-              "required": true
-            },
             "ataDisplayMode": {
               "title": "Control Mode",
               "type": "integer",
@@ -571,15 +562,6 @@
                 }
               }
             },
-            "ataRefreshInterval": {
-              "title": "Refresh Interval",
-              "type": "integer",
-              "default": 75,
-              "minimum": 60,
-              "maximum": 900,
-              "description": "Here set the background state refresh time in (sec) for Air Conditioner.",
-              "required": true
-            },
             "atwDisplayMode": {
               "title": "Control Mode",
               "type": "integer",
@@ -829,15 +811,6 @@
                 }
               }
             },
-            "atwRefreshInterval": {
-              "title": "Refresh Interval",
-              "type": "integer",
-              "default": 70,
-              "minimum": 60,
-              "maximum": 900,
-              "description": "Here set the background state refresh time in (sec) for Heat Pump.",
-              "required": true
-            },
             "ervDisplayMode": {
               "title": "Control Mode",
               "type": "integer",
@@ -1033,13 +1006,13 @@
                 }
               }
             },
-            "ervRefreshInterval": {
+            "refreshInterval": {
               "title": "Refresh Interval",
               "type": "integer",
-              "default": 75,
-              "minimum": 60,
-              "maximum": 900,
-              "description": "Here set the background state refresh time in (sec) for Energy Recovery Ventilation.",
+              "default": 120,
+              "minimum": 1,
+              "maximum": 600,
+              "description": "Here set the background devices state refresh time in (sec).",
               "required": true
             },
             "disableLogInfo": {
@@ -1205,7 +1178,6 @@
                     "accounts[].ataDisableAutoMode",
                     "accounts[].ataDisableHeatMode",
                     "accounts[].ataAutoHeatMode",
-                    "accounts[].ataRefreshInterval",
                     {
                       "key": "accounts[]",
                       "type": "section",
@@ -1235,7 +1207,6 @@
                     "accounts[].atwDisplayMode",
                     "accounts[].atwTemperatureSensor",
                     "accounts[].atwPresets",
-                    "accounts[].atwRefreshInterval",
                     {
                       "key": "accounts[]",
                       "type": "section",
@@ -1265,7 +1236,6 @@
                     "accounts[].ervDisplayMode",
                     "accounts[].ervTemperatureSensor",
                     "accounts[].ervPresets",
-                    "accounts[].ervRefreshInterval",
                     {
                       "key": "accounts[]",
                       "type": "section",
@@ -1295,7 +1265,7 @@
                     "accounts[].enableDebugMode",
                     "accounts[].disableLogInfo",
                     "accounts[].disableLogDeviceInfo",
-                    "accounts[].accountRefreshInterval"
+                    "accounts[].refreshInterval"
                   ]
                 },
                 {

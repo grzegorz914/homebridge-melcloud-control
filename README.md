@@ -174,7 +174,6 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `user` | Here set the MELCloud username. |
 | `passwd` | Here set the MELCloud password. |
 | `language` | Here select the MELCloud language. |
-| `accountRefreshInterval` | Here set the background MELCLoud account settings refresh time in (sec), default 120s. |
 | `ataDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
 | `ataTemperatureSensor` | This enable extra temperature sensor for Heater/Cooler control mode to use with automations in HomeKit app. |
 | `ataDisableAutoMode` | This will disable `Auto` mode even this mode is supported by device. |
@@ -185,7 +184,6 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ataButtons.mode` | Here select button mode, VH - Vane Horizontal, VV - Vane Horizontal. |
 | `ataButtons.displayType` | Here select display type in HomeKit app, possible `None/Disabled`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`.|
 | `ataButtons.namePrefix` | Here enable/disable the accessory name as a prefix for button/sensor name.|
-| `ataRefreshInterval` | Here set the background state refresh time in (sec) for Air Conditioner, default 75s. |
 | `atwDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
 | `atwTemperatureSensor` | This enable extra temperature sensor for Heater/Cooler control mode to use with automations in HomeKit app. |
 | `atwPresets` | This enable display Heat Pump presets in HomeKit app. |
@@ -193,7 +191,6 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `atwButtons.mode` | Here select button mode. |
 | `atwButtons.displayType` | Here select display type in HomeKit app, possible `None/Disabled`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`.|
 | `atwButtons.namePrefix` | Here enable/disable the accessory name as a prefix for button/sensor name.|
-| `atwRefreshInterval` | Here set the background state refresh time in (sec) for Heat Pump, default 75s. |
 | `ervDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
 | `ervTemperatureSensor` | This enable extra temperature sensor for Heater/Cooler control mode to use with automations in HomeKit app. |
 | `ervPresets` | This enable display EnergyRecovery Ventilation presets in HomeKit app. |
@@ -201,7 +198,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ervButtons.mode` | Here select button mode. |
 | `ervButtons.displayType` | Here select display type in HomeKit app, possible `None/Disabled`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`.|
 | `ervButtons.namePrefix` | Here enable/disable the accessory name as a prefix for button/sensor name.|
-| `ervRefreshInterval` | Here set the background state refresh time in (sec) for Energy Recovery Ventilation, default 75s. |
+| `refreshInterval` | Here set the background devices state refresh time in (sec), default 120s. |
 | `enableDebugMode` | This enable deep log in homebridge console. |
 | `disableLogInfo` | This disable display log values and states on every it change. |
 | `disableLogDeviceInfo` | This disable display log device info on plugin start. |

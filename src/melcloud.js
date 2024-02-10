@@ -34,7 +34,7 @@ class MelCloud extends EventEmitter {
             maxContentLength: 100000000,
             maxBodyLength: 1000000000,
             httpsAgent: new https.Agent({
-                keepAlive: true,
+                keepAlive: false,
                 rejectUnauthorized: false
             })
         });
@@ -42,9 +42,21 @@ class MelCloud extends EventEmitter {
         this.on('connect', async () => {
             try {
                 const accountData = await axiosInstanceLogin(CONSTANS.ApiUrls.ClientLogin, options);
-                const debug = enableDebugMode ? this.emit('debug', `MELCloud Info: ${JSON.stringify(accountData.data, null, 2)}`) : false;
-                const accountInfo = accountData.data.LoginData;
+                const account = accountData.data;
+                const accountInfo = account.LoginData;
                 const contextKey = accountInfo.ContextKey;
+
+                //remove sensitive data
+                const config = {
+                    ...account.LoginData,
+                    ContextKey: 'removed',
+                    ClientId: 'removed',
+                    Client: 'removed',
+                    Name: 'removed',
+                    MapLongitude: 'removed',
+                    MapLatitude: 'removed'
+                };
+                const debug = enableDebugMode ? this.emit('debug', `MELCloud Info: ${JSON.stringify(config, null, 2)}`) : false;
 
                 if (contextKey === undefined || contextKey === null) {
                     this.emit('message', `context key: ${contextKey}, missing, reconnect in ${refreshIntervalSec}.`)
@@ -64,7 +76,7 @@ class MelCloud extends EventEmitter {
                     maxBodyLength: 1000000000,
                     withCredentials: true,
                     httpsAgent: new https.Agent({
-                        keepAlive: true,
+                        keepAlive: false,
                         rejectUnauthorized: false
                     })
                 });
@@ -82,7 +94,7 @@ class MelCloud extends EventEmitter {
                     maxBodyLength: 1000000000,
                     withCredentials: true,
                     httpsAgent: new https.Agent({
-                        keepAlive: true,
+                        keepAlive: false,
                         rejectUnauthorized: false
                     })
                 });
@@ -116,6 +128,7 @@ class MelCloud extends EventEmitter {
 
                 //save buildings to the file
                 await this.saveData(buildingsFile, buildingsList);
+                const debug = enableDebugMode ? this.emit('debug', `Buildings list saved.`) : false;
 
                 //read buildings structure and get the devices
                 const devices = [];
@@ -152,6 +165,7 @@ class MelCloud extends EventEmitter {
                     //save every device info to the file
                     const deviceInfoFile = `${prefDir}/${accountName}_Device_${deviceId}`;
                     await this.saveData(deviceInfoFile, deviceInfo);
+                    const debug = enableDebugMode ? this.emit('debug', `Device: ${deviceName} state saved.`) : false;
 
                     //prepare device if not in devices array
                     if (!devicesId.includes(deviceId)) {
@@ -163,7 +177,7 @@ class MelCloud extends EventEmitter {
                 this.checkDevicesList();
             } catch (error) {
                 this.emit('error', `check devices list error, ${error}, check again in ${refreshIntervalSec}s.`);
-                this.checkDevicesList();
+                this.reconnect();
             };
         })
         this.emit('connect');

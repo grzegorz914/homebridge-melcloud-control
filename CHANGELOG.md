@@ -10,6 +10,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Important changes v0.4.0 and above!!!
   * Main control mode, buttons and presets need to be configured again!!!
 
+## [0.16.0] - (10.02.2024)
+## Changes
+- removed possibility to set indyvidual refresh time for ATA, ATW, ERV state
+- full code refactor for ATA, ATW, ERV
+- fixed accesorry publish if units are not configured in MELCloud
+- remove sensitive information from debug
+- drastically reduce call trace
+- config.schema updated
+- cleanup
+
 ## [0.15.0] - (05.02.2024)
 ## Changes
 - added possibility to set indyvidual refresh time for Account Settings and ATA, ATW, ERV state, [#68](https://github.com/grzegorz914/homebridge-melcloud-control/issues/68)

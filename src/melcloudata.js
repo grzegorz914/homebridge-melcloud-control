@@ -18,10 +18,10 @@ class MelCloudAta extends EventEmitter {
         const restFulEnabled = config.restFulEnabled;
         const mqttEnabled = config.mqttEnabled;
         const deviceInfoFile = `${prefDir}/${accountName}_Device_${deviceId}`;
-        const refreshIntervalSec = config.refreshInterval / 1000;
-        this.refreshInterval = config.refreshInterval;
 
         //set default values
+        this.device = {};
+        this.presets = [];
         this.roomTemperature = 0;
         this.setTemperature = 0;
         this.setFanSpeed = 0;
@@ -38,20 +38,8 @@ class MelCloudAta extends EventEmitter {
         this.prohibitPower = false;
         this.power = false;
         this.offline = false;
+        this.displayDeviceInfo = true;
 
-        this.axiosInstanceGet = axios.create({
-            method: 'GET',
-            baseURL: CONSTANS.ApiUrls.BaseURL,
-            timeout: 25000,
-            headers: {
-                'X-MitsContextKey': contextKey,
-            },
-            withCredentials: true,
-            httpsAgent: new https.Agent({
-                keepAlive: true,
-                rejectUnauthorized: false
-            })
-        });
         this.axiosInstancePost = axios.create({
             method: 'POST',
             baseURL: CONSTANS.ApiUrls.BaseURL,
@@ -62,64 +50,63 @@ class MelCloudAta extends EventEmitter {
             },
             withCredentials: true,
             httpsAgent: new https.Agent({
-                keepAlive: true,
+                keepAlive: false,
                 rejectUnauthorized: false
             })
         });
 
-        this.on('checkDeviceInfo', async () => {
+        this.on('checkDevice', async () => {
             try {
                 //read device info from file
-                const deviceInfo = await this.readData(deviceInfoFile);
-                const debug = debugLog ? this.emit('debug', `Info: ${JSON.stringify(deviceInfo, null, 2)}`) : false;
+                const deviceData = await this.readData(deviceInfoFile);
+                const debug = debugLog ? this.emit('debug', `Info: ${JSON.stringify(deviceData, null, 2)}`) : false;
 
-                if (!deviceInfo) {
-                    this.checkDeviceInfo();
+                if (!deviceData) {
+                    this.checkDevice();
                     return;
                 }
 
                 //device info
-                //const deviceId = deviceInfo.DeviceID;
-                //const deviceName = deviceInfo.DeviceName;
-                //const buildingId = deviceInfo.BuildingID;
-                const buildingName = deviceInfo.BuildingName;
-                const floorId = deviceInfo.FloorID;
-                const floorName = deviceInfo.FloorName;
-                const areaId = deviceInfo.AreaID;
-                const areaName = deviceInfo.AreaName;
-                const imageId = deviceInfo.ImageID;
-                const installationDate = deviceInfo.InstallationDate;
-                const lastServiceDate = deviceInfo.LastServiceDate;
+                //const deviceId = deviceData.DeviceID;
+                //const deviceName = deviceData.DeviceName;
+                //const buildingId = deviceData.BuildingID;
+                const buildingName = deviceData.BuildingName;
+                const floorId = deviceData.FloorID;
+                const floorName = deviceData.FloorName;
+                const areaId = deviceData.AreaID;
+                const areaName = deviceData.AreaName;
+                const imageId = deviceData.ImageID;
+                const installationDate = deviceData.InstallationDate;
+                const lastServiceDate = deviceData.LastServiceDate;
 
                 //presets
-                const presets = deviceInfo.Presets;
-                const presetsCount = presets.length;
+                const presets = deviceData.Presets;
 
-                const ownerId = deviceInfo.OwnerID;
-                const ownerName = deviceInfo.OwnerName;
-                const ownerEmail = deviceInfo.OwnerEmail;
-                const accessLevel = deviceInfo.AccessLevel;
-                const directAccess = deviceInfo.DirectAccess;
-                const endDate = deviceInfo.EndDate;
-                const zone1Name = deviceInfo.Zone1Name;
-                const zone2Name = deviceInfo.Zone2Name;
-                const minTemperature = deviceInfo.MinTemperature;
-                const maxTemperature = deviceInfo.MaxTemperature;
-                const hideVaneControls = deviceInfo.HideVaneControls;
-                const hideDryModeControl = deviceInfo.HideDryModeControl;
-                const hideRoomTemperature = deviceInfo.HideRoomTemperature;
-                const hideSupplyTemperature = deviceInfo.HideSupplyTemperature;
-                const hideOutdoorTemperature = deviceInfo.HideOutdoorTemperature;
-                const buildingCountry = deviceInfo.BuildingCountry;
-                //const ownerCountry = deviceInfo.OwnerCountry;
-                //const adaptorType = deviceInfo.AdaptorType;
-                //const linkedDevice = deviceInfo.LinkedDevice;
-                const type = deviceInfo.Type;
-                //const macAddress = deviceInfo.MacAddress;
-                //const serialNumber = deviceInfo.SerialNumber !== null ? deviceInfo.SerialNumber.toString() : 'Undefined';
+                const ownerId = deviceData.OwnerID;
+                const ownerName = deviceData.OwnerName;
+                const ownerEmail = deviceData.OwnerEmail;
+                const accessLevel = deviceData.AccessLevel;
+                const directAccess = deviceData.DirectAccess;
+                const endDate = deviceData.EndDate;
+                const zone1Name = deviceData.Zone1Name;
+                const zone2Name = deviceData.Zone2Name;
+                const minTemperature = deviceData.MinTemperature;
+                const maxTemperature = deviceData.MaxTemperature;
+                const hideVaneControls = deviceData.HideVaneControls;
+                const hideDryModeControl = deviceData.HideDryModeControl;
+                const hideRoomTemperature = deviceData.HideRoomTemperature;
+                const hideSupplyTemperature = deviceData.HideSupplyTemperature;
+                const hideOutdoorTemperature = deviceData.HideOutdoorTemperature;
+                const buildingCountry = deviceData.BuildingCountry;
+                const ownerCountry = deviceData.OwnerCountry;
+                const adaptorType = deviceData.AdaptorType;
+                const linkedDevice = deviceData.LinkedDevice;
+                const type = deviceData.Type;
+                const macAddress = deviceData.MacAddress;
+                const serialNumber = deviceData.SerialNumber ?? 'Undefined';
 
                 //device
-                const device = deviceInfo.Device;
+                const device = deviceData.Device;
                 const pCycleActual = device.PCycleActual;
                 const errorMessages = device.ErrorMessages;
                 const deviceType = device.DeviceType;
@@ -203,19 +190,19 @@ class MelCloudAta extends EventEmitter {
                 const maxIndoorUnits = device.MaxIndoorUnits;
                 const maxTemperatureControlUnits = device.MaxTemperatureControlUnits;
                 const modelCode = device.ModelCode;
-                const deviceId = device.DeviceID;
-                const macAddress = device.MacAddress;
-                const serialNumber = device.SerialNumber ?? 'Undefined';
+                //const deviceId = device.DeviceID;
+                //const macAddress = device.MacAddress;
+                //const serialNumber = device.SerialNumber;
                 const timeZoneID = device.TimeZoneID;
                 const diagnosticMode = device.DiagnosticMode;
                 const diagnosticEndDate = device.DiagnosticEndDate;
                 const expectedCommand = device.ExpectedCommand;
                 const owner = device.Owner;
                 const detectedCountry = device.DetectedCountry;
-                const adaptorType = device.AdaptorType;
+                //const adaptorType = device.AdaptorType;
                 const firmwareDeployment = device.FirmwareDeployment;
                 const firmwareUpdateAborted = device.FirmwareUpdateAborted;
-                const linkedDevice = device.LinkedDevice;
+                //const linkedDevice = device.LinkedDevice;
                 const wifiSignalStrength = device.WifiSignalStrength;
                 const wifiAdapterStatus = device.WifiAdapterStatus;
                 const position = device.Position;
@@ -235,7 +222,7 @@ class MelCloudAta extends EventEmitter {
                 const consecutiveUploadErrors = device.ConsecutiveUploadErrors;
                 const doNotRespondAfter = device.DoNotRespondAfter;
                 const ownerRoleAccessLevel = device.OwnerRoleAccessLevel;
-                const ownerCountry = device.OwnerCountry;
+                //const ownerCountry = device.OwnerCountry;
                 const hideEnergyReport = device.HideEnergyReport;
                 const exceptionHash = device.ExceptionHash;
                 const exceptionDate = device.ExceptionDate;
@@ -305,98 +292,53 @@ class MelCloudAta extends EventEmitter {
                 }
 
                 //diagnostic
-                //const diagnosticMode = deviceInfo.DiagnosticMode;
-                //const diagnosticEndDate = deviceInfo.DiagnosticEndDate;
-                const location = deviceInfo.Location;
-                //const detectedCountry = deviceInfo.DetectedCountry;
-                const registrations = deviceInfo.Registrations;
-                const localIPAddress = deviceInfo.LocalIPAddress;
-                const timeZone = deviceInfo.TimeZone;
-                const registReason = deviceInfo.RegistReason;
-                //const expectedCommand = deviceInfo.ExpectedCommand;
-                const registRetry = deviceInfo.RegistRetry;
-                const dateCreated = deviceInfo.DateCreated;
-                //const firmwareDeployment = deviceInfo.FirmwareDeployment;
-                //const firmwareUpdateAborted = deviceInfo.FirmwareUpdateAborted;
+                //const diagnosticMode = deviceData.DiagnosticMode;
+                //const diagnosticEndDate = deviceData.DiagnosticEndDate;
+                const location = deviceData.Location;
+                //const detectedCountry = deviceData.DetectedCountry;
+                const registrations = deviceData.Registrations;
+                const localIPAddress = deviceData.LocalIPAddress;
+                const timeZone = deviceData.TimeZone;
+                const registReason = deviceData.RegistReason;
+                //const expectedCommand = deviceData.ExpectedCommand;
+                const registRetry = deviceData.RegistRetry;
+                const dateCreated = deviceData.DateCreated;
+                //const firmwareDeployment = deviceData.FirmwareDeployment;
+                //const firmwareUpdateAborted = deviceData.FirmwareUpdateAborted;
 
                 //permissions
-                const permissionCanSetOperationMode = deviceInfo.Permissions.CanSetOperationMode;
-                const permissionCanSetFanSpeed = deviceInfo.Permissions.CanSetFanSpeed;
-                const permissionCanSetVaneDirection = deviceInfo.Permissions.CanSetVaneDirection;
-                const permissionCanSetPower = deviceInfo.Permissions.CanSetPower;
-                const permissionCanSetTemperatureIncrementOverride = deviceInfo.Permissions.CanSetTemperatureIncrementOverride;
-                const permissionCanDisableLocalController = deviceInfo.Permissions.CanDisableLocalController;
+                const permissionCanSetOperationMode = deviceData.Permissions.CanSetOperationMode;
+                const permissionCanSetFanSpeed = deviceData.Permissions.CanSetFanSpeed;
+                const permissionCanSetVaneDirection = deviceData.Permissions.CanSetVaneDirection;
+                const permissionCanSetPower = deviceData.Permissions.CanSetPower;
+                const permissionCanSetTemperatureIncrementOverride = deviceData.Permissions.CanSetTemperatureIncrementOverride;
+                const permissionCanDisableLocalController = deviceData.Permissions.CanDisableLocalController;
 
+                //display info if units are not configured in MELCloud service
                 if (unitsCount === 0) {
-                    this.emit('message', `No device found, check again in ${refreshIntervalSec}s.`);
-                    this.checkDeviceInfo();
-                    return;
+                    this.emit('message', `Units are not configured in MELCloud service.`);
                 };
 
-                this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, presets, presetsCount, hasAutomaticFanSpeed, airDirectionFunction, swingFunction, numberOfFanSpeeds, temperatureIncrement, minTempCoolDry, maxTempCoolDry, minTempHeat, maxTempHeat, minTempAutomatic, maxTempAutomatic, modelSupportsFanSpeed, modelSupportsAuto, modelSupportsHeat, modelSupportsDry);
+                //emit info
+                const emitInfo = this.displayDeviceInfo ? this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) : false;
+                this.displayDeviceInfo = false;
 
                 //restFul
-                const restFul = restFulEnabled ? this.emit('restFul', 'info', deviceInfo) : false;
+                const restFul = restFulEnabled ? this.emit('restFul', 'info', deviceData) : false;
+                const restFul1 = restFulEnabled ? this.emit('restFul', 'state', device) : false;
 
                 //mqtt
-                const mqtt = mqttEnabled ? this.emit('mqtt', `Info`, deviceInfo) : false;
-
-                //check device state
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                this.emit('checkDeviceState');
-            } catch (error) {
-                this.emit('error', `check info, ${error}, check again in ${refreshIntervalSec}s.`);
-                this.checkDeviceInfo();
-            };
-        }).on('checkDeviceState', async () => {
-            try {
-                const url = CONSTANS.ApiUrls.DeviceState.replace("DID", deviceId).replace("BID", buildingId);
-                const responseData = await this.axiosInstanceGet(url);
-                const deviceState = responseData.data;
-                const debug = debugLog ? this.emit('debug', `State: ${JSON.stringify(deviceState, null, 2)}`) : false;
-
-                // device state
-                const effectiveFlags = deviceState.EffectiveFlags;
-                const localIPAddress = deviceState.LocalIPAddress;
-                const roomTemperature = deviceState.RoomTemperature;
-                const setTemperature = deviceState.SetTemperature;
-                const setFanSpeed = deviceState.SetFanSpeed;
-                const operationMode = deviceState.OperationMode;
-                const vaneHorizontal = deviceState.VaneHorizontal;
-                const vaneVertical = deviceState.VaneVertical;
-                const name = deviceState.Name;
-                const numberOfFanSpeeds = deviceState.NumberOfFanSpeeds;
-                const weatherObservations = deviceState.WeatherObservations;
-                const errorMessage = deviceState.ErrorMessage;
-                const errorCode = deviceState.ErrorCode;
-                const defaultHeatingSetTemperature = deviceState.DefaultHeatingSetTemperature;
-                const defaultCoolingSetTemperature = deviceState.DefaultCoolingSetTemperature;
-                const demandPercentage = deviceState.DemandPercentage;
-                const hideVaneControls = deviceState.HideVaneControls;
-                const hideDryModeControl = deviceState.HideDryModeControl;
-                const roomTemperatureLabel = deviceState.RoomTemperatureLabel;
-                const inStandbyMode = deviceState.InStandbyMode;
-                const temperatureIncrementOverride = deviceState.TemperatureIncrementOverride;
-                const prohibitSetTemperature = deviceState.ProhibitSetTemperature;
-                const prohibitOperationMode = deviceState.ProhibitOperationMode;
-                const prohibitPower = deviceState.ProhibitPower;
-                //const deviceId = deviceState.DeviceID;
-                const deviceType = deviceState.DeviceType;
-                const lastCommunication = deviceState.LastCommunication;
-                const nextCommunication = deviceState.NextCommunication;
-                const power = deviceState.Power;
-                const hasPendingCommand = deviceState.HasPendingCommand;
-                const offline = deviceState.Offline;
-                const scene = deviceState.Scene;
-                const sceneOwner = deviceState.SceneOwner;
+                const mqtt = mqttEnabled ? this.emit('mqtt', `Info`, deviceData) : false;
+                const mqtt1 = mqttEnabled ? this.emit('mqtt', `State`, device) : false;
 
                 const stateHasNotChanged =
-                    roomTemperature === this.roomTemperature
+                    JSON.stringify(presets) === JSON.stringify(this.presets)
+                    && roomTemperature === this.roomTemperature
                     && setTemperature === this.setTemperature
-                    && setFanSpeed === this.setFanSpeed
+                    && fanSpeed === this.setFanSpeed
                     && operationMode === this.operationMode
-                    && vaneHorizontal === this.vaneHorizontal
-                    && vaneVertical === this.vaneVertical
+                    && vaneHorizontalDirection === this.vaneHorizontal
+                    && vaneVerticalDirection === this.vaneVertical
                     && defaultHeatingSetTemperature === this.defaultHeatingSetTemperature
                     && defaultCoolingSetTemperature === this.defaultCoolingSetTemperature
                     && hideVaneControls === this.hideVaneControls
@@ -409,16 +351,37 @@ class MelCloudAta extends EventEmitter {
                     && offline === this.offline;
 
                 if (stateHasNotChanged) {
-                    this.checkDeviceInfo();
+                    this.checkDevice();
                     return;
                 }
 
+                const deviceState = {
+                    DeviceId: deviceId,
+                    EffectiveFlags: effectiveFlags,
+                    RoomTemperature: roomTemperature,
+                    SetTemperature: setTemperature,
+                    SetFanSpeed: fanSpeed,
+                    OperationMode: operationMode,
+                    VaneHorizontal: vaneHorizontalDirection,
+                    VaneVertical: vaneVerticalDirection,
+                    HideVaneControls: hideVaneControls,
+                    HideDryModeControl: hideDryModeControl,
+                    InStandbyMode: inStandbyMode,
+                    ProhibitSetTemperature: prohibitSetTemperature,
+                    ProhibitOperationMode: prohibitOperationMode,
+                    ProhibitPower: prohibitPower,
+                    Power: power,
+                    Offline: offline
+                }
+
+                this.device = device;
+                this.presets = presets;
                 this.roomTemperature = roomTemperature;
                 this.setTemperature = setTemperature;
-                this.setFanSpeed = setFanSpeed;
+                this.setFanSpeed = fanSpeed;
                 this.operationMode = operationMode;
-                this.vaneHorizontal = vaneHorizontal;
-                this.vaneVertical = vaneVertical;
+                this.vaneHorizontal = vaneHorizontalDirection;
+                this.vaneVertical = vaneVerticalDirection;
                 this.defaultHeatingSetTemperature = defaultHeatingSetTemperature;
                 this.defaultCoolingSetTemperature = defaultCoolingSetTemperature;
                 this.hideVaneControls = hideVaneControls;
@@ -430,27 +393,20 @@ class MelCloudAta extends EventEmitter {
                 this.power = power;
                 this.offline = offline;
 
-                this.emit('deviceState', deviceState, roomTemperature, setTemperature, setFanSpeed, operationMode, vaneHorizontal, vaneVertical, defaultHeatingSetTemperature, defaultCoolingSetTemperature, hideVaneControls, hideDryModeControl, inStandbyMode, prohibitSetTemperature, prohibitOperationMode, prohibitPower, power, offline);
-
-                //restFul
-                const restFul = restFulEnabled ? this.emit('restFul', 'state', deviceState) : false;
-
-                //mqtt
-                const mqtt = mqttEnabled ? this.emit('mqtt', `State`, deviceState) : false;
-
-                this.checkDeviceInfo();
+                this.emit('deviceState', device, deviceState, presets);
+                this.checkDevice();
             } catch (error) {
-                this.emit('error', `check device state error, ${error}, check again in ${refreshIntervalSec}s.`);
-                this.checkDeviceInfo();
+                this.emit('error', `check device error: ${error}.`);
+                this.checkDevice();
             };
         });
 
-        this.emit('checkDeviceInfo');
+        this.emit('checkDevice');
     };
 
-    async checkDeviceInfo() {
-        await new Promise(resolve => setTimeout(resolve, this.refreshInterval));
-        this.emit('checkDeviceInfo');
+    async checkDevice() {
+        await new Promise(resolve => setTimeout(resolve, 30000));
+        this.emit('checkDevice');
     };
 
     readData(path) {
@@ -474,11 +430,8 @@ class MelCloudAta extends EventEmitter {
                 };
 
                 await this.axiosInstancePost(CONSTANS.ApiUrls.SetAta, options);
+                this.emit('deviceState', this.device, deviceState, this.presets);
                 resolve();
-
-                await new Promise(resolve => setTimeout(resolve, 250));
-                this.emit('deviceState', deviceState, deviceState.RoomTemperature, deviceState.SetTemperature, deviceState.SetFanSpeed, deviceState.OperationMode, deviceState.VaneHorizontal, deviceState.VaneVertical, deviceState.DefaultHeatingSetTemperature, deviceState.DefaultCoolingSetTemperature, deviceState.HideVaneControls, deviceState.HideDryModeControl, deviceState.InStandbyMode, deviceState.ProhibitSetTemperature, deviceState.ProhibitOperationMode, deviceState.ProhibitPower, deviceState.Power, deviceState.Offline);
-                this.checkDeviceInfo();
             } catch (error) {
                 reject(error);
             };

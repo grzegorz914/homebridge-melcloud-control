@@ -27,10 +27,7 @@ class MelCloudPlatform {
 				const passwd = account.passwd;
 				const language = account.language;
 				const enableDebugMode = account.enableDebugMode;
-				const accountRefreshInterval = account.accountRefreshInterval * 1000 || 90000;
-				const ataRefreshInterval = account.ataRefreshInterval * 1000 || 75000;
-				const atwRefreshInterval = account.atwRefreshInterval * 1000 || 75000;
-				const ervRefreshInterval = account.ervRefreshInterval * 1000 || 75000;
+				const refreshInterval = account.refreshInterval * 1000 || 120000;
 
 				//check mandatory properties
 				if (!accountName || !user || !passwd || !language) {
@@ -40,15 +37,23 @@ class MelCloudPlatform {
 
 				//debug config
 				const debug = enableDebugMode ? log(`Account: ${accountName}, did finish launching.`) : false;
-				const debug1 = enableDebugMode ? log(`Account: ${accountName}, Config: ${JSON.stringify(account, null, 2)}`) : false;
+
+				//remove sensitive data
+				const config = {
+					...account,
+					user: 'removed',
+					passwd: 'removed',
+					mqttUser: 'removed',
+					mqttPasswd: 'removed'
+				};
+				const debug1 = enableDebugMode ? log(`Account: ${accountName}, Config: ${JSON.stringify(config, null, 2)}`) : false;
 
 				//melcloud account
-				const melCloud = new MelCloud(prefDir, accountName, user, passwd, language, enableDebugMode, accountRefreshInterval);
+				const melCloud = new MelCloud(prefDir, accountName, user, passwd, language, enableDebugMode, refreshInterval);
 				melCloud.on('checkDevicesListComplete', (accountInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText) => {
 
 					//melcloud devices
-					const deviceRefreshInterval = [ataRefreshInterval, atwRefreshInterval, 0, ervRefreshInterval][deviceType];
-					const melCloudDevice = new MelCloudDevice(api, prefDir, account, accountName, melCloud, accountInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText, deviceRefreshInterval)
+					const melCloudDevice = new MelCloudDevice(api, prefDir, account, accountName, melCloud, accountInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText)
 					melCloudDevice.on('publishAccessory', (accessory) => {
 
 						//publish devices
