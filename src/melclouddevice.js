@@ -183,8 +183,6 @@ class MelCloudDevice extends EventEmitter {
                     const prohibitPower = deviceState.ProhibitPower;
                     const power = deviceState.Power ?? false;
                     const offline = deviceState.Offline ?? false;
-                    this.power = power;
-                    this.offline = offline;
 
                     //presets
                     this.ataPresets = presets;
@@ -285,17 +283,6 @@ class MelCloudDevice extends EventEmitter {
                             };
                             break;
                     };
-
-                    this.currentOperationMode = currentOperationMode;
-                    this.targetOperationMode = targetOperationMode;
-                    this.roomTemperature = roomTemperature;
-                    this.setTemperature = setTemperature;
-                    this.fanSpeed = fanSpeed;
-                    this.setFanSpeed = setFanSpeed;
-                    this.swingMode = swingMode;
-                    this.vaneHorizontal = vaneHorizontal;
-                    this.vaneVertical = vaneVertical;
-                    this.lockPhysicalControls = lockPhysicalControls;
 
                     //update buttons state
                     if (this.ataButtonsCount > 0) {
@@ -526,6 +513,19 @@ class MelCloudDevice extends EventEmitter {
                         };
                     };
 
+                    this.power = power;
+                    this.offline = offline;
+                    this.currentOperationMode = currentOperationMode;
+                    this.targetOperationMode = targetOperationMode;
+                    this.roomTemperature = roomTemperature;
+                    this.setTemperature = setTemperature;
+                    this.fanSpeed = fanSpeed;
+                    this.setFanSpeed = setFanSpeed;
+                    this.swingMode = swingMode;
+                    this.vaneHorizontal = vaneHorizontal;
+                    this.vaneVertical = vaneVertical;
+                    this.lockPhysicalControls = lockPhysicalControls;
+
                     //start prepare accessory
                     if (this.startPrepareAccessory) {
                         try {
@@ -645,11 +645,6 @@ class MelCloudDevice extends EventEmitter {
                     const idleZone2 = deviceState.IdleZone2 ?? false;
                     const power = deviceState.Power ?? false;
                     const offline = deviceState.Offline ?? false;
-                    this.unitStatus = unitStatus;
-                    this.idleZone1 = idleZone1;
-                    this.idleZone2 = idleZone2;
-                    this.power = power;
-                    this.offline = offline;
 
                     //presets
                     this.atwPresets = presets;
@@ -1015,6 +1010,12 @@ class MelCloudDevice extends EventEmitter {
                         };
                     };
 
+                    this.unitStatus = unitStatus;
+                    this.idleZone1 = idleZone1;
+                    this.idleZone2 = idleZone2;
+                    this.power = power;
+                    this.offline = offline;
+
                     //start prepare accessory
                     if (this.startPrepareAccessory) {
                         try {
@@ -1137,8 +1138,6 @@ class MelCloudDevice extends EventEmitter {
                     const hideOutdoorTemperature = device.HideOutdoorTemperature;
                     const power = device.Power ?? false;
                     const offline = device.Offline ?? false;
-                    this.power = power;
-                    this.offline = offline;
 
                     //presets
                     this.ervPresets = presets;
@@ -1151,7 +1150,7 @@ class MelCloudDevice extends EventEmitter {
                     let lockPhysicalControls = 0;
 
                     //set temperature
-                    setTemperature = hasCoolOperationMode || hasHeatOperationMode ? setTemperature : roomTemperature
+                    const targetTemperature = hasCoolOperationMode || hasHeatOperationMode ? setTemperature : roomTemperature
 
                     let operationModeSetPropsMinValue = 0;
                     let operationModeSetPropsMaxValue = 3;
@@ -1199,10 +1198,10 @@ class MelCloudDevice extends EventEmitter {
                                     .updateCharacteristic(Characteristic.LockPhysicalControls, lockPhysicalControls)
                                     .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.useFahrenheit);
                                 if (hasHeatOperationMode) {
-                                    this.ervMelCloudServices[0].updateCharacteristic(Characteristic.HeatingThresholdTemperature, setTemperature)
+                                    this.ervMelCloudServices[0].updateCharacteristic(Characteristic.HeatingThresholdTemperature, targetTemperature)
                                 }
                                 if (hasCoolOperationMode) {
-                                    this.ervMelCloudServices[0].updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature)
+                                    this.ervMelCloudServices[0].updateCharacteristic(Characteristic.CoolingThresholdTemperature, targetTemperature)
                                 }
                             };
 
@@ -1227,21 +1226,11 @@ class MelCloudDevice extends EventEmitter {
                                     .updateCharacteristic(Characteristic.CurrentHeatingCoolingState, currentOperationMode)
                                     .updateCharacteristic(Characteristic.TargetHeatingCoolingState, targetOperationMode)
                                     .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-                                    .updateCharacteristic(Characteristic.TargetTemperature, setTemperature)
+                                    .updateCharacteristic(Characteristic.TargetTemperature, targetTemperature)
                                     .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.useFahrenheit);
                             };
                             break;
                     };
-
-                    this.currentOperationMode = currentOperationMode;
-                    this.targetOperationMode = targetOperationMode;
-                    this.roomTemperature = roomTemperature;
-                    this.supplyTemperature = supplyTemperature;
-                    this.outdoorTemperature = outdoorTemperature;
-                    this.setTemperature = setTemperature;
-                    this.fanSpeed = fanSpeed;
-                    this.setFanSpeed = setFanSpeed;
-                    this.lockPhysicalControls = lockPhysicalControls;
 
                     //update core maintenance
                     if (this.ervCoreMaintenanceService) {
@@ -1377,7 +1366,7 @@ class MelCloudDevice extends EventEmitter {
                         for (let i = 0; i < this.ervPresetsCount; i++) {
                             const preset = presets[i];
                             const presetState =
-                                preset.SetTemperature === setTemperature
+                                preset.SetTemperature === targetTemperature
                                 && preset.Power === power
                                 && preset.OperationMode === operationMode
                                 && preset.VentilationMode === ventilationMode
@@ -1390,6 +1379,18 @@ class MelCloudDevice extends EventEmitter {
                             };
                         };
                     };
+
+                    this.power = power;
+                    this.offline = offline;
+                    this.currentOperationMode = currentOperationMode;
+                    this.targetOperationMode = targetOperationMode;
+                    this.roomTemperature = roomTemperature;
+                    this.supplyTemperature = supplyTemperature;
+                    this.outdoorTemperature = outdoorTemperature;
+                    this.setTemperature = targetTemperature;
+                    this.fanSpeed = fanSpeed;
+                    this.setFanSpeed = setFanSpeed;
+                    this.lockPhysicalControls = lockPhysicalControls;
 
                     //start prepare accessory
                     if (this.startPrepareAccessory) {
