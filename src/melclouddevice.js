@@ -9,7 +9,7 @@ const CONSTANS = require('./constans.json');
 let Accessory, Characteristic, Service, Categories, UUID;
 
 class MelCloudDevice extends EventEmitter {
-    constructor(api, prefDir, account, accountName, melCloud, accountInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText) {
+    constructor(api, prefDir, account, accountName, melCloud, accountInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit) {
         super();
 
         Accessory = api.platformAccessory;
@@ -48,8 +48,14 @@ class MelCloudDevice extends EventEmitter {
         this.deviceType = deviceType;
         this.deviceName = deviceName;
         this.deviceTypeText = deviceTypeText;
+        this.useFahrenheit = useFahrenheit ? 1 : 0;
         this.startPrepareAccessory = true;
         this.displayDeviceInfo = true;
+
+        //temperature unit
+        this.targetCoolTempSetPropsMinValue = [16, 61][this.useFahrenheit];
+        this.targetTempSetPropsMinValue = [10, 50][this.useFahrenheit];
+        this.targetTempSetPropsMaxValue = [31, 88][this.useFahrenheit];
 
         //RESTFul server
         const restFulEnabled = account.enableRestFul || false;
@@ -139,12 +145,6 @@ class MelCloudDevice extends EventEmitter {
                     this.serialNumber = serialNumber;
                     this.firmwareRevision = firmwareAppVersion;
                 }).on('deviceState', async (device, deviceState, presets) => {
-                    //account info
-                    this.useFahrenheit = this.accountInfo.UseFahrenheit ? 1 : 0;
-                    this.ataTargetCoolTempSetPropsMinValue = [16, 61][this.useFahrenheit];
-                    this.ataTargetTempSetPropsMinValue = [10, 50][this.useFahrenheit];
-                    this.ataTargetTempSetPropsMaxValue = [31, 88][this.useFahrenheit];
-
                     //device info
                     const displayMode = this.ataDisplayMode;
                     const hasAutomaticFanSpeed = device.HasAutomaticFanSpeed;
@@ -606,9 +606,6 @@ class MelCloudDevice extends EventEmitter {
                     this.atwCaseHotWater = caseHotWater;
                     this.atwCaseZone2 = caseZone2;
                 }).on('deviceState', async (deviceState, presets) => {
-                    //accout info
-                    this.useFahrenheit = this.accountInfo.UseFahrenheit ? 1 : 0;
-
                     //device info
                     const displayMode = this.atwDisplayMode;
                     const zonesCount = this.atwZonesCount;
@@ -1097,11 +1094,6 @@ class MelCloudDevice extends EventEmitter {
                     this.ervNumberOfFanSpeeds = numberOfFanSpeeds;
                     this.ervTemperatureIncrement = temperatureIncrement;
                 }).on('deviceState', async (device, deviceState, presets) => {
-                    //accout info
-                    this.useFahrenheit = this.accountInfo.UseFahrenheit ? 1 : 0;
-                    this.ervTargetTempSetPropsMinValue = [10, 50][this.useFahrenheit];
-                    this.ervTargetTempSetPropsMaxValue = [31, 88][this.useFahrenheit];
-
                     //device info
                     const displayMode = this.ervDisplayMode;
                     const hasCoolOperationMode = this.ervHasCoolOperationMode;
@@ -1618,8 +1610,8 @@ class MelCloudDevice extends EventEmitter {
                                     });
                                 ataMelCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
                                     .setProps({
-                                        minValue: this.ataTargetTempSetPropsMinValue,
-                                        maxValue: this.ataTargetTempSetPropsMaxValue,
+                                        minValue: this.targetTempSetPropsMinValue,
+                                        maxValue: this.targetTempSetPropsMaxValue,
                                         minStep: this.ataTemperatureIncrement
                                     })
                                     .onGet(async () => {
@@ -1639,8 +1631,8 @@ class MelCloudDevice extends EventEmitter {
                                     });
                                 ataMelCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
                                     .setProps({
-                                        minValue: this.ataTargetCoolTempSetPropsMinValue,
-                                        maxValue: this.ataTargetTempSetPropsMaxValue,
+                                        minValue: this.targetCoolTempSetPropsMinValue,
+                                        maxValue: this.targetTempSetPropsMaxValue,
                                         minStep: this.ataTemperatureIncrement
                                     })
                                     .onGet(async () => {
@@ -1766,8 +1758,8 @@ class MelCloudDevice extends EventEmitter {
                                     });
                                 ataMelCloudServiceT.getCharacteristic(Characteristic.TargetTemperature)
                                     .setProps({
-                                        minValue: this.ataTargetTempSetPropsMinValue,
-                                        maxValue: this.ataTargetTempSetPropsMaxValue,
+                                        minValue: this.targetTempSetPropsMinValue,
+                                        maxValue: this.targetTempSetPropsMaxValue,
                                         minStep: this.ataTemperatureIncrement
                                     })
                                     .onGet(async () => {
@@ -2936,8 +2928,8 @@ class MelCloudDevice extends EventEmitter {
                                 if (ervHasHeatOperationMode) {
                                     ervMelCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
                                         .setProps({
-                                            minValue: this.ervTargetTempSetPropsMinValue,
-                                            maxValue: this.ervTargetTempSetPropsMaxValue,
+                                            minValue: this.targetTempSetPropsMinValue,
+                                            maxValue: this.targetTempSetPropsMaxValue,
                                             minStep: this.ervTemperatureIncrement
                                         })
                                         .onGet(async () => {
@@ -2960,8 +2952,8 @@ class MelCloudDevice extends EventEmitter {
                                 if (ervHasCoolOperationMode) {
                                     ervMelCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
                                         .setProps({
-                                            minValue: this.ervTargetTempSetPropsMinValue,
-                                            maxValue: this.ervTargetTempSetPropsMaxValue,
+                                            minValue: this.targetTempSetPropsMinValue,
+                                            maxValue: this.targetTempSetPropsMaxValue,
                                             minStep: this.ervTemperatureIncrement
                                         })
                                         .onGet(async () => {
@@ -3086,8 +3078,8 @@ class MelCloudDevice extends EventEmitter {
                                     });
                                 ervMelCloudServiceT.getCharacteristic(Characteristic.TargetTemperature)
                                     .setProps({
-                                        minValue: this.ervTargetTempSetPropsMinValue,
-                                        maxValue: this.ervTargetTempSetPropsMaxValue,
+                                        minValue: this.targetTempSetPropsMinValue,
+                                        maxValue: this.targetTempSetPropsMaxValue,
                                         minStep: this.ervTemperatureIncrement
                                     })
                                     .onGet(async () => {

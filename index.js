@@ -53,7 +53,7 @@ class MelCloudPlatform {
 				melCloud.on('checkDevicesListComplete', (accountInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText) => {
 
 					//melcloud devices
-					const melCloudDevice = new MelCloudDevice(api, prefDir, account, accountName, melCloud, accountInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText)
+					const melCloudDevice = new MelCloudDevice(api, prefDir, account, accountName, melCloud, accountInfo, contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit)
 					melCloudDevice.on('publishAccessory', (accessory) => {
 
 						//publish devices
