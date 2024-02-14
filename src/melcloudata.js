@@ -28,8 +28,6 @@ class MelCloudAta extends EventEmitter {
         this.operationMode = 0;
         this.vaneHorizontal = 0;
         this.vaneVertical = 0;
-        this.defaultHeatingSetTemperature = 0;
-        this.defaultCoolingSetTemperature = 0;
         this.hideVaneControls = false;
         this.hideDryModeControl = false;
         this.inStandbyMode = false;
@@ -339,8 +337,6 @@ class MelCloudAta extends EventEmitter {
                     && operationMode === this.operationMode
                     && vaneHorizontalDirection === this.vaneHorizontal
                     && vaneVerticalDirection === this.vaneVertical
-                    && defaultHeatingSetTemperature === this.defaultHeatingSetTemperature
-                    && defaultCoolingSetTemperature === this.defaultCoolingSetTemperature
                     && hideVaneControls === this.hideVaneControls
                     && hideDryModeControl === this.hideDryModeControl
                     && inStandbyMode === this.inStandbyMode
