@@ -486,21 +486,15 @@ class MelCloudDevice extends EventEmitter {
                     const hotWaterZoneName = 'Hot Water';
                     const hasHotWaterTank = device.HasHotWaterTank;
                     const hasZone2 = device.HasZone2;
+                    const heatCoolModes = device.CanHeat && device.CanCool ? 0 : device.CanHeat ? 1 : device.CanCool ? 2 : 3;
+                    const temperatureIncrement = device.TemperatureIncrement;
 
-                    //zones count
+                    //zones
                     const hotWater = hasHotWaterTank ? 1 : 0;
                     const zone2 = hasZone2 ? 1 : 0;
                     const zonesCount = 2 + hotWater + zone2;
-
-                    if (zonesCount === 0) {
-                        this.emit('message', `Zones or device not found.`);
-                        return;
-                    };
-
-                    const heatCoolModes = device.CanHeat && device.CanCool ? 0 : device.CanHeat ? 1 : device.CanCool ? 2 : 3;
-                    const caseHotWater = device.HasHotWaterTank ? 2 : -1;
-                    const caseZone2 = device.HasZone2 ? device.HasHotWaterTank ? 3 : 2 : -1;
-                    const temperatureIncrement = device.TemperatureIncrement;
+                    const caseHotWater = hasHotWaterTank ? 2 : -1;
+                    const caseZone2 = hasZone2 ? hasHotWaterTank ? 3 : 2 : -1;
 
                     this.atwZonesCount = zonesCount;
                     this.atwHeatPumpName = heatPumpZoneName;
@@ -956,7 +950,7 @@ class MelCloudDevice extends EventEmitter {
                     const roomCO2Detected = hasCO2Sensor && roomCO2Level > 1000 ? true : false;
                     const hasPM25Sensor = device.HasPM25Sensor;
                     const pM25SensorStatus = hasPM25Sensor ? device.PM25SensorStatus : 0;
-                    const pM25Level = hasPM25Sensor ? pM25Level : 0;
+                    const pM25Level = hasPM25Sensor ? device.PM25Level : 0;
                     const pM25AirQuality = hasPM25Sensor ? pM25Level <= 13 ? 1 : pM25Level <= 35 ? 2 : pM25Level <= 55 ? 3 : pM25Level <= 75 ? 4 : pM25Level <= 110 ? 5 : 0 : 0;
                     const hasAutoVentilationMode = device.HasAutoVentilationMode;
                     const hasBypassVentilationMode = device.HasBypassVentilationMode;
