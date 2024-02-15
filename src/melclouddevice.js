@@ -930,7 +930,7 @@ class MelCloudDevice extends EventEmitter {
 
                     //accessory info 					
                     this.manufacturer = manufacturer;
-                    this.model = modelIndoor ?? modelOutdoor ?? `${deviceTypeText} ${deviceData.DeviceII}`;
+                    this.model = modelIndoor ?? modelOutdoor ?? `${deviceTypeText} ${deviceData.DeviceID}`;
                     this.serialNumber = serialNumber;
                     this.firmwareRevision = firmwareAppVersion;
 
