@@ -67,14 +67,14 @@ class MelCloudPlatform {
 						});
 
 						this.restFul.on('connected', (message) => {
-							this.emit('message', `${message}`);
+							log(deviceTypeText, deviceName, message);
 							this.restFulConnected = true;
 						})
-							.on('error', (error) => {
-								this.emit('error', error);
-							})
 							.on('debug', (debug) => {
-								this.emit('debug', debug);
+								log(`${deviceTypeText}, ${deviceName}, debug: ${debug}`);
+							})
+							.on('error', (error) => {
+								log.error(deviceTypeText, deviceName, error);
 							});
 					}
 
@@ -101,14 +101,14 @@ class MelCloudPlatform {
 						});
 
 						this.mqtt.on('connected', (message) => {
-							this.emit('message', message);
+							log(deviceTypeText, deviceName, message);
 							this.mqttConnected = true;
 						})
 							.on('debug', (debug) => {
-								this.emit('debug', debug);
+								log(`${deviceTypeText}, ${deviceName}, debug: ${debug}`);
 							})
 							.on('error', (error) => {
-								this.emit('error', error);
+								log.error(deviceTypeText, deviceName, error);
 							});
 					}
 
