@@ -43,11 +43,8 @@ class MelCloudDevice extends EventEmitter {
         this.melCloud = melCloud; //function
         this.startPrepareAccessory = true;
 
-        //account info
-        this.useFahrenheit = useFahrenheit ? 1 : 0;
-        this.ataTargetCoolTempSetPropsMinValue = [16, 61][this.useFahrenheit];
-        this.targetTempSetPropsMinValue = [10, 50][this.useFahrenheit];
-        this.targetTempSetPropsMaxValue = [31, 88][this.useFahrenheit];
+        //temp unit
+        this.useFahrenheit = useFahrenheit;
 
         //melcloud device
         switch (deviceType) {
@@ -84,7 +81,6 @@ class MelCloudDevice extends EventEmitter {
                     const airDirectionFunction = device.AirDirectionFunction;
                     const swingFunction = device.SwingFunction;
                     const numberOfFanSpeeds = device.NumberOfFanSpeeds;
-                    const temperatureIncrement = device.TemperatureIncrement;
                     const modelSupportsFanSpeed = device.ModelSupportsFanSpeed;
                     const modelSupportsAuto = !this.ataDisableAutoMode && device.ModelSupportsAuto;
                     const modelSupportsHeat = !this.ataDisableHeatMode && device.ModelSupportsHeat;
@@ -94,7 +90,6 @@ class MelCloudDevice extends EventEmitter {
                     this.ataAirDirectionFunction = airDirectionFunction;
                     this.ataSwingFunction = swingFunction;
                     this.ataNumberOfFanSpeeds = numberOfFanSpeeds;
-                    this.ataTemperatureIncrement = temperatureIncrement;
                     this.ataModelSupportsFanSpeed = modelSupportsFanSpeed;
                     this.ataModelSupportsAuto = modelSupportsAuto;
                     this.ataModelSupportsHeat = modelSupportsHeat;
@@ -117,8 +112,9 @@ class MelCloudDevice extends EventEmitter {
                     const offline = deviceState.Offline ?? false;
 
                     //presets
-                    this.ataPresets = deviceData.Presets;
-                    this.ataPresetsCount = this.ataPresetsEnabled ? deviceData.Presets.length : 0;
+                    const presets = deviceData.Presets
+                    this.ataPresets = presets;
+                    this.ataPresetsCount = this.ataPresetsEnabled ? presets.length : 0;
 
                     //operating mode
                     let autoHeatDryFanMode = 0;
@@ -218,189 +214,152 @@ class MelCloudDevice extends EventEmitter {
 
                     //update buttons state
                     if (this.ataButtonsCount > 0) {
-                        this.ataButtonsStates = [];
                         this.ataButtonsConfigured = [];
 
                         for (const button of this.ataButtons) {
-                            const buttonMode = button.mode ?? 0;
-                            const buttonDisplayType = button.displayType ?? -1;
+                            const buttonDisplayType = button.displayType ?? 0;
 
-                            if (buttonDisplayType >= 0) {
-                                let buttonState = false;
+                            if (buttonDisplayType > 0) {
+                                const buttonMode = button.mode ?? 100;
                                 switch (buttonMode) {
                                     case 0: //POWER ON,OFF
-                                        buttonState = (power === true);
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = (power === true);
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 1: //OPERATING MODE HEAT
-                                        buttonState = power ? (operationMode === 1) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (operationMode === 1) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 2: //OPERATING MODE DRY
-                                        buttonState = power ? (operationMode === 2) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (operationMode === 2) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break
                                     case 3: //OPERATING MODE COOL
-                                        buttonState = power ? (operationMode === 3) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (operationMode === 3) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 4: //OPERATING MODE FAN
-                                        buttonState = power ? (operationMode === 7) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (operationMode === 7) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 5: //OPERATING MODE AUTO
-                                        buttonState = power ? (operationMode === 8) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (operationMode === 8) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 6: //OPERATING MODE PURIFY
-                                        buttonState = power ? (operationMode === 9) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (operationMode === 9) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 7: //OPERATING MODE DRY CONTROL HIDE
-                                        buttonState = power ? (hideDryModeControl === true) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (hideDryModeControl === true) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 10: //VANE H SWING MODE AUTO
-                                        buttonState = power ? (vaneHorizontal === 0) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (vaneHorizontal === 0) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 11: //VANE H SWING MODE 1
-                                        buttonState = power ? (vaneHorizontal === 1) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (vaneHorizontal === 1) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 12: //VANE H SWING MODE 2
-                                        buttonState = power ? (vaneHorizontal === 2) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (vaneHorizontal === 2) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 13: //VANE H SWING MODE 3
-                                        buttonState = power ? (vaneHorizontal === 3) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (vaneHorizontal === 3) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 14: //VANE H SWING MODE 4
-                                        buttonState = power ? (vaneHorizontal === 4) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (vaneHorizontal === 4) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 15: //VANE H SWING MODE 5
-                                        buttonState = power ? (vaneHorizontal === 5) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (vaneHorizontal === 5) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 16: //VANE H SWING MODE SPLIT
-                                        buttonState = power ? (vaneHorizontal === 8) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (vaneHorizontal === 8) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 17: //VANE H SWING MODE SWING
-                                        buttonState = power ? (vaneHorizontal === 12) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (vaneHorizontal === 12) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 20: //VANE V SWING MODE AUTO
-                                        buttonState = power ? (vaneVertical === 0) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (vaneVertical === 0) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 21: //VANE V SWING MODE 1
-                                        buttonState = power ? (vaneVertical === 1) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (vaneVertical === 1) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 22: //VANE V SWING MODE 2
-                                        buttonState = power ? (vaneVertical === 2) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (vaneVertical === 2) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 23: //VANE V SWING MODE 3
-                                        buttonState = power ? (vaneVertical === 3) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (vaneVertical === 3) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 24: //VANE V SWING MODE 4
-                                        buttonState = power ? (vaneVertical === 4) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (vaneVertical === 4) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 25: //VANE V SWING MODE 5
-                                        buttonState = power ? (vaneVertical === 5) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (vaneVertical === 5) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 26: //VANE V SWING MODE SWING
-                                        buttonState = power ? (vaneVertical === 7) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (vaneVertical === 7) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 27: //VANE H/V CONTROLS HIDE
-                                        buttonState = power ? (hideVaneControls === true) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (hideVaneControls === true) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 30: //FAN SPEED MODE AUTO
-                                        buttonState = power ? (setFanSpeed === 0) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (setFanSpeed === 0) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 31: //FAN SPEED MODE 1
-                                        buttonState = power ? (setFanSpeed === 1) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (setFanSpeed === 1) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 32: //FAN SPEED MODE 2
-                                        buttonState = power ? (setFanSpeed === 2) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (setFanSpeed === 2) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 33: //FAN SPEED MODE 3
-                                        buttonState = power ? (setFanSpeed === 3) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (setFanSpeed === 3) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 34: //FAN SPEED MODE 4
-                                        buttonState = power ? (setFanSpeed === 4) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (setFanSpeed === 4) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 35: //FAN SPEED  MODE 5
-                                        buttonState = power ? (setFanSpeed === 5) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (setFanSpeed === 5) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 36: //FAN SPEED  MODE 6
-                                        buttonState = power ? (setFanSpeed === 6) : false;
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (setFanSpeed === 6) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 37: //PHYSICAL LOCK CONTROLS ALL
-                                        buttonState = (lockPhysicalControls === 1);
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = (lockPhysicalControls === 1);
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 38: //PHYSICAL LOCK CONTROLS POWER
-                                        buttonState = (prohibitPower === true);
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = (prohibitPower === true);
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 39: //PHYSICAL LOCK CONTROLS MODE
-                                        buttonState = (prohibitOperationMode === true);
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = (prohibitOperationMode === true);
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 40: //PHYSICAL LOCK CONTROLS TEMP
-                                        buttonState = (prohibitSetTemperature === true);
-                                        this.ataButtonsStates.push(buttonState);
+                                        button.buttonState = (prohibitSetTemperature === true);
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     default: //Unknown button
@@ -412,9 +371,10 @@ class MelCloudDevice extends EventEmitter {
 
                         this.ataButtonsConfiguredCount = this.ataButtonsConfigured.length;
                         for (let i = 0; i < this.ataButtonsConfiguredCount; i++) {
-                            const buttonState = this.ataButtonsStates[i];
-                            const buttonDisplayType = this.ataButtonsConfigured[i].displayType;
-                            const characteristicType = [Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
+                            const button = this.ataButtonsConfigured[i];
+                            const buttonState = button.buttonState;
+                            const buttonDisplayType = button.displayType;
+                            const characteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
                             if (this.ataButtonsServices) {
                                 this.ataButtonsServices[i]
                                     .updateCharacteristic(characteristicType, buttonState)
@@ -470,7 +430,7 @@ class MelCloudDevice extends EventEmitter {
                             this.emit('publishAccessory', accessory);
                             this.startPrepareAccessory = false;
                         } catch (error) {
-                            this.emit('error', `prepare accessory error: ${error}`);
+                            this.emit('error', `Prepare accessory error: ${error}`);
                         };
                     };
                 })
@@ -580,8 +540,9 @@ class MelCloudDevice extends EventEmitter {
                     const offline = deviceState.Offline ?? false;
 
                     //presets
-                    this.atwPresets = deviceData.Presets;
-                    this.atwPresetsCount = this.atwPresetsEnabled ? deviceData.Presets.length : 0;
+                    const presets = deviceData.Presets
+                    this.atwPresets = presets;
+                    this.atwPresetsCount = this.atwPresetsEnabled ? presets.length : 0;
 
                     //zones array
                     this.currentOperationModes = [];
@@ -771,129 +732,104 @@ class MelCloudDevice extends EventEmitter {
 
                     //update buttons state
                     if (this.atwButtonsCount > 0) {
-                        this.atwButtonsStates = [];
                         this.atwButtonsConfigured = [];
 
                         for (const button of this.atwButtons) {
-                            const buttonMode = button.mode ?? 0;
-                            const buttonDisplayType = button.displayType ?? -1;
+                            const buttonDisplayType = button.displayType ?? 0;
 
-                            if (buttonDisplayType >= 0) {
-                                let buttonState = false;
+                            if (buttonDisplayType > 0) {
+                                const buttonMode = button.mode ?? 100;
                                 switch (buttonMode) {
                                     case 0: //POWER ON,OFF
-                                        buttonState = (power === true);
-                                        this.atwButtonsStates.push(buttonState);
+                                        button.buttonState = (power === true);
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 1: //HEAT PUMP HEAT
-                                        buttonState = power ? (operationMode === 0) : false;
-                                        this.atwButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (operationMode === 0) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 2: //COOL
-                                        buttonState = power ? (operationMode === 1) : false;
-                                        this.atwButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (operationMode === 1) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 53: //HOLIDAY
-                                        buttonState = power ? (holidayMode === true) : false;
-                                        this.atwButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (holidayMode === true) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 10: //ALL ZONES PHYSICAL LOCK CONTROL
-                                        buttonState = power ? (prohibitZone1 === true && prohibitHotWater === true && prohibitZone2 === true) : false;
-                                        this.atwButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (prohibitZone1 === true && prohibitHotWater === true && prohibitZone2 === true) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 20: //HOT WATER AUTO
-                                        buttonState = power ? (forcedHotWaterMode === false) : false;
-                                        this.atwButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (forcedHotWaterMode === false) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 21: //ECO
-                                        buttonState = power ? (ecoHotWater === true) : false;
-                                        this.atwButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (ecoHotWater === true) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 22: //FORCE HEAT
-                                        buttonState = power ? (forcedHotWaterMode === true) : false;
-                                        this.atwButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (forcedHotWaterMode === true) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 30: //PHYSICAL LOCK CONTROL
-                                        buttonState = (prohibitHotWater === true);
-                                        this.atwButtonsStates.push(buttonState);
+                                        button.buttonState = (prohibitHotWater === true);
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 40: //ZONE 1 HEAT THERMOSTAT
-                                        buttonState = power ? (operationModeZone1 === 0) : false;
-                                        this.atwButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (operationModeZone1 === 0) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 41: //HEAT FLOW
-                                        buttonState = power ? (operationModeZone1 === 1) : false;
-                                        this.atwButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (operationModeZone1 === 1) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 42: //HEAT CURVE
-                                        buttonState = power ? (operationModeZone1 === 2) : false;
-                                        this.atwButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (operationModeZone1 === 2) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 43: //COOL THERMOSTAT
-                                        buttonState = power ? (operationModeZone1 === 3) : false;
-                                        this.atwButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (operationModeZone1 === 3) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 44: //COOL FLOW
-                                        buttonState = power ? (operationModeZone1 === 4) : false;
-                                        this.atwButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (operationModeZone1 === 4) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 45: //FLOOR DRYUP
-                                        buttonState = power ? (operationModeZone1 === 5) : false;
-                                        this.atwButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (operationModeZone1 === 5) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 50: //PHYSICAL LOCK CONTROL
-                                        buttonState = (prohibitZone1 === true);
-                                        this.atwButtonsStates.push(buttonState);
+                                        button.buttonState = (prohibitZone1 === true);
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 60: //ZONE 2 HEAT THERMOSTAT
-                                        buttonState = power ? (operationModeZone2 === 0) : false;
-                                        this.atwButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (operationModeZone2 === 0) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 61: //HEAT FLOW
-                                        buttonState = power ? (operationModeZone2 === 1) : false;
-                                        this.atwButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (operationModeZone2 === 1) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 62: //HEAT CURVE
-                                        buttonState = power ? (operationModeZone2 === 2) : false;
-                                        this.atwButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (operationModeZone2 === 2) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 63: //COOL THERMOSTAT
-                                        buttonState = power ? (operationModeZone2 === 3) : false;
-                                        this.atwButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (operationModeZone2 === 3) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 64: //COOL FLOW
-                                        buttonState = power ? (operationModeZone2 === 4) : false;
-                                        this.atwButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (operationModeZone2 === 4) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 65: //FLOOR DRYUP
-                                        buttonState = power ? (operationModeZone2 === 5) : false;
-                                        this.atwButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (operationModeZone2 === 5) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 70: //PHYSICAL LOCK CONTROL
-                                        buttonState = (prohibitZone2 === true);
-                                        this.atwButtonsStates.push(buttonState);
+                                        button.buttonState = (prohibitZone2 === true);
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     default: //Unknown button
@@ -905,9 +841,10 @@ class MelCloudDevice extends EventEmitter {
 
                         this.atwButtonsConfiguredCount = this.atwButtonsConfigured.length;
                         for (let i = 0; i < this.atwButtonsConfiguredCount; i++) {
-                            const buttonState = this.atwButtonsStates[i];
-                            const buttonDisplayType = this.atwButtonsConfigured[i].displayType;
-                            const characteristicType = [Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
+                            const button = this.atwButtonsConfigured[i];
+                            const buttonState = button.buttonState;
+                            const buttonDisplayType = button.displayType;
+                            const characteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
                             if (this.atwButtonsServices) {
                                 this.atwButtonsServices[i]
                                     .updateCharacteristic(characteristicType, buttonState)
@@ -956,7 +893,7 @@ class MelCloudDevice extends EventEmitter {
                             this.emit('publishAccessory', accessory);
                             this.startPrepareAccessory = false;
                         } catch (error) {
-                            this.emit('error', `prepare accessory error: ${error}`);
+                            this.emit('error', `Prepare accessory error: ${error}`);
                         };
                     };
                 })
@@ -1028,7 +965,6 @@ class MelCloudDevice extends EventEmitter {
                     const filterMaintenanceRequired = device.FilterMaintenanceRequired ? 1 : 0;
                     const actualVentilationMode = device.ActualVentilationMode;
                     const numberOfFanSpeeds = device.NumberOfFanSpeeds;
-                    const temperatureIncrement = device.TemperatureIncrement;
 
                     this.ervHasCoolOperationMode = hasCoolOperationMode;
                     this.ervHasHeatOperationMode = hasHeatOperationMode;
@@ -1050,7 +986,6 @@ class MelCloudDevice extends EventEmitter {
                     this.ervFilterMaintenanceRequired = filterMaintenanceRequired;
                     this.ervActualVentilationMode = actualVentilationMode;
                     this.ervNumberOfFanSpeeds = numberOfFanSpeeds;
-                    this.ervTemperatureIncrement = temperatureIncrement;
 
                     //device state
                     const roomTemperature = deviceState.RoomTemperature;
@@ -1068,8 +1003,9 @@ class MelCloudDevice extends EventEmitter {
                     const offline = deviceState.Offline ?? false;
 
                     //presets
-                    this.ervPresets = deviceData.Presets;
-                    this.ervPresetsCount = this.ervPresetsEnabled ? deviceData.Presets.length : 0;
+                    const presets = deviceData.Presets
+                    this.ervPresets = presets;
+                    this.ervPresetsCount = this.ervPresetsEnabled ? presets.length : 0;
 
                     //operating mode
                     let currentOperationMode = 0;
@@ -1188,84 +1124,68 @@ class MelCloudDevice extends EventEmitter {
 
                     //update buttons state
                     if (this.ervButtonsCount > 0) {
-                        this.ervButtonsStates = [];
                         this.ervButtonsConfigured = [];
 
                         for (const button of this.ervButtons) {
-                            const buttonMode = button.mode ?? 0;
-                            const buttonDisplayType = button.displayType ?? -1;
+                            const buttonDisplayType = button.displayType ?? 0;
 
-                            if (buttonDisplayType >= 0) {
-                                let buttonState = false;
+                            if (buttonDisplayType > 0) {
+                                const buttonMode = button.mode ?? 100;
                                 switch (buttonMode) {
                                     case 0: //POWER ON,OFF
-                                        buttonState = (power === true);
-                                        this.ervButtonsStates.push(buttonState);
+                                        button.buttonState = (power === true);
                                         this.ervButtonsConfigured.push(button);
                                         break;
                                     case 1: //OPERATION MODE RECOVERY
-                                        buttonState = power ? (ventilationMode === 0) : false;
-                                        this.ervButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (ventilationMode === 0) : false;
                                         this.ervButtonsConfigured.push(button);
                                         break;
                                     case 2: //OPERATION MODE BYPAS
-                                        buttonState = power ? (ventilationMode === 1) : false;
-                                        this.ervButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (ventilationMode === 1) : false;
                                         this.ervButtonsConfigured.push(button);
                                         break;
                                     case 3: //OPERATION MODE AUTO
-                                        buttonState = power ? (ventilationMode === 2) : false;
-                                        this.ervButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (ventilationMode === 2) : false;
                                         this.ervButtonsConfigured.push(button);
                                         break;
                                     case 4: //NIGHT PURGE MODE
-                                        buttonState = power ? (nightPurgeMode === true) : false;
-                                        this.ervButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (nightPurgeMode === true) : false;
                                         this.ervButtonsConfigured.push(button);
                                         break;
                                     case 10: //FAN SPEED MODE AUTO
-                                        buttonState = power ? (setFanSpeed === 0) : false;
-                                        this.ervButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (setFanSpeed === 0) : false;
                                         this.ervButtonsConfigured.push(button);
                                         break;
                                     case 11: //FAN SPEED MODE 1
-                                        buttonState = power ? (setFanSpeed === 1) : false;
-                                        this.ervButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (setFanSpeed === 1) : false;
                                         this.ervButtonsConfigured.push(button);
                                         break;
                                     case 12: //FAN SPEED MODE 2
-                                        buttonState = power ? (setFanSpeed === 2) : false;
-                                        this.ervButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (setFanSpeed === 2) : false;
                                         this.ervButtonsConfigured.push(button);
                                         break;
                                     case 13: //FAN SPEED MODE 3
-                                        buttonState = power ? (setFanSpeed === 3) : false;
-                                        this.ervButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (setFanSpeed === 3) : false;
                                         this.ervButtonsConfigured.push(button);
                                         break;
                                     case 14: //FAN SPEED MODE 4
-                                        buttonState = power ? (setFanSpeed === 4) : false;
-                                        this.ervButtonsStates.push(buttonState);
+                                        button.buttonState = power ? (setFanSpeed === 4) : false;
                                         this.ervButtonsConfigured.push(button);
                                         break;
                                     case 15: //PHYSICAL LOCK CONTROLS
-                                        buttonState = (lockPhysicalControls === 1);
-                                        this.ervButtonsStates.push(buttonState);
+                                        button.buttonState = (lockPhysicalControls === 1);
                                         this.ervButtonsConfigured.push(button);
                                         break;
                                     case 16: //ROOM TEMP HIDE
-                                        buttonState = (hideRoomTemperature === true);
-                                        this.ervButtonsStates.push(buttonState);
+                                        button.buttonState = (hideRoomTemperature === true);
                                         this.ervButtonsConfigured.push(button);
                                         break;
                                     case 17: //SUPPLY TEMP HIDE
-                                        buttonState = (hideSupplyTemperature === true);
-                                        this.ervButtonsStates.push(buttonState);
+                                        button.buttonState = (hideSupplyTemperature === true);
                                         this.ervButtonsConfigured.push(button);
                                         break;
                                     case 18: //OUTDOOR TEMP HIDE
-                                        buttonState = (hideOutdoorTemperature === true);
-                                        this.ervButtonsStates.push(buttonState);
+                                        button.buttonState = (hideOutdoorTemperature === true);
                                         this.ervButtonsConfigured.push(button);
                                         break;
                                     default: //Unknown button
@@ -1277,9 +1197,10 @@ class MelCloudDevice extends EventEmitter {
 
                         this.ervButtonsConfiguredCount = this.ervButtonsConfigured.length;
                         for (let i = 0; i < this.ervButtonsConfiguredCount; i++) {
-                            const buttonState = this.ervButtonsStates[i];
-                            const buttonDisplayType = this.ervButtonsConfigured[i].displayType;
-                            const characteristicType = [Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
+                            const button = this.ervButtonsConfigured[i];
+                            const buttonState = button.buttonState;
+                            const buttonDisplayType = button.displayType;
+                            const characteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
                             if (this.ervButtonsServices) {
                                 this.ervButtonsServices[i]
                                     .updateCharacteristic(characteristicType, buttonState)
@@ -1332,7 +1253,7 @@ class MelCloudDevice extends EventEmitter {
                             this.emit('publishAccessory', accessory);
                             this.startPrepareAccessory = false;
                         } catch (error) {
-                            this.emit('error', `prepare accessory error: ${error}`);
+                            this.emit('error', `Prepare accessory error: ${error}`);
                         };
                     };
                 })
@@ -1403,7 +1324,7 @@ class MelCloudDevice extends EventEmitter {
                         this.ataMelCloudServices = [];
                         switch (ataDisplayMode) {
                             case 0: //Heater Cooler
-                                const ataMelCloudService = new Service.HeaterCooler(ataServiceName, `HeaterCooler ${deviceId}`);
+                                const ataMelCloudService = accessory.addService(Service.HeaterCooler, ataServiceName, `HeaterCooler ${deviceId}`);
                                 ataMelCloudService.getCharacteristic(Characteristic.Active)
                                     .onGet(async () => {
                                         const state = this.power;
@@ -1540,11 +1461,6 @@ class MelCloudDevice extends EventEmitter {
                                         return value;
                                     });
                                 ataMelCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
-                                    .setProps({
-                                        minValue: this.targetTempSetPropsMinValue,
-                                        maxValue: this.targetTempSetPropsMaxValue,
-                                        minStep: this.ataTemperatureIncrement
-                                    })
                                     .onGet(async () => {
                                         const value = this.setTemperature;
                                         const info = this.disableLogInfo ? false : this.emit('message', `Heating threshold temperature: ${value}${temperatureUnit}`);
@@ -1561,11 +1477,6 @@ class MelCloudDevice extends EventEmitter {
                                         };
                                     });
                                 ataMelCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
-                                    .setProps({
-                                        minValue: this.ataTargetCoolTempSetPropsMinValue,
-                                        maxValue: this.targetTempSetPropsMaxValue,
-                                        minStep: this.ataTemperatureIncrement
-                                    })
                                     .onGet(async () => {
                                         const value = this.setTemperature;
                                         const info = this.disableLogInfo ? false : this.emit('message', `Cooling threshold temperature: ${value}${temperatureUnit}`);
@@ -1618,12 +1529,11 @@ class MelCloudDevice extends EventEmitter {
                                     });
 
                                 this.ataMelCloudServices.push(ataMelCloudService);
-                                accessory.addService(ataMelCloudService);
 
                                 //temperature sensor services
                                 if (ataTemperatureSensor) {
                                     const debug = this.enableDebugMode ? this.emit('debug', `Prepare temperature sensor service`) : false;
-                                    this.ataTemperatureSensorService = new Service.TemperatureSensor(ataServiceName, `Temperature Sensor`);
+                                    this.ataTemperatureSensorService = accessory.addService(Service.TemperatureSensor, ataServiceName, `Temperature Sensor`);
                                     this.ataTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                     this.ataTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, ataServiceName);
                                     this.ataTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
@@ -1635,7 +1545,7 @@ class MelCloudDevice extends EventEmitter {
                                 };
                                 break;
                             case 1: //Thermostat
-                                const ataMelCloudServiceT = new Service.Thermostat(ataServiceName, `Thermostat ${deviceId}`);
+                                const ataMelCloudServiceT = accessory.addService(Service.Thermostat, ataServiceName, `Thermostat ${deviceId}`);
                                 ataMelCloudServiceT.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
                                     .onGet(async () => {
                                         const value = this.currentOperationMode;
@@ -1691,11 +1601,6 @@ class MelCloudDevice extends EventEmitter {
                                         return value;
                                     });
                                 ataMelCloudServiceT.getCharacteristic(Characteristic.TargetTemperature)
-                                    .setProps({
-                                        minValue: this.targetTempSetPropsMinValue,
-                                        maxValue: this.targetTempSetPropsMaxValue,
-                                        minStep: this.ataTemperatureIncrement
-                                    })
                                     .onGet(async () => {
                                         const value = this.setTemperature;
                                         const info = this.disableLogInfo ? false : this.emit('message', `Target temperature: ${value}${temperatureUnit}`);
@@ -1728,7 +1633,6 @@ class MelCloudDevice extends EventEmitter {
                                         };
                                     });
                                 this.ataMelCloudServices.push(ataMelCloudServiceT);
-                                accessory.addService(ataMelCloudServiceT);
                                 break;
                         };
 
@@ -1747,20 +1651,20 @@ class MelCloudDevice extends EventEmitter {
                                 const buttonDisplayType = button.displayType;
 
                                 //get button name
-                                const buttonName = button.name || [`Button ${i}`, `Button ${i}`, `Sensor ${i}`, `Sensor ${i}`, `Sensor ${i}`][buttonDisplayType];
+                                const buttonName = button.name || ['', `Button ${i}`, `Button ${i}`, `Sensor ${i}`, `Sensor ${i}`, `Sensor ${i}`][buttonDisplayType];
 
                                 //get button name prefix
                                 const buttonNamePrefix = button.namePrefix ?? false;
 
                                 const buttonServiceName = buttonNamePrefix ? `${accessoryName} ${buttonName}` : buttonName;
-                                const buttonServiceType = [Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][buttonDisplayType];
-                                const characteristicType = [Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
-                                const buttonService = new buttonServiceType(buttonServiceName, `Button ${deviceId} ${i}`);
+                                const buttonServiceType = ['', Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][buttonDisplayType];
+                                const characteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
+                                const buttonService = accessory.addService(buttonServiceType, buttonServiceName, `Button ${deviceId} ${i}`);
                                 buttonService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 buttonService.setCharacteristic(Characteristic.ConfiguredName, buttonServiceName);
                                 buttonService.getCharacteristic(characteristicType)
                                     .onGet(async () => {
-                                        const state = this.ataButtonsStates[i];
+                                        const state = button[i].buttonState;
                                         return state;
                                     })
                                     .onSet(async (state) => {
@@ -1949,7 +1853,6 @@ class MelCloudDevice extends EventEmitter {
                                     });
 
                                 this.ataButtonsServices.push(buttonService);
-                                accessory.addService(buttonService)
                             };
                         };
 
@@ -1963,7 +1866,7 @@ class MelCloudDevice extends EventEmitter {
                                 const preset = ataPresets[i];
                                 const presetName = preset.NumberDescription;
 
-                                const presetService = new Service.Outlet(`${accessoryName} ${presetName}`, `Preset ${deviceId} ${i}`);
+                                const presetService = accessory.addService(Service.Outlet, `${accessoryName} ${presetName}`, `Preset ${deviceId} ${i}`);
                                 presetService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 presetService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${presetName}`);
                                 presetService.getCharacteristic(Characteristic.On)
@@ -1998,7 +1901,6 @@ class MelCloudDevice extends EventEmitter {
 
                                 ataPreviousPresets.push(deviceState);
                                 this.ataPresetsServices.push(presetService);
-                                accessory.addService(presetService);
                             };
                         };
                         resolve(accessory);
@@ -2536,14 +2438,14 @@ class MelCloudDevice extends EventEmitter {
                                 const buttonDisplayType = button.displayType;
 
                                 //get button name
-                                const buttonName = button.name || [`Button ${i}`, `Button ${i}`, `Sensor ${i}`, `Sensor ${i}`, `Sensor ${i}`][buttonDisplayType];
+                                const buttonName = button.name || ['', `Button ${i}`, `Button ${i}`, `Sensor ${i}`, `Sensor ${i}`, `Sensor ${i}`][buttonDisplayType];
 
                                 //get button name prefix
                                 const buttonNamePrefix = button.namePrefix ?? false;
 
                                 const buttonServiceName = buttonNamePrefix ? `${accessoryName} ${buttonName}` : buttonName;
-                                const buttonServiceType = [Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][buttonDisplayType];
-                                const characteristicType = [Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
+                                const buttonServiceType = ['', Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][buttonDisplayType];
+                                const characteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
                                 const buttonService = new buttonServiceType(buttonServiceName, `Button ${deviceId} ${i}`);
                                 buttonService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 buttonService.setCharacteristic(Characteristic.ConfiguredName, buttonServiceName);
@@ -2551,7 +2453,7 @@ class MelCloudDevice extends EventEmitter {
                                 buttonService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${buttonName}`);
                                 buttonService.getCharacteristic(characteristicType)
                                     .onGet(async () => {
-                                        const state = this.atwButtonsStates[i];
+                                        const state = button[i].buttonState;
                                         return state;
                                     })
                                     .onSet(async (state) => {
@@ -2764,7 +2666,7 @@ class MelCloudDevice extends EventEmitter {
                         this.ervMelCloudServices = [];
                         switch (ervDisplayMode) {
                             case 0: //Heater Cooler
-                                const ervMelCloudService = new Service.HeaterCooler(ervServiceName, `HeaterCooler ${deviceId}`);
+                                const ervMelCloudService = accessory.addService(Service.HeaterCooler, ervServiceName, `HeaterCooler ${deviceId}`);
                                 ervMelCloudService.getCharacteristic(Characteristic.Active)
                                     .onGet(async () => {
                                         const state = this.power;
@@ -2873,11 +2775,6 @@ class MelCloudDevice extends EventEmitter {
                                 //device can heat
                                 if (ervHasHeatOperationMode) {
                                     ervMelCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
-                                        .setProps({
-                                            minValue: this.targetTempSetPropsMinValue,
-                                            maxValue: this.targetTempSetPropsMaxValue,
-                                            minStep: this.ervTemperatureIncrement
-                                        })
                                         .onGet(async () => {
                                             const value = this.setTemperature;
                                             const info = this.disableLogInfo ? false : this.emit('message', `Heating threshold temperature: ${value}${temperatureUnit}`);
@@ -2897,11 +2794,6 @@ class MelCloudDevice extends EventEmitter {
                                 //device can cool
                                 if (ervHasCoolOperationMode) {
                                     ervMelCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
-                                        .setProps({
-                                            minValue: this.targetTempSetPropsMinValue,
-                                            maxValue: this.targetTempSetPropsMaxValue,
-                                            minStep: this.ervTemperatureIncrement
-                                        })
                                         .onGet(async () => {
                                             const value = this.setTemperature;
                                             const info = this.disableLogInfo ? false : this.emit('message', `Cooling threshold temperature: ${value}${temperatureUnit}`);
@@ -2952,12 +2844,11 @@ class MelCloudDevice extends EventEmitter {
                                         };
                                     });
                                 this.ervMelCloudServices.push(ervMelCloudService);
-                                accessory.addService(ervMelCloudService);
 
                                 //temperature sensor services
                                 if (ervTemperatureSensor) {
                                     const debug = this.enableDebugMode ? this.emit('debug', `Prepare temperature sensor service`) : false;
-                                    this.ervTemperatureSensorService = new Service.TemperatureSensor(ervServiceName, `Temperature Sensor`);
+                                    this.ervTemperatureSensorService = accessory.addService(Service.TemperatureSensor, ervServiceName, `Temperature Sensor`);
                                     this.ervTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                     this.ervTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, ervServiceName);
                                     this.ervTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
@@ -2965,11 +2856,10 @@ class MelCloudDevice extends EventEmitter {
                                             const state = this.roomTemperature;
                                             return state;
                                         })
-                                    accessory.addService(this.ervTemperatureSensorService);
                                 };
                                 break;
                             case 1: //Thermostat
-                                const ervMelCloudServiceT = new Service.Thermostat(ervServiceName, `Thermostat ${deviceId}`);
+                                const ervMelCloudServiceT = accessory.addService(Service.Thermostat, ervServiceName, `Thermostat ${deviceId}`);
                                 ervMelCloudServiceT.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
                                     .onGet(async () => {
                                         const value = this.currentOperationMode;
@@ -3025,11 +2915,6 @@ class MelCloudDevice extends EventEmitter {
                                         return value;
                                     });
                                 ervMelCloudServiceT.getCharacteristic(Characteristic.TargetTemperature)
-                                    .setProps({
-                                        minValue: this.targetTempSetPropsMinValue,
-                                        maxValue: this.targetTempSetPropsMaxValue,
-                                        minStep: this.ervTemperatureIncrement
-                                    })
                                     .onGet(async () => {
                                         const value = this.setTemperature;
                                         const info = this.disableLogInfo ? false : this.emit('message', `Target temperature: ${value}${temperatureUnit}`);
@@ -3062,12 +2947,11 @@ class MelCloudDevice extends EventEmitter {
                                         };
                                     });
                                 this.ervMelCloudServices.push(ervMelCloudServiceT);
-                                accessory.addService(ervMelCloudServiceT);
                                 break;
                         };
 
                         //core maintenance
-                        this.ervCoreMaintenanceService = new Service.FilterMaintenance(`${accessoryName} Core Maintenance`, `CoreMaintenance ${deviceId}`);
+                        this.ervCoreMaintenanceService = accessory.addService(Service.FilterMaintenance, `${accessoryName} Core Maintenance`, `CoreMaintenance ${deviceId}`);
                         this.ervCoreMaintenanceService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                         this.ervCoreMaintenanceService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Core Maintenance`);
                         this.ervCoreMaintenanceService.getCharacteristic(Characteristic.FilterChangeIndication)
@@ -3079,10 +2963,9 @@ class MelCloudDevice extends EventEmitter {
                         this.ervCoreMaintenanceService.getCharacteristic(Characteristic.ResetFilterIndication)
                             .onSet(async (state) => {
                             });
-                        accessory.addService(this.ervCoreMaintenanceService);
 
                         //filter maintenance
-                        this.ervFilterMaintenanceService = new Service.FilterMaintenance(`${accessoryName} Filter Maintenance`, `FilterMaintenance ${deviceId}`);
+                        this.ervFilterMaintenanceService = accessory.addService(Service.FilterMaintenance, `${accessoryName} Filter Maintenance`, `FilterMaintenance ${deviceId}`);
                         this.ervFilterMaintenanceService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                         this.ervFilterMaintenanceService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Filter Maintenance`);
                         this.ervFilterMaintenanceService.getCharacteristic(Characteristic.FilterChangeIndication)
@@ -3094,11 +2977,10 @@ class MelCloudDevice extends EventEmitter {
                         this.ervFilterMaintenanceService.getCharacteristic(Characteristic.ResetFilterIndication)
                             .onSet(async (state) => {
                             });
-                        accessory.addService(this.ervFilterMaintenanceService);
 
                         //room CO2 sensor
                         if (ervHasCO2Sensor) {
-                            this.ervCarbonDioxideSensorService = new Service.CarbonDioxideSensor(`${accessoryName} CO2 Sensor`, `CO2Sensor ${deviceId}`);
+                            this.ervCarbonDioxideSensorService = accessory.addService(Service.CarbonDioxideSensor, `${accessoryName} CO2 Sensor`, `CO2Sensor ${deviceId}`);
                             this.ervCarbonDioxideSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                             this.ervCarbonDioxideSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} CO2 Sensor`);
                             this.ervCarbonDioxideSensorService.getCharacteristic(Characteristic.CarbonDioxideDetected)
@@ -3113,12 +2995,11 @@ class MelCloudDevice extends EventEmitter {
                                     const info = this.disableLogInfo ? false : this.emit('message', `CO2 level: ${value} ppm`);
                                     return value;
                                 });
-                            accessory.addService(this.ervCarbonDioxideSensorService);
                         }
 
                         //room PM2.5 sensor
                         if (ervHasPM25Sensor) {
-                            this.ervAirQualitySensorService = new Service.AirQualitySensor(`${accessoryName} PM2.5 Sensor`, `PM25Sensor ${deviceId}`);
+                            this.ervAirQualitySensorService = accessory.addService(Service.AirQualitySensor, `${accessoryName} PM2.5 Sensor`, `PM25Sensor ${deviceId}`);
                             this.ervAirQualitySensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                             this.ervAirQualitySensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} PM2.5 Sensor`);
                             this.ervAirQualitySensorService.getCharacteristic(Characteristic.AirQuality)
@@ -3133,7 +3014,6 @@ class MelCloudDevice extends EventEmitter {
                                     const info = this.disableLogInfo ? false : this.emit('message', `PM2.5 level: ${value} µg/m`);
                                     return value;
                                 });
-                            accessory.addService(this.ervAirQualitySensorService);
                         }
 
                         //buttons services
@@ -3151,20 +3031,20 @@ class MelCloudDevice extends EventEmitter {
                                 const buttonDisplayType = button.displayType;
 
                                 //get button name
-                                const buttonName = button.name || [`Button ${i}`, `Button ${i}`, `Sensor ${i}`, `Sensor ${i}`, `Sensor ${i}`][buttonDisplayType];
+                                const buttonName = button.name || ['', `Button ${i}`, `Button ${i}`, `Sensor ${i}`, `Sensor ${i}`, `Sensor ${i}`][buttonDisplayType];
 
                                 //get button name prefix
                                 const buttonNamePrefix = button.namePrefix ?? false;
 
                                 const buttonServiceName = buttonNamePrefix ? `${accessoryName} ${buttonName}` : buttonName;
-                                const buttonServiceType = [Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][buttonDisplayType];
-                                const characteristicType = [Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
-                                const buttonService = new buttonServiceType(buttonServiceName, `Button ${deviceId} ${i}`);
+                                const buttonServiceType = ['', Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][buttonDisplayType];
+                                const characteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
+                                const buttonService = accessory.addService(buttonServiceType, buttonServiceName, `Button ${deviceId} ${i}`);
                                 buttonService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 buttonService.setCharacteristic(Characteristic.ConfiguredName, buttonServiceName);
                                 buttonService.getCharacteristic(characteristicType)
                                     .onGet(async () => {
-                                        const state = this.ervButtonsStates[i];
+                                        const state = button[i].buttonState;
                                         return state;
                                     })
                                     .onSet(async (state) => {
@@ -3247,7 +3127,6 @@ class MelCloudDevice extends EventEmitter {
                                     });
 
                                 this.ervButtonsServices.push(buttonService);
-                                accessory.addService(buttonService);
                             };
                         };
 
@@ -3261,7 +3140,7 @@ class MelCloudDevice extends EventEmitter {
                                 const preset = ervPresets[i];
                                 const presetName = preset.NumberDescription;
 
-                                const presetService = new Service.Outlet(`${accessoryName} ${presetName}`, `Preset ${deviceId} ${i}`);
+                                const presetService = accessory.addService(Service.Outlet, `${accessoryName} ${presetName}`, `Preset ${deviceId} ${i}`);
                                 presetService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 presetService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${presetName}`);
                                 presetService.getCharacteristic(Characteristic.On)
@@ -3295,7 +3174,6 @@ class MelCloudDevice extends EventEmitter {
 
                                 ervPreviousPresets.push(deviceState);
                                 this.ervPresetsServices.push(presetService);
-                                accessory.addService(presetService);
                             };
                         };
 

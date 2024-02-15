@@ -198,7 +198,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ervButtons.mode` | Here select button mode. |
 | `ervButtons.displayType` | Here select display type in HomeKit app, possible `None/Disabled`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`.|
 | `ervButtons.namePrefix` | Here enable/disable the accessory name as a prefix for button/sensor name.|
-| `refreshInterval` | Here set the background devices state refresh time in (sec), default 120s. |
+| `refreshInterval` | Here set the background devices state refresh time in (sec), default `120s`. |
 | `enableDebugMode` | This enable deep log in homebridge console. |
 | `disableLogInfo` | This disable display log values and states on every it change. |
 | `disableLogDeviceInfo` | This disable display log device info on plugin start. |
@@ -213,4 +213,4 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `mqttAuth` | This enabled MQTT Broker authorization credentials. |
 | `mqttUser` | Here set the MQTT Broker user. |
 | `mqttPasswd` | Here set the MQTT Broker password. |
-| `Display Type Buttons` | -1 - `None/Disabled`, 0 - `Outlet`, 1 - `Switch`, 2 - `Motion Sensor`, 3 - `Occupancy Sensor`, 4 - `Contact Sensor`.|
+| `Display Type Buttons` | 0 - `None/Disabled`, 1 - `Outlet`, 2 - `Switch`, 3 - `Motion Sensor`, 4 - `Occupancy Sensor`, 5 - `Contact Sensor`.|

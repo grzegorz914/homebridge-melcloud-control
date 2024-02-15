@@ -109,7 +109,7 @@ class MelCloud extends EventEmitter {
                 await new Promise(resolve => setTimeout(resolve, 500));
                 this.emit('checkDevicesList', accountInfo, contextKey);
             } catch (error) {
-                this.emit('error', `login error, ${error}, reconnect in  ${refreshIntervalSec}.`);
+                this.emit('error', `Login error: ${error}, reconnect in  ${refreshIntervalSec}s.`);
                 this.reconnect();
             };
         }).on('checkDevicesList', async () => {
@@ -121,7 +121,7 @@ class MelCloud extends EventEmitter {
                 const debug1 = enableDebugMode ? this.emit('debug', `Buildings: ${JSON.stringify(buildingsList, null, 2)}`) : false;
 
                 if (!buildingsList) {
-                    this.emit('message', `no building found, check again in ${refreshIntervalSec}s.`);
+                    this.emit('message', `No building found, check again in ${refreshIntervalSec}s.`);
                     this.checkDevicesList();
                     return;
                 }
@@ -148,7 +148,7 @@ class MelCloud extends EventEmitter {
 
                 const devicesCount = devices.length;
                 if (devicesCount === 0) {
-                    this.emit('message', `no devices found, check again in ${refreshIntervalSec}.`);
+                    this.emit('message', `No devices found, check again in: ${refreshIntervalSec}s.`);
                     this.checkDevicesList();
                     return;
                 }
@@ -156,9 +156,7 @@ class MelCloud extends EventEmitter {
 
                 //get device info fom devices
                 for (const deviceInfo of devices) {
-                    const buildingId = deviceInfo.BuildingID.toString();
                     const deviceId = deviceInfo.DeviceID.toString();
-                    const deviceType = deviceInfo.Type;
                     const deviceName = deviceInfo.DeviceName;
 
                     //save every device info to the file
@@ -168,15 +166,14 @@ class MelCloud extends EventEmitter {
 
                     //prepare device if not in devices array
                     if (!devicesId.includes(deviceId)) {
-                        const useFahrenheit = this.accountInfo.UseFahrenheit;
-                        this.emit('checkDevicesListComplete', this.accountInfo, this.contextKey, deviceId, deviceType, deviceName, useFahrenheit);
+                        this.emit('checkDevicesListComplete', this.accountInfo, this.contextKey, deviceInfo);
                         devicesId.push(deviceId);
                     }
                 }
 
                 this.checkDevicesList();
             } catch (error) {
-                this.emit('error', `check devices list error, ${error}, check again in ${refreshIntervalSec}s.`);
+                this.emit('error', `Check devices list error: ${error}, check again in: ${refreshIntervalSec}s.`);
                 this.reconnect();
             };
         })
@@ -199,7 +196,7 @@ class MelCloud extends EventEmitter {
                 await fsPromises.writeFile(path, JSON.stringify(data, null, 2));
                 resolve();
             } catch (error) {
-                reject(`save data to path: ${path}, error: ${error}`);
+                reject(`Save data to path: ${path}, error: ${error}`);
             }
         });
     }

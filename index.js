@@ -30,6 +30,8 @@ class MelCloudPlatform {
 				const language = account.language;
 				const enableDebugMode = account.enableDebugMode;
 				const refreshInterval = account.refreshInterval * 1000 || 120000;
+				const restFulEnabled = account.enableRestFul || false;
+				const mqttEnabled = account.enableMqtt || false;
 
 				//check mandatory properties
 				if (!accountName || !user || !passwd || !language) {
@@ -52,14 +54,17 @@ class MelCloudPlatform {
 
 				//melcloud account
 				const melCloud = new MelCloud(prefDir, accountName, user, passwd, language, enableDebugMode, refreshInterval);
-				melCloud.on('checkDevicesListComplete', (accountInfo, contextKey, deviceId, deviceType, deviceName, useFahrenheit) => {
+				melCloud.on('checkDevicesListComplete', (accountInfo, contextKey, deviceInfo) => {
+					const deviceId = deviceInfo.DeviceID.toString();
+					const deviceType = deviceInfo.Type;
+					const deviceName = deviceInfo.DeviceName;
+					const useFahrenheit = accountInfo.UseFahrenheit ? 1 : 0;
 					const deviceTypeText = CONSTANS.DeviceType[deviceType];
 					const deviceInfoFile = `${prefDir}/${accountName}_Device_${deviceId}`;
 
 					//RESTFul server
-					const restFulEnabled = account.enableRestFul || false;
-					this.restFulConnected = false;
 					if (restFulEnabled) {
+						this.restFulConnected = false;
 						const restFulPort = deviceId.slice(-4);
 						this.restFul = new RestFul({
 							port: restFulPort,
@@ -79,12 +84,11 @@ class MelCloudPlatform {
 					}
 
 					//MQTT client
-					const mqttEnabled = account.enableMqtt || false;
-					this.mqttConnected = false;
 					if (mqttEnabled) {
+						this.mqttConnected = false;
 						const mqttHost = account.mqttHost;
 						const mqttPort = account.mqttPort || 1883;
-						const mqttClientId = account.mqttClientId || `mqtt_${Math.random().toString(16).slice(3)}`;
+						const mqttClientId = account.mqttClientId || `melcloud_${Math.random().toString(16).slice(3)}`;
 						const mqttUser = account.mqttUser;
 						const mqttPasswd = account.mqttPass;
 						const mqttPrefix = `${account.mqttPrefix}/${deviceTypeText}/${deviceName} ${deviceId}`;
@@ -112,11 +116,11 @@ class MelCloudPlatform {
 							});
 					}
 
-					//melcloud devices
+					//melcloud device
 					const melCloudDevice = new MelCloudDevice(api, account, accountName, melCloud, accountInfo, contextKey, deviceType, deviceTypeText, useFahrenheit, deviceInfoFile)
 					melCloudDevice.on('publishAccessory', (accessory) => {
 
-						//publish devices
+						//publish device
 						api.publishExternalAccessories(CONSTANS.PluginName, [accessory]);
 						const debug = enableDebugMode ? log(`${accountName}, ${deviceTypeText} ${deviceName}, published as external accessory.`) : false;
 					})

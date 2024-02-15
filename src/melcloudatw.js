@@ -415,7 +415,7 @@ class MelCloudAtw extends EventEmitter {
                 this.emit('deviceState', deviceData, device, deviceState);
                 this.checkDevice();
             } catch (error) {
-                this.emit('error', `check device error: ${error}.`);
+                this.emit('error', `Check device error: ${error}.`);
                 this.checkDevice();
             };
         });
@@ -435,7 +435,7 @@ class MelCloudAtw extends EventEmitter {
                 const data = savedData.length > 0 ? JSON.parse(savedData) : false;
                 resolve(data);
             } catch (error) {
-                reject(`read data from path: ${path}, error: ${error}`);
+                reject(`Read data from path: ${path}, error: ${error}`);
             }
         });
     }

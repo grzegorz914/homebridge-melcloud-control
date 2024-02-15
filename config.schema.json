@@ -511,41 +511,43 @@
                   "displayType": {
                     "title": "Type",
                     "type": "integer",
+                    "minimum": 0,
+                    "maximum": 5,
                     "oneOf": [
                       {
                         "title": "None/Disabled",
-                        "enum": [
-                          -1
-                        ]
-                      },
-                      {
-                        "title": "Outlet",
                         "enum": [
                           0
                         ]
                       },
                       {
-                        "title": "Switch",
+                        "title": "Outlet",
                         "enum": [
                           1
                         ]
                       },
                       {
-                        "title": "Motion Sensor",
+                        "title": "Switch",
                         "enum": [
                           2
                         ]
                       },
                       {
-                        "title": "Occupancy Sensor",
+                        "title": "Motion Sensor",
                         "enum": [
                           3
                         ]
                       },
                       {
-                        "title": "Contact Sensor",
+                        "title": "Occupancy Sensor",
                         "enum": [
                           4
+                        ]
+                      },
+                      {
+                        "title": "Contact Sensor",
+                        "enum": [
+                          5
                         ]
                       }
                     ],
@@ -760,41 +762,43 @@
                   "displayType": {
                     "title": "Type",
                     "type": "integer",
+                    "minimum": 0,
+                    "maximum": 5,
                     "oneOf": [
                       {
                         "title": "None/Disabled",
-                        "enum": [
-                          -1
-                        ]
-                      },
-                      {
-                        "title": "Outlet",
                         "enum": [
                           0
                         ]
                       },
                       {
-                        "title": "Switch",
+                        "title": "Outlet",
                         "enum": [
                           1
                         ]
                       },
                       {
-                        "title": "Motion Sensor",
+                        "title": "Switch",
                         "enum": [
                           2
                         ]
                       },
                       {
-                        "title": "Occupancy Sensor",
+                        "title": "Motion Sensor",
                         "enum": [
                           3
                         ]
                       },
                       {
-                        "title": "Contact Sensor",
+                        "title": "Occupancy Sensor",
                         "enum": [
                           4
+                        ]
+                      },
+                      {
+                        "title": "Contact Sensor",
+                        "enum": [
+                          5
                         ]
                       }
                     ],
@@ -955,41 +959,43 @@
                   "displayType": {
                     "title": "Type",
                     "type": "integer",
+                    "minimum": 0,
+                    "maximum": 5,
                     "oneOf": [
                       {
                         "title": "None/Disabled",
-                        "enum": [
-                          -1
-                        ]
-                      },
-                      {
-                        "title": "Outlet",
                         "enum": [
                           0
                         ]
                       },
                       {
-                        "title": "Switch",
+                        "title": "Outlet",
                         "enum": [
                           1
                         ]
                       },
                       {
-                        "title": "Motion Sensor",
+                        "title": "Switch",
                         "enum": [
                           2
                         ]
                       },
                       {
-                        "title": "Occupancy Sensor",
+                        "title": "Motion Sensor",
                         "enum": [
                           3
                         ]
                       },
                       {
-                        "title": "Contact Sensor",
+                        "title": "Occupancy Sensor",
                         "enum": [
                           4
+                        ]
+                      },
+                      {
+                        "title": "Contact Sensor",
+                        "enum": [
+                          5
                         ]
                       }
                     ],
