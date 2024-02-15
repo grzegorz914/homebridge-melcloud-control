@@ -2645,16 +2645,10 @@ class MelCloudDevice extends EventEmitter {
                         const ervPresetsCount = this.ervPresetsCount;
                         const ervHasCoolOperationMode = this.ervHasCoolOperationMode;
                         const ervHasHeatOperationMode = this.ervHasHeatOperationMode;
-                        const ervHasAutoOperationMode = this.ervHasAutoOperationMode;
-                        const ervHasRoomTemperature = this.ervHasRoomTemperature;
-                        const ervHasSupplyTemperature = this.ervHasSupplyTemperature;
-                        const ervHasOutdoorTemperature = this.ervHasOutdoorTemperature;
                         const ervHasCO2Sensor = this.ervHasCO2Sensor;
                         const ervHasPM25Sensor = this.ervHasPM25Sensor;
                         const ervHasAutoVentilationMode = this.ervHasAutoVentilationMode;
                         const ervHasBypassVentilationMode = this.ervHasBypassVentilationMode;
-                        const ervHasAutomaticFanSpeed = this.ervHasAutomaticFanSpeed;
-                        const ervNumberOfFanSpeeds = this.ervNumberOfFanSpeeds
                         const ervServiceName = `${accessoryName} ${deviceTypeText}`;
 
                         this.ervMelCloudServices = [];

@@ -361,7 +361,7 @@ class MelCloudErv extends EventEmitter {
     send(deviceState) {
         return new Promise(async (resolve, reject) => {
             try {
-                device.HasPendingCommand = true;
+                deviceState.HasPendingCommand = true;
                 const options = {
                     data: deviceState
                 };
