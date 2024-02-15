@@ -499,7 +499,7 @@ class MelCloudDevice extends EventEmitter {
 
                     const heatCoolModes = device.CanHeat && device.CanCool ? 0 : device.CanHeat ? 1 : device.CanCool ? 2 : 3;
                     const caseHotWater = device.HasHotWaterTank ? 2 : -1;
-                    const caseZone2 = device.hasZone2 ? device.HasHotWaterTank ? 3 : 2 : -1;
+                    const caseZone2 = device.HasZone2 ? device.HasHotWaterTank ? 3 : 2 : -1;
                     const temperatureIncrement = device.TemperatureIncrement;
 
                     this.atwZonesCount = zonesCount;
