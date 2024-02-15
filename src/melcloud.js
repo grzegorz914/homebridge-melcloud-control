@@ -160,7 +160,6 @@ class MelCloud extends EventEmitter {
                     const deviceId = deviceInfo.DeviceID.toString();
                     const deviceType = deviceInfo.Type;
                     const deviceName = deviceInfo.DeviceName;
-                    const deviceTypeText = CONSTANS.DeviceType[deviceType];
 
                     //save every device info to the file
                     const deviceInfoFile = `${prefDir}/${accountName}_Device_${deviceId}`;
@@ -170,7 +169,7 @@ class MelCloud extends EventEmitter {
                     //prepare device if not in devices array
                     if (!devicesId.includes(deviceId)) {
                         const useFahrenheit = this.accountInfo.UseFahrenheit;
-                        this.emit('checkDevicesListComplete', this.accountInfo, this.contextKey, buildingId, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit);
+                        this.emit('checkDevicesListComplete', this.accountInfo, this.contextKey, deviceId, deviceType, deviceName, useFahrenheit);
                         devicesId.push(deviceId);
                     }
                 }

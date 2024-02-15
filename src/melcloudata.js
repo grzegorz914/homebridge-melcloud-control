@@ -9,33 +9,15 @@ const CONSTANS = require('./constans.json');
 class MelCloudAta extends EventEmitter {
     constructor(config) {
         super();
-        const prefDir = config.prefDir;
-        const accountName = config.accountName;
         const contextKey = config.contextKey;
-        const buildingId = config.buildingId;
-        const deviceId = config.deviceId;
+        const deviceInfoFile = config.deviceInfoFile;
         const debugLog = config.debugLog;
         const restFulEnabled = config.restFulEnabled;
         const mqttEnabled = config.mqttEnabled;
-        const deviceInfoFile = `${prefDir}/${accountName}_Device_${deviceId}`;
 
         //set default values
+        this.deviceData = {};
         this.device = {};
-        this.presets = [];
-        this.roomTemperature = 0;
-        this.setTemperature = 0;
-        this.setFanSpeed = 0;
-        this.operationMode = 0;
-        this.vaneHorizontal = 0;
-        this.vaneVertical = 0;
-        this.hideVaneControls = false;
-        this.hideDryModeControl = false;
-        this.inStandbyMode = false;
-        this.prohibitSetTemperature = false;
-        this.prohibitOperationMode = false;
-        this.prohibitPower = false;
-        this.power = false;
-        this.offline = false;
         this.displayDeviceInfo = true;
 
         this.axiosInstancePost = axios.create({
@@ -65,9 +47,9 @@ class MelCloudAta extends EventEmitter {
                 }
 
                 //device info
-                //const deviceId = deviceData.DeviceID;
-                //const deviceName = deviceData.DeviceName;
-                //const buildingId = deviceData.BuildingID;
+                const deviceId = deviceData.DeviceID.toString();
+                const deviceName = deviceData.DeviceName;
+                const buildingId = deviceData.BuildingID;
                 const buildingName = deviceData.BuildingName;
                 const floorId = deviceData.FloorID;
                 const floorName = deviceData.FloorName;
@@ -78,7 +60,7 @@ class MelCloudAta extends EventEmitter {
                 const lastServiceDate = deviceData.LastServiceDate;
 
                 //presets
-                const presets = deviceData.Presets;
+                const presets = Array.isArray(deviceData.Presets) ? deviceData.Presets : [];
 
                 const ownerId = deviceData.OwnerID;
                 const ownerName = deviceData.OwnerName;
@@ -104,7 +86,7 @@ class MelCloudAta extends EventEmitter {
                 const serialNumber = deviceData.SerialNumber ?? 'Undefined';
 
                 //device
-                const device = deviceData.Device;
+                const device = deviceData.Device ?? {};
                 const pCycleActual = device.PCycleActual;
                 const errorMessages = device.ErrorMessages;
                 const deviceType = device.DeviceType;
@@ -318,7 +300,7 @@ class MelCloudAta extends EventEmitter {
                 };
 
                 //emit info
-                const emitInfo = this.displayDeviceInfo ? this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) : false;
+                const emitInfo = this.displayDeviceInfo ? this.emit('deviceInfo', deviceData, device, manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) : false;
                 this.displayDeviceInfo = false;
 
                 //restFul
@@ -329,23 +311,7 @@ class MelCloudAta extends EventEmitter {
                 const mqtt = mqttEnabled ? this.emit('mqtt', `Info`, deviceData) : false;
                 const mqtt1 = mqttEnabled ? this.emit('mqtt', `State`, device) : false;
 
-                const stateHasNotChanged =
-                    JSON.stringify(presets) === JSON.stringify(this.presets)
-                    && roomTemperature === this.roomTemperature
-                    && setTemperature === this.setTemperature
-                    && fanSpeed === this.setFanSpeed
-                    && operationMode === this.operationMode
-                    && vaneHorizontalDirection === this.vaneHorizontal
-                    && vaneVerticalDirection === this.vaneVertical
-                    && hideVaneControls === this.hideVaneControls
-                    && hideDryModeControl === this.hideDryModeControl
-                    && inStandbyMode === this.inStandbyMode
-                    && prohibitSetTemperature === this.prohibitSetTemperature
-                    && prohibitOperationMode === this.prohibitOperationMode
-                    && prohibitPower === this.prohibitPower
-                    && power === this.power
-                    && offline === this.offline;
-
+                const stateHasNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);
                 if (stateHasNotChanged) {
                     this.checkDevice();
                     return;
@@ -370,26 +336,10 @@ class MelCloudAta extends EventEmitter {
                     Offline: offline
                 }
 
+                this.deviceData = deviceData;
                 this.device = device;
-                this.presets = presets;
-                this.roomTemperature = roomTemperature;
-                this.setTemperature = setTemperature;
-                this.setFanSpeed = fanSpeed;
-                this.operationMode = operationMode;
-                this.vaneHorizontal = vaneHorizontalDirection;
-                this.vaneVertical = vaneVerticalDirection;
-                this.defaultHeatingSetTemperature = defaultHeatingSetTemperature;
-                this.defaultCoolingSetTemperature = defaultCoolingSetTemperature;
-                this.hideVaneControls = hideVaneControls;
-                this.hideDryModeControl = hideDryModeControl;
-                this.inStandbyMode = inStandbyMode;
-                this.prohibitSetTemperature = prohibitSetTemperature;
-                this.prohibitOperationMode = prohibitOperationMode;
-                this.prohibitPower = prohibitPower;
-                this.power = power;
-                this.offline = offline;
 
-                this.emit('deviceState', device, deviceState, presets);
+                this.emit('deviceState', deviceData, device, deviceState);
                 this.checkDevice();
             } catch (error) {
                 this.emit('error', `check device error: ${error}.`);
@@ -426,7 +376,7 @@ class MelCloudAta extends EventEmitter {
                 };
 
                 await this.axiosInstancePost(CONSTANS.ApiUrls.SetAta, options);
-                this.emit('deviceState', this.device, deviceState, this.presets);
+                this.emit('deviceState', this.deviceData, this.device, deviceState);
                 resolve();
             } catch (error) {
                 reject(error);

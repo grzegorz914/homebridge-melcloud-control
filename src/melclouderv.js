@@ -9,15 +9,16 @@ const CONSTANS = require('./constans.json');
 class MelCloudErv extends EventEmitter {
     constructor(config) {
         super();
-        const prefDir = config.prefDir;
-        const accountName = config.accountName;
         const contextKey = config.contextKey;
-        const buildingId = config.buildingId;
-        const deviceId = config.deviceId;
+        const deviceInfoFile = config.deviceInfoFile;
         const debugLog = config.debugLog;
         const restFulEnabled = config.restFulEnabled;
         const mqttEnabled = config.mqttEnabled;
-        const deviceInfoFile = `${prefDir}/${accountName}_Device_${deviceId}`;
+
+        //set default values
+        this.deviceData = {};
+        this.device = {};
+        this.displayDeviceInfo = true;
 
         this.axiosInstancePost = axios.create({
             method: 'POST',
@@ -34,25 +35,6 @@ class MelCloudErv extends EventEmitter {
             })
         });
 
-        //set default values
-        this.device = {};
-        this.presets = [];
-        this.roomTemperature = 0;
-        this.supplyTemperature = 0;
-        this.outdoorTemperature = 0;
-        this.nightPurgeMode = false;
-        this.setTemperature = 0;
-        this.setFanSpeed = 0;
-        this.operationMode = 0;
-        this.ventilationMode = 0;
-        this.defaultHeatingSetTemperature = 0;
-        this.defaultCoolingSetTemperature = 0;
-        this.hideRoomTemperature = false;
-        this.hideSupplyTemperature = false;
-        this.hideOutdoorTemperature = false;
-        this.power = false;
-        this.offline = false;
-
         this.on('checkDevice', async () => {
             try {
                 //read device info from file
@@ -65,9 +47,9 @@ class MelCloudErv extends EventEmitter {
                 }
 
                 //deviceData
-                //const deviceId = deviceData.DeviceID;
-                //const deviceName = deviceData.DeviceName;
-                //const buildingId = deviceData.BuildingID;
+                const deviceId = deviceData.DeviceID.toString();
+                const deviceName = deviceData.DeviceName;
+                const buildingId = deviceData.BuildingID;
                 const buildingName = deviceData.BuildingName;
                 const floorId = deviceData.FloorID;
                 const floorName = deviceData.FloorName;
@@ -78,7 +60,7 @@ class MelCloudErv extends EventEmitter {
                 const lastServiceDate = deviceData.LastServiceDate;
 
                 //presets
-                const presets = deviceData.Presets;
+                const presets = Array.isArray(deviceData.Presets) ? deviceData.Presets : [];
 
                 const ownerId = deviceData.OwnerID;
                 const ownerName = deviceData.OwnerName;
@@ -104,7 +86,7 @@ class MelCloudErv extends EventEmitter {
                 const serialNumber = deviceData.SerialNumber ?? 'Undefined';
 
                 //device
-                const device = deviceData.Device;
+                const device = deviceData.Device ?? {};
                 const pCycleActual = device.PCycleActual;
                 const errorMessages = device.ErrorMessages;
                 const deviceType = device.DeviceType;
@@ -307,7 +289,8 @@ class MelCloudErv extends EventEmitter {
                 };
 
                 //emit info
-                this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, hasCoolOperationMode, hasHeatOperationMode, hasAutoOperationMode, hasRoomTemperature, hasSupplyTemperature, hasOutdoorTemperature, hasCO2Sensor, hasPM25Sensor, pM25SensorStatus, pM25Level, hasAutoVentilationMode, hasBypassVentilationMode, hasAutomaticFanSpeed, coreMaintenanceRequired, filterMaintenanceRequired, roomCO2Level, actualVentilationMode, numberOfFanSpeeds, temperatureIncrement);
+                const emitInfo = this.displayDeviceInfo ? this.emit('deviceInfo', deviceData, device, manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) : false;
+                this.displayDeviceInfo = false;
 
                 //restFul
                 const restFul = restFulEnabled ? this.emit('restFul', 'info', deviceData) : false;
@@ -320,24 +303,7 @@ class MelCloudErv extends EventEmitter {
                 //check device state
                 await new Promise(resolve => setTimeout(resolve, 500));
 
-                const stateHasNotChanged =
-                    JSON.stringify(presets) === JSON.stringify(this.presets)
-                    && roomTemperature === this.roomTemperature
-                    && supplyTemperature === this.supplyTemperature
-                    && outdoorTemperature === this.outdoorTemperature
-                    && nightPurgeMode === this.nightPurgeMode
-                    && setTemperature === this.setTemperature
-                    && setFanSpeed === this.setFanSpeed
-                    && operationMode === this.operationMode
-                    && ventilationMode === this.ventilationMode
-                    && defaultHeatingSetTemperature === this.defaultHeatingSetTemperature
-                    && defaultCoolingSetTemperature === this.defaultCoolingSetTemperature
-                    && hideRoomTemperature === this.hideRoomTemperature
-                    && hideSupplyTemperature === this.hideSupplyTemperature
-                    && hideOutdoorTemperature === this.hideOutdoorTemperature
-                    && power === this.power
-                    && offline === this.offline;
-
+                const stateHasNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);
                 if (stateHasNotChanged) {
                     this.checkDevice();
                     return;
@@ -361,25 +327,10 @@ class MelCloudErv extends EventEmitter {
                     Offline: offline,
                 }
 
-                this.device = device;
-                this.presets = presets;
-                this.roomTemperature = roomTemperature;
-                this.supplyTemperature = supplyTemperature;
-                this.outdoorTemperature = outdoorTemperature;
-                this.nightPurgeMode = nightPurgeMode;
-                this.setTemperature = setTemperature;
-                this.setFanSpeed = setFanSpeed;
-                this.operationMode = operationMode;
-                this.ventilationMode = ventilationMode;
-                this.defaultHeatingSetTemperature = defaultHeatingSetTemperature;
-                this.defaultCoolingSetTemperature = defaultCoolingSetTemperature;
-                this.hideRoomTemperature = hideRoomTemperature;
-                this.hideSupplyTemperature = hideSupplyTemperature;
-                this.hideOutdoorTemperature = hideOutdoorTemperature;
-                this.power = power;
-                this.offline = offline;
+                this.deviceData = deviceData;
+                this.device = device;;
 
-                this.emit('deviceState', device, deviceState, presets);
+                this.emit('deviceState', deviceData, device, deviceState);
                 this.checkDevice();
             } catch (error) {
                 this.emit('error', `check device error: ${error}.`);
@@ -416,7 +367,7 @@ class MelCloudErv extends EventEmitter {
                 };
 
                 await this.axiosInstancePost(CONSTANS.ApiUrls.SetErv, options);
-                this.emit('deviceStaate', this.device, deviceState, this.presets);
+                this.emit('deviceStaate', this.deviceData, this.device, deviceState);
                 resolve();
             } catch (error) {
                 reject(error);
