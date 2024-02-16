@@ -1527,7 +1527,10 @@ class MelCloudDevice extends EventEmitter {
                                 //temperature sensor services
                                 if (ataTemperatureSensor) {
                                     const debug = this.enableDebugMode ? this.emit('debug', `Prepare temperature sensor service`) : false;
-                                    this.ataTemperatureSensorService = accessory.addService(Service.TemperatureSensor, ataServiceName, `Temperature Sensor`);
+                                    this.ataTemperatureSensorService = accessory.getService(Service.TemperatureSensor);
+                                    if (!this.ataTemperatureSensorService) {
+                                        this.ataTemperatureSensorService = accessory.addService(Service.TemperatureSensor, ataServiceName, `Temperature Sensor ${deviceId}`);
+                                    }
                                     this.ataTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                     this.ataTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, ataServiceName);
                                     this.ataTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
@@ -1535,7 +1538,6 @@ class MelCloudDevice extends EventEmitter {
                                             const state = this.roomTemperature;
                                             return state;
                                         })
-                                    accessory.addService(this.ataTemperatureSensorService);
                                 };
                                 break;
                             case 1: //Thermostat
@@ -1658,7 +1660,7 @@ class MelCloudDevice extends EventEmitter {
                                 buttonService.setCharacteristic(Characteristic.ConfiguredName, buttonServiceName);
                                 buttonService.getCharacteristic(characteristicType)
                                     .onGet(async () => {
-                                        const state = button[i].buttonState;
+                                        const state = button.buttonState;
                                         return state;
                                     })
                                     .onSet(async (state) => {
@@ -2206,7 +2208,7 @@ class MelCloudDevice extends EventEmitter {
                                     //temperature sensor services
                                     if (atwTemperatureSensor) {
                                         const debug = this.enableDebugMode ? this.emit('debug', `Prepare temperature sensor service`) : false;
-                                        const atwTemperatureSensorService = new Service.TemperatureSensor(atwServiceName, `Temperature Sensor ${i}`);
+                                        const atwTemperatureSensorService = new Service.TemperatureSensor(atwServiceName, `Temperature Sensor ${deviceId} ${i}`);
                                         atwTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                         atwTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, atwServiceName);
                                         atwTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
@@ -2447,7 +2449,7 @@ class MelCloudDevice extends EventEmitter {
                                 buttonService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${buttonName}`);
                                 buttonService.getCharacteristic(characteristicType)
                                     .onGet(async () => {
-                                        const state = button[i].buttonState;
+                                        const state = button.buttonState;
                                         return state;
                                     })
                                     .onSet(async (state) => {
@@ -2836,7 +2838,10 @@ class MelCloudDevice extends EventEmitter {
                                 //temperature sensor services
                                 if (ervTemperatureSensor) {
                                     const debug = this.enableDebugMode ? this.emit('debug', `Prepare temperature sensor service`) : false;
-                                    this.ervTemperatureSensorService = accessory.addService(Service.TemperatureSensor, ervServiceName, `Temperature Sensor`);
+                                    this.ervTemperatureSensorService = accessory.getService(Service.TemperatureSensor);
+                                    if (!this.ervTemperatureSensorService) {
+                                        this.ervTemperatureSensorService = accessory.addService(Service.TemperatureSensor, ervServiceName, `Temperature Sensor ${deviceId}`);
+                                    }
                                     this.ervTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                     this.ervTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, ervServiceName);
                                     this.ervTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
@@ -3032,7 +3037,7 @@ class MelCloudDevice extends EventEmitter {
                                 buttonService.setCharacteristic(Characteristic.ConfiguredName, buttonServiceName);
                                 buttonService.getCharacteristic(characteristicType)
                                     .onGet(async () => {
-                                        const state = button[i].buttonState;
+                                        const state = button.buttonState;
                                         return state;
                                     })
                                     .onSet(async (state) => {
