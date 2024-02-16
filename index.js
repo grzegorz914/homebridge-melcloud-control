@@ -28,16 +28,18 @@ class MelCloudPlatform {
 				const user = account.user;
 				const passwd = account.passwd;
 				const language = account.language;
-				const enableDebugMode = account.enableDebugMode;
-				const refreshInterval = account.refreshInterval * 1000 || 120000;
-				const restFulEnabled = account.enableRestFul || false;
-				const mqttEnabled = account.enableMqtt || false;
 
 				//check mandatory properties
 				if (!accountName || !user || !passwd || !language) {
 					log.warn(`Name: ${accountName ? 'OK' : accountName}, user: ${user ? 'OK' : user}, password: ${passwd ? 'OK' : passwd}, language: ${language ? 'OK' : language} in config missing.`);
 					return;
 				}
+
+				//config
+				const enableDebugMode = account.enableDebugMode || false;
+				const refreshInterval = account.refreshInterval * 1000 || 120000;
+				const restFulEnabled = account.enableRestFul || false;
+				const mqttEnabled = account.enableMqtt || false;
 
 				//debug config
 				const debug = enableDebugMode ? log(`Account: ${accountName}, did finish launching.`) : false;
