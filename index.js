@@ -68,7 +68,7 @@ class MelCloudPlatform {
 					if (restFulEnabled) {
 						this.restFulConnected = false;
 						const restFulPort = deviceId.slice(-4);
-						this.restFul = new RestFul({
+						const restFul = new RestFul({
 							port: restFulPort,
 							debug: account.restFulDebug || false
 						});
@@ -96,7 +96,7 @@ class MelCloudPlatform {
 						const mqttPrefix = `${account.mqttPrefix}/${deviceTypeText}/${deviceName} ${deviceId}`;
 						const mqttDebug = account.mqttDebug || false;
 
-						this.mqtt = new Mqtt({
+						const mqtt = new Mqtt({
 							host: mqttHost,
 							port: mqttPort,
 							clientId: mqttClientId,
@@ -139,10 +139,10 @@ class MelCloudPlatform {
 							log.error(deviceTypeText, deviceName, error);
 						})
 						.on('restFul', (path, data) => {
-							const restFul = this.restFulConnected ? this.restFul.update(path, data) : false;
+							const restFul = this.restFulConnected ? restFul.update(path, data) : false;
 						})
 						.on('mqtt', (topic, message) => {
-							const mqtt = this.mqttConnected ? this.mqtt.send(topic, message) : false;
+							const mqtt = this.mqttConnected ? mqtt.send(topic, message) : false;
 						});
 				})
 					.on('message', (message) => {
