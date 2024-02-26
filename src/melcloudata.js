@@ -328,6 +328,8 @@ class MelCloudAta extends EventEmitter {
                     VaneVertical: vaneVerticalDirection,
                     HideVaneControls: hideVaneControls,
                     HideDryModeControl: hideDryModeControl,
+                    DefaultCoolingSetTemperature: defaultCoolingSetTemperature,
+                    DefaultHeatingSetTemperature: defaultHeatingSetTemperature,
                     InStandbyMode: inStandbyMode,
                     ProhibitSetTemperature: prohibitSetTemperature,
                     ProhibitOperationMode: prohibitOperationMode,

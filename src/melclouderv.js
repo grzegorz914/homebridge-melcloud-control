@@ -320,6 +320,8 @@ class MelCloudErv extends EventEmitter {
                     SetFanSpeed: setFanSpeed,
                     OperationMode: operationMode,
                     VentilationMode: ventilationMode,
+                    DefaultCoolingSetTemperature: defaultCoolingSetTemperature,
+                    DefaultHeatingSetTemperature: defaultHeatingSetTemperature,
                     HideRoomTemperature: hideRoomTemperature,
                     HideSupplyTemperature: hideSupplyTemperature,
                     HideOutdoorTemperature: hideOutdoorTemperature,

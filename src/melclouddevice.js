@@ -1455,6 +1455,11 @@ class MelCloudDevice extends EventEmitter {
                                         return value;
                                     });
                                 ataMelCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
+                                    .setProps({
+                                        minValue: [0, 32][this.useFahrenheit],
+                                        maxValue: [31, 88][this.useFahrenheit],
+                                        minStep: [0.5, 1][this.useFahrenheit]
+                                    })
                                     .onGet(async () => {
                                         const value = this.setTemperature;
                                         const info = this.disableLogInfo ? false : this.emit('message', `Heating threshold temperature: ${value}${temperatureUnit}`);
@@ -1471,6 +1476,11 @@ class MelCloudDevice extends EventEmitter {
                                         };
                                     });
                                 ataMelCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
+                                    .setProps({
+                                        minValue: [10, 50][this.useFahrenheit],
+                                        maxValue: [31, 88][this.useFahrenheit],
+                                        minStep: [0.5, 1][this.useFahrenheit]
+                                    })
                                     .onGet(async () => {
                                         const value = this.setTemperature;
                                         const info = this.disableLogInfo ? false : this.emit('message', `Cooling threshold temperature: ${value}${temperatureUnit}`);
@@ -1597,6 +1607,11 @@ class MelCloudDevice extends EventEmitter {
                                         return value;
                                     });
                                 ataMelCloudServiceT.getCharacteristic(Characteristic.TargetTemperature)
+                                    .setProps({
+                                        minValue: [0, 32][this.useFahrenheit],
+                                        maxValue: [31, 88][this.useFahrenheit],
+                                        minStep: [0.5, 1][this.useFahrenheit]
+                                    })
                                     .onGet(async () => {
                                         const value = this.setTemperature;
                                         const info = this.disableLogInfo ? false : this.emit('message', `Target temperature: ${value}${temperatureUnit}`);
@@ -2072,7 +2087,7 @@ class MelCloudDevice extends EventEmitter {
                                     if (this.atwHeatCoolModes === 0 || this.atwHeatCoolModes === 1) {
                                         atwMelCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
                                             .setProps({
-                                                minValue: this.temperaturesSetPropsMinValue[i],
+                                                minValue: [0, 32][this.useFahrenheit],
                                                 maxValue: this.temperaturesSetPropsMaxValue[i],
                                                 minStep: this.atwTemperatureIncrement
                                             })
@@ -2113,7 +2128,7 @@ class MelCloudDevice extends EventEmitter {
                                     if ((this.atwHeatCoolModes === 0 || this.atwHeatCoolModes === 2) && i !== atwCaseHotWater) {
                                         atwMelCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
                                             .setProps({
-                                                minValue: this.temperaturesSetPropsMinValue[i],
+                                                minValue: [10, 50][this.useFahrenheit],
                                                 maxValue: this.temperaturesSetPropsMaxValue[i],
                                                 minStep: this.atwTemperatureIncrement
                                             })
@@ -2361,7 +2376,7 @@ class MelCloudDevice extends EventEmitter {
                                         });
                                     atwMelCloudServiceT.getCharacteristic(Characteristic.TargetTemperature)
                                         .setProps({
-                                            minValue: this.temperaturesSetPropsMinValue[i],
+                                            minValue: [0, 32][this.useFahrenheit],
                                             maxValue: this.temperaturesSetPropsMaxValue[i],
                                             minStep: this.atwTemperatureIncrement
                                         })
@@ -2765,6 +2780,11 @@ class MelCloudDevice extends EventEmitter {
                                 //device can heat
                                 if (ervHasHeatOperationMode) {
                                     ervMelCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
+                                        .setProps({
+                                            minValue: [0, 32][this.useFahrenheit],
+                                            maxValue: [31, 88][this.useFahrenheit],
+                                            minStep: [0.5, 1][this.useFahrenheit]
+                                        })
                                         .onGet(async () => {
                                             const value = this.setTemperature;
                                             const info = this.disableLogInfo ? false : this.emit('message', `Heating threshold temperature: ${value}${temperatureUnit}`);
@@ -2784,6 +2804,11 @@ class MelCloudDevice extends EventEmitter {
                                 //device can cool
                                 if (ervHasCoolOperationMode) {
                                     ervMelCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
+                                        .setProps({
+                                            minValue: [10, 50][this.useFahrenheit],
+                                            maxValue: [31, 88][this.useFahrenheit],
+                                            minStep: [0.5, 1][this.useFahrenheit]
+                                        })
                                         .onGet(async () => {
                                             const value = this.setTemperature;
                                             const info = this.disableLogInfo ? false : this.emit('message', `Cooling threshold temperature: ${value}${temperatureUnit}`);
@@ -2908,6 +2933,11 @@ class MelCloudDevice extends EventEmitter {
                                         return value;
                                     });
                                 ervMelCloudServiceT.getCharacteristic(Characteristic.TargetTemperature)
+                                    .setProps({
+                                        minValue: [0, 32][this.useFahrenheit],
+                                        maxValue: [31, 88][this.useFahrenheit],
+                                        minStep: [0.5, 1][this.useFahrenheit]
+                                    })
                                     .onGet(async () => {
                                         const value = this.setTemperature;
                                         const info = this.disableLogInfo ? false : this.emit('message', `Target temperature: ${value}${temperatureUnit}`);
