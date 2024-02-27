@@ -12,12 +12,9 @@ class MelCloudAta extends EventEmitter {
         const contextKey = config.contextKey;
         const deviceInfoFile = config.deviceInfoFile;
         const debugLog = config.debugLog;
-        const restFulEnabled = config.restFulEnabled;
-        const mqttEnabled = config.mqttEnabled;
 
         //set default values
         this.deviceData = {};
-        this.device = {};
         this.displayDeviceInfo = true;
 
         this.axiosInstancePost = axios.create({
@@ -300,16 +297,19 @@ class MelCloudAta extends EventEmitter {
                 };
 
                 //emit info
-                const emitInfo = this.displayDeviceInfo ? this.emit('deviceInfo', deviceData, device, manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) : false;
+                const emitInfo = this.displayDeviceInfo ? this.emit('deviceInfo', deviceData, manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) : false;
                 this.displayDeviceInfo = false;
 
                 //restFul
-                const restFul = restFulEnabled ? this.emit('restFul', 'info', deviceData) : false;
-                const restFul1 = restFulEnabled ? this.emit('restFul', 'state', device) : false;
+                this.emit('restFul', 'info', deviceData);
+                this.emit('restFul', 'state', device);
 
                 //mqtt
-                const mqtt = mqttEnabled ? this.emit('mqtt', `Info`, deviceData) : false;
-                const mqtt1 = mqttEnabled ? this.emit('mqtt', `State`, device) : false;
+                this.emit('mqtt', `Info`, deviceData);
+                this.emit('mqtt', `State`, device);
+
+                //check device state
+                await new Promise(resolve => setTimeout(resolve, 350));
 
                 const stateHasNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);
                 if (stateHasNotChanged) {
@@ -337,11 +337,9 @@ class MelCloudAta extends EventEmitter {
                     Power: power,
                     Offline: offline
                 }
-
                 this.deviceData = deviceData;
-                this.device = device;
 
-                this.emit('deviceState', deviceData, device, deviceState);
+                this.emit('deviceState', deviceData, deviceState);
                 this.checkDevice();
             } catch (error) {
                 this.emit('error', `Check device error: ${error}.`);
@@ -378,7 +376,7 @@ class MelCloudAta extends EventEmitter {
                 };
 
                 await this.axiosInstancePost(CONSTANS.ApiUrls.SetAta, options);
-                this.emit('deviceState', this.deviceData, this.device, deviceState);
+                this.emit('deviceState', this.deviceData, deviceState);
                 resolve();
             } catch (error) {
                 reject(error);

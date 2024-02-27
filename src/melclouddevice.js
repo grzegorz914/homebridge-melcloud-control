@@ -52,12 +52,10 @@ class MelCloudDevice extends EventEmitter {
                 this.melCloudAta = new MelCloudAta({
                     contextKey: contextKey,
                     deviceInfoFile: deviceInfoFile,
-                    debugLog: account.enableDebugMode,
-                    restFulEnabled: account.enableRestFul,
-                    mqttEnabled: account.enableMqtt
+                    debugLog: account.enableDebugMode
                 });
 
-                this.melCloudAta.on('deviceInfo', (deviceData, device, manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) => {
+                this.melCloudAta.on('deviceInfo', (deviceData, manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) => {
                     if (!this.disableLogDeviceInfo) {
                         this.emit('devInfo', `---- ${deviceTypeText}: ${deviceData.DeviceName} ----`);
                         this.emit('devInfo', `Account: ${accountName}`);
@@ -74,17 +72,17 @@ class MelCloudDevice extends EventEmitter {
                     this.model = modelIndoor ?? modelOutdoor ?? `${deviceTypeText} ${deviceData.DeviceID}`;
                     this.serialNumber = serialNumber;
                     this.firmwareRevision = firmwareAppVersion;
-                }).on('deviceState', async (deviceData, device, deviceState) => {
+                }).on('deviceState', async (deviceData, deviceState) => {
                     //device info
                     const displayMode = this.ataDisplayMode;
-                    const hasAutomaticFanSpeed = device.HasAutomaticFanSpeed;
-                    const airDirectionFunction = device.AirDirectionFunction;
-                    const swingFunction = device.SwingFunction;
-                    const numberOfFanSpeeds = device.NumberOfFanSpeeds;
-                    const modelSupportsFanSpeed = device.ModelSupportsFanSpeed;
-                    const modelSupportsAuto = !this.ataDisableAutoMode && device.ModelSupportsAuto;
-                    const modelSupportsHeat = !this.ataDisableHeatMode && device.ModelSupportsHeat;
-                    const modelSupportsDry = device.ModelSupportsDry;
+                    const hasAutomaticFanSpeed = deviceData.Device.HasAutomaticFanSpeed;
+                    const airDirectionFunction = deviceData.Device.AirDirectionFunction;
+                    const swingFunction = deviceData.Device.SwingFunction;
+                    const numberOfFanSpeeds = deviceData.Device.NumberOfFanSpeeds;
+                    const modelSupportsFanSpeed = deviceData.Device.ModelSupportsFanSpeed;
+                    const modelSupportsAuto = !this.ataDisableAutoMode && deviceData.Device.ModelSupportsAuto;
+                    const modelSupportsHeat = !this.ataDisableHeatMode && deviceData.Device.ModelSupportsHeat;
+                    const modelSupportsDry = deviceData.Device.ModelSupportsDry;
 
                     this.ataHasAutomaticFanSpeed = hasAutomaticFanSpeed;
                     this.ataAirDirectionFunction = airDirectionFunction;
@@ -104,7 +102,7 @@ class MelCloudDevice extends EventEmitter {
                     const vaneVertical = deviceState.VaneVertical;
                     const hideVaneControls = deviceState.HideVaneControls;
                     const hideDryModeControl = deviceState.HideDryModeControl;
-                    const inStandbyMode = device.InStandbyMode;
+                    const inStandbyMode = deviceData.Device.InStandbyMode;
                     const prohibitSetTemperature = deviceState.ProhibitSetTemperature;
                     const prohibitOperationMode = deviceState.ProhibitOperationMode;
                     const prohibitPower = deviceState.ProhibitPower;
@@ -454,12 +452,10 @@ class MelCloudDevice extends EventEmitter {
                 this.melCloudAtw = new MelCloudAtw({
                     contextKey: contextKey,
                     deviceInfoFile: deviceInfoFile,
-                    debugLog: account.enableDebugMode,
-                    restFulEnabled: account.enableRestFul,
-                    mqttEnabled: account.enableMqtt
+                    debugLog: account.enableDebugMode
                 });
 
-                this.melCloudAtw.on('deviceInfo', (deviceData, device, manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) => {
+                this.melCloudAtw.on('deviceInfo', (deviceData, manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) => {
                     if (!this.disableLogDeviceInfo) {
                         this.emit('devInfo', `---- ${deviceTypeText}: ${deviceData.DeviceName} ----`);
                         this.emit('devInfo', `Account: ${accountName}`);
@@ -469,8 +465,8 @@ class MelCloudDevice extends EventEmitter {
                         this.emit('devInfo', `Firmware: ${firmwareAppVersion}`);
                         this.emit('devInfo', `Manufacturer: ${manufacturer}`);
                         this.emit('devInfo', '----------------------------------');
-                        this.emit('devInfo', `Hot Water Tank: ${device.HasHotWaterTank ? 'Yes' : 'No'}`);
-                        this.emit('devInfo', `Zone 2: ${device.HasZone2 ? 'Yes' : 'No'}`);
+                        this.emit('devInfo', `Hot Water Tank: ${deviceData.Device.HasHotWaterTank ? 'Yes' : 'No'}`);
+                        this.emit('devInfo', `Zone 2: ${deviceData.Device.HasZone2 ? 'Yes' : 'No'}`);
                         this.emit('devInfo', '----------------------------------');
                     };
 
@@ -479,15 +475,15 @@ class MelCloudDevice extends EventEmitter {
                     this.model = modelIndoor ?? modelOutdoor ?? `${deviceTypeText} ${deviceData.DeviceID}`;
                     this.serialNumber = serialNumber;
                     this.firmwareRevision = firmwareAppVersion;
-                }).on('deviceState', async (deviceData, device, deviceState) => {
+                }).on('deviceState', async (deviceData, deviceState) => {
                     //device info
                     const displayMode = this.atwDisplayMode;
                     const heatPumpZoneName = 'Heat Pump';
                     const hotWaterZoneName = 'Hot Water';
-                    const hasHotWaterTank = device.HasHotWaterTank;
-                    const hasZone2 = device.HasZone2;
-                    const heatCoolModes = device.CanHeat && device.CanCool ? 0 : device.CanHeat ? 1 : device.CanCool ? 2 : 3;
-                    const temperatureIncrement = device.TemperatureIncrement;
+                    const hasHotWaterTank = deviceData.Device.HasHotWaterTank;
+                    const hasZone2 = deviceData.Device.HasZone2;
+                    const heatCoolModes = deviceData.Device.CanHeat && deviceData.Device.CanCool ? 0 : deviceData.Device.CanHeat ? 1 : deviceData.Device.CanCool ? 2 : 3;
+                    const temperatureIncrement = deviceData.Device.TemperatureIncrement;
 
                     //zones
                     const hotWater = hasHotWaterTank ? 1 : 0;
@@ -911,12 +907,10 @@ class MelCloudDevice extends EventEmitter {
                 this.melCloudErv = new MelCloudErv({
                     contextKey: contextKey,
                     deviceInfoFile: deviceInfoFile,
-                    debugLog: account.enableDebugMode,
-                    restFulEnabled: account.enableRestFul,
-                    mqttEnabled: account.enableMqtt
+                    debugLog: account.enableDebugMode
                 });
 
-                this.melCloudErv.on('deviceInfo', (deviceData, device, manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) => {
+                this.melCloudErv.on('deviceInfo', (deviceData, manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) => {
                     if (!this.disableLogDeviceInfo) {
                         this.emit('devInfo', `---- ${deviceTypeText}: ${deviceData.DeviceName} ----`);
                         this.emit('devInfo', `Account: ${accountName}`);
@@ -936,29 +930,29 @@ class MelCloudDevice extends EventEmitter {
 
                     //device info
 
-                }).on('deviceState', async (deviceData, device, deviceState) => {
+                }).on('deviceState', async (deviceData, deviceState) => {
                     //device info
                     const displayMode = this.ervDisplayMode;
-                    const hasCoolOperationMode = device.HasCoolOperationMode;
-                    const hasHeatOperationMode = device.HasHeatOperationMode;
-                    const hasAutoOperationMode = device.HasAutoOperationMode;
-                    const hasRoomTemperature = device.HasRoomTemperature;
-                    const hasSupplyTemperature = device.HasSupplyTemperature;
-                    const hasOutdoorTemperature = device.HasOutdoorTemperature;
-                    const hasCO2Sensor = device.HasCO2Sensor;
-                    const roomCO2Level = device.RoomCO2Level;
+                    const hasCoolOperationMode = deviceData.Device.HasCoolOperationMode;
+                    const hasHeatOperationMode = deviceData.Device.HasHeatOperationMode;
+                    const hasAutoOperationMode = deviceData.Device.HasAutoOperationMode;
+                    const hasRoomTemperature = deviceData.Device.HasRoomTemperature;
+                    const hasSupplyTemperature = deviceData.Device.HasSupplyTemperature;
+                    const hasOutdoorTemperature = deviceData.Device.HasOutdoorTemperature;
+                    const hasCO2Sensor = deviceData.Device.HasCO2Sensor;
+                    const roomCO2Level = deviceData.Device.RoomCO2Level;
                     const roomCO2Detected = hasCO2Sensor && roomCO2Level > 1000 ? true : false;
-                    const hasPM25Sensor = device.HasPM25Sensor;
-                    const pM25SensorStatus = hasPM25Sensor ? device.PM25SensorStatus : 0;
-                    const pM25Level = hasPM25Sensor ? device.PM25Level : 0;
+                    const hasPM25Sensor = deviceData.Device.HasPM25Sensor;
+                    const pM25SensorStatus = hasPM25Sensor ? deviceData.Device.PM25SensorStatus : 0;
+                    const pM25Level = hasPM25Sensor ? deviceData.Device.PM25Level : 0;
                     const pM25AirQuality = hasPM25Sensor ? pM25Level <= 13 ? 1 : pM25Level <= 35 ? 2 : pM25Level <= 55 ? 3 : pM25Level <= 75 ? 4 : pM25Level <= 110 ? 5 : 0 : 0;
-                    const hasAutoVentilationMode = device.HasAutoVentilationMode;
-                    const hasBypassVentilationMode = device.HasBypassVentilationMode;
-                    const hasAutomaticFanSpeed = device.HasAutomaticFanSpeed;
-                    const coreMaintenanceRequired = device.CoreMaintenanceRequired ? 1 : 0;
-                    const filterMaintenanceRequired = device.FilterMaintenanceRequired ? 1 : 0;
-                    const actualVentilationMode = device.ActualVentilationMode;
-                    const numberOfFanSpeeds = device.NumberOfFanSpeeds;
+                    const hasAutoVentilationMode = deviceData.Device.HasAutoVentilationMode;
+                    const hasBypassVentilationMode = deviceData.Device.HasBypassVentilationMode;
+                    const hasAutomaticFanSpeed = deviceData.Device.HasAutomaticFanSpeed;
+                    const coreMaintenanceRequired = deviceData.Device.CoreMaintenanceRequired ? 1 : 0;
+                    const filterMaintenanceRequired = deviceData.Device.FilterMaintenanceRequired ? 1 : 0;
+                    const actualVentilationMode = deviceData.Device.ActualVentilationMode;
+                    const numberOfFanSpeeds = deviceData.Device.NumberOfFanSpeeds;
 
                     this.ervHasCoolOperationMode = hasCoolOperationMode;
                     this.ervHasHeatOperationMode = hasHeatOperationMode;
