@@ -57,7 +57,7 @@ class MelCloudAta extends EventEmitter {
                 const lastServiceDate = deviceData.LastServiceDate;
 
                 //presets
-                const presets = Array.isArray(deviceData.Presets) ? deviceData.Presets : [];
+                const presets = deviceData.Presets ?? [];
 
                 const ownerId = deviceData.OwnerID;
                 const ownerName = deviceData.OwnerName;
@@ -69,8 +69,8 @@ class MelCloudAta extends EventEmitter {
                 const zone2Name = deviceData.Zone2Name;
                 const minTemperature = deviceData.MinTemperature;
                 const maxTemperature = deviceData.MaxTemperature;
-                const hideVaneControls = deviceData.HideVaneControls;
-                const hideDryModeControl = deviceData.HideDryModeControl;
+                const hideVaneControls = deviceData.HideVaneControls ?? false;
+                const hideDryModeControl = deviceData.HideDryModeControl ?? false;
                 const hideRoomTemperature = deviceData.HideRoomTemperature;
                 const hideSupplyTemperature = deviceData.HideSupplyTemperature;
                 const hideOutdoorTemperature = deviceData.HideOutdoorTemperature;
@@ -119,15 +119,15 @@ class MelCloudAta extends EventEmitter {
                 const modelDisableEnergyReport = device.ModelDisableEnergyReport;
                 const modelSupportsStandbyMode = device.ModelSupportsStandbyMode;
                 const modelSupportsEnergyReporting = device.ModelSupportsEnergyReporting;
-                const prohibitSetTemperature = device.ProhibitSetTemperature;
-                const prohibitOperationMode = device.ProhibitOperationMode;
-                const prohibitPower = device.ProhibitPower;
-                const power = device.Power;
+                const prohibitSetTemperature = device.ProhibitSetTemperature ?? false;
+                const prohibitOperationMode = device.ProhibitOperationMode ?? false;
+                const prohibitPower = device.ProhibitPower ?? false;
+                const power = device.Power ?? false;
                 const roomTemperature = device.RoomTemperature;
                 const outdoorTemperature = device.OutdoorTemperature;
                 const setTemperature = device.SetTemperature;
                 const actualFanSpeed = device.ActualFanSpeed;
-                const fanSpeed = device.FanSpeed;
+                const fanSpeed = device.FanSpeed ?? 0;
                 const automaticFanSpeed = device.AutomaticFanSpeed;
                 const vaneVerticalDirection = device.VaneVerticalDirection;
                 const vaneVerticalSwing = device.VaneVerticalSwing;
@@ -135,7 +135,7 @@ class MelCloudAta extends EventEmitter {
                 const vaneHorizontalSwing = device.VaneHorizontalSwing;
                 const operationMode = device.OperationMode;
                 const effectiveFlags = device.EffectiveFlags;
-                const inStandbyMode = device.InStandbyMode;
+                const inStandbyMode = device.InStandbyMode ?? false;
                 const demandPercentage = device.DemandPercentage;
                 const configuredDemandPercentage = device.ConfiguredDemandPercentage;
                 const hasDemandSideControl = device.HasDemandSideControl;
@@ -214,7 +214,7 @@ class MelCloudAta extends EventEmitter {
                 const mqttFlags = device.MqttFlags;
                 const hasErrorMessages = device.HasErrorMessages;
                 const hasZone2 = device.HasZone2;
-                const offline = device.Offline;
+                const offline = device.Offline ?? false;
                 const supportsHourlyEnergyReport = device.SupportsHourlyEnergyReport;
 
                 //units
@@ -302,21 +302,11 @@ class MelCloudAta extends EventEmitter {
 
                 //restFul
                 this.emit('restFul', 'info', deviceData);
-                this.emit('restFul', 'state', device);
 
                 //mqtt
                 this.emit('mqtt', `Info`, deviceData);
-                this.emit('mqtt', `State`, device);
 
-                //check device state
-                await new Promise(resolve => setTimeout(resolve, 350));
-
-                const stateHasNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);
-                if (stateHasNotChanged) {
-                    this.checkDevice();
-                    return;
-                }
-
+                //device state
                 const deviceState = {
                     DeviceId: deviceId,
                     EffectiveFlags: effectiveFlags,
@@ -337,9 +327,23 @@ class MelCloudAta extends EventEmitter {
                     Power: power,
                     Offline: offline
                 }
+
+                const stateHasNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);
+                const someValeueNullOrUndefined = Object.values(deviceState).some(value => value === undefined || value === null);
+                if (someValeueNullOrUndefined || stateHasNotChanged) {
+                    this.checkDevice();
+                    return;
+                }
                 this.deviceData = deviceData;
 
+                //emit state changes
                 this.emit('deviceState', deviceData, deviceState);
+
+                //restFul
+                this.emit('restFul', 'state', deviceState);
+
+                //mqtt
+                this.emit('mqtt', `State`, deviceState);
                 this.checkDevice();
             } catch (error) {
                 this.emit('error', `Check device error: ${error}.`);
@@ -351,7 +355,7 @@ class MelCloudAta extends EventEmitter {
     };
 
     async checkDevice() {
-        await new Promise(resolve => setTimeout(resolve, 30000));
+        await new Promise(resolve => setTimeout(resolve, 15000));
         this.emit('checkDevice');
     };
 

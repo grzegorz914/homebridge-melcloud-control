@@ -3,11 +3,13 @@ const EventEmitter = require('events');
 const MelCloudAta = require('./melcloudata.js');
 const MelCloudAtw = require('./melcloudatw.js');
 const MelCloudErv = require('./melclouderv.js');
+const RestFul = require('./restful.js');
+const Mqtt = require('./mqtt.js');
 const CONSTANS = require('./constans.json');
 let Accessory, Characteristic, Service, Categories, UUID;
 
 class MelCloudDevice extends EventEmitter {
-    constructor(api, account, accountName, melCloud, accountInfo, contextKey, deviceType, deviceTypeText, useFahrenheit, deviceInfoFile) {
+    constructor(api, account, accountName, melCloud, accountInfo, contextKey, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, deviceInfoFile) {
         super();
 
         Accessory = api.platformAccessory;
@@ -42,9 +44,65 @@ class MelCloudDevice extends EventEmitter {
         //variables
         this.melCloud = melCloud; //function
         this.startPrepareAccessory = true;
+        this.restFulConnected = false;
+        this.mqttConnected = false;
 
         //temp unit
         this.useFahrenheit = useFahrenheit;
+
+        //RESTFul server
+        const restFulEnabled = account.enableRestFul || false;
+        if (restFulEnabled) {
+            const restFulPort = deviceId.slice(-4);
+            this.restFul = new RestFul({
+                port: restFulPort,
+                debug: account.restFulDebug || false
+            });
+
+            this.restFul.on('connected', (message) => {
+                this.emit('message', message);
+                this.restFulConnected = true;
+            })
+                .on('debug', (debug) => {
+                    this.emit('debug', debug);
+                })
+                .on('error', (error) => {
+                    this.emit('error', error);
+                });
+        }
+
+        //MQTT client
+        const mqttEnabled = account.enableMqtt || false;
+        if (mqttEnabled) {
+            const mqttHost = account.mqttHost;
+            const mqttPort = account.mqttPort || 1883;
+            const mqttClientId = `${account.mqttClientId}_${deviceId}` || `${deviceTypeText}_${deviceName}_${deviceId}`;
+            const mqttUser = account.mqttUser;
+            const mqttPasswd = account.mqttPass;
+            const mqttPrefix = `${account.mqttPrefix}/${deviceTypeText}/${deviceName}`;
+            const mqttDebug = account.mqttDebug || false;
+
+            this.mqtt = new Mqtt({
+                host: mqttHost,
+                port: mqttPort,
+                clientId: mqttClientId,
+                user: mqttUser,
+                passwd: mqttPasswd,
+                prefix: mqttPrefix,
+                debug: mqttDebug
+            });
+
+            this.mqtt.on('connected', (message) => {
+                this.emit('message', message);
+                this.mqttConnected = true;
+            })
+                .on('debug', (debug) => {
+                    this.emit('debug', debug);
+                })
+                .on('error', (error) => {
+                    this.emit('error', error);
+                });
+        }
 
         //melcloud device
         switch (deviceType) {
@@ -57,7 +115,7 @@ class MelCloudDevice extends EventEmitter {
 
                 this.melCloudAta.on('deviceInfo', (deviceData, manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) => {
                     if (!this.disableLogDeviceInfo) {
-                        this.emit('devInfo', `---- ${deviceTypeText}: ${deviceData.DeviceName} ----`);
+                        this.emit('devInfo', `---- ${deviceTypeText}: ${deviceName} ----`);
                         this.emit('devInfo', `Account: ${accountName}`);
                         const indoor = modelIndoor !== 'Undefined' ? this.emit('devInfo', `Indoor: ${modelIndoor}`) : false;
                         const outdoor = modelOutdoor !== 'Undefined' ? this.emit('devInfo', `Outdoor: ${modelOutdoor}`) : false
@@ -69,20 +127,23 @@ class MelCloudDevice extends EventEmitter {
 
                     //accessory info 					
                     this.manufacturer = manufacturer;
-                    this.model = modelIndoor ?? modelOutdoor ?? `${deviceTypeText} ${deviceData.DeviceID}`;
+                    this.model = modelIndoor ?? modelOutdoor ?? `${deviceTypeText} ${deviceId}`;
                     this.serialNumber = serialNumber;
                     this.firmwareRevision = firmwareAppVersion;
                 }).on('deviceState', async (deviceData, deviceState) => {
                     //device info
                     const displayMode = this.ataDisplayMode;
-                    const hasAutomaticFanSpeed = deviceData.Device.HasAutomaticFanSpeed;
-                    const airDirectionFunction = deviceData.Device.AirDirectionFunction;
-                    const swingFunction = deviceData.Device.SwingFunction;
-                    const numberOfFanSpeeds = deviceData.Device.NumberOfFanSpeeds;
-                    const modelSupportsFanSpeed = deviceData.Device.ModelSupportsFanSpeed;
-                    const modelSupportsAuto = !this.ataDisableAutoMode && deviceData.Device.ModelSupportsAuto;
-                    const modelSupportsHeat = !this.ataDisableHeatMode && deviceData.Device.ModelSupportsHeat;
-                    const modelSupportsDry = deviceData.Device.ModelSupportsDry;
+                    const hasAutomaticFanSpeed = deviceData.Device.HasAutomaticFanSpeed ?? false;
+                    const airDirectionFunction = deviceData.Device.AirDirectionFunction ?? false;
+                    const swingFunction = deviceData.Device.SwingFunction ?? false;
+                    const numberOfFanSpeeds = deviceData.Device.NumberOfFanSpeeds ?? 0;
+                    const modelSupportsFanSpeed = deviceData.Device.ModelSupportsFanSpeed ?? false;
+                    const modelSupportsAuto1 = deviceData.Device.ModelSupportsAuto ?? false;
+                    const modelSupportsAuto = !this.ataDisableAutoMode && modelSupportsAuto1;
+                    const modelSupportsHeat1 = deviceData.Device.ModelSupportsHeat ?? false;
+                    const modelSupportsHeat = !this.ataDisableHeatMode && modelSupportsHeat1;
+                    const modelSupportsDry = deviceData.Device.ModelSupportsDry ?? false;
+                    const temperatureIncrement = deviceData.Device.TemperatureIncrement ?? 1;
 
                     this.ataHasAutomaticFanSpeed = hasAutomaticFanSpeed;
                     this.ataAirDirectionFunction = airDirectionFunction;
@@ -92,6 +153,7 @@ class MelCloudDevice extends EventEmitter {
                     this.ataModelSupportsAuto = modelSupportsAuto;
                     this.ataModelSupportsHeat = modelSupportsHeat;
                     this.ataModelSupportsDry = modelSupportsDry;
+                    this.ataTemperatureIncrement = temperatureIncrement;
 
                     //device state
                     const roomTemperature = deviceState.RoomTemperature;
@@ -106,11 +168,11 @@ class MelCloudDevice extends EventEmitter {
                     const prohibitSetTemperature = deviceState.ProhibitSetTemperature;
                     const prohibitOperationMode = deviceState.ProhibitOperationMode;
                     const prohibitPower = deviceState.ProhibitPower;
-                    const power = deviceState.Power ?? false;
-                    const offline = deviceState.Offline ?? false;
+                    const power = deviceState.Power;
+                    const offline = deviceState.Offline;
 
                     //presets
-                    const presets = deviceData.Presets
+                    const presets = deviceData.Presets ?? [];
                     this.ataPresets = presets;
                     this.ataPresetsCount = this.ataPresetsEnabled ? presets.length : 0;
 
@@ -209,6 +271,19 @@ class MelCloudDevice extends EventEmitter {
                             };
                             break;
                     };
+
+                    this.power = power;
+                    this.offline = offline;
+                    this.currentOperationMode = currentOperationMode;
+                    this.targetOperationMode = targetOperationMode;
+                    this.roomTemperature = roomTemperature;
+                    this.setTemperature = setTemperature;
+                    this.fanSpeed = fanSpeed;
+                    this.setFanSpeed = setFanSpeed;
+                    this.swingMode = swingMode;
+                    this.vaneHorizontal = vaneHorizontal;
+                    this.vaneVertical = vaneVertical;
+                    this.lockPhysicalControls = lockPhysicalControls;
 
                     //update buttons state
                     if (this.ataButtonsCount > 0) {
@@ -403,19 +478,6 @@ class MelCloudDevice extends EventEmitter {
                         };
                     };
 
-                    this.power = power;
-                    this.offline = offline;
-                    this.currentOperationMode = currentOperationMode;
-                    this.targetOperationMode = targetOperationMode;
-                    this.roomTemperature = roomTemperature;
-                    this.setTemperature = setTemperature;
-                    this.fanSpeed = fanSpeed;
-                    this.setFanSpeed = setFanSpeed;
-                    this.swingMode = swingMode;
-                    this.vaneHorizontal = vaneHorizontal;
-                    this.vaneVertical = vaneVertical;
-                    this.lockPhysicalControls = lockPhysicalControls;
-
                     //start prepare accessory
                     if (this.startPrepareAccessory) {
                         try {
@@ -424,7 +486,7 @@ class MelCloudDevice extends EventEmitter {
                             this.operationModeSetPropsValidValues = operationModeSetPropsValidValues;
                             this.fanSpeedSetPropsMaxValue = fanSpeedSetPropsMaxValue;
 
-                            const accessory = await this.prepareAccessory(accountInfo, deviceState, deviceData.DeviceID, deviceType, deviceTypeText, deviceData.DeviceName);
+                            const accessory = await this.prepareAccessory(accountInfo, deviceState, deviceId, deviceType, deviceTypeText, deviceName);
                             this.emit('publishAccessory', accessory);
                             this.startPrepareAccessory = false;
                         } catch (error) {
@@ -442,10 +504,10 @@ class MelCloudDevice extends EventEmitter {
                         this.emit('error', error);
                     })
                     .on('restFul', (path, data) => {
-                        this.emit('restFul', path, data)
+                        const restFul = this.restFulConnected ? this.restFul.update(path, data) : false;
                     })
                     .on('mqtt', (topic, message) => {
-                        this.emit('mqtt', topic, message)
+                        const mqtt = this.mqttConnected ? this.mqtt.send(topic, message) : false;
                     });
                 break;
             case 1: //heat pump
@@ -457,7 +519,7 @@ class MelCloudDevice extends EventEmitter {
 
                 this.melCloudAtw.on('deviceInfo', (deviceData, manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) => {
                     if (!this.disableLogDeviceInfo) {
-                        this.emit('devInfo', `---- ${deviceTypeText}: ${deviceData.DeviceName} ----`);
+                        this.emit('devInfo', `---- ${deviceTypeText}: ${deviceName} ----`);
                         this.emit('devInfo', `Account: ${accountName}`);
                         const indoor = modelIndoor !== 'Undefined' ? this.emit('devInfo', `Indoor: ${modelIndoor}`) : false;
                         const outdoor = modelOutdoor !== 'Undefined' ? this.emit('devInfo', `Outdoor: ${modelOutdoor}`) : false
@@ -472,7 +534,7 @@ class MelCloudDevice extends EventEmitter {
 
                     //accessory info 					
                     this.manufacturer = manufacturer;
-                    this.model = modelIndoor ?? modelOutdoor ?? `${deviceTypeText} ${deviceData.DeviceID}`;
+                    this.model = modelIndoor ?? modelOutdoor ?? `${deviceTypeText} ${deviceId}`;
                     this.serialNumber = serialNumber;
                     this.firmwareRevision = firmwareAppVersion;
                 }).on('deviceState', async (deviceData, deviceState) => {
@@ -480,10 +542,14 @@ class MelCloudDevice extends EventEmitter {
                     const displayMode = this.atwDisplayMode;
                     const heatPumpZoneName = 'Heat Pump';
                     const hotWaterZoneName = 'Hot Water';
-                    const hasHotWaterTank = deviceData.Device.HasHotWaterTank;
-                    const hasZone2 = deviceData.Device.HasZone2;
-                    const heatCoolModes = deviceData.Device.CanHeat && deviceData.Device.CanCool ? 0 : deviceData.Device.CanHeat ? 1 : deviceData.Device.CanCool ? 2 : 3;
-                    const temperatureIncrement = deviceData.Device.TemperatureIncrement;
+                    const heatPumpZone1Name = deviceData.Zone1Name ?? 'Zone 1';
+                    const heatPumpZone2Name = deviceData.Zone2Name ?? 'Zone 2';
+                    const hasHotWaterTank = deviceData.Device.HasHotWaterTank ?? false;
+                    const hasZone2 = deviceData.Device.HasZone2 ?? false;
+                    const canHeat = deviceData.Device.CanHeat ?? false;
+                    const canCool = deviceData.Device.CanCool ?? false;
+                    const heatCoolModes = canHeat && canCool ? 0 : canHeat ? 1 : canCool ? 2 : 3;
+                    const temperatureIncrement = deviceData.Device.TemperatureIncrement ?? 1;
 
                     //zones
                     const hotWater = hasHotWaterTank ? 1 : 0;
@@ -495,12 +561,12 @@ class MelCloudDevice extends EventEmitter {
                     this.atwZonesCount = zonesCount;
                     this.atwHeatPumpName = heatPumpZoneName;
                     this.atwHotWaterName = hotWaterZoneName;
+                    this.atwZone1Name = heatPumpZone1Name
+                    this.atwZone2Name = heatPumpZone2Name;
                     this.atwHeatCoolModes = heatCoolModes;
                     this.atwCaseHotWater = caseHotWater;
                     this.atwCaseZone2 = caseZone2;
                     this.atwTemperatureIncrement = temperatureIncrement;
-                    this.atwZone1Name = deviceData.Zone1Name;
-                    this.atwZone2Name = deviceData.Zone2Name;
 
                     //device state
                     const setTemperatureZone1 = deviceState.SetTemperatureZone1;
@@ -517,20 +583,20 @@ class MelCloudDevice extends EventEmitter {
                     const tankWaterTemperature = deviceState.TankWaterTemperature;
                     const setTankWaterTemperature = deviceState.SetTankWaterTemperature;
                     const forcedHotWaterMode = deviceState.ForcedHotWaterMode;
-                    const unitStatus = deviceState.UnitStatus ?? 0;
+                    const unitStatus = deviceState.UnitStatus;
                     const outdoorTemperature = deviceState.OutdoorTemperature;
                     const ecoHotWater = deviceState.EcoHotWater;
                     const holidayMode = deviceState.HolidayMode;
                     const prohibitZone1 = deviceState.ProhibitZone1;
                     const prohibitZone2 = deviceState.ProhibitZone2;
                     const prohibitHotWater = deviceState.ProhibitHotWater;
-                    const idleZone1 = deviceState.IdleZone1 ?? false;
-                    const idleZone2 = deviceState.IdleZone2 ?? false;
-                    const power = deviceState.Power ?? false;
-                    const offline = deviceState.Offline ?? false;
+                    const idleZone1 = deviceState.IdleZone1;
+                    const idleZone2 = deviceState.IdleZone2;
+                    const power = deviceState.Power;
+                    const offline = deviceState.Offline;
 
                     //presets
-                    const presets = deviceData.Presets
+                    const presets = deviceData.Presets ?? [];
                     this.atwPresets = presets;
                     this.atwPresetsCount = this.atwPresetsEnabled ? presets.length : 0;
 
@@ -619,7 +685,7 @@ class MelCloudDevice extends EventEmitter {
                                 };
 
                                 //update characteristics
-                                if (this.atwMelCloudServices && currentOperationMode != undefined && targetOperationMode != undefined) {
+                                if (this.atwMelCloudServices && currentOperationMode !== undefined && targetOperationMode !== undefined) {
                                     this.atwMelCloudServices[i]
                                         .updateCharacteristic(Characteristic.Active, power)
                                         .updateCharacteristic(Characteristic.CurrentHeaterCoolerState, currentOperationMode)
@@ -693,7 +759,7 @@ class MelCloudDevice extends EventEmitter {
                                 };
 
                                 //update characteristics
-                                if (this.atwMelCloudServices) {
+                                if (this.atwMelCloudServices && currentOperationMode !== undefined && targetOperationMode !== undefined) {
                                     this.atwMelCloudServices[i]
                                         .updateCharacteristic(Characteristic.CurrentHeaterCoolerState, currentOperationMode)
                                         .updateCharacteristic(Characteristic.TargetHeaterCoolerState, targetOperationMode)
@@ -719,6 +785,12 @@ class MelCloudDevice extends EventEmitter {
                             this.temperaturesSetPropsMaxValue.push(temperatureSetPropsMaxValue);
                         };
                     };
+
+                    this.unitStatus = unitStatus;
+                    this.idleZone1 = idleZone1;
+                    this.idleZone2 = idleZone2;
+                    this.power = power;
+                    this.offline = offline;
 
                     //update buttons state
                     if (this.atwButtonsCount > 0) {
@@ -870,16 +942,10 @@ class MelCloudDevice extends EventEmitter {
                         };
                     };
 
-                    this.unitStatus = unitStatus;
-                    this.idleZone1 = idleZone1;
-                    this.idleZone2 = idleZone2;
-                    this.power = power;
-                    this.offline = offline;
-
                     //start prepare accessory
                     if (this.startPrepareAccessory) {
                         try {
-                            const accessory = await this.prepareAccessory(accountInfo, deviceState, deviceData.DeviceID, deviceType, deviceTypeText, deviceData.DeviceName);
+                            const accessory = await this.prepareAccessory(accountInfo, deviceState, deviceId, deviceType, deviceTypeText, deviceName);
                             this.emit('publishAccessory', accessory);
                             this.startPrepareAccessory = false;
                         } catch (error) {
@@ -897,10 +963,10 @@ class MelCloudDevice extends EventEmitter {
                         this.emit('error', error);
                     })
                     .on('restFul', (path, data) => {
-                        this.emit('restFul', path, data)
+                        const restFul = this.restFulConnected ? this.restFul.update(path, data) : false;
                     })
                     .on('mqtt', (topic, message) => {
-                        this.emit('mqtt', topic, message)
+                        const mqtt = this.mqttConnected ? this.mqtt.send(topic, message) : false;
                     });
                 break;
             case 3: //energy recovery ventilation
@@ -912,7 +978,7 @@ class MelCloudDevice extends EventEmitter {
 
                 this.melCloudErv.on('deviceInfo', (deviceData, manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) => {
                     if (!this.disableLogDeviceInfo) {
-                        this.emit('devInfo', `---- ${deviceTypeText}: ${deviceData.DeviceName} ----`);
+                        this.emit('devInfo', `---- ${deviceTypeText}: ${deviceName} ----`);
                         this.emit('devInfo', `Account: ${accountName}`);
                         const indoor = modelIndoor !== 'Undefined' ? this.emit('devInfo', `Indoor: ${modelIndoor}`) : false;
                         const outdoor = modelOutdoor !== 'Undefined' ? this.emit('devInfo', `Outdoor: ${modelOutdoor}`) : false;
@@ -924,7 +990,7 @@ class MelCloudDevice extends EventEmitter {
 
                     //accessory info 					
                     this.manufacturer = manufacturer;
-                    this.model = modelIndoor ?? modelOutdoor ?? `${deviceTypeText} ${deviceData.DeviceID}`;
+                    this.model = modelIndoor ?? modelOutdoor ?? `${deviceTypeText} ${deviceId}`;
                     this.serialNumber = serialNumber;
                     this.firmwareRevision = firmwareAppVersion;
 
@@ -933,26 +999,27 @@ class MelCloudDevice extends EventEmitter {
                 }).on('deviceState', async (deviceData, deviceState) => {
                     //device info
                     const displayMode = this.ervDisplayMode;
-                    const hasCoolOperationMode = deviceData.Device.HasCoolOperationMode;
-                    const hasHeatOperationMode = deviceData.Device.HasHeatOperationMode;
-                    const hasAutoOperationMode = deviceData.Device.HasAutoOperationMode;
-                    const hasRoomTemperature = deviceData.Device.HasRoomTemperature;
-                    const hasSupplyTemperature = deviceData.Device.HasSupplyTemperature;
-                    const hasOutdoorTemperature = deviceData.Device.HasOutdoorTemperature;
-                    const hasCO2Sensor = deviceData.Device.HasCO2Sensor;
-                    const roomCO2Level = deviceData.Device.RoomCO2Level;
+                    const hasCoolOperationMode = deviceData.Device.HasCoolOperationMode ?? false;
+                    const hasHeatOperationMode = deviceData.Device.HasHeatOperationMode ?? false;
+                    const hasAutoOperationMode = deviceData.Device.HasAutoOperationMode ?? false;
+                    const hasRoomTemperature = deviceData.Device.HasRoomTemperature ?? false;
+                    const hasSupplyTemperature = deviceData.Device.HasSupplyTemperature ?? false;
+                    const hasOutdoorTemperature = deviceData.Device.HasOutdoorTemperature ?? false;
+                    const hasCO2Sensor = deviceData.Device.HasCO2Sensor ?? false;
+                    const roomCO2Level = deviceData.Device.RoomCO2Level ?? false;
                     const roomCO2Detected = hasCO2Sensor && roomCO2Level > 1000 ? true : false;
-                    const hasPM25Sensor = deviceData.Device.HasPM25Sensor;
+                    const hasPM25Sensor = deviceData.Device.HasPM25Sensor ?? false;
                     const pM25SensorStatus = hasPM25Sensor ? deviceData.Device.PM25SensorStatus : 0;
                     const pM25Level = hasPM25Sensor ? deviceData.Device.PM25Level : 0;
                     const pM25AirQuality = hasPM25Sensor ? pM25Level <= 13 ? 1 : pM25Level <= 35 ? 2 : pM25Level <= 55 ? 3 : pM25Level <= 75 ? 4 : pM25Level <= 110 ? 5 : 0 : 0;
-                    const hasAutoVentilationMode = deviceData.Device.HasAutoVentilationMode;
-                    const hasBypassVentilationMode = deviceData.Device.HasBypassVentilationMode;
-                    const hasAutomaticFanSpeed = deviceData.Device.HasAutomaticFanSpeed;
+                    const hasAutoVentilationMode = deviceData.Device.HasAutoVentilationMode ?? false;
+                    const hasBypassVentilationMode = deviceData.Device.HasBypassVentilationMode ?? false;
+                    const hasAutomaticFanSpeed = deviceData.Device.HasAutomaticFanSpeed ?? false;
                     const coreMaintenanceRequired = deviceData.Device.CoreMaintenanceRequired ? 1 : 0;
                     const filterMaintenanceRequired = deviceData.Device.FilterMaintenanceRequired ? 1 : 0;
                     const actualVentilationMode = deviceData.Device.ActualVentilationMode;
-                    const numberOfFanSpeeds = deviceData.Device.NumberOfFanSpeeds;
+                    const numberOfFanSpeeds = deviceData.Device.NumberOfFanSpeeds ?? 0;
+                    const temperatureIncrement = deviceData.Device.TemperatureIncrement ?? 1;
 
                     this.ervHasCoolOperationMode = hasCoolOperationMode;
                     this.ervHasHeatOperationMode = hasHeatOperationMode;
@@ -974,6 +1041,7 @@ class MelCloudDevice extends EventEmitter {
                     this.ervFilterMaintenanceRequired = filterMaintenanceRequired;
                     this.ervActualVentilationMode = actualVentilationMode;
                     this.ervNumberOfFanSpeeds = numberOfFanSpeeds;
+                    this.ervTemperatureIncrement = temperatureIncrement;
 
                     //device state
                     const roomTemperature = deviceState.RoomTemperature;
@@ -987,11 +1055,11 @@ class MelCloudDevice extends EventEmitter {
                     const hideRoomTemperature = deviceState.HideRoomTemperature;
                     const hideSupplyTemperature = deviceState.HideSupplyTemperature;
                     const hideOutdoorTemperature = deviceState.HideOutdoorTemperature;
-                    const power = deviceState.Power ?? false;
-                    const offline = deviceState.Offline ?? false;
+                    const power = deviceState.Power;
+                    const offline = deviceState.Offline;
 
                     //presets
-                    const presets = deviceData.Presets
+                    const presets = deviceData.Presets ?? [];
                     this.ervPresets = presets;
                     this.ervPresetsCount = this.ervPresetsEnabled ? presets.length : 0;
 
@@ -1110,6 +1178,18 @@ class MelCloudDevice extends EventEmitter {
                             .updateCharacteristic(Characteristic.PM2_5Density, pM25Level)
                     }
 
+                    this.power = power;
+                    this.offline = offline;
+                    this.currentOperationMode = currentOperationMode;
+                    this.targetOperationMode = targetOperationMode;
+                    this.roomTemperature = roomTemperature;
+                    this.supplyTemperature = supplyTemperature;
+                    this.outdoorTemperature = outdoorTemperature;
+                    this.setTemperature = targetTemperature;
+                    this.fanSpeed = fanSpeed;
+                    this.setFanSpeed = setFanSpeed;
+                    this.lockPhysicalControls = lockPhysicalControls;
+
                     //update buttons state
                     if (this.ervButtonsCount > 0) {
                         this.ervButtonsConfigured = [];
@@ -1217,18 +1297,6 @@ class MelCloudDevice extends EventEmitter {
                         };
                     };
 
-                    this.power = power;
-                    this.offline = offline;
-                    this.currentOperationMode = currentOperationMode;
-                    this.targetOperationMode = targetOperationMode;
-                    this.roomTemperature = roomTemperature;
-                    this.supplyTemperature = supplyTemperature;
-                    this.outdoorTemperature = outdoorTemperature;
-                    this.setTemperature = targetTemperature;
-                    this.fanSpeed = fanSpeed;
-                    this.setFanSpeed = setFanSpeed;
-                    this.lockPhysicalControls = lockPhysicalControls;
-
                     //start prepare accessory
                     if (this.startPrepareAccessory) {
                         try {
@@ -1237,7 +1305,7 @@ class MelCloudDevice extends EventEmitter {
                             this.operationModeSetPropsValidValues = operationModeSetPropsValidValues;
                             this.fanSpeedSetPropsMaxValue = fanSpeedSetPropsMaxValue;
 
-                            const accessory = await this.prepareAccessory(accountInfo, deviceState, deviceData.DeviceID, deviceType, deviceTypeText, deviceData.DeviceName);
+                            const accessory = await this.prepareAccessory(accountInfo, deviceState, deviceId, deviceType, deviceTypeText, deviceName);
                             this.emit('publishAccessory', accessory);
                             this.startPrepareAccessory = false;
                         } catch (error) {
@@ -1255,10 +1323,10 @@ class MelCloudDevice extends EventEmitter {
                         this.emit('error', error);
                     })
                     .on('restFul', (path, data) => {
-                        this.emit('restFul', path, data)
+                        const restFul = this.restFulConnected ? this.restFul.update(path, data) : false;
                     })
                     .on('mqtt', (topic, message) => {
-                        this.emit('mqtt', topic, message)
+                        const mqtt = this.mqttConnected ? this.mqtt.send(topic, message) : false;
                     });
                 break;
             default: //unknown system detected
@@ -1452,7 +1520,7 @@ class MelCloudDevice extends EventEmitter {
                                     .setProps({
                                         minValue: [0, 32][this.useFahrenheit],
                                         maxValue: [31, 88][this.useFahrenheit],
-                                        minStep: [0.5, 1][this.useFahrenheit]
+                                        minStep: this.ataTemperatureIncrement
                                     })
                                     .onGet(async () => {
                                         const value = this.setTemperature;
@@ -1473,7 +1541,7 @@ class MelCloudDevice extends EventEmitter {
                                     .setProps({
                                         minValue: [10, 50][this.useFahrenheit],
                                         maxValue: [31, 88][this.useFahrenheit],
-                                        minStep: [0.5, 1][this.useFahrenheit]
+                                        minStep: this.ataTemperatureIncrement
                                     })
                                     .onGet(async () => {
                                         const value = this.setTemperature;
@@ -1519,7 +1587,7 @@ class MelCloudDevice extends EventEmitter {
                                         try {
                                             accountInfo.UseFahrenheit = value ? true : false;
                                             await this.melCloud.send(accountInfo);
-                                            this.accountInfo = accountInfo;
+                                            this.useFahrenheit = accountInfo.UseFahrenheit;
                                             const info = this.disableLogInfo ? false : this.emit('message', `Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
                                         } catch (error) {
                                             this.emit('error', `Set temperature display unit error: ${error}`);
@@ -1604,7 +1672,7 @@ class MelCloudDevice extends EventEmitter {
                                     .setProps({
                                         minValue: [0, 32][this.useFahrenheit],
                                         maxValue: [31, 88][this.useFahrenheit],
-                                        minStep: [0.5, 1][this.useFahrenheit]
+                                        minStep: this.ataTemperatureIncrement
                                     })
                                     .onGet(async () => {
                                         const value = this.setTemperature;
@@ -1631,7 +1699,7 @@ class MelCloudDevice extends EventEmitter {
                                         try {
                                             accountInfo.UseFahrenheit = value ? true : false;
                                             await this.melCloud.send(accountInfo);
-                                            this.accountInfo = accountInfo;
+                                            this.useFahrenheit = accountInfo.UseFahrenheit;
                                             const info = this.disableLogInfo ? false : this.emit('message', `Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
                                         } catch (error) {
                                             this.emit('error', `Set temperature display unit error: ${error}`);
@@ -1923,7 +1991,7 @@ class MelCloudDevice extends EventEmitter {
                         const atwCaseZone2 = this.atwCaseZone2;
 
                         this.atwMelCloudServices = [];
-                        this.atwTemperatureSensorServices = [];
+                        this.atwTemperatureSensorServices = atwTemperatureSensor ? [] : false;
                         for (let i = 0; i < atwZonesCount; i++) {
                             const zoneName = [this.atwHeatPumpName, this.atwZone1Name, this.atwHotWaterName, this.atwZone2Name][i];
                             const atwServiceName = `${accessoryName}: ${zoneName}`;
@@ -2205,7 +2273,7 @@ class MelCloudDevice extends EventEmitter {
                                             try {
                                                 accountInfo.UseFahrenheit = value ? true : false;
                                                 await this.melCloud.send(accountInfo);
-                                                this.accountInfo = accountInfo;
+                                                this.useFahrenheit = accountInfo.UseFahrenheit;
                                                 const info = this.disableLogInfo ? false : this.emit('message', `Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
                                             } catch (error) {
                                                 this.emit('error', `Set temperature display unit error: ${error}`);
@@ -2416,7 +2484,7 @@ class MelCloudDevice extends EventEmitter {
                                             try {
                                                 accountInfo.UseFahrenheit = value ? true : false;
                                                 await this.melCloud.send(accountInfo);
-                                                this.accountInfo = accountInfo;
+                                                this.useFahrenheit = accountInfo.UseFahrenheit;
                                                 const info = this.disableLogInfo ? false : this.emit('message', `Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
                                             } catch (error) {
                                                 this.emit('error', `Set temperature display unit error: ${error}`);
@@ -2777,7 +2845,7 @@ class MelCloudDevice extends EventEmitter {
                                         .setProps({
                                             minValue: [0, 32][this.useFahrenheit],
                                             maxValue: [31, 88][this.useFahrenheit],
-                                            minStep: [0.5, 1][this.useFahrenheit]
+                                            minStep: this.ervTemperatureIncrement
                                         })
                                         .onGet(async () => {
                                             const value = this.setTemperature;
@@ -2801,7 +2869,7 @@ class MelCloudDevice extends EventEmitter {
                                         .setProps({
                                             minValue: [10, 50][this.useFahrenheit],
                                             maxValue: [31, 88][this.useFahrenheit],
-                                            minStep: [0.5, 1][this.useFahrenheit]
+                                            minStep: this.ervTemperatureIncrement
                                         })
                                         .onGet(async () => {
                                             const value = this.setTemperature;
@@ -2846,7 +2914,7 @@ class MelCloudDevice extends EventEmitter {
                                         try {
                                             accountInfo.UseFahrenheit = value ? true : false;
                                             await this.melCloud.send(accountInfo);
-                                            this.accountInfo = accountInfo;
+                                            this.useFahrenheit = accountInfo.UseFahrenheit;
                                             const info = this.disableLogInfo ? false : this.emit('message', `Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
                                         } catch (error) {
                                             this.emit('error', `Set temperature display unit error: ${error}`);
@@ -2930,7 +2998,7 @@ class MelCloudDevice extends EventEmitter {
                                     .setProps({
                                         minValue: [0, 32][this.useFahrenheit],
                                         maxValue: [31, 88][this.useFahrenheit],
-                                        minStep: [0.5, 1][this.useFahrenheit]
+                                        minStep: this.ervTemperatureIncrement
                                     })
                                     .onGet(async () => {
                                         const value = this.setTemperature;
@@ -2957,7 +3025,7 @@ class MelCloudDevice extends EventEmitter {
                                         try {
                                             accountInfo.UseFahrenheit = value ? true : false;
                                             await this.melCloud.send(accountInfo);
-                                            this.accountInfo = accountInfo;
+                                            this.useFahrenheit = accountInfo.UseFahrenheit;
                                             const info = this.disableLogInfo ? false : this.emit('message', `Set temperature display unit: ${CONSTANS.TemperatureDisplayUnits[value]}`);
                                         } catch (error) {
                                             this.emit('error', `Set temperature display unit error: ${error}`);

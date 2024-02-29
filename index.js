@@ -1,8 +1,6 @@
 'use strict';
 const path = require('path');
 const fs = require('fs');
-const RestFul = require('./src/restful.js');
-const Mqtt = require('./src/mqtt.js');
 const MelCloud = require('./src/melcloud.js')
 const MelCloudDevice = require('./src/melclouddevice.js')
 const CONSTANS = require('./src/constans.json');
@@ -49,75 +47,21 @@ class MelCloudPlatform {
 				};
 				const debug1 = enableDebugMode ? log(`Account: ${accountName}, Config: ${JSON.stringify(config, null, 2)}`) : false;
 
-				//melcloud account
+				//config
 				const refreshInterval = account.refreshInterval * 1000 || 120000;
+
+				//melcloud account
 				const melCloud = new MelCloud(prefDir, accountName, user, passwd, language, enableDebugMode, refreshInterval);
 				melCloud.on('checkDevicesListComplete', (accountInfo, contextKey, deviceInfo) => {
 					const deviceId = deviceInfo.DeviceID.toString();
 					const deviceType = deviceInfo.Type;
 					const deviceName = deviceInfo.DeviceName;
-					const useFahrenheit = accountInfo.UseFahrenheit ? 1 : 0;
 					const deviceTypeText = CONSTANS.DeviceType[deviceType];
+					const useFahrenheit = accountInfo.UseFahrenheit ? 1 : 0;
 					const deviceInfoFile = `${prefDir}/${accountName}_Device_${deviceId}`;
 
-					//RESTFul server
-					const restFulEnabled = account.enableRestFul || false;
-					if (restFulEnabled) {
-						this.restFulConnected = false;
-						const restFulPort = deviceId.slice(-4);
-						this.restFul = new RestFul({
-							port: restFulPort,
-							debug: account.restFulDebug || false
-						});
-
-						this.restFul.on('connected', (message) => {
-							log(deviceTypeText, deviceName, message);
-							this.restFulConnected = true;
-						})
-							.on('debug', (debug) => {
-								log(`${deviceTypeText}, ${deviceName}, debug: ${debug}`);
-							})
-							.on('error', (error) => {
-								log.error(deviceTypeText, deviceName, error);
-							});
-					}
-
-					//MQTT client
-					const mqttEnabled = account.enableMqtt || false;
-					if (mqttEnabled) {
-						this.mqttConnected = false;
-						const mqttHost = account.mqttHost;
-						const mqttPort = account.mqttPort || 1883;
-						const mqttClientId = `${account.mqttClientId}_${deviceId}` || `Melcloud_${deviceId}`;
-						const mqttUser = account.mqttUser;
-						const mqttPasswd = account.mqttPass;
-						const mqttPrefix = `${account.mqttPrefix}/${deviceTypeText}/${deviceName} ${deviceId}`;
-						const mqttDebug = account.mqttDebug || false;
-
-						this.mqtt = new Mqtt({
-							host: mqttHost,
-							port: mqttPort,
-							clientId: mqttClientId,
-							user: mqttUser,
-							passwd: mqttPasswd,
-							prefix: mqttPrefix,
-							debug: mqttDebug
-						});
-
-						this.mqtt.on('connected', (message) => {
-							log(deviceTypeText, deviceName, message);
-							this.mqttConnected = true;
-						})
-							.on('debug', (debug) => {
-								log(`${deviceTypeText}, ${deviceName}, debug: ${debug}`);
-							})
-							.on('error', (error) => {
-								log.error(deviceTypeText, deviceName, error);
-							});
-					}
-
 					//melcloud device
-					const melCloudDevice = new MelCloudDevice(api, account, accountName, melCloud, accountInfo, contextKey, deviceType, deviceTypeText, useFahrenheit, deviceInfoFile)
+					const melCloudDevice = new MelCloudDevice(api, account, accountName, melCloud, accountInfo, contextKey, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, deviceInfoFile)
 					melCloudDevice.on('publishAccessory', (accessory) => {
 
 						//publish device
@@ -135,12 +79,6 @@ class MelCloudPlatform {
 						})
 						.on('error', (error) => {
 							log.error(deviceTypeText, deviceName, error);
-						})
-						.on('restFul', (path, data) => {
-							const restFul = this.restFulConnected ? this.restFul.update(path, data) : false;
-						})
-						.on('mqtt', (topic, message) => {
-							const mqtt = this.mqttConnected ? this.mqtt.send(topic, message) : false;
 						});
 				})
 					.on('message', (message) => {

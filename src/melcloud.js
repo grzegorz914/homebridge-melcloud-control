@@ -162,9 +162,10 @@ class MelCloud extends EventEmitter {
                     //save every device info to the file
                     const deviceInfoFile = `${prefDir}/${accountName}_Device_${deviceId}`;
                     await this.saveData(deviceInfoFile, deviceInfo);
-                    const debug = enableDebugMode ? this.emit('debug', `Device: ${deviceName} state saved.`) : false;
+                    const debug = enableDebugMode ? this.emit('debug', `Device: ${deviceName} info saved.`) : false;
 
                     //prepare device if not in devices array
+                    await new Promise(resolve => setTimeout(resolve, 350));
                     if (!devicesId.includes(deviceId)) {
                         this.emit('checkDevicesListComplete', this.accountInfo, this.contextKey, deviceInfo);
                         devicesId.push(deviceId);
