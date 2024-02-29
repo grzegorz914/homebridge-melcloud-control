@@ -143,8 +143,8 @@ class MelCloudErv extends EventEmitter {
                 const actualVentilationMode = device.ActualVentilationMode; //Lossnay, Bypass
                 const effectiveFlags = device.EffectiveFlags;
                 const lastEffectiveFlags = device.LastEffectiveFlags;
-                const defaultCoolingSetTemperature = device.DefaultCoolingSetTemperature;
-                const defaultHeatingSetTemperature = device.DefaultHeatingSetTemperature;
+                const defaultCoolingSetTemperature = device.DefaultCoolingSetTemperature ?? 23;
+                const defaultHeatingSetTemperature = device.DefaultHeatingSetTemperature ?? 21;
                 const hasEnergyConsumedMeter = device.HasEnergyConsumedMeter;
                 const currentEnergyConsumed = device.CurrentEnergyConsumed
                 const currentEnergyAssignment = device.CurrentEnergyAssignment;

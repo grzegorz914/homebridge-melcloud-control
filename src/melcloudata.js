@@ -139,8 +139,8 @@ class MelCloudAta extends EventEmitter {
                 const demandPercentage = device.DemandPercentage;
                 const configuredDemandPercentage = device.ConfiguredDemandPercentage;
                 const hasDemandSideControl = device.HasDemandSideControl;
-                const defaultCoolingSetTemperature = device.DefaultCoolingSetTemperature;
-                const defaultHeatingSetTemperature = device.DefaultHeatingSetTemperature;
+                const defaultCoolingSetTemperature = device.DefaultCoolingSetTemperature ?? 23;
+                const defaultHeatingSetTemperature = device.DefaultHeatingSetTemperature ?? 21;
                 const roomTemperatureLabel = device.RoomTemperatureLabel;
                 const heatingEnergyConsumedRate1 = device.HeatingEnergyConsumedRate1;
                 const heatingEnergyConsumedRate2 = device.HeatingEnergyConsumedRate2;
