@@ -92,7 +92,7 @@ class MelCloudAtw extends EventEmitter {
                 const deviceType = device.DeviceType;
                 const canHeat = device.CanHeat;
                 const canCool = device.CanCool;
-                const hasHotWaterTank = device.HasHotWaterTank;
+                const hasHotWaterTank = device.HasHotWaterTank ?? false;
                 const fTCVersion = device.FTCVersion;
                 const fTCRevision = device.FTCRevision;
                 const lastFTCVersion = device.LastFTCVersion;
@@ -149,7 +149,7 @@ class MelCloudAtw extends EventEmitter {
                 const effectiveFlags = device.EffectiveFlags;
                 const lastEffectiveFlags = device.LastEffectiveFlags;
                 const power = device.Power ?? false;
-                const ecoHotWater = device.EcoHotWater;
+                const ecoHotWater = device.EcoHotWater ?? false;
                 const operationMode = device.OperationMode;
                 const operationModeZone1 = device.OperationModeZone1;
                 const operationModeZone2 = device.OperationModeZone2;
@@ -163,8 +163,8 @@ class MelCloudAtw extends EventEmitter {
                 const prohibitHotWater = device.ProhibitHotWater ?? false;
                 const prohibitHeatingZone1 = device.ProhibitHeatingZone1 ?? false;
                 const prohibitHeatingZone2 = device.ProhibitHeatingZone2 ?? false;
-                const prohibitCoolingZone1 = device.ProhibitCoolingZone1;
-                const prohibitCoolingZone2 = device.ProhibitCoolingZone2;
+                const prohibitCoolingZone1 = device.ProhibitCoolingZone1 ?? false;
+                const prohibitCoolingZone2 = device.ProhibitCoolingZone2 ?? false;
                 const serverTimerDesired = device.ServerTimerDesired;
                 const secondaryZoneHeatCurve = device.SecondaryZoneHeatCurve;
                 const setHeatFlowTemperatureZone1 = device.SetHeatFlowTemperatureZone1;
@@ -220,7 +220,7 @@ class MelCloudAtw extends EventEmitter {
                 const canEstimateEnergyUsage = device.CanEstimateEnergyUsage;
                 const canUseRoomTemperatureCooling = device.CanUseRoomTemperatureCooling;
                 const isFtcModelSupported = device.IsFtcModelSupported;
-                const maxTankTemperature = device.MaxTankTemperature ?? 0;
+                const maxTankTemperature = device.MaxTankTemperature;
                 const idleZone1 = device.IdleZone1 ?? false;
                 const idleZone2 = device.IdleZone2 ?? false;
                 const minPcycle = device.MinPcycle;
@@ -276,7 +276,7 @@ class MelCloudAtw extends EventEmitter {
                 const hasErrorMessages = device.HasErrorMessages;
                 const offline = device.Offline ?? false;
                 const supportsHourlyEnergyReport = device.SupportsHourlyEnergyReport;
-                const hasZone2 = device.HasZone2;
+                const hasZone2 = device.HasZone2 ?? false;
 
                 //units
                 const units = Array.isArray(device.Units) ? device.Units : [];
@@ -400,8 +400,7 @@ class MelCloudAtw extends EventEmitter {
                 }
 
                 const stateHasNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);
-                const someValeueNullOrUndefined = Object.values(deviceState).some(value => value === undefined || value === null);
-                if (someValeueNullOrUndefined || stateHasNotChanged) {
+                if (stateHasNotChanged) {
                     this.checkDevice();
                     return;
                 }

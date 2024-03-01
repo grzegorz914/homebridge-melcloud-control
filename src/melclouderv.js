@@ -126,16 +126,16 @@ class MelCloudErv extends EventEmitter {
                 const coreMaintenanceRequired = device.CoreMaintenanceRequired ?? false;
                 const filterMaintenanceRequired = device.FilterMaintenanceRequired ?? false;
                 const power = device.Power ?? false;
-                const roomTemperature = hasRoomTemperature ? device.RoomTemperature : 0;
-                const supplyTemperature = hasSupplyTemperature ? device.SupplyTemperature : 0;
-                const outdoorTemperature = hasOutdoorTemperature ? device.OutdoorTemperature : 0;
+                const roomTemperature = device.RoomTemperature;
+                const supplyTemperature = device.SupplyTemperature;
+                const outdoorTemperature = device.OutdoorTemperature;
                 const roomCO2Level = device.RoomCO2Level;
                 const nightPurgeMode = device.NightPurgeMode ?? false;
                 const thermostatOn = device.ThermostatOn;
-                const setTemperature = device.SetTemperature ?? 20;
+                const setTemperature = device.SetTemperature;
                 const actualSupplyFanSpeed = device.ActualSupplyFanSpeed;
                 const actualExhaustFanSpeed = device.ActualExhaustFanSpeed;
-                const setFanSpeed = device.SetFanSpeed ?? 0;
+                const setFanSpeed = device.SetFanSpeed;
                 const automaticFanSpeed = device.AutomaticFanSpeed;
                 const operationMode = device.OperationMode; //0, Heat, 2, Cool, 4, 5, 6, Fan, Auto
                 const actualOperationMode = device.ActualOperationMode;
@@ -317,8 +317,7 @@ class MelCloudErv extends EventEmitter {
                 }
 
                 const stateHasNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);
-                const someValeueNullOrUndefined = Object.values(deviceState).some(value => value === undefined || value === null);
-                if (someValeueNullOrUndefined || stateHasNotChanged) {
+                if (stateHasNotChanged) {
                     this.checkDevice();
                     return;
                 }

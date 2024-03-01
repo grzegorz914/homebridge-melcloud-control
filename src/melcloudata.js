@@ -329,8 +329,7 @@ class MelCloudAta extends EventEmitter {
                 }
 
                 const stateHasNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);
-                const someValeueNullOrUndefined = Object.values(deviceState).some(value => value === undefined || value === null);
-                if (someValeueNullOrUndefined || stateHasNotChanged) {
+                if (stateHasNotChanged) {
                     this.checkDevice();
                     return;
                 }
