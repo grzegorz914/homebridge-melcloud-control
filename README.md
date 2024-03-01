@@ -78,8 +78,9 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Vane H mode `AUTO/1/2/3/4/5/SPLIT/SWING`.
       * Vane V mode `AUTO/1/2/3/4/5/SWING`.
       * Fan speed mode `AUTO/1/2/3/4/5/`.
-      * Temperature change for `HEATER/COOLER`.
       * Presets `ACTIV/UNACTIV`.
+      * Room temperature.
+      * Outdoor temperature.
 * Heat Pump:
   * Heater Cooler:
     * Heat Pump:
@@ -121,8 +122,11 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Power `ON/OFF`.
       * Operating mode `HEAT/COOL/CURVE/HOLIDAY/AUTO HOT WATER/ECO HOT WATER/FORCE HOT WATER`.
       * Physical lock controls `LOCK/UNLOCK`.
-      * Temperature change for `HEATER/COOLER`.
       * Presets `ACTIV/UNACTIV`.
+      * Outdoor temperature.
+      * Zone 1 temperature.
+      * Zone 2 temperature.
+      * Water tank temperature.
 * Energy Recovery Ventilation Lossnay:
   * Heater Cooler:
     * Power `ON/OFF`.
@@ -144,8 +148,10 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Power `ON/OFF`.
       * Operating mode `LOSSNAY/BYPAS/AUTO/NIGHT PURGE`.
       * Fan speed mode `AUTO/1/2/3/4`.
-      * Temperature change for `HEATER/COOLER`.
       * Presets `ACTIV/UNACTIV`.
+      * Room temperature.
+      * Outdoor temperature.
+      * Supply temperature.
       * Core maintenance.
       * Filter maintenance.
       * CO2 detected and level.
@@ -175,7 +181,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `passwd` | Here set the MELCloud password. |
 | `language` | Here select the MELCloud language. |
 | `ataDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
-| `ataTemperatureSensor` | This enable extra temperature sensor for Heater/Cooler control mode to use with automations in HomeKit app. |
+| `ataTemperatureSensor` | This enable extra temperature sensors to use with automations in HomeKit app. |
 | `ataDisableAutoMode` | This will disable `Auto` mode even this mode is supported by device. |
 | `ataDisableHeatMode` | This will disable `Heat` mode even this mode is supported by device. |
 | `ataAutoHeatMode` | Here select operation mode for `Auto/Heat`, if `Auto`, `Heat` or both modes are not supported by device will be used selected modes instead. |
@@ -185,14 +191,14 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ataButtons.displayType` | Here select display type in HomeKit app, possible `None/Disabled`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`.|
 | `ataButtons.namePrefix` | Here enable/disable the accessory name as a prefix for button/sensor name.|
 | `atwDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
-| `atwTemperatureSensor` | This enable extra temperature sensor for Heater/Cooler control mode to use with automations in HomeKit app. |
+| `atwTemperatureSensor` | This enable extra temperature sensors to use with automations in HomeKit app. |
 | `atwPresets` | This enable display Heat Pump presets in HomeKit app. |
 | `atwButtons.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
 | `atwButtons.mode` | Here select button mode. |
 | `atwButtons.displayType` | Here select display type in HomeKit app, possible `None/Disabled`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`.|
 | `atwButtons.namePrefix` | Here enable/disable the accessory name as a prefix for button/sensor name.|
 | `ervDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
-| `ervTemperatureSensor` | This enable extra temperature sensor for Heater/Cooler control mode to use with automations in HomeKit app. |
+| `ervTemperatureSensor` | This enable extra temperature sensors to use with automations in HomeKit app. |
 | `ervPresets` | This enable display EnergyRecovery Ventilation presets in HomeKit app. |
 | `ervButtons.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
 | `ervButtons.mode` | Here select button mode. |

@@ -230,11 +230,8 @@
               "title": "Temperature Sensor",
               "type": "boolean",
               "default": false,
-              "description": "This enable extra temperature sensor for Heater/Cooler control mode to use with automations in HomeKit app.",
-              "required": false,
-              "condition": {
-                "functionBody": "return  model.accounts[arrayIndices].ataDisplayMode === 0;"
-              }
+              "description": "This enable extra temperature sensor to use with automations in HomeKit app.",
+              "required": false
             },
             "ataPresets": {
               "title": "Presets",
@@ -591,11 +588,8 @@
               "title": "Temperature Sensor",
               "type": "boolean",
               "default": false,
-              "description": "This enable extra temperature sensor for Heater/Cooler control mode to use with automations in HomeKit app.",
-              "required": false,
-              "condition": {
-                "functionBody": "return  model.accounts[arrayIndices].atwDisplayMode === 0;"
-              }
+              "description": "This enable extra temperature sensor to use with automations in HomeKit app.",
+              "required": false
             },
             "atwPresets": {
               "title": "Presets",
@@ -839,14 +833,11 @@
               "required": true
             },
             "ervTemperatureSensor": {
-              "title": "Temperature Sensor",
+              "title": "Temperature Sensors",
               "type": "boolean",
               "default": false,
-              "description": "This enable extra temperature sensor for Heater/Cooler control mode to use with automations in HomeKit app.",
-              "required": false,
-              "condition": {
-                "functionBody": "return  model.accounts[arrayIndices].ervDisplayMode === 0;"
-              }
+              "description": "This enable extra temperature sensor to use with automations in HomeKit app.",
+              "required": false
             },
             "ervPresets": {
               "title": "Presets",

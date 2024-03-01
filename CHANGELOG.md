@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Important changes v0.4.0 and above!!!
   * Main control mode, buttons and presets need to be configured again!!!
 
+## [0.17.0] - (01.03.2024)
+## Changes
+- added outdoor/room temperature sensors for Air Conditioner if supported
+- added outdoor/room/supply temperature sensors for Losnay if supported
+- added outdoor/room/zone1/zone2/water tank temperature sensors for Heta pump if supported
+- config.schema updated
+- cleanup
+
 ## [0.16.0] - (10.02.2024)
 ## Changes
 - removed possibility to set indyvidual refresh time for ATA, ATW, ERV state
