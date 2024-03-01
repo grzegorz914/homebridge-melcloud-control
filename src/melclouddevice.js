@@ -113,12 +113,12 @@ class MelCloudDevice extends EventEmitter {
                     debugLog: account.enableDebugMode
                 });
 
-                this.melCloudAta.on('deviceInfo', (deviceData, manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) => {
+                this.melCloudAta.on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) => {
                     if (!this.disableLogDeviceInfo) {
                         this.emit('devInfo', `---- ${deviceTypeText}: ${deviceName} ----`);
                         this.emit('devInfo', `Account: ${accountName}`);
-                        const indoor = modelIndoor !== 'Undefined' ? this.emit('devInfo', `Indoor: ${modelIndoor}`) : false;
-                        const outdoor = modelOutdoor !== 'Undefined' ? this.emit('devInfo', `Outdoor: ${modelOutdoor}`) : false
+                        const indoor = modelIndoor ? this.emit('devInfo', `Indoor: ${modelIndoor}`) : false;
+                        const outdoor = modelOutdoor ? this.emit('devInfo', `Outdoor: ${modelOutdoor}`) : false
                         this.emit('devInfo', `Serial: ${serialNumber}`);
                         this.emit('devInfo', `Firmware: ${firmwareAppVersion}`);
                         this.emit('devInfo', `Manufacturer: ${manufacturer}`);
@@ -127,7 +127,7 @@ class MelCloudDevice extends EventEmitter {
 
                     //accessory info 					
                     this.manufacturer = manufacturer;
-                    this.model = modelIndoor ?? modelOutdoor ?? `${deviceTypeText} ${deviceId}`;
+                    this.model = modelIndoor ? modelIndoor : modelOutdoor ? modelOutdoor : `${deviceTypeText} ${deviceId}`;
                     this.serialNumber = serialNumber;
                     this.firmwareRevision = firmwareAppVersion;
                 }).on('deviceState', async (deviceData, deviceState) => {
@@ -517,24 +517,24 @@ class MelCloudDevice extends EventEmitter {
                     debugLog: account.enableDebugMode
                 });
 
-                this.melCloudAtw.on('deviceInfo', (deviceData, manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) => {
+                this.melCloudAtw.on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, hasHotWaterTank, hasZone2) => {
                     if (!this.disableLogDeviceInfo) {
                         this.emit('devInfo', `---- ${deviceTypeText}: ${deviceName} ----`);
                         this.emit('devInfo', `Account: ${accountName}`);
-                        const indoor = modelIndoor !== 'Undefined' ? this.emit('devInfo', `Indoor: ${modelIndoor}`) : false;
-                        const outdoor = modelOutdoor !== 'Undefined' ? this.emit('devInfo', `Outdoor: ${modelOutdoor}`) : false
+                        const indoor = modelIndoor ? this.emit('devInfo', `Indoor: ${modelIndoor}`) : false;
+                        const outdoor = modelOutdoor ? this.emit('devInfo', `Outdoor: ${modelOutdoor}`) : false
                         this.emit('devInfo', `Serial: ${serialNumber}`)
                         this.emit('devInfo', `Firmware: ${firmwareAppVersion}`);
                         this.emit('devInfo', `Manufacturer: ${manufacturer}`);
                         this.emit('devInfo', '----------------------------------');
-                        this.emit('devInfo', `Hot Water Tank: ${deviceData.Device.HasHotWaterTank ? 'Yes' : 'No'}`);
-                        this.emit('devInfo', `Zone 2: ${deviceData.Device.HasZone2 ? 'Yes' : 'No'}`);
+                        this.emit('devInfo', `Hot Water Tank: ${hasHotWaterTank ? 'Yes' : 'No'}`);
+                        this.emit('devInfo', `Zone 2: ${hasZone2 ? 'Yes' : 'No'}`);
                         this.emit('devInfo', '----------------------------------');
                     };
 
                     //accessory info 					
                     this.manufacturer = manufacturer;
-                    this.model = modelIndoor ?? modelOutdoor ?? `${deviceTypeText} ${deviceId}`;
+                    this.model = modelIndoor ? modelIndoor : modelOutdoor ? modelOutdoor : `${deviceTypeText} ${deviceId}`;
                     this.serialNumber = serialNumber;
                     this.firmwareRevision = firmwareAppVersion;
                 }).on('deviceState', async (deviceData, deviceState) => {
@@ -976,12 +976,12 @@ class MelCloudDevice extends EventEmitter {
                     debugLog: account.enableDebugMode
                 });
 
-                this.melCloudErv.on('deviceInfo', (deviceData, manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) => {
+                this.melCloudErv.on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) => {
                     if (!this.disableLogDeviceInfo) {
                         this.emit('devInfo', `---- ${deviceTypeText}: ${deviceName} ----`);
                         this.emit('devInfo', `Account: ${accountName}`);
-                        const indoor = modelIndoor !== 'Undefined' ? this.emit('devInfo', `Indoor: ${modelIndoor}`) : false;
-                        const outdoor = modelOutdoor !== 'Undefined' ? this.emit('devInfo', `Outdoor: ${modelOutdoor}`) : false;
+                        const indoor = modelIndoor ? this.emit('devInfo', `Indoor: ${modelIndoor}`) : false;
+                        const outdoor = modelOutdoor ? this.emit('devInfo', `Outdoor: ${modelOutdoor}`) : false;
                         this.emit('devInfo', `Serial: ${serialNumber}`);
                         this.emit('devInfo', `Firmware: ${firmwareAppVersion}`);
                         this.emit('devInfo', `Manufacturer: ${manufacturer}`);
@@ -990,7 +990,7 @@ class MelCloudDevice extends EventEmitter {
 
                     //accessory info 					
                     this.manufacturer = manufacturer;
-                    this.model = modelIndoor ?? modelOutdoor ?? `${deviceTypeText} ${deviceId}`;
+                    this.model = modelIndoor ? modelIndoor : modelOutdoor ? modelOutdoor : `${deviceTypeText} ${deviceId}`;
                     this.serialNumber = serialNumber;
                     this.firmwareRevision = firmwareAppVersion;
 
@@ -1362,8 +1362,8 @@ class MelCloudDevice extends EventEmitter {
                         const debug0 = this.enableDebugMode ? this.emit('debug', `Prepare ata service`) : false;
                         const ataDisplayMode = this.ataDisplayMode;
                         const ataTemperatureSensor = this.ataTemperatureSensor;
-                        const ataButtons = this.ataButtonsConfigured;
-                        const ataButtonsCount = this.ataButtonsConfiguredCount;
+                        const ataButtonsConfigured = this.ataButtonsConfigured;
+                        const ataButtonsConfiguredCount = this.ataButtonsConfiguredCount;
                         const ataPresets = this.ataPresets;
                         const ataPresetsCount = this.ataPresetsCount;
                         const ataHasAutomaticFanSpeed = this.ataHasAutomaticFanSpeed;
@@ -1710,12 +1710,12 @@ class MelCloudDevice extends EventEmitter {
                         };
 
                         //buttons services
-                        if (ataButtonsCount > 0) {
+                        if (ataButtonsConfiguredCount > 0) {
                             const debug = this.enableDebugMode ? this.emit('debug', `Prepare buttons/sensors service`) : false;
                             this.ataButtonsServices = [];
 
-                            for (let i = 0; i < ataButtonsCount; i++) {
-                                const button = ataButtons[i];
+                            for (let i = 0; i < ataButtonsConfiguredCount; i++) {
+                                const button = ataButtonsConfigured[i];
 
                                 //get button mode
                                 const buttonMode = button.mode;
@@ -1924,7 +1924,6 @@ class MelCloudDevice extends EventEmitter {
                                             };
                                         };
                                     });
-
                                 this.ataButtonsServices.push(buttonService);
                             };
                         };
@@ -1971,7 +1970,6 @@ class MelCloudDevice extends EventEmitter {
                                             this.emit('error', `Set preset error: ${error}`);
                                         };
                                     });
-
                                 ataPreviousPresets.push(deviceState);
                                 this.ataPresetsServices.push(presetService);
                             };
@@ -1982,8 +1980,8 @@ class MelCloudDevice extends EventEmitter {
                         const debug1 = this.enableDebugMode ? this.emit('debug', `Prepare atw service`) : false;
                         const atwZonesCount = this.atwZonesCount;
                         const atwTemperatureSensor = this.atwTemperatureSensor;
-                        const atwButtons = this.atwButtonsConfigured;
-                        const atwButtonsCount = this.atwButtonsConfiguredCount;
+                        const atwButtonsConfigured = this.atwButtonsConfigured;
+                        const atwButtonsConfiguredCount = this.atwButtonsConfiguredCount;
                         const atwPresets = this.atwPresets;
                         const atwPresetsCount = this.atwPresetsCount;
                         const atwDisplayMode = this.atwDisplayMode;
@@ -2497,12 +2495,12 @@ class MelCloudDevice extends EventEmitter {
                         };
 
                         //buttons services
-                        if (atwButtonsCount > 0) {
+                        if (atwButtonsConfiguredCount > 0) {
                             const debug = this.enableDebugMode ? this.emit('debug', `Prepare buttons service`) : false;
                             this.atwButtonsServices = [];
 
-                            for (let i = 0; i < atwButtonsCount; i++) {
-                                const button = atwButtons[i];
+                            for (let i = 0; i < atwButtonsConfiguredCount; i++) {
+                                const button = atwButtonsConfigured[i];
 
                                 //get button mode
                                 const buttonMode = button.mode;
@@ -2651,7 +2649,6 @@ class MelCloudDevice extends EventEmitter {
                                             };
                                         };
                                     });
-
                                 this.atwButtonsServices.push(buttonService);
                                 accessory.addService(buttonService)
                             };
@@ -2705,7 +2702,6 @@ class MelCloudDevice extends EventEmitter {
                                             this.emit('error', `Set preset error: ${error}`);
                                         };
                                     });
-
                                 atwPreviousPresets.push(deviceState);
                                 this.atwPresetsServices.push(presetService);
                                 accessory.addService(presetService);
@@ -2718,8 +2714,8 @@ class MelCloudDevice extends EventEmitter {
                         const debug3 = this.enableDebugMode ? this.emit('debug', `Prepare erv service`) : false;
                         const ervDisplayMode = this.ervDisplayMode;
                         const ervTemperatureSensor = this.ervTemperatureSensor;
-                        const ervButtons = this.ervButtonsConfigured;
-                        const ervButtonsCount = this.ervButtonsConfiguredCount;
+                        const ervButtonsConfigured = this.ervButtonsConfigured;
+                        const ervButtonsConfiguredCount = this.ervButtonsConfiguredCount;
                         const ervPresets = this.ervPresets;
                         const ervPresetsCount = this.ervPresetsCount;
                         const ervHasCoolOperationMode = this.ervHasCoolOperationMode;
@@ -3102,12 +3098,12 @@ class MelCloudDevice extends EventEmitter {
                         }
 
                         //buttons services
-                        if (ervButtonsCount > 0) {
+                        if (ervButtonsConfiguredCount > 0) {
                             const debug = this.enableDebugMode ? this.emit('debug', `Prepare buttons service`) : false;
                             this.ervButtonsServices = [];
 
-                            for (let i = 0; i < ervButtonsCount; i++) {
-                                const button = ervButtons[i];
+                            for (let i = 0; i < ervButtonsConfiguredCount; i++) {
+                                const button = ervButtonsConfigured[i];
 
                                 //get button mode
                                 const buttonMode = button.mode;
@@ -3210,7 +3206,6 @@ class MelCloudDevice extends EventEmitter {
                                             };
                                         };
                                     });
-
                                 this.ervButtonsServices.push(buttonService);
                             };
                         };
@@ -3256,7 +3251,6 @@ class MelCloudDevice extends EventEmitter {
                                             this.emit('error', `Set preset error: ${error}`);
                                         };
                                     });
-
                                 ervPreviousPresets.push(deviceState);
                                 this.ervPresetsServices.push(presetService);
                             };

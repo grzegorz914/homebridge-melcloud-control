@@ -132,7 +132,7 @@ class MelCloudErv extends EventEmitter {
                 const roomCO2Level = device.RoomCO2Level;
                 const nightPurgeMode = device.NightPurgeMode ?? false;
                 const thermostatOn = device.ThermostatOn;
-                const setTemperature = device.SetTemperature;
+                const setTemperature = device.SetTemperature ?? 20;
                 const actualSupplyFanSpeed = device.ActualSupplyFanSpeed;
                 const actualExhaustFanSpeed = device.ActualExhaustFanSpeed;
                 const setFanSpeed = device.SetFanSpeed;
@@ -216,7 +216,7 @@ class MelCloudErv extends EventEmitter {
                 let deviceIndoor = 0;
                 let serialNumberIndoor = 'Undefined';
                 let modelNumberIndoor = 0;
-                let modelIndoor = 'Undefined';
+                let modelIndoor = false;
                 let typeIndoor = 0;
 
                 //outdoor
@@ -224,7 +224,7 @@ class MelCloudErv extends EventEmitter {
                 let deviceOutdoor = 0;
                 let serialNumberOutdoor = 'Undefined';
                 let modelNumberOutdoor = 0;
-                let modelOutdoor = 'Undefined';
+                let modelOutdoor = false;
                 let typeOutdoor = 0;
 
                 //units array
@@ -233,7 +233,7 @@ class MelCloudErv extends EventEmitter {
                     const unitDevice = unit.Device;
                     const unitSerialNumber = unit.SerialNumber ?? 'Undefined';
                     const unitModelNumber = unit.ModelNumber;
-                    const unitModel = unit.Model ?? 'Undefined';
+                    const unitModel = unit.Model ?? false;
                     const unitType = unit.UnitType;
                     const unitIsIndoor = unit.IsIndoor ?? false;
 
@@ -286,7 +286,7 @@ class MelCloudErv extends EventEmitter {
                 };
 
                 //emit info
-                const emitInfo = this.displayDeviceInfo ? this.emit('deviceInfo', deviceData, manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) : false;
+                const emitInfo = this.displayDeviceInfo ? this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) : false;
                 this.displayDeviceInfo = false;
 
                 //restFul
