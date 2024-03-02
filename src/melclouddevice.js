@@ -145,7 +145,7 @@ class MelCloudDevice extends EventEmitter {
                     const modelSupportsHeat = !this.ataDisableHeatMode && modelSupportsHeat1;
                     const modelSupportsDry = deviceData.Device.ModelSupportsDry ?? false;
                     const temperatureIncrement = deviceData.Device.TemperatureIncrement ?? 1;
-                    const outdoorTemperature = deviceData.Device.OutdoorTemperature;
+                    const outdoorTemperature = deviceData.Device.OutdoorTemperature ?? 0;
 
                     this.ataHasAutomaticFanSpeed = hasAutomaticFanSpeed;
                     this.ataAirDirectionFunction = airDirectionFunction;
@@ -157,7 +157,6 @@ class MelCloudDevice extends EventEmitter {
                     this.ataModelSupportsHeat = modelSupportsHeat;
                     this.ataModelSupportsDry = modelSupportsDry;
                     this.ataTemperatureIncrement = temperatureIncrement;
-                    this.ataOutdoorTemperature = outdoorTemperature;
 
                     //device state
                     const roomTemperature = deviceState.RoomTemperature;
@@ -276,6 +275,7 @@ class MelCloudDevice extends EventEmitter {
                     this.currentOperationMode = currentOperationMode;
                     this.targetOperationMode = targetOperationMode;
                     this.roomTemperature = roomTemperature;
+                    this.outdoorTemperature = outdoorTemperature;
                     this.setTemperature = setTemperature;
                     this.fanSpeed = fanSpeed;
                     this.setFanSpeed = setFanSpeed;
@@ -283,7 +283,6 @@ class MelCloudDevice extends EventEmitter {
                     this.vaneHorizontal = vaneHorizontal;
                     this.vaneVertical = vaneVertical;
                     this.lockPhysicalControls = lockPhysicalControls;
-                    this.outdoorTemperature = outdoorTemperature;
 
                     if (this.ataTemperatureSensor) {
                         if (this.ataRoomTemperatureSensorService) {
@@ -618,7 +617,7 @@ class MelCloudDevice extends EventEmitter {
                     const setTankWaterTemperature = deviceState.SetTankWaterTemperature;
                     const forcedHotWaterMode = deviceState.ForcedHotWaterMode ? 1 : 0;
                     const unitStatus = deviceState.UnitStatus;
-                    const outdoorTemperature = deviceState.OutdoorTemperature;
+                    const outdoorTemperature = deviceState.OutdoorTemperature ?? 0;
                     const ecoHotWater = deviceState.EcoHotWater;
                     const holidayMode = deviceState.HolidayMode;
                     const prohibitZone1 = deviceState.ProhibitZone1;
@@ -1796,9 +1795,9 @@ class MelCloudDevice extends EventEmitter {
                         };
 
                         //temperature sensor services
-                        if (ataTemperatureSensor) {
+                        if (ataTemperatureSensor && this.roomTemperature !== null) {
                             const debug = this.enableDebugMode ? this.emit('debug', `Prepare room temperature sensor service`) : false;
-                            this.ataRoomTemperatureSensorService = new Service.TemperatureSensor(`${ataServiceName} Room`, `Temperature Sensor ${deviceId}`);
+                            this.ataRoomTemperatureSensorService = new Service.TemperatureSensor(`${ataServiceName} Room`, `Room Temperature Sensor ${deviceId}`);
                             this.ataRoomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                             this.ataRoomTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Room`);
                             this.ataRoomTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
@@ -1808,14 +1807,14 @@ class MelCloudDevice extends EventEmitter {
                                 })
                             accessory.addService(this.ataRoomTemperatureSensorService);
 
-                            if (ataHasOutdoorTemperature) {
-                                const debug = this.enableDebugMode ? this.emit('debug', `Prepare Outdoor temperature sensor service`) : false;
-                                this.ataOutdoorTemperatureSensorService = new Service.TemperatureSensor(`${ataServiceName} Outdoor`, `Temperature Sensor ${deviceId}`);
+                            if (ataHasOutdoorTemperature && this.outdoorTemperature !== null) {
+                                const debug = this.enableDebugMode ? this.emit('debug', `Prepare outdoor temperature sensor service`) : false;
+                                this.ataOutdoorTemperatureSensorService = new Service.TemperatureSensor(`${ataServiceName} Outdoor`, `Outdoor Temperature Sensor ${deviceId}`);
                                 this.ataOutdoorTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 this.ataOutdoorTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Outdoor`);
                                 this.ataOutdoorTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
                                     .onGet(async () => {
-                                        const state = this.ataOutdoorTemperature;
+                                        const state = this.outdoorTemperature;
                                         return state;
                                     })
                                 accessory.addService(this.ataOutdoorTemperatureSensorService);
@@ -2596,9 +2595,9 @@ class MelCloudDevice extends EventEmitter {
                             };
 
                             //temperature sensor services zones
-                            if (atwTemperatureSensor) {
+                            if (atwTemperatureSensor && this.roomTemperatures[i] !== null) {
                                 const debug = this.enableDebugMode ? this.emit('debug', `${zoneName}, Prepare temperature sensor service`) : false;
-                                this.atwTemperatureSensorServices = new Service.TemperatureSensor(`${accessoryName} ${zoneName}`, `Temperature Sensor ${deviceId} ${i}`);
+                                this.atwTemperatureSensorServices = new Service.TemperatureSensor(`${accessoryName} ${zoneName}`, `${zoneName} Temperature Sensor ${deviceId} ${i}`);
                                 this.atwTemperatureSensorServices.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 this.atwTemperatureSensorServices.setCharacteristic(Characteristic.ConfiguredName, `${atwServiceName}`);
                                 this.atwTemperatureSensorServices.getCharacteristic(Characteristic.CurrentTemperature)
@@ -2612,96 +2611,112 @@ class MelCloudDevice extends EventEmitter {
 
                         //temperature sensor services
                         if (atwTemperatureSensor) {
-                            const debug = this.enableDebugMode ? this.emit('debug', `Prepare flow temperature sensor service`) : false;
-                            this.atwFlowTemperatureSensorService = new Service.TemperatureSensor(`${accessoryName} Flow`, `Flow Temperature Sensor ${deviceId}`);
-                            this.atwFlowTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                            this.atwFlowTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Flow`);
-                            this.atwFlowTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                                .onGet(async () => {
-                                    const state = this.atwFlowTemperature;
-                                    return state;
-                                })
-                            accessory.addService(this.atwFlowTemperatureSensorService);
+                            if (this.atwFlowTemperature !== null) {
+                                const debug = this.enableDebugMode ? this.emit('debug', `Prepare flow temperature sensor service`) : false;
+                                this.atwFlowTemperatureSensorService = new Service.TemperatureSensor(`${accessoryName} Flow`, `Flow Temperature Sensor ${deviceId}`);
+                                this.atwFlowTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                this.atwFlowTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Flow`);
+                                this.atwFlowTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                    .onGet(async () => {
+                                        const state = this.atwFlowTemperature;
+                                        return state;
+                                    })
+                                accessory.addService(this.atwFlowTemperatureSensorService);
 
-                            const debug1 = this.enableDebugMode ? this.emit('debug', `Prepare return temperature sensor service`) : false;
-                            this.atwreturnTemperatureSensorService = new Service.TemperatureSensor(`${accessoryName} Return`, `Return Temperature Sensor ${deviceId}`);
-                            this.atwreturnTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                            this.atwreturnTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Return`);
-                            this.atwreturnTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                                .onGet(async () => {
-                                    const state = this.atwReturnTemperature;
-                                    return state;
-                                })
-                            accessory.addService(this.atwreturnTemperatureSensorService);
+                            };
+                            if (this.atwReturnTemperature !== null) {
+                                const debug1 = this.enableDebugMode ? this.emit('debug', `Prepare return temperature sensor service`) : false;
+                                this.atwreturnTemperatureSensorService = new Service.TemperatureSensor(`${accessoryName} Return`, `Return Temperature Sensor ${deviceId}`);
+                                this.atwreturnTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                this.atwreturnTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Return`);
+                                this.atwreturnTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                    .onGet(async () => {
+                                        const state = this.atwReturnTemperature;
+                                        return state;
+                                    })
+                                accessory.addService(this.atwreturnTemperatureSensorService);
+                            };
 
-                            const debug2 = this.enableDebugMode ? this.emit('debug', `Prepare flow temperature zone 1 sensor service`) : false;
-                            this.atwFlowTemperatureZone1SensorService = new Service.TemperatureSensor(`${accessoryName} Flow Zone 1`, `Flow Temperature Zone 1 Sensor ${deviceId}`);
-                            this.atwFlowTemperatureZone1SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                            this.atwFlowTemperatureZone1SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Flow Zone 1`);
-                            this.atwFlowTemperatureZone1SensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                                .onGet(async () => {
-                                    const state = this.atwFlowTemperatureZone1;
-                                    return state;
-                                })
-                            accessory.addService(this.atwFlowTemperatureZone1SensorService);
+                            if (this.atwFlowTemperatureZone1 !== null) {
+                                const debug2 = this.enableDebugMode ? this.emit('debug', `Prepare flow temperature zone 1 sensor service`) : false;
+                                this.atwFlowTemperatureZone1SensorService = new Service.TemperatureSensor(`${accessoryName} Flow Zone 1`, `Flow Temperature Sensor Zone 1 ${deviceId}`);
+                                this.atwFlowTemperatureZone1SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                this.atwFlowTemperatureZone1SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Flow Zone 1`);
+                                this.atwFlowTemperatureZone1SensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                    .onGet(async () => {
+                                        const state = this.atwFlowTemperatureZone1;
+                                        return state;
+                                    })
+                                accessory.addService(this.atwFlowTemperatureZone1SensorService);
+                            };
 
-                            const debug3 = this.enableDebugMode ? this.emit('debug', `Prepare return temperature zone 1 sensor service`) : false;
-                            this.atwReturnTemperatureZone1SensorService = new Service.TemperatureSensor(`${accessoryName} Return Zone 1`, `Return Temperature Zone 1 Sensor ${deviceId}`);
-                            this.atwReturnTemperatureZone1SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                            this.atwReturnTemperatureZone1SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Return Zone 1`);
-                            this.atwReturnTemperatureZone1SensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                                .onGet(async () => {
-                                    const state = this.atwReturnTemperatureZone1;
-                                    return state;
-                                })
-                            accessory.addService(this.atwReturnTemperatureZone1SensorService);
+                            if (this.atwReturnTemperatureZone1 !== null) {
+                                const debug3 = this.enableDebugMode ? this.emit('debug', `Prepare return temperature zone 1 sensor service`) : false;
+                                this.atwReturnTemperatureZone1SensorService = new Service.TemperatureSensor(`${accessoryName} Return Zone 1`, `Return Temperature Sensor Zone 1 ${deviceId}`);
+                                this.atwReturnTemperatureZone1SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                this.atwReturnTemperatureZone1SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Return Zone 1`);
+                                this.atwReturnTemperatureZone1SensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                    .onGet(async () => {
+                                        const state = this.atwReturnTemperatureZone1;
+                                        return state;
+                                    })
+                                accessory.addService(this.atwReturnTemperatureZone1SensorService);
+                            };
 
                             if (atwHasHotWaterTank) {
-                                const debug = this.enableDebugMode ? this.emit('debug', `Prepare flow temperature water tank sensor service`) : false;
-                                this.atwFlowTemperatureWaterTankSensorService = new Service.TemperatureSensor(`${accessoryName} Flow Water Tank`, `Flow Temperature Water Tank Sensor ${deviceId}`);
-                                this.atwFlowTemperatureWaterTankSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                                this.atwFlowTemperatureWaterTankSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Flow Water Tank`);
-                                this.atwFlowTemperatureWaterTankSensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                                    .onGet(async () => {
-                                        const state = this.atwFlowTemperatureWaterTank;
-                                        return state;
-                                    })
-                                accessory.addService(this.atwFlowTemperatureWaterTankSensorService);
+                                if (this.atwFlowTemperatureWaterTank !== null) {
+                                    const debug = this.enableDebugMode ? this.emit('debug', `Prepare flow temperature water tank sensor service`) : false;
+                                    this.atwFlowTemperatureWaterTankSensorService = new Service.TemperatureSensor(`${accessoryName} Flow Water Tank`, `Flow Temperature Sensor Water Tank ${deviceId}`);
+                                    this.atwFlowTemperatureWaterTankSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                    this.atwFlowTemperatureWaterTankSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Flow Water Tank`);
+                                    this.atwFlowTemperatureWaterTankSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                        .onGet(async () => {
+                                            const state = this.atwFlowTemperatureWaterTank;
+                                            return state;
+                                        })
+                                    accessory.addService(this.atwFlowTemperatureWaterTankSensorService);
+                                };
 
-                                const debug1 = this.enableDebugMode ? this.emit('debug', `Prepare return temperature water tank sensor service`) : false;
-                                this.atwReturnTemperatureWaterTankSensorService = new Service.TemperatureSensor(`${accessoryName} Return Water Tank`, `Return Temperature Water Tank Sensor ${deviceId}`);
-                                this.atwReturnTemperatureWaterTankSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                                this.atwReturnTemperatureWaterTankSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Return Water Tank`);
-                                this.atwReturnTemperatureWaterTankSensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                                    .onGet(async () => {
-                                        const state = this.atwReturnTemperatureWaterTank;
-                                        return state;
-                                    })
-                                accessory.addService(this.atwReturnTemperatureWaterTankSensorService);
+                                if (this.atwReturnTemperatureWaterTank !== null) {
+                                    const debug1 = this.enableDebugMode ? this.emit('debug', `Prepare return temperature water tank sensor service`) : false;
+                                    this.atwReturnTemperatureWaterTankSensorService = new Service.TemperatureSensor(`${accessoryName} Return Water Tank`, `Return Temperature Sensor Water Tank ${deviceId}`);
+                                    this.atwReturnTemperatureWaterTankSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                    this.atwReturnTemperatureWaterTankSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Return Water Tank`);
+                                    this.atwReturnTemperatureWaterTankSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                        .onGet(async () => {
+                                            const state = this.atwReturnTemperatureWaterTank;
+                                            return state;
+                                        })
+                                    accessory.addService(this.atwReturnTemperatureWaterTankSensorService);
+                                };
                             };
 
                             if (atwHasZone2) {
-                                const debug = this.enableDebugMode ? this.emit('debug', `Prepare flow temperature zone 2 sensor service`) : false;
-                                this.atwFlowTemperatureZone2SensorService = new Service.TemperatureSensor(`${accessoryName} Flow Zone 2`, `Flow Temperature Zone 2 Sensor ${deviceId}`);
-                                this.atwFlowTemperatureZone2SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                                this.atwFlowTemperatureZone2SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Flow Zone 2`);
-                                this.atwFlowTemperatureZone2SensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                                    .onGet(async () => {
-                                        const state = this.atwFlowTemperatureZone2;
-                                        return state;
-                                    })
-                                accessory.addService(this.atwFlowTemperatureZone2SensorService);
+                                if (this.atwFlowTemperatureZone2 !== null) {
+                                    const debug = this.enableDebugMode ? this.emit('debug', `Prepare flow temperature zone 2 sensor service`) : false;
+                                    this.atwFlowTemperatureZone2SensorService = new Service.TemperatureSensor(`${accessoryName} Flow Zone 2`, `Flow Temperature Sensor Zone 2 ${deviceId}`);
+                                    this.atwFlowTemperatureZone2SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                    this.atwFlowTemperatureZone2SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Flow Zone 2`);
+                                    this.atwFlowTemperatureZone2SensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                        .onGet(async () => {
+                                            const state = this.atwFlowTemperatureZone2;
+                                            return state;
+                                        })
+                                    accessory.addService(this.atwFlowTemperatureZone2SensorService);
+                                };
 
-                                const debug1 = this.enableDebugMode ? this.emit('debug', `Prepare return temperature zone 2 sensor service`) : false;
-                                this.atwReturnTemperatureZone2SensorService = new Service.TemperatureSensor(`${accessoryName} Return Zone 2`, `Return Temperature Zone 2 Sensor ${deviceId}`);
-                                this.atwReturnTemperatureZone2SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                                this.atwReturnTemperatureZone2SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Return Zone 2`);
-                                this.atwReturnTemperatureZone2SensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                                    .onGet(async () => {
-                                        const state = this.atwReturnTemperatureZone2;
-                                        return state;
-                                    })
-                                accessory.addService(this.atwReturnTemperatureZone2SensorService);
+                                if (this.atwReturnTemperatureZone2 !== null) {
+                                    const debug1 = this.enableDebugMode ? this.emit('debug', `Prepare return temperature zone 2 sensor service`) : false;
+                                    this.atwReturnTemperatureZone2SensorService = new Service.TemperatureSensor(`${accessoryName} Return Zone 2`, `Return Temperature Sensor Zone 2 ${deviceId}`);
+                                    this.atwReturnTemperatureZone2SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                    this.atwReturnTemperatureZone2SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Return Zone 2`);
+                                    this.atwReturnTemperatureZone2SensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                        .onGet(async () => {
+                                            const state = this.atwReturnTemperatureZone2;
+                                            return state;
+                                        })
+                                    accessory.addService(this.atwReturnTemperatureZone2SensorService);
+                                };
                             };
                         };
 
@@ -3228,7 +3243,7 @@ class MelCloudDevice extends EventEmitter {
 
                         //temperature sensor services
                         if (ervTemperatureSensor) {
-                            if (this.ervHasRoomTemperature) {
+                            if (this.ervHasRoomTemperature && this.roomTemperature !== null) {
                                 const debug = this.enableDebugMode ? this.emit('debug', `Prepare room temperature sensor service`) : false;
                                 this.ervRoomTemperatureSensorService = new Service.TemperatureSensor(`${ervServiceName} Room`, `Room Temperature Sensor ${deviceId}`);
                                 this.ervRoomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
@@ -3241,27 +3256,27 @@ class MelCloudDevice extends EventEmitter {
                                 accessory.addService(this.ervRoomTemperatureSensorService);
                             };
 
-                            if (this.ervHasSupplyTemperature) {
+                            if (this.ervHasSupplyTemperature && this.supplyTemperature !== null) {
                                 const debug = this.enableDebugMode ? this.emit('debug', `Prepare supply temperature sensor service`) : false;
                                 this.ervSupplyTemperatureSensorService = new Service.TemperatureSensor(`${ervServiceName} Supply`, `Supply Temperature Sensor ${deviceId}`);
                                 this.ervSupplyTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 this.ervSupplyTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${ervServiceName} Supply`);
                                 this.ervSupplyTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
                                     .onGet(async () => {
-                                        const state = this.outdoorTemperature;
+                                        const state = this.supplyTemperature;
                                         return state;
                                     })
                                 accessory.addService(this.ervSupplyTemperatureSensorService);
                             };
 
-                            if (this.ervHasOutdoorTemperature) {
+                            if (this.ervHasOutdoorTemperature && this.outdoorTemperature !== null) {
                                 const debug = this.enableDebugMode ? this.emit('debug', `Prepare outdoor temperature sensor service`) : false;
                                 this.ervOutdoorTemperatureSensorService = new Service.TemperatureSensor(`${ervServiceName} Outdoor`, `Outdoor Temperature Sensor ${deviceId}`);
                                 this.ervOutdoorTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 this.ervOutdoorTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${ervServiceName} Outdoor`);
                                 this.ervOutdoorTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
                                     .onGet(async () => {
-                                        const state = this.supplyTemperature;
+                                        const state = this.outdoorTemperature;
                                         return state;
                                     })
                                 accessory.addService(this.ervOutdoorTemperatureSensorService);

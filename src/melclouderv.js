@@ -322,6 +322,7 @@ class MelCloudErv extends EventEmitter {
                     Power: power,
                     Offline: offline,
                 }
+                const debug1 = debugLog ? this.emit('debug', `State: ${JSON.stringify(deviceState, null, 2)}`) : false;
 
                 //emit state changes
                 this.emit('deviceState', deviceData, deviceState);
