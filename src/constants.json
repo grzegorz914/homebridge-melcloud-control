@@ -125,7 +125,7 @@
             "HEATING ZONES",
             "COOLING",
             "HOT WATER STORAGE",
-            "FREZE STAT",
+            "FREEZE STAT",
             "LEGIONELLA",
             "HEATING ECO",
             "MODE 1",
@@ -151,7 +151,7 @@
             "HEAT CURVE",
             "COOL THERMOSTAT",
             "COOL FLOW",
-            "FLOOR DRYUP",
+            "FLOOR DRY UP",
             "IDLE"
         ],
         "EffectiveFlags": {
@@ -200,7 +200,7 @@
             "FAN",
             "AUTO"
         ],
-        "AktualOperationMode": [
+        "ActualOperationMode": [
             "NOT AUTO",
             "DETERMINING",
             "HEATING",
@@ -216,7 +216,7 @@
         ],
         "VentilationMode": [
             "LOSSNAY",
-            "BYPAS",
+            "BYPASS",
             "AUTO"
         ],
         "FanSpeed": [
@@ -227,18 +227,18 @@
             "4",
             "OFF"
         ],
-        "AktualVentilationMode": [
+        "ActualVentilationMode": [
             "LOSSNAY",
-            "BYPAS"
+            "BYPASS"
         ],
-        "AktualSupplyFanSpeed": [
+        "ActualSupplyFanSpeed": [
             "STOP",
             "1",
             "2",
             "3",
             "4"
         ],
-        "AktualExtractFanSpeed": [
+        "ActualExtractFanSpeed": [
             "STOP",
             "1",
             "2",
