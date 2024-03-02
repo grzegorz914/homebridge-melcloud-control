@@ -21,7 +21,7 @@ class MelCloudPlatform {
 		};
 
 		api.on('didFinishLaunching', () => {
-		    //loop through accounts
+			//loop through accounts
 			for (const account of config.accounts) {
 				const accountName = account.name;
 				const user = account.user;

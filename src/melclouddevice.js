@@ -732,7 +732,7 @@ class MelCloudDevice extends EventEmitter {
                                     if (this.atwHeatCoolModes === 0 || this.atwHeatCoolModes === 1) {
                                         this.atwMelCloudServices[i].updateCharacteristic(Characteristic.HeatingThresholdTemperature, setTemperature)
                                     }
-                                    if ((this.atwHeatCoolModes === 0 || this.atwHeatCoolModes === 2) && i !== this.atwCaseHotWate) {
+                                    if ((this.atwHeatCoolModes === 0 || this.atwHeatCoolModes === 2) && i !== this.atwCaseHotWater) {
                                         this.atwMelCloudServices[i].updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature)
                                     }
                                 }
@@ -854,7 +854,7 @@ class MelCloudDevice extends EventEmitter {
                                 .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureZone1)
                         };
 
-                        if (hasHotWaterTank && this.atwFlowTemperatureWaterTankSensorService) {
+                        if (hasHotWaterTank) {
                             if (this.atwFlowTemperatureWaterTankSensorService) {
                                 this.atwFlowTemperatureWaterTankSensorService
                                     .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureWaterTank)
@@ -1245,6 +1245,12 @@ class MelCloudDevice extends EventEmitter {
                     this.fanSpeed = fanSpeed;
                     this.setFanSpeed = setFanSpeed;
                     this.lockPhysicalControls = lockPhysicalControls;
+                  
+                    //update temperature sensors
+                    if (this.ervRoomTemperatureSensorService) {
+                        this.ervRoomTemperatureSensorService
+                            .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+                    };
 
                     //update temperature sensors
                     if (this.ervTemperatureSensor) {

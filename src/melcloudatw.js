@@ -98,7 +98,7 @@ class MelCloudAtw extends EventEmitter {
                 const lastFTCVersion = device.LastFTCVersion;
                 const lastFTCRevision = device.LastFTCRevision;
                 const fTCModel = device.FTCModel;
-                const refridgerentAddress = device.RefridgerentAddress;
+                const refridgerentAddress = device.RefridgerentAddress; // TODO: Typo in MELCloud service?
                 const dipSwitch1 = device.DipSwitch1;
                 const dipSwitch2 = device.DipSwitch2;
                 const dipSwitch3 = device.DipSwitch3;
