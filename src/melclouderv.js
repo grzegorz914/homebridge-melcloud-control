@@ -92,7 +92,7 @@ class MelCloudErv extends EventEmitter {
                 const labelControls = device.LabelControls;
                 const devicePowerDisabled = device.DevicePowerDisabled;
                 const silentMode = device.SilentMode;
-                const deviceHolidayModde = device.DeviceHolidayMode;
+                const deviceHolidayMode = device.DeviceHolidayMode;
                 const externalControl = device.ExternalControl;
                 const bypassVentilationSkipped = device.BypassVentilationSkipped;
                 const autoVentilationSkipped = device.AutoVentilationSkipped;
@@ -367,7 +367,7 @@ class MelCloudErv extends EventEmitter {
                 };
 
                 await this.axiosInstancePost(CONSTANS.ApiUrls.SetErv, options);
-                this.emit('deviceStaate', this.deviceData, deviceState);
+                this.emit('deviceState', this.deviceData, deviceState);
                 resolve();
             } catch (error) {
                 reject(error);

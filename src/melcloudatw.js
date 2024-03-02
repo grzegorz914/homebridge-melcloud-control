@@ -98,7 +98,7 @@ class MelCloudAtw extends EventEmitter {
                 const lastFTCVersion = device.LastFTCVersion;
                 const lastFTCRevision = device.LastFTCRevision;
                 const fTCModel = device.FTCModel;
-                const refridgerentAddress = device.RefridgerentAddress;
+                const refridgerentAddress = device.RefridgerentAddress; // TODO: Typo in MELCloud service?
                 const dipSwitch1 = device.DipSwitch1;
                 const dipSwitch2 = device.DipSwitch2;
                 const dipSwitch3 = device.DipSwitch3;
@@ -345,13 +345,13 @@ class MelCloudAtw extends EventEmitter {
                 //const firmwareUpdateAborted = deviceData.FirmwareUpdateAborted;
 
                 //permissions
-                const permiossionCanSetForcedHotWater = deviceData.Permissions.CanSetForcedHotWater;
-                const permiossionCanSetOperationMode = deviceData.Permissions.CanSetOperationMode;
-                const permiossionCanSetPower = deviceData.Permissions.CanSetPower;
-                const permiossionCanSetTankWaterTemperature = deviceData.Permissions.CanSetTankWaterTemperature;
-                const permiossionCanSetEcoHotWater = deviceData.Permissions.CanSetEcoHotWater;
-                const permiossionCanSetFlowTemperature = deviceData.Permissions.CanSetFlowTemperature;
-                const permiossionCanSetTemperatureIncrementOverride = deviceData.Permissions.CanSetTemperatureIncrementOverride;
+                const permissionCanSetForcedHotWater = deviceData.Permissions.CanSetForcedHotWater;
+                const permissionCanSetOperationMode = deviceData.Permissions.CanSetOperationMode;
+                const permissionCanSetPower = deviceData.Permissions.CanSetPower;
+                const permissionCanSetTankWaterTemperature = deviceData.Permissions.CanSetTankWaterTemperature;
+                const permissionCanSetEcoHotWater = deviceData.Permissions.CanSetEcoHotWater;
+                const permissionCanSetFlowTemperature = deviceData.Permissions.CanSetFlowTemperature;
+                const permissionCanSetTemperatureIncrementOverride = deviceData.Permissions.CanSetTemperatureIncrementOverride;
 
                 //display info if units are not configured in MELCloud service
                 if (unitsCount === 0) {
@@ -441,16 +441,16 @@ class MelCloudAtw extends EventEmitter {
         });
     }
 
-    send(deviveState) {
+    send(deviceState) {
         return new Promise(async (resolve, reject) => {
             try {
-                deviveState.HasPendingCommand = true;
+                deviceState.HasPendingCommand = true;
                 const options = {
-                    data: deviveState
+                    data: deviceState
                 };
 
                 await this.axiosInstancePost(CONSTANS.ApiUrls.SetAtw, options);
-                this.emit('deviceState', this.deviceData, deviveState);
+                this.emit('deviceState', this.deviceData, deviceState);
                 resolve();
             } catch (error) {
                 reject(error);

@@ -18,21 +18,21 @@
               "title": "Account",
               "type": "string",
               "placeholder": "Account name",
-              "description": "Here set your own account name.",
+              "description": "Your own account name.",
               "required": true
             },
             "user": {
               "title": "User",
               "type": "string",
               "placeholder": "User",
-              "description": "Here set the MELCloud account username.",
+              "description": "MELCloud account username.",
               "required": true
             },
             "passwd": {
               "title": "Password",
               "type": "string",
               "placeholder": "Password",
-              "description": "Here set the MELCloud account password.",
+              "description": "MELCloud account password.",
               "required": true
             },
             "language": {
@@ -223,33 +223,33 @@
                   ]
                 }
               ],
-              "description": "Here select main control mode.",
+              "description": "Select main control mode.",
               "required": true
             },
             "ataTemperatureSensor": {
               "title": "Temperature Sensor",
               "type": "boolean",
               "default": false,
-              "description": "This enable extra temperature sensor to use with automations in HomeKit app.",
+              "description": "This enables extra temperature sensor to use with automations in HomeKit app.",
               "required": false
             },
             "ataPresets": {
               "title": "Presets",
               "type": "boolean",
               "default": false,
-              "description": "This enable display device presets as extra buttons in HomeKit app.",
+              "description": "This enables the display of device presets as extra buttons in HomeKit app.",
               "required": false
             },
             "ataDisableAutoMode": {
               "title": "Disable Auto Mode",
               "type": "boolean",
-              "description": "This will disable Auto mode even this mode is supported by device.",
+              "description": "This will disable Auto mode even if this mode is supported by device.",
               "required": false
             },
             "ataDisableHeatMode": {
               "title": "Disable Heat Mode",
               "type": "boolean",
-              "description": "This will disable Heat mode even this mode is supported by device.",
+              "description": "This will disable Heat mode even if this mode is supported by device.",
               "required": false
             },
             "ataAutoHeatMode": {
@@ -269,7 +269,7 @@
                   ]
                 }
               ],
-              "description": "Here select operation mode for Auto/Heat option, if Auto, Heat or both modes are not supported by device will be used selected modes instead.",
+              "description": "Operation mode for Auto/Heat option, if Auto, Heat or both modes are not supported by the device this will be used for selected modes instead.",
               "required": true
             },
             "ataButtons": {
@@ -282,7 +282,7 @@
                     "title": "Name",
                     "type": "string",
                     "placeholder": "Button name",
-                    "description": "Here set Your own name displayed in Homebridge/HomeKit app.",
+                    "description": "Your own name displayed in Homebridge/HomeKit app.",
                     "required": true
                   },
                   "mode": {
@@ -290,7 +290,7 @@
                     "type": "integer",
                     "minimum": 0,
                     "maximum": 40,
-                    "description": "Here select the function, VH - Vane Horizontal, VV - Vane Veretical.",
+                    "description": "Function, VH - Vane Horizontal, VV - Vane Vertical.",
                     "oneOf": [
                       {
                         "title": "POWER ON/OFF",
@@ -548,14 +548,14 @@
                         ]
                       }
                     ],
-                    "description": "Here select extra function/tile to be exposed in HomeKit app.",
+                    "description": "Extra function/tile to be exposed in HomeKit app.",
                     "required": true
                   },
                   "namePrefix": {
                     "title": "Prefix",
                     "type": "boolean",
                     "default": false,
-                    "description": "Here enable/disable the accessory name as a prefix for button/sensor name.",
+                    "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
                     "required": true
                   }
                 }
@@ -581,21 +581,21 @@
                   ]
                 }
               ],
-              "description": "Here select main control mode.",
+              "description": "Main control mode.",
               "required": true
             },
             "atwTemperatureSensor": {
               "title": "Temperature Sensor",
               "type": "boolean",
               "default": false,
-              "description": "This enable extra temperature sensor to use with automations in HomeKit app.",
+              "description": "This enables extra temperature sensor for use with automations in HomeKit app.",
               "required": false
             },
             "atwPresets": {
               "title": "Presets",
               "type": "boolean",
               "default": false,
-              "description": "This enable display device presets as extra buttons in HomeKit app.",
+              "description": "This enables display of the device presets as extra buttons in HomeKit app.",
               "required": false
             },
             "atwButtons": {
@@ -608,7 +608,7 @@
                     "title": "Name",
                     "type": "string",
                     "placeholder": "Button name",
-                    "description": "Here set Your own name displayed in Homebridge/HomeKit app.",
+                    "description": "Your own name displayed in Homebridge/HomeKit app.",
                     "required": true
                   },
                   "mode": {
@@ -616,7 +616,7 @@
                     "type": "integer",
                     "minimum": 0,
                     "maximum": 70,
-                    "description": "Here select the function.",
+                    "description": "Select the function.",
                     "oneOf": [
                       {
                         "title": "POWER ON/OFF",
@@ -679,7 +679,7 @@
                         ]
                       },
                       {
-                        "title": "Z1 MODE FLOOR DRYUP",
+                        "title": "Z1 MODE FLOOR DRY UP",
                         "enum": [
                           25
                         ]
@@ -739,7 +739,7 @@
                         ]
                       },
                       {
-                        "title": "Z2 MODE FLOOR DRYUP",
+                        "title": "Z2 MODE FLOOR DRY UP",
                         "enum": [
                           65
                         ]
@@ -796,14 +796,14 @@
                         ]
                       }
                     ],
-                    "description": "Here select extra function/tile to be exposed in HomeKit app.",
+                    "description": "Select extra function/tile to be exposed in HomeKit app.",
                     "required": true
                   },
                   "namePrefix": {
                     "title": "Prefix",
                     "type": "boolean",
                     "default": false,
-                    "description": "Here enable/disable the accessory name as a prefix for button/sensor name.",
+                    "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
                     "required": true
                   }
                 }
@@ -829,21 +829,21 @@
                   ]
                 }
               ],
-              "description": "Here select main control mode.",
+              "description": "Select main control mode.",
               "required": true
             },
             "ervTemperatureSensor": {
               "title": "Temperature Sensors",
               "type": "boolean",
               "default": false,
-              "description": "This enable extra temperature sensor to use with automations in HomeKit app.",
+              "description": "This enables extra temperature sensor to be used with automations in HomeKit app.",
               "required": false
             },
             "ervPresets": {
               "title": "Presets",
               "type": "boolean",
               "default": false,
-              "description": "This enable display device presets as extra buttons in HomeKit app.",
+              "description": "This enable display of the device presets as extra buttons in HomeKit app.",
               "required": false
             },
             "ervButtons": {
@@ -856,7 +856,7 @@
                     "title": "Name",
                     "type": "string",
                     "placeholder": "Button name",
-                    "description": "Here set Your own name displayed in Homebridge/HomeKit app.",
+                    "description": "Your own name displayed in Homebridge/HomeKit app.",
                     "required": true
                   },
                   "mode": {
@@ -864,7 +864,7 @@
                     "type": "integer",
                     "minimum": 0,
                     "maximum": 18,
-                    "description": "Here select the function.",
+                    "description": "Select the function.",
                     "oneOf": [
                       {
                         "title": "POWER ON/OFF",
@@ -879,7 +879,7 @@
                         ]
                       },
                       {
-                        "title": "MODE BYPAS",
+                        "title": "MODE BYPASS",
                         "enum": [
                           2
                         ]
@@ -990,14 +990,14 @@
                         ]
                       }
                     ],
-                    "description": "Here select extra function/tile to be exposed in HomeKit app.",
+                    "description": "Select extra function/tile to be exposed in HomeKit app.",
                     "required": true
                   },
                   "namePrefix": {
                     "title": "Prefix",
                     "type": "boolean",
                     "default": false,
-                    "description": "Here enable/disable the accessory name as a prefix for button/sensor name.",
+                    "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
                     "required": true
                   }
                 }
@@ -1009,28 +1009,28 @@
               "default": 120,
               "minimum": 1,
               "maximum": 600,
-              "description": "Here set the background devices state refresh time in (sec).",
+              "description": "Set the background devices state refresh time in seconds.",
               "required": true
             },
             "disableLogInfo": {
               "title": "Disable Log Info",
               "type": "boolean",
               "default": false,
-              "description": "This disable display log values and states on every it change.",
+              "description": "Don't display values and states in log every time info changes.",
               "required": false
             },
             "disableLogDeviceInfo": {
               "title": "Disable Log Device Info",
               "type": "boolean",
               "default": false,
-              "description": "This disable display log device info on plugin start.",
+              "description": "Don't display device info in log on plugin start.",
               "required": false
             },
             "enableDebugMode": {
               "title": "Debug",
               "type": "boolean",
               "default": false,
-              "description": "This enable debug mode.",
+              "description": "Enable debug mode.",
               "required": false
             },
             "enableRestFul": {
@@ -1038,14 +1038,14 @@
               "type": "boolean",
               "default": false,
               "required": false,
-              "description": "This enable RESTful server."
+              "description": "Enable RESTful server."
             },
             "restFulDebug": {
               "title": "Debug",
               "type": "boolean",
               "default": false,
               "required": false,
-              "description": "This enable debug mode for RESTFul.",
+              "description": "Enable debug mode for RESTFul server.",
               "condition": {
                 "functionBody": "return model.accounts[arrayIndices].enableRestFul === true;"
               }
@@ -1055,14 +1055,14 @@
               "type": "boolean",
               "default": false,
               "required": false,
-              "description": "This enable MQTT client."
+              "description": "Enable MQTT client."
             },
             "mqttDebug": {
               "title": "Debug",
               "type": "boolean",
               "default": false,
               "required": false,
-              "description": "This enable debug mode for MQTT.",
+              "description": "Enable debug mode for MQTT client.",
               "condition": {
                 "functionBody": "return model.accounts[arrayIndices].enableMqtt === true;"
               }
@@ -1070,10 +1070,10 @@
             "mqttHost": {
               "title": "IP/Hostname",
               "type": "string",
-              "placeholder": "ip or hostname",
+              "placeholder": "IP or hostname",
               "required": true,
               "format": "hostname",
-              "description": "Here set the IP/Hostname of MQTT Broker.",
+              "description": "IP or Hostname of MQTT Broker.",
               "condition": {
                 "functionBody": "return model.accounts[arrayIndices].enableMqtt === true;"
               }
@@ -1083,7 +1083,7 @@
               "type": "integer",
               "placeholder": 1883,
               "required": true,
-              "description": "Here set the port of MQTT Broker.",
+              "description": "Port of MQTT Broker.",
               "condition": {
                 "functionBody": "return model.accounts[arrayIndices].enableMqtt === true;"
               }
@@ -1093,7 +1093,7 @@
               "type": "string",
               "placeholder": "client id",
               "required": false,
-              "description": "Here optional set the Client ID of MQTT Broker.",
+              "description": "Client ID of MQTT Broker (optional).",
               "condition": {
                 "functionBody": "return model.accounts[arrayIndices].enableMqtt === true"
               }
@@ -1103,7 +1103,7 @@
               "type": "string",
               "placeholder": "home/account",
               "required": false,
-              "description": "Here set the prefix.",
+              "description": "MQTT prefix.",
               "condition": {
                 "functionBody": "return model.accounts[arrayIndices].enableMqtt === true;"
               }
@@ -1113,7 +1113,7 @@
               "type": "boolean",
               "default": false,
               "required": false,
-              "description": "This enable authorization for MQTT Broker.",
+              "description": "Enable authorization for MQTT Broker.",
               "condition": {
                 "functionBody": "return model.accounts[arrayIndices].enableMqtt === true;"
               }
@@ -1123,7 +1123,7 @@
               "type": "string",
               "placeholder": "user",
               "required": false,
-              "description": "Here set the user of MQTT Broker.",
+              "description": "User for MQTT Broker.",
               "condition": {
                 "functionBody": "return model.accounts[arrayIndices].enableMqtt === true && model.accounts[arrayIndices].mqttAuth === true;"
               }
@@ -1133,7 +1133,7 @@
               "type": "string",
               "placeholder": "password",
               "required": false,
-              "description": "Here set the password of MQTT Broker.",
+              "description": "Password for MQTT Broker.",
               "condition": {
                 "functionBody": "return model.accounts[arrayIndices].enableMqtt === true && model.accounts[arrayIndices].mqttAuth === true;"
               }

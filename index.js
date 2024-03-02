@@ -21,6 +21,7 @@ class MelCloudPlatform {
 		};
 
 		api.on('didFinishLaunching', () => {
+			//loop through accounts
 			for (const account of config.accounts) {
 				const accountName = account.name;
 				const user = account.user;
@@ -47,7 +48,7 @@ class MelCloudPlatform {
 				};
 				const debug1 = enableDebugMode ? log(`Account: ${accountName}, Config: ${JSON.stringify(config, null, 2)}`) : false;
 
-				//config
+				//set refresh interval
 				const refreshInterval = account.refreshInterval * 1000 || 120000;
 
 				//melcloud account
