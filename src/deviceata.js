@@ -513,9 +513,24 @@ class MelCloudDevice extends EventEmitter {
                                         deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.SetFanSpeed;
                                         this.melCloudAta.send(deviceState);
                                         break;
-                                    case 'SwingMode':
+                                    case 'VaneHorizontal':
                                         deviceState[key] = value;
-                                        deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.VaneHorizontal + CONSTANTS.AirConditioner.EffectiveFlags.VaneVertical;
+                                        deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.VaneHorizontal;
+                                        this.melCloudAta.send(deviceState);
+                                        break;
+                                    case 'VaneVertical':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.VaneVertical;
+                                        this.melCloudAta.send(deviceState);
+                                        break;
+                                    case 'HideVaneControls':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Prohibit;
+                                        this.melCloudAta.send(deviceState);
+                                        break;
+                                    case 'HideDryModeControl':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Prohibit;
                                         this.melCloudAta.send(deviceState);
                                         break;
                                     case 'ProhibitSetTemperature':

@@ -2,9 +2,9 @@
 const path = require('path');
 const fs = require('fs');
 const MelCloud = require('./src/melcloud.js')
-const MelCloudDeviceAta = require('./src/melclouddeviceata.js')
-const MelCloudDeviceAtw = require('./src/melclouddeviceatw.js')
-const MelCloudDeviceErv = require('./src/melclouddeviceerv.js')
+const DeviceAta = require('./src/deviceata.js')
+const DeviceAtw = require('./src/deviceatw.js')
+const DeviceErv = require('./src/deviceerv.js')
 const CONSTANTS = require('./src/constants.json');
 
 class MelCloudPlatform {
@@ -66,7 +66,7 @@ class MelCloudPlatform {
 					//melcloud devices
 					switch (deviceType) {
 						case 0: //Air Conditioner
-							const airConditioner = new MelCloudDeviceAta(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, useFahrenheit, deviceInfoFile)
+							const airConditioner = new DeviceAta(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, useFahrenheit, deviceInfoFile)
 							airConditioner.on('publishAccessory', (accessory) => {
 
 								//publish device
@@ -87,7 +87,7 @@ class MelCloudPlatform {
 								});
 							break;
 						case 1: //Heat Pump
-							const heatPump = new MelCloudDeviceAtw(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, useFahrenheit, deviceInfoFile)
+							const heatPump = new DeviceAtw(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, useFahrenheit, deviceInfoFile)
 							heatPump.on('publishAccessory', (accessory) => {
 
 								//publish device
@@ -108,7 +108,7 @@ class MelCloudPlatform {
 								});
 							break;
 						case 3: //Energy Recovery Ventilation
-							const energyRecoveryVentilation = new MelCloudDeviceErv(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, useFahrenheit, deviceInfoFile)
+							const energyRecoveryVentilation = new DeviceErv(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, useFahrenheit, deviceInfoFile)
 							energyRecoveryVentilation.on('publishAccessory', (accessory) => {
 
 								//publish device
