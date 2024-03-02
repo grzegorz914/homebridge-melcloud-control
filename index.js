@@ -2,7 +2,9 @@
 const path = require('path');
 const fs = require('fs');
 const MelCloud = require('./src/melcloud.js')
-const MelCloudDevice = require('./src/melclouddevice.js')
+const MelCloudDeviceAta = require('./src/melclouddeviceata.js')
+const MelCloudDeviceAtw = require('./src/melclouddeviceatw.js')
+const MelCloudDeviceErv = require('./src/melclouddeviceerv.js')
 const CONSTANTS = require('./src/constants.json');
 
 class MelCloudPlatform {
@@ -61,26 +63,75 @@ class MelCloudPlatform {
 					const useFahrenheit = accountInfo.UseFahrenheit ? 1 : 0;
 					const deviceInfoFile = `${prefDir}/${accountName}_Device_${deviceId}`;
 
-					//melcloud device
-					const melCloudDevice = new MelCloudDevice(api, account, accountName, melCloud, accountInfo, contextKey, deviceId, deviceType, deviceName, deviceTypeText, useFahrenheit, deviceInfoFile)
-					melCloudDevice.on('publishAccessory', (accessory) => {
+					//melcloud devices
+					switch (deviceType) {
+						case 0: //Air Conditioner
+							const airConditioner = new MelCloudDeviceAta(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, useFahrenheit, deviceInfoFile)
+							airConditioner.on('publishAccessory', (accessory) => {
 
-						//publish device
-						api.publishExternalAccessories(CONSTANTS.PluginName, [accessory]);
-						const debug = enableDebugMode ? log(`${accountName}, ${deviceTypeText} ${deviceName}, published as external accessory.`) : false;
-					})
-						.on('devInfo', (devInfo) => {
-							log(devInfo);
-						})
-						.on('message', (message) => {
-							log(deviceTypeText, deviceName, message);
-						})
-						.on('debug', (debug) => {
-							log(`${deviceTypeText}, ${deviceName}, debug: ${debug}`);
-						})
-						.on('error', (error) => {
-							log.error(deviceTypeText, deviceName, error);
-						});
+								//publish device
+								api.publishExternalAccessories(CONSTANTS.PluginName, [accessory]);
+								const debug = enableDebugMode ? log(`${accountName}, ${deviceTypeText} ${deviceName}, published as external accessory.`) : false;
+							})
+								.on('devInfo', (devInfo) => {
+									log(devInfo);
+								})
+								.on('message', (message) => {
+									log(`${deviceTypeText}, ${deviceName}, ${message}`);
+								})
+								.on('debug', (debug) => {
+									log(`${deviceTypeText}, ${deviceName}, debug: ${debug}`);
+								})
+								.on('error', (error) => {
+									log.error(`${deviceTypeText}, ${deviceName}, ${error}`);
+								});
+							break;
+						case 1: //Heat Pump
+							const heatPump = new MelCloudDeviceAtw(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, useFahrenheit, deviceInfoFile)
+							heatPump.on('publishAccessory', (accessory) => {
+
+								//publish device
+								api.publishExternalAccessories(CONSTANTS.PluginName, [accessory]);
+								const debug = enableDebugMode ? log(`${accountName}, ${deviceTypeText} ${deviceName}, published as external accessory.`) : false;
+							})
+								.on('devInfo', (devInfo) => {
+									log(devInfo);
+								})
+								.on('message', (message) => {
+									log(`${deviceTypeText}, ${deviceName}, ${message}`);
+								})
+								.on('debug', (debug) => {
+									log(`${deviceTypeText}, ${deviceName}, debug: ${debug}`);
+								})
+								.on('error', (error) => {
+									log.error(`${deviceTypeText}, ${deviceName}, ${error}`);
+								});
+							break;
+						case 3: //Energy Recovery Ventilation
+							const energyRecoveryVentilation = new MelCloudDeviceErv(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, useFahrenheit, deviceInfoFile)
+							energyRecoveryVentilation.on('publishAccessory', (accessory) => {
+
+								//publish device
+								api.publishExternalAccessories(CONSTANTS.PluginName, [accessory]);
+								const debug = enableDebugMode ? log(`${accountName}, ${deviceTypeText} ${deviceName}, published as external accessory.`) : false;
+							})
+								.on('devInfo', (devInfo) => {
+									log(devInfo);
+								})
+								.on('message', (message) => {
+									log(`${deviceTypeText}, ${deviceName}, ${message}`);
+								})
+								.on('debug', (debug) => {
+									log(`${deviceTypeText}, ${deviceName}, debug: ${debug}`);
+								})
+								.on('error', (error) => {
+									log.error(`${deviceTypeText}, ${deviceName}, ${error}`);
+								});
+							break;
+						default:
+							log(`Unknown device type: ${deviceType},`);
+							break;
+					}
 				})
 					.on('message', (message) => {
 						log(`Account ${accountName}, ${message}`);
