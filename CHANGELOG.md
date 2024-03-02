@@ -10,6 +10,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Important changes v0.4.0 and above!!!
   * Main control mode, buttons and presets need to be configured again!!!
 
+  ## [0.18.0] - (02.03.2024)
+## Changes
+- added temperature sensors for heat pump, flow, return, zone 1, zone 2, water tank
+- fix [#91](https://github.com/grzegorz914/homebridge-melcloud-control/issues/91)
+- fix [#92](https://github.com/grzegorz914/homebridge-melcloud-control/issues/92)
+- fix [#96](https://github.com/grzegorz914/homebridge-melcloud-control/issues/96)
+- config.schema updated
+- cleanup
+
+
+
 ## [0.17.0] - (01.03.2024)
 ## Changes
 - added outdoor/room temperature sensors for Air Conditioner if supported

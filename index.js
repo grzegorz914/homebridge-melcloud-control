@@ -3,13 +3,13 @@ const path = require('path');
 const fs = require('fs');
 const MelCloud = require('./src/melcloud.js')
 const MelCloudDevice = require('./src/melclouddevice.js')
-const CONSTANS = require('./src/constans.json');
+const CONSTANTS = require('./src/constants.json');
 
 class MelCloudPlatform {
 	constructor(log, config, api) {
 		// only load if configured
 		if (!config || !Array.isArray(config.accounts)) {
-			log.warn(`No configuration found for ${CONSTANS.PluginName}`);
+			log.warn(`No configuration found for ${CONSTANTS.PluginName}`);
 			return;
 		}
 		this.accessories = [];
@@ -21,6 +21,7 @@ class MelCloudPlatform {
 		};
 
 		api.on('didFinishLaunching', () => {
+		    //loop through accounts
 			for (const account of config.accounts) {
 				const accountName = account.name;
 				const user = account.user;
@@ -47,7 +48,7 @@ class MelCloudPlatform {
 				};
 				const debug1 = enableDebugMode ? log(`Account: ${accountName}, Config: ${JSON.stringify(config, null, 2)}`) : false;
 
-				//config
+				//set refresh interval
 				const refreshInterval = account.refreshInterval * 1000 || 120000;
 
 				//melcloud account
@@ -56,7 +57,7 @@ class MelCloudPlatform {
 					const deviceId = deviceInfo.DeviceID.toString();
 					const deviceType = deviceInfo.Type;
 					const deviceName = deviceInfo.DeviceName;
-					const deviceTypeText = CONSTANS.DeviceType[deviceType];
+					const deviceTypeText = CONSTANTS.DeviceType[deviceType];
 					const useFahrenheit = accountInfo.UseFahrenheit ? 1 : 0;
 					const deviceInfoFile = `${prefDir}/${accountName}_Device_${deviceId}`;
 
@@ -65,7 +66,7 @@ class MelCloudPlatform {
 					melCloudDevice.on('publishAccessory', (accessory) => {
 
 						//publish device
-						api.publishExternalAccessories(CONSTANS.PluginName, [accessory]);
+						api.publishExternalAccessories(CONSTANTS.PluginName, [accessory]);
 						const debug = enableDebugMode ? log(`${accountName}, ${deviceTypeText} ${deviceName}, published as external accessory.`) : false;
 					})
 						.on('devInfo', (devInfo) => {
@@ -100,5 +101,5 @@ class MelCloudPlatform {
 };
 
 module.exports = (api) => {
-	api.registerPlatform(CONSTANS.PluginName, CONSTANS.PlatformName, MelCloudPlatform, true);
+	api.registerPlatform(CONSTANTS.PluginName, CONSTANTS.PlatformName, MelCloudPlatform, true);
 };
