@@ -1,0 +1,282 @@
+{
+    "PlatformName": "melcloudcontrol",
+    "PluginName": "homebridge-melcloud-control",
+    "ApiUrls": {
+        "BaseURL": "https://app.melcloud.com/Mitsubishi.Wifi.Client",
+        "ClientLogin": "/Login/ClientLogin",
+        "GetUserDetails": "/User/GetUserDetails",
+        "ListDevices": "/User/ListDevices",
+        "ListDeviceUnits": "/Device/ListDeviceUnits",
+        "DeviceState": "/Device/Get?id=DID&buildingID=BID",
+        "TileState": "/Tile/Get2?id=DID&buildingID=BID",
+        "SetAta": "/Device/SetAta",
+        "SetAtw": "/Device/SetAtw",
+        "SetErv": "/Device/SetErv",
+        "UpdateApplicationOptions": "/User/UpdateApplicationOptions",
+        "HolidayModeUpdate": "/HolidayMode/Update",
+        "EnergyCostReport": "/EnergyCost/Report"
+    },
+    "DeviceType": [
+        "Air Conditioner",
+        "Heat Pump",
+        "Unknown",
+        "Energy Recovery Ventilation"
+    ],
+    "TemperatureDisplayUnits": [
+        "°C",
+        "°F"
+    ],
+    "AirConditioner": {
+        "System": [
+            "AIR CONDITIONER OFF",
+            "AIR CONDITIONER ON",
+            "AIR CONDITIONER OFFLINE"
+        ],
+        "DriveMode": [
+            "0",
+            "HEATING",
+            "DRY",
+            "COOLING",
+            "4",
+            "5",
+            "6",
+            "FAN",
+            "AUTO",
+            "ISEE HEATING",
+            "ISEE DRY",
+            "ISEE COOLING"
+        ],
+        "VerticalVane": [
+            "AUTO",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "SWING"
+        ],
+        "HorizontalVane": [
+            "AUTO",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "SPLIT",
+            "SWING"
+        ],
+        "AirDirection": [
+            "AUTO",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "SWING"
+        ],
+        "FanSpeed": [
+            "AUTO",
+            "1",
+            "QUIET",
+            "WEAK",
+            "4",
+            "STRONG",
+            "VERY STRONG",
+            "OFF"
+        ],
+        "EffectiveFlags": {
+            "Power": 1,
+            "OperationMode": 2,
+            "SetTemperature": 4,
+            "SetFanSpeed": 8,
+            "VaneVertical": 16,
+            "Prohibit": 64,
+            "VaneHorizontal": 256,
+            "HolidayMode": 131072,
+            "All": 281483566710825
+        }
+    },
+    "HeatPump": {
+        "System": [
+            "SYSTEM OFF",
+            "SYSTEM ON",
+            "EMERGENCY RUN",
+            "TEST RUN"
+        ],
+        "ZoneName": [
+            "Heat Pump",
+            "Zone 1",
+            "Hot Water",
+            "Zone 2"
+        ],
+        "ControlType": [
+            "HEATING",
+            "COOLING"
+        ],
+        "Defrost": [
+            "NORMAL",
+            "STANDBY",
+            "DEFROST",
+            "WAITING RESTART"
+        ],
+        "OperationMode": [
+            "IDLE",
+            "HOT WATER",
+            "HEATING ZONES",
+            "COOLING",
+            "HOT WATER STORAGE",
+            "FREEZE STAT",
+            "LEGIONELLA",
+            "HEATING ECO",
+            "MODE 1",
+            "MODE 2",
+            "MODE 3",
+            "HEATING UP"
+        ],
+        "OperationModeDhw": [
+            "NORMAL",
+            "ECO"
+        ],
+        "ForceDhw": [
+            "NORMAL",
+            "HEAT NOW"
+        ],
+        "Holiday": [
+            "NORMAL",
+            "HOLIDAY"
+        ],
+        "ZoneOperation": [
+            "HEAT THERMOSTAT",
+            "HEAT FLOW",
+            "HEAT CURVE",
+            "COOL THERMOSTAT",
+            "COOL FLOW",
+            "FLOOR DRY UP",
+            "IDLE"
+        ],
+        "EffectiveFlags": {
+            "Power": 1,
+            "OperationMode": 2,
+            "EcoHotWater": 4,
+            "OperationModeZone1": 8,
+            "OperationModeZone2": 16,
+            "SetTankWaterTemperature": 32,
+            "Prohibit": 64,
+            "TargetHCTemperatureZone1": 128,
+            "TargetHCTemperatureZone2": 512,
+            "ForcedHotWaterMode": 65536,
+            "HolidayMode": 131072,
+            "ProhibitHotWater": 262144,
+            "ProhibitHeatingZone1": 524288,
+            "ProhibitCoolingZone1": 1048576,
+            "ProhibitHeatingZone2": 2097152,
+            "ProhibitCoolingZone2": 4194304,
+            "Demand": 67108864,
+            "SetTemperatureZone1": 8589934720,
+            "SetTemperatureZone2": 34359738880,
+            "ThermostatTemperatureZone1": 8589934592,
+            "ThermostatTemperatureZone2": 34359738368,
+            "SetHeatFlowTemperatureZone1": 281474976710656,
+            "SetHeatFlowTemperatureZone2": 281474976710656,
+            "SetCoolFlowTemperatureZone1": 281474976710656,
+            "SetCoolFlowTemperatureZone2": 281474976710656,
+            "All": 281483566710825
+        }
+    },
+    "Ventilation": {
+        "System": [
+            "VENTILATION OFF",
+            "VENTILATION ON",
+            "VENTILATION OFFLINE"
+        ],
+        "OperationMode": [
+            "0",
+            "HEAT",
+            "2",
+            "COOL",
+            "4",
+            "5",
+            "6",
+            "FAN",
+            "AUTO"
+        ],
+        "ActualOperationMode": [
+            "NOT AUTO",
+            "DETERMINING",
+            "HEATING",
+            "COOLING"
+        ],
+        "AutoFanSpeedControl": [
+            "NOT AVAILABLE",
+            "AVAILABLE"
+        ],
+        "NightPurge": [
+            "NORMAL",
+            "NIGHT PURGE"
+        ],
+        "VentilationMode": [
+            "LOSSNAY",
+            "BYPASS",
+            "AUTO"
+        ],
+        "FanSpeed": [
+            "AUTO",
+            "1",
+            "2",
+            "3",
+            "4",
+            "OFF"
+        ],
+        "ActualVentilationMode": [
+            "LOSSNAY",
+            "BYPASS"
+        ],
+        "ActualSupplyFanSpeed": [
+            "STOP",
+            "1",
+            "2",
+            "3",
+            "4"
+        ],
+        "ActualExtractFanSpeed": [
+            "STOP",
+            "1",
+            "2",
+            "3",
+            "4"
+        ],
+        "Co2Detected": [
+            "NO",
+            "YES"
+        ],
+        "PM25AirQuality": [
+            "UNKNOWN",
+            "EXCELLENT",
+            "GOOD",
+            "FAIR",
+            "INFERIOR",
+            "POOR"
+        ],
+        "CoreMaintenance": [
+            "ALL OK",
+            "REQUIRED"
+        ],
+        "FilterMaintenance": [
+            "ALL OK",
+            "REQUIRED"
+        ],
+        "EffectiveFlags": {
+            "Power": 1,
+            "OperationMode": 2,
+            "VentilationMode": 4,
+            "SetFanSpeed": 8,
+            "Prohibit": 64,
+            "HolidayMode": 131072,
+            "All": 281483566710825
+        }
+    },
+    "AccessLevel": {
+        "Quest": 3,
+        "Owner": 4
+    }
+}
