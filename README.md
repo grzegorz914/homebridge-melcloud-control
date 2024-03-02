@@ -39,9 +39,20 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
   * Port: last 4 numbers of `device Id`, displayed in HB log during start.
   * Path: `info`, `state`.
   * Response as JSON data.
-* MQTT client:
-  * Topic: `Info`, `State`.
-  * Publish as JSON data.
+* MQTT:
+  * Publish:
+    * Topic: `Info`, `State`.
+    * Publish as JSON data.
+  * Subscribe:
+    * Topic: `Set`.
+     * Subscribe as JSON data.
+       * Properties:
+         * Air Conditioner:
+           * `Power`, `OperationMode`, `SetTemperature`, `DefaultCoolingSetTemperature`, `DefaultHeatingSetTemperature`, `SetFanSpeed`, `SwingMode`, `ProhibitSetTemperature`, `ProhibitOperationMode`, `ProhibitPower`.
+         * Heat Pump:
+           * `Power`, `OperationMode`, `OperationModeZone1`, `OperationModeZone2`, `SetTemperature`, `SetTemperatureZone1`, `SetTemperatureZone2`, `SetHeatFlowTemperatureZone1`, `SetHeatFlowTemperatureZone2`, `SetCoolFlowTemperatureZone1`, `SetCoolFlowTemperatureZone2`, `SetTankWaterTemperature`, `ForcedHotWaterMode`, `EcoHotWater`, `HolidayMode`, `ProhibitZone1`, `ProhibitZone2`, `ProhibitHotWater`.
+         * Energy Recovery Ventilation Lossnay:
+           * `Power`, `OperationMode`, `VentilationMode`, `SetTemperature`, `DefaultCoolingSetTemperature`, `DefaultHeatingSetTemperature`, `NightPurgeMode`, `SetFanSpeed`, `HideRoomTemperature`, `HideSupplyTemperature`, `HideOutdoorTemperature`.
 
 ### Control Mode
 
