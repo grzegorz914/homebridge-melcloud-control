@@ -26,8 +26,9 @@ class MQTTCLIENT extends EventEmitter {
             }
             const url = `mqtt://${this.mqttHost}:${this.mqttPort}`;
             this.mqttClient = await MQTT.connectAsync(url, options);
-            this.isConnected = true;
             this.emit('connected', 'MQTT Connected.');
+            this.isConnected = true;
+
             this.subscribe();
         } catch (error) {
             this.isConnected = false;
@@ -39,13 +40,13 @@ class MQTTCLIENT extends EventEmitter {
         try {
             this.mqttClient.on('message', (topic, message) => {
                 const data = JSON.parse(message.toString());
-                const emitDebug = this.mqttDebug ? this.emit('debug', `MQTT received topic: ${topic}, message: ${JSON.stringify(data, null, 2)}`) : false;
+                const emitDebug = this.mqttDebug ? this.emit('debug', `MQTT Received topic: ${topic}, message: ${JSON.stringify(data, null, 2)}`) : false;
                 this.emit('changeState', data);
             });
 
             const topic = `${this.mqttPrefix}/Set`;
             await this.mqttClient.subscribe(topic);
-            const emitDebug = this.mqttDebug ? this.emit('connected', `MQTT subscribe topic: ${topic}.`) : false;
+           this.emit('connected', `MQTT Subscribe topic: ${topic}.`);
         } catch (error) {
             this.emit('error', `MQTT Subscribe error: ${error}`);
         };
@@ -53,7 +54,7 @@ class MQTTCLIENT extends EventEmitter {
 
     async send(topic, message) {
         if (!this.isConnected) {
-            const emitDebug = this.mqttDebug ? this.emit('debug', `MQTT client not connected.`) : false;
+            const emitDebug = this.mqttDebug ? this.emit('debug', `MQTT Client not connected.`) : false;
             return
         };
 
