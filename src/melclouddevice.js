@@ -291,7 +291,7 @@ class MelCloudDevice extends EventEmitter {
                                 .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                         };
 
-                        if (ataHasOutdoorTemperature && this.ataOutdoorTemperatureSensorService) {
+                        if (hasOutdoorTemperature && this.ataOutdoorTemperatureSensorService) {
                             this.ataOutdoorTemperatureSensorService
                                 .updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature)
                         };
