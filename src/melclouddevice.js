@@ -145,7 +145,7 @@ class MelCloudDevice extends EventEmitter {
                     const modelSupportsHeat = !this.ataDisableHeatMode && modelSupportsHeat1;
                     const modelSupportsDry = deviceData.Device.ModelSupportsDry ?? false;
                     const temperatureIncrement = deviceData.Device.TemperatureIncrement ?? 1;
-                    const outdoorTemperature = deviceData.Device.OutdoorTemperature ?? 0;
+                    const outdoorTemperature = deviceData.Device.OutdoorTemperature;
 
                     this.ataHasAutomaticFanSpeed = hasAutomaticFanSpeed;
                     this.ataAirDirectionFunction = airDirectionFunction;
@@ -617,7 +617,7 @@ class MelCloudDevice extends EventEmitter {
                     const setTankWaterTemperature = deviceState.SetTankWaterTemperature;
                     const forcedHotWaterMode = deviceState.ForcedHotWaterMode ? 1 : 0;
                     const unitStatus = deviceState.UnitStatus;
-                    const outdoorTemperature = deviceState.OutdoorTemperature ?? 0;
+                    const outdoorTemperature = deviceState.OutdoorTemperature;
                     const ecoHotWater = deviceState.EcoHotWater;
                     const holidayMode = deviceState.HolidayMode;
                     const prohibitZone1 = deviceState.ProhibitZone1;
