@@ -165,7 +165,7 @@ class MelCloud extends EventEmitter {
                     const debug = enableDebugMode ? this.emit('debug', `Device: ${deviceName} info saved.`) : false;
 
                     //prepare device if not in devices array
-                    await new Promise(resolve => setTimeout(resolve, 350));
+                    await new Promise(resolve => setTimeout(resolve, 500));
                     if (!devicesId.includes(deviceId)) {
                         this.emit('checkDevicesListComplete', this.accountInfo, this.contextKey, deviceInfo);
                         devicesId.push(deviceId);
