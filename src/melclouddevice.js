@@ -793,8 +793,8 @@ class MelCloudDevice extends EventEmitter {
                                 //update characteristics
                                 if (this.atwMelCloudServices && currentOperationMode !== undefined && targetOperationMode !== undefined) {
                                     this.atwMelCloudServices[i]
-                                        .updateCharacteristic(Characteristic.CurrentHeaterCoolerState, currentOperationMode)
-                                        .updateCharacteristic(Characteristic.TargetHeaterCoolerState, targetOperationMode)
+                                        .updateCharacteristic(Characteristic.CurrentHeatingCoolingState, currentOperationMode)
+                                        .updateCharacteristic(Characteristic.TargetHeatingCoolingState, targetOperationMode)
                                         .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                                         .updateCharacteristic(Characteristic.TargetTemperature, setTemperature)
                                         .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.useFahrenheit)
