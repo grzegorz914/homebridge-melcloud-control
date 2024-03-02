@@ -28,17 +28,17 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 ### About The Plugin
 
 * All devices are detected automatically.
-* Support multiple MELCloud accounts, buildings, flors, areas.
+* Support multiple MELCloud accounts, buildings, floors, areas.
 * Support temperature display units `Celsius/Fahrenheit`.
 * Support control device `Presets`.
-* Support direct device controll creating extra `Buttons`, appiled for all devices of same type in account.
-* Support identify all states of device creating `Sensors`, appiled for all devices of same type in account.
-* Support automations, shortcuts and siri.
+* Support direct device control creating extra `Buttons`, applied for all devices of same type in account.
+* Support identify all states of device creating `Sensors`, applied for all devices of same type in account.
+* Support automations, shortcuts and Siri.
 * RESTful server:
   * Request: `http//homebridge_ip_address:port/path`.
   * Port: last 4 numbers of `device Id`, displayed in HB log during start.
   * Path: `info`, `state`.
-  * Respone as JSON data.
+  * Response as JSON data.
 * MQTT client:
   * Topic: `Info`, `State`.
   * Publish as JSON data.
@@ -112,7 +112,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Operating mode `HEAT/AUTO` - `HEAT NOW, AUTO`.
       * Temperature `SET/GET`.
   * Buttons:
-    * For direct device control.  
+    * For direct device control.
       * Power `ON/OFF`.
       * Operating mode `HEAT/COOL/CURVE/HOLIDAY/AUTO HOT WATER/ECO HOT WATER/FORCE HOT WATER`.
       * Physical lock controls `LOCK/UNLOCK`.
@@ -130,23 +130,23 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * Energy Recovery Ventilation Lossnay:
   * Heater Cooler:
     * Power `ON/OFF`.
-    * Operating mode `AUTO/HEAT/COOL/POWER OFF` - `AUTO, LOSSNAY, BYPAS, POWER OFF`.
+    * Operating mode `AUTO/HEAT/COOL/POWER OFF` - `AUTO, LOSSNAY, BYPASS, POWER OFF`.
     * Fan speed `OFF/1/2/3/4/AUTO`.
     * Temperature display unit `°F/°C`.
   * Thermostat:
     * Power `ON/OFF`.
-    * Operating mode `POWER OFF/HEAT/COOL/AUTO` - `POWER OFF, LOSSNAY, BYPAS, AUTO`.
+    * Operating mode `POWER OFF/HEAT/COOL/AUTO` - `POWER OFF, LOSSNAY, BYPASS, AUTO`.
     * Temperature display unit `°F/°C`.
   * Buttons:
     * For direct device control.
       * Power `ON/OFF`.
-      * Operating mode `LOSSNAY/BYPAS/AUTO/NIGHT PURGE`.
+      * Operating mode `LOSSNAY/BYPASS/AUTO/NIGHT PURGE`.
       * Fan speed mode `AUTO/1/2/3/4`.
       * Presets `SET/UNSET`.
   * Sensors:
     * For automation and notifications.
       * Power `ON/OFF`.
-      * Operating mode `LOSSNAY/BYPAS/AUTO/NIGHT PURGE`.
+      * Operating mode `LOSSNAY/BYPASS/AUTO/NIGHT PURGE`.
       * Fan speed mode `AUTO/1/2/3/4`.
       * Presets `ACTIV/UNACTIV`.
       * Room temperature.
@@ -210,11 +210,11 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `disableLogDeviceInfo` | This disable display log device info on plugin start. |
 | `enableRestFul` | If enabled, RESTful server will start automatically and respond to any path request. |
 | `restFulDebug` | If enabled, deep log will be present in homebridge console for RESTFul server. |
-| `enableMqtt` | This enabled MQTT Broker and publish to it all awailable data. |
+| `enableMqtt` | This enabled MQTT Broker and publish to it all available data. |
 | `mqttDebug` | This enabled deep log in homebridge console for MQTT. |
 | `mqttHost` | Here set the `IP Address` or `Hostname` for MQTT Broker. |
 | `mqttPort` | Here set the `Port` for MQTT Broker, default 1883. |
-| `mqttCientId` | Here optinal set the `Client Id` for MQTT broker or leave empty. |
+| `mqttClientId` | Here optional set the `Client Id` for MQTT broker or leave empty. |
 | `mqttPrefix` | Here set the `Prefix` for `Topic` or leave empty. |
 | `mqttAuth` | This enabled MQTT Broker authorization credentials. |
 | `mqttUser` | Here set the MQTT Broker user. |
