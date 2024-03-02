@@ -368,6 +368,13 @@ class MelCloudAtw extends EventEmitter {
                 //mqtt
                 this.emit('mqtt', `Info`, deviceData);
 
+                const stateHasNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);
+                if (stateHasNotChanged) {
+                    this.checkDevice();
+                    return;
+                }
+                this.deviceData = deviceData;
+
                 //device state
                 const deviceState = {
                     DeviceId: deviceId,
@@ -398,13 +405,6 @@ class MelCloudAtw extends EventEmitter {
                     Power: power,
                     Offline: offline
                 }
-
-                const stateHasNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);
-                if (stateHasNotChanged) {
-                    this.checkDevice();
-                    return;
-                }
-                this.deviceData = deviceData;
 
                 //emit state changes
                 this.emit('deviceState', deviceData, deviceState);

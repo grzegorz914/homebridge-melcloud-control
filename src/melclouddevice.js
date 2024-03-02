@@ -157,6 +157,7 @@ class MelCloudDevice extends EventEmitter {
                     this.ataModelSupportsHeat = modelSupportsHeat;
                     this.ataModelSupportsDry = modelSupportsDry;
                     this.ataTemperatureIncrement = temperatureIncrement;
+                    this.ataOutdoorTemperature = outdoorTemperature;
 
                     //device state
                     const roomTemperature = deviceState.RoomTemperature;
@@ -284,14 +285,16 @@ class MelCloudDevice extends EventEmitter {
                     this.lockPhysicalControls = lockPhysicalControls;
                     this.outdoorTemperature = outdoorTemperature;
 
-                    if (this.ataRoomTemperatureSensorService) {
-                        this.ataRoomTemperatureSensorService
-                            .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-                    };
+                    if (this.ataTemperatureSensor) {
+                        if (this.ataRoomTemperatureSensorService) {
+                            this.ataRoomTemperatureSensorService
+                                .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+                        };
 
-                    if (this.ataOutdoorTemperatureSensorService) {
-                        this.ataOutdoorTemperatureSensorService
-                            .updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature)
+                        if (ataHasOutdoorTemperature && this.ataOutdoorTemperatureSensorService) {
+                            this.ataOutdoorTemperatureSensorService
+                                .updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature)
+                        };
                     };
 
                     //update buttons state
@@ -571,16 +574,16 @@ class MelCloudDevice extends EventEmitter {
                     const returnTemperatureZone2 = deviceData.Device.ReturnTemperatureZone2;
                     const returnTemperatureWaterTank = deviceData.Device.ReturnTemperatureBoiler;
 
-                    this.hasHotWaterTank = hasHotWaterTank;
-                    this.hasZone2 = hasZone2;
-                    this.flowTemperature = flowTemperature;
-                    this.flowTemperatureZone1 = flowTemperatureZone1;
-                    this.flowTemperatureZone2 = flowTemperatureZone2;
-                    this.flowTemperatureWaterTank = flowTemperatureWaterTank;
-                    this.returnTemperature = returnTemperature;
-                    this.returnTemperatureZone1 = returnTemperatureZone1;
-                    this.returnTemperatureZone2 = returnTemperatureZone2;
-                    this.returnTemperatureWaterTank = returnTemperatureWaterTank;
+                    this.atwHasHotWaterTank = hasHotWaterTank;
+                    this.atwHasZone2 = hasZone2;
+                    this.atwFlowTemperature = flowTemperature;
+                    this.atwFlowTemperatureZone1 = flowTemperatureZone1;
+                    this.atwFlowTemperatureZone2 = flowTemperatureZone2;
+                    this.atwFlowTemperatureWaterTank = flowTemperatureWaterTank;
+                    this.atwReturnTemperature = returnTemperature;
+                    this.atwReturnTemperatureZone1 = returnTemperatureZone1;
+                    this.atwReturnTemperatureZone2 = returnTemperatureZone2;
+                    this.atwReturnTemperatureWaterTank = returnTemperatureWaterTank;
 
                     //zones
                     const hotWater = hasHotWaterTank ? 1 : 0;
@@ -837,24 +840,14 @@ class MelCloudDevice extends EventEmitter {
                                 .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperature)
                         };
 
-                        if (this.atwFlowTemperatureZone1SensorService) {
-                            this.atwFlowTemperatureZone1SensorService
-                                .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureZone1)
-                        };
-
-                        if (hasZone2 && this.atwFlowTemperatureZone2SensorService) {
-                            this.atwFlowTemperatureZone2SensorService
-                                .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureZone2)
-                        };
-
-                        if (hasHotWaterTank && this.atwFlowTemperatureWaterTankSensorService) {
-                            this.atwFlowTemperatureWaterTankSensorService
-                                .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureWaterTank)
-                        };
-
                         if (this.atwReturnTemperatureSensorService) {
                             this.atwReturnTemperatureSensorService
                                 .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperature)
+                        };
+
+                        if (this.atwFlowTemperatureZone1SensorService) {
+                            this.atwFlowTemperatureZone1SensorService
+                                .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureZone1)
                         };
 
                         if (this.atwReturnTemperatureZone1SensorService) {
@@ -862,14 +855,28 @@ class MelCloudDevice extends EventEmitter {
                                 .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureZone1)
                         };
 
-                        if (hasZone2 && this.atwReturnTemperatureZone2SensorService) {
-                            this.atwReturnTemperatureZone2SensorService
-                                .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureZone2)
+                        if (hasHotWaterTank && this.atwFlowTemperatureWaterTankSensorService) {
+                            if (this.atwFlowTemperatureWaterTankSensorService) {
+                                this.atwFlowTemperatureWaterTankSensorService
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureWaterTank)
+                            };
+
+                            if (this.atwReturnTemperatureWaterTankSensorService) {
+                                this.atwReturnTemperatureWaterTankSensorService
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureWaterTank)
+                            };
                         };
 
-                        if (hasHotWaterTank && this.atwReturnTemperatureWaterTankSensorService) {
-                            this.atwReturnTemperatureWaterTankSensorService
-                                .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureWaterTank)
+                        if (hasZone2) {
+                            if (this.atwFlowTemperatureZone2SensorService) {
+                                this.atwFlowTemperatureZone2SensorService
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureZone2)
+                            };
+
+                            if (this.atwReturnTemperatureZone2SensorService) {
+                                this.atwReturnTemperatureZone2SensorService
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureZone2)
+                            };
                         };
                     };
 
@@ -1241,20 +1248,22 @@ class MelCloudDevice extends EventEmitter {
                     this.lockPhysicalControls = lockPhysicalControls;
 
                     //update temperature sensors
-                    if (this.ervRoomTemperatureSensorService) {
-                        this.ervRoomTemperatureSensorService
-                            .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-                    };
+                    if (this.ervTemperatureSensor) {
+                        if (hasRoomTemperature && this.ervRoomTemperatureSensorService) {
+                            this.ervRoomTemperatureSensorService
+                                .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+                        };
 
-                    if (this.ervOutdoorTemperatureSensorService) {
-                        this.ervOutdoorTemperatureSensorService
-                            .updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature)
-                    };
+                        if (hasOutdoorTemperature && this.ervOutdoorTemperatureSensorService) {
+                            this.ervOutdoorTemperatureSensorService
+                                .updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature)
+                        };
 
-                    if (this.ervSupplyTemperatureSensorService) {
-                        this.ervSupplyTemperatureSensorService
-                            .updateCharacteristic(Characteristic.CurrentTemperature, supplyTemperature)
-                    };
+                        if (hasSupplyTemperature && this.ervSupplyTemperatureSensorService) {
+                            this.ervSupplyTemperatureSensorService
+                                .updateCharacteristic(Characteristic.CurrentTemperature, supplyTemperature)
+                        };
+                    }
 
                     //update core maintenance
                     if (this.ervCoreMaintenanceService) {
@@ -1269,14 +1278,14 @@ class MelCloudDevice extends EventEmitter {
                     }
 
                     //update CO2 sensor
-                    if (this.ervCarbonDioxideSensorService) {
+                    if (hasCO2Sensor && this.ervCarbonDioxideSensorService) {
                         this.ervCarbonDioxideSensorService
                             .updateCharacteristic(Characteristic.CarbonDioxideDetected, roomCO2Detected)
                             .updateCharacteristic(Characteristic.CarbonDioxideLevel, roomCO2Level)
                     }
 
                     //update PM2.5 sensor
-                    if (this.ervAirQualitySensorService) {
+                    if (hasPM25Sensor && this.ervAirQualitySensorService) {
                         this.ervAirQualitySensorService
                             .updateCharacteristic(Characteristic.AirQuality, pM25AirQuality)
                             .updateCharacteristic(Characteristic.PM2_5Density, pM25Level)
@@ -1465,6 +1474,7 @@ class MelCloudDevice extends EventEmitter {
                         const ataModelSupportsDry = this.ataModelSupportsDry;
                         const ataNumberOfFanSpeeds = this.ataNumberOfFanSpeeds;
                         const ataSwingFunction = this.ataSwingFunction;
+                        const ataHasOutdoorTemperature = this.ataHasOutdoorTemperature;
                         const ataAutoDryFan = [ataModelSupportsDry ? 2 : 7, 7][this.ataAutoHeatMode];
                         const ataHeatFanDry = [7, ataModelSupportsDry ? 2 : 7][this.ataAutoHeatMode];
                         const ataServiceName = `${deviceTypeText} ${accessoryName}`;
@@ -1798,14 +1808,14 @@ class MelCloudDevice extends EventEmitter {
                                 })
                             accessory.addService(this.ataRoomTemperatureSensorService);
 
-                            if (this.hasOutdoorTemperature) {
+                            if (ataHasOutdoorTemperature) {
                                 const debug = this.enableDebugMode ? this.emit('debug', `Prepare Outdoor temperature sensor service`) : false;
                                 this.ataOutdoorTemperatureSensorService = new Service.TemperatureSensor(`${ataServiceName} Outdoor`, `Temperature Sensor ${deviceId}`);
                                 this.ataOutdoorTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 this.ataOutdoorTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Outdoor`);
                                 this.ataOutdoorTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
                                     .onGet(async () => {
-                                        const state = this.outdoorTemperature;
+                                        const state = this.ataOutdoorTemperature;
                                         return state;
                                     })
                                 accessory.addService(this.ataOutdoorTemperatureSensorService);
@@ -2092,8 +2102,8 @@ class MelCloudDevice extends EventEmitter {
                         const atwDisplayMode = this.atwDisplayMode;
                         const atwCaseHotWater = this.atwCaseHotWater;
                         const atwCaseZone2 = this.atwCaseZone2;
-                        const hasHotWaterTank = this.hasHotWaterTank;
-                        const hasZone2 = this.hasZone2;
+                        const atwHasHotWaterTank = this.atwHasHotWaterTank;
+                        const atwHasZone2 = this.atwHasZone2;
 
                         this.atwMelCloudServices = [];
                         this.atwTemperatureSensorServices = atwTemperatureSensor ? [] : false;
@@ -2608,7 +2618,7 @@ class MelCloudDevice extends EventEmitter {
                             this.atwFlowTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Flow`);
                             this.atwFlowTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
                                 .onGet(async () => {
-                                    const state = this.flowTemperature;
+                                    const state = this.atwFlowTemperature;
                                     return state;
                                 })
                             accessory.addService(this.atwFlowTemperatureSensorService);
@@ -2619,7 +2629,7 @@ class MelCloudDevice extends EventEmitter {
                             this.atwreturnTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Return`);
                             this.atwreturnTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
                                 .onGet(async () => {
-                                    const state = this.returnTemperature;
+                                    const state = this.atwReturnTemperature;
                                     return state;
                                 })
                             accessory.addService(this.atwreturnTemperatureSensorService);
@@ -2630,7 +2640,7 @@ class MelCloudDevice extends EventEmitter {
                             this.atwFlowTemperatureZone1SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Flow Zone 1`);
                             this.atwFlowTemperatureZone1SensorService.getCharacteristic(Characteristic.CurrentTemperature)
                                 .onGet(async () => {
-                                    const state = this.flowTemperatureZone1;
+                                    const state = this.atwFlowTemperatureZone1;
                                     return state;
                                 })
                             accessory.addService(this.atwFlowTemperatureZone1SensorService);
@@ -2641,43 +2651,19 @@ class MelCloudDevice extends EventEmitter {
                             this.atwReturnTemperatureZone1SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Return Zone 1`);
                             this.atwReturnTemperatureZone1SensorService.getCharacteristic(Characteristic.CurrentTemperature)
                                 .onGet(async () => {
-                                    const state = this.returnTemperatureZone1;
+                                    const state = this.atwReturnTemperatureZone1;
                                     return state;
                                 })
                             accessory.addService(this.atwReturnTemperatureZone1SensorService);
 
-                            if (hasZone2) {
-                                const debug = this.enableDebugMode ? this.emit('debug', `Prepare flow temperature zone 2 sensor service`) : false;
-                                this.atwFlowTemperatureZone2SensorService = new Service.TemperatureSensor(`${accessoryName} Flow Zone 2`, `Flow Temperature Zone 2 Sensor ${deviceId}`);
-                                this.atwFlowTemperatureZone2SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                                this.atwFlowTemperatureZone2SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Flow Zone 2`);
-                                this.atwFlowTemperatureZone2SensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                                    .onGet(async () => {
-                                        const state = this.flowTemperatureZone2;
-                                        return state;
-                                    })
-                                accessory.addService(this.atwFlowTemperatureZone2SensorService);
-
-                                const debug1 = this.enableDebugMode ? this.emit('debug', `Prepare return temperature zone 2 sensor service`) : false;
-                                this.atwReturnTemperatureZone2SensorService = new Service.TemperatureSensor(`${accessoryName} Return Zone 2`, `Return Temperature Zone 2 Sensor ${deviceId}`);
-                                this.atwReturnTemperatureZone2SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                                this.atwReturnTemperatureZone2SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Return Zone 2`);
-                                this.atwReturnTemperatureZone2SensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                                    .onGet(async () => {
-                                        const state = this.returnTemperatureZone2;
-                                        return state;
-                                    })
-                                accessory.addService(this.atwReturnTemperatureZone2SensorService);
-                            };
-
-                            if (hasHotWaterTank) {
+                            if (atwHasHotWaterTank) {
                                 const debug = this.enableDebugMode ? this.emit('debug', `Prepare flow temperature water tank sensor service`) : false;
                                 this.atwFlowTemperatureWaterTankSensorService = new Service.TemperatureSensor(`${accessoryName} Flow Water Tank`, `Flow Temperature Water Tank Sensor ${deviceId}`);
                                 this.atwFlowTemperatureWaterTankSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 this.atwFlowTemperatureWaterTankSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Flow Water Tank`);
                                 this.atwFlowTemperatureWaterTankSensorService.getCharacteristic(Characteristic.CurrentTemperature)
                                     .onGet(async () => {
-                                        const state = this.flowTemperatureWaterTank;
+                                        const state = this.atwFlowTemperatureWaterTank;
                                         return state;
                                     })
                                 accessory.addService(this.atwFlowTemperatureWaterTankSensorService);
@@ -2688,10 +2674,34 @@ class MelCloudDevice extends EventEmitter {
                                 this.atwReturnTemperatureWaterTankSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Return Water Tank`);
                                 this.atwReturnTemperatureWaterTankSensorService.getCharacteristic(Characteristic.CurrentTemperature)
                                     .onGet(async () => {
-                                        const state = this.returnTemperatureWaterTank;
+                                        const state = this.atwReturnTemperatureWaterTank;
                                         return state;
                                     })
                                 accessory.addService(this.atwReturnTemperatureWaterTankSensorService);
+                            };
+
+                            if (atwHasZone2) {
+                                const debug = this.enableDebugMode ? this.emit('debug', `Prepare flow temperature zone 2 sensor service`) : false;
+                                this.atwFlowTemperatureZone2SensorService = new Service.TemperatureSensor(`${accessoryName} Flow Zone 2`, `Flow Temperature Zone 2 Sensor ${deviceId}`);
+                                this.atwFlowTemperatureZone2SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                this.atwFlowTemperatureZone2SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Flow Zone 2`);
+                                this.atwFlowTemperatureZone2SensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                    .onGet(async () => {
+                                        const state = this.atwFlowTemperatureZone2;
+                                        return state;
+                                    })
+                                accessory.addService(this.atwFlowTemperatureZone2SensorService);
+
+                                const debug1 = this.enableDebugMode ? this.emit('debug', `Prepare return temperature zone 2 sensor service`) : false;
+                                this.atwReturnTemperatureZone2SensorService = new Service.TemperatureSensor(`${accessoryName} Return Zone 2`, `Return Temperature Zone 2 Sensor ${deviceId}`);
+                                this.atwReturnTemperatureZone2SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                this.atwReturnTemperatureZone2SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Return Zone 2`);
+                                this.atwReturnTemperatureZone2SensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                    .onGet(async () => {
+                                        const state = this.atwReturnTemperatureZone2;
+                                        return state;
+                                    })
+                                accessory.addService(this.atwReturnTemperatureZone2SensorService);
                             };
                         };
 
