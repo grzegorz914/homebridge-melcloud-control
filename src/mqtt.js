@@ -28,9 +28,26 @@ class MQTTCLIENT extends EventEmitter {
             this.mqttClient = await MQTT.connectAsync(url, options);
             this.isConnected = true;
             this.emit('connected', 'MQTT Connected.');
+            this.subscribe();
         } catch (error) {
             this.isConnected = false;
             this.emit('error', `MQTT Connect error: ${error}`);
+        };
+    };
+
+    async subscribe() {
+        try {
+            this.mqttClient.on('message', (topic, message) => {
+                const data = JSON.parse(message.toString());
+                const emitDebug = this.mqttDebug ? this.emit('debug', `MQTT received topic: ${topic}, message: ${JSON.stringify(data, null, 2)}`) : false;
+                this.emit('changeState', data);
+            });
+
+            const topic = `${this.mqttPrefix}/Set`;
+            await this.mqttClient.subscribe(topic);
+            const emitDebug = this.mqttDebug ? this.emit('debug', `MQTT subscribe: ${topic}.`) : false;
+        } catch (error) {
+            this.emit('error', `MQTT Subscribe error: ${error}`);
         };
     };
 

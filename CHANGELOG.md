@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Important changes v0.4.0 and above!!!
   * Main control mode, buttons and presets need to be configured again!!!
 
+## [0.19.0] - (02.03.2024)
+## Changes
+- added support to control devices over MQTT protocol
+- cleanup
+
 ## [0.18.0] - (02.03.2024)
 ## Changes
 - added temperature sensors for heat pump, flow, return, zone 1, zone 2, water tank
