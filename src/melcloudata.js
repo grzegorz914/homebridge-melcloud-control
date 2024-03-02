@@ -306,13 +306,6 @@ class MelCloudAta extends EventEmitter {
                 //mqtt
                 this.emit('mqtt', `Info`, deviceData);
 
-                const stateHasNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);
-                if (stateHasNotChanged) {
-                    this.checkDevice();
-                    return;
-                }
-                this.deviceData = deviceData;
-
                 //device state
                 const deviceState = {
                     DeviceId: deviceId,
@@ -336,14 +329,22 @@ class MelCloudAta extends EventEmitter {
                 }
                 const debug1 = debugLog ? this.emit('debug', `State: ${JSON.stringify(deviceState, null, 2)}`) : false;
 
-                //emit state changes
-                this.emit('deviceState', deviceData, deviceState);
-
                 //restFul
                 this.emit('restFul', 'state', deviceState);
 
                 //mqtt
                 this.emit('mqtt', `State`, deviceState);
+
+                //check state changes
+                const stateHasNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);
+                if (stateHasNotChanged) {
+                    this.checkDevice();
+                    return;
+                }
+                this.deviceData = deviceData;
+
+                //emit state changes
+                this.emit('deviceState', deviceData, deviceState);
                 this.checkDevice();
             } catch (error) {
                 this.emit('error', `Check device error: ${error}.`);
@@ -355,7 +356,7 @@ class MelCloudAta extends EventEmitter {
     };
 
     async checkDevice() {
-        await new Promise(resolve => setTimeout(resolve, 15000));
+        await new Promise(resolve => setTimeout(resolve, 10000));
         this.emit('checkDevice');
     };
 
