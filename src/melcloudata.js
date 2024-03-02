@@ -4,7 +4,7 @@ const fsPromises = fs.promises;
 const https = require('https');
 const axios = require('axios');
 const EventEmitter = require('events');
-const CONSTANS = require('./constans.json');
+const CONSTANTS = require('./constants.json');
 
 class MelCloudAta extends EventEmitter {
     constructor(config) {
@@ -19,7 +19,7 @@ class MelCloudAta extends EventEmitter {
 
         this.axiosInstancePost = axios.create({
             method: 'POST',
-            baseURL: CONSTANS.ApiUrls.BaseURL,
+            baseURL: CONSTANTS.ApiUrls.BaseURL,
             timeout: 25000,
             headers: {
                 'X-MitsContextKey': contextKey,
@@ -378,7 +378,7 @@ class MelCloudAta extends EventEmitter {
                     data: deviceState
                 };
 
-                await this.axiosInstancePost(CONSTANS.ApiUrls.SetAta, options);
+                await this.axiosInstancePost(CONSTANTS.ApiUrls.SetAta, options);
                 this.emit('deviceState', this.deviceData, deviceState);
                 resolve();
             } catch (error) {

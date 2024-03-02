@@ -4,7 +4,7 @@ const fsPromises = fs.promises;
 const https = require('https');
 const axios = require('axios');
 const EventEmitter = require('events');
-const CONSTANS = require('./constans.json');
+const CONSTANTS = require('./constants.json');
 
 class MelCloud extends EventEmitter {
     constructor(prefDir, accountName, user, passwd, language, enableDebugMode, refreshInterval) {
@@ -28,7 +28,7 @@ class MelCloud extends EventEmitter {
         };
         const axiosInstanceLogin = axios.create({
             method: 'POST',
-            baseURL: CONSTANS.ApiUrls.BaseURL,
+            baseURL: CONSTANTS.ApiUrls.BaseURL,
             timeout: 25000,
             withCredentials: true,
             maxContentLength: 100000000,
@@ -41,7 +41,7 @@ class MelCloud extends EventEmitter {
 
         this.on('connect', async () => {
             try {
-                const accountData = await axiosInstanceLogin(CONSTANS.ApiUrls.ClientLogin, options);
+                const accountData = await axiosInstanceLogin(CONSTANTS.ApiUrls.ClientLogin, options);
                 const account = accountData.data;
                 const accountInfo = account.LoginData;
                 const contextKey = accountInfo.ContextKey;
@@ -67,7 +67,7 @@ class MelCloud extends EventEmitter {
                 //create axios instance get
                 this.axiosInstanceGet = axios.create({
                     method: 'GET',
-                    baseURL: CONSTANS.ApiUrls.BaseURL,
+                    baseURL: CONSTANTS.ApiUrls.BaseURL,
                     timeout: 15000,
                     headers: {
                         'X-MitsContextKey': contextKey
@@ -84,7 +84,7 @@ class MelCloud extends EventEmitter {
                 //create axios instance post
                 this.axiosInstancePost = axios.create({
                     method: 'POST',
-                    baseURL: CONSTANS.ApiUrls.BaseURL,
+                    baseURL: CONSTANTS.ApiUrls.BaseURL,
                     timeout: 15000,
                     headers: {
                         'X-MitsContextKey': contextKey,
@@ -116,7 +116,7 @@ class MelCloud extends EventEmitter {
             const debug = enableDebugMode ? this.emit('debug', `Scanning for devices.`) : false;
 
             try {
-                const listDevicesData = await this.axiosInstanceGet(CONSTANS.ApiUrls.ListDevices);
+                const listDevicesData = await this.axiosInstanceGet(CONSTANTS.ApiUrls.ListDevices);
                 const buildingsList = listDevicesData.data;
                 const debug1 = enableDebugMode ? this.emit('debug', `Buildings: ${JSON.stringify(buildingsList, null, 2)}`) : false;
 
@@ -209,7 +209,7 @@ class MelCloud extends EventEmitter {
                     data: accountInfo
                 };
 
-                await this.axiosInstancePost(CONSTANS.ApiUrls.UpdateApplicationOptions, options);
+                await this.axiosInstancePost(CONSTANTS.ApiUrls.UpdateApplicationOptions, options);
                 await this.saveData(this.accountInfoFile, accountInfo);
 
                 resolve();
