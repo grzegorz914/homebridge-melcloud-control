@@ -295,6 +295,13 @@ class MelCloudErv extends EventEmitter {
                 //mqtt
                 this.emit('mqtt', `Info`, deviceData);
 
+                const stateHasNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);
+                if (stateHasNotChanged) {
+                    this.checkDevice();
+                    return;
+                }
+                this.deviceData = deviceData;
+
                 //device state
                 const deviceState = {
                     DeviceId: deviceId,
@@ -315,13 +322,7 @@ class MelCloudErv extends EventEmitter {
                     Power: power,
                     Offline: offline,
                 }
-
-                const stateHasNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);
-                if (stateHasNotChanged) {
-                    this.checkDevice();
-                    return;
-                }
-                this.deviceData = deviceData;
+                const debug1 = debugLog ? this.emit('debug', `State: ${JSON.stringify(deviceState, null, 2)}`) : false;
 
                 //emit state changes
                 this.emit('deviceState', deviceData, deviceState);

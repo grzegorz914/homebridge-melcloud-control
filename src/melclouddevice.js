@@ -145,7 +145,7 @@ class MelCloudDevice extends EventEmitter {
                     const modelSupportsHeat = !this.ataDisableHeatMode && modelSupportsHeat1;
                     const modelSupportsDry = deviceData.Device.ModelSupportsDry ?? false;
                     const temperatureIncrement = deviceData.Device.TemperatureIncrement ?? 1;
-                    const outdoorTemperature = deviceData.Device.OutdoorTemperature;
+                    const outdoorTemperature = deviceData.Device.OutdoorTemperature ?? 0;
 
                     this.ataHasAutomaticFanSpeed = hasAutomaticFanSpeed;
                     this.ataAirDirectionFunction = airDirectionFunction;
@@ -270,21 +270,12 @@ class MelCloudDevice extends EventEmitter {
                             break;
                     };
 
-                    if (this.ataRoomTemperatureSensorService) {
-                        this.ataRoomTemperatureSensorService
-                            .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-                    };
-
-                    if (this.ataOutdoorTemperatureSensorService) {
-                        this.ataOutdoorTemperatureSensorService
-                            .updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature)
-                    };
-
                     this.power = power;
                     this.offline = offline;
                     this.currentOperationMode = currentOperationMode;
                     this.targetOperationMode = targetOperationMode;
                     this.roomTemperature = roomTemperature;
+                    this.outdoorTemperature = outdoorTemperature;
                     this.setTemperature = setTemperature;
                     this.fanSpeed = fanSpeed;
                     this.setFanSpeed = setFanSpeed;
@@ -292,160 +283,171 @@ class MelCloudDevice extends EventEmitter {
                     this.vaneHorizontal = vaneHorizontal;
                     this.vaneVertical = vaneVertical;
                     this.lockPhysicalControls = lockPhysicalControls;
-                    this.outdoorTemperature = outdoorTemperature;
+
+                    if (this.ataTemperatureSensor) {
+                        if (this.ataRoomTemperatureSensorService) {
+                            this.ataRoomTemperatureSensorService
+                                .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+                        };
+
+                        if (hasOutdoorTemperature && this.ataOutdoorTemperatureSensorService) {
+                            this.ataOutdoorTemperatureSensorService
+                                .updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature)
+                        };
+                    };
 
                     //update buttons state
                     if (this.ataButtonsCount > 0) {
                         this.ataButtonsConfigured = [];
 
                         for (const button of this.ataButtons) {
-                            const buttonDisplayType = button.displayType ?? 0;
+                            const displayType = button.displayType ?? 0;
 
-                            if (buttonDisplayType > 0) {
-                                const buttonMode = button.mode ?? 100;
-                                switch (buttonMode) {
+                            if (displayType > 0) {
+                                const mode = button.mode ?? 100;
+                                switch (mode) {
                                     case 0: //POWER ON,OFF
-                                        button.buttonState = (power === true);
+                                        button.state = (power === true);
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 1: //OPERATING MODE HEAT
-                                        button.buttonState = power ? (operationMode === 1) : false;
+                                        button.state = power ? (operationMode === 1) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 2: //OPERATING MODE DRY
-                                        button.buttonState = power ? (operationMode === 2) : false;
+                                        button.state = power ? (operationMode === 2) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break
                                     case 3: //OPERATING MODE COOL
-                                        button.buttonState = power ? (operationMode === 3) : false;
+                                        button.state = power ? (operationMode === 3) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 4: //OPERATING MODE FAN
-                                        button.buttonState = power ? (operationMode === 7) : false;
+                                        button.state = power ? (operationMode === 7) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 5: //OPERATING MODE AUTO
-                                        button.buttonState = power ? (operationMode === 8) : false;
+                                        button.state = power ? (operationMode === 8) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 6: //OPERATING MODE PURIFY
-                                        button.buttonState = power ? (operationMode === 9) : false;
+                                        button.state = power ? (operationMode === 9) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 7: //OPERATING MODE DRY CONTROL HIDE
-                                        button.buttonState = power ? (hideDryModeControl === true) : false;
+                                        button.state = power ? (hideDryModeControl === true) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 10: //VANE H SWING MODE AUTO
-                                        button.buttonState = power ? (vaneHorizontal === 0) : false;
+                                        button.state = power ? (vaneHorizontal === 0) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 11: //VANE H SWING MODE 1
-                                        button.buttonState = power ? (vaneHorizontal === 1) : false;
+                                        button.state = power ? (vaneHorizontal === 1) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 12: //VANE H SWING MODE 2
-                                        button.buttonState = power ? (vaneHorizontal === 2) : false;
+                                        button.state = power ? (vaneHorizontal === 2) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 13: //VANE H SWING MODE 3
-                                        button.buttonState = power ? (vaneHorizontal === 3) : false;
+                                        button.state = power ? (vaneHorizontal === 3) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 14: //VANE H SWING MODE 4
-                                        button.buttonState = power ? (vaneHorizontal === 4) : false;
+                                        button.state = power ? (vaneHorizontal === 4) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 15: //VANE H SWING MODE 5
-                                        button.buttonState = power ? (vaneHorizontal === 5) : false;
+                                        button.state = power ? (vaneHorizontal === 5) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 16: //VANE H SWING MODE SPLIT
-                                        button.buttonState = power ? (vaneHorizontal === 8) : false;
+                                        button.state = power ? (vaneHorizontal === 8) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 17: //VANE H SWING MODE SWING
-                                        button.buttonState = power ? (vaneHorizontal === 12) : false;
+                                        button.state = power ? (vaneHorizontal === 12) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 20: //VANE V SWING MODE AUTO
-                                        button.buttonState = power ? (vaneVertical === 0) : false;
+                                        button.state = power ? (vaneVertical === 0) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 21: //VANE V SWING MODE 1
-                                        button.buttonState = power ? (vaneVertical === 1) : false;
+                                        button.state = power ? (vaneVertical === 1) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 22: //VANE V SWING MODE 2
-                                        button.buttonState = power ? (vaneVertical === 2) : false;
+                                        button.state = power ? (vaneVertical === 2) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 23: //VANE V SWING MODE 3
-                                        button.buttonState = power ? (vaneVertical === 3) : false;
+                                        button.state = power ? (vaneVertical === 3) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 24: //VANE V SWING MODE 4
-                                        button.buttonState = power ? (vaneVertical === 4) : false;
+                                        button.state = power ? (vaneVertical === 4) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 25: //VANE V SWING MODE 5
-                                        button.buttonState = power ? (vaneVertical === 5) : false;
+                                        button.state = power ? (vaneVertical === 5) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 26: //VANE V SWING MODE SWING
-                                        button.buttonState = power ? (vaneVertical === 7) : false;
+                                        button.state = power ? (vaneVertical === 7) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 27: //VANE H/V CONTROLS HIDE
-                                        button.buttonState = power ? (hideVaneControls === true) : false;
+                                        button.state = power ? (hideVaneControls === true) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 30: //FAN SPEED MODE AUTO
-                                        button.buttonState = power ? (setFanSpeed === 0) : false;
+                                        button.state = power ? (setFanSpeed === 0) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 31: //FAN SPEED MODE 1
-                                        button.buttonState = power ? (setFanSpeed === 1) : false;
+                                        button.state = power ? (setFanSpeed === 1) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 32: //FAN SPEED MODE 2
-                                        button.buttonState = power ? (setFanSpeed === 2) : false;
+                                        button.state = power ? (setFanSpeed === 2) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 33: //FAN SPEED MODE 3
-                                        button.buttonState = power ? (setFanSpeed === 3) : false;
+                                        button.state = power ? (setFanSpeed === 3) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 34: //FAN SPEED MODE 4
-                                        button.buttonState = power ? (setFanSpeed === 4) : false;
+                                        button.state = power ? (setFanSpeed === 4) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 35: //FAN SPEED  MODE 5
-                                        button.buttonState = power ? (setFanSpeed === 5) : false;
+                                        button.state = power ? (setFanSpeed === 5) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 36: //FAN SPEED  MODE 6
-                                        button.buttonState = power ? (setFanSpeed === 6) : false;
+                                        button.state = power ? (setFanSpeed === 6) : false;
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 37: //PHYSICAL LOCK CONTROLS ALL
-                                        button.buttonState = (lockPhysicalControls === 1);
+                                        button.state = (lockPhysicalControls === 1);
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 38: //PHYSICAL LOCK CONTROLS POWER
-                                        button.buttonState = (prohibitPower === true);
+                                        button.state = (prohibitPower === true);
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 39: //PHYSICAL LOCK CONTROLS MODE
-                                        button.buttonState = (prohibitOperationMode === true);
+                                        button.state = (prohibitOperationMode === true);
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     case 40: //PHYSICAL LOCK CONTROLS TEMP
-                                        button.buttonState = (prohibitSetTemperature === true);
+                                        button.state = (prohibitSetTemperature === true);
                                         this.ataButtonsConfigured.push(button);
                                         break;
                                     default: //Unknown button
-                                        this.emit('message', `Unknown button mode: ${buttonMode} detected.`);
+                                        this.emit('message', `Unknown button mode: ${mode} detected.`);
                                         break;
                                 };
                             };
@@ -454,12 +456,12 @@ class MelCloudDevice extends EventEmitter {
                         this.ataButtonsConfiguredCount = this.ataButtonsConfigured.length;
                         for (let i = 0; i < this.ataButtonsConfiguredCount; i++) {
                             const button = this.ataButtonsConfigured[i];
-                            const buttonState = button.buttonState;
-                            const buttonDisplayType = button.displayType;
-                            const characteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
+                            const state = button.state;
+                            const displayType = button.displayType;
+                            const characteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][displayType];
                             if (this.ataButtonsServices) {
                                 this.ataButtonsServices[i]
-                                    .updateCharacteristic(characteristicType, buttonState)
+                                    .updateCharacteristic(characteristicType, state)
                             };
                         };
 
@@ -559,6 +561,28 @@ class MelCloudDevice extends EventEmitter {
                     const canCool = deviceData.Device.CanCool ?? false;
                     const heatCoolModes = canHeat && canCool ? 0 : canHeat ? 1 : canCool ? 2 : 3;
                     const temperatureIncrement = deviceData.Device.TemperatureIncrement ?? 1;
+                    const minSetTemperature = deviceData.Device.MinSetTemperature ?? 20;
+                    const maxSetTemperature = deviceData.Device.MaxSetTemperature ?? 40;
+                    const maxTankTemperature = deviceData.Device.MaxTankTemperature ?? 60;
+                    const flowTemperature = deviceData.Device.FlowTemperature;
+                    const flowTemperatureZone1 = deviceData.Device.FlowTemperatureZone1;
+                    const flowTemperatureZone2 = deviceData.Device.FlowTemperatureZone2;
+                    const flowTemperatureWaterTank = deviceData.Device.FlowTemperatureBoiler;
+                    const returnTemperature = deviceData.Device.ReturnTemperature;
+                    const returnTemperatureZone1 = deviceData.Device.ReturnTemperatureZone1;
+                    const returnTemperatureZone2 = deviceData.Device.ReturnTemperatureZone2;
+                    const returnTemperatureWaterTank = deviceData.Device.ReturnTemperatureBoiler;
+
+                    this.atwHasHotWaterTank = hasHotWaterTank;
+                    this.atwHasZone2 = hasZone2;
+                    this.atwFlowTemperature = flowTemperature;
+                    this.atwFlowTemperatureZone1 = flowTemperatureZone1;
+                    this.atwFlowTemperatureZone2 = flowTemperatureZone2;
+                    this.atwFlowTemperatureWaterTank = flowTemperatureWaterTank;
+                    this.atwReturnTemperature = returnTemperature;
+                    this.atwReturnTemperatureZone1 = returnTemperatureZone1;
+                    this.atwReturnTemperatureZone2 = returnTemperatureZone2;
+                    this.atwReturnTemperatureWaterTank = returnTemperatureWaterTank;
 
                     //zones
                     const hotWater = hasHotWaterTank ? 1 : 0;
@@ -591,9 +615,9 @@ class MelCloudDevice extends EventEmitter {
                     const setCoolFlowTemperatureZone2 = deviceState.SetCoolFlowTemperatureZone2;
                     const tankWaterTemperature = deviceState.TankWaterTemperature;
                     const setTankWaterTemperature = deviceState.SetTankWaterTemperature;
-                    const forcedHotWaterMode = deviceState.ForcedHotWaterMode;
+                    const forcedHotWaterMode = deviceState.ForcedHotWaterMode ? 1 : 0;
                     const unitStatus = deviceState.UnitStatus;
-                    const outdoorTemperature = deviceState.OutdoorTemperature;
+                    const outdoorTemperature = deviceState.OutdoorTemperature ?? 0;
                     const ecoHotWater = deviceState.EcoHotWater;
                     const holidayMode = deviceState.HolidayMode;
                     const prohibitZone1 = deviceState.ProhibitZone1;
@@ -646,11 +670,11 @@ class MelCloudDevice extends EventEmitter {
                                         setTemperature = outdoorTemperature;
                                         lockPhysicalControls = hasHotWaterTank && hasZone2 ? (prohibitZone1 && prohibitHotWater && prohibitZone2 ? 1 : 0) : hasHotWaterTank ? (prohibitZone1 && prohibitHotWater ? 1 : 0) : hasZone2 ? (prohibitZone1 && prohibitZone2 ? 1 : 0) : 0;
 
-                                        operationModeSetPropsMinValue = [1, 1, 2][heatCoolModes];
-                                        operationModeSetPropsMaxValue = [2, 1, 2][heatCoolModes];
-                                        operationModeSetPropsValidValues = [[1, 2], [1], [2]][heatCoolModes];
-                                        temperatureSetPropsMinValue = [-35, -31][this.useFahrenheit];
-                                        temperatureSetPropsMaxValue = [50, 122][this.useFahrenheit];
+                                        operationModeSetPropsMinValue = [1, 1, 2, 0][heatCoolModes];
+                                        operationModeSetPropsMaxValue = [2, 1, 2, 0][heatCoolModes];
+                                        operationModeSetPropsValidValues = [[1, 2], [1], [2], [0]][heatCoolModes];
+                                        temperatureSetPropsMinValue = -35;
+                                        temperatureSetPropsMaxValue = 100;
                                         break;
                                     case 1: //Zone 1 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
                                         currentOperationMode = !power ? 0 : idleZone1 ? 1 : [2, 2, 2, 3, 3, 2][operationModeZone1]; //INACTIVE, IDLE, HEATING, COOLING
@@ -659,11 +683,11 @@ class MelCloudDevice extends EventEmitter {
                                         setTemperature = setTemperatureZone1;
                                         lockPhysicalControls = prohibitZone1 ? 1 : 0;
 
-                                        operationModeSetPropsMinValue = [0, 0, 1][heatCoolModes];
-                                        operationModeSetPropsMaxValue = [2, 2, 2][heatCoolModes];
-                                        operationModeSetPropsValidValues = [[0, 1, 2], [0, 1, 2], [1, 2]][heatCoolModes];
-                                        temperatureSetPropsMinValue = [10, 50][this.useFahrenheit];
-                                        temperatureSetPropsMaxValue = [35, 95][this.useFahrenheit];
+                                        operationModeSetPropsMinValue = [0, 0, 1, 0][heatCoolModes];
+                                        operationModeSetPropsMaxValue = [2, 2, 2, 0][heatCoolModes];
+                                        operationModeSetPropsValidValues = [[0, 1, 2], [0, 1, 2], [1, 2], [0]][heatCoolModes];
+                                        temperatureSetPropsMinValue = minSetTemperature;
+                                        temperatureSetPropsMaxValue = maxSetTemperature;
                                         break;
                                     case caseHotWater: //Hot Water - NORMAL, HEAT NOW
                                         currentOperationMode = !power ? 0 : operationMode === 1 ? 2 : [1, 2][forcedHotWaterMode]; //INACTIVE, IDLE, HEATING, COOLING
@@ -675,8 +699,8 @@ class MelCloudDevice extends EventEmitter {
                                         operationModeSetPropsMinValue = 0;
                                         operationModeSetPropsMaxValue = 1;
                                         operationModeSetPropsValidValues = [0, 1];
-                                        temperatureSetPropsMinValue = [30, 86][this.useFahrenheit];
-                                        temperatureSetPropsMaxValue = [60, 140][this.useFahrenheit];
+                                        temperatureSetPropsMinValue = minSetTemperature;
+                                        temperatureSetPropsMaxValue = maxTankTemperature;
                                         break;
                                     case caseZone2: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
                                         currentOperationMode = !power ? 0 : idleZone2 ? 1 : [2, 2, 2, 3, 3, 2][operationModeZone2]; //INACTIVE, IDLE, HEATING, COOLING
@@ -685,11 +709,14 @@ class MelCloudDevice extends EventEmitter {
                                         setTemperature = setTemperatureZone2;
                                         lockPhysicalControls = prohibitZone2 ? 1 : 0;
 
-                                        operationModeSetPropsMinValue = [0, 0, 1][heatCoolModes];
-                                        operationModeSetPropsMaxValue = [2, 2, 2][heatCoolModes];
-                                        operationModeSetPropsValidValues = [[0, 1, 2], [0, 1, 2], [1, 2]][heatCoolModes];
-                                        temperatureSetPropsMinValue = [10, 50][this.useFahrenheit];
-                                        temperatureSetPropsMaxValue = [35, 95][this.useFahrenheit];
+                                        operationModeSetPropsMinValue = [0, 0, 1, 0][heatCoolModes];
+                                        operationModeSetPropsMaxValue = [2, 2, 2, 0][heatCoolModes];
+                                        operationModeSetPropsValidValues = [[0, 1, 2], [0, 1, 2], [1, 2], [0]][heatCoolModes];
+                                        temperatureSetPropsMinValue = minSetTemperature;
+                                        temperatureSetPropsMaxValue = maxSetTemperature;
+                                        break;
+                                    default: //unknown zone detected
+                                        this.emit('message', `Unknown zone: ${i} detected.`);
                                         break;
                                 };
 
@@ -718,11 +745,11 @@ class MelCloudDevice extends EventEmitter {
                                         roomTemperature = outdoorTemperature;
                                         setTemperature = outdoorTemperature;
 
-                                        operationModeSetPropsMinValue = [0, 0, 0][heatCoolModes];
-                                        operationModeSetPropsMaxValue = [2, 1, 2][heatCoolModes];
-                                        operationModeSetPropsValidValues = [[0, 1, 2], [0, 1], [0, 2]][heatCoolModes];
-                                        temperatureSetPropsMinValue = [-35, -31][this.useFahrenheit];
-                                        temperatureSetPropsMaxValue = [50, 122][this.useFahrenheit];
+                                        operationModeSetPropsMinValue = [0, 0, 0, 0][heatCoolModes];
+                                        operationModeSetPropsMaxValue = [2, 1, 2, 0][heatCoolModes];
+                                        operationModeSetPropsValidValues = [[0, 1, 2], [0, 1], [0, 2], [0]][heatCoolModes];
+                                        temperatureSetPropsMinValue = -35;
+                                        temperatureSetPropsMaxValue = 100;
                                         break;
                                     case 1: //Zone 1 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
                                         currentOperationMode = !power ? 0 : idleZone1 ? 0 : [1, 1, 1, 2, 2, 1][operationModeZone1]; //OFF, HEAT, COOL
@@ -730,11 +757,11 @@ class MelCloudDevice extends EventEmitter {
                                         roomTemperature = roomTemperatureZone1;
                                         setTemperature = setTemperatureZone1;
 
-                                        operationModeSetPropsMinValue = [1, 1, 1][heatCoolModes];
-                                        operationModeSetPropsMaxValue = [3, 3, 2][heatCoolModes];
-                                        operationModeSetPropsValidValues = [[1, 2, 3], [1, 2, 3], [1, 2]][heatCoolModes];
-                                        temperatureSetPropsMinValue = [10, 50][this.useFahrenheit];
-                                        temperatureSetPropsMaxValue = [35, 95][this.useFahrenheit];
+                                        operationModeSetPropsMinValue = [1, 1, 1, 0][heatCoolModes];
+                                        operationModeSetPropsMaxValue = [3, 3, 2, 0][heatCoolModes];
+                                        operationModeSetPropsValidValues = [[1, 2, 3], [1, 2, 3], [1, 2], [0]][heatCoolModes];
+                                        temperatureSetPropsMinValue = minSetTemperature;
+                                        temperatureSetPropsMaxValue = maxSetTemperature;
                                         break;
                                     case caseHotWater: //Hot Water - NORMAL, HEAT NOW
                                         currentOperationMode = !power ? 0 : operationMode === 1 ? 1 : [0, 1][forcedHotWaterMode]; //OFF, HEAT, COOL
@@ -745,8 +772,8 @@ class MelCloudDevice extends EventEmitter {
                                         operationModeSetPropsMinValue = 1;
                                         operationModeSetPropsMaxValue = 3;
                                         operationModeSetPropsValidValues = [1, 3];
-                                        temperatureSetPropsMinValue = [30, 86][this.useFahrenheit];
-                                        temperatureSetPropsMaxValue = [60, 140][this.useFahrenheit];
+                                        temperatureSetPropsMinValue = minSetTemperature;
+                                        temperatureSetPropsMaxValue = maxTankTemperature;
                                         break;
                                     case caseZone2: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
                                         currentOperationMode = !power ? 0 : idleZone2 ? 0 : [1, 1, 1, 2, 2, 1][operationModeZone2]; //OFF, HEAT, COOL
@@ -754,27 +781,33 @@ class MelCloudDevice extends EventEmitter {
                                         roomTemperature = roomTemperatureZone2;
                                         setTemperature = setTemperatureZone2;
 
-                                        operationModeSetPropsMinValue = [1, 1, 1][heatCoolModes];
-                                        operationModeSetPropsMaxValue = [3, 3, 2][heatCoolModes];
-                                        operationModeSetPropsValidValues = [[1, 2, 3], [1, 2, 3], [1, 2]][heatCoolModes];
-                                        temperatureSetPropsMinValue = [10, 10][this.useFahrenheit];
-                                        temperatureSetPropsMaxValue = [35, 95][this.useFahrenheit];
+                                        operationModeSetPropsMinValue = [1, 1, 1, 0][heatCoolModes];
+                                        operationModeSetPropsMaxValue = [3, 3, 2, 0][heatCoolModes];
+                                        operationModeSetPropsValidValues = [[1, 2, 3], [1, 2, 3], [1, 2], [0]][heatCoolModes];
+                                        temperatureSetPropsMinValue = minSetTemperature;
+                                        temperatureSetPropsMaxValue = maxSetTemperature;
+                                        break;
+                                    default: //unknown zone detected
+                                        this.emit('message', `Unknown zone: ${i} detected.`);
                                         break;
                                 };
 
                                 //update characteristics
                                 if (this.atwMelCloudServices && currentOperationMode !== undefined && targetOperationMode !== undefined) {
                                     this.atwMelCloudServices[i]
-                                        .updateCharacteristic(Characteristic.CurrentHeaterCoolerState, currentOperationMode)
-                                        .updateCharacteristic(Characteristic.TargetHeaterCoolerState, targetOperationMode)
+                                        .updateCharacteristic(Characteristic.CurrentHeatingCoolingState, currentOperationMode)
+                                        .updateCharacteristic(Characteristic.TargetHeatingCoolingState, targetOperationMode)
                                         .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                                         .updateCharacteristic(Characteristic.TargetTemperature, setTemperature)
                                         .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.useFahrenheit)
                                 }
                                 break;
+                            default: //unknown display type detected
+                                this.emit('message', `Unknown display type: ${displayType} detected.`);
+                                break;
                         };
 
-                        if (this.atwTemperatureSensorServices) {
+                        if (this.atwTemperatureSensor && this.atwTemperatureSensorServices) {
                             this.atwTemperatureSensorServices[i]
                                 .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                         };
@@ -786,13 +819,12 @@ class MelCloudDevice extends EventEmitter {
                         this.setTemperatures.push(setTemperature);
                         this.lockPhysicalsControls.push(lockPhysicalControls);
 
-                        if (this.startPrepareAccessory) {
-                            this.operationModesSetPropsMinValue.push(operationModeSetPropsMinValue);
-                            this.operationModesSetPropsMaxValue.push(operationModeSetPropsMaxValue);
-                            this.operationModesSetPropsValidValues.push(operationModeSetPropsValidValues);
-                            this.temperaturesSetPropsMinValue.push(temperatureSetPropsMinValue);
-                            this.temperaturesSetPropsMaxValue.push(temperatureSetPropsMaxValue);
-                        };
+                        //push only 1 time for zone
+                        const push = this.startPrepareAccessory ? this.operationModesSetPropsMinValue.push(operationModeSetPropsMinValue) : false;
+                        const push1 = this.startPrepareAccessory ? this.operationModesSetPropsMaxValue.push(operationModeSetPropsMaxValue) : false;
+                        const push2 = this.startPrepareAccessory ? this.operationModesSetPropsValidValues.push(operationModeSetPropsValidValues) : false;
+                        const push3 = this.startPrepareAccessory ? this.temperaturesSetPropsMinValue.push(temperatureSetPropsMinValue) : false;
+                        const push4 = this.startPrepareAccessory ? this.temperaturesSetPropsMaxValue.push(temperatureSetPropsMaxValue) : false;
                     };
 
                     this.unitStatus = unitStatus;
@@ -801,110 +833,156 @@ class MelCloudDevice extends EventEmitter {
                     this.power = power;
                     this.offline = offline;
 
+                    if (this.atwTemperatureSensor) {
+                        if (this.atwFlowTemperatureSensorService) {
+                            this.atwFlowTemperatureSensorService
+                                .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperature)
+                        };
+
+                        if (this.atwReturnTemperatureSensorService) {
+                            this.atwReturnTemperatureSensorService
+                                .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperature)
+                        };
+
+                        if (this.atwFlowTemperatureZone1SensorService) {
+                            this.atwFlowTemperatureZone1SensorService
+                                .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureZone1)
+                        };
+
+                        if (this.atwReturnTemperatureZone1SensorService) {
+                            this.atwReturnTemperatureZone1SensorService
+                                .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureZone1)
+                        };
+
+                        if (hasHotWaterTank) {
+                            if (this.atwFlowTemperatureWaterTankSensorService) {
+                                this.atwFlowTemperatureWaterTankSensorService
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureWaterTank)
+                            };
+
+                            if (this.atwReturnTemperatureWaterTankSensorService) {
+                                this.atwReturnTemperatureWaterTankSensorService
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureWaterTank)
+                            };
+                        };
+
+                        if (hasZone2) {
+                            if (this.atwFlowTemperatureZone2SensorService) {
+                                this.atwFlowTemperatureZone2SensorService
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureZone2)
+                            };
+
+                            if (this.atwReturnTemperatureZone2SensorService) {
+                                this.atwReturnTemperatureZone2SensorService
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureZone2)
+                            };
+                        };
+                    };
+
                     //update buttons state
                     if (this.atwButtonsCount > 0) {
                         this.atwButtonsConfigured = [];
 
                         for (const button of this.atwButtons) {
-                            const buttonDisplayType = button.displayType ?? 0;
+                            const displayType = button.displayType ?? 0;
 
-                            if (buttonDisplayType > 0) {
-                                const buttonMode = button.mode ?? 100;
-                                switch (buttonMode) {
+                            if (displayType > 0) {
+                                const mode = button.mode ?? 100;
+                                switch (mode) {
                                     case 0: //POWER ON,OFF
-                                        button.buttonState = (power === true);
+                                        button.state = (power === true);
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 1: //HEAT PUMP HEAT
-                                        button.buttonState = power ? (operationMode === 0) : false;
+                                        button.state = power ? (operationMode === 0) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 2: //COOL
-                                        button.buttonState = power ? (operationMode === 1) : false;
+                                        button.state = power ? (operationMode === 1) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 53: //HOLIDAY
-                                        button.buttonState = power ? (holidayMode === true) : false;
+                                        button.state = power ? (holidayMode === true) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 10: //ALL ZONES PHYSICAL LOCK CONTROL
-                                        button.buttonState = power ? (prohibitZone1 === true && prohibitHotWater === true && prohibitZone2 === true) : false;
+                                        button.state = power ? (prohibitZone1 === true && prohibitHotWater === true && prohibitZone2 === true) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 20: //HOT WATER AUTO
-                                        button.buttonState = power ? (forcedHotWaterMode === false) : false;
+                                        button.state = power ? (forcedHotWaterMode === false) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 21: //ECO
-                                        button.buttonState = power ? (ecoHotWater === true) : false;
+                                        button.state = power ? (ecoHotWater === true) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 22: //FORCE HEAT
-                                        button.buttonState = power ? (forcedHotWaterMode === true) : false;
+                                        button.state = power ? (forcedHotWaterMode === true) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 30: //PHYSICAL LOCK CONTROL
-                                        button.buttonState = (prohibitHotWater === true);
+                                        button.state = (prohibitHotWater === true);
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 40: //ZONE 1 HEAT THERMOSTAT
-                                        button.buttonState = power ? (operationModeZone1 === 0) : false;
+                                        button.state = power ? (operationModeZone1 === 0) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 41: //HEAT FLOW
-                                        button.buttonState = power ? (operationModeZone1 === 1) : false;
+                                        button.state = power ? (operationModeZone1 === 1) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 42: //HEAT CURVE
-                                        button.buttonState = power ? (operationModeZone1 === 2) : false;
+                                        button.state = power ? (operationModeZone1 === 2) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 43: //COOL THERMOSTAT
-                                        button.buttonState = power ? (operationModeZone1 === 3) : false;
+                                        button.state = power ? (operationModeZone1 === 3) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 44: //COOL FLOW
-                                        button.buttonState = power ? (operationModeZone1 === 4) : false;
+                                        button.state = power ? (operationModeZone1 === 4) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 45: //FLOOR DRY UP
-                                        button.buttonState = power ? (operationModeZone1 === 5) : false;
+                                        button.state = power ? (operationModeZone1 === 5) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 50: //PHYSICAL LOCK CONTROL
-                                        button.buttonState = (prohibitZone1 === true);
+                                        button.state = (prohibitZone1 === true);
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 60: //ZONE 2 HEAT THERMOSTAT
-                                        button.buttonState = power ? (operationModeZone2 === 0) : false;
+                                        button.state = power ? (operationModeZone2 === 0) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 61: //HEAT FLOW
-                                        button.buttonState = power ? (operationModeZone2 === 1) : false;
+                                        button.state = power ? (operationModeZone2 === 1) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 62: //HEAT CURVE
-                                        button.buttonState = power ? (operationModeZone2 === 2) : false;
+                                        button.state = power ? (operationModeZone2 === 2) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 63: //COOL THERMOSTAT
-                                        button.buttonState = power ? (operationModeZone2 === 3) : false;
+                                        button.state = power ? (operationModeZone2 === 3) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 64: //COOL FLOW
-                                        button.buttonState = power ? (operationModeZone2 === 4) : false;
+                                        button.state = power ? (operationModeZone2 === 4) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 65: //FLOOR DRY UP
-                                        button.buttonState = power ? (operationModeZone2 === 5) : false;
+                                        button.state = power ? (operationModeZone2 === 5) : false;
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     case 70: //PHYSICAL LOCK CONTROL
-                                        button.buttonState = (prohibitZone2 === true);
+                                        button.state = (prohibitZone2 === true);
                                         this.atwButtonsConfigured.push(button);
                                         break;
                                     default: //Unknown button
-                                        this.emit('message', `Unknown button mode: ${buttonMode} detected.`);
+                                        this.emit('message', `Unknown button mode: ${mode} detected.`);
                                         break;
                                 };
                             };
@@ -913,12 +991,12 @@ class MelCloudDevice extends EventEmitter {
                         this.atwButtonsConfiguredCount = this.atwButtonsConfigured.length;
                         for (let i = 0; i < this.atwButtonsConfiguredCount; i++) {
                             const button = this.atwButtonsConfigured[i];
-                            const buttonState = button.buttonState;
-                            const buttonDisplayType = button.displayType;
-                            const characteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
+                            const state = button.state;
+                            const displayType = button.displayType;
+                            const characteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][displayType];
                             if (this.atwButtonsServices) {
                                 this.atwButtonsServices[i]
-                                    .updateCharacteristic(characteristicType, buttonState)
+                                    .updateCharacteristic(characteristicType, state)
                             };
                         };
                     };
@@ -1156,21 +1234,41 @@ class MelCloudDevice extends EventEmitter {
                             break;
                     };
 
+                    this.power = power;
+                    this.offline = offline;
+                    this.currentOperationMode = currentOperationMode;
+                    this.targetOperationMode = targetOperationMode;
+                    this.roomTemperature = roomTemperature;
+                    this.supplyTemperature = supplyTemperature;
+                    this.outdoorTemperature = outdoorTemperature;
+                    this.setTemperature = targetTemperature;
+                    this.fanSpeed = fanSpeed;
+                    this.setFanSpeed = setFanSpeed;
+                    this.lockPhysicalControls = lockPhysicalControls;
+                  
                     //update temperature sensors
                     if (this.ervRoomTemperatureSensorService) {
                         this.ervRoomTemperatureSensorService
                             .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                     };
 
-                    if (this.ervOutdoorTemperatureSensorService) {
-                        this.ervOutdoorTemperatureSensorService
-                            .updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature)
-                    };
+                    //update temperature sensors
+                    if (this.ervTemperatureSensor) {
+                        if (hasRoomTemperature && this.ervRoomTemperatureSensorService) {
+                            this.ervRoomTemperatureSensorService
+                                .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+                        };
 
-                    if (this.ervSupplyTemperatureSensorService) {
-                        this.ervSupplyTemperatureSensorService
-                            .updateCharacteristic(Characteristic.CurrentTemperature, supplyTemperature)
-                    };
+                        if (hasOutdoorTemperature && this.ervOutdoorTemperatureSensorService) {
+                            this.ervOutdoorTemperatureSensorService
+                                .updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature)
+                        };
+
+                        if (hasSupplyTemperature && this.ervSupplyTemperatureSensorService) {
+                            this.ervSupplyTemperatureSensorService
+                                .updateCharacteristic(Characteristic.CurrentTemperature, supplyTemperature)
+                        };
+                    }
 
                     //update core maintenance
                     if (this.ervCoreMaintenanceService) {
@@ -1185,99 +1283,87 @@ class MelCloudDevice extends EventEmitter {
                     }
 
                     //update CO2 sensor
-                    if (this.ervCarbonDioxideSensorService) {
+                    if (hasCO2Sensor && this.ervCarbonDioxideSensorService) {
                         this.ervCarbonDioxideSensorService
                             .updateCharacteristic(Characteristic.CarbonDioxideDetected, roomCO2Detected)
                             .updateCharacteristic(Characteristic.CarbonDioxideLevel, roomCO2Level)
                     }
 
                     //update PM2.5 sensor
-                    if (this.ervAirQualitySensorService) {
+                    if (hasPM25Sensor && this.ervAirQualitySensorService) {
                         this.ervAirQualitySensorService
                             .updateCharacteristic(Characteristic.AirQuality, pM25AirQuality)
                             .updateCharacteristic(Characteristic.PM2_5Density, pM25Level)
                     }
-
-                    this.power = power;
-                    this.offline = offline;
-                    this.currentOperationMode = currentOperationMode;
-                    this.targetOperationMode = targetOperationMode;
-                    this.roomTemperature = roomTemperature;
-                    this.supplyTemperature = supplyTemperature;
-                    this.outdoorTemperature = outdoorTemperature;
-                    this.setTemperature = targetTemperature;
-                    this.fanSpeed = fanSpeed;
-                    this.setFanSpeed = setFanSpeed;
-                    this.lockPhysicalControls = lockPhysicalControls;
 
                     //update buttons state
                     if (this.ervButtonsCount > 0) {
                         this.ervButtonsConfigured = [];
 
                         for (const button of this.ervButtons) {
-                            const buttonDisplayType = button.displayType ?? 0;
+                            const displayType = button.displayType ?? 0;
 
-                            if (buttonDisplayType > 0) {
-                                const buttonMode = button.mode ?? 100;
-                                switch (buttonMode) {
+                            if (displayType > 0) {
+                                const mode = button.mode ?? 100;
+                                switch (mode) {
                                     case 0: //POWER ON,OFF
-                                        button.buttonState = (power === true);
+                                        button.state = (power === true);
                                         this.ervButtonsConfigured.push(button);
                                         break;
                                     case 1: //OPERATION MODE RECOVERY
-                                        button.buttonState = power ? (ventilationMode === 0) : false;
+                                        button.state = power ? (ventilationMode === 0) : false;
                                         this.ervButtonsConfigured.push(button);
                                         break;
                                     case 2: //OPERATION MODE BYPASS
-                                        button.buttonState = power ? (ventilationMode === 1) : false;
+                                        button.state = power ? (ventilationMode === 1) : false;
                                         this.ervButtonsConfigured.push(button);
                                         break;
                                     case 3: //OPERATION MODE AUTO
-                                        button.buttonState = power ? (ventilationMode === 2) : false;
+                                        button.state = power ? (ventilationMode === 2) : false;
                                         this.ervButtonsConfigured.push(button);
                                         break;
                                     case 4: //NIGHT PURGE MODE
-                                        button.buttonState = power ? (nightPurgeMode === true) : false;
+                                        button.state = power ? (nightPurgeMode === true) : false;
                                         this.ervButtonsConfigured.push(button);
                                         break;
                                     case 10: //FAN SPEED MODE AUTO
-                                        button.buttonState = power ? (setFanSpeed === 0) : false;
+                                        button.state = power ? (setFanSpeed === 0) : false;
                                         this.ervButtonsConfigured.push(button);
                                         break;
                                     case 11: //FAN SPEED MODE 1
-                                        button.buttonState = power ? (setFanSpeed === 1) : false;
+                                        button.state = power ? (setFanSpeed === 1) : false;
                                         this.ervButtonsConfigured.push(button);
                                         break;
                                     case 12: //FAN SPEED MODE 2
-                                        button.buttonState = power ? (setFanSpeed === 2) : false;
+                                        button.state = power ? (setFanSpeed === 2) : false;
                                         this.ervButtonsConfigured.push(button);
                                         break;
                                     case 13: //FAN SPEED MODE 3
-                                        button.buttonState = power ? (setFanSpeed === 3) : false;
+                                        button.state = power ? (setFanSpeed === 3) : false;
                                         this.ervButtonsConfigured.push(button);
                                         break;
                                     case 14: //FAN SPEED MODE 4
-                                        button.buttonState = power ? (setFanSpeed === 4) : false;
+                                        button.state = power ? (setFanSpeed === 4) : false;
                                         this.ervButtonsConfigured.push(button);
                                         break;
                                     case 15: //PHYSICAL LOCK CONTROLS
-                                        button.buttonState = (lockPhysicalControls === 1);
+                                        button.state = (lockPhysicalControls === 1);
                                         this.ervButtonsConfigured.push(button);
                                         break;
                                     case 16: //ROOM TEMP HIDE
-                                        button.buttonState = (hideRoomTemperature === true);
+                                        button.state = (hideRoomTemperature === true);
                                         this.ervButtonsConfigured.push(button);
                                         break;
                                     case 17: //SUPPLY TEMP HIDE
-                                        button.buttonState = (hideSupplyTemperature === true);
+                                        button.state = (hideSupplyTemperature === true);
                                         this.ervButtonsConfigured.push(button);
                                         break;
                                     case 18: //OUTDOOR TEMP HIDE
-                                        button.buttonState = (hideOutdoorTemperature === true);
+                                        button.state = (hideOutdoorTemperature === true);
                                         this.ervButtonsConfigured.push(button);
                                         break;
                                     default: //Unknown button
-                                        this.emit('message', `Unknown button mode: ${buttonMode} detected.`);
+                                        this.emit('message', `Unknown button mode: ${mode} detected.`);
                                         break;
                                 };
                             };
@@ -1286,12 +1372,12 @@ class MelCloudDevice extends EventEmitter {
                         this.ervButtonsConfiguredCount = this.ervButtonsConfigured.length;
                         for (let i = 0; i < this.ervButtonsConfiguredCount; i++) {
                             const button = this.ervButtonsConfigured[i];
-                            const buttonState = button.buttonState;
-                            const buttonDisplayType = button.displayType;
-                            const characteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
+                            const state = button.state;
+                            const displayType = button.displayType;
+                            const characteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][displayType];
                             if (this.ervButtonsServices) {
                                 this.ervButtonsServices[i]
-                                    .updateCharacteristic(characteristicType, buttonState)
+                                    .updateCharacteristic(characteristicType, state)
                             };
                         };
                     };
@@ -1393,6 +1479,7 @@ class MelCloudDevice extends EventEmitter {
                         const ataModelSupportsDry = this.ataModelSupportsDry;
                         const ataNumberOfFanSpeeds = this.ataNumberOfFanSpeeds;
                         const ataSwingFunction = this.ataSwingFunction;
+                        const ataHasOutdoorTemperature = this.ataHasOutdoorTemperature;
                         const ataAutoDryFan = [ataModelSupportsDry ? 2 : 7, 7][this.ataAutoHeatMode];
                         const ataHeatFanDry = [7, ataModelSupportsDry ? 2 : 7][this.ataAutoHeatMode];
                         const ataServiceName = `${deviceTypeText} ${accessoryName}`;
@@ -1714,9 +1801,9 @@ class MelCloudDevice extends EventEmitter {
                         };
 
                         //temperature sensor services
-                        if (ataTemperatureSensor) {
+                        if (ataTemperatureSensor && this.roomTemperature !== null) {
                             const debug = this.enableDebugMode ? this.emit('debug', `Prepare room temperature sensor service`) : false;
-                            this.ataRoomTemperatureSensorService = new Service.TemperatureSensor(`${ataServiceName} Room`, `Temperature Sensor ${deviceId}`);
+                            this.ataRoomTemperatureSensorService = new Service.TemperatureSensor(`${ataServiceName} Room`, `Room Temperature Sensor ${deviceId}`);
                             this.ataRoomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                             this.ataRoomTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Room`);
                             this.ataRoomTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
@@ -1726,9 +1813,9 @@ class MelCloudDevice extends EventEmitter {
                                 })
                             accessory.addService(this.ataRoomTemperatureSensorService);
 
-                            if (this.hasOutdoorTemperature) {
-                                const debug = this.enableDebugMode ? this.emit('debug', `Prepare Outdoor temperature sensor service`) : false;
-                                this.ataOutdoorTemperatureSensorService = new Service.TemperatureSensor(`${ataServiceName} Outdoor`, `Temperature Sensor ${deviceId}`);
+                            if (ataHasOutdoorTemperature && this.outdoorTemperature !== null) {
+                                const debug = this.enableDebugMode ? this.emit('debug', `Prepare outdoor temperature sensor service`) : false;
+                                this.ataOutdoorTemperatureSensorService = new Service.TemperatureSensor(`${ataServiceName} Outdoor`, `Outdoor Temperature Sensor ${deviceId}`);
                                 this.ataOutdoorTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 this.ataOutdoorTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Outdoor`);
                                 this.ataOutdoorTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
@@ -1749,32 +1836,32 @@ class MelCloudDevice extends EventEmitter {
                                 const button = ataButtonsConfigured[i];
 
                                 //get button mode
-                                const buttonMode = button.mode;
+                                const mode = button.mode;
 
                                 //get button display type
-                                const buttonDisplayType = button.displayType;
+                                const displayType = button.displayType;
 
                                 //get button name
-                                const buttonName = button.name || ['', `Button ${i}`, `Button ${i}`, `Sensor ${i}`, `Sensor ${i}`, `Sensor ${i}`][buttonDisplayType];
+                                const buttonName = button.name || ['', `Button ${i}`, `Button ${i}`, `Sensor ${i}`, `Sensor ${i}`, `Sensor ${i}`][displayType];
 
                                 //get button name prefix
                                 const buttonNamePrefix = button.namePrefix ?? false;
 
                                 const buttonServiceName = buttonNamePrefix ? `${accessoryName} ${buttonName}` : buttonName;
-                                const buttonServiceType = ['', Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][buttonDisplayType];
-                                const characteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
+                                const buttonServiceType = ['', Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][displayType];
+                                const characteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][displayType];
                                 const buttonService = new buttonServiceType(buttonServiceName, `Button ${deviceId} ${i}`);
                                 buttonService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 buttonService.setCharacteristic(Characteristic.ConfiguredName, buttonServiceName);
                                 buttonService.getCharacteristic(characteristicType)
                                     .onGet(async () => {
-                                        const state = button.buttonState;
+                                        const state = button.state;
                                         return state;
                                     })
                                     .onSet(async (state) => {
-                                        if (buttonDisplayType <= 1) {
+                                        if (displayType <= 2) {
                                             try {
-                                                switch (buttonMode) {
+                                                switch (mode) {
                                                     case 0: //POWER ON,OFF
                                                         deviceState.Power = state;
                                                         deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power;
@@ -2020,6 +2107,8 @@ class MelCloudDevice extends EventEmitter {
                         const atwDisplayMode = this.atwDisplayMode;
                         const atwCaseHotWater = this.atwCaseHotWater;
                         const atwCaseZone2 = this.atwCaseZone2;
+                        const atwHasHotWaterTank = this.atwHasHotWaterTank;
+                        const atwHasZone2 = this.atwHasZone2;
 
                         this.atwMelCloudServices = [];
                         this.atwTemperatureSensorServices = atwTemperatureSensor ? [] : false;
@@ -2180,7 +2269,7 @@ class MelCloudDevice extends EventEmitter {
                                     if (this.atwHeatCoolModes === 0 || this.atwHeatCoolModes === 1) {
                                         atwMelCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
                                             .setProps({
-                                                minValue: [0, 32][this.useFahrenheit],
+                                                minValue: this.temperaturesSetPropsMinValue[i],
                                                 maxValue: this.temperaturesSetPropsMaxValue[i],
                                                 minStep: this.atwTemperatureIncrement
                                             })
@@ -2221,7 +2310,7 @@ class MelCloudDevice extends EventEmitter {
                                     if ((this.atwHeatCoolModes === 0 || this.atwHeatCoolModes === 2) && i !== atwCaseHotWater) {
                                         atwMelCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
                                             .setProps({
-                                                minValue: [10, 50][this.useFahrenheit],
+                                                minValue: this.temperaturesSetPropsMinValue[i],
                                                 maxValue: this.temperaturesSetPropsMaxValue[i],
                                                 minStep: this.atwTemperatureIncrement
                                             })
@@ -2454,7 +2543,7 @@ class MelCloudDevice extends EventEmitter {
                                         });
                                     atwMelCloudServiceT.getCharacteristic(Characteristic.TargetTemperature)
                                         .setProps({
-                                            minValue: [0, 32][this.useFahrenheit],
+                                            minValue: this.temperaturesSetPropsMinValue[i],
                                             maxValue: this.temperaturesSetPropsMaxValue[i],
                                             minStep: this.atwTemperatureIncrement
                                         })
@@ -2511,10 +2600,10 @@ class MelCloudDevice extends EventEmitter {
                                     break;
                             };
 
-                            //temperature sensor services
-                            if (atwTemperatureSensor) {
-                                const debug = this.enableDebugMode ? this.emit('debug', `Prepare temperature sensor service`) : false;
-                                this.atwTemperatureSensorServices = new Service.TemperatureSensor(`${atwServiceName}`, `Temperature Sensor ${deviceId} ${i}`);
+                            //temperature sensor services zones
+                            if (atwTemperatureSensor && this.roomTemperatures[i] !== null) {
+                                const debug = this.enableDebugMode ? this.emit('debug', `${zoneName}, Prepare temperature sensor service`) : false;
+                                this.atwTemperatureSensorServices = new Service.TemperatureSensor(`${accessoryName} ${zoneName}`, `${zoneName} Temperature Sensor ${deviceId} ${i}`);
                                 this.atwTemperatureSensorServices.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 this.atwTemperatureSensorServices.setCharacteristic(Characteristic.ConfiguredName, `${atwServiceName}`);
                                 this.atwTemperatureSensorServices.getCharacteristic(Characteristic.CurrentTemperature)
@@ -2523,6 +2612,117 @@ class MelCloudDevice extends EventEmitter {
                                         return state;
                                     })
                                 accessory.addService(this.atwTemperatureSensorServices);
+                            };
+                        };
+
+                        //temperature sensor services
+                        if (atwTemperatureSensor) {
+                            if (this.atwFlowTemperature !== null) {
+                                const debug = this.enableDebugMode ? this.emit('debug', `Prepare flow temperature sensor service`) : false;
+                                this.atwFlowTemperatureSensorService = new Service.TemperatureSensor(`${accessoryName} Flow`, `Flow Temperature Sensor ${deviceId}`);
+                                this.atwFlowTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                this.atwFlowTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Flow`);
+                                this.atwFlowTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                    .onGet(async () => {
+                                        const state = this.atwFlowTemperature;
+                                        return state;
+                                    })
+                                accessory.addService(this.atwFlowTemperatureSensorService);
+
+                            };
+                            if (this.atwReturnTemperature !== null) {
+                                const debug1 = this.enableDebugMode ? this.emit('debug', `Prepare return temperature sensor service`) : false;
+                                this.atwreturnTemperatureSensorService = new Service.TemperatureSensor(`${accessoryName} Return`, `Return Temperature Sensor ${deviceId}`);
+                                this.atwreturnTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                this.atwreturnTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Return`);
+                                this.atwreturnTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                    .onGet(async () => {
+                                        const state = this.atwReturnTemperature;
+                                        return state;
+                                    })
+                                accessory.addService(this.atwreturnTemperatureSensorService);
+                            };
+
+                            if (this.atwFlowTemperatureZone1 !== null) {
+                                const debug2 = this.enableDebugMode ? this.emit('debug', `Prepare flow temperature zone 1 sensor service`) : false;
+                                this.atwFlowTemperatureZone1SensorService = new Service.TemperatureSensor(`${accessoryName} Flow Zone 1`, `Flow Temperature Sensor Zone 1 ${deviceId}`);
+                                this.atwFlowTemperatureZone1SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                this.atwFlowTemperatureZone1SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Flow Zone 1`);
+                                this.atwFlowTemperatureZone1SensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                    .onGet(async () => {
+                                        const state = this.atwFlowTemperatureZone1;
+                                        return state;
+                                    })
+                                accessory.addService(this.atwFlowTemperatureZone1SensorService);
+                            };
+
+                            if (this.atwReturnTemperatureZone1 !== null) {
+                                const debug3 = this.enableDebugMode ? this.emit('debug', `Prepare return temperature zone 1 sensor service`) : false;
+                                this.atwReturnTemperatureZone1SensorService = new Service.TemperatureSensor(`${accessoryName} Return Zone 1`, `Return Temperature Sensor Zone 1 ${deviceId}`);
+                                this.atwReturnTemperatureZone1SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                this.atwReturnTemperatureZone1SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Return Zone 1`);
+                                this.atwReturnTemperatureZone1SensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                    .onGet(async () => {
+                                        const state = this.atwReturnTemperatureZone1;
+                                        return state;
+                                    })
+                                accessory.addService(this.atwReturnTemperatureZone1SensorService);
+                            };
+
+                            if (atwHasHotWaterTank) {
+                                if (this.atwFlowTemperatureWaterTank !== null) {
+                                    const debug = this.enableDebugMode ? this.emit('debug', `Prepare flow temperature water tank sensor service`) : false;
+                                    this.atwFlowTemperatureWaterTankSensorService = new Service.TemperatureSensor(`${accessoryName} Flow Water Tank`, `Flow Temperature Sensor Water Tank ${deviceId}`);
+                                    this.atwFlowTemperatureWaterTankSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                    this.atwFlowTemperatureWaterTankSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Flow Water Tank`);
+                                    this.atwFlowTemperatureWaterTankSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                        .onGet(async () => {
+                                            const state = this.atwFlowTemperatureWaterTank;
+                                            return state;
+                                        })
+                                    accessory.addService(this.atwFlowTemperatureWaterTankSensorService);
+                                };
+
+                                if (this.atwReturnTemperatureWaterTank !== null) {
+                                    const debug1 = this.enableDebugMode ? this.emit('debug', `Prepare return temperature water tank sensor service`) : false;
+                                    this.atwReturnTemperatureWaterTankSensorService = new Service.TemperatureSensor(`${accessoryName} Return Water Tank`, `Return Temperature Sensor Water Tank ${deviceId}`);
+                                    this.atwReturnTemperatureWaterTankSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                    this.atwReturnTemperatureWaterTankSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Return Water Tank`);
+                                    this.atwReturnTemperatureWaterTankSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                        .onGet(async () => {
+                                            const state = this.atwReturnTemperatureWaterTank;
+                                            return state;
+                                        })
+                                    accessory.addService(this.atwReturnTemperatureWaterTankSensorService);
+                                };
+                            };
+
+                            if (atwHasZone2) {
+                                if (this.atwFlowTemperatureZone2 !== null) {
+                                    const debug = this.enableDebugMode ? this.emit('debug', `Prepare flow temperature zone 2 sensor service`) : false;
+                                    this.atwFlowTemperatureZone2SensorService = new Service.TemperatureSensor(`${accessoryName} Flow Zone 2`, `Flow Temperature Sensor Zone 2 ${deviceId}`);
+                                    this.atwFlowTemperatureZone2SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                    this.atwFlowTemperatureZone2SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Flow Zone 2`);
+                                    this.atwFlowTemperatureZone2SensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                        .onGet(async () => {
+                                            const state = this.atwFlowTemperatureZone2;
+                                            return state;
+                                        })
+                                    accessory.addService(this.atwFlowTemperatureZone2SensorService);
+                                };
+
+                                if (this.atwReturnTemperatureZone2 !== null) {
+                                    const debug1 = this.enableDebugMode ? this.emit('debug', `Prepare return temperature zone 2 sensor service`) : false;
+                                    this.atwReturnTemperatureZone2SensorService = new Service.TemperatureSensor(`${accessoryName} Return Zone 2`, `Return Temperature Sensor Zone 2 ${deviceId}`);
+                                    this.atwReturnTemperatureZone2SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                    this.atwReturnTemperatureZone2SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Return Zone 2`);
+                                    this.atwReturnTemperatureZone2SensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                        .onGet(async () => {
+                                            const state = this.atwReturnTemperatureZone2;
+                                            return state;
+                                        })
+                                    accessory.addService(this.atwReturnTemperatureZone2SensorService);
+                                };
                             };
                         };
 
@@ -2535,20 +2735,20 @@ class MelCloudDevice extends EventEmitter {
                                 const button = atwButtonsConfigured[i];
 
                                 //get button mode
-                                const buttonMode = button.mode;
+                                const mode = button.mode;
 
                                 //get button display type
-                                const buttonDisplayType = button.displayType;
+                                const displayType = button.displayType;
 
                                 //get button name
-                                const buttonName = button.name || ['', `Button ${i}`, `Button ${i}`, `Sensor ${i}`, `Sensor ${i}`, `Sensor ${i}`][buttonDisplayType];
+                                const buttonName = button.name || ['', `Button ${i}`, `Button ${i}`, `Sensor ${i}`, `Sensor ${i}`, `Sensor ${i}`][displayType];
 
                                 //get button name prefix
                                 const buttonNamePrefix = button.namePrefix ?? false;
 
                                 const buttonServiceName = buttonNamePrefix ? `${accessoryName} ${buttonName}` : buttonName;
-                                const buttonServiceType = ['', Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][buttonDisplayType];
-                                const characteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
+                                const buttonServiceType = ['', Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][displayType];
+                                const characteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][displayType];
                                 const buttonService = new buttonServiceType(buttonServiceName, `Button ${deviceId} ${i}`);
                                 buttonService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 buttonService.setCharacteristic(Characteristic.ConfiguredName, buttonServiceName);
@@ -2556,13 +2756,13 @@ class MelCloudDevice extends EventEmitter {
                                 buttonService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${buttonName}`);
                                 buttonService.getCharacteristic(characteristicType)
                                     .onGet(async () => {
-                                        const state = button.buttonState;
+                                        const state = button.state;
                                         return state;
                                     })
                                     .onSet(async (state) => {
-                                        if (buttonDisplayType <= 1) {
+                                        if (displayType <= 2) {
                                             try {
-                                                switch (buttonMode) {
+                                                switch (mode) {
                                                     case 0: //POWER ON,OFF
                                                         deviceState.Power = state;
                                                         deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power;
@@ -3049,7 +3249,7 @@ class MelCloudDevice extends EventEmitter {
 
                         //temperature sensor services
                         if (ervTemperatureSensor) {
-                            if (this.ervHasRoomTemperature) {
+                            if (this.ervHasRoomTemperature && this.roomTemperature !== null) {
                                 const debug = this.enableDebugMode ? this.emit('debug', `Prepare room temperature sensor service`) : false;
                                 this.ervRoomTemperatureSensorService = new Service.TemperatureSensor(`${ervServiceName} Room`, `Room Temperature Sensor ${deviceId}`);
                                 this.ervRoomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
@@ -3062,27 +3262,27 @@ class MelCloudDevice extends EventEmitter {
                                 accessory.addService(this.ervRoomTemperatureSensorService);
                             };
 
-                            if (this.ervHasSupplyTemperature) {
+                            if (this.ervHasSupplyTemperature && this.supplyTemperature !== null) {
                                 const debug = this.enableDebugMode ? this.emit('debug', `Prepare supply temperature sensor service`) : false;
                                 this.ervSupplyTemperatureSensorService = new Service.TemperatureSensor(`${ervServiceName} Supply`, `Supply Temperature Sensor ${deviceId}`);
                                 this.ervSupplyTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 this.ervSupplyTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${ervServiceName} Supply`);
                                 this.ervSupplyTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
                                     .onGet(async () => {
-                                        const state = this.outdoorTemperature;
+                                        const state = this.supplyTemperature;
                                         return state;
                                     })
                                 accessory.addService(this.ervSupplyTemperatureSensorService);
                             };
 
-                            if (this.ervHasOutdoorTemperature) {
+                            if (this.ervHasOutdoorTemperature && this.outdoorTemperature !== null) {
                                 const debug = this.enableDebugMode ? this.emit('debug', `Prepare outdoor temperature sensor service`) : false;
                                 this.ervOutdoorTemperatureSensorService = new Service.TemperatureSensor(`${ervServiceName} Outdoor`, `Outdoor Temperature Sensor ${deviceId}`);
                                 this.ervOutdoorTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 this.ervOutdoorTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${ervServiceName} Outdoor`);
                                 this.ervOutdoorTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
                                     .onGet(async () => {
-                                        const state = this.supplyTemperature;
+                                        const state = this.outdoorTemperature;
                                         return state;
                                     })
                                 accessory.addService(this.ervOutdoorTemperatureSensorService);
@@ -3168,32 +3368,32 @@ class MelCloudDevice extends EventEmitter {
                                 const button = ervButtonsConfigured[i];
 
                                 //get button mode
-                                const buttonMode = button.mode;
+                                const mode = button.mode;
 
                                 //get button display type
-                                const buttonDisplayType = button.displayType;
+                                const displayType = button.displayType;
 
                                 //get button name
-                                const buttonName = button.name || ['', `Button ${i}`, `Button ${i}`, `Sensor ${i}`, `Sensor ${i}`, `Sensor ${i}`][buttonDisplayType];
+                                const buttonName = button.name || ['', `Button ${i}`, `Button ${i}`, `Sensor ${i}`, `Sensor ${i}`, `Sensor ${i}`][displayType];
 
                                 //get button name prefix
                                 const buttonNamePrefix = button.namePrefix ?? false;
 
                                 const buttonServiceName = buttonNamePrefix ? `${accessoryName} ${buttonName}` : buttonName;
-                                const buttonServiceType = ['', Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][buttonDisplayType];
-                                const characteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
+                                const buttonServiceType = ['', Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][displayType];
+                                const characteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][displayType];
                                 const buttonService = new buttonServiceType(buttonServiceName, `Button ${deviceId} ${i}`);
                                 buttonService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 buttonService.setCharacteristic(Characteristic.ConfiguredName, buttonServiceName);
                                 buttonService.getCharacteristic(characteristicType)
                                     .onGet(async () => {
-                                        const state = button.buttonState;
+                                        const state = button.state;
                                         return state;
                                     })
                                     .onSet(async (state) => {
-                                        if (buttonDisplayType <= 1) {
+                                        if (displayType <= 2) {
                                             try {
-                                                switch (buttonMode) {
+                                                switch (mode) {
                                                     case 0: //POWER ON,OFF
                                                         deviceState.Power = state;
                                                         deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power;
