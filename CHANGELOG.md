@@ -13,9 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   ## [0.18.0] - (02.03.2024)
 ## Changes
 - added temperature sensors for heat pump, flow, return, zone 1, zone 2, water tank
-- fix [#91](https://github.com/grzegorz914/homebridge-melcloud-control/issues/91)
-- fix [#92](https://github.com/grzegorz914/homebridge-melcloud-control/issues/92)
+- fix [#91](https://github.com/grzegorz914/homebridge-melcloud-control/issues/91), thanks @alesf
+- fix [#92](https://github.com/grzegorz914/homebridge-melcloud-control/issues/92), thanks @alesf
 - fix [#96](https://github.com/grzegorz914/homebridge-melcloud-control/issues/96)
+- fix some grammar mistakes in config schema, readme and in source code, thanks @alesf
 - config.schema updated
 - cleanup
 
