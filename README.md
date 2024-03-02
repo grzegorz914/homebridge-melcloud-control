@@ -45,14 +45,16 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
     * Publish as JSON data.
   * Subscribe:
     * Topic: `Set`.
-     * Subscribe as JSON data.
-       * Properties:
-         * Air Conditioner:
-           * `Power`, `OperationMode`, `SetTemperature`, `DefaultCoolingSetTemperature`, `DefaultHeatingSetTemperature`, `SetFanSpeed`, `SwingMode`, `ProhibitSetTemperature`, `ProhibitOperationMode`, `ProhibitPower`.
-         * Heat Pump:
-           * `Power`, `OperationMode`, `OperationModeZone1`, `OperationModeZone2`, `SetTemperature`, `SetTemperatureZone1`, `SetTemperatureZone2`, `SetHeatFlowTemperatureZone1`, `SetHeatFlowTemperatureZone2`, `SetCoolFlowTemperatureZone1`, `SetCoolFlowTemperatureZone2`, `SetTankWaterTemperature`, `ForcedHotWaterMode`, `EcoHotWater`, `HolidayMode`, `ProhibitZone1`, `ProhibitZone2`, `ProhibitHotWater`.
-         * Energy Recovery Ventilation Lossnay:
-           * `Power`, `OperationMode`, `VentilationMode`, `SetTemperature`, `DefaultCoolingSetTemperature`, `DefaultHeatingSetTemperature`, `NightPurgeMode`, `SetFanSpeed`, `HideRoomTemperature`, `HideSupplyTemperature`, `HideOutdoorTemperature`.
+     * Payload JSON data.
+      * Air Conditioner:
+         * Key/Value:
+           * `Power: boolean`, `OperationMode: integer`, `SetTemperature: float`, `DefaultCoolingSetTemperature: float`, `DefaultHeatingSetTemperature: float`, `SetFanSpeed: integer`, `SwingMode: integer`, `ProhibitSetTemperature: boolean`, `ProhibitOperationMode: boolean`, `ProhibitPower: boolean`.
+      * Heat Pump:
+        * Key/Value:
+           * `Power: boolean`, `OperationMode: integer`, `OperationModeZone1: integer`, `OperationModeZone2: integer`, `SetTemperature: float`, `SetTemperatureZone1: float`, `SetTemperatureZone2: float`, `SetHeatFlowTemperatureZone1`, `SetHeatFlowTemperatureZone2`, `SetCoolFlowTemperatureZone1: float`, `SetCoolFlowTemperatureZone2: float`, `SetTankWaterTemperature: float`, `ForcedHotWaterMode: boolean`, `EcoHotWater: boolean`, `HolidayMode: boolean`, `ProhibitZone1: boolean`, `ProhibitZone2: boolean`, `ProhibitHotWater: boolean`.
+      * Energy Recovery Ventilation Lossnay:
+        * Key/Value:
+           * `Power: boolean`, `OperationMode: integer`, `VentilationMode: integer`, `SetTemperature: float`, `DefaultCoolingSetTemperature: float`, `DefaultHeatingSetTemperature: float`, `NightPurgeMode: boolean`, `SetFanSpeed`, `HideRoomTemperature: boolean`, `HideSupplyTemperature: boolean`, `HideOutdoorTemperature: boolean`.
 
 ### Control Mode
 
