@@ -58,7 +58,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 
 | Device | Key | Value | Value Type | Description |
 | --- | --- | --- | --- | --- |
-| ATA | `Power` | true/false | boolean | Set power ON/OFF |
+| ATA | `Power` | `true`, `false` | boolean | Set power ON/OFF |
 
 ### Control Mode
 
