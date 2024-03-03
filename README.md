@@ -59,14 +59,14 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 |     | `ProhibitSetTemperature` | `true`, `false` | boolean | Lock set temperature |
 |     | `ProhibitOperationMode` | `true`, `false` | boolean | Lock set operation mode |
 |     | `ProhibitPower` | `true`, `false` | boolean | Lock set power |
-|     | `OperationMode` | `1`, `2`, `3`, `7`, `8` | integer | Operation mode |
-|     | `SetFanSpeed` | `0`, `1`, `2`, `3`, `4`, `5` | integer | Fan speed |
-|     | `VaneHorizontal` | `0`, `1`, `2`, `3`, `4`, `5`, `8`, `12` | integer | Vane H mode |
-|     | `VaneVertical` | `0`, `1`, `2`, `3`, `4`, `5`, `7` | integer | Vane V mode |
+|     | `OperationMode` | `1 - Heat`, `2 - Dry`, `3 - Cool`, `7 - Fan`, `8 - Auto` | integer | Operation mode |
+|     | `SetFanSpeed` | `0 - Auto`, `1`, `2`, `3`, `4`, `5`, `6` | integer | Fan speed |
+|     | `VaneHorizontal` | `0`, `1`, `2`, `3`, `4`, `5`, `8 - Split`, `12 - Swing` | integer | Vane H mode |
+|     | `VaneVertical` | `0`, `1`, `2`, `3`, `4`, `5`, `7 - Swing` | integer | Vane V mode |
 |     | `SetTemperature` | `0.0` | float | Room temperature |
 |     | `DefaultCoolingSetTemperature` | `0.0` | float | Default cooling temperature |
 |     | `DefaultHeatingSetTemperature` | `0.0` | float | Default heating temperature |
-| Heat Pump |     |     |     |      |
+| Heat Pump |     |     |     |      |HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
 |     | `Power` | `true`, `false` | boolean | Power state |
 |     | `ForcedHotWaterMode` | `true`, `false` | boolean | Force hot water |
 |     | `EcoHotWater` | `true`, `false` | boolean | Eco hot water |
@@ -74,9 +74,9 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 |     | `ProhibitZone1` | `true`, `false` | boolean | Lock control zone 1 |
 |     | `ProhibitZone2` | `true`, `false` | boolean | Lock control zone 2 |
 |     | `ProhibitHotWater` | `true`, `false` | boolean | Lock control hot water |
-|     | `OperationMode` | `0`, `1`, `2` | integer | Operation mode heat pump |
-|     | `OperationModeZone1` | `0`, `1`, `2`, `3`, `4`, `5` | integer | Operation mode zone 1|
-|     | `OperationModeZone2` | `0`, `1`, `2`, `3`, `4`, `5` | integer | Operation mode zone 2 |
+|     | `OperationMode` | `0 - Auto`, `1 - Heat`, `2 - Cool` | integer | Operation mode heat pump |
+|     | `OperationModeZone1` | `0 - Heat Thermostat`, `1 - Heat Flow`, `2 - Heat Curve`, `3 - Cool Thermostat`, `4 - Cool Flow`, `5 - Flor Dry Up` | integer | Operation mode zone 1|
+|     | `OperationModeZone2` | `0 - Heat Thermostat`, `1 - Heat Flow`, `2 - Heat Curve`, `3 - Cool Thermostat`, `4 - Cool Flow`, `5 - Flor Dry Up` | integer | Operation mode zone 2 |
 |     | `SetTemperatureZone1` | `0.0` | float | Temperature zone 1|
 |     | `SetTemperatureZone2` | `0.0` | float | Temperature zone 2 |
 |     | `SetHeatFlowTemperatureZone1` | `0.0` | float | Heat flow temperature zone 1 |
@@ -90,9 +90,9 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 |     | `HideRoomTemperature` | `true`, `false` | boolean | Hide room temperature |
 |     | `HideSupplyTemperature` | `true`, `false` | boolean | Hide supply temperature |
 |     | `HideOutdoorTemperature` | `true`, `false` | boolean | Hide outdoor temperature|
-|     | `OperationMode` | `1`, `3`, `7`, `8` | integer | Operation mode |
-|     | `VentilationMode` | `0`, `1`, `2` | integer | Ventilation mode |
-|     | `SetFanSpeed` | `0`, `1`, `2`, `3`, `4` | integer | Fan speed |
+|     | `OperationMode` | `1 - Heat`, `3 - Cool`, `7 - Fan`, `8 - Auto` | integer | Operation mode |
+|     | `VentilationMode` | `0 - Lossnay`, `1 - Bypass`, `2 - Auto` | integer | Ventilation mode |
+|     | `SetFanSpeed` | `0 - Auto`, `1`, `2`, `3`, `4` | integer | Fan speed |
 |     | `SetTemperature` | `0.0` | float | Room temperature |
 |     | `DefaultCoolingSetTemperature` | `0.0` | float | Default cooling temperature |
 |     | `DefaultHeatingSetTemperature` | `0.0` | float | Default heating temperature |
