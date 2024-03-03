@@ -66,7 +66,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 |     | `SetTemperature` | `0.0` | float | Room temperature |
 |     | `DefaultCoolingSetTemperature` | `0.0` | float | Default cooling temperature |
 |     | `DefaultHeatingSetTemperature` | `0.0` | float | Default heating temperature |
-| Heat Pump |     |     |     |      |HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
+| Heat Pump |     |     |     |      |
 |     | `Power` | `true`, `false` | boolean | Power state |
 |     | `ForcedHotWaterMode` | `true`, `false` | boolean | Force hot water |
 |     | `EcoHotWater` | `true`, `false` | boolean | Eco hot water |
