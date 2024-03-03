@@ -28,18 +28,14 @@ class MelCloudDevice extends EventEmitter {
         this.disableLogDeviceInfo = account.disableLogDeviceInfo || false;
         this.enableDebugMode = account.enableDebugMode || false;
 
-        //RESTFul
-        const restFulEnabled = account.enableRestFul || false;
-
-        //MQTT client
-        const mqttEnabled = account.enableMqtt || false;
+        //external integrations
+        this.restFulConnected = false;
+        this.mqttConnected = false;
 
         //variables
         this.melCloud = melCloud; //function
         this.buttonsCount = this.buttons.length;
         this.startPrepareAccessory = true;
-        this.restFulConnected = false;
-        this.mqttConnected = false;
 
         //temp unit
         this.useFahrenheit = useFahrenheit;
@@ -430,13 +426,8 @@ class MelCloudDevice extends EventEmitter {
             //start prepare accessory
             if (this.startPrepareAccessory) {
                 try {
-                    this.operationModeSetPropsMinValue = operationModeSetPropsMinValue;
-                    this.operationModeSetPropsMaxValue = operationModeSetPropsMaxValue;
-                    this.operationModeSetPropsValidValues = operationModeSetPropsValidValues;
-                    this.fanSpeedSetPropsMaxValue = fanSpeedSetPropsMaxValue;
-                    const accessory = await this.prepareAccessory(accountInfo, deviceState, deviceId, deviceTypeText, deviceName);
-
                     //RESTFul server
+                    const restFulEnabled = account.enableRestFul || false;
                     if (restFulEnabled) {
                         this.restFul = new RestFul({
                             port: deviceId.slice(-4),
@@ -456,14 +447,15 @@ class MelCloudDevice extends EventEmitter {
                     }
 
                     //MQTT client
+                    const mqttEnabled = account.enableMqtt || false;
                     if (mqttEnabled) {
                         this.mqtt = new Mqtt({
                             host: account.mqttHost,
                             port: account.mqttPort || 1883,
                             clientId: `${account.mqttClientId}_${deviceId}` || `${deviceTypeText}_${deviceName}_${deviceId}`,
+                            prefix: `${account.mqttPrefix}/${deviceTypeText}/${deviceName}`,
                             user: account.mqttUser,
                             passwd: account.mqttPass,
-                            prefix: `${account.mqttPrefix}/${deviceTypeText}/${deviceName}`,
                             debug: account.mqttDebug || false
                         });
 
@@ -553,7 +545,13 @@ class MelCloudDevice extends EventEmitter {
                             });
                     }
 
+                    this.operationModeSetPropsMinValue = operationModeSetPropsMinValue;
+                    this.operationModeSetPropsMaxValue = operationModeSetPropsMaxValue;
+                    this.operationModeSetPropsValidValues = operationModeSetPropsValidValues;
+                    this.fanSpeedSetPropsMaxValue = fanSpeedSetPropsMaxValue;
+
                     await new Promise(resolve => setTimeout(resolve, 150));
+                    const accessory = await this.prepareAccessory(accountInfo, deviceState, deviceId, deviceTypeText, deviceName);
                     this.emit('publishAccessory', accessory);
                     this.startPrepareAccessory = false;
                 } catch (error) {
@@ -979,7 +977,7 @@ class MelCloudDevice extends EventEmitter {
                         const displayType = button.displayType;
 
                         //get button name
-                        const buttonName = button.name || ['', `Button ${i}`, `Button ${i}`, `Sensor ${i}`, `Sensor ${i}`, `Sensor ${i}`][displayType];
+                        const buttonName = button.name || `Button ${i}`;
 
                         //get button name prefix
                         const buttonNamePrefix = button.namePrefix ?? false;
@@ -1168,7 +1166,7 @@ class MelCloudDevice extends EventEmitter {
                                                 deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Prohibit;
                                                 break;
                                             default:
-                                                deviceState = deviceState;
+                                                this.emit('message', `Unknown button mode: ${mode}`);
                                                 break;
                                         };
 

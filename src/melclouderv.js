@@ -344,7 +344,7 @@ class MelCloudErv extends EventEmitter {
     };
 
     async checkDevice() {
-        await new Promise(resolve => setTimeout(resolve, 10000));
+        await new Promise(resolve => setTimeout(resolve, 5000));
         this.emit('checkDevice');
     };
 
