@@ -34,7 +34,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * Support direct device control creating extra `Buttons`, applied for all devices of same type in account.
 * Support identify all states of device creating `Sensors`, applied for all devices of same type in account.
 * Support automations, shortcuts and Siri.
-* Support external integrations, RESTFul and MQTT.
+* Support external integrations, [RESTFul](https://github.com/grzegorz914/homebridge-melcloud-control?tab=readme-ov-file#restful-integration), [MQTT](https://github.com/grzegorz914/homebridge-melcloud-control?tab=readme-ov-file#mqtt-integration).
 
 ### Control Mode
 
