@@ -4,7 +4,7 @@ const MelCloudAtw = require('./melcloudatw.js');
 const RestFul = require('./restful.js');
 const Mqtt = require('./mqtt.js');
 const CONSTANTS = require('./constants.json');
-let Accessory, Characteristic, Service, Categories, UUID;
+let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class MelCloudDevice extends EventEmitter {
     constructor(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, useFahrenheit, deviceInfoFile) {
@@ -14,14 +14,13 @@ class MelCloudDevice extends EventEmitter {
         Characteristic = api.hap.Characteristic;
         Service = api.hap.Service;
         Categories = api.hap.Categories;
-        UUID = api.hap.uuid;
+        AccessoryUUID = api.hap.uuid;
 
         //account config
         this.displayMode = account.atwDisplayMode || 0;
         this.temperatureSensor = account.atwTemperatureSensor || false;
         this.presetsEnabled = account.atwPresets || false;
         this.buttons = account.atwButtons || [];
-        this.buttonsCount = this.buttons.length;
         this.disableLogInfo = account.disableLogInfo || false;
         this.disableLogDeviceInfo = account.disableLogDeviceInfo || false;
         this.enableDebugMode = account.enableDebugMode || false;
@@ -31,16 +30,10 @@ class MelCloudDevice extends EventEmitter {
 
         //MQTT client
         const mqttEnabled = account.enableMqtt || false;
-        const mqttHost = account.mqttHost;
-        const mqttPort = account.mqttPort || 1883;
-        const mqttClientId = `${account.mqttClientId}_${deviceId}` || `${deviceTypeText}_${deviceName}_${deviceId}`;
-        const mqttUser = account.mqttUser;
-        const mqttPasswd = account.mqttPass;
-        const mqttPrefix = `${account.mqttPrefix}/${deviceTypeText}/${deviceName}`;
-        const mqttDebug = account.mqttDebug || false;
 
         //variables
         this.melCloud = melCloud; //function
+        this.buttonsCount = this.buttons.length;
         this.startPrepareAccessory = true;
         this.restFulConnected = false;
         this.mqttConnected = false;
@@ -127,6 +120,7 @@ class MelCloudDevice extends EventEmitter {
             this.caseHotWater = caseHotWater;
             this.caseZone2 = caseZone2;
             this.temperatureIncrement = temperatureIncrement;
+            this.temperatureUnit = CONSTANTS.TemperatureDisplayUnits[this.useFahrenheit];
 
             //device state
             const setTemperatureZone1 = deviceState.SetTemperatureZone1;
@@ -534,8 +528,7 @@ class MelCloudDevice extends EventEmitter {
 
                 for (let i = 0; i < this.presetsCount; i++) {
                     const preset = presets[i];
-                    const presetState =
-                        preset.Power === power
+                    const state = preset.Power === power
                         && preset.EcoHotWater === ecoHotWater
                         && preset.OperationModeZone1 === operationModeZone1
                         && preset.OperationModeZone2 === operationModeZone2
@@ -547,11 +540,11 @@ class MelCloudDevice extends EventEmitter {
                         && preset.SetHeatFlowTemperatureZone2 === setHeatFlowTemperatureZone2
                         && preset.SetCoolFlowTemperatureZone1 === setCoolFlowTemperatureZone1
                         && preset.SetCoolFlowTemperatureZone2 === setCoolFlowTemperatureZone2;
-                    this.presetsStates.push(presetState);
+                    this.presetsStates.push(state);
 
                     if (this.presetsServices) {
                         this.presetsServices[i]
-                            .updateCharacteristic(Characteristic.On, presetState)
+                            .updateCharacteristic(Characteristic.On, state)
                     };
                 };
             };
@@ -563,9 +556,8 @@ class MelCloudDevice extends EventEmitter {
 
                     //RESTFul server
                     if (restFulEnabled) {
-                        const restFulPort = deviceId.slice(-4);
                         this.restFul = new RestFul({
-                            port: restFulPort,
+                            port: deviceId.slice(-4),
                             debug: account.restFulDebug || false
                         });
 
@@ -584,13 +576,13 @@ class MelCloudDevice extends EventEmitter {
                     //MQTT client
                     if (mqttEnabled) {
                         this.mqtt = new Mqtt({
-                            host: mqttHost,
-                            port: mqttPort,
-                            clientId: mqttClientId,
-                            user: mqttUser,
-                            passwd: mqttPasswd,
-                            prefix: mqttPrefix,
-                            debug: mqttDebug
+                            host: account.mqttHost,
+                            port: account.mqttPort || 1883,
+                            clientId: `${account.mqttClientId}_${deviceId}` || `${deviceTypeText}_${deviceName}_${deviceId}`,
+                            user: account.mqttUser,
+                            passwd: account.mqttPass,
+                            prefix: `${account.mqttPrefix}/${deviceTypeText}/${deviceName}`,
+                            debug: account.mqttDebug || false
                         });
 
                         this.mqtt.on('connected', (message) => {
@@ -619,11 +611,6 @@ class MelCloudDevice extends EventEmitter {
                                     case 'OperationModeZone2':
                                         deviceState[key] = value;
                                         deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone2;
-                                        this.melCloudAtw.send(deviceState);
-                                        break;
-                                    case 'SetTemperature':
-                                        deviceState[key] = value;
-                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperature;
                                         this.melCloudAtw.send(deviceState);
                                         break;
                                     case 'SetTemperatureZone1':
@@ -734,9 +721,9 @@ class MelCloudDevice extends EventEmitter {
         return new Promise((resolve, reject) => {
             try {
                 //accessory
-                const debug = this.enableDebugMode ? this.emit('debug', `Prepare atw accessory`) : false;
+                const debug = this.enableDebugMode ? this.emit('debug', `Prepare accessory`) : false;
                 const accessoryName = deviceName;
-                const accessoryUUID = UUID.generate(deviceId.toString());
+                const accessoryUUID = AccessoryUUID.generate(deviceId.toString());
                 const accessoryCategory = Categories.AIR_HEATER;
                 const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 
@@ -749,7 +736,7 @@ class MelCloudDevice extends EventEmitter {
                     .setCharacteristic(Characteristic.FirmwareRevision, this.firmwareRevision);
 
                 //melcloud services
-                const temperatureUnit = CONSTANTS.TemperatureDisplayUnits[this.useFahrenheit];
+                const temperatureUnit = this.temperatureUnit;
                 const zonesCount = this.zonesCount;
                 const temperatureSensor = this.temperatureSensor;
                 const buttonsConfigured = this.buttonsConfigured;
@@ -1044,10 +1031,11 @@ class MelCloudDevice extends EventEmitter {
                                 })
                                 .onSet(async (value) => {
                                     try {
-                                        accountInfo.UseFahrenheit = value ? true : false;
+                                        value = value ? true : false;
+                                        accountInfo.UseFahrenheit = value
                                         await this.melCloud.send(accountInfo);
-                                        this.useFahrenheit = accountInfo.UseFahrenheit;
                                         const info = this.disableLogInfo ? false : this.emit('message', `Set temperature display unit: ${CONSTANTS.TemperatureDisplayUnits[value]}`);
+                                        this.useFahrenheit = value;
                                     } catch (error) {
                                         this.emit('error', `Set temperature display unit error: ${error}`);
                                     };
@@ -1241,10 +1229,11 @@ class MelCloudDevice extends EventEmitter {
                                 })
                                 .onSet(async (value) => {
                                     try {
-                                        accountInfo.UseFahrenheit = value ? true : false;
+                                        value = value ? true : false;
+                                        accountInfo.UseFahrenheit = value
                                         await this.melCloud.send(accountInfo);
-                                        this.useFahrenheit = accountInfo.UseFahrenheit;
                                         const info = this.disableLogInfo ? false : this.emit('message', `Set temperature display unit: ${CONSTANTS.TemperatureDisplayUnits[value]}`);
+                                        this.useFahrenheit = value;
                                     } catch (error) {
                                         this.emit('error', `Set temperature display unit error: ${error}`);
                                     };
