@@ -45,12 +45,10 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 
 ### MQTT Integration
 
-* Publish:
-  * Topic: `Info`, `State`.
-  * Publish as JSON data.
-* Subscribe:
-  * Topic: `Set`.
-  * Payload JSON data.
+| Publisch | Topic | Data | Description |
+| --- | --- | --- | --- |
+|  Publish   | `Info`, `State` | JSON object | Publish to MQTT boker |
+|  Subscribe   | `Set` | JSON object | Subscribe from MQTT broker |
 
 | Device | Key | Value | Type | Description |
 | --- | --- | --- | --- | --- |
