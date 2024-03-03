@@ -47,7 +47,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
     * Topic: `Set`.
     * Payload JSON data.
 
-| Device | Key | Value | Value Type | Description |
+| Device | Key | Value | Type | Description |
 | --- | --- | --- | --- | --- |
 | Air Conditioner |     |     |     |      |
 |     | `Power` | `true`, `false` | boolean | Set power state |
