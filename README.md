@@ -45,22 +45,22 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
     * Publish as JSON data.
   * Subscribe:
     * Topic: `Set`.
-     * Payload JSON data.
-      * Air Conditioner:
-         * Key/Value:
-           * `Power: boolean`, `OperationMode: integer`, `SetTemperature: float`, `DefaultCoolingSetTemperature: float`, `DefaultHeatingSetTemperature: float`, `SetFanSpeed: integer`, `VaneHorizontal: integer`, `VaneVertical: integer`, `HideVaneControls: boolean`, `HideDryModeControl: boolean`, `ProhibitSetTemperature: boolean`, `ProhibitOperationMode: boolean`, `ProhibitPower: boolean`.
-      * Heat Pump:
-        * Key/Value:
-           * `Power: boolean`, `OperationMode: integer`, `OperationModeZone1: integer`, `OperationModeZone2: integer`, `SetTemperature: float`, `SetTemperatureZone1: float`, `SetTemperatureZone2: float`, `SetHeatFlowTemperatureZone1: float`, `SetHeatFlowTemperatureZone2: float`, `SetCoolFlowTemperatureZone1: float`, `SetCoolFlowTemperatureZone2: float`, `SetTankWaterTemperature: float`, `ForcedHotWaterMode: boolean`, `EcoHotWater: boolean`, `HolidayMode: boolean`, `ProhibitZone1: boolean`, `ProhibitZone2: boolean`, `ProhibitHotWater: boolean`.
-      * Energy Recovery Ventilation Lossnay:
-        * Key/Value:
-           * `Power: boolean`, `OperationMode: integer`, `VentilationMode: integer`, `SetTemperature: float`, `DefaultCoolingSetTemperature: float`, `DefaultHeatingSetTemperature: float`, `NightPurgeMode: boolean`, `SetFanSpeed`, `HideRoomTemperature: boolean`, `HideSupplyTemperature: boolean`, `HideOutdoorTemperature: boolean`.
+    * Payload JSON data.
+    * Air Conditioner:
+      * Key/Value:
+        * `Power: boolean`, `OperationMode: integer`, `SetTemperature: float`, `DefaultCoolingSetTemperature: float`, `DefaultHeatingSetTemperature: float`, `SetFanSpeed: integer`, `VaneHorizontal: integer`, `VaneVertical: integer`, `HideVaneControls: boolean`, `HideDryModeControl: boolean`, `ProhibitSetTemperature: boolean`, `ProhibitOperationMode: boolean`, `ProhibitPower: boolean`.
+    * Heat Pump:
+      * Key/Value:
+        * `Power: boolean`, `OperationMode: integer`, `OperationModeZone1: integer`, `OperationModeZone2: integer`, `SetTemperature: float`, `SetTemperatureZone1: float`, `SetTemperatureZone2: float`, `SetHeatFlowTemperatureZone1: float`, `SetHeatFlowTemperatureZone2: float`, `SetCoolFlowTemperatureZone1: float`, `SetCoolFlowTemperatureZone2: float`, `SetTankWaterTemperature: float`, `ForcedHotWaterMode: boolean`, `EcoHotWater: boolean`, `HolidayMode: boolean`, `ProhibitZone1: boolean`, `ProhibitZone2: boolean`, `ProhibitHotWater: boolean`.
+    * Energy Recovery Ventilation Lossnay:
+      * Key/Value:
+        * `Power: boolean`, `OperationMode: integer`, `VentilationMode: integer`, `SetTemperature: float`, `DefaultCoolingSetTemperature: float`, `DefaultHeatingSetTemperature: float`, `NightPurgeMode: boolean`, `SetFanSpeed`, `HideRoomTemperature: boolean`, `HideSupplyTemperature: boolean`, `HideOutdoorTemperature: boolean`.
 
 | Device | Key | Value | Value Type | Description |
 | --- | --- | --- | --- | --- |
 | Air Conditioner |     |     |     |      |
 |     | `Power` | `true`, `false` | boolean | Set power ON/OFF |
-|     | `HideVaneControls` | `true`, `false` | Hide vane controls |
+|     | `HideVaneControls` | `true`, `false` | boolean | Hide vane controls |
 |     | `HideDryModeControl` | `true`, `false` | boolean | Hide dry mode control |
 |     | `ProhibitSetTemperature` | `true`, `false` | boolean | Lock set temperature |
 |     | `ProhibitOperationMode` | `true`, `false` | boolean | Lock set operation mode |
