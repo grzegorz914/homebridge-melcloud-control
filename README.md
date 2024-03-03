@@ -61,12 +61,15 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | Air Conditioner |     |     |     |      |
 |     | `Power` | `true`, `false` | boolean | Set power ON/OFF |
 |     | `OperationMode` | `0`, `1` | integer | Set operation mode |
+|     | `SetTemperature` | `0.0` | float | Set temperature |
 | Heat Pump |     |     |     |      |
 |     | `Power` | `true`, `false` | boolean | Set power ON/OFF |
 |     | `OperationMode` | `0`, `1` | integer | Set operation mode |
+|     | `SetTemperature` | `0.0` | float | Set temperature |
 | Energy Recovery Ventilation |     |     |     |      |
 |     | `Power` | `true`, `false` | boolean | Set power ON/OFF |
 |     | `OperationMode` | `0`, `1` | integer | Set operation mode |
+|     | `SetTemperature` | `0.0` | float | Set temperature |
 
 ### Control Mode
 
