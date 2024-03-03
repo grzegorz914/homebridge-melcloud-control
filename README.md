@@ -65,11 +65,10 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 |     | `ProhibitSetTemperature` | `true`, `false` | boolean | Lock set temperature |
 |     | `ProhibitOperationMode` | `true`, `false` | boolean | Lock set operation mode |
 |     | `ProhibitPower` | `true`, `false` | boolean | lock set power |
-|     | `OperationMode` | `0`, `1` | integer | Set operation mode |
-|     | `SetFanSpeed` | `0`, `1` | integer | Set fan speed |
-|     | `VaneHorizontal` | `0`, `1` | integer | Set vane H mode |
-|     | `VaneVertical` | `0`, `1` | integer | Set vane V mode |
-|     | `OperationMode` | `0`, `1` | integer | Set operation mode |
+|     | `OperationMode` | `1`, `2`, `3`, `7`, `8` | integer | Set operation mode |
+|     | `SetFanSpeed` | `0`, `1`, `2`, `3`, `4`, `5` | integer | Set fan speed |
+|     | `VaneHorizontal` | `0`, `1`, `2`, `3`, `4`, `5`, `8`, `12` | integer | Set vane H mode |
+|     | `VaneVertical` | `0`, `1`, `2`, `3`, `4`, `5`, `7` | integer | Set vane V mode |
 |     | `SetTemperature` | `0.0` | float | Set temperature |
 |     | `DefaultCoolingSetTemperature` | `0.0` | float | Set default cooling temperature |
 |     | `DefaultHeatingSetTemperature` | `0.0` | float | Set default heating temperature |
