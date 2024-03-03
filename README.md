@@ -205,7 +205,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `disableLogDeviceInfo` | This disable display log device info on plugin start. |
 | `enableRestFul` | If enabled, RESTful server will start automatically and respond to any path request. |
 | `restFulDebug` | If enabled, deep log will be present in homebridge console for RESTFul server. |
-| `enableMqtt` | This enabled MQTT Broker and publish to it all available data. |
+| `enableMqtt` | This enabled MQTT Broker, publish and subscribe all available data. |
 | `mqttDebug` | This enabled deep log in homebridge console for MQTT. |
 | `mqttHost` | Here set the `IP Address` or `Hostname` for MQTT Broker. |
 | `mqttPort` | Here set the `Port` for MQTT Broker, default 1883. |
@@ -243,7 +243,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 |     | `SetFanSpeed` | `0 - Auto`, `1`, `2`, `3`, `4`, `5`, `6` | integer | Fan speed |
 |     | `VaneHorizontal` | `0`, `1`, `2`, `3`, `4`, `5`, `8 - Split`, `12 - Swing` | integer | Vane H mode. |
 |     | `VaneVertical` | `0`, `1`, `2`, `3`, `4`, `5`, `7 - Swing` | integer | Vane V mode. |
-|     | `SetTemperature` | `0.0` | float | Room temperature |
+|     | `SetTemperature` | `0.0` | float | Room temperature. |
 |     | `DefaultCoolingSetTemperature` | `0.0` | float | Default cooling temperature. |
 |     | `DefaultHeatingSetTemperature` | `0.0` | float | Default heating temperature. |
 | Heat Pump |     |     |     |      |
@@ -254,7 +254,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 |     | `ProhibitZone1` | `true`, `false` | boolean | Lock control zone 1. |
 |     | `ProhibitZone2` | `true`, `false` | boolean | Lock control zone 2. |
 |     | `ProhibitHotWater` | `true`, `false` | boolean | Lock control hot water. |
-|     | `OperationMode` | `0 - Auto`, `1 - Heat`, `2 - Cool` | integer | Operation mode heat pump |
+|     | `OperationMode` | `0 - Auto`, `1 - Heat`, `2 - Cool` | integer | Operation mode heat pump. |
 |     | `OperationModeZone1` | `0 - Heat Thermostat`, `1 - Heat Flow`, `2 - Heat Curve`, `3 - Cool Thermostat`, `4 - Cool Flow`, `5 - Flor Dry Up` | integer | Operation mode zone 1. |
 |     | `OperationModeZone2` | `0 - Heat Thermostat`, `1 - Heat Flow`, `2 - Heat Curve`, `3 - Cool Thermostat`, `4 - Cool Flow`, `5 - Flor Dry Up` | integer | Operation mode zone 2. |
 |     | `SetTemperatureZone1` | `0.0` | float | Temperature zone 1. |
