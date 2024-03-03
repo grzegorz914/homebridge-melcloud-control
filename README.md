@@ -48,7 +48,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
      * Payload JSON data.
       * Air Conditioner:
          * Key/Value:
-           * `Power: boolean`, `OperationMode: integer`, `SetTemperature: float`, `DefaultCoolingSetTemperature: float`, `DefaultHeatingSetTemperature: float`, `SetFanSpeed: integer`, `VaneHorizontal: integer`, `VaneHVertical: integer`, `HideVaneControls: boolean`, `HideDryModeControl: boolean`, `ProhibitSetTemperature: boolean`, `ProhibitOperationMode: boolean`, `ProhibitPower: boolean`.
+           * `Power: boolean`, `OperationMode: integer`, `SetTemperature: float`, `DefaultCoolingSetTemperature: float`, `DefaultHeatingSetTemperature: float`, `SetFanSpeed: integer`, `VaneHorizontal: integer`, `VaneVertical: integer`, `HideVaneControls: boolean`, `HideDryModeControl: boolean`, `ProhibitSetTemperature: boolean`, `ProhibitOperationMode: boolean`, `ProhibitPower: boolean`.
       * Heat Pump:
         * Key/Value:
            * `Power: boolean`, `OperationMode: integer`, `OperationModeZone1: integer`, `OperationModeZone2: integer`, `SetTemperature: float`, `SetTemperatureZone1: float`, `SetTemperatureZone2: float`, `SetHeatFlowTemperatureZone1: float`, `SetHeatFlowTemperatureZone2: float`, `SetCoolFlowTemperatureZone1: float`, `SetCoolFlowTemperatureZone2: float`, `SetTankWaterTemperature: float`, `ForcedHotWaterMode: boolean`, `EcoHotWater: boolean`, `HolidayMode: boolean`, `ProhibitZone1: boolean`, `ProhibitZone2: boolean`, `ProhibitHotWater: boolean`.
@@ -60,8 +60,19 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | --- | --- | --- | --- | --- |
 | Air Conditioner |     |     |     |      |
 |     | `Power` | `true`, `false` | boolean | Set power ON/OFF |
+|     | `HideVaneControls` | `true`, `false` | Hide vane controls |
+|     | `HideDryModeControl` | `true`, `false` | boolean | Hide dry mode control |
+|     | `ProhibitSetTemperature` | `true`, `false` | boolean | Lock set temperature |
+|     | `ProhibitOperationMode` | `true`, `false` | boolean | Lock set operation mode |
+|     | `ProhibitPower` | `true`, `false` | boolean | lock set power |
+|     | `OperationMode` | `0`, `1` | integer | Set operation mode |
+|     | `SetFanSpeed` | `0`, `1` | integer | Set fan speed |
+|     | `VaneHorizontal` | `0`, `1` | integer | Set vane H mode |
+|     | `VaneVertical` | `0`, `1` | integer | Set vane V mode |
 |     | `OperationMode` | `0`, `1` | integer | Set operation mode |
 |     | `SetTemperature` | `0.0` | float | Set temperature |
+|     | `DefaultCoolingSetTemperature` | `0.0` | float | Set default cooling temperature |
+|     | `DefaultHeatingSetTemperature` | `0.0` | float | Set default heating temperature |
 | Heat Pump |     |     |     |      |
 |     | `Power` | `true`, `false` | boolean | Set power ON/OFF |
 |     | `OperationMode` | `0`, `1` | integer | Set operation mode |
