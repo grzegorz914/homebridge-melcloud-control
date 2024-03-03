@@ -34,18 +34,23 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * Support direct device control creating extra `Buttons`, applied for all devices of same type in account.
 * Support identify all states of device creating `Sensors`, applied for all devices of same type in account.
 * Support automations, shortcuts and Siri.
-* RESTful server:
-  * Request: `http//homebridge_ip_address:port/path`.
-  * Port: last 4 numbers of `device Id`, displayed in HB log during start.
-  * Path: `info`, `state`.
-  * Response as JSON data.
-* MQTT:
-  * Publish:
-    * Topic: `Info`, `State`.
-    * Publish as JSON data.
-  * Subscribe:
-    * Topic: `Set`.
-    * Payload JSON data.
+* Support external integrations, RESTFul and MQTT.
+
+### RESTful Integration
+
+* Request: `http//homebridge_ip_address:port/path`.
+* Port: last 4 numbers of `device Id`, displayed in HB log during start.
+* Path: `info`, `state`.
+* Response as JSON data.
+
+### MQTT Integration
+
+* Publish:
+  * Topic: `Info`, `State`.
+  * Publish as JSON data.
+* Subscribe:
+  * Topic: `Set`.
+  * Payload JSON data.
 
 | Device | Key | Value | Type | Description |
 | --- | --- | --- | --- | --- |
