@@ -120,8 +120,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Zone 1 temperature.
       * Zone 2 temperature.
       * Water tank temperature.
-      * Flow Temperature Zone 1, 2, Hot Water
-      * Return Temperature Zone 1, 2, Hot Water
+      * Flow Temperature Zone 1, 2, Hot Water.
+      * Return Temperature Zone 1, 2, Hot Water.
 * Energy Recovery Ventilation Lossnay:
   * Heater Cooler:
     * Power `ON/OFF`.
