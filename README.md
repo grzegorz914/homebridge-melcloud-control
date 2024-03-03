@@ -48,7 +48,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | Connection | Topic | Message | Description |
 | --- | --- | --- | --- |
 |  Publish   | `Info`, `State` | JSON object | Publish JSON object to MQTT boker |
-|  Subscribe   | `Set` | JSON object | Subscribe JSON object from MQTT broker |
+|  Subscribe   | `Set` | `{"Power": true}` | Subscribe JSON object from MQTT broker |
  
 | Subscribe | Key | Value | Type | Description |
 | --- | --- | --- | --- | --- |
