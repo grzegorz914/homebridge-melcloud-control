@@ -50,49 +50,49 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | Device | Key | Value | Type | Description |
 | --- | --- | --- | --- | --- |
 | Air Conditioner |     |     |     |      |
-|     | `Power` | `true`, `false` | boolean | Set power state |
+|     | `Power` | `true`, `false` | boolean | Power state |
 |     | `HideVaneControls` | `true`, `false` | boolean | Hide vane controls |
 |     | `HideDryModeControl` | `true`, `false` | boolean | Hide dry mode control |
 |     | `ProhibitSetTemperature` | `true`, `false` | boolean | Lock set temperature |
 |     | `ProhibitOperationMode` | `true`, `false` | boolean | Lock set operation mode |
-|     | `ProhibitPower` | `true`, `false` | boolean | lock set power |
-|     | `OperationMode` | `1`, `2`, `3`, `7`, `8` | integer | Set operation mode |
-|     | `SetFanSpeed` | `0`, `1`, `2`, `3`, `4`, `5` | integer | Set fan speed |
-|     | `VaneHorizontal` | `0`, `1`, `2`, `3`, `4`, `5`, `8`, `12` | integer | Set vane H mode |
-|     | `VaneVertical` | `0`, `1`, `2`, `3`, `4`, `5`, `7` | integer | Set vane V mode |
-|     | `SetTemperature` | `0.0` | float | Set temperature |
-|     | `DefaultCoolingSetTemperature` | `0.0` | float | Set default cooling temperature |
-|     | `DefaultHeatingSetTemperature` | `0.0` | float | Set default heating temperature |
+|     | `ProhibitPower` | `true`, `false` | boolean | Lock set power |
+|     | `OperationMode` | `1`, `2`, `3`, `7`, `8` | integer | Operation mode |
+|     | `SetFanSpeed` | `0`, `1`, `2`, `3`, `4`, `5` | integer | Fan speed |
+|     | `VaneHorizontal` | `0`, `1`, `2`, `3`, `4`, `5`, `8`, `12` | integer | Vane H mode |
+|     | `VaneVertical` | `0`, `1`, `2`, `3`, `4`, `5`, `7` | integer | Vane V mode |
+|     | `SetTemperature` | `0.0` | float | Room temperature |
+|     | `DefaultCoolingSetTemperature` | `0.0` | float | Default cooling temperature |
+|     | `DefaultHeatingSetTemperature` | `0.0` | float | Default heating temperature |
 | Heat Pump |     |     |     |      |
-|     | `Power` | `true`, `false` | boolean | Set power state |
-|     | `ForcedHotWaterMode` | `true`, `false` | boolean | Set force hot water |
-|     | `EcoHotWater` | `true`, `false` | boolean | Set eco hot water |
-|     | `HolidayMode` | `true`, `false` | boolean | Set holiday mode |
+|     | `Power` | `true`, `false` | boolean | Power state |
+|     | `ForcedHotWaterMode` | `true`, `false` | boolean | Force hot water |
+|     | `EcoHotWater` | `true`, `false` | boolean | Eco hot water |
+|     | `HolidayMode` | `true`, `false` | boolean | Holiday mode |
 |     | `ProhibitZone1` | `true`, `false` | boolean | Lock control zone 1 |
 |     | `ProhibitZone2` | `true`, `false` | boolean | Lock control zone 2 |
 |     | `ProhibitHotWater` | `true`, `false` | boolean | Lock control hot water |
-|     | `OperationMode` | `0`, `1`, `2` | integer | Set operation mode heat pump|
-|     | `OperationModeZone1` | `0`, `1`, `2`, `3`, `4`, `5` | integer | Set operation mode zone 1|
-|     | `OperationModeZone2` | `0`, `1`, `2`, `3`, `4`, `5` | integer | Set operation mode zone 2 |
-|     | `SetTemperatureZone1` | `0.0` | float | Set temperature zone 1|
-|     | `SetTemperatureZone2` | `0.0` | float | Set temperature zone 2 |
-|     | `SetHeatFlowTemperatureZone1` | `0.0` | float | Set heat flow temperature zone 1 |
-|     | `SetHeatFlowTemperatureZone2` | `0.0` | float | Set heat flow temperature zone 2 |
-|     | `SetCoolFlowTemperatureZone1` | `0.0` | float | Set cool flow temperature zone 1 |
-|     | `SetCoolFlowTemperatureZone2` | `0.0` | float | Set cool flow temperature zone 2|
-|     | `SetTankWaterTemperature` | `0.0` | float | Set hot water temperature |
+|     | `OperationMode` | `0`, `1`, `2` | integer | Operation mode heat pump |
+|     | `OperationModeZone1` | `0`, `1`, `2`, `3`, `4`, `5` | integer | Operation mode zone 1|
+|     | `OperationModeZone2` | `0`, `1`, `2`, `3`, `4`, `5` | integer | Operation mode zone 2 |
+|     | `SetTemperatureZone1` | `0.0` | float | Temperature zone 1|
+|     | `SetTemperatureZone2` | `0.0` | float | Temperature zone 2 |
+|     | `SetHeatFlowTemperatureZone1` | `0.0` | float | Heat flow temperature zone 1 |
+|     | `SetHeatFlowTemperatureZone2` | `0.0` | float | Heat flow temperature zone 2 |
+|     | `SetCoolFlowTemperatureZone1` | `0.0` | float | Cool flow temperature zone 1 |
+|     | `SetCoolFlowTemperatureZone2` | `0.0` | float | Cool flow temperature zone 2|
+|     | `SetTankWaterTemperature` | `0.0` | float | Hot water temperature |
 | Energy Recovery Ventilation |     |     |     |      |
-|     | `Power` | `true`, `false` | boolean | Set power state |
-|     | `NightPurgeMode` | `true`, `false` | boolean | Set power state |
+|     | `Power` | `true`, `false` | boolean | Power state |
+|     | `NightPurgeMode` | `true`, `false` | boolean | Night purge mode |
 |     | `HideRoomTemperature` | `true`, `false` | boolean | Hide room temperature |
 |     | `HideSupplyTemperature` | `true`, `false` | boolean | Hide supply temperature |
 |     | `HideOutdoorTemperature` | `true`, `false` | boolean | Hide outdoor temperature|
-|     | `OperationMode` | `1`, `3`, `7`, `8` | integer | Set operation mode |
-|     | `VentilationMode` | `0`, `1`, `2` | integer | Set ventilation mode |
-|     | `SetFanSpeed` | `0`, `1`, `2`, `3`, `4` | integer | Set fan speed |
-|     | `SetTemperature` | `0.0` | float | Set temperature |
-|     | `DefaultCoolingSetTemperature` | `0.0` | float | Set default cooling temperature |
-|     | `DefaultHeatingSetTemperature` | `0.0` | float | Set default heating temperature |
+|     | `OperationMode` | `1`, `3`, `7`, `8` | integer | Operation mode |
+|     | `VentilationMode` | `0`, `1`, `2` | integer | Ventilation mode |
+|     | `SetFanSpeed` | `0`, `1`, `2`, `3`, `4` | integer | Fan speed |
+|     | `SetTemperature` | `0.0` | float | Room temperature |
+|     | `DefaultCoolingSetTemperature` | `0.0` | float | Default cooling temperature |
+|     | `DefaultHeatingSetTemperature` | `0.0` | float | Default heating temperature |
 
 ### Control Mode
 
