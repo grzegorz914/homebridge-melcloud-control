@@ -58,11 +58,14 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 
 | Device | Key | Value | Value Type | Description |
 | --- | --- | --- | --- | --- |
-| Air Conditioner | `Power` | `true`, `false` | boolean | Set power ON/OFF |
-|     | `OperationMode` | `0`, `1` | boolean | Set power ON/OFF |
-| Heat Pump | `Power` | `true`, `false` | boolean | Set power ON/OFF |
+| Air Conditioner |     |     |     |      |
+|     | `Power` | `true`, `false` | boolean | Set power ON/OFF |
 |     | `OperationMode` | `0`, `1` | integer | Set operation mode |
-| Energy Recovery Ventilation | `Power` | `true`, `false` | boolean | Set power ON/OFF |
+| Heat Pump |     |     |     |      |
+|     | `Power` | `true`, `false` | boolean | Set power ON/OFF |
+|     | `OperationMode` | `0`, `1` | integer | Set operation mode |
+| Energy Recovery Ventilation |     |     |     |      |
+|     | `Power` | `true`, `false` | boolean | Set power ON/OFF |
 |     | `OperationMode` | `0`, `1` | integer | Set operation mode |
 
 ### Control Mode
