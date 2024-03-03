@@ -57,7 +57,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
            * `Power: boolean`, `OperationMode: integer`, `VentilationMode: integer`, `SetTemperature: float`, `DefaultCoolingSetTemperature: float`, `DefaultHeatingSetTemperature: float`, `NightPurgeMode: boolean`, `SetFanSpeed`, `HideRoomTemperature: boolean`, `HideSupplyTemperature: boolean`, `HideOutdoorTemperature: boolean`.
 
 | Device | Key | Value | Value Type | Description |
-| --- | --- | --- | --- |
+| --- | --- | --- | --- | --- |
 | ATA | `Power` | true/false | boolean | Set power ON/OFF |
 
 ### Control Mode
