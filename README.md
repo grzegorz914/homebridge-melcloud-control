@@ -227,8 +227,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 
 | Direction | Topic | Message | Description |
 | --- | --- | --- | --- |
-|  Publish   | `Info`, `State` | `{"Power": true, "SetTemperature": 21.5}` | Publish JSON object |
-|  Subscribe   | `Set` | `{"Power": true}` | Subscribe JSON object |
+|  Publish   | `Info`, `State` | `{"Power": true, "SetTemperature": 21.5, "SetFanSpeed": 0}` | JSON object |
+|  Subscribe   | `Set` | `{"Power": true}` | JSON object |
  
 | Subscribe | Key | Value | Type | Description |
 | --- | --- | --- | --- | --- |
