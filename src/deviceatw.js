@@ -326,7 +326,7 @@ class MelCloudDevice extends EventEmitter {
                         break;
                 };
 
-                if (this.temperatureSensor && this.roomTemperatureSensorServices[i]) {
+                if (this.temperatureSensor && this.roomTemperatureSensorServices) {
                     this.roomTemperatureSensorServices[i]
                         .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                 };
@@ -513,7 +513,7 @@ class MelCloudDevice extends EventEmitter {
                     const state = button.state;
                     const displayType = button.displayType;
                     const characteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][displayType];
-                    if (this.buttonsServices[i]) {
+                    if (this.buttonsServices) {
                         this.buttonsServices[i]
                             .updateCharacteristic(characteristicType, state)
                     };
@@ -540,7 +540,7 @@ class MelCloudDevice extends EventEmitter {
                         && preset.SetCoolFlowTemperatureZone2 === setCoolFlowTemperatureZone2;
                     this.presetsStates.push(state);
 
-                    if (this.presetsServices[i]) {
+                    if (this.presetsServices) {
                         this.presetsServices[i]
                             .updateCharacteristic(Characteristic.On, state)
                     };
