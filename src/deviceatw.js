@@ -240,7 +240,7 @@ class MelCloudDevice extends EventEmitter {
                         };
 
                         //update characteristics
-                        if (this.melCloudServices && currentOperationMode !== undefined && targetOperationMode !== undefined) {
+                        if (this.melCloudServices[i] && currentOperationMode !== undefined && targetOperationMode !== undefined) {
                             this.melCloudServices[i]
                                 .updateCharacteristic(Characteristic.Active, power)
                                 .updateCharacteristic(Characteristic.CurrentHeaterCoolerState, currentOperationMode)
@@ -312,7 +312,7 @@ class MelCloudDevice extends EventEmitter {
                         };
 
                         //update characteristics
-                        if (this.melCloudServices && currentOperationMode !== undefined && targetOperationMode !== undefined) {
+                        if (this.melCloudServices[i] && currentOperationMode !== undefined && targetOperationMode !== undefined) {
                             this.melCloudServices[i]
                                 .updateCharacteristic(Characteristic.CurrentHeatingCoolingState, currentOperationMode)
                                 .updateCharacteristic(Characteristic.TargetHeatingCoolingState, targetOperationMode)
@@ -326,8 +326,8 @@ class MelCloudDevice extends EventEmitter {
                         break;
                 };
 
-                if (this.temperatureSensor && this.temperatureSensorServices) {
-                    this.temperatureSensorServices[i]
+                if (this.temperatureSensor && this.roomTemperatureSensorServices[i]) {
+                    this.roomTemperatureSensorServices[i]
                         .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                 };
 
@@ -513,7 +513,7 @@ class MelCloudDevice extends EventEmitter {
                     const state = button.state;
                     const displayType = button.displayType;
                     const characteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][displayType];
-                    if (this.buttonsServices) {
+                    if (this.buttonsServices[i]) {
                         this.buttonsServices[i]
                             .updateCharacteristic(characteristicType, state)
                     };
@@ -540,7 +540,7 @@ class MelCloudDevice extends EventEmitter {
                         && preset.SetCoolFlowTemperatureZone2 === setCoolFlowTemperatureZone2;
                     this.presetsStates.push(state);
 
-                    if (this.presetsServices) {
+                    if (this.presetsServices[i]) {
                         this.presetsServices[i]
                             .updateCharacteristic(Characteristic.On, state)
                     };
@@ -749,7 +749,7 @@ class MelCloudDevice extends EventEmitter {
                 const hasZone2 = this.hasZone2;
 
                 this.melCloudServices = [];
-                this.temperatureSensorServices = temperatureSensor ? [] : false;
+                this.roomTemperatureSensorServices = [];
                 for (let i = 0; i < zonesCount; i++) {
                     const zoneName = [this.heatPumpName, this.zone1Name, this.hotWaterName, this.zone2Name][i];
                     const serviceName = `${deviceTypeText} ${accessoryName}: ${zoneName}`;
@@ -1177,6 +1177,11 @@ class MelCloudDevice extends EventEmitter {
                                     };
                                 });
                             melCloudServiceT.getCharacteristic(Characteristic.CurrentTemperature)
+                                .setProps({
+                                    minValue: -35,
+                                    maxValue: 150,
+                                    minStep: 0.5
+                                })
                                 .onGet(async () => {
                                     const value = this.roomTemperatures[i];
                                     const info = this.disableLogInfo ? false : this.emit('message', `${zoneName}, ${i === 0 ? 'Outdoor temperature:' : 'Temperature:'} ${value}${temperatureUnit}`);
@@ -1245,15 +1250,21 @@ class MelCloudDevice extends EventEmitter {
                     //temperature sensor services zones
                     if (temperatureSensor && this.roomTemperatures[i] !== null) {
                         const debug = this.enableDebugMode ? this.emit('debug', `${zoneName}, Prepare temperature sensor service`) : false;
-                        this.temperatureSensorServices = new Service.TemperatureSensor(`${accessoryName} ${zoneName}`, `${zoneName} Temperature Sensor ${deviceId} ${i}`);
-                        this.temperatureSensorServices.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                        this.temperatureSensorServices.setCharacteristic(Characteristic.ConfiguredName, `${serviceName}`);
-                        this.temperatureSensorServices.getCharacteristic(Characteristic.CurrentTemperature)
+                        const roomTemperatureSensorService = new Service.TemperatureSensor(`${accessoryName} ${zoneName}`, `${zoneName} Temperature Sensor ${deviceId} ${i}`);
+                        roomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                        roomTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${serviceName}`);
+                        roomTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                            .setProps({
+                                minValue: -35,
+                                maxValue: 150,
+                                minStep: 0.5
+                            })
                             .onGet(async () => {
                                 const state = this.roomTemperatures[i];
                                 return state;
                             })
-                        accessory.addService(this.temperatureSensorServices);
+                        this.roomTemperatureSensorServices.push(roomTemperatureSensorService);
+                        accessory.addService(roomTemperatureSensorService);
                     };
                 };
 
@@ -1265,6 +1276,11 @@ class MelCloudDevice extends EventEmitter {
                         this.flowTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                         this.flowTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Flow`);
                         this.flowTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                            .setProps({
+                                minValue: -35,
+                                maxValue: 150,
+                                minStep: 0.5
+                            })
                             .onGet(async () => {
                                 const state = this.flowTemperature;
                                 return state;
@@ -1278,6 +1294,11 @@ class MelCloudDevice extends EventEmitter {
                         this.returnTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                         this.returnTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Return`);
                         this.returnTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                            .setProps({
+                                minValue: -35,
+                                maxValue: 150,
+                                minStep: 0.5
+                            })
                             .onGet(async () => {
                                 const state = this.returnTemperature;
                                 return state;
@@ -1291,6 +1312,11 @@ class MelCloudDevice extends EventEmitter {
                         this.flowTemperatureZone1SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                         this.flowTemperatureZone1SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Flow Zone 1`);
                         this.flowTemperatureZone1SensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                            .setProps({
+                                minValue: -35,
+                                maxValue: 150,
+                                minStep: 0.5
+                            })
                             .onGet(async () => {
                                 const state = this.flowTemperatureZone1;
                                 return state;
@@ -1304,6 +1330,11 @@ class MelCloudDevice extends EventEmitter {
                         this.returnTemperatureZone1SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                         this.returnTemperatureZone1SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Return Zone 1`);
                         this.returnTemperatureZone1SensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                            .setProps({
+                                minValue: -35,
+                                maxValue: 150,
+                                minStep: 0.5
+                            })
                             .onGet(async () => {
                                 const state = this.returnTemperatureZone1;
                                 return state;
@@ -1318,6 +1349,11 @@ class MelCloudDevice extends EventEmitter {
                             this.flowTemperatureWaterTankSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                             this.flowTemperatureWaterTankSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Flow Water Tank`);
                             this.flowTemperatureWaterTankSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                .setProps({
+                                    minValue: -35,
+                                    maxValue: 150,
+                                    minStep: 0.5
+                                })
                                 .onGet(async () => {
                                     const state = this.flowTemperatureWaterTank;
                                     return state;
@@ -1331,6 +1367,11 @@ class MelCloudDevice extends EventEmitter {
                             this.returnTemperatureWaterTankSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                             this.returnTemperatureWaterTankSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Return Water Tank`);
                             this.returnTemperatureWaterTankSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                .setProps({
+                                    minValue: -35,
+                                    maxValue: 150,
+                                    minStep: 0.5
+                                })
                                 .onGet(async () => {
                                     const state = this.returnTemperatureWaterTank;
                                     return state;
@@ -1346,6 +1387,11 @@ class MelCloudDevice extends EventEmitter {
                             this.flowTemperatureZone2SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                             this.flowTemperatureZone2SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Flow Zone 2`);
                             this.flowTemperatureZone2SensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                .setProps({
+                                    minValue: -35,
+                                    maxValue: 150,
+                                    minStep: 0.5
+                                })
                                 .onGet(async () => {
                                     const state = this.flowTemperatureZone2;
                                     return state;
@@ -1359,6 +1405,11 @@ class MelCloudDevice extends EventEmitter {
                             this.returnTemperatureZone2SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                             this.returnTemperatureZone2SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Return Zone 2`);
                             this.returnTemperatureZone2SensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                .setProps({
+                                    minValue: -35,
+                                    maxValue: 150,
+                                    minStep: 0.5
+                                })
                                 .onGet(async () => {
                                     const state = this.returnTemperatureZone2;
                                     return state;
