@@ -240,7 +240,7 @@ class MelCloudDevice extends EventEmitter {
                         };
 
                         //update characteristics
-                        if (this.melCloudServices[i] && currentOperationMode !== undefined && targetOperationMode !== undefined) {
+                        if (this.melCloudServices && currentOperationMode !== undefined && targetOperationMode !== undefined) {
                             this.melCloudServices[i]
                                 .updateCharacteristic(Characteristic.Active, power)
                                 .updateCharacteristic(Characteristic.CurrentHeaterCoolerState, currentOperationMode)
@@ -312,7 +312,7 @@ class MelCloudDevice extends EventEmitter {
                         };
 
                         //update characteristics
-                        if (this.melCloudServices[i] && currentOperationMode !== undefined && targetOperationMode !== undefined) {
+                        if (this.melCloudServices && currentOperationMode !== undefined && targetOperationMode !== undefined) {
                             this.melCloudServices[i]
                                 .updateCharacteristic(Characteristic.CurrentHeatingCoolingState, currentOperationMode)
                                 .updateCharacteristic(Characteristic.TargetHeatingCoolingState, targetOperationMode)
