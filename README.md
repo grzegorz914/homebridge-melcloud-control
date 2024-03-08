@@ -221,7 +221,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * Request: `http//homebridge_ip_address:port/path`.
 * Port: last 4 numbers of `device Id`, displayed in HB log during start.
 * Path: `info`, `state`.
-* Response as JSON data.
+* Response as JSON object.
 
 ### MQTT Integration
 
