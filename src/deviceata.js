@@ -943,22 +943,24 @@ class MelCloudDevice extends EventEmitter {
                 };
 
                 //temperature sensor services
-                if (temperatureSensor && this.roomTemperature !== null) {
-                    const debug = this.enableDebugMode ? this.emit('debug', `Prepare room temperature sensor service`) : false;
-                    this.roomTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Room`, `Room Temperature Sensor ${deviceId}`);
-                    this.roomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                    this.roomTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Room`);
-                    this.roomTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                        .setProps({
-                            minValue: -35,
-                            maxValue: 150,
-                            minStep: 0.5
-                        })
-                        .onGet(async () => {
-                            const state = this.roomTemperature;
-                            return state;
-                        })
-                    accessory.addService(this.roomTemperatureSensorService);
+                if (temperatureSensor) {
+                    if (this.roomTemperature !== null) {
+                        const debug = this.enableDebugMode ? this.emit('debug', `Prepare room temperature sensor service`) : false;
+                        this.roomTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Room`, `Room Temperature Sensor ${deviceId}`);
+                        this.roomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                        this.roomTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Room`);
+                        this.roomTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                            .setProps({
+                                minValue: -35,
+                                maxValue: 150,
+                                minStep: 0.5
+                            })
+                            .onGet(async () => {
+                                const state = this.roomTemperature;
+                                return state;
+                            })
+                        accessory.addService(this.roomTemperatureSensorService);
+                    };
 
                     if (hasOutdoorTemperature && this.outdoorTemperature !== null) {
                         const debug = this.enableDebugMode ? this.emit('debug', `Prepare outdoor temperature sensor service`) : false;
