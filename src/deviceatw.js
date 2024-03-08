@@ -787,8 +787,6 @@ class MelCloudDevice extends EventEmitter {
                 const displayMode = this.displayMode;
                 const caseHotWater = this.caseHotWater;
                 const caseZone2 = this.caseZone2;
-                const hasHotWaterTank = this.hasHotWaterTank;
-                const hasZone2 = this.hasZone2;
                 const heatCoolModes = this.heatCoolModes;
 
                 this.melCloudServices = [];
