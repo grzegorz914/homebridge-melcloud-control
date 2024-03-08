@@ -322,11 +322,6 @@ class MelCloudDevice extends EventEmitter {
                         break;
                 };
 
-                if (this.temperatureSensor && this.roomTemperatureSensorServices) {
-                    this.roomTemperatureSensorServices[i]
-                        .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-                };
-
                 //push value to arrays
                 this.currentOperationModes.push(currentOperationMode);
                 this.targetOperationModes.push(targetOperationMode);
@@ -340,6 +335,76 @@ class MelCloudDevice extends EventEmitter {
                 const push2 = this.startPrepareAccessory ? this.operationModesSetPropsValidValues.push(operationModeSetPropsValidValues) : false;
                 const push3 = this.startPrepareAccessory ? this.temperaturesSetPropsMinValue.push(temperatureSetPropsMinValue) : false;
                 const push4 = this.startPrepareAccessory ? this.temperaturesSetPropsMaxValue.push(temperatureSetPropsMaxValue) : false;
+
+                //update temperature sensors
+                if (this.temperatureSensor) {
+                    switch (i) {
+                        case 0: //Heat Pump
+                            if (this.roomTemperatureSensorServices) {
+                                this.roomTemperatureSensorServices[i]
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+                            };
+
+                            if (this.flowTemperatureSensorService) {
+                                this.flowTemperatureSensorService
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperature)
+                            };
+
+                            if (this.returnTemperatureSensorService) {
+                                this.returnTemperatureSensorService
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperature)
+                            };
+                            break;
+                        case 1: //Zone 1
+                            if (this.roomTemperatureSensorServices) {
+                                this.roomTemperatureSensorServices[i]
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+                            };
+
+                            if (this.flowTemperatureZone1SensorService) {
+                                this.flowTemperatureZone1SensorService
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureZone1)
+                            };
+
+                            if (this.returnTemperatureZone1SensorService) {
+                                this.returnTemperatureZone1SensorService
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureZone1)
+                            };
+                            break;
+                        case caseHotWater: //Hot Water
+                            if (this.roomTemperatureSensorServices) {
+                                this.roomTemperatureSensorServices[i]
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+                            };
+
+                            if (this.flowTemperatureWaterTankSensorService) {
+                                this.flowTemperatureWaterTankSensorService
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureWaterTank)
+                            };
+
+                            if (this.returnTemperatureWaterTankSensorService) {
+                                this.returnTemperatureWaterTankSensorService
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureWaterTank)
+                            };
+                            break;
+                        case caseZone2: //Zone 2
+                            if (this.roomTemperatureSensorServices) {
+                                this.roomTemperatureSensorServices[i]
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+                            };
+
+                            if (this.flowTemperatureZone2SensorService) {
+                                this.flowTemperatureZone2SensorService
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureZone2)
+                            };
+
+                            if (this.returnTemperatureZone2SensorService) {
+                                this.returnTemperatureZone2SensorService
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureZone2)
+                            };
+                            break;
+                    };
+                };
 
                 //log current state
                 if (!this.disableLogInfo) {
@@ -393,52 +458,6 @@ class MelCloudDevice extends EventEmitter {
             this.idleZone2 = idleZone2;
             this.power = power;
             this.offline = offline;
-
-            if (this.temperatureSensor) {
-                if (this.flowTemperatureSensorService) {
-                    this.flowTemperatureSensorService
-                        .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperature)
-                };
-
-                if (this.returnTemperatureSensorService) {
-                    this.returnTemperatureSensorService
-                        .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperature)
-                };
-
-                if (this.flowTemperatureZone1SensorService) {
-                    this.flowTemperatureZone1SensorService
-                        .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureZone1)
-                };
-
-                if (this.returnTemperatureZone1SensorService) {
-                    this.returnTemperatureZone1SensorService
-                        .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureZone1)
-                };
-
-                if (hasHotWaterTank) {
-                    if (this.flowTemperatureWaterTankSensorService) {
-                        this.flowTemperatureWaterTankSensorService
-                            .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureWaterTank)
-                    };
-
-                    if (this.returnTemperatureWaterTankSensorService) {
-                        this.returnTemperatureWaterTankSensorService
-                            .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureWaterTank)
-                    };
-                };
-
-                if (hasZone2) {
-                    if (this.flowTemperatureZone2SensorService) {
-                        this.flowTemperatureZone2SensorService
-                            .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureZone2)
-                    };
-
-                    if (this.returnTemperatureZone2SensorService) {
-                        this.returnTemperatureZone2SensorService
-                            .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureZone2)
-                    };
-                };
-            };
 
             //update buttons state
             if (this.buttonsCount > 0) {
