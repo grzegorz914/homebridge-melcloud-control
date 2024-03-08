@@ -247,13 +247,9 @@ class MelCloudDevice extends EventEmitter {
                                 .updateCharacteristic(Characteristic.TargetHeaterCoolerState, targetOperationMode)
                                 .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                                 .updateCharacteristic(Characteristic.LockPhysicalControls, lockPhysicalControls)
-                                .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.useFahrenheit)
-                            if (this.heatCoolModes === 0 || this.heatCoolModes === 1) {
-                                this.melCloudServices[i].updateCharacteristic(Characteristic.HeatingThresholdTemperature, setTemperature)
-                            }
-                            if ((this.heatCoolModes === 0 || this.heatCoolModes === 2) && i !== this.caseHotWater) {
-                                this.melCloudServices[i].updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature)
-                            }
+                                .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.useFahrenheit);
+                            const updateHT = heatCoolModes === 0 || heatCoolModes === 1 ? this.melCloudServices[i].updateCharacteristic(Characteristic.HeatingThresholdTemperature, setTemperature) : false;
+                            const updateCT = heatCoolModes === 0 || heatCoolModes === 2 ? this.melCloudServices[i].updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature) : false;
                         }
                         break;
                     case 1: //Thermostat
@@ -318,7 +314,7 @@ class MelCloudDevice extends EventEmitter {
                                 .updateCharacteristic(Characteristic.TargetHeatingCoolingState, targetOperationMode)
                                 .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                                 .updateCharacteristic(Characteristic.TargetTemperature, setTemperature)
-                                .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.useFahrenheit)
+                                .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.useFahrenheit);
                         }
                         break;
                     default: //unknown display type detected
@@ -747,6 +743,7 @@ class MelCloudDevice extends EventEmitter {
                 const caseZone2 = this.caseZone2;
                 const hasHotWaterTank = this.hasHotWaterTank;
                 const hasZone2 = this.hasZone2;
+                const heatCoolModes = this.heatCoolModes;
 
                 this.melCloudServices = [];
                 this.roomTemperatureSensorServices = [];
@@ -905,7 +902,7 @@ class MelCloudDevice extends EventEmitter {
                                     return value;
                                 });
                             //device can heat/cool or only heat
-                            if (this.heatCoolModes === 0 || this.heatCoolModes === 1) {
+                            if (heatCoolModes === 0 || heatCoolModes === 1) {
                                 melCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
                                     .setProps({
                                         minValue: this.temperaturesSetPropsMinValue[i],
@@ -946,7 +943,7 @@ class MelCloudDevice extends EventEmitter {
                                     });
                             };
                             //only for heat/cool, only cool and not for hot water tank
-                            if ((this.heatCoolModes === 0 || this.heatCoolModes === 2) && i !== caseHotWater) {
+                            if ((heatCoolModes === 0 || heatCoolModes === 2) && i !== caseHotWater) {
                                 melCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
                                     .setProps({
                                         minValue: this.temperaturesSetPropsMinValue[i],

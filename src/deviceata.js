@@ -180,8 +180,8 @@ class MelCloudDevice extends EventEmitter {
                             .updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature)
                             .updateCharacteristic(Characteristic.LockPhysicalControls, lockPhysicalControls)
                             .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.useFahrenheit);
-                        const updateRotationSpeed = modelSupportsFanSpeed ? this.melCloudService.updateCharacteristic(Characteristic.RotationSpeed, fanSpeed) : false;
-                        const updateSwingMode = swingFunction ? this.melCloudService.updateCharacteristic(Characteristic.SwingMode, swingMode) : false;
+                        const updateRS = modelSupportsFanSpeed ? this.melCloudService.updateCharacteristic(Characteristic.RotationSpeed, fanSpeed) : false;
+                        const updateSM = swingFunction ? this.melCloudService.updateCharacteristic(Characteristic.SwingMode, swingMode) : false;
                     };
                     break;
                 case 1: //Thermostat
