@@ -376,6 +376,27 @@ class MelCloudDevice extends EventEmitter {
                 };
             };
 
+            //log current state
+            if (!this.disableLogInfo) {
+                const operationModeText = !power ? CONSTANTS.Ventilation.System[0] : CONSTANTS.Ventilation.OperationMode[ventilationMode];
+                this.emit('message', `Power: ${power ? 'ON' : 'OFF'}`);
+                this.emit('message', `Operation mode: ${operationModeText}`);
+                this.emit('message', `Room temperature: ${roomTemperature}${this.temperatureUnit}`);
+                const info = hasCoolOperationMode || hasHeatOperationMode ? this.emit('message', `Target temperature: ${targetTemperature}${this.temperatureUnit}`) : false;
+                const info1 = hasSupplyTemperature && this.supplyTemperature !== null ? this.emit('message', `Supply temperature: ${roomTemperature}${this.temperatureUnit}`) : false;
+                const info2 = hasOutdoorTemperature && this.outdoorTemperature !== null ? this.emit('message', `Outdoor temperature: ${roomTemperature}${this.temperatureUnit}`) : false;
+                const info3 = hasHeatOperationMode && displayMode === 0 ? this.emit('message', `Heating threshold temperature: ${targetTemperature}${this.temperatureUnit}`) : false;
+                const info4 = hasCoolOperationMode && displayMode === 0 ? this.emit('message', `Cooling threshold temperature: ${targetTemperature}${this.temperatureUnit}`) : false;
+                this.emit('message', `Fan speed mode: ${CONSTANTS.Ventilation.FanSpeed[setFanSpeed]}`);
+                this.emit('message', `Temperature display unit: ${this.temperatureUnit}`);
+                this.emit('message', `Core maintenance: ${CONSTANTS.Ventilation.CoreMaintenance[coreMaintenanceRequired]}`);
+                this.emit('message', `Filter maintenance: ${CONSTANTS.Ventilation.FilterMaintenance[filterMaintenanceRequired]}`);
+                const info5 = hasCO2Sensor ? this.emit('message', `CO2 detected: ${CONSTANTS.Ventilation.Co2Detected[roomCO2Detected]}`) : false;
+                const info6 = hasCO2Sensor ? this.emit('message', `CO2 level: ${roomCO2Level} ppm`) : false;
+                const info7 = hasPM25Sensor ? this.emit('message', `PM2.5 air quality: ${CONSTANTS.Ventilation.PM25AirQuality[pM25AirQuality]}`) : false;
+                const info8 = hasPM25Sensor ? this.emit('message', `PM2.5 level: ${pM25Level} µg/m`) : false;
+            };
+
             //start prepare accessory
             if (this.startPrepareAccessory) {
                 try {
@@ -561,7 +582,6 @@ class MelCloudDevice extends EventEmitter {
                         this.melCloudService.getCharacteristic(Characteristic.Active)
                             .onGet(async () => {
                                 const state = this.power;
-                                const info = this.disableLogInfo ? false : this.emit('message', `Power: ${state ? 'ON' : 'OFF'}`);
                                 return state;
                             })
                             .onSet(async (state) => {
@@ -578,8 +598,6 @@ class MelCloudDevice extends EventEmitter {
                         this.melCloudService.getCharacteristic(Characteristic.CurrentHeaterCoolerState)
                             .onGet(async () => {
                                 const value = this.currentOperationMode;
-                                const operationModeText = !this.power ? CONSTANTS.Ventilation.System[0] : CONSTANTS.Ventilation.OperationMode[deviceState.VentilationMode];
-                                const info = this.disableLogInfo ? false : this.emit('message', `Operation mode: ${operationModeText}`);
                                 return value;
                             });
                         this.melCloudService.getCharacteristic(Characteristic.TargetHeaterCoolerState)
@@ -627,7 +645,6 @@ class MelCloudDevice extends EventEmitter {
                             })
                             .onGet(async () => {
                                 const value = this.fanSpeed; //STOP, 1, 2, 3, 4, OFF
-                                const info = this.disableLogInfo ? false : this.emit('message', `Fan speed mode: ${CONSTANTS.Ventilation.FanSpeed[this.setFanSpeed]}`);
                                 return value;
                             })
                             .onSet(async (value) => {
@@ -665,7 +682,6 @@ class MelCloudDevice extends EventEmitter {
                             })
                             .onGet(async () => {
                                 const value = this.roomTemperature;
-                                const info = this.disableLogInfo ? false : this.emit('message', `Room temperature: ${value}${temperatureUnit}`);
                                 return value;
                             });
                         //device can heat
@@ -678,7 +694,6 @@ class MelCloudDevice extends EventEmitter {
                                 })
                                 .onGet(async () => {
                                     const value = this.setTemperature;
-                                    const info = this.disableLogInfo ? false : this.emit('message', `Heating threshold temperature: ${value}${temperatureUnit}`);
                                     return value;
                                 })
                                 .onSet(async (value) => {
@@ -702,7 +717,6 @@ class MelCloudDevice extends EventEmitter {
                                 })
                                 .onGet(async () => {
                                     const value = this.setTemperature;
-                                    const info = this.disableLogInfo ? false : this.emit('message', `Cooling threshold temperature: ${value}${temperatureUnit}`);
                                     return value;
                                 })
                                 .onSet(async (value) => {
@@ -736,7 +750,6 @@ class MelCloudDevice extends EventEmitter {
                         this.melCloudService.getCharacteristic(Characteristic.TemperatureDisplayUnits)
                             .onGet(async () => {
                                 const value = this.useFahrenheit;
-                                const info = this.disableLogInfo ? false : this.emit('message', `Temperature display unit: ${temperatureUnit}`);
                                 return value;
                             })
                             .onSet(async (value) => {
@@ -757,8 +770,6 @@ class MelCloudDevice extends EventEmitter {
                         this.melCloudService.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
                             .onGet(async () => {
                                 const value = this.currentOperationMode;
-                                const operationModeText = !this.power ? CONSTANTS.Ventilation.System[0] : CONSTANTS.Ventilation.OperationMode[deviceState.OperationMode];
-                                const info = this.disableLogInfo ? false : this.emit('message', `Operation mode: ${operationModeText}`);
                                 return value;
                             });
                         this.melCloudService.getCharacteristic(Characteristic.TargetHeatingCoolingState)
@@ -810,7 +821,6 @@ class MelCloudDevice extends EventEmitter {
                             })
                             .onGet(async () => {
                                 const value = this.roomTemperature;
-                                const info = this.disableLogInfo ? false : this.emit('message', `Room temperature: ${value}${temperatureUnit}`);
                                 return value;
                             });
                         this.melCloudService.getCharacteristic(Characteristic.TargetTemperature)
@@ -821,7 +831,6 @@ class MelCloudDevice extends EventEmitter {
                             })
                             .onGet(async () => {
                                 const value = this.setTemperature;
-                                const info = this.disableLogInfo ? false : this.emit('message', `Target temperature: ${value}${temperatureUnit}`);
                                 return value;
                             })
                             .onSet(async (value) => {
@@ -837,7 +846,6 @@ class MelCloudDevice extends EventEmitter {
                         this.melCloudService.getCharacteristic(Characteristic.TemperatureDisplayUnits)
                             .onGet(async () => {
                                 const value = this.useFahrenheit;
-                                const info = this.disableLogInfo ? false : this.emit('message', `Temperature display unit: ${temperatureUnit}`);
                                 return value;
                             })
                             .onSet(async (value) => {
@@ -918,7 +926,6 @@ class MelCloudDevice extends EventEmitter {
                 this.coreMaintenanceService.getCharacteristic(Characteristic.FilterChangeIndication)
                     .onGet(async () => {
                         const value = this.coreMaintenanceRequired;
-                        const info = this.disableLogInfo ? false : this.emit('message', `Core maintenance: ${CONSTANTS.Ventilation.CoreMaintenance[value]}`);
                         return value;
                     });
                 this.coreMaintenanceService.getCharacteristic(Characteristic.ResetFilterIndication)
@@ -933,7 +940,6 @@ class MelCloudDevice extends EventEmitter {
                 this.filterMaintenanceService.getCharacteristic(Characteristic.FilterChangeIndication)
                     .onGet(async () => {
                         const value = this.filterMaintenanceRequired;
-                        const info = this.disableLogInfo ? false : this.emit('message', `Filter maintenance: ${CONSTANTS.Ventilation.FilterMaintenance[value]}`);
                         return value;
                     });
                 this.filterMaintenanceService.getCharacteristic(Characteristic.ResetFilterIndication)
@@ -949,13 +955,11 @@ class MelCloudDevice extends EventEmitter {
                     this.carbonDioxideSensorService.getCharacteristic(Characteristic.CarbonDioxideDetected)
                         .onGet(async () => {
                             const value = this.roomCO2Detected;
-                            const info = this.disableLogInfo ? false : this.emit('message', `CO2 detected: ${CONSTANTS.Ventilation.Co2Detected[value]}`);
                             return value;
                         });
                     this.carbonDioxideSensorService.getCharacteristic(Characteristic.CarbonDioxideLevel)
                         .onGet(async () => {
                             const value = this.roomCO2Level;
-                            const info = this.disableLogInfo ? false : this.emit('message', `CO2 level: ${value} ppm`);
                             return value;
                         });
                     accessory.addService(this.carbonDioxideSensorService);
@@ -969,13 +973,11 @@ class MelCloudDevice extends EventEmitter {
                     this.airQualitySensorService.getCharacteristic(Characteristic.AirQuality)
                         .onGet(async () => {
                             const value = this.pM25AirQuality;
-                            const info = this.disableLogInfo ? false : this.emit('message', `PM2.5 air quality: ${CONSTANTS.Ventilation.PM25AirQuality[value]}`);
                             return value;
                         });
                     this.airQualitySensorService.getCharacteristic(Characteristic.PM2_5Density)
                         .onGet(async () => {
                             const value = this.pM25Level;
-                            const info = this.disableLogInfo ? false : this.emit('message', `PM2.5 level: ${value} µg/m`);
                             return value;
                         });
                     accessory.addService(this.airQualitySensorService);

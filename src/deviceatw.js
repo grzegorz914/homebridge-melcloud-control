@@ -69,10 +69,10 @@ class MelCloudDevice extends EventEmitter {
         }).on('deviceState', async (deviceData, deviceState) => {
             //device info
             const displayMode = this.displayMode;
-            const heatPumpZoneName = 'Heat Pump';
-            const hotWaterZoneName = 'Hot Water';
-            const heatPumpZone1Name = deviceData.Zone1Name ?? 'Zone 1';
-            const heatPumpZone2Name = deviceData.Zone2Name ?? 'Zone 2';
+            const heatPumpName = 'Heat Pump';
+            const hotWaterName = 'Hot Water';
+            const zone1Name = deviceData.Zone1Name ?? 'Zone 1';
+            const zone2Name = deviceData.Zone2Name ?? 'Zone 2';
             const hasHotWaterTank = deviceData.Device.HasHotWaterTank ?? false;
             const hasZone2 = deviceData.Device.HasZone2 ?? false;
             const canHeat = deviceData.Device.CanHeat ?? false;
@@ -110,10 +110,10 @@ class MelCloudDevice extends EventEmitter {
             const caseZone2 = hasZone2 ? hasHotWaterTank ? 3 : 2 : -1;
 
             this.zonesCount = zonesCount;
-            this.heatPumpName = heatPumpZoneName;
-            this.hotWaterName = hotWaterZoneName;
-            this.zone1Name = heatPumpZone1Name
-            this.zone2Name = heatPumpZone2Name;
+            this.heatPumpName = heatPumpName;
+            this.hotWaterName = hotWaterName;
+            this.zone1Name = zone1Name
+            this.zone2Name = zone2Name;
             this.heatCoolModes = heatCoolModes;
             this.caseHotWater = caseHotWater;
             this.caseZone2 = caseZone2;
@@ -334,12 +334,58 @@ class MelCloudDevice extends EventEmitter {
                 this.setTemperatures.push(setTemperature);
                 this.lockPhysicalsControls.push(lockPhysicalControls);
 
-                //push only 1 time for zone
+                //push only 1 time for every zone
                 const push = this.startPrepareAccessory ? this.operationModesSetPropsMinValue.push(operationModeSetPropsMinValue) : false;
                 const push1 = this.startPrepareAccessory ? this.operationModesSetPropsMaxValue.push(operationModeSetPropsMaxValue) : false;
                 const push2 = this.startPrepareAccessory ? this.operationModesSetPropsValidValues.push(operationModeSetPropsValidValues) : false;
                 const push3 = this.startPrepareAccessory ? this.temperaturesSetPropsMinValue.push(temperatureSetPropsMinValue) : false;
                 const push4 = this.startPrepareAccessory ? this.temperaturesSetPropsMaxValue.push(temperatureSetPropsMaxValue) : false;
+
+                //log current state
+                if (!this.disableLogInfo) {
+                    let operationModeText = '';
+                    switch (i) {
+                        case 0: //Heat Pump - HEAT, COOL, OFF
+                            this.emit('message', `${heatPumpName}, Power: ${power ? 'ON' : 'OFF'}`)
+                            this.emit('message', `${heatPumpName}, Operation mode: ${!power ? CONSTANTS.HeatPump.System[0] : CONSTANTS.HeatPump.System[unitStatus]}`);
+                            this.emit('message', `${heatPumpName},'Outdoor temperature: ${roomTemperature}${this.temperatureUnit}`);
+                            const info = flowTemperature !== null ? this.emit('message', `${heatPumpName}, Flow temperature: ${flowTemperature}${this.temperatureUnit}`) : false;
+                            const info1 = returnTemperature !== null ? this.emit('message', `${heatPumpName}, Return temperature: ${returnTemperature}${this.temperatureUnit}`) : false;
+                            this.emit('message', `${heatPumpName}, Temperature display unit: ${this.temperatureUnit}`);
+                            this.emit('message', `${heatPumpName}, Lock physical controls: ${lockPhysicalControls ? 'LOCKED' : 'UNLOCKED'}`);
+                            break;
+                        case 1: //Zone 1 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
+                            operationModeText = idleZone1 ? CONSTANTS.HeatPump.ZoneOperation[6] : CONSTANTS.HeatPump.ZoneOperation[operationModeZone1];
+                            this.emit('message', `${zone1Name}, Operation mode: ${!power ? CONSTANTS.HeatPump.System[0] : operationModeText}`);
+                            this.emit('message', `${zone1Name}, Temperature: ${roomTemperature}${this.temperatureUnit}`);
+                            this.emit('message', `${zone1Name}, Target temperature: ${setTemperature}${this.temperatureUnit}`)
+                            const info2 = flowTemperatureZone1 !== null ? this.emit('message', `${zone1Name}, Flow temperature: ${flowTemperatureZone1}${this.temperatureUnit}`) : false;
+                            const info3 = returnTemperatureZone1 !== null ? this.emit('message', `${zone1Name}, Return temperature: ${returnTemperatureZone1}${this.temperatureUnit}`) : false;
+                            this.emit('message', `${zone1Name}, Temperature display unit: ${this.temperatureUnit}`);
+                            this.emit('message', `${zone1Name}, Lock physical controls: ${lockPhysicalControls ? 'LOCKED' : 'UNLOCKED'}`);
+                            break;
+                        case caseHotWater: //Hot Water - AUTO, HEAT NOW
+                            operationModeText = operationMode === 1 ? CONSTANTS.HeatPump.ForceDhw[1] : CONSTANTS.HeatPump.ForceDhw[forcedHotWaterMode ? 1 : 0];
+                            this.emit('message', `${hotWaterName}, Operation mode: ${!power ? CONSTANTS.HeatPump.System[0] : operationModeText}`);
+                            this.emit('message', `${hotWaterName}, Temperature: ${roomTemperature}${this.temperatureUnit}`);
+                            this.emit('message', `${hotWaterName}, Target temperature: ${setTemperature}${this.temperatureUnit}`)
+                            const info4 = flowTemperatureWaterTank !== null ? this.emit('message', `${hotWaterName}, Flow temperature: ${flowTemperatureWaterTank}${this.temperatureUnit}`) : false;
+                            const info5 = returnTemperatureWaterTank !== null ? this.emit('message', `${hotWaterName}, Return temperature: ${returnTemperatureWaterTank}${this.temperatureUnit}`) : false;
+                            this.emit('message', `${hotWaterName}, Temperature display unit: ${this.temperatureUnit}`);
+                            this.emit('message', `${hotWaterName}, Lock physical controls: ${lockPhysicalControls ? 'LOCKED' : 'UNLOCKED'}`);
+                            break;
+                        case caseZone2: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
+                            operationModeText = idleZone2 ? CONSTANTS.HeatPump.ZoneOperation[6] : CONSTANTS.HeatPump.ZoneOperation[operationModeZone2];
+                            this.emit('message', `${zone2Name}, Operation mode: ${!power ? CONSTANTS.HeatPump.System[0] : operationModeText}`);
+                            this.emit('message', `${zone2Name}, Temperature: ${roomTemperature}${this.temperatureUnit}`);
+                            this.emit('message', `${zone2Name}, Target temperature: ${setTemperature}${this.temperatureUnit}`)
+                            const info6 = flowTemperatureZone2 !== null ? this.emit('message', `${zone2Name}, Flow temperature: ${flowTemperatureZone2}${this.temperatureUnit}`) : false;
+                            const info7 = roomTemperatureZone2 !== null ? this.emit('message', `${zone2Name}, Return temperature: ${roomTemperatureZone2}${this.temperatureUnit}`) : false;
+                            this.emit('message', `${zone2Name}, Temperature display unit: ${this.temperatureUnit}`);
+                            this.emit('message', `${zone2Name}, Lock physical controls: ${lockPhysicalControls ? 'LOCKED' : 'UNLOCKED'}`);
+                            break;
+                    };
+                };
             };
 
             this.unitStatus = unitStatus;
@@ -778,24 +824,6 @@ class MelCloudDevice extends EventEmitter {
                             melCloudService.getCharacteristic(Characteristic.CurrentHeaterCoolerState)
                                 .onGet(async () => {
                                     const value = this.currentOperationModes[i];
-                                    let operationModeText = '';
-                                    switch (i) {
-                                        case 0: //Heat Pump - HEAT, COOL, OFF
-                                            operationModeText = CONSTANTS.HeatPump.System[deviceState.UnitStatus];
-                                            break;
-                                        case 1: //Zone 1 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
-                                            operationModeText = this.idleZone1 ? CONSTANTS.HeatPump.ZoneOperation[6] : CONSTANTS.HeatPump.ZoneOperation[deviceState.OperationModeZone1];
-                                            break;
-                                        case caseHotWater: //Hot Water - AUTO, HEAT NOW
-                                            operationModeText = deviceState.OperationMode === 1 ? CONSTANTS.HeatPump.ForceDhw[1] : CONSTANTS.HeatPump.ForceDhw[deviceState.ForcedHotWaterMode ? 1 : 0];
-                                            break;
-                                        case caseZone2: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
-                                            operationModeText = this.idleZone2 ? CONSTANTS.HeatPump.ZoneOperation[6] : CONSTANTS.HeatPump.ZoneOperation[deviceState.OperationModeZone2];
-                                            break;
-                                    };
-
-                                    operationModeText = !this.power ? CONSTANTS.HeatPump.System[0] : operationModeText;
-                                    const info = this.disableLogInfo && i >= zonesCount ? false : this.emit('message', `${zoneName}, Operation mode: ${operationModeText}`);
                                     return value;
                                 });
                             melCloudService.getCharacteristic(Characteristic.TargetHeaterCoolerState)
@@ -898,7 +926,6 @@ class MelCloudDevice extends EventEmitter {
                                 })
                                 .onGet(async () => {
                                     const value = this.roomTemperatures[i];
-                                    const info = this.disableLogInfo ? false : this.emit('message', `${zoneName}, ${i === 0 ? 'Outdoor temperature:' : 'Temperature:'} ${value}${temperatureUnit}`);
                                     return value;
                                 });
                             //device can heat/cool or only heat
@@ -911,7 +938,6 @@ class MelCloudDevice extends EventEmitter {
                                     })
                                     .onGet(async () => {
                                         const value = this.setTemperatures[i];
-                                        const info = this.disableLogInfo || i === 0 ? false : this.emit('message', `${zoneName}, Heating threshold temperature: ${value}${temperatureUnit}`);
                                         return value;
                                     })
                                     .onSet(async (value) => {
@@ -952,7 +978,6 @@ class MelCloudDevice extends EventEmitter {
                                     })
                                     .onGet(async () => {
                                         const value = this.setTemperatures[i];
-                                        const info = this.disableLogInfo || i === 0 ? false : this.emit('message', `${zoneName}, Cooling threshold temperature: ${value}${temperatureUnit}`);
                                         return value;
                                     })
                                     .onSet(async (value) => {
@@ -986,7 +1011,6 @@ class MelCloudDevice extends EventEmitter {
                             melCloudService.getCharacteristic(Characteristic.LockPhysicalControls)
                                 .onGet(async () => {
                                     const value = this.lockPhysicalsControls[i];
-                                    const info = this.disableLogInfo ? false : this.emit('message', `${zoneName}, Lock physical controls: ${value ? 'LOCKED' : 'UNLOCKED'}`);
                                     return value;
                                 })
                                 .onSet(async (value) => {
@@ -1022,7 +1046,6 @@ class MelCloudDevice extends EventEmitter {
                             melCloudService.getCharacteristic(Characteristic.TemperatureDisplayUnits)
                                 .onGet(async () => {
                                     const value = this.useFahrenheit;
-                                    const info = this.disableLogInfo ? false : this.emit('message', `Temperature display unit: ${temperatureUnit}`);
                                     return value;
                                 })
                                 .onSet(async (value) => {
@@ -1044,25 +1067,7 @@ class MelCloudDevice extends EventEmitter {
                             const melCloudServiceT = new Service.Thermostat(serviceName, `Thermostat ${deviceId} ${i}`);
                             melCloudServiceT.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
                                 .onGet(async () => {
-                                    let operationModeText = '';
-                                    switch (i) {
-                                        case 0: //Heat Pump - IDLE, HOT WATER, HEATING ZONES, COOLING, "FREEZE STAT, LEGIONELLA, HEATING ECO, MODE 1, MODE 2, MODE 3, HEATING UP
-                                            operationModeText = CONSTANTS.HeatPump.System[deviceState.UnitStatus];
-                                            break;
-                                        case 1: //Zone 1 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
-                                            operationModeText = CONSTANTS.HeatPump.ZoneOperation[deviceState.OperationModeZone1];
-                                            break;
-                                        case caseHotWater: //Hot Water - AUTO, HEAT NOW
-                                            operationModeText = deviceState.OperationMode === 1 ? CONSTANTS.HeatPump.ForceDhw[1] : CONSTANTS.HeatPump.ForceDhw[deviceState.ForcedHotWaterMode ? 1 : 0];
-                                            break;
-                                        case caseZone2: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
-                                            operationModeText = CONSTANTS.HeatPump.ZoneOperation[deviceState.OperationModeZone2];
-                                            break;
-                                    };
-
                                     const value = this.currentOperationModes[i];
-                                    operationModeText = !this.power ? CONSTANTS.HeatPump.System[0] : operationModeText;
-                                    const info = this.disableLogInfo ? false : this.emit('message', `${zoneName}, Operation mode: ${operationModeText}`);
                                     return value;
                                 });
                             melCloudServiceT.getCharacteristic(Characteristic.TargetHeatingCoolingState)
@@ -1181,7 +1186,6 @@ class MelCloudDevice extends EventEmitter {
                                 })
                                 .onGet(async () => {
                                     const value = this.roomTemperatures[i];
-                                    const info = this.disableLogInfo ? false : this.emit('message', `${zoneName}, ${i === 0 ? 'Outdoor temperature:' : 'Temperature:'} ${value}${temperatureUnit}`);
                                     return value;
                                 });
                             melCloudServiceT.getCharacteristic(Characteristic.TargetTemperature)
@@ -1192,7 +1196,6 @@ class MelCloudDevice extends EventEmitter {
                                 })
                                 .onGet(async () => {
                                     const value = this.setTemperatures[i];
-                                    const info = this.disableLogInfo || i === 0 ? false : this.emit('message', `${zoneName}, Target temperature: ${value}${temperatureUnit}`);
                                     return value;
                                 })
                                 .onSet(async (value) => {
@@ -1225,7 +1228,6 @@ class MelCloudDevice extends EventEmitter {
                             melCloudServiceT.getCharacteristic(Characteristic.TemperatureDisplayUnits)
                                 .onGet(async () => {
                                     const value = this.useFahrenheit;
-                                    const info = this.disableLogInfo ? false : this.emit('message', `Temperature display unit: ${temperatureUnit}`);
                                     return value;
                                 })
                                 .onSet(async (value) => {
