@@ -803,7 +803,6 @@ class MelCloudDevice extends EventEmitter {
                             melCloudService.getCharacteristic(Characteristic.Active)
                                 .onGet(async () => {
                                     const state = this.power;
-                                    const info = this.disableLogInfo || i > 0 ? false : this.emit('message', `${zoneName}, Power: ${state ? 'ON' : 'OFF'}`);
                                     return state;
                                 })
                                 .onSet(async (state) => {
