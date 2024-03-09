@@ -205,8 +205,8 @@ class MelCloudDevice extends EventEmitter {
                                 operationModeSetPropsMinValue = [0, 0, 1, 0][heatCoolModes];
                                 operationModeSetPropsMaxValue = [2, 2, 2, 0][heatCoolModes];
                                 operationModeSetPropsValidValues = [[0, 1, 2], [0, 1, 2], [1, 2], [0]][heatCoolModes];
-                                temperatureSetPropsMinValue = [10, 50][this.useFahrenheit];
-                                temperatureSetPropsMaxValue = [30, 86][this.useFahrenheit];
+                                temperatureSetPropsMinValue = [0, 32][this.useFahrenheit];
+                                temperatureSetPropsMaxValue = [31, 88][this.useFahrenheit];
                                 break;
                             case caseHotWater: //Hot Water - NORMAL, HEAT NOW
                                 currentOperationMode = !power ? 0 : operationMode === 1 ? 2 : [1, 2][forcedHotWaterMode]; //INACTIVE, IDLE, HEATING, COOLING
@@ -218,7 +218,7 @@ class MelCloudDevice extends EventEmitter {
                                 operationModeSetPropsMinValue = 0;
                                 operationModeSetPropsMaxValue = 1;
                                 operationModeSetPropsValidValues = [0, 1];
-                                temperatureSetPropsMinValue = [16, 60][this.useFahrenheit];
+                                temperatureSetPropsMinValue = [0, 32][this.useFahrenheit];
                                 temperatureSetPropsMaxValue = [60, 140][this.useFahrenheit];
                                 break;
                             case caseZone2: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
@@ -231,8 +231,8 @@ class MelCloudDevice extends EventEmitter {
                                 operationModeSetPropsMinValue = [0, 0, 1, 0][heatCoolModes];
                                 operationModeSetPropsMaxValue = [2, 2, 2, 0][heatCoolModes];
                                 operationModeSetPropsValidValues = [[0, 1, 2], [0, 1, 2], [1, 2], [0]][heatCoolModes];
-                                temperatureSetPropsMinValue = [10, 50][this.useFahrenheit];
-                                temperatureSetPropsMaxValue = [30, 86][this.useFahrenheit];
+                                temperatureSetPropsMinValue = [0, 32][this.useFahrenheit];
+                                temperatureSetPropsMaxValue = [31, 88][this.useFahrenheit];
                                 break;
                             default: //unknown zone detected
                                 this.emit('message', `Unknown zone: ${i} detected.`);
@@ -275,8 +275,8 @@ class MelCloudDevice extends EventEmitter {
                                 operationModeSetPropsMinValue = [1, 1, 1, 0][heatCoolModes];
                                 operationModeSetPropsMaxValue = [3, 3, 2, 0][heatCoolModes];
                                 operationModeSetPropsValidValues = [[1, 2, 3], [1, 2, 3], [1, 2], [0]][heatCoolModes];
-                                temperatureSetPropsMinValue = [10, 50][this.useFahrenheit];
-                                temperatureSetPropsMaxValue = [30, 86][this.useFahrenheit];
+                                temperatureSetPropsMinValue = [0, 32][this.useFahrenheit];
+                                temperatureSetPropsMaxValue = [31, 88][this.useFahrenheit];
                                 break;
                             case caseHotWater: //Hot Water - NORMAL, HEAT NOW
                                 currentOperationMode = !power ? 0 : operationMode === 1 ? 1 : [0, 1][forcedHotWaterMode]; //OFF, HEAT, COOL
@@ -287,7 +287,7 @@ class MelCloudDevice extends EventEmitter {
                                 operationModeSetPropsMinValue = 1;
                                 operationModeSetPropsMaxValue = 3;
                                 operationModeSetPropsValidValues = [1, 3];
-                                temperatureSetPropsMinValue = [16, 60][this.useFahrenheit];
+                                temperatureSetPropsMinValue = [0, 32][this.useFahrenheit];
                                 temperatureSetPropsMaxValue = [60, 140][this.useFahrenheit];
                                 break;
                             case caseZone2: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
@@ -299,8 +299,8 @@ class MelCloudDevice extends EventEmitter {
                                 operationModeSetPropsMinValue = [1, 1, 1, 0][heatCoolModes];
                                 operationModeSetPropsMaxValue = [3, 3, 2, 0][heatCoolModes];
                                 operationModeSetPropsValidValues = [[1, 2, 3], [1, 2, 3], [1, 2], [0]][heatCoolModes];
-                                temperatureSetPropsMinValue = [10, 50][this.useFahrenheit];
-                                temperatureSetPropsMaxValue = [30, 86][this.useFahrenheit];
+                                temperatureSetPropsMinValue = [0, 32][this.useFahrenheit];
+                                temperatureSetPropsMaxValue = [31, 88][this.useFahrenheit];
                                 break;
                             default: //unknown zone detected
                                 this.emit('message', `Unknown zone: ${i} detected.`);

@@ -141,8 +141,7 @@ class MelCloudDevice extends EventEmitter {
             let lockPhysicalControls = 0;
 
             //set temperature
-            const targetTemperature = hasCoolOperationMode || hasHeatOperationMode ? setTemperature : roomTemperature;
-
+            const targetTemperature = hasCoolOperationMode || hasHeatOperationMode ? setTemperature : [20, 68][this.useFahrenheit];
             let operationModeSetPropsMinValue = 0;
             let operationModeSetPropsMaxValue = 3;
             let operationModeSetPropsValidValues = [0, 1, 2, 3];
