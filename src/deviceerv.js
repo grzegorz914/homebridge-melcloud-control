@@ -751,11 +751,10 @@ class MelCloudDevice extends EventEmitter {
                             })
                             .onSet(async (value) => {
                                 try {
-                                    value = value ? true : false;
-                                    accountInfo.UseFahrenheit = value
+                                    this.useFahrenheit = value ? true : false;
+                                    accountInfo.UseFahrenheit = this.useFahrenheit;
                                     await this.melCloud.send(accountInfo);
                                     const info = this.disableLogInfo ? false : this.emit('message', `Set temperature display unit: ${CONSTANTS.TemperatureDisplayUnits[value]}`);
-                                    this.useFahrenheit = value;
                                 } catch (error) {
                                     this.emit('error', `Set temperature display unit error: ${error}`);
                                 };
@@ -847,11 +846,10 @@ class MelCloudDevice extends EventEmitter {
                             })
                             .onSet(async (value) => {
                                 try {
-                                    value = value ? true : false;
-                                    accountInfo.UseFahrenheit = value
+                                    this.useFahrenheit = value ? true : false;
+                                    accountInfo.UseFahrenheit = this.useFahrenheit;
                                     await this.melCloud.send(accountInfo);
                                     const info = this.disableLogInfo ? false : this.emit('message', `Set temperature display unit: ${CONSTANTS.TemperatureDisplayUnits[value]}`);
-                                    this.useFahrenheit = value;
                                 } catch (error) {
                                     this.emit('error', `Set temperature display unit error: ${error}`);
                                 };
