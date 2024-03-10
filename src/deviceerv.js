@@ -7,7 +7,7 @@ const CONSTANTS = require('./constants.json');
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class MelCloudDevice extends EventEmitter {
-    constructor(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, useFahrenheit, deviceInfoFile) {
+    constructor(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile) {
         super();
 
         Accessory = api.platformAccessory;
@@ -36,12 +36,10 @@ class MelCloudDevice extends EventEmitter {
         this.restFulConnected = false;
         this.mqttConnected = false;
 
-        //temp unit
-        this.useFahrenheit = useFahrenheit;
-
         //melcloud device
         this.melCloudErv = new MelCloudErv({
             contextKey: contextKey,
+            accountInfoFile: accountInfoFile,
             deviceInfoFile: deviceInfoFile,
             debugLog: account.enableDebugMode
         });
@@ -66,7 +64,7 @@ class MelCloudDevice extends EventEmitter {
 
             //device info
 
-        }).on('deviceState', async (deviceData, deviceState) => {
+        }).on('deviceState', async (deviceData, deviceState, useFahrenheit) => {
             //device info
             const displayMode = this.displayMode;
             const hasCoolOperationMode = deviceData.Device.HasCoolOperationMode ?? false;
@@ -112,7 +110,8 @@ class MelCloudDevice extends EventEmitter {
             this.actualVentilationMode = actualVentilationMode;
             this.numberOfFanSpeeds = numberOfFanSpeeds;
             this.temperatureIncrement = temperatureIncrement;
-            this.temperatureUnit = CONSTANTS.TemperatureDisplayUnits[this.useFahrenheit];
+            this.temperatureUnit = CONSTANTS.TemperatureDisplayUnits[useFahrenheit];
+            this.useFahrenheit = useFahrenheit;
 
             //device state
             const roomTemperature = deviceState.RoomTemperature;
@@ -141,7 +140,7 @@ class MelCloudDevice extends EventEmitter {
             let lockPhysicalControls = 0;
 
             //set temperature
-            const targetTemperature = hasCoolOperationMode || hasHeatOperationMode ? setTemperature : [20, 68][this.useFahrenheit];
+            const targetTemperature = hasCoolOperationMode || hasHeatOperationMode ? setTemperature : 20;
             let operationModeSetPropsMinValue = 0;
             let operationModeSetPropsMaxValue = 3;
             let operationModeSetPropsValidValues = [0, 1, 2, 3];
@@ -186,7 +185,7 @@ class MelCloudDevice extends EventEmitter {
                             .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                             .updateCharacteristic(Characteristic.RotationSpeed, fanSpeed)
                             .updateCharacteristic(Characteristic.LockPhysicalControls, lockPhysicalControls)
-                            .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.useFahrenheit);
+                            .updateCharacteristic(Characteristic.TemperatureDisplayUnits, useFahrenheit);
                         const updateHOM = hasHeatOperationMode ? this.melCloudService.updateCharacteristic(Characteristic.HeatingThresholdTemperature, targetTemperature) : false;
                         const updateCOM = hasCoolOperationMode ? this.melCloudService.updateCharacteristic(Characteristic.CoolingThresholdTemperature, targetTemperature) : false;
                     };
@@ -208,7 +207,7 @@ class MelCloudDevice extends EventEmitter {
                             .updateCharacteristic(Characteristic.TargetHeatingCoolingState, targetOperationMode)
                             .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                             .updateCharacteristic(Characteristic.TargetTemperature, targetTemperature)
-                            .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.useFahrenheit);
+                            .updateCharacteristic(Characteristic.TemperatureDisplayUnits, useFahrenheit);
                     };
                     break;
             };
@@ -559,7 +558,6 @@ class MelCloudDevice extends EventEmitter {
                     .setCharacteristic(Characteristic.FirmwareRevision, this.firmwareRevision);
 
                 //melcloud services
-                const temperatureUnit = this.temperatureUnit;
                 const displayMode = this.displayMode;
                 const temperatureSensor = this.temperatureSensor;
                 const buttonsConfigured = this.buttonsConfigured;
@@ -687,8 +685,8 @@ class MelCloudDevice extends EventEmitter {
                         if (hasHeatOperationMode) {
                             this.melCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
                                 .setProps({
-                                    minValue: [0, 32][this.useFahrenheit],
-                                    maxValue: [31, 88][this.useFahrenheit],
+                                    minValue: 0,
+                                    maxValue: 31,
                                     minStep: this.temperatureIncrement
                                 })
                                 .onGet(async () => {
@@ -700,7 +698,7 @@ class MelCloudDevice extends EventEmitter {
                                         deviceState.SetTemperature = value;
                                         deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetTemperature;
                                         await this.melCloudErv.send(deviceState);
-                                        const info = this.disableLogInfo ? false : this.emit('message', `Set heating threshold temperature: ${value}${temperatureUnit}`);
+                                        const info = this.disableLogInfo ? false : this.emit('message', `Set heating threshold temperature: ${value}${this.temperatureUnit}`);
                                     } catch (error) {
                                         this.emit('error', `Set heating threshold temperature error: ${error}`);
                                     };
@@ -710,8 +708,8 @@ class MelCloudDevice extends EventEmitter {
                         if (hasCoolOperationMode) {
                             this.melCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
                                 .setProps({
-                                    minValue: [10, 50][this.useFahrenheit],
-                                    maxValue: [31, 88][this.useFahrenheit],
+                                    minValue: 10,
+                                    maxValue: 31,
                                     minStep: this.temperatureIncrement
                                 })
                                 .onGet(async () => {
@@ -723,7 +721,7 @@ class MelCloudDevice extends EventEmitter {
                                         deviceState.SetTemperature = value;
                                         deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetTemperature;
                                         await this.melCloudErv.send(deviceState);
-                                        const info = this.disableLogInfo ? false : this.emit('message', `Set cooling threshold temperature: ${value}${temperatureUnit}`);
+                                        const info = this.disableLogInfo ? false : this.emit('message', `Set cooling threshold temperature: ${value}${this.temperatureUnit}`);
                                     } catch (error) {
                                         this.emit('error', `Set cooling threshold temperature error: ${error}`);
                                     };
@@ -824,8 +822,8 @@ class MelCloudDevice extends EventEmitter {
                             });
                         this.melCloudService.getCharacteristic(Characteristic.TargetTemperature)
                             .setProps({
-                                minValue: [0, 32][this.useFahrenheit],
-                                maxValue: [31, 88][this.useFahrenheit],
+                                minValue: 0,
+                                maxValue: 31,
                                 minStep: this.temperatureIncrement
                             })
                             .onGet(async () => {
@@ -837,7 +835,7 @@ class MelCloudDevice extends EventEmitter {
                                     deviceState.SetTemperature = value;
                                     deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetTemperature;
                                     await this.melCloudErv.send(deviceState);
-                                    const info = this.disableLogInfo ? false : this.emit('message', `Set temperature: ${value}${temperatureUnit}`);
+                                    const info = this.disableLogInfo ? false : this.emit('message', `Set temperature: ${value}${this.temperatureUnit}`);
                                 } catch (error) {
                                     this.emit('error', `Set temperature error: ${error}`);
                                 };

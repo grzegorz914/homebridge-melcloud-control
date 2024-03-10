@@ -7,11 +7,9 @@ const EventEmitter = require('events');
 const CONSTANTS = require('./constants.json');
 
 class MelCloud extends EventEmitter {
-    constructor(prefDir, accountName, user, passwd, language, enableDebugMode, refreshInterval) {
+    constructor(prefDir, accountName, user, passwd, language, enableDebugMode, accountInfoFile, buildingsFile, refreshInterval) {
         super();
-        this.accountInfoFile = `${prefDir}/${accountName}_Account`;
-        const buildingsFile = `${prefDir}/${accountName}_Buildings`;
-        const devicesId = [];
+        this.accountInfoFile = accountInfoFile;
         const refreshIntervalSec = refreshInterval / 1000;
         this.refreshInterval = refreshInterval;
 
@@ -39,6 +37,7 @@ class MelCloud extends EventEmitter {
             })
         });
 
+        const devicesId = [];
         this.on('connect', async () => {
             try {
                 const accountData = await axiosInstanceLogin(CONSTANTS.ApiUrls.ClientLogin, options);
@@ -47,8 +46,8 @@ class MelCloud extends EventEmitter {
                 const contextKey = accountInfo.ContextKey;
 
                 //remove sensitive data
-                const config = {
-                    ...account.LoginData,
+                const debugData = {
+                    ...accountInfo,
                     ContextKey: 'removed',
                     ClientId: 'removed',
                     Client: 'removed',
@@ -56,7 +55,7 @@ class MelCloud extends EventEmitter {
                     MapLongitude: 'removed',
                     MapLatitude: 'removed'
                 };
-                const debug = enableDebugMode ? this.emit('debug', `MELCloud Info: ${JSON.stringify(config, null, 2)}`) : false;
+                const debug = enableDebugMode ? this.emit('debug', `MELCloud Info: ${JSON.stringify(debugData, null, 2)}`) : false;
 
                 if (contextKey === undefined || contextKey === null) {
                     this.emit('message', `context key: ${contextKey}, missing, reconnect in ${refreshIntervalSec}.`)
@@ -103,7 +102,7 @@ class MelCloud extends EventEmitter {
                 this.contextKey = contextKey;
 
                 //save melcloud info to the file
-                await this.saveData(this.accountInfoFile, accountInfo);
+                await this.saveData(accountInfoFile, accountInfo);
 
                 //check devices list
                 await new Promise(resolve => setTimeout(resolve, 500));

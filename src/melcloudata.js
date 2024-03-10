@@ -10,6 +10,7 @@ class MelCloudAta extends EventEmitter {
     constructor(config) {
         super();
         const contextKey = config.contextKey;
+        const accountInfoFile = config.accountInfoFile;
         const deviceInfoFile = config.deviceInfoFile;
         const debugLog = config.debugLog;
 
@@ -34,9 +35,26 @@ class MelCloudAta extends EventEmitter {
 
         this.on('checkDevice', async () => {
             try {
+                //read account info from file
+                const accountInfo = await this.readData(accountInfoFile);
+
+                //remove sensitive data
+                const debugData = {
+                    ...accountInfo,
+                    ContextKey: 'removed',
+                    ClientId: 'removed',
+                    Client: 'removed',
+                    Name: 'removed',
+                    MapLongitude: 'removed',
+                    MapLatitude: 'removed'
+                };
+                const debug = debugLog ? this.emit('debug', `Account Info: ${JSON.stringify(debugData, null, 2)}`) : false;
+                const useFahrenheit = accountInfo.UseFahrenheit ? 1 : 0;
+                this.useFahrenheit = useFahrenheit;
+
                 //read device info from file
                 const deviceData = await this.readData(deviceInfoFile);
-                const debug = debugLog ? this.emit('debug', `Info: ${JSON.stringify(deviceData, null, 2)}`) : false;
+                const debug1 = debugLog ? this.emit('debug', `Device Info: ${JSON.stringify(deviceData, null, 2)}`) : false;
 
                 if (!deviceData) {
                     this.checkDevice();
@@ -327,7 +345,6 @@ class MelCloudAta extends EventEmitter {
                     Power: power,
                     Offline: offline
                 }
-                const debug1 = debugLog ? this.emit('debug', `State: ${JSON.stringify(deviceState, null, 2)}`) : false;
 
                 //restFul
                 this.emit('restFul', 'state', deviceState);
@@ -342,9 +359,10 @@ class MelCloudAta extends EventEmitter {
                     return;
                 }
                 this.deviceData = deviceData;
+                const debug2 = debugLog ? this.emit('debug', `Device State: ${JSON.stringify(deviceState, null, 2)}`) : false;
 
                 //emit state changes
-                this.emit('deviceState', deviceData, deviceState);
+                this.emit('deviceState', deviceData, deviceState, useFahrenheit);
                 this.checkDevice();
             } catch (error) {
                 this.emit('error', `Check device error: ${error}.`);
@@ -375,13 +393,42 @@ class MelCloudAta extends EventEmitter {
     send(deviceState) {
         return new Promise(async (resolve, reject) => {
             try {
+
+                //prevent set wrong temp
+                const minTempCoolDry = this.deviceData.Device.MinTempCoolDry ?? 16;
+                const maxTempCoolDry = this.deviceData.Device.MaxTempCoolDry ?? 31;
+                const minTempHeat = this.deviceData.Device.MinTempHeat ?? 10;
+                const maxTempHeat = this.deviceData.Device.MaxTempHeat ?? 31;
+                const minTempAutomatic = this.deviceData.Device.MinTempAutomatic ?? 16;
+                const maxTempAutomatic = this.deviceData.Device.MaxTempAutomatic ?? 31;
+                switch (deviceState.OperationMode) {//operating mode 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
+                    case 1:
+                        deviceState.SetTemperature = deviceState.SetTemperature < minTempHeat ? minTempHeat : deviceState.SetTemperature;
+                        deviceState.SetTemperature = deviceState.SetTemperature > maxTempHeat ? maxTempHeat : deviceState.SetTemperature;
+                        break;
+                    case 2:
+                        deviceState.SetTemperature = deviceState.SetTemperature < minTempCoolDry ? minTempCoolDry : deviceState.SetTemperature;
+                        deviceState.SetTemperature = deviceState.SetTemperature > maxTempCoolDry ? maxTempCoolDry : deviceState.SetTemperature;
+                        break;
+                    case 3:
+                        deviceState.SetTemperature = deviceState.SetTemperature < minTempCoolDry ? minTempCoolDry : deviceState.SetTemperature;
+                        deviceState.SetTemperature = deviceState.SetTemperature > maxTempCoolDry ? maxTempCoolDry : deviceState.SetTemperature;
+                        break;
+                    case 8:
+                        deviceState.SetTemperature = deviceState.SetTemperature < minTempAutomatic ? minTempAutomatic : deviceState.SetTemperature;
+                        deviceState.SetTemperature = deviceState.SetTemperature > maxTempAutomatic ? maxTempAutomatic : deviceState.SetTemperature;
+                        break;
+                    default:
+                        break;
+                };
+
                 deviceState.HasPendingCommand = true;
                 const options = {
                     data: deviceState
                 };
 
                 await this.axiosInstancePost(CONSTANTS.ApiUrls.SetAta, options);
-                this.emit('deviceState', this.deviceData, deviceState);
+                this.emit('deviceState', this.deviceData, deviceState, this.useFahrenheit);
                 resolve();
             } catch (error) {
                 reject(error);

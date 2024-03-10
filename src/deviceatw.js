@@ -7,7 +7,7 @@ const CONSTANTS = require('./constants.json');
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class MelCloudDevice extends EventEmitter {
-    constructor(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, useFahrenheit, deviceInfoFile) {
+    constructor(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile) {
         super();
 
         Accessory = api.platformAccessory;
@@ -36,12 +36,10 @@ class MelCloudDevice extends EventEmitter {
         this.restFulConnected = false;
         this.mqttConnected = false;
 
-        //temp unit
-        this.useFahrenheit = useFahrenheit;
-
         //melcloud device
         this.melCloudAtw = new MelCloudAtw({
             contextKey: contextKey,
+            accountInfoFile: accountInfoFile,
             deviceInfoFile: deviceInfoFile,
             debugLog: account.enableDebugMode
         });
@@ -66,7 +64,7 @@ class MelCloudDevice extends EventEmitter {
             this.model = modelIndoor ? modelIndoor : modelOutdoor ? modelOutdoor : `${deviceTypeText} ${deviceId}`;
             this.serialNumber = serialNumber;
             this.firmwareRevision = firmwareAppVersion;
-        }).on('deviceState', async (deviceData, deviceState) => {
+        }).on('deviceState', async (deviceData, deviceState, useFahrenheit) => {
             //device info
             const displayMode = this.displayMode;
             const heatPumpName = 'Heat Pump';
@@ -118,7 +116,8 @@ class MelCloudDevice extends EventEmitter {
             this.caseHotWater = caseHotWater;
             this.caseZone2 = caseZone2;
             this.temperatureIncrement = temperatureIncrement;
-            this.temperatureUnit = CONSTANTS.TemperatureDisplayUnits[this.useFahrenheit];
+            this.temperatureUnit = CONSTANTS.TemperatureDisplayUnits[useFahrenheit];
+            this.useFahrenheit = useFahrenheit;
 
             //device state
             const setTemperatureZone1 = deviceState.SetTemperatureZone1;
@@ -205,8 +204,8 @@ class MelCloudDevice extends EventEmitter {
                                 operationModeSetPropsMinValue = [0, 0, 1, 0][heatCoolModes];
                                 operationModeSetPropsMaxValue = [2, 2, 2, 0][heatCoolModes];
                                 operationModeSetPropsValidValues = [[0, 1, 2], [0, 1, 2], [1, 2], [0]][heatCoolModes];
-                                temperatureSetPropsMinValue = [0, 32][this.useFahrenheit];
-                                temperatureSetPropsMaxValue = [31, 88][this.useFahrenheit];
+                                temperatureSetPropsMinValue = 0;
+                                temperatureSetPropsMaxValue = 31;
                                 break;
                             case caseHotWater: //Hot Water - NORMAL, HEAT NOW
                                 currentOperationMode = !power ? 0 : operationMode === 1 ? 2 : [1, 2][forcedHotWaterMode]; //INACTIVE, IDLE, HEATING, COOLING
@@ -218,8 +217,8 @@ class MelCloudDevice extends EventEmitter {
                                 operationModeSetPropsMinValue = 0;
                                 operationModeSetPropsMaxValue = 1;
                                 operationModeSetPropsValidValues = [0, 1];
-                                temperatureSetPropsMinValue = [0, 32][this.useFahrenheit];
-                                temperatureSetPropsMaxValue = [60, 140][this.useFahrenheit];
+                                temperatureSetPropsMinValue = 0;
+                                temperatureSetPropsMaxValue = 60;
                                 break;
                             case caseZone2: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
                                 currentOperationMode = !power ? 0 : idleZone2 ? 1 : [2, 2, 2, 3, 3, 2][operationModeZone2]; //INACTIVE, IDLE, HEATING, COOLING
@@ -231,8 +230,8 @@ class MelCloudDevice extends EventEmitter {
                                 operationModeSetPropsMinValue = [0, 0, 1, 0][heatCoolModes];
                                 operationModeSetPropsMaxValue = [2, 2, 2, 0][heatCoolModes];
                                 operationModeSetPropsValidValues = [[0, 1, 2], [0, 1, 2], [1, 2], [0]][heatCoolModes];
-                                temperatureSetPropsMinValue = [0, 32][this.useFahrenheit];
-                                temperatureSetPropsMaxValue = [31, 88][this.useFahrenheit];
+                                temperatureSetPropsMinValue = 0;
+                                temperatureSetPropsMaxValue = 31;
                                 break;
                             default: //unknown zone detected
                                 this.emit('message', `Unknown zone: ${i} detected.`);
@@ -247,7 +246,7 @@ class MelCloudDevice extends EventEmitter {
                                 .updateCharacteristic(Characteristic.TargetHeaterCoolerState, targetOperationMode)
                                 .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                                 .updateCharacteristic(Characteristic.LockPhysicalControls, lockPhysicalControls)
-                                .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.useFahrenheit);
+                                .updateCharacteristic(Characteristic.TemperatureDisplayUnits, useFahrenheit);
                             const updateHT = heatCoolModes === 0 || heatCoolModes === 1 ? this.melCloudServices[i].updateCharacteristic(Characteristic.HeatingThresholdTemperature, setTemperature) : false;
                             const updateCT = heatCoolModes === 0 || heatCoolModes === 2 ? this.melCloudServices[i].updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature) : false;
                         }
@@ -275,8 +274,8 @@ class MelCloudDevice extends EventEmitter {
                                 operationModeSetPropsMinValue = [1, 1, 1, 0][heatCoolModes];
                                 operationModeSetPropsMaxValue = [3, 3, 2, 0][heatCoolModes];
                                 operationModeSetPropsValidValues = [[1, 2, 3], [1, 2, 3], [1, 2], [0]][heatCoolModes];
-                                temperatureSetPropsMinValue = [0, 32][this.useFahrenheit];
-                                temperatureSetPropsMaxValue = [31, 88][this.useFahrenheit];
+                                temperatureSetPropsMinValue = 0;
+                                temperatureSetPropsMaxValue = 31;
                                 break;
                             case caseHotWater: //Hot Water - NORMAL, HEAT NOW
                                 currentOperationMode = !power ? 0 : operationMode === 1 ? 1 : [0, 1][forcedHotWaterMode]; //OFF, HEAT, COOL
@@ -287,8 +286,8 @@ class MelCloudDevice extends EventEmitter {
                                 operationModeSetPropsMinValue = 1;
                                 operationModeSetPropsMaxValue = 3;
                                 operationModeSetPropsValidValues = [1, 3];
-                                temperatureSetPropsMinValue = [0, 32][this.useFahrenheit];
-                                temperatureSetPropsMaxValue = [60, 140][this.useFahrenheit];
+                                temperatureSetPropsMinValue = 0;
+                                temperatureSetPropsMaxValue = 60;
                                 break;
                             case caseZone2: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
                                 currentOperationMode = !power ? 0 : idleZone2 ? 0 : [1, 1, 1, 2, 2, 1][operationModeZone2]; //OFF, HEAT, COOL
@@ -299,8 +298,8 @@ class MelCloudDevice extends EventEmitter {
                                 operationModeSetPropsMinValue = [1, 1, 1, 0][heatCoolModes];
                                 operationModeSetPropsMaxValue = [3, 3, 2, 0][heatCoolModes];
                                 operationModeSetPropsValidValues = [[1, 2, 3], [1, 2, 3], [1, 2], [0]][heatCoolModes];
-                                temperatureSetPropsMinValue = [0, 32][this.useFahrenheit];
-                                temperatureSetPropsMaxValue = [31, 88][this.useFahrenheit];
+                                temperatureSetPropsMinValue = 0;
+                                temperatureSetPropsMaxValue = 31;
                                 break;
                             default: //unknown zone detected
                                 this.emit('message', `Unknown zone: ${i} detected.`);
@@ -314,7 +313,7 @@ class MelCloudDevice extends EventEmitter {
                                 .updateCharacteristic(Characteristic.TargetHeatingCoolingState, targetOperationMode)
                                 .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                                 .updateCharacteristic(Characteristic.TargetTemperature, setTemperature)
-                                .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.useFahrenheit);
+                                .updateCharacteristic(Characteristic.TemperatureDisplayUnits, useFahrenheit);
                         }
                         break;
                     default: //unknown display type detected
@@ -796,7 +795,6 @@ class MelCloudDevice extends EventEmitter {
                     .setCharacteristic(Characteristic.FirmwareRevision, this.firmwareRevision);
 
                 //melcloud services
-                const temperatureUnit = this.temperatureUnit;
                 const zonesCount = this.zonesCount;
                 const temperatureSensor = this.temperatureSensor;
                 const buttonsConfigured = this.buttonsConfigured;
@@ -978,7 +976,7 @@ class MelCloudDevice extends EventEmitter {
                                             };
 
                                             const set = i > 0 ? await this.melCloudAtw.send(deviceState) : false;
-                                            const info = this.disableLogInfo || i === 0 ? false : this.emit('message', `${zoneName}, Set heating threshold temperature: ${value}${temperatureUnit}`);
+                                            const info = this.disableLogInfo || i === 0 ? false : this.emit('message', `${zoneName}, Set heating threshold temperature: ${value}${this.temperatureUnit}`);
                                         } catch (error) {
                                             this.emit('error', `${zoneName}, Set heating threshold temperature error: ${error}`);
                                         };
@@ -1018,7 +1016,7 @@ class MelCloudDevice extends EventEmitter {
                                             };
 
                                             const set = i > 0 ? await this.melCloudAtw.send(deviceState) : false;
-                                            const info = this.disableLogInfo || i === 0 ? false : this.emit('message', `${zoneName}, Set cooling threshold temperature: ${value}${temperatureUnit}`);
+                                            const info = this.disableLogInfo || i === 0 ? false : this.emit('message', `${zoneName}, Set cooling threshold temperature: ${value}${this.temperatureUnit}`);
                                         } catch (error) {
                                             this.emit('error', `${zoneName}, Set cooling threshold temperature error: ${error}`);
                                         };
@@ -1236,7 +1234,7 @@ class MelCloudDevice extends EventEmitter {
                                         };
 
                                         const set = i > 0 ? await this.melCloudAtw.send(deviceState) : false;
-                                        const info = this.disableLogInfo || i === 0 ? false : this.emit('message', `${zoneName}, Set temperature: ${value}${temperatureUnit}`);
+                                        const info = this.disableLogInfo || i === 0 ? false : this.emit('message', `${zoneName}, Set temperature: ${value}${this.temperatureUnit}`);
                                     } catch (error) {
                                         this.emit('error', `${zoneName}, Set temperature error: ${error}`);
                                     };

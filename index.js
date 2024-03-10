@@ -41,32 +41,33 @@ class MelCloudPlatform {
 				const debug = enableDebugMode ? log(`Account: ${accountName}, did finish launching.`) : false;
 
 				//remove sensitive data
-				const config = {
+				const debugData = {
 					...account,
 					user: 'removed',
 					passwd: 'removed',
 					mqttUser: 'removed',
 					mqttPasswd: 'removed'
 				};
-				const debug1 = enableDebugMode ? log(`Account: ${accountName}, Config: ${JSON.stringify(config, null, 2)}`) : false;
+				const debug1 = enableDebugMode ? log(`Account: ${accountName}, Config: ${JSON.stringify(debugData, null, 2)}`) : false;
 
 				//set refresh interval
+				const accountInfoFile = `${prefDir}/${accountName}_Account`;
+				const buildingsFile = `${prefDir}/${accountName}_Buildings`;
 				const refreshInterval = account.refreshInterval * 1000 || 120000;
 
 				//melcloud account
-				const melCloud = new MelCloud(prefDir, accountName, user, passwd, language, enableDebugMode, refreshInterval);
+				const melCloud = new MelCloud(prefDir, accountName, user, passwd, language, enableDebugMode, accountInfoFile, buildingsFile, refreshInterval);
 				melCloud.on('checkDevicesListComplete', (accountInfo, contextKey, deviceInfo) => {
 					const deviceId = deviceInfo.DeviceID.toString();
 					const deviceType = deviceInfo.Type;
 					const deviceName = deviceInfo.DeviceName;
 					const deviceTypeText = CONSTANTS.DeviceType[deviceType];
-					const useFahrenheit = accountInfo.UseFahrenheit ? 1 : 0;
 					const deviceInfoFile = `${prefDir}/${accountName}_Device_${deviceId}`;
 
 					//melcloud devices
 					switch (deviceType) {
 						case 0: //Air Conditioner
-							const airConditioner = new DeviceAta(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, useFahrenheit, deviceInfoFile)
+							const airConditioner = new DeviceAta(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile)
 							airConditioner.on('publishAccessory', (accessory) => {
 
 								//publish device
@@ -87,7 +88,7 @@ class MelCloudPlatform {
 								});
 							break;
 						case 1: //Heat Pump
-							const heatPump = new DeviceAtw(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, useFahrenheit, deviceInfoFile)
+							const heatPump = new DeviceAtw(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile)
 							heatPump.on('publishAccessory', (accessory) => {
 
 								//publish device
@@ -108,7 +109,7 @@ class MelCloudPlatform {
 								});
 							break;
 						case 3: //Energy Recovery Ventilation
-							const energyRecoveryVentilation = new DeviceErv(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, useFahrenheit, deviceInfoFile)
+							const energyRecoveryVentilation = new DeviceErv(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile)
 							energyRecoveryVentilation.on('publishAccessory', (accessory) => {
 
 								//publish device

@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Important changes v0.4.0 and above!!!
   * Main control mode, buttons and presets need to be configured again!!!
 
+## [0.20.0] - (10.03.2024)
+## Changes
+- dynamically update temp unit
+- prevent set out of range temperature for Air Conditioner
+- cleanup
+
 ## [0.19.0] - (02.03.2024)
 ## Changes
 - added support to control devices over MQTT protocol
