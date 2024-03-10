@@ -395,10 +395,10 @@ class MelCloudAta extends EventEmitter {
             try {
 
                 //prevent set wrong temp
-                const minTempCoolDry = this.deviceData.Device.MinTempCoolDry ?? 16;
-                const maxTempCoolDry = this.deviceData.Device.MaxTempCoolDry ?? 31;
                 const minTempHeat = this.deviceData.Device.MinTempHeat ?? 10;
                 const maxTempHeat = this.deviceData.Device.MaxTempHeat ?? 31;
+                const minTempCoolDry = this.deviceData.Device.MinTempCoolDry ?? 16;
+                const maxTempCoolDry = this.deviceData.Device.MaxTempCoolDry ?? 31;
                 const minTempAutomatic = this.deviceData.Device.MinTempAutomatic ?? 16;
                 const maxTempAutomatic = this.deviceData.Device.MaxTempAutomatic ?? 31;
                 switch (deviceState.OperationMode) {//operating mode 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL

@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Important changes v0.4.0 and above!!!
   * Main control mode, buttons and presets need to be configured again!!!
 
+## [0.20.1] - (10.03.2024)
+## Changes
+- prevent set out of range temperature for Heat Pump
+- prevent set out of range temperature for Energy Recovery Ventilation
+- cleanup
+
 ## [0.20.0] - (10.03.2024)
 ## Changes
 - dynamically update temp unit

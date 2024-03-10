@@ -381,6 +381,12 @@ class MelCloudErv extends EventEmitter {
     send(deviceState) {
         return new Promise(async (resolve, reject) => {
             try {
+                //prevent set wrong temp
+                const minTemp = this.deviceData.Device.MinTempHeat ?? 10;
+                const maxTemp = this.deviceData.Device.MaxTempHeat ?? 31;
+                deviceState.SetTemperature = deviceState.SetTemperature < minTemp ? minTemp : deviceState.SetTemperature;
+                deviceState.SetTemperature = deviceState.SetTemperature > maxTemp ? maxTemp : deviceState.SetTemperature;
+                
                 deviceState.HasPendingCommand = true;
                 const options = {
                     data: deviceState

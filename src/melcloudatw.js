@@ -464,6 +464,18 @@ class MelCloudAtw extends EventEmitter {
     send(deviceState) {
         return new Promise(async (resolve, reject) => {
             try {
+                //prevent set wrong temp
+                const minTempZones = 10;
+                const maxTempZones = 31;
+                const minTempWaterTank = 16;
+                const maxTempWaterTank = this.deviceData.Device.MaxTankTemperature ?? 60;
+                deviceState.SetTemperatureZone1 = deviceState.SetTemperatureZone1 < minTempZones ? minTempZones : deviceState.SetTemperatureZone1;
+                deviceState.SetTemperatureZone1 = deviceState.SetTemperatureZone1 > maxTempZones ? maxTempZones : deviceState.SetTemperatureZone1;
+                deviceState.SetTemperatureZone1 = deviceState.SetTemperatureZone2 < minTempZones ? minTempZones : deviceState.SetTemperatureZone2;
+                deviceState.SetTemperatureZone1 = deviceState.SetTemperatureZone2 > maxTempZones ? maxTempZones : deviceState.SetTemperatureZone2;
+                deviceState.SetTankWaterTemperature = deviceState.SetTankWaterTemperature < minTempWaterTank ? minTempWaterTank : deviceState.SetTankWaterTemperature;
+                deviceState.SetTankWaterTemperature = deviceState.SetTankWaterTemperature > maxTempWaterTank ? maxTempWaterTank : deviceState.SetTankWaterTemperature;
+
                 deviceState.HasPendingCommand = true;
                 const options = {
                     data: deviceState
