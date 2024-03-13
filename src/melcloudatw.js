@@ -464,7 +464,7 @@ class MelCloudAtw extends EventEmitter {
     send(deviceState) {
         return new Promise(async (resolve, reject) => {
             try {
-                //prevent set wrong temp
+                //prevent to set out of range temp
                 const minTempZones = 10;
                 const maxTempZones = 31;
                 const minTempWaterTank = 16;

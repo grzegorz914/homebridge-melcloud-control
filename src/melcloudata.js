@@ -394,7 +394,7 @@ class MelCloudAta extends EventEmitter {
         return new Promise(async (resolve, reject) => {
             try {
 
-                //prevent set wrong temp
+                //prevent to set out of range temp
                 const minTempHeat = this.deviceData.Device.MinTempHeat ?? 10;
                 const maxTempHeat = this.deviceData.Device.MaxTempHeat ?? 31;
                 const minTempCoolDry = this.deviceData.Device.MinTempCoolDry ?? 16;
@@ -419,6 +419,8 @@ class MelCloudAta extends EventEmitter {
                         deviceState.SetTemperature = deviceState.SetTemperature > maxTempAutomatic ? maxTempAutomatic : deviceState.SetTemperature;
                         break;
                     default:
+                        deviceState.SetTemperature = deviceState.SetTemperature < 10 ? 10 : deviceState.SetTemperature;
+                        deviceState.SetTemperature = deviceState.SetTemperature > 31 ? 31 : deviceState.SetTemperature;
                         break;
                 };
 
