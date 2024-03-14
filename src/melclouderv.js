@@ -303,16 +303,6 @@ class MelCloudErv extends EventEmitter {
                     this.emit('message', `Units are not configured in MELCloud service.`);
                 };
 
-                //emit info
-                const emitInfo = this.displayDeviceInfo ? this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) : false;
-                this.displayDeviceInfo = false;
-
-                //restFul
-                this.emit('restFul', 'info', deviceData);
-
-                //mqtt
-                this.emit('mqtt', `Info`, deviceData);
-
                 //device state
                 const deviceState = {
                     DeviceId: deviceId,
@@ -334,11 +324,16 @@ class MelCloudErv extends EventEmitter {
                     Offline: offline,
                 }
 
+                //external integrations
+                this.emit('externalIntegrations', deviceState);
+
                 //restFul
+                this.emit('restFul', 'info', deviceData)
                 this.emit('restFul', 'state', deviceState);
 
                 //mqtt
                 this.emit('mqtt', `State`, deviceState);
+                this.emit('mqtt', `Info`, deviceData);
 
                 //check state changes
                 const stateHasNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);
@@ -349,7 +344,11 @@ class MelCloudErv extends EventEmitter {
                 this.deviceData = deviceData;
                 const debug2 = debugLog ? this.emit('debug', `Device State: ${JSON.stringify(deviceState, null, 2)}`) : false;
 
-                //emit state changes
+                //emit info
+                const emitInfo = this.displayDeviceInfo ? this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) : false;
+                this.displayDeviceInfo = false;
+
+                //emit state 
                 this.emit('deviceState', deviceData, deviceState, useFahrenheit);
                 this.checkDevice();
             } catch (error) {
@@ -386,7 +385,7 @@ class MelCloudErv extends EventEmitter {
                 const maxTemp = this.deviceData.Device.MaxTempHeat ?? 31;
                 deviceState.SetTemperature = deviceState.SetTemperature < minTemp ? minTemp : deviceState.SetTemperature;
                 deviceState.SetTemperature = deviceState.SetTemperature > maxTemp ? maxTemp : deviceState.SetTemperature;
-                
+
                 deviceState.HasPendingCommand = true;
                 const options = {
                     data: deviceState
