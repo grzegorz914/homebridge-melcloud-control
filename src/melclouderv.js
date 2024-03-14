@@ -325,15 +325,7 @@ class MelCloudErv extends EventEmitter {
                 }
 
                 //external integrations
-                this.emit('externalIntegrations', deviceState);
-
-                //restFul
-                this.emit('restFul', 'info', deviceData)
-                this.emit('restFul', 'state', deviceState);
-
-                //mqtt
-                this.emit('mqtt', `State`, deviceState);
-                this.emit('mqtt', `Info`, deviceData);
+                this.emit('externalIntegrations', deviceData, deviceState);
 
                 //check state changes
                 const stateHasNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);

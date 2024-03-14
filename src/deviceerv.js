@@ -26,7 +26,9 @@ class MelCloudDevice extends EventEmitter {
         this.enableDebugMode = account.enableDebugMode || false;
 
         //external integrations
+        const restFulEnabled = account.enableRestFul || false;
         this.restFulConnected = false;
+        const mqttEnabled = account.enableMqtt || false;
         this.mqttConnected = false;
 
         //variables
@@ -42,124 +44,130 @@ class MelCloudDevice extends EventEmitter {
             debugLog: account.enableDebugMode
         });
 
-        this.melCloudErv.on('externalIntegrations', (deviceState) => {
+        this.melCloudErv.on('externalIntegrations', (deviceData, deviceState) => {
             //RESTFul server
-            const restFulEnabled = account.enableRestFul || false;
-            if (restFulEnabled && !this.restFulConnected) {
-                this.restFul = new RestFul({
-                    port: deviceId.slice(-4),
-                    debug: account.restFulDebug || false
-                });
-
-                this.restFul.on('connected', (message) => {
-                    this.restFulConnected = true;
-                    this.emit('message', message);
-                })
-                    .on('debug', (debug) => {
-                        this.emit('debug', debug);
-                    })
-                    .on('error', (error) => {
-                        this.emit('error', error);
+            if (restFulEnabled) {
+                if (!this.restFulConnected) {
+                    this.restFul = new RestFul({
+                        port: deviceId.slice(-4),
+                        debug: account.restFulDebug || false
                     });
+
+                    this.restFul.on('connected', (message) => {
+                        this.restFulConnected = true;
+                        this.emit('message', message);
+                    })
+                        .on('debug', (debug) => {
+                            this.emit('debug', debug);
+                        })
+                        .on('error', (error) => {
+                            this.emit('error', error);
+                        });
+                }
+                const restFul = this.restFulConnected ? this.restFul.update('info', deviceData) : false;
+                const restFul1 = this.restFulConnected ? this.restFul.update('state', deviceState) : false;
             }
 
             //MQTT client
-            const mqttEnabled = account.enableMqtt || false;
-            if (mqttEnabled && !this.mqttConnected) {
-                this.mqtt = new Mqtt({
-                    host: account.mqttHost,
-                    port: account.mqttPort || 1883,
-                    clientId: `${account.mqttClientId}_${deviceId}` || `${deviceTypeText}_${deviceName}_${deviceId}`,
-                    prefix: `${account.mqttPrefix}/${deviceTypeText}/${deviceName}`,
-                    user: account.mqttUser,
-                    passwd: account.mqttPass,
-                    debug: account.mqttDebug || false
-                });
+            if (mqttEnabled) {
+                if (!this.mqttConnected) {
+                    this.mqtt = new Mqtt({
+                        host: account.mqttHost,
+                        port: account.mqttPort || 1883,
+                        clientId: `${account.mqttClientId}_${deviceId}` || `${deviceTypeText}_${deviceName}_${deviceId}`,
+                        prefix: `${account.mqttPrefix}/${deviceTypeText}/${deviceName}`,
+                        user: account.mqttUser,
+                        passwd: account.mqttPass,
+                        debug: account.mqttDebug || false
+                    });
 
-                this.mqtt.on('connected', (message) => {
-                    this.mqttConnected = true;
-                    this.emit('message', message);
-                })
-                    .on('subscribed', (message) => {
+                    this.mqtt.on('connected', (message) => {
+                        this.mqttConnected = true;
                         this.emit('message', message);
                     })
-                    .on('subscribedMessage', async (data) => {
-                        const key = Object.keys(data)[0];
-                        const value = Object.values(data)[0];
-                        let send = false;
-                        switch (key) {
-                            case 'Power':
-                                deviceState[key] = value;
-                                deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power;
-                                send = true;
-                                break;
-                            case 'OperationMode':
-                                deviceState[key] = value;
-                                deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.OperationMode;
-                                send = true;
-                                break;
-                            case 'VentilationMode':
-                                deviceState[key] = value;
-                                deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.VentilationMode;
-                                send = true;
-                                break;
-                            case 'SetTemperature':
-                                deviceState[key] = value;
-                                deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetTemperature;
-                                send = true;
-                                break;
-                            case 'DefaultCoolingSetTemperature':
-                                deviceState[key] = value;
-                                deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetTemperature;
-                                send = true;
-                                break;
-                            case 'DefaultHeatingSetTemperature':
-                                deviceState[key] = value;
-                                deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetTemperature;
-                                send = true;
-                                break;
-                            case 'NightPurgeMode':
-                                deviceState[key] = value;
-                                deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.NightPurgeMode;
-                                send = true;
-                                break;
-                            case 'SetFanSpeed':
-                                deviceState[key] = value;
-                                deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
-                                send = true;
-                                break;
-                            case 'HideRoomTemperature':
-                                deviceState[key] = value;
-                                deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Prohibit;
-                                send = true;
-                                break;
-                            case 'HideSupplyTemperature':
-                                deviceState[key] = value;
-                                deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Prohibit;
-                                send = true;
-                                break;
-                            case 'HideOutdoorTemperature':
-                                deviceState[key] = value;
-                                deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Prohibit;
-                                send = true;
-                                break;
-                            default:
-                                this.emit('message', `MQTT Received unknown key: ${key}, value: ${value}`);
-                                break;
-                        };
+                        .on('subscribed', (message) => {
+                            this.emit('message', message);
+                        })
+                        .on('subscribedMessage', async (data) => {
+                            const key = Object.keys(data)[0];
+                            const value = Object.values(data)[0];
+                            let send = false;
+                            switch (key) {
+                                case 'Power':
+                                    deviceState[key] = value;
+                                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power;
+                                    send = true;
+                                    break;
+                                case 'OperationMode':
+                                    deviceState[key] = value;
+                                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.OperationMode;
+                                    send = true;
+                                    break;
+                                case 'VentilationMode':
+                                    deviceState[key] = value;
+                                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.VentilationMode;
+                                    send = true;
+                                    break;
+                                case 'SetTemperature':
+                                    deviceState[key] = value;
+                                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetTemperature;
+                                    send = true;
+                                    break;
+                                case 'DefaultCoolingSetTemperature':
+                                    deviceState[key] = value;
+                                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetTemperature;
+                                    send = true;
+                                    break;
+                                case 'DefaultHeatingSetTemperature':
+                                    deviceState[key] = value;
+                                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetTemperature;
+                                    send = true;
+                                    break;
+                                case 'NightPurgeMode':
+                                    deviceState[key] = value;
+                                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.NightPurgeMode;
+                                    send = true;
+                                    break;
+                                case 'SetFanSpeed':
+                                    deviceState[key] = value;
+                                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
+                                    send = true;
+                                    break;
+                                case 'HideRoomTemperature':
+                                    deviceState[key] = value;
+                                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Prohibit;
+                                    send = true;
+                                    break;
+                                case 'HideSupplyTemperature':
+                                    deviceState[key] = value;
+                                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Prohibit;
+                                    send = true;
+                                    break;
+                                case 'HideOutdoorTemperature':
+                                    deviceState[key] = value;
+                                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Prohibit;
+                                    send = true;
+                                    break;
+                                default:
+                                    this.emit('message', `MQTT Received unknown key: ${key}, value: ${value}`);
+                                    break;
+                            };
 
-                        try {
-                            const sendCommand = send ? await this.melCloudErv.send(deviceState) : false;
-                        } catch (error) {
-                            this.emit('error', `MQTT send error: ${error}.`);
-                        };
-                    })
-                    .on('debug', (debug) => {
-                        this.emit('debug', debug);
-                    })
-                    .on('error', (error) => {
-                        this.emit('error', error);
-                    });
+                            try {
+                                const sendCommand = send ? await this.melCloudErv.send(deviceState) : false;
+                            } catch (error) {
+                                this.emit('error', `MQTT send error: ${error}.`);
+                            };
+                        })
+                        .on('debug', (debug) => {
+                            this.emit('debug', debug);
+                        })
+                        .on('error', (error) => {
+                            this.emit('error', error);
+                        });
+                }
+                const mqtt = this.mqttConnected ? this.mqtt.emit('publish', `Info`, deviceData) : false;
+                const mqtt1 = this.mqttConnected ? this.mqtt.emit('publish', `State`, deviceState) : false;
             }
         })
             .on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) => {
@@ -539,12 +547,6 @@ class MelCloudDevice extends EventEmitter {
             })
             .on('error', (error) => {
                 this.emit('error', error);
-            })
-            .on('restFul', (path, data) => {
-                const restFul = this.restFulConnected ? this.restFul.update(path, data) : false;
-            })
-            .on('mqtt', (topic, message) => {
-                const mqtt = this.mqttConnected ? this.mqtt.emit('publish', topic, message) : false;
             });
     };
 

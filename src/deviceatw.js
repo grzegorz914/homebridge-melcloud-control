@@ -26,7 +26,9 @@ class MelCloudDevice extends EventEmitter {
         this.enableDebugMode = account.enableDebugMode || false;
 
         //external integrations
+        const restFulEnabled = account.enableRestFul || false;
         this.restFulConnected = false;
+        const mqttEnabled = account.enableMqtt || false;
         this.mqttConnected = false;
 
         //variables
@@ -42,154 +44,160 @@ class MelCloudDevice extends EventEmitter {
             debugLog: account.enableDebugMode
         });
 
-        this.melCloudAtw.on('externalIntegrations', (deviceState) => {
+        this.melCloudAtw.on('externalIntegrations', (deviceData, deviceState) => {
             //RESTFul server
-            const restFulEnabled = account.enableRestFul || false;
-            if (restFulEnabled && !this.restFulConnected) {
-                this.restFul = new RestFul({
-                    port: deviceId.slice(-4),
-                    debug: account.restFulDebug || false
-                });
-
-                this.restFul.on('connected', (message) => {
-                    this.restFulConnected = true;
-                    this.emit('message', message);
-                })
-                    .on('debug', (debug) => {
-                        this.emit('debug', debug);
-                    })
-                    .on('error', (error) => {
-                        this.emit('error', error);
+            if (restFulEnabled) {
+                if (!this.restFulConnected) {
+                    this.restFul = new RestFul({
+                        port: deviceId.slice(-4),
+                        debug: account.restFulDebug || false
                     });
+
+                    this.restFul.on('connected', (message) => {
+                        this.restFulConnected = true;
+                        this.emit('message', message);
+                    })
+                        .on('debug', (debug) => {
+                            this.emit('debug', debug);
+                        })
+                        .on('error', (error) => {
+                            this.emit('error', error);
+                        });
+                }
+                const restFul = this.restFulConnected ? this.restFul.update('info', deviceData) : false;
+                const restFul1 = this.restFulConnected ? this.restFul.update('state', deviceState) : false;
             }
 
             //MQTT client
-            const mqttEnabled = account.enableMqtt || false;
-            if (mqttEnabled && !this.mqttConnected) {
-                this.mqtt = new Mqtt({
-                    host: account.mqttHost,
-                    port: account.mqttPort || 1883,
-                    clientId: `${account.mqttClientId}_${deviceId}` || `${deviceTypeText}_${deviceName}_${deviceId}`,
-                    prefix: `${account.mqttPrefix}/${deviceTypeText}/${deviceName}`,
-                    user: account.mqttUser,
-                    passwd: account.mqttPass,
-                    debug: account.mqttDebug || false
-                });
+            if (mqttEnabled) {
+                if (!this.mqttConnected) {
+                    this.mqtt = new Mqtt({
+                        host: account.mqttHost,
+                        port: account.mqttPort || 1883,
+                        clientId: `${account.mqttClientId}_${deviceId}` || `${deviceTypeText}_${deviceName}_${deviceId}`,
+                        prefix: `${account.mqttPrefix}/${deviceTypeText}/${deviceName}`,
+                        user: account.mqttUser,
+                        passwd: account.mqttPass,
+                        debug: account.mqttDebug || false
+                    });
 
-                this.mqtt.on('connected', (message) => {
-                    this.mqttConnected = true;
-                    this.emit('message', message);
-                })
-                    .on('subscribed', (message) => {
+                    this.mqtt.on('connected', (message) => {
+                        this.mqttConnected = true;
                         this.emit('message', message);
                     })
-                    .on('subscribedMessage', async (data) => {
-                        const key = Object.keys(data)[0];
-                        const value = Object.values(data)[0];
-                        let send = false;
-                        switch (key) {
-                            case 'Power':
-                                deviceState[key] = value;
-                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power;
-                                send = true;
-                                break;
-                            case 'OperationMode':
-                                deviceState[key] = value;
-                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.OperationMode;
-                                send = true;
-                                break;
-                            case 'OperationModeZone1':
-                                deviceState[key] = value;
-                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone1;
-                                send = true;
-                                break;
-                            case 'OperationModeZone2':
-                                deviceState[key] = value;
-                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone2;
-                                send = true;
-                                break;
-                            case 'SetTemperatureZone1':
-                                deviceState[key] = value;
-                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone2;
-                                send = true;
-                                break;
-                            case 'SetTemperatureZone2':
-                                deviceState[key] = value;
-                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone2;
-                                send = true;
-                                break;
-                            case 'SetHeatFlowTemperatureZone1':
-                                deviceState[key] = value;
-                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetHeatFlowTemperatureZone1;
-                                send = true;
-                                break;
-                            case 'SetHeatFlowTemperatureZone2':
-                                deviceState[key] = value;
-                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetHeatFlowTemperatureZone2;
-                                send = true;
-                                break;
-                            case 'SetCoolFlowTemperatureZone1':
-                                deviceState[key] = value;
-                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetCoolFlowTemperatureZone1;
-                                send = true;
-                                break;
-                            case 'SetCoolFlowTemperatureZone2':
-                                deviceState[key] = value;
-                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetCoolFlowTemperatureZone2;
-                                send = true;
-                                break;
-                            case 'SetTankWaterTemperature':
-                                deviceState[key] = value;
-                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTankWaterTemperature;
-                                send = true;
-                                break;
-                            case 'ForcedHotWaterMode':
-                                deviceState[key] = value;
-                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.ForcedHotWaterMode;
-                                send = true;
-                                break;
-                            case 'EcoHotWater':
-                                deviceState[key] = value;
-                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.EcoHotWater;
-                                send = true;
-                                break;
-                            case 'HolidayMode':
-                                deviceState[key] = value;
-                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.HolidayMode;
-                                send = true;
-                                break;
-                            case 'ProhibitZone1':
-                                deviceState[key] = value;
-                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.ProhibitZone1;
-                                send = true;
-                                break;
-                            case 'ProhibitZone2':
-                                deviceState[key] = value;
-                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.ProhibitZone2;
-                                send = true;
-                                break;
-                            case 'ProhibitHotWater':
-                                deviceState[key] = value;
-                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.ProhibitHotWater;
-                                send = true;
-                                break;
-                            default:
-                                this.emit('message', `MQTT Received unknown key: ${key}, value: ${value}`);
-                                break;
-                        };
-                        
-                        try {
-                            const sendCommand = send ? await this.melCloudAtw.send(deviceState) : false;
-                        } catch (error) {
-                            this.emit('error', `MQTT send error: ${error}.`);
-                        };
-                    })
-                    .on('debug', (debug) => {
-                        this.emit('debug', debug);
-                    })
-                    .on('error', (error) => {
-                        this.emit('error', error);
-                    });
+                        .on('subscribed', (message) => {
+                            this.emit('message', message);
+                        })
+                        .on('subscribedMessage', async (data) => {
+                            const key = Object.keys(data)[0];
+                            const value = Object.values(data)[0];
+                            let send = false;
+                            switch (key) {
+                                case 'Power':
+                                    deviceState[key] = value;
+                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power;
+                                    send = true;
+                                    break;
+                                case 'OperationMode':
+                                    deviceState[key] = value;
+                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.OperationMode;
+                                    send = true;
+                                    break;
+                                case 'OperationModeZone1':
+                                    deviceState[key] = value;
+                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone1;
+                                    send = true;
+                                    break;
+                                case 'OperationModeZone2':
+                                    deviceState[key] = value;
+                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone2;
+                                    send = true;
+                                    break;
+                                case 'SetTemperatureZone1':
+                                    deviceState[key] = value;
+                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone2;
+                                    send = true;
+                                    break;
+                                case 'SetTemperatureZone2':
+                                    deviceState[key] = value;
+                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone2;
+                                    send = true;
+                                    break;
+                                case 'SetHeatFlowTemperatureZone1':
+                                    deviceState[key] = value;
+                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetHeatFlowTemperatureZone1;
+                                    send = true;
+                                    break;
+                                case 'SetHeatFlowTemperatureZone2':
+                                    deviceState[key] = value;
+                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetHeatFlowTemperatureZone2;
+                                    send = true;
+                                    break;
+                                case 'SetCoolFlowTemperatureZone1':
+                                    deviceState[key] = value;
+                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetCoolFlowTemperatureZone1;
+                                    send = true;
+                                    break;
+                                case 'SetCoolFlowTemperatureZone2':
+                                    deviceState[key] = value;
+                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetCoolFlowTemperatureZone2;
+                                    send = true;
+                                    break;
+                                case 'SetTankWaterTemperature':
+                                    deviceState[key] = value;
+                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTankWaterTemperature;
+                                    send = true;
+                                    break;
+                                case 'ForcedHotWaterMode':
+                                    deviceState[key] = value;
+                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.ForcedHotWaterMode;
+                                    send = true;
+                                    break;
+                                case 'EcoHotWater':
+                                    deviceState[key] = value;
+                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.EcoHotWater;
+                                    send = true;
+                                    break;
+                                case 'HolidayMode':
+                                    deviceState[key] = value;
+                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.HolidayMode;
+                                    send = true;
+                                    break;
+                                case 'ProhibitZone1':
+                                    deviceState[key] = value;
+                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.ProhibitZone1;
+                                    send = true;
+                                    break;
+                                case 'ProhibitZone2':
+                                    deviceState[key] = value;
+                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.ProhibitZone2;
+                                    send = true;
+                                    break;
+                                case 'ProhibitHotWater':
+                                    deviceState[key] = value;
+                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.ProhibitHotWater;
+                                    send = true;
+                                    break;
+                                default:
+                                    this.emit('message', `MQTT Received unknown key: ${key}, value: ${value}`);
+                                    break;
+                            };
+
+                            try {
+                                const sendCommand = send ? await this.melCloudAtw.send(deviceState) : false;
+                            } catch (error) {
+                                this.emit('error', `MQTT send error: ${error}.`);
+                            };
+                        })
+                        .on('debug', (debug) => {
+                            this.emit('debug', debug);
+                        })
+                        .on('error', (error) => {
+                            this.emit('error', error);
+                        });
+                }
+                const mqtt = this.mqttConnected ? this.mqtt.emit('publish', `Info`, deviceData) : false;
+                const mqtt1 = this.mqttConnected ? this.mqtt.emit('publish', `State`, deviceState) : false;
             }
         })
             .on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, hasHotWaterTank, hasZone2) => {
@@ -776,12 +784,6 @@ class MelCloudDevice extends EventEmitter {
             })
             .on('error', (error) => {
                 this.emit('error', error);
-            })
-            .on('restFul', (path, data) => {
-                const restFul = this.restFulConnected ? this.restFul.update(path, data) : false;
-            })
-            .on('mqtt', (topic, message) => {
-                const mqtt = this.mqttConnected ? this.mqtt.emit('publish', topic, message) : false;
             });
     };
 
