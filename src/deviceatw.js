@@ -6,7 +6,7 @@ const Mqtt = require('./mqtt.js');
 const CONSTANTS = require('./constants.json');
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
-class MelCloudDevice extends EventEmitter {
+class DeviceAtw extends EventEmitter {
     constructor(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile) {
         super();
 
@@ -1721,4 +1721,4 @@ class MelCloudDevice extends EventEmitter {
         });
     };
 };
-module.exports = MelCloudDevice;
+module.exports = DeviceAtw;
