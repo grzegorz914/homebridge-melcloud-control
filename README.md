@@ -30,6 +30,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * All devices are detected automatically.
 * Support multiple MELCloud accounts, buildings, floors, areas.
 * Support temperature display units `Celsius/Fahrenheit`.
+* Support hide device by `DeviceId`.
 * Support control device `Presets`.
 * Support direct device control creating extra `Buttons`, applied for all devices of same type in account.
 * Support identify all states of device creating `Sensors`, applied for all devices of same type in account.
@@ -185,6 +186,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ataButtons.mode` | Here select button mode, VH - Vane Horizontal, VV - Vane Horizontal. |
 | `ataButtons.displayType` | Here select display type in HomeKit app, possible `None/Disabled`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`. |
 | `ataButtons.namePrefix` | Here enable/disable the accessory name as a prefix for button/sensor name. |
+| `ataHideDeviceById.name` | Here set Your own name. |
+| `ataHideDeviceById.id` | Here set `DeviceId` to be hidden and not exposed to the `Homebridge/Homekit`. |
 | `atwDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
 | `atwTemperatureSensor` | This enable extra temperature sensors to use with automations in HomeKit app. |
 | `atwPresets` | This enable display Heat Pump presets in HomeKit app. |
@@ -192,6 +195,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `atwButtons.mode` | Here select button mode. |
 | `atwButtons.displayType` | Here select display type in HomeKit app, possible `None/Disabled`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`. |
 | `atwButtons.namePrefix` | Here enable/disable the accessory name as a prefix for button/sensor name. |
+| `atwHideDeviceById.name` | Here set Your own name. |
+| `atwHideDeviceById.id` | Here set `DeviceId` to be hidden and not exposed to the `Homebridge/Homekit`. |
 | `ervDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
 | `ervTemperatureSensor` | This enable extra temperature sensors to use with automations in HomeKit app. |
 | `ervPresets` | This enable display EnergyRecovery Ventilation presets in HomeKit app. |
@@ -199,6 +204,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ervButtons.mode` | Here select button mode. |
 | `ervButtons.displayType` | Here select display type in HomeKit app, possible `None/Disabled`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`. |
 | `ervButtons.namePrefix` | Here enable/disable the accessory name as a prefix for button/sensor name. |
+| `ervHideDeviceById.name` | Here set Your own name. |
+| `ervHideDeviceById.id` | Here set `DeviceId` to be hidden and not exposed to the `Homebridge/Homekit`. |
 | `refreshInterval` | Here set the background devices state refresh time in (sec), default `120s`. |
 | `enableDebugMode` | This enable deep log in homebridge console. |
 | `disableLogInfo` | This disable display log values and states on every it change. |

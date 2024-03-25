@@ -36,6 +36,11 @@ class MelCloudPlatform {
 					return;
 				}
 
+				//hide devices
+				const ataHideDeviceById = account.ataHideDeviceById || [];
+				const atwHideDeviceById = account.atwHideDeviceById || [];
+				const ervHideDeviceById = account.ervHideDeviceById || [];
+
 				//debug config
 				const enableDebugMode = account.enableDebugMode || false;
 				const debug = enableDebugMode ? log(`Account: ${accountName}, did finish launching.`) : false;
@@ -67,6 +72,11 @@ class MelCloudPlatform {
 					//melcloud devices
 					switch (deviceType) {
 						case 0: //Air Conditioner
+							const ataHideDevice = ataHideDeviceById.some(device => device.id === deviceId);
+							if (ataHideDevice) {
+								return;
+							};
+
 							const airConditioner = new DeviceAta(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile)
 							airConditioner.on('publishAccessory', (accessory) => {
 
@@ -88,6 +98,11 @@ class MelCloudPlatform {
 								});
 							break;
 						case 1: //Heat Pump
+							const atwHideDevice = atwHideDeviceById.some(device => device.id === deviceId);
+							if (atwHideDevice) {
+								return;
+							};
+
 							const heatPump = new DeviceAtw(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile)
 							heatPump.on('publishAccessory', (accessory) => {
 
@@ -109,6 +124,11 @@ class MelCloudPlatform {
 								});
 							break;
 						case 3: //Energy Recovery Ventilation
+							const ervHideDevice = ervHideDeviceById.some(device => device.id === deviceId);
+							if (ervHideDevice) {
+								return;
+							};
+
 							const energyRecoveryVentilation = new DeviceErv(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile)
 							energyRecoveryVentilation.on('publishAccessory', (accessory) => {
 

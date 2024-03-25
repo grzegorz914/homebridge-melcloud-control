@@ -155,7 +155,7 @@ class MelCloud extends EventEmitter {
 
                 //get device info fom devices
                 for (const deviceInfo of devices) {
-                    const deviceId = deviceInfo.DeviceID.toString();
+                    const deviceId = deviceInfo.DeviceID
                     const deviceName = deviceInfo.DeviceName;
 
                     //save every device info to the file

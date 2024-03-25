@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Important changes v0.4.0 and above!!!
   * Main control mode, buttons and presets need to be configured again!!!
 
+## [0.21.0] - (25.03.2024)
+## Changes
+- added [#109](https://github.com/grzegorz914/homebridge-melcloud-control/issues/109), possibility filter out specific device and not exposed to the Homebridge/homekit by deviceId
+- cleanup
+
 ## [0.20.1] - (10.03.2024)
 ## Changes
 - prevent set out of range temperature for Heat Pump

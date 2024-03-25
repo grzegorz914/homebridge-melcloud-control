@@ -561,6 +561,28 @@
                 }
               }
             },
+            "ataHideDeviceById": {
+              "title": "Hide Device By Id",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "title": "Name",
+                    "type": "string",
+                    "placeholder": "Device name",
+                    "description": "Your own name.",
+                    "required": false
+                  },
+                  "id": {
+                    "title": "Id",
+                    "type": "string",
+                    "description": "Set device Id to be hidden and not exposed to the Homebridge/Homekit.",
+                    "required": true
+                  }
+                }
+              }
+            },
             "atwDisplayMode": {
               "title": "Control Mode",
               "type": "integer",
@@ -809,6 +831,28 @@
                 }
               }
             },
+            "atwHideDeviceById": {
+              "title": "Hide Device By Id",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "title": "Name",
+                    "type": "string",
+                    "placeholder": "Device name",
+                    "description": "Your own name.",
+                    "required": true
+                  },
+                  "id": {
+                    "title": "Id",
+                    "type": "string",
+                    "description": "Set device Id to be hidden and not exposed to the Homebridge/Homekit.",
+                    "required": true
+                  }
+                }
+              }
+            },
             "ervDisplayMode": {
               "title": "Control Mode",
               "type": "integer",
@@ -1009,6 +1053,28 @@
                 }
               }
             },
+            "ervHideDeviceById": {
+              "title": "Hide Device By Id",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "title": "Name",
+                    "type": "string",
+                    "placeholder": "Device name",
+                    "description": "Your own name.",
+                    "required": true
+                  },
+                  "id": {
+                    "title": "Id",
+                    "type": "string",
+                    "description": "Set device Id to be hidden and not exposed to the Homebridge/Homekit.",
+                    "required": true
+                  }
+                }
+              }
+            },
             "refreshInterval": {
               "title": "Refresh Interval",
               "type": "integer",
@@ -1200,6 +1266,24 @@
                           ]
                         }
                       ]
+                    },
+                    {
+                      "key": "accounts[]",
+                      "type": "section",
+                      "title": "Hide Device By Id",
+                      "expandable": true,
+                      "expanded": false,
+                      "items": [
+                        {
+                          "key": "accounts[].ataHideDeviceById",
+                          "type": "tabarray",
+                          "title": "{{ value.name || 'device' }}",
+                          "items": [
+                            "accounts[].ataHideDeviceById[].name",
+                            "accounts[].ataHideDeviceById[].id"
+                          ]
+                        }
+                      ]
                     }
                   ]
                 },
@@ -1229,6 +1313,24 @@
                           ]
                         }
                       ]
+                    },
+                    {
+                      "key": "accounts[]",
+                      "type": "section",
+                      "title": "Hide Device By Id",
+                      "expandable": true,
+                      "expanded": false,
+                      "items": [
+                        {
+                          "key": "accounts[].atwHideDeviceById",
+                          "type": "tabarray",
+                          "title": "{{ value.name || 'device' }}",
+                          "items": [
+                            "accounts[].atwHideDeviceById[].name",
+                            "accounts[].atwHideDeviceById[].id"
+                          ]
+                        }
+                      ]
                     }
                   ]
                 },
@@ -1255,6 +1357,24 @@
                             "accounts[].ervButtons[].mode",
                             "accounts[].ervButtons[].displayType",
                             "accounts[].ervButtons[].namePrefix"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "key": "accounts[]",
+                      "type": "section",
+                      "title": "Hide Device By Id",
+                      "expandable": true,
+                      "expanded": false,
+                      "items": [
+                        {
+                          "key": "accounts[].ervHideDeviceById",
+                          "type": "tabarray",
+                          "title": "{{ value.name || 'device' }}",
+                          "items": [
+                            "accounts[].ervHideDeviceById[].name",
+                            "accounts[].ervHideDeviceById[].id"
                           ]
                         }
                       ]

@@ -37,6 +37,12 @@
               "namePrefix": false
             }
           ],
+          "ataHideDeviceById": [
+            {
+              "name": "A.C. Kitchen",
+              "id": "65456432"
+            }
+          ],
           "atwDisplayMode": 0,
           "atwTemperatureSensor": false,
           "atwPresets": false,
@@ -48,6 +54,12 @@
               "namePrefix": false
             }
           ],
+          "atwHideDeviceById": [
+            {
+              "name": "Heat Pump",
+              "id": "6545678"
+            }
+          ],
           "ervDisplayMode": 0,
           "ervTemperatureSensor": false,
           "ervPresets": false,
@@ -57,6 +69,12 @@
               "mode": 0,
               "displayType": 0,
               "namePrefix": false
+            }
+          ],
+          "ervHideDeviceById": [
+            {
+              "name": "E.R.V. Kitchen",
+              "id": "65456432"
             }
           ],
           "refreshInterval": 120,
