@@ -89,100 +89,97 @@ class DeviceAtw extends EventEmitter {
                             this.emit('message', message);
                         })
                         .on('subscribedMessage', async (key, value) => {
-                            let send = false;
-                            switch (key) {
-                                case 'Power':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power;
-                                    send = true;
-                                    break;
-                                case 'OperationMode':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.OperationMode;
-                                    send = true;
-                                    break;
-                                case 'OperationModeZone1':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone1;
-                                    send = true;
-                                    break;
-                                case 'OperationModeZone2':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone2;
-                                    send = true;
-                                    break;
-                                case 'SetTemperatureZone1':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone2;
-                                    send = true;
-                                    break;
-                                case 'SetTemperatureZone2':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone2;
-                                    send = true;
-                                    break;
-                                case 'SetHeatFlowTemperatureZone1':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetHeatFlowTemperatureZone1;
-                                    send = true;
-                                    break;
-                                case 'SetHeatFlowTemperatureZone2':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetHeatFlowTemperatureZone2;
-                                    send = true;
-                                    break;
-                                case 'SetCoolFlowTemperatureZone1':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetCoolFlowTemperatureZone1;
-                                    send = true;
-                                    break;
-                                case 'SetCoolFlowTemperatureZone2':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetCoolFlowTemperatureZone2;
-                                    send = true;
-                                    break;
-                                case 'SetTankWaterTemperature':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTankWaterTemperature;
-                                    send = true;
-                                    break;
-                                case 'ForcedHotWaterMode':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.ForcedHotWaterMode;
-                                    send = true;
-                                    break;
-                                case 'EcoHotWater':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.EcoHotWater;
-                                    send = true;
-                                    break;
-                                case 'HolidayMode':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.HolidayMode;
-                                    send = true;
-                                    break;
-                                case 'ProhibitZone1':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.ProhibitZone1;
-                                    send = true;
-                                    break;
-                                case 'ProhibitZone2':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.ProhibitZone2;
-                                    send = true;
-                                    break;
-                                case 'ProhibitHotWater':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.ProhibitHotWater;
-                                    send = true;
-                                    break;
-                                default:
-                                    this.emit('message', `MQTT Received unknown key: ${key}, value: ${value}`);
-                                    break;
-                            };
-
                             try {
-                                const sendCommand = send ? await this.melCloudAtw.send(deviceState) : false;
+                                switch (key) {
+                                    case 'Power':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'OperationMode':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.OperationMode;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'OperationModeZone1':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone1;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'OperationModeZone2':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone2;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'SetTemperatureZone1':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone2;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'SetTemperatureZone2':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone2;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'SetHeatFlowTemperatureZone1':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetHeatFlowTemperatureZone1;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'SetHeatFlowTemperatureZone2':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetHeatFlowTemperatureZone2;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'SetCoolFlowTemperatureZone1':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetCoolFlowTemperatureZone1;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'SetCoolFlowTemperatureZone2':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetCoolFlowTemperatureZone2;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'SetTankWaterTemperature':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTankWaterTemperature;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'ForcedHotWaterMode':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.ForcedHotWaterMode;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'EcoHotWater':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.EcoHotWater;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'HolidayMode':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.HolidayMode;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'ProhibitZone1':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.ProhibitZone1;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'ProhibitZone2':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.ProhibitZone2;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'ProhibitHotWater':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.ProhibitHotWater;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    default:
+                                        this.emit('message', `MQTT Received unknown key: ${key}, value: ${value}`);
+                                        break;
+                                };
                             } catch (error) {
                                 this.emit('error', `MQTT send error: ${error}.`);
                             };

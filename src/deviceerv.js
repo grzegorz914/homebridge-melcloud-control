@@ -89,70 +89,67 @@ class DeviceErv extends EventEmitter {
                             this.emit('message', message);
                         })
                         .on('subscribedMessage', async (key, value) => {
-                            let send = false;
-                            switch (key) {
-                                case 'Power':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power;
-                                    send = true;
-                                    break;
-                                case 'OperationMode':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.OperationMode;
-                                    send = true;
-                                    break;
-                                case 'VentilationMode':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.VentilationMode;
-                                    send = true;
-                                    break;
-                                case 'SetTemperature':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetTemperature;
-                                    send = true;
-                                    break;
-                                case 'DefaultCoolingSetTemperature':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetTemperature;
-                                    send = true;
-                                    break;
-                                case 'DefaultHeatingSetTemperature':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetTemperature;
-                                    send = true;
-                                    break;
-                                case 'NightPurgeMode':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.NightPurgeMode;
-                                    send = true;
-                                    break;
-                                case 'SetFanSpeed':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
-                                    send = true;
-                                    break;
-                                case 'HideRoomTemperature':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Prohibit;
-                                    send = true;
-                                    break;
-                                case 'HideSupplyTemperature':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Prohibit;
-                                    send = true;
-                                    break;
-                                case 'HideOutdoorTemperature':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Prohibit;
-                                    send = true;
-                                    break;
-                                default:
-                                    this.emit('message', `MQTT Received unknown key: ${key}, value: ${value}`);
-                                    break;
-                            };
-
                             try {
-                                const sendCommand = send ? await this.melCloudErv.send(deviceState) : false;
+                                switch (key) {
+                                    case 'Power':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power;
+                                        await this.melCloudErv.send(deviceState);
+                                        break;
+                                    case 'OperationMode':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.OperationMode;
+                                        await this.melCloudErv.send(deviceState);
+                                        break;
+                                    case 'VentilationMode':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.VentilationMode;
+                                        await this.melCloudErv.send(deviceState);
+                                        break;
+                                    case 'SetTemperature':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetTemperature;
+                                        await this.melCloudErv.send(deviceState);
+                                        break;
+                                    case 'DefaultCoolingSetTemperature':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetTemperature;
+                                        await this.melCloudErv.send(deviceState);
+                                        break;
+                                    case 'DefaultHeatingSetTemperature':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetTemperature;
+                                        await this.melCloudErv.send(deviceState);
+                                        break;
+                                    case 'NightPurgeMode':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.NightPurgeMode;
+                                        await this.melCloudErv.send(deviceState);
+                                        break;
+                                    case 'SetFanSpeed':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
+                                        await this.melCloudErv.send(deviceState);
+                                        break;
+                                    case 'HideRoomTemperature':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Prohibit;
+                                        await this.melCloudErv.send(deviceState);
+                                        break;
+                                    case 'HideSupplyTemperature':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Prohibit;
+                                        await this.melCloudErv.send(deviceState);
+                                        break;
+                                    case 'HideOutdoorTemperature':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Prohibit;
+                                        await this.melCloudErv.send(deviceState);
+                                        break;
+                                    default:
+                                        this.emit('message', `MQTT Received unknown key: ${key}, value: ${value}`);
+                                        break;
+                                };
                             } catch (error) {
                                 this.emit('error', `MQTT send error: ${error}.`);
                             };

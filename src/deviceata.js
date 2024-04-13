@@ -92,81 +92,77 @@ class DeviceAta extends EventEmitter {
                             this.emit('message', message);
                         })
                         .on('subscribedMessage', async (key, value) => {
-                            let send = false;
-                            switch (key) {
-                                case 'Power':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power;
-                                    send = true;
-                                    break;
-                                case 'OperationMode':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.OperationMode;
-                                    send = true;
-                                    break;
-                                case 'SetTemperature':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.SetTemperature;
-                                    send = true;
-                                    break;
-                                case 'DefaultCoolingSetTemperature':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.SetTemperature;
-                                    send = true;
-                                    break;
-                                case 'DefaultHeatingSetTemperature':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.SetTemperature;
-                                    send = true;
-                                    break;
-                                case 'SetFanSpeed':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.SetFanSpeed;
-                                    send = true;
-                                    break;
-                                case 'VaneHorizontal':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.VaneHorizontal;
-                                    send = true;
-                                    break;
-                                case 'VaneVertical':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.VaneVertical;
-                                    send = true;
-                                    break;
-                                case 'HideVaneControls':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Prohibit;
-                                    send = true;
-                                    break;
-                                case 'HideDryModeControl':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Prohibit;
-                                    send = true;
-                                    break;
-                                case 'ProhibitSetTemperature':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Prohibit;
-                                    send = true;
-                                    break;
-                                case 'ProhibitOperationMode':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Prohibit;
-                                    send = true;
-                                    break;
-                                case 'ProhibitPower':
-                                    deviceState[key] = value;
-                                    deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Prohibit;
-                                    send = true;
-                                    break;
-                                default:
-                                    this.emit('message', `MQTT Received unknown key: ${key}, value: ${value}`);
-                                    send = false;
-                                    break;
-                            };
-
                             try {
-                                const sendCommand = send ? await this.melCloudAta.send(deviceState) : false;
+                                switch (key) {
+                                    case 'Power':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power;
+                                        await this.melCloudAta.send(deviceState);
+                                        break;
+                                    case 'OperationMode':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.OperationMode;
+                                        await this.melCloudAta.send(deviceState);
+                                        break;
+                                    case 'SetTemperature':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.SetTemperature;
+                                        await this.melCloudAta.send(deviceState);
+                                        break;
+                                    case 'DefaultCoolingSetTemperature':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.SetTemperature;
+                                        await this.melCloudAta.send(deviceState);
+                                        break;
+                                    case 'DefaultHeatingSetTemperature':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.SetTemperature;
+                                        await this.melCloudAta.send(deviceState);
+                                        break;
+                                    case 'SetFanSpeed':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.SetFanSpeed;
+                                        await this.melCloudAta.send(deviceState);
+                                        break;
+                                    case 'VaneHorizontal':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.VaneHorizontal;
+                                        await this.melCloudAta.send(deviceState);
+                                        break;
+                                    case 'VaneVertical':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.VaneVertical;
+                                        await this.melCloudAta.send(deviceState);
+                                        break;
+                                    case 'HideVaneControls':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Prohibit;
+                                        await this.melCloudAta.send(deviceState);
+                                        break;
+                                    case 'HideDryModeControl':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Prohibit;
+                                        await this.melCloudAta.send(deviceState);
+                                        break;
+                                    case 'ProhibitSetTemperature':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Prohibit;
+                                        await this.melCloudAta.send(deviceState);
+                                        break;
+                                    case 'ProhibitOperationMode':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Prohibit;
+                                        await this.melCloudAta.send(deviceState);
+                                        break;
+                                    case 'ProhibitPower':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Prohibit;
+                                        await this.melCloudAta.send(deviceState);
+                                        break;
+                                    default:
+                                        this.emit('message', `MQTT Received unknown key: ${key}, value: ${value}`);
+                                        break;
+                                };
                             } catch (error) {
                                 this.emit('error', `MQTT send error: ${error}.`);
                             };
