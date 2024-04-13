@@ -41,7 +41,9 @@
     "ecodan",
     "zubadan",
     "lossnay",
-    "vrf"
+    "vrf",
+    "mqtt",
+    "restful"
   ],
   "funding": {
     "type": "github",
