@@ -91,9 +91,7 @@ class DeviceAta extends EventEmitter {
                         .on('subscribed', (message) => {
                             this.emit('message', message);
                         })
-                        .on('subscribedMessage', async (data) => {
-                            const key = Object.keys(data)[0];
-                            const value = Object.values(data)[0];
+                        .on('subscribedMessage', async (key, value) => {
                             let send = false;
                             switch (key) {
                                 case 'Power':
