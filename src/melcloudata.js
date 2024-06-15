@@ -4,6 +4,7 @@ const fsPromises = fs.promises;
 const https = require('https');
 const axios = require('axios');
 const EventEmitter = require('events');
+const ImpulseGenerator = require('./impulsegenerator.js');
 const CONSTANTS = require('./constants.json');
 
 class MelCloudAta extends EventEmitter {
@@ -33,7 +34,12 @@ class MelCloudAta extends EventEmitter {
             })
         });
 
-        this.on('checkDevice', async () => {
+        const timers = [
+            { name: 'checkDevice', interval: 5000 },
+        ];
+
+        const impulseGenerator = new ImpulseGenerator(timers);
+        impulseGenerator.on('checkDevice', async () => {
             try {
                 //read account info from file
                 const accountInfo = await this.readData(accountInfoFile);
@@ -57,7 +63,6 @@ class MelCloudAta extends EventEmitter {
                 const debug1 = debugLog ? this.emit('debug', `Device Info: ${JSON.stringify(deviceData, null, 2)}`) : false;
 
                 if (!deviceData) {
-                    this.checkDevice();
                     return;
                 }
 
@@ -342,7 +347,6 @@ class MelCloudAta extends EventEmitter {
                 //check state changes
                 const stateHasNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);
                 if (stateHasNotChanged) {
-                    this.checkDevice();
                     return;
                 }
                 this.deviceData = deviceData;
@@ -354,19 +358,12 @@ class MelCloudAta extends EventEmitter {
 
                 //emit state
                 this.emit('deviceState', deviceData, deviceState, useFahrenheit);
-                this.checkDevice();
             } catch (error) {
                 this.emit('error', `Check device error: ${error}.`);
-                this.checkDevice();
             };
         });
 
-        this.emit('checkDevice');
-    };
-
-    async checkDevice() {
-        await new Promise(resolve => setTimeout(resolve, 5000));
-        this.emit('checkDevice');
+        impulseGenerator.start();
     };
 
     readData(path) {

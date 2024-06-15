@@ -1,7 +1,7 @@
 {
   "displayName": "MELCloud Control",
   "name": "homebridge-melcloud-control",
-  "version": "0.21.5",
+  "version": "0.21.6",
   "description": "Homebridge plugin to control Mitsubishi Air Conditioner, Heat Pump and Energy Recovery Ventilation.",
   "license": "MIT",
   "author": "grzegorz914",
