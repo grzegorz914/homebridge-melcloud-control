@@ -45,12 +45,12 @@ class MelCloud extends EventEmitter {
 
         const impulseGenerator = new ImpulseGenerator(timers);
         impulseGenerator.on('connect', async () => {
-            const debug = enableDebugMode ? this.emit('debug', `Connect to MELCloud.`) : false;
             if (this.connectCompleted) {
                 return;
             }
 
             try {
+                const debug = enableDebugMode ? this.emit('debug', `Connecting to MELCloud.`) : false;
                 const accountData = await axiosInstanceLogin(CONSTANTS.ApiUrls.ClientLogin, options);
                 const account = accountData.data;
                 const accountInfo = account.LoginData;
@@ -66,10 +66,10 @@ class MelCloud extends EventEmitter {
                     MapLongitude: 'removed',
                     MapLatitude: 'removed'
                 };
-                const debug = enableDebugMode ? this.emit('debug', `MELCloud Info: ${JSON.stringify(debugData, null, 2)}`) : false;
+                const debug1 = enableDebugMode ? this.emit('debug', `MELCloud Info: ${JSON.stringify(debugData, null, 2)}`) : false;
 
                 if (contextKey === undefined || contextKey === null) {
-                    this.emit('message', `context key: ${contextKey}, missing, reconnect in ${refreshInterval / 1000}.`)
+                    this.emit('message', `Context key: ${contextKey}, missing, reconnect in ${refreshInterval / 1000}.`)
                     return;
                 };
 
@@ -118,15 +118,15 @@ class MelCloud extends EventEmitter {
                 this.connectCompleted = true;
                 impulseGenerator.emit('checkDevicesList');
             } catch (error) {
-                this.emit('error', `Login error: ${error}, reconnect in  ${refreshInterval / 1000}s.`);
+                this.emit('error', `Connect to MELCloud error: ${error}, reconnect in  ${refreshInterval / 1000}s.`);
             };
         }).on('checkDevicesList', async () => {
-            const debug = enableDebugMode ? this.emit('debug', `Scanning for devices.`) : false;
             if (!this.connectCompleted) {
                 return;
             }
 
             try {
+                const debug = enableDebugMode ? this.emit('debug', `Scanning for devices.`) : false;
                 const listDevicesData = await this.axiosInstanceGet(CONSTANTS.ApiUrls.ListDevices);
                 const buildingsList = listDevicesData.data;
                 const debug1 = enableDebugMode ? this.emit('debug', `Buildings: ${JSON.stringify(buildingsList, null, 2)}`) : false;
@@ -138,7 +138,7 @@ class MelCloud extends EventEmitter {
 
                 //save buildings to the file
                 await this.saveData(buildingsFile, buildingsList);
-                const debug = enableDebugMode ? this.emit('debug', `Buildings list saved.`) : false;
+                const debug2 = enableDebugMode ? this.emit('debug', `Buildings list saved.`) : false;
 
                 //read buildings structure and get the devices
                 const devices = [];
@@ -161,7 +161,7 @@ class MelCloud extends EventEmitter {
                     this.emit('message', `No devices found, check again in: ${refreshInterval / 1000}s.`);
                     return;
                 }
-                const debug2 = enableDebugMode ? this.emit('debug', `Found: ${devicesCount} devices.`) : false;
+                const debug3 = enableDebugMode ? this.emit('debug', `Found: ${devicesCount} devices.`) : false;
 
                 //get device info fom devices
                 for (const deviceInfo of devices) {
@@ -181,8 +181,7 @@ class MelCloud extends EventEmitter {
                     }
                 }
             } catch (error) {
-                this.emit('error', `Check devices list error: ${error}, check again in: ${refreshInterval / 1000}s.`);
-                this.connectCompleted = false;
+                this.emit('error', `Scanning for devices error: ${error}, check again in: ${refreshInterval / 1000}s.`);
             };
         })
 

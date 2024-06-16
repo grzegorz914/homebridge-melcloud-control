@@ -308,6 +308,10 @@ class MelCloudErv extends EventEmitter {
                     this.emit('message', `Units are not configured in MELCloud service.`);
                 };
 
+                //emit info
+                const emitInfo = this.displayDeviceInfo ? this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) : false;
+                this.displayDeviceInfo = false;
+
                 //device state
                 const deviceState = {
                     DeviceId: deviceId,
@@ -337,14 +341,10 @@ class MelCloudErv extends EventEmitter {
                 if (stateHasNotChanged) {
                     return;
                 }
-                this.deviceData = deviceData;
-                const debug2 = debugLog ? this.emit('debug', `Device State: ${JSON.stringify(deviceState, null, 2)}`) : false;
-
-                //emit info
-                const emitInfo = this.displayDeviceInfo ? this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) : false;
-                this.displayDeviceInfo = false;
 
                 //emit state 
+                this.deviceData = deviceData;
+                const debug2 = debugLog ? this.emit('debug', `Device State: ${JSON.stringify(deviceState, null, 2)}`) : false;
                 this.emit('deviceState', deviceData, deviceState, useFahrenheit);
             } catch (error) {
                 this.emit('error', `Check device error: ${error}.`);
