@@ -763,7 +763,7 @@ class DeviceAtw extends EventEmitter {
                 if (this.startPrepareAccessory) {
                     try {
                         await new Promise(resolve => setTimeout(resolve, 150));
-                        const accessory = await this.prepareAccessory(accountInfo, deviceState, deviceId, deviceTypeText, deviceName);
+                        const accessory = await this.prepareAccessory(accountInfo, deviceState, deviceId, deviceTypeText, deviceName, accountName);
                         this.emit('publishAccessory', accessory);
                         this.startPrepareAccessory = false;
                     } catch (error) {
@@ -783,13 +783,13 @@ class DeviceAtw extends EventEmitter {
     };
 
     //prepare accessory
-    prepareAccessory(accountInfo, deviceState, deviceId, deviceTypeText, deviceName) {
+    prepareAccessory(accountInfo, deviceState, deviceId, deviceTypeText, deviceName, accountName) {
         return new Promise((resolve, reject) => {
             try {
                 //accessory
                 const debug = this.enableDebugMode ? this.emit('debug', `Prepare accessory`) : false;
                 const accessoryName = deviceName;
-                const accessoryUUID = AccessoryUUID.generate(deviceId.toString());
+                const accessoryUUID = AccessoryUUID.generate(accountName + deviceId.toString());
                 const accessoryCategory = Categories.AIR_HEATER;
                 const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 

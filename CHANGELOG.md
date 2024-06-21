@@ -10,6 +10,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Important changes v0.4.0 and above!!!
   * Main control mode, buttons and presets need to be configured again!!!
 
+## Important changes v1.0.0 and above
+* After update to this version need to remove the devices from Home app and add it again!!!
+
+## [1.0.0] - (21.06.2024)
+## Changes
+
+- added [#120](https://github.com/grzegorz914/homebridge-melcloud-control/issues/120) püossibility run same device many times as other aqqount or in other homebridge instance
+- cleanup   
+
+## [1.0.0] - (21.06.2024)
+## Changes
+- added [#109](https://github.com/grzegorz914/homebridge-melcloud-control/issues/109), possibility filter out specific device and not exposed to the Homebridge/homekit by deviceId
+- cleanup  
+
 ## [0.21.0] - (25.03.2024)
 ## Changes
 - added [#109](https://github.com/grzegorz914/homebridge-melcloud-control/issues/109), possibility filter out specific device and not exposed to the Homebridge/homekit by deviceId
