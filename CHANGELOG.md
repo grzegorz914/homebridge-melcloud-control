@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * Main control mode, buttons and presets need to be configured again!!!
   
 ## Important changes v1.0.0 and above
-  * After update to this version need to remove the devices from Home app and add it again!!!
+  * After update to this version the devices need to be added to the Home app again and the old unresponsive remove!!!
   * This devices will be removed from all automations and scenes!!!
 
 ## [1.0.0] - (21.06.2024)
