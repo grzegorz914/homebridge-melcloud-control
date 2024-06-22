@@ -12,12 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Important changes v1.0.0 and above
 * After update to this version need to remove the devices from Home app and add it again!!!
+* This devices will be removed from all automations and scenes!!!
 
 ## [1.0.0] - (21.06.2024)
 ## Changes
 
-- added [#120](https://github.com/grzegorz914/homebridge-melcloud-control/issues/120) püossibility run same device many times as other aqqount or in other homebridge instance
-- cleanup   
+- added [#120](https://github.com/grzegorz914/homebridge-melcloud-control/issues/120) püossibility run same device many times in other account or in other homebridge instance
+- cleanup
 
 ## [1.0.0] - (21.06.2024)
 ## Changes
