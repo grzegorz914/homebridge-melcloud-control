@@ -38,7 +38,7 @@ class MelCloudPlatform {
 				}
 
 				//check duplicate account name
-				if (!accountsName.includes(accountName)) {
+				if (accountsName.includes(accountName)) {
 					log.warn(`Account name: ${accountName}, must be unique.`);
 					return;
 				}
