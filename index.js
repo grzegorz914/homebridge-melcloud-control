@@ -15,6 +15,7 @@ class MelCloudPlatform {
 			return;
 		}
 		this.accessories = [];
+		const accountsName = [];
 
 		//check if the directory exists, if not then create it
 		const prefDir = path.join(api.user.storagePath(), 'melcloud');
@@ -35,6 +36,13 @@ class MelCloudPlatform {
 					log.warn(`Name: ${accountName ? 'OK' : accountName}, user: ${user ? 'OK' : user}, password: ${passwd ? 'OK' : passwd}, language: ${language ? 'OK' : language} in config missing.`);
 					return;
 				}
+
+				//check duplicate account name
+				if (!accountsName.includes(accountName)) {
+					log.warn(`Account name: ${accountName}, must be unique.`);
+					return;
+				}
+				accountsName.push(accountName);
 
 				//hide devices
 				const ataHideDeviceById = account.ataHideDeviceById || [];

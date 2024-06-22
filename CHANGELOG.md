@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * After update to this version the devices need to be added to the Home app again and the old unresponsive remove!!!
   * This devices will be removed from all automations and scenes!!!
 
+## [1.0.1] - (22.06.2024)
+## Changes
+
+- check duplicate account name if run only one Homebridge instance
+- cleanup  
+
 ## [1.0.0] - (21.06.2024)
 ## Changes
 
