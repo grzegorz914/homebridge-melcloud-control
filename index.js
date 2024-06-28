@@ -80,7 +80,7 @@ class MelCloudPlatform {
 					//melcloud devices
 					switch (deviceType) {
 						case 0: //Air Conditioner
-							const ataHideDevice = ataHideDeviceById.some(device => device.id === deviceId);
+							const ataHideDevice = ataHideDeviceById.some(device => device.id === deviceId) ?? false;
 							if (ataHideDevice) {
 								return;
 							};
@@ -106,7 +106,7 @@ class MelCloudPlatform {
 								});
 							break;
 						case 1: //Heat Pump
-							const atwHideDevice = atwHideDeviceById.some(device => device.id === deviceId);
+							const atwHideDevice = atwHideDeviceById.some(device => device.id === deviceId) ?? false;
 							if (atwHideDevice) {
 								return;
 							};
@@ -132,7 +132,7 @@ class MelCloudPlatform {
 								});
 							break;
 						case 3: //Energy Recovery Ventilation
-							const ervHideDevice = ervHideDeviceById.some(device => device.id === deviceId);
+							const ervHideDevice = ervHideDeviceById.some(device => device.id === deviceId) ?? false;
 							if (ervHideDevice) {
 								return;
 							};

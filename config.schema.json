@@ -270,7 +270,7 @@
                 }
               ],
               "description": "Operation mode for Auto/Heat option, if Auto, Heat or both modes are not supported by the device this will be used for selected modes instead.",
-              "required": true
+              "required": false
             },
             "ataButtons": {
               "title": "Button / Sensor",
@@ -283,7 +283,7 @@
                     "type": "string",
                     "placeholder": "Button name",
                     "description": "Your own name displayed in Homebridge/HomeKit app.",
-                    "required": true
+                    "required": false
                   },
                   "mode": {
                     "title": "Mode",
@@ -503,7 +503,7 @@
                         ]
                       }
                     ],
-                    "required": true
+                    "required": false
                   },
                   "displayType": {
                     "title": "Type",
@@ -549,17 +549,17 @@
                       }
                     ],
                     "description": "Extra function/tile to be exposed in HomeKit app.",
-                    "required": true
+                    "required": false
                   },
                   "namePrefix": {
                     "title": "Prefix",
                     "type": "boolean",
-                    "default": false,
                     "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
-                    "required": true
+                    "required": false
                   }
                 }
-              }
+              },
+              "required": false
             },
             "ataHideDeviceById": {
               "title": "Hide Device By Id",
@@ -578,10 +578,11 @@
                     "title": "Id",
                     "type": "string",
                     "description": "Set device Id to be hidden and not exposed to the Homebridge/Homekit.",
-                    "required": true
+                    "required": false
                   }
                 }
-              }
+              },
+              "required": false
             },
             "atwDisplayMode": {
               "title": "Control Mode",
@@ -631,7 +632,7 @@
                     "type": "string",
                     "placeholder": "Button name",
                     "description": "Your own name displayed in Homebridge/HomeKit app.",
-                    "required": true
+                    "required": false
                   },
                   "mode": {
                     "title": "Mode",
@@ -773,7 +774,7 @@
                         ]
                       }
                     ],
-                    "required": true
+                    "required": false
                   },
                   "displayType": {
                     "title": "Type",
@@ -819,17 +820,17 @@
                       }
                     ],
                     "description": "Select extra function/tile to be exposed in HomeKit app.",
-                    "required": true
+                    "required": false
                   },
                   "namePrefix": {
                     "title": "Prefix",
                     "type": "boolean",
-                    "default": false,
                     "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
-                    "required": true
+                    "required": false
                   }
                 }
-              }
+              },
+              "required": false
             },
             "atwHideDeviceById": {
               "title": "Hide Device By Id",
@@ -842,16 +843,17 @@
                     "type": "string",
                     "placeholder": "Device name",
                     "description": "Your own name.",
-                    "required": true
+                    "required": false
                   },
                   "id": {
                     "title": "Id",
                     "type": "string",
                     "description": "Set device Id to be hidden and not exposed to the Homebridge/Homekit.",
-                    "required": true
+                    "required": false
                   }
                 }
-              }
+              },
+              "required": false
             },
             "ervDisplayMode": {
               "title": "Control Mode",
@@ -901,7 +903,7 @@
                     "type": "string",
                     "placeholder": "Button name",
                     "description": "Your own name displayed in Homebridge/HomeKit app.",
-                    "required": true
+                    "required": false
                   },
                   "mode": {
                     "title": "Mode",
@@ -995,7 +997,7 @@
                         ]
                       }
                     ],
-                    "required": true
+                    "required": false
                   },
                   "displayType": {
                     "title": "Type",
@@ -1041,17 +1043,17 @@
                       }
                     ],
                     "description": "Select extra function/tile to be exposed in HomeKit app.",
-                    "required": true
+                    "required": false
                   },
                   "namePrefix": {
                     "title": "Prefix",
                     "type": "boolean",
-                    "default": false,
                     "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
-                    "required": true
+                    "required": false
                   }
                 }
-              }
+              },
+              "required": false
             },
             "ervHideDeviceById": {
               "title": "Hide Device By Id",
@@ -1064,16 +1066,17 @@
                     "type": "string",
                     "placeholder": "Device name",
                     "description": "Your own name.",
-                    "required": true
+                    "required": false
                   },
                   "id": {
                     "title": "Id",
                     "type": "string",
                     "description": "Set device Id to be hidden and not exposed to the Homebridge/Homekit.",
-                    "required": true
+                    "required": false
                   }
                 }
-              }
+              },
+              "required": false
             },
             "refreshInterval": {
               "title": "Refresh Interval",
@@ -1082,7 +1085,7 @@
               "minimum": 1,
               "maximum": 600,
               "description": "Set the background devices state refresh time in seconds.",
-              "required": true
+              "required": false
             },
             "disableLogInfo": {
               "title": "Disable Log Info",
@@ -1109,106 +1112,106 @@
               "title": "Enable",
               "type": "boolean",
               "default": false,
-              "required": false,
-              "description": "Enable RESTful server."
+              "description": "Enable RESTful server.",
+              "required": false
             },
             "restFulDebug": {
               "title": "Debug",
               "type": "boolean",
               "default": false,
-              "required": false,
               "description": "Enable debug mode for RESTFul server.",
               "condition": {
                 "functionBody": "return model.accounts[arrayIndices].enableRestFul === true;"
-              }
+              },
+              "required": false
             },
             "enableMqtt": {
               "title": "Enable",
               "type": "boolean",
               "default": false,
-              "required": false,
-              "description": "Enable MQTT client."
+              "description": "Enable MQTT client.",
+              "required": false
             },
             "mqttDebug": {
               "title": "Debug",
               "type": "boolean",
               "default": false,
-              "required": false,
               "description": "Enable debug mode for MQTT client.",
               "condition": {
                 "functionBody": "return model.accounts[arrayIndices].enableMqtt === true;"
-              }
+              },
+              "required": false
             },
             "mqttHost": {
               "title": "IP/Hostname",
               "type": "string",
               "placeholder": "IP or hostname",
-              "required": true,
               "format": "hostname",
               "description": "IP or Hostname of MQTT Broker.",
               "condition": {
                 "functionBody": "return model.accounts[arrayIndices].enableMqtt === true;"
-              }
+              },
+              "required": false
             },
             "mqttPort": {
               "title": "Port",
               "type": "integer",
               "placeholder": 1883,
-              "required": true,
               "description": "Port of MQTT Broker.",
               "condition": {
                 "functionBody": "return model.accounts[arrayIndices].enableMqtt === true;"
-              }
+              },
+              "required": false
             },
             "mqttClientId": {
               "title": "Client ID",
               "type": "string",
               "placeholder": "client id",
-              "required": false,
               "description": "Client ID of MQTT Broker (optional).",
               "condition": {
                 "functionBody": "return model.accounts[arrayIndices].enableMqtt === true"
-              }
+              },
+              "required": false
             },
             "mqttPrefix": {
               "title": "Prefix",
               "type": "string",
               "placeholder": "home/account",
-              "required": false,
               "description": "MQTT prefix.",
               "condition": {
                 "functionBody": "return model.accounts[arrayIndices].enableMqtt === true;"
-              }
+              },
+              "required": false
             },
             "mqttAuth": {
               "title": "Authorization",
               "type": "boolean",
               "default": false,
-              "required": false,
               "description": "Enable authorization for MQTT Broker.",
               "condition": {
                 "functionBody": "return model.accounts[arrayIndices].enableMqtt === true;"
-              }
+              },
+              "required": false
             },
             "mqttUser": {
               "title": "User",
               "type": "string",
               "placeholder": "user",
-              "required": false,
               "description": "User for MQTT Broker.",
               "condition": {
                 "functionBody": "return model.accounts[arrayIndices].enableMqtt === true && model.accounts[arrayIndices].mqttAuth === true;"
-              }
+              },
+              "required": false
             },
             "mqttPasswd": {
               "title": "Password",
               "type": "string",
               "placeholder": "password",
-              "required": false,
               "description": "Password for MQTT Broker.",
               "condition": {
                 "functionBody": "return model.accounts[arrayIndices].enableMqtt === true && model.accounts[arrayIndices].mqttAuth === true;"
-              }
+              },
+              "required": false
             }
           }
         }
