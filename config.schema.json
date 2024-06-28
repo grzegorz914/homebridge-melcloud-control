@@ -1087,6 +1087,13 @@
               "description": "Set the background devices state refresh time in seconds.",
               "required": false
             },
+            "enableDebugMode": {
+              "title": "Debug",
+              "type": "boolean",
+              "default": false,
+              "description": "Enable debug mode.",
+              "required": false
+            },
             "disableLogInfo": {
               "title": "Disable Log Info",
               "type": "boolean",
@@ -1099,13 +1106,6 @@
               "type": "boolean",
               "default": false,
               "description": "Don't display device info in log on plugin start.",
-              "required": false
-            },
-            "enableDebugMode": {
-              "title": "Debug",
-              "type": "boolean",
-              "default": false,
-              "description": "Enable debug mode.",
               "required": false
             },
             "enableRestFul": {
