@@ -33,8 +33,28 @@ class DeviceAtw extends EventEmitter {
 
         //variables
         this.melCloud = melCloud; //function
-        this.buttonsCount = this.buttons.length;
         this.startPrepareAccessory = true;
+
+        //buttons configured
+        this.buttonsConfigured = [];
+        for (const button of this.buttons) {
+            const buttonName = button.name ?? false;
+            const buttonMode = button.mode ?? false;
+            const buttonDisplayType = button.displayType ?? 0;
+            const buttonNamePrefix = button.namePrefix ?? false;
+            if (buttonName && buttonMode && buttonDisplayType > 0) {
+                const buttonServiceType = ['', Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][buttonDisplayType];
+                const buttonCharacteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
+                button.namePrefix = buttonNamePrefix;
+                button.serviceType = buttonServiceType;
+                button.characteristicType = buttonCharacteristicType;
+                button.state = false;
+                this.buttonsConfigured.push(button);
+            } else {
+                const log = buttonDisplayType === 0 ? false : this.emit('message', `Button Name: ${buttonName ? buttonName : 'Missing'}, Mode: ${buttonMode ? buttonMode : 'Missing'}.`);
+            };
+        }
+        this.buttonsConfiguredCount = this.buttonsConfigured.length || 0;
 
         //melcloud device
         this.melCloudAtw = new MelCloudAtw({
@@ -611,123 +631,90 @@ class DeviceAtw extends EventEmitter {
                 this.offline = offline;
 
                 //update buttons state
-                if (this.buttonsCount > 0) {
-                    this.buttonsConfigured = [];
-
-                    for (const button of this.buttons) {
-                        const displayType = button.displayType ?? 0;
-
-                        if (displayType > 0) {
-                            const mode = button.mode ?? 100;
-                            switch (mode) {
-                                case 0: //POWER ON,OFF
-                                    button.state = (power === true);
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 1: //HEAT PUMP HEAT
-                                    button.state = power ? (operationMode === 0) : false;
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 2: //COOL
-                                    button.state = power ? (operationMode === 1) : false;
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 53: //HOLIDAY
-                                    button.state = power ? (holidayMode === true) : false;
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 10: //ALL ZONES PHYSICAL LOCK CONTROL
-                                    button.state = power ? (prohibitZone1 === true && prohibitHotWater === true && prohibitZone2 === true) : false;
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 20: //HOT WATER AUTO
-                                    button.state = power ? (forcedHotWaterMode === false) : false;
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 21: //ECO
-                                    button.state = power ? (ecoHotWater === true) : false;
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 22: //FORCE HEAT
-                                    button.state = power ? (forcedHotWaterMode === true) : false;
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 30: //PHYSICAL LOCK CONTROL
-                                    button.state = (prohibitHotWater === true);
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 40: //ZONE 1 HEAT THERMOSTAT
-                                    button.state = power ? (operationModeZone1 === 0) : false;
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 41: //HEAT FLOW
-                                    button.state = power ? (operationModeZone1 === 1) : false;
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 42: //HEAT CURVE
-                                    button.state = power ? (operationModeZone1 === 2) : false;
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 43: //COOL THERMOSTAT
-                                    button.state = power ? (operationModeZone1 === 3) : false;
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 44: //COOL FLOW
-                                    button.state = power ? (operationModeZone1 === 4) : false;
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 45: //FLOOR DRY UP
-                                    button.state = power ? (operationModeZone1 === 5) : false;
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 50: //PHYSICAL LOCK CONTROL
-                                    button.state = (prohibitZone1 === true);
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 60: //ZONE 2 HEAT THERMOSTAT
-                                    button.state = power ? (operationModeZone2 === 0) : false;
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 61: //HEAT FLOW
-                                    button.state = power ? (operationModeZone2 === 1) : false;
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 62: //HEAT CURVE
-                                    button.state = power ? (operationModeZone2 === 2) : false;
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 63: //COOL THERMOSTAT
-                                    button.state = power ? (operationModeZone2 === 3) : false;
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 64: //COOL FLOW
-                                    button.state = power ? (operationModeZone2 === 4) : false;
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 65: //FLOOR DRY UP
-                                    button.state = power ? (operationModeZone2 === 5) : false;
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 70: //PHYSICAL LOCK CONTROL
-                                    button.state = (prohibitZone2 === true);
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                default: //Unknown button
-                                    this.emit('message', `Unknown button mode: ${mode} detected.`);
-                                    break;
-                            };
-                        };
-                    };
-
-                    this.buttonsConfiguredCount = this.buttonsConfigured.length;
+                if (this.buttonsConfiguredCount > 0) {
                     for (let i = 0; i < this.buttonsConfiguredCount; i++) {
                         const button = this.buttonsConfigured[i];
-                        const state = button.state;
-                        const displayType = button.displayType;
-                        const characteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][displayType];
+                        const mode = this.buttonsConfigured[i].mode;
+                        switch (mode) {
+                            case 0: //POWER ON,OFF
+                                button.state = (power === true);
+                                break;
+                            case 1: //HEAT PUMP HEAT
+                                button.state = power ? (operationMode === 0) : false;
+                                break;
+                            case 2: //COOL
+                                button.state = power ? (operationMode === 1) : false;
+                                break;
+                            case 53: //HOLIDAY
+                                button.state = power ? (holidayMode === true) : false;
+                                break;
+                            case 10: //ALL ZONES PHYSICAL LOCK CONTROL
+                                button.state = power ? (prohibitZone1 === true && prohibitHotWater === true && prohibitZone2 === true) : false;
+                                break;
+                            case 20: //HOT WATER AUTO
+                                button.state = power ? (forcedHotWaterMode === false) : false;
+                                break;
+                            case 21: //ECO
+                                button.state = power ? (ecoHotWater === true) : false;
+                                break;
+                            case 22: //FORCE HEAT
+                                button.state = power ? (forcedHotWaterMode === true) : false;
+                                break;
+                            case 30: //PHYSICAL LOCK CONTROL
+                                button.state = (prohibitHotWater === true);
+                                break;
+                            case 40: //ZONE 1 HEAT THERMOSTAT
+                                button.state = power ? (operationModeZone1 === 0) : false;
+                                break;
+                            case 41: //HEAT FLOW
+                                button.state = power ? (operationModeZone1 === 1) : false;
+                                break;
+                            case 42: //HEAT CURVE
+                                button.state = power ? (operationModeZone1 === 2) : false;
+                                break;
+                            case 43: //COOL THERMOSTAT
+                                button.state = power ? (operationModeZone1 === 3) : false;
+                                break;
+                            case 44: //COOL FLOW
+                                button.state = power ? (operationModeZone1 === 4) : false;
+                                break;
+                            case 45: //FLOOR DRY UP
+                                button.state = power ? (operationModeZone1 === 5) : false;
+                                break;
+                            case 50: //PHYSICAL LOCK CONTROL
+                                button.state = (prohibitZone1 === true);
+                                break;
+                            case 60: //ZONE 2 HEAT THERMOSTAT
+                                button.state = power ? (operationModeZone2 === 0) : false;
+                                break;
+                            case 61: //HEAT FLOW
+                                button.state = power ? (operationModeZone2 === 1) : false;
+                                break;
+                            case 62: //HEAT CURVE
+                                button.state = power ? (operationModeZone2 === 2) : false;
+                                break;
+                            case 63: //COOL THERMOSTAT
+                                button.state = power ? (operationModeZone2 === 3) : false;
+                                break;
+                            case 64: //COOL FLOW
+                                button.state = power ? (operationModeZone2 === 4) : false;
+                                break;
+                            case 65: //FLOOR DRY UP
+                                button.state = power ? (operationModeZone2 === 5) : false;
+                                break;
+                            case 70: //PHYSICAL LOCK CONTROL
+                                button.state = (prohibitZone2 === true);
+                                break;
+                            default: //Unknown button
+                                this.emit('message', `Unknown button mode: ${mode} detected.`);
+                                break;
+                        };
+
+                        //update services
                         if (this.buttonsServices) {
+                            const characteristicType = button.characteristicType;
                             this.buttonsServices[i]
-                                .updateCharacteristic(characteristicType, state)
+                                .updateCharacteristic(characteristicType, button.state)
                         };
                     };
                 };
@@ -1511,144 +1498,146 @@ class DeviceAtw extends EventEmitter {
                         const displayType = button.displayType;
 
                         //get button name
-                        const buttonName = button.name || `Button ${i}`;
+                        const buttonName = button.name;
 
                         //get button name prefix
-                        const buttonNamePrefix = button.namePrefix ?? false;
+                        const buttonNamePrefix = button.namePrefix;
 
                         const buttonServiceName = buttonNamePrefix ? `${accessoryName} ${buttonName}` : buttonName;
-                        const buttonServiceType = ['', Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][displayType];
-                        const characteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][displayType];
+                        const buttonServiceType = button.serviceType;
+                        const buttomCharacteristicType = button.characteristicType;
                         const buttonService = new buttonServiceType(buttonServiceName, `Button ${deviceId} ${i}`);
                         buttonService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                         buttonService.setCharacteristic(Characteristic.ConfiguredName, buttonServiceName);
                         buttonService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                         buttonService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${buttonName}`);
-                        buttonService.getCharacteristic(characteristicType)
+                        buttonService.getCharacteristic(buttomCharacteristicType)
                             .onGet(async () => {
                                 const state = button.state;
                                 return state;
                             })
                             .onSet(async (state) => {
-                                if (displayType <= 2) {
-                                    try {
-                                        switch (mode) {
-                                            case 0: //POWER ON,OFF
-                                                deviceState.Power = state;
-                                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power;
-                                                break;
-                                            case 1: //HEAT PUMP HEAT
-                                                deviceState.Power = true;
-                                                deviceState.UnitStatus = 0;
-                                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationMode;
-                                                break;
-                                            case 2: //COOL
-                                                deviceState.Power = true;
-                                                deviceState.UnitStatus = 1;
-                                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationMode;
-                                                break;
-                                            case 3: //HOLIDAY
-                                                deviceState.HolidayMode = state;
-                                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.HolidayMode;
-                                                break;
-                                            case 10: //ALL ZONES PHYSICAL LOCK CONTROL
-                                                deviceState.ProhibitZone1 = state;
-                                                deviceState.ProhibitHotWater = state;
-                                                deviceState.ProhibitZone2 = state;
-                                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.ProhibitHeatingZone1 + CONSTANTS.HeatPump.EffectiveFlags.ProhibitHotWater + CONSTANTS.HeatPump.EffectiveFlags.ProhibitHeatingZone2;
-                                                break;
-                                            case 20: //ZONE 1 HEAT THERMOSTAT
-                                                deviceState.Power = true;
-                                                deviceState.OperationModeZone1 = 0;
-                                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone1;
-                                                break;
-                                            case 21: //HEAT FLOW
-                                                deviceState.Power = true;
-                                                deviceState.OperationModeZone1 = 1;
-                                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone1;
-                                                break;
-                                            case 22: //HEAT CURVE
-                                                deviceState.Power = true;
-                                                deviceState.OperationModeZone1 = 2;
-                                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone1;
-                                                break;
-                                            case 23: //COOL THERMOSTAT
-                                                deviceState.Power = true;
-                                                deviceState.OperationModeZone1 = 3;
-                                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone1;
-                                                break;
-                                            case 24: //COOL FLOW
-                                                deviceState.Power = true;
-                                                deviceState.OperationModeZone1 = 4;
-                                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone1;
-                                                break;
-                                            case 25: //FLOOR DRY UP
-                                                deviceState.Power = true;
-                                                deviceState.OperationModeZone1 = 5;
-                                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone1;
-                                                break;
-                                            case 30: //PHYSICAL LOCK CONTROL
-                                                deviceState.ProhibitZone1 = state;
-                                                CONSTANTS.HeatPump.EffectiveFlags.ProhibitHeatingZone1;
-                                                break;
-                                            case 40: //HOT WATER NORMAL/FORCE HOT WATER
-                                                deviceState.Power = true;
-                                                deviceState.ForcedHotWaterMode = state;
-                                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.ForcedHotWaterMode;
-                                                break;
-                                            case 41: //NORMAL/ECO
-                                                deviceState.Power = true;
-                                                deviceState.EcoHotWater = state;
-                                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.EcoHotWater;
-                                                break;
-                                            case 50: //PHYSICAL LOCK CONTROL
-                                                deviceState.ProhibitHotWater = state;
-                                                CONSTANTS.HeatPump.EffectiveFlags.ProhibitHotWater;
-                                                break;
-                                            case 60: //ZONE 2 HEAT THERMOSTAT
-                                                deviceState.Power = true;
-                                                deviceState.OperationModeZone2 = 0;
-                                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone2;
-                                                break;
-                                            case 61: // HEAT FLOW
-                                                deviceState.Power = true;
-                                                deviceState.OperationModeZone2 = 1;
-                                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone2;
-                                                break;
-                                            case 62: //HEAT CURVE
-                                                deviceState.Power = true;
-                                                deviceState.OperationModeZone2 = 2;
-                                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone2;
-                                                break;
-                                            case 63: //COOL THERMOSTAT
-                                                deviceState.Power = true;
-                                                deviceState.OperationModeZone2 = 3;
-                                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone2;
-                                                break;
-                                            case 64: //COOL FLOW
-                                                deviceState.Power = true;
-                                                deviceState.OperationModeZone2 = 4;
-                                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone2;
-                                                break;
-                                            case 65: //FLOOR DRY UP
-                                                deviceState.Power = true;
-                                                deviceState.OperationModeZone2 = 5;
-                                                deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone2;
-                                                break;
-                                            case 70: //PHYSICAL LOCK CONTROL
-                                                deviceState.ProhibitZone2 = state;
-                                                CONSTANTS.HeatPump.EffectiveFlags.ProhibitHeatingZone2;
-                                                break;
-                                            default:
-                                                this.emit('message', `Unknown button mode: ${mode}`);
-                                                break;
-                                        };
+                                if (displayType > 2) {
+                                    return;
+                                };
 
-                                        await this.melCloudAtw.send(deviceState);
-                                        const info = this.disableLogInfo ? false : this.emit('message', `Set: ${buttonName}`);
-                                    } catch (error) {
-                                        this.emit('error', `Set button error: ${error}`);
+                                try {
+                                    switch (mode) {
+                                        case 0: //POWER ON,OFF
+                                            deviceState.Power = state;
+                                            deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power;
+                                            break;
+                                        case 1: //HEAT PUMP HEAT
+                                            deviceState.Power = true;
+                                            deviceState.UnitStatus = 0;
+                                            deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationMode;
+                                            break;
+                                        case 2: //COOL
+                                            deviceState.Power = true;
+                                            deviceState.UnitStatus = 1;
+                                            deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationMode;
+                                            break;
+                                        case 3: //HOLIDAY
+                                            deviceState.HolidayMode = state;
+                                            deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.HolidayMode;
+                                            break;
+                                        case 10: //ALL ZONES PHYSICAL LOCK CONTROL
+                                            deviceState.ProhibitZone1 = state;
+                                            deviceState.ProhibitHotWater = state;
+                                            deviceState.ProhibitZone2 = state;
+                                            deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.ProhibitHeatingZone1 + CONSTANTS.HeatPump.EffectiveFlags.ProhibitHotWater + CONSTANTS.HeatPump.EffectiveFlags.ProhibitHeatingZone2;
+                                            break;
+                                        case 20: //ZONE 1 HEAT THERMOSTAT
+                                            deviceState.Power = true;
+                                            deviceState.OperationModeZone1 = 0;
+                                            deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone1;
+                                            break;
+                                        case 21: //HEAT FLOW
+                                            deviceState.Power = true;
+                                            deviceState.OperationModeZone1 = 1;
+                                            deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone1;
+                                            break;
+                                        case 22: //HEAT CURVE
+                                            deviceState.Power = true;
+                                            deviceState.OperationModeZone1 = 2;
+                                            deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone1;
+                                            break;
+                                        case 23: //COOL THERMOSTAT
+                                            deviceState.Power = true;
+                                            deviceState.OperationModeZone1 = 3;
+                                            deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone1;
+                                            break;
+                                        case 24: //COOL FLOW
+                                            deviceState.Power = true;
+                                            deviceState.OperationModeZone1 = 4;
+                                            deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone1;
+                                            break;
+                                        case 25: //FLOOR DRY UP
+                                            deviceState.Power = true;
+                                            deviceState.OperationModeZone1 = 5;
+                                            deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone1;
+                                            break;
+                                        case 30: //PHYSICAL LOCK CONTROL
+                                            deviceState.ProhibitZone1 = state;
+                                            CONSTANTS.HeatPump.EffectiveFlags.ProhibitHeatingZone1;
+                                            break;
+                                        case 40: //HOT WATER NORMAL/FORCE HOT WATER
+                                            deviceState.Power = true;
+                                            deviceState.ForcedHotWaterMode = state;
+                                            deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.ForcedHotWaterMode;
+                                            break;
+                                        case 41: //NORMAL/ECO
+                                            deviceState.Power = true;
+                                            deviceState.EcoHotWater = state;
+                                            deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.EcoHotWater;
+                                            break;
+                                        case 50: //PHYSICAL LOCK CONTROL
+                                            deviceState.ProhibitHotWater = state;
+                                            CONSTANTS.HeatPump.EffectiveFlags.ProhibitHotWater;
+                                            break;
+                                        case 60: //ZONE 2 HEAT THERMOSTAT
+                                            deviceState.Power = true;
+                                            deviceState.OperationModeZone2 = 0;
+                                            deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone2;
+                                            break;
+                                        case 61: // HEAT FLOW
+                                            deviceState.Power = true;
+                                            deviceState.OperationModeZone2 = 1;
+                                            deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone2;
+                                            break;
+                                        case 62: //HEAT CURVE
+                                            deviceState.Power = true;
+                                            deviceState.OperationModeZone2 = 2;
+                                            deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone2;
+                                            break;
+                                        case 63: //COOL THERMOSTAT
+                                            deviceState.Power = true;
+                                            deviceState.OperationModeZone2 = 3;
+                                            deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone2;
+                                            break;
+                                        case 64: //COOL FLOW
+                                            deviceState.Power = true;
+                                            deviceState.OperationModeZone2 = 4;
+                                            deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone2;
+                                            break;
+                                        case 65: //FLOOR DRY UP
+                                            deviceState.Power = true;
+                                            deviceState.OperationModeZone2 = 5;
+                                            deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone2;
+                                            break;
+                                        case 70: //PHYSICAL LOCK CONTROL
+                                            deviceState.ProhibitZone2 = state;
+                                            CONSTANTS.HeatPump.EffectiveFlags.ProhibitHeatingZone2;
+                                            break;
+                                        default:
+                                            this.emit('message', `Unknown button mode: ${mode}`);
+                                            break;
                                     };
+
+                                    await this.melCloudAtw.send(deviceState);
+                                    const info = this.disableLogInfo ? false : this.emit('message', `Set: ${buttonName}`);
+                                } catch (error) {
+                                    this.emit('error', `Set button error: ${error}`);
                                 };
                             });
                         this.buttonsServices.push(buttonService);

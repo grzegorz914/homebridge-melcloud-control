@@ -33,8 +33,28 @@ class DeviceErv extends EventEmitter {
 
         //variables
         this.melCloud = melCloud; //function
-        this.buttonsCount = this.buttons.length;
         this.startPrepareAccessory = true;
+
+        //buttons configured
+        this.buttonsConfigured = [];
+        for (const button of this.buttons) {
+            const buttonName = button.name ?? false;
+            const buttonMode = button.mode ?? false;
+            const buttonDisplayType = button.displayType ?? 0;
+            const buttonNamePrefix = button.namePrefix ?? false;
+            if (buttonName && buttonMode && buttonDisplayType > 0) {
+                const buttonServiceType = ['', Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][buttonDisplayType];
+                const buttonCharacteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
+                button.namePrefix = buttonNamePrefix;
+                button.serviceType = buttonServiceType;
+                button.characteristicType = buttonCharacteristicType;
+                button.state = false;
+                this.buttonsConfigured.push(button);
+            } else {
+                const log = buttonDisplayType === 0 ? false : this.emit('message', `Button Name: ${buttonName ? buttonName : 'Missing'}, Mode: ${buttonMode ? buttonMode : 'Missing'}.`);
+            };
+        }
+        this.buttonsConfiguredCount = this.buttonsConfigured.length || 0;
 
         //melcloud device
         this.melCloudErv = new MelCloudErv({
@@ -391,87 +411,63 @@ class DeviceErv extends EventEmitter {
                 }
 
                 //update buttons state
-                if (this.buttonsCount > 0) {
-                    this.buttonsConfigured = [];
-
-                    for (const button of this.buttons) {
-                        const displayType = button.displayType ?? 0;
-
-                        if (displayType > 0) {
-                            const mode = button.mode ?? 100;
-                            switch (mode) {
-                                case 0: //POWER ON,OFF
-                                    button.state = (power === true);
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 1: //OPERATION MODE RECOVERY
-                                    button.state = power ? (ventilationMode === 0) : false;
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 2: //OPERATION MODE BYPASS
-                                    button.state = power ? (ventilationMode === 1) : false;
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 3: //OPERATION MODE AUTO
-                                    button.state = power ? (ventilationMode === 2) : false;
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 4: //NIGHT PURGE MODE
-                                    button.state = power ? (nightPurgeMode === true) : false;
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 10: //FAN SPEED MODE AUTO
-                                    button.state = power ? (setFanSpeed === 0) : false;
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 11: //FAN SPEED MODE 1
-                                    button.state = power ? (setFanSpeed === 1) : false;
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 12: //FAN SPEED MODE 2
-                                    button.state = power ? (setFanSpeed === 2) : false;
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 13: //FAN SPEED MODE 3
-                                    button.state = power ? (setFanSpeed === 3) : false;
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 14: //FAN SPEED MODE 4
-                                    button.state = power ? (setFanSpeed === 4) : false;
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 15: //PHYSICAL LOCK CONTROLS
-                                    button.state = (lockPhysicalControls === 1);
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 16: //ROOM TEMP HIDE
-                                    button.state = (hideRoomTemperature === true);
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 17: //SUPPLY TEMP HIDE
-                                    button.state = (hideSupplyTemperature === true);
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                case 18: //OUTDOOR TEMP HIDE
-                                    button.state = (hideOutdoorTemperature === true);
-                                    this.buttonsConfigured.push(button);
-                                    break;
-                                default: //Unknown button
-                                    this.emit('message', `Unknown button mode: ${mode} detected.`);
-                                    break;
-                            };
-                        };
-                    };
-
-                    this.buttonsConfiguredCount = this.buttonsConfigured.length;
+                if (this.buttonsConfiguredCount > 0) {
                     for (let i = 0; i < this.buttonsConfiguredCount; i++) {
                         const button = this.buttonsConfigured[i];
-                        const state = button.state;
-                        const displayType = button.displayType;
-                        const characteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][displayType];
+                        const mode = this.buttonsConfigured[i].mode;;
+                        switch (mode) {
+                            case 0: //POWER ON,OFF
+                                button.state = (power === true);
+                                break;
+                            case 1: //OPERATION MODE RECOVERY
+                                button.state = power ? (ventilationMode === 0) : false;
+                                break;
+                            case 2: //OPERATION MODE BYPASS
+                                button.state = power ? (ventilationMode === 1) : false;
+                                break;
+                            case 3: //OPERATION MODE AUTO
+                                button.state = power ? (ventilationMode === 2) : false;
+                                break;
+                            case 4: //NIGHT PURGE MODE
+                                button.state = power ? (nightPurgeMode === true) : false;
+                                break;
+                            case 10: //FAN SPEED MODE AUTO
+                                button.state = power ? (setFanSpeed === 0) : false;
+                                break;
+                            case 11: //FAN SPEED MODE 1
+                                button.state = power ? (setFanSpeed === 1) : false;
+                                break;
+                            case 12: //FAN SPEED MODE 2
+                                button.state = power ? (setFanSpeed === 2) : false;
+                                break;
+                            case 13: //FAN SPEED MODE 3
+                                button.state = power ? (setFanSpeed === 3) : false;
+                                break;
+                            case 14: //FAN SPEED MODE 4
+                                button.state = power ? (setFanSpeed === 4) : false;
+                                break;
+                            case 15: //PHYSICAL LOCK CONTROLS
+                                button.state = (lockPhysicalControls === 1);
+                                break;
+                            case 16: //ROOM TEMP HIDE
+                                button.state = (hideRoomTemperature === true);
+                                break;
+                            case 17: //SUPPLY TEMP HIDE
+                                button.state = (hideSupplyTemperature === true);
+                                break;
+                            case 18: //OUTDOOR TEMP HIDE
+                                button.state = (hideOutdoorTemperature === true);
+                                break;
+                            default: //Unknown button
+                                this.emit('message', `Unknown button mode: ${mode} detected.`);
+                                break;
+                        };
+
+                        //update services
                         if (this.buttonsServices) {
+                            const characteristicType = button.characteristicType;
                             this.buttonsServices[i]
-                                .updateCharacteristic(characteristicType, state)
+                                .updateCharacteristic(characteristicType, button.state)
                         };
                     };
                 };
@@ -1000,98 +996,100 @@ class DeviceErv extends EventEmitter {
                         const displayType = button.displayType;
 
                         //get button name
-                        const buttonName = button.name || `Button ${i}`;
+                        const buttonName = button.name;
 
                         //get button name prefix
-                        const buttonNamePrefix = button.namePrefix ?? false;
+                        const buttonNamePrefix = button.namePrefix;
 
                         const buttonServiceName = buttonNamePrefix ? `${accessoryName} ${buttonName}` : buttonName;
-                        const buttonServiceType = ['', Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][displayType];
-                        const characteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][displayType];
+                        const buttonServiceType = button.serviceType;
+                        const buttomCharacteristicType = button.characteristicType;
                         const buttonService = new buttonServiceType(buttonServiceName, `Button ${deviceId} ${i}`);
                         buttonService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                         buttonService.setCharacteristic(Characteristic.ConfiguredName, buttonServiceName);
-                        buttonService.getCharacteristic(characteristicType)
+                        buttonService.getCharacteristic(buttomCharacteristicType)
                             .onGet(async () => {
                                 const state = button.state;
                                 return state;
                             })
                             .onSet(async (state) => {
-                                if (displayType <= 2) {
-                                    try {
-                                        switch (mode) {
-                                            case 0: //POWER ON,OFF
-                                                deviceState.Power = state;
-                                                deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power;
-                                                break;
-                                            case 1: //OPERATING MODE RECOVERY
-                                                deviceState.Power = true;
-                                                deviceState.VentilationMode = 0;
-                                                deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.VentilationMode;
-                                                break;
-                                            case 2: //OPERATING MODE BYPASS
-                                                deviceState.Power = true;
-                                                deviceState.VentilationMode = 1;
-                                                deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.VentilationMode;
-                                                break
-                                            case 3: //OPERATING MODE AUTO
-                                                deviceState.Power = true;
-                                                deviceState.VentilationMode = 2;
-                                                deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.VentilationMode;
-                                                break;
-                                            case 4: //NIGHT PURGE MODE
-                                                deviceState.Power = true;
-                                                deviceState.NightPurgeMode = state;
-                                                deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power
-                                                break;
-                                            case 10: //FAN SPEED MODE AUTO
-                                                deviceState.Power = true;
-                                                deviceState.SetFanSpeed = 0;
-                                                deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
-                                                break;
-                                            case 11: //FAN SPEED MODE 1
-                                                deviceState.Power = true;
-                                                deviceState.SetFanSpeed = 1;
-                                                deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
-                                                break;
-                                            case 12: //FAN SPEED MODE 2
-                                                deviceState.Power = true;
-                                                deviceState.SetFanSpeed = 2;
-                                                deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
-                                                break;
-                                            case 13: //FAN SPEED MODE 3
-                                                deviceState.Power = true;
-                                                deviceState.SetFanSpeed = 3;
-                                                deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
-                                                break;
-                                            case 14: //FAN MODE 4
-                                                deviceState.Power = true;
-                                                deviceState.SetFanSpeed = 4;
-                                                deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
-                                                break;
-                                            case 15: //PHYSICAL LOCK CONTROLS
-                                                deviceState = deviceState;
-                                                deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Prohibit;
-                                                break;
-                                            case 16: //ROOM TEMP HIDE
-                                                deviceState.HideRoomTemperature = state;
-                                                break;
-                                            case 17: //SUPPLY TEMP HIDE
-                                                deviceState.HideSupplyTemperature = state;
-                                                break;
-                                            case 18: //OUTDOOR EMP HIDE
-                                                deviceState.hideOutdoorTemperature = state;
-                                                break;
-                                            default:
-                                                this.emit('message', `Unknown button mode: ${mode}`);
-                                                break;
-                                        };
+                                if (displayType > 2) {
+                                    return;
+                                };
 
-                                        await this.melCloudErv.send(deviceState);
-                                        const info = this.disableLogInfo ? false : this.emit('message', `Set: ${buttonName}`);
-                                    } catch (error) {
-                                        this.emit('error', `Set button error: ${error}`);
+                                try {
+                                    switch (mode) {
+                                        case 0: //POWER ON,OFF
+                                            deviceState.Power = state;
+                                            deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power;
+                                            break;
+                                        case 1: //OPERATING MODE RECOVERY
+                                            deviceState.Power = true;
+                                            deviceState.VentilationMode = 0;
+                                            deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.VentilationMode;
+                                            break;
+                                        case 2: //OPERATING MODE BYPASS
+                                            deviceState.Power = true;
+                                            deviceState.VentilationMode = 1;
+                                            deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.VentilationMode;
+                                            break
+                                        case 3: //OPERATING MODE AUTO
+                                            deviceState.Power = true;
+                                            deviceState.VentilationMode = 2;
+                                            deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.VentilationMode;
+                                            break;
+                                        case 4: //NIGHT PURGE MODE
+                                            deviceState.Power = true;
+                                            deviceState.NightPurgeMode = state;
+                                            deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power
+                                            break;
+                                        case 10: //FAN SPEED MODE AUTO
+                                            deviceState.Power = true;
+                                            deviceState.SetFanSpeed = 0;
+                                            deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
+                                            break;
+                                        case 11: //FAN SPEED MODE 1
+                                            deviceState.Power = true;
+                                            deviceState.SetFanSpeed = 1;
+                                            deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
+                                            break;
+                                        case 12: //FAN SPEED MODE 2
+                                            deviceState.Power = true;
+                                            deviceState.SetFanSpeed = 2;
+                                            deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
+                                            break;
+                                        case 13: //FAN SPEED MODE 3
+                                            deviceState.Power = true;
+                                            deviceState.SetFanSpeed = 3;
+                                            deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
+                                            break;
+                                        case 14: //FAN MODE 4
+                                            deviceState.Power = true;
+                                            deviceState.SetFanSpeed = 4;
+                                            deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
+                                            break;
+                                        case 15: //PHYSICAL LOCK CONTROLS
+                                            deviceState = deviceState;
+                                            deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Prohibit;
+                                            break;
+                                        case 16: //ROOM TEMP HIDE
+                                            deviceState.HideRoomTemperature = state;
+                                            break;
+                                        case 17: //SUPPLY TEMP HIDE
+                                            deviceState.HideSupplyTemperature = state;
+                                            break;
+                                        case 18: //OUTDOOR EMP HIDE
+                                            deviceState.hideOutdoorTemperature = state;
+                                            break;
+                                        default:
+                                            this.emit('message', `Unknown button mode: ${mode}`);
+                                            break;
                                     };
+
+                                    await this.melCloudErv.send(deviceState);
+                                    const info = this.disableLogInfo ? false : this.emit('message', `Set: ${buttonName}`);
+                                } catch (error) {
+                                    this.emit('error', `Set button error: ${error}`);
                                 };
                             });
                         this.buttonsServices.push(buttonService);

@@ -243,12 +243,14 @@
             "ataDisableAutoMode": {
               "title": "Disable Auto Mode",
               "type": "boolean",
+              "default": false,
               "description": "This will disable Auto mode even if this mode is supported by device.",
               "required": false
             },
             "ataDisableHeatMode": {
               "title": "Disable Heat Mode",
               "type": "boolean",
+              "default": false,
               "description": "This will disable Heat mode even if this mode is supported by device.",
               "required": false
             },
@@ -270,7 +272,7 @@
                 }
               ],
               "description": "Operation mode for Auto/Heat option, if Auto, Heat or both modes are not supported by the device this will be used for selected modes instead.",
-              "required": false
+              "required": true
             },
             "ataButtons": {
               "title": "Button / Sensor",
@@ -283,7 +285,7 @@
                     "type": "string",
                     "placeholder": "Button name",
                     "description": "Your own name displayed in Homebridge/HomeKit app.",
-                    "required": false
+                    "required": true
                   },
                   "mode": {
                     "title": "Mode",
@@ -503,7 +505,7 @@
                         ]
                       }
                     ],
-                    "required": false
+                    "required": true
                   },
                   "displayType": {
                     "title": "Type",
@@ -549,7 +551,7 @@
                       }
                     ],
                     "description": "Extra function/tile to be exposed in HomeKit app.",
-                    "required": false
+                    "required": true
                   },
                   "namePrefix": {
                     "title": "Prefix",
@@ -632,7 +634,7 @@
                     "type": "string",
                     "placeholder": "Button name",
                     "description": "Your own name displayed in Homebridge/HomeKit app.",
-                    "required": false
+                    "required": true
                   },
                   "mode": {
                     "title": "Mode",
@@ -774,7 +776,7 @@
                         ]
                       }
                     ],
-                    "required": false
+                    "required": true
                   },
                   "displayType": {
                     "title": "Type",
@@ -820,7 +822,7 @@
                       }
                     ],
                     "description": "Select extra function/tile to be exposed in HomeKit app.",
-                    "required": false
+                    "required": true
                   },
                   "namePrefix": {
                     "title": "Prefix",
@@ -903,7 +905,7 @@
                     "type": "string",
                     "placeholder": "Button name",
                     "description": "Your own name displayed in Homebridge/HomeKit app.",
-                    "required": false
+                    "required": true
                   },
                   "mode": {
                     "title": "Mode",
@@ -997,7 +999,7 @@
                         ]
                       }
                     ],
-                    "required": false
+                    "required": true
                   },
                   "displayType": {
                     "title": "Type",
