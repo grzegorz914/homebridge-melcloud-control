@@ -25,6 +25,7 @@
           "language": "0",
           "ataDisplayMode": 0,
           "ataTemperatureSensor": false,
+          "ataTemperatureSensorOutdoor": false,
           "ataDisableAutoMode": false,
           "ataDisableHeatMode": false,
           "ataAutoHeatMode": 0,
@@ -45,6 +46,14 @@
           ],
           "atwDisplayMode": 0,
           "atwTemperatureSensor": false,
+          "atwTemperatureSensorFlow": false,
+          "atwTemperatureSensorReturn": false,
+          "atwTemperatureSensorFlowZone1": false,
+          "atwTemperatureSensorReturnZone1": false,
+          "atwTemperatureSensorFlowWatertank": false,
+          "atwTemperatureSensorReturnWaterTank": false,
+          "atwTemperatureSensorFlowZone2": false,
+          "atwTemperatureSensorReturnZone2": false,
           "atwPresets": false,
           "atwButtons": [
             {
@@ -62,6 +71,8 @@
           ],
           "ervDisplayMode": 0,
           "ervTemperatureSensor": false,
+          "ervTemperatureSensorOutdoor": false,
+          "ervTemperatureSensorSupply": false,
           "ervPresets": false,
           "ervButtons": [
             {

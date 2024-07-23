@@ -19,6 +19,14 @@ class DeviceAtw extends EventEmitter {
         //account config
         this.displayMode = account.atwDisplayMode || 0;
         this.temperatureSensor = account.atwTemperatureSensor || false;
+        this.temperatureSensorFlow = account.atwTemperatureSensorFlow || false;
+        this.temperatureSensorReturn = account.atwTemperatureSensorReturn || false;
+        this.temperatureSensorFlowZone1 = account.atwTemperatureSensorFlowZone1 || false;
+        this.temperatureSensorReturnZone1 = account.atwTemperatureSensorFlowWaterTank || false;
+        this.temperatureSensorFlowWaterTank = account.atwTemperatureSensorFlowZone1 || false;
+        this.temperatureSensorReturnWaterTank = account.atwTemperatureSensorReturnWaterTank || false;
+        this.temperatureSensorFlowZone2 = account.atwTemperatureSensorFlowZone2 || false;
+        this.temperatureSensorReturnZone2 = account.atwTemperatureSensorReturnZone2 || false;
         this.presetsEnabled = account.atwPresets || false;
         this.buttons = account.atwButtons || [];
         this.disableLogInfo = account.disableLogInfo || false;
@@ -508,73 +516,71 @@ class DeviceAtw extends EventEmitter {
                     const push4 = this.startPrepareAccessory ? this.temperaturesSetPropsMaxValue.push(temperatureSetPropsMaxValue) : false;
 
                     //update temperature sensors
-                    if (this.temperatureSensor) {
-                        switch (i) {
-                            case 0: //Heat Pump
-                                if (this.roomTemperatureSensorServices) {
-                                    this.roomTemperatureSensorServices[i]
-                                        .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-                                };
+                    switch (i) {
+                        case 0: //Heat Pump
+                            if (this.roomTemperatureSensorServices) {
+                                this.roomTemperatureSensorServices[i]
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+                            };
 
-                                if (this.flowTemperatureSensorService) {
-                                    this.flowTemperatureSensorService
-                                        .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperature)
-                                };
+                            if (this.flowTemperatureSensorService) {
+                                this.flowTemperatureSensorService
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperature)
+                            };
 
-                                if (this.returnTemperatureSensorService) {
-                                    this.returnTemperatureSensorService
-                                        .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperature)
-                                };
-                                break;
-                            case 1: //Zone 1
-                                if (this.roomTemperatureSensorServices) {
-                                    this.roomTemperatureSensorServices[i]
-                                        .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-                                };
+                            if (this.returnTemperatureSensorService) {
+                                this.returnTemperatureSensorService
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperature)
+                            };
+                            break;
+                        case 1: //Zone 1
+                            if (this.roomTemperatureSensorServices) {
+                                this.roomTemperatureSensorServices[i]
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+                            };
 
-                                if (this.flowTemperatureZone1SensorService) {
-                                    this.flowTemperatureZone1SensorService
-                                        .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureZone1)
-                                };
+                            if (this.flowTemperatureZone1SensorService) {
+                                this.flowTemperatureZone1SensorService
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureZone1)
+                            };
 
-                                if (this.returnTemperatureZone1SensorService) {
-                                    this.returnTemperatureZone1SensorService
-                                        .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureZone1)
-                                };
-                                break;
-                            case caseHotWater: //Hot Water
-                                if (this.roomTemperatureSensorServices) {
-                                    this.roomTemperatureSensorServices[i]
-                                        .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-                                };
+                            if (this.returnTemperatureZone1SensorService) {
+                                this.returnTemperatureZone1SensorService
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureZone1)
+                            };
+                            break;
+                        case caseHotWater: //Hot Water
+                            if (this.roomTemperatureSensorServices) {
+                                this.roomTemperatureSensorServices[i]
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+                            };
 
-                                if (this.flowTemperatureWaterTankSensorService) {
-                                    this.flowTemperatureWaterTankSensorService
-                                        .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureWaterTank)
-                                };
+                            if (this.flowTemperatureWaterTankSensorService) {
+                                this.flowTemperatureWaterTankSensorService
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureWaterTank)
+                            };
 
-                                if (this.returnTemperatureWaterTankSensorService) {
-                                    this.returnTemperatureWaterTankSensorService
-                                        .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureWaterTank)
-                                };
-                                break;
-                            case caseZone2: //Zone 2
-                                if (this.roomTemperatureSensorServices) {
-                                    this.roomTemperatureSensorServices[i]
-                                        .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-                                };
+                            if (this.returnTemperatureWaterTankSensorService) {
+                                this.returnTemperatureWaterTankSensorService
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureWaterTank)
+                            };
+                            break;
+                        case caseZone2: //Zone 2
+                            if (this.roomTemperatureSensorServices) {
+                                this.roomTemperatureSensorServices[i]
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+                            };
 
-                                if (this.flowTemperatureZone2SensorService) {
-                                    this.flowTemperatureZone2SensorService
-                                        .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureZone2)
-                                };
+                            if (this.flowTemperatureZone2SensorService) {
+                                this.flowTemperatureZone2SensorService
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureZone2)
+                            };
 
-                                if (this.returnTemperatureZone2SensorService) {
-                                    this.returnTemperatureZone2SensorService
-                                        .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureZone2)
-                                };
-                                break;
-                        };
+                            if (this.returnTemperatureZone2SensorService) {
+                                this.returnTemperatureZone2SensorService
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureZone2)
+                            };
+                            break;
                     };
 
                     //log current state
@@ -791,6 +797,14 @@ class DeviceAtw extends EventEmitter {
                 //melcloud services
                 const zonesCount = this.zonesCount;
                 const temperatureSensor = this.temperatureSensor;
+                const temperatureSensorFlow = this.temperatureSensorFlow;
+                const temperatureSensorReturn = this.temperatureSensorReturn;
+                const temperatureSensorFlowZone1 = this.temperatureSensorFlowZone1;
+                const temperatureSensorReturnZone1 = this.temperatureSensorReturnZone1;
+                const temperatureSensorFlowWaterTank = this.temperatureSensorFlowWaterTank;
+                const temperatureSensorReturnWaterTank = this.temperatureSensorReturnWaterTank;
+                const temperatureSensorFlowZone2 = this.temperatureSensorFlowZone2;
+                const temperatureSensorReturnZone2 = this.temperatureSensorReturnZone2;
                 const buttonsConfigured = this.buttonsConfigured;
                 const buttonsConfiguredCount = this.buttonsConfiguredCount;
                 const presets = this.presets;
@@ -1253,233 +1267,231 @@ class DeviceAtw extends EventEmitter {
                     };
 
                     //temperature sensor services zones
-                    if (temperatureSensor) {
-                        switch (i) {
-                            case 0: //Heat Pump
-                                if (this.roomTemperatures[i] !== null) {
-                                    const debug = this.enableDebugMode ? this.emit('debug', `${zoneName}, Prepare temperature sensor service`) : false;
-                                    const roomTemperatureSensorService = new Service.TemperatureSensor(`${serviceName}`, `${zoneName} Temperature Sensor ${deviceId} ${i}`);
-                                    roomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                                    roomTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName}`);
-                                    roomTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                                        .setProps({
-                                            minValue: -35,
-                                            maxValue: 150,
-                                            minStep: 0.5
-                                        })
-                                        .onGet(async () => {
-                                            const state = this.roomTemperatures[i];
-                                            return state;
-                                        })
-                                    this.roomTemperatureSensorServices.push(roomTemperatureSensorService);
-                                    accessory.addService(roomTemperatureSensorService);
-                                };
+                    switch (i) {
+                        case 0: //Heat Pump
+                            if (temperatureSensor && this.roomTemperatures[i] !== null) {
+                                const debug = this.enableDebugMode ? this.emit('debug', `${zoneName}, Prepare temperature sensor service`) : false;
+                                const roomTemperatureSensorService = new Service.TemperatureSensor(`${serviceName}`, `${zoneName} Temperature Sensor ${deviceId} ${i}`);
+                                roomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                roomTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName}`);
+                                roomTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                    .setProps({
+                                        minValue: -35,
+                                        maxValue: 150,
+                                        minStep: 0.5
+                                    })
+                                    .onGet(async () => {
+                                        const state = this.roomTemperatures[i];
+                                        return state;
+                                    })
+                                this.roomTemperatureSensorServices.push(roomTemperatureSensorService);
+                                accessory.addService(roomTemperatureSensorService);
+                            };
 
-                                if (this.flowTemperature !== null) {
-                                    const debug = this.enableDebugMode ? this.emit('debug', `Prepare flow temperature sensor service`) : false;
-                                    this.flowTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Flow`, `${zoneName} Temperature Sensor Flow ${deviceId} ${i}`);
-                                    this.flowTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                                    this.flowTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName} Flow`);
-                                    this.flowTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                                        .setProps({
-                                            minValue: -35,
-                                            maxValue: 150,
-                                            minStep: 0.5
-                                        })
-                                        .onGet(async () => {
-                                            const state = this.flowTemperature;
-                                            return state;
-                                        })
-                                    accessory.addService(this.flowTemperatureSensorService);
+                            if (temperatureSensorFlow && this.flowTemperature !== null) {
+                                const debug = this.enableDebugMode ? this.emit('debug', `Prepare flow temperature sensor service`) : false;
+                                this.flowTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Flow`, `${zoneName} Temperature Sensor Flow ${deviceId} ${i}`);
+                                this.flowTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                this.flowTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName} Flow`);
+                                this.flowTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                    .setProps({
+                                        minValue: -35,
+                                        maxValue: 150,
+                                        minStep: 0.5
+                                    })
+                                    .onGet(async () => {
+                                        const state = this.flowTemperature;
+                                        return state;
+                                    })
+                                accessory.addService(this.flowTemperatureSensorService);
 
-                                };
-                                if (this.returnTemperature !== null) {
-                                    const debug1 = this.enableDebugMode ? this.emit('debug', `Prepare return temperature sensor service`) : false;
-                                    this.returnTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Return`, `${zoneName} Temperature Sensor Return ${deviceId} ${i}`);
-                                    this.returnTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                                    this.returnTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName} Return`);
-                                    this.returnTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                                        .setProps({
-                                            minValue: -35,
-                                            maxValue: 150,
-                                            minStep: 0.5
-                                        })
-                                        .onGet(async () => {
-                                            const state = this.returnTemperature;
-                                            return state;
-                                        })
-                                    accessory.addService(this.returnTemperatureSensorService);
-                                };
-                                break;
-                            case 1: //Zone 1
-                                if (this.roomTemperatures[i] !== null) {
-                                    const debug = this.enableDebugMode ? this.emit('debug', `${zoneName}, Prepare temperature sensor service`) : false;
-                                    const roomTemperatureSensorService = new Service.TemperatureSensor(`${serviceName}`, `${zoneName} Temperature Sensor ${deviceId} ${i}`);
-                                    roomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                                    roomTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName}`);
-                                    roomTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                                        .setProps({
-                                            minValue: -35,
-                                            maxValue: 150,
-                                            minStep: 0.5
-                                        })
-                                        .onGet(async () => {
-                                            const state = this.roomTemperatures[i];
-                                            return state;
-                                        })
-                                    this.roomTemperatureSensorServices.push(roomTemperatureSensorService);
-                                    accessory.addService(roomTemperatureSensorService);
-                                };
+                            };
+                            if (temperatureSensorReturn && this.returnTemperature !== null) {
+                                const debug1 = this.enableDebugMode ? this.emit('debug', `Prepare return temperature sensor service`) : false;
+                                this.returnTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Return`, `${zoneName} Temperature Sensor Return ${deviceId} ${i}`);
+                                this.returnTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                this.returnTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName} Return`);
+                                this.returnTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                    .setProps({
+                                        minValue: -35,
+                                        maxValue: 150,
+                                        minStep: 0.5
+                                    })
+                                    .onGet(async () => {
+                                        const state = this.returnTemperature;
+                                        return state;
+                                    })
+                                accessory.addService(this.returnTemperatureSensorService);
+                            };
+                            break;
+                        case 1: //Zone 1
+                            if (temperatureSensor && this.roomTemperatures[i] !== null) {
+                                const debug = this.enableDebugMode ? this.emit('debug', `${zoneName}, Prepare temperature sensor service`) : false;
+                                const roomTemperatureSensorService = new Service.TemperatureSensor(`${serviceName}`, `${zoneName} Temperature Sensor ${deviceId} ${i}`);
+                                roomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                roomTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName}`);
+                                roomTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                    .setProps({
+                                        minValue: -35,
+                                        maxValue: 150,
+                                        minStep: 0.5
+                                    })
+                                    .onGet(async () => {
+                                        const state = this.roomTemperatures[i];
+                                        return state;
+                                    })
+                                this.roomTemperatureSensorServices.push(roomTemperatureSensorService);
+                                accessory.addService(roomTemperatureSensorService);
+                            };
 
-                                if (this.flowTemperatureZone1 !== null) {
-                                    const debug2 = this.enableDebugMode ? this.emit('debug', `Prepare flow temperature zone 1 sensor service`) : false;
-                                    this.flowTemperatureZone1SensorService = new Service.TemperatureSensor(`${serviceName} Flow`, `${zoneName} Temperature Sensor Flow ${deviceId} ${i}`);
-                                    this.flowTemperatureZone1SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                                    this.flowTemperatureZone1SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName} Flow`);
-                                    this.flowTemperatureZone1SensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                                        .setProps({
-                                            minValue: -35,
-                                            maxValue: 150,
-                                            minStep: 0.5
-                                        })
-                                        .onGet(async () => {
-                                            const state = this.flowTemperatureZone1;
-                                            return state;
-                                        })
-                                    accessory.addService(this.flowTemperatureZone1SensorService);
-                                };
+                            if (temperatureSensorFlowZone1 && this.flowTemperatureZone1 !== null) {
+                                const debug2 = this.enableDebugMode ? this.emit('debug', `Prepare flow temperature zone 1 sensor service`) : false;
+                                this.flowTemperatureZone1SensorService = new Service.TemperatureSensor(`${serviceName} Flow`, `${zoneName} Temperature Sensor Flow ${deviceId} ${i}`);
+                                this.flowTemperatureZone1SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                this.flowTemperatureZone1SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName} Flow`);
+                                this.flowTemperatureZone1SensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                    .setProps({
+                                        minValue: -35,
+                                        maxValue: 150,
+                                        minStep: 0.5
+                                    })
+                                    .onGet(async () => {
+                                        const state = this.flowTemperatureZone1;
+                                        return state;
+                                    })
+                                accessory.addService(this.flowTemperatureZone1SensorService);
+                            };
 
-                                if (this.returnTemperatureZone1 !== null) {
-                                    const debug3 = this.enableDebugMode ? this.emit('debug', `Prepare return temperature zone 1 sensor service`) : false;
-                                    this.returnTemperatureZone1SensorService = new Service.TemperatureSensor(`${serviceName} Return`, `${zoneName} Temperature Sensor Return ${deviceId} ${i}`);
-                                    this.returnTemperatureZone1SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                                    this.returnTemperatureZone1SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName} Return`);
-                                    this.returnTemperatureZone1SensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                                        .setProps({
-                                            minValue: -35,
-                                            maxValue: 150,
-                                            minStep: 0.5
-                                        })
-                                        .onGet(async () => {
-                                            const state = this.returnTemperatureZone1;
-                                            return state;
-                                        })
-                                    accessory.addService(this.returnTemperatureZone1SensorService);
-                                };
-                                break;
-                            case caseHotWater: //Hot Water
-                                if (this.roomTemperatures[i] !== null) {
-                                    const debug = this.enableDebugMode ? this.emit('debug', `${zoneName}, Prepare temperature sensor service`) : false;
-                                    const roomTemperatureSensorService = new Service.TemperatureSensor(`${serviceName}`, `${zoneName} Temperature Sensor ${deviceId} ${i}`);
-                                    roomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                                    roomTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName}`);
-                                    roomTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                                        .setProps({
-                                            minValue: -35,
-                                            maxValue: 150,
-                                            minStep: 0.5
-                                        })
-                                        .onGet(async () => {
-                                            const state = this.roomTemperatures[i];
-                                            return state;
-                                        })
-                                    this.roomTemperatureSensorServices.push(roomTemperatureSensorService);
-                                    accessory.addService(roomTemperatureSensorService);
-                                };
+                            if (temperatureSensorReturnZone1 && this.returnTemperatureZone1 !== null) {
+                                const debug3 = this.enableDebugMode ? this.emit('debug', `Prepare return temperature zone 1 sensor service`) : false;
+                                this.returnTemperatureZone1SensorService = new Service.TemperatureSensor(`${serviceName} Return`, `${zoneName} Temperature Sensor Return ${deviceId} ${i}`);
+                                this.returnTemperatureZone1SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                this.returnTemperatureZone1SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName} Return`);
+                                this.returnTemperatureZone1SensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                    .setProps({
+                                        minValue: -35,
+                                        maxValue: 150,
+                                        minStep: 0.5
+                                    })
+                                    .onGet(async () => {
+                                        const state = this.returnTemperatureZone1;
+                                        return state;
+                                    })
+                                accessory.addService(this.returnTemperatureZone1SensorService);
+                            };
+                            break;
+                        case caseHotWater: //Hot Water
+                            if (temperatureSensor && this.roomTemperatures[i] !== null) {
+                                const debug = this.enableDebugMode ? this.emit('debug', `${zoneName}, Prepare temperature sensor service`) : false;
+                                const roomTemperatureSensorService = new Service.TemperatureSensor(`${serviceName}`, `${zoneName} Temperature Sensor ${deviceId} ${i}`);
+                                roomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                roomTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName}`);
+                                roomTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                    .setProps({
+                                        minValue: -35,
+                                        maxValue: 150,
+                                        minStep: 0.5
+                                    })
+                                    .onGet(async () => {
+                                        const state = this.roomTemperatures[i];
+                                        return state;
+                                    })
+                                this.roomTemperatureSensorServices.push(roomTemperatureSensorService);
+                                accessory.addService(roomTemperatureSensorService);
+                            };
 
-                                if (this.flowTemperatureWaterTank !== null) {
-                                    const debug = this.enableDebugMode ? this.emit('debug', `Prepare flow temperature water tank sensor service`) : false;
-                                    this.flowTemperatureWaterTankSensorService = new Service.TemperatureSensor(`${serviceName} Flow`, `${zoneName} Temperature Sensor Flow ${deviceId} ${i}`);
-                                    this.flowTemperatureWaterTankSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                                    this.flowTemperatureWaterTankSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName} Flow`);
-                                    this.flowTemperatureWaterTankSensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                                        .setProps({
-                                            minValue: -35,
-                                            maxValue: 150,
-                                            minStep: 0.5
-                                        })
-                                        .onGet(async () => {
-                                            const state = this.flowTemperatureWaterTank;
-                                            return state;
-                                        })
-                                    accessory.addService(this.flowTemperatureWaterTankSensorService);
-                                };
+                            if (temperatureSensorFlowWaterTank && this.flowTemperatureWaterTank !== null) {
+                                const debug = this.enableDebugMode ? this.emit('debug', `Prepare flow temperature water tank sensor service`) : false;
+                                this.flowTemperatureWaterTankSensorService = new Service.TemperatureSensor(`${serviceName} Flow`, `${zoneName} Temperature Sensor Flow ${deviceId} ${i}`);
+                                this.flowTemperatureWaterTankSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                this.flowTemperatureWaterTankSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName} Flow`);
+                                this.flowTemperatureWaterTankSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                    .setProps({
+                                        minValue: -35,
+                                        maxValue: 150,
+                                        minStep: 0.5
+                                    })
+                                    .onGet(async () => {
+                                        const state = this.flowTemperatureWaterTank;
+                                        return state;
+                                    })
+                                accessory.addService(this.flowTemperatureWaterTankSensorService);
+                            };
 
-                                if (this.returnTemperatureWaterTank !== null) {
-                                    const debug1 = this.enableDebugMode ? this.emit('debug', `Prepare return temperature water tank sensor service`) : false;
-                                    this.returnTemperatureWaterTankSensorService = new Service.TemperatureSensor(`${serviceName} Return`, `${zoneName} Temperature Sensor Return ${deviceId} ${i}`);
-                                    this.returnTemperatureWaterTankSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                                    this.returnTemperatureWaterTankSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName} Return`);
-                                    this.returnTemperatureWaterTankSensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                                        .setProps({
-                                            minValue: -35,
-                                            maxValue: 150,
-                                            minStep: 0.5
-                                        })
-                                        .onGet(async () => {
-                                            const state = this.returnTemperatureWaterTank;
-                                            return state;
-                                        })
-                                    accessory.addService(this.returnTemperatureWaterTankSensorService);
-                                };
-                                break;
-                            case caseZone2: //Zone 2
-                                if (this.roomTemperatures[i] !== null) {
-                                    const debug = this.enableDebugMode ? this.emit('debug', `${zoneName}, Prepare temperature sensor service`) : false;
-                                    const roomTemperatureSensorService = new Service.TemperatureSensor(`${serviceName}`, `${zoneName} Temperature Sensor ${deviceId} ${i}`);
-                                    roomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                                    roomTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName}`);
-                                    roomTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                                        .setProps({
-                                            minValue: -35,
-                                            maxValue: 150,
-                                            minStep: 0.5
-                                        })
-                                        .onGet(async () => {
-                                            const state = this.roomTemperatures[i];
-                                            return state;
-                                        })
-                                    this.roomTemperatureSensorServices.push(roomTemperatureSensorService);
-                                    accessory.addService(roomTemperatureSensorService);
-                                };
+                            if (temperatureSensorReturnWaterTank && this.returnTemperatureWaterTank !== null) {
+                                const debug1 = this.enableDebugMode ? this.emit('debug', `Prepare return temperature water tank sensor service`) : false;
+                                this.returnTemperatureWaterTankSensorService = new Service.TemperatureSensor(`${serviceName} Return`, `${zoneName} Temperature Sensor Return ${deviceId} ${i}`);
+                                this.returnTemperatureWaterTankSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                this.returnTemperatureWaterTankSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName} Return`);
+                                this.returnTemperatureWaterTankSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                    .setProps({
+                                        minValue: -35,
+                                        maxValue: 150,
+                                        minStep: 0.5
+                                    })
+                                    .onGet(async () => {
+                                        const state = this.returnTemperatureWaterTank;
+                                        return state;
+                                    })
+                                accessory.addService(this.returnTemperatureWaterTankSensorService);
+                            };
+                            break;
+                        case caseZone2: //Zone 2
+                            if (temperatureSensor && this.roomTemperatures[i] !== null) {
+                                const debug = this.enableDebugMode ? this.emit('debug', `${zoneName}, Prepare temperature sensor service`) : false;
+                                const roomTemperatureSensorService = new Service.TemperatureSensor(`${serviceName}`, `${zoneName} Temperature Sensor ${deviceId} ${i}`);
+                                roomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                roomTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName}`);
+                                roomTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                    .setProps({
+                                        minValue: -35,
+                                        maxValue: 150,
+                                        minStep: 0.5
+                                    })
+                                    .onGet(async () => {
+                                        const state = this.roomTemperatures[i];
+                                        return state;
+                                    })
+                                this.roomTemperatureSensorServices.push(roomTemperatureSensorService);
+                                accessory.addService(roomTemperatureSensorService);
+                            };
 
-                                if (this.flowTemperatureZone2 !== null) {
-                                    const debug = this.enableDebugMode ? this.emit('debug', `Prepare flow temperature zone 2 sensor service`) : false;
-                                    this.flowTemperatureZone2SensorService = new Service.TemperatureSensor(`${serviceName} Flow`, `${zoneName} Temperature Sensor Flow${deviceId} ${i}`);
-                                    this.flowTemperatureZone2SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                                    this.flowTemperatureZone2SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName} Flow`);
-                                    this.flowTemperatureZone2SensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                                        .setProps({
-                                            minValue: -35,
-                                            maxValue: 150,
-                                            minStep: 0.5
-                                        })
-                                        .onGet(async () => {
-                                            const state = this.flowTemperatureZone2;
-                                            return state;
-                                        })
-                                    accessory.addService(this.flowTemperatureZone2SensorService);
-                                };
+                            if (temperatureSensorFlowZone2 && this.flowTemperatureZone2 !== null) {
+                                const debug = this.enableDebugMode ? this.emit('debug', `Prepare flow temperature zone 2 sensor service`) : false;
+                                this.flowTemperatureZone2SensorService = new Service.TemperatureSensor(`${serviceName} Flow`, `${zoneName} Temperature Sensor Flow${deviceId} ${i}`);
+                                this.flowTemperatureZone2SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                this.flowTemperatureZone2SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName} Flow`);
+                                this.flowTemperatureZone2SensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                    .setProps({
+                                        minValue: -35,
+                                        maxValue: 150,
+                                        minStep: 0.5
+                                    })
+                                    .onGet(async () => {
+                                        const state = this.flowTemperatureZone2;
+                                        return state;
+                                    })
+                                accessory.addService(this.flowTemperatureZone2SensorService);
+                            };
 
-                                if (this.returnTemperatureZone2 !== null) {
-                                    const debug1 = this.enableDebugMode ? this.emit('debug', `Prepare return temperature zone 2 sensor service`) : false;
-                                    this.returnTemperatureZone2SensorService = new Service.TemperatureSensor(`${serviceName} Return`, `${zoneName} Temperature Sensor Return${deviceId} ${i}`);
-                                    this.returnTemperatureZone2SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                                    this.returnTemperatureZone2SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName} Return`);
-                                    this.returnTemperatureZone2SensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                                        .setProps({
-                                            minValue: -35,
-                                            maxValue: 150,
-                                            minStep: 0.5
-                                        })
-                                        .onGet(async () => {
-                                            const state = this.returnTemperatureZone2;
-                                            return state;
-                                        })
-                                    accessory.addService(this.returnTemperatureZone2SensorService);
-                                };
-                                break;
-                        };
+                            if (temperatureSensorReturnZone2 && this.returnTemperatureZone2 !== null) {
+                                const debug1 = this.enableDebugMode ? this.emit('debug', `Prepare return temperature zone 2 sensor service`) : false;
+                                this.returnTemperatureZone2SensorService = new Service.TemperatureSensor(`${serviceName} Return`, `${zoneName} Temperature Sensor Return${deviceId} ${i}`);
+                                this.returnTemperatureZone2SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                this.returnTemperatureZone2SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName} Return`);
+                                this.returnTemperatureZone2SensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                    .setProps({
+                                        minValue: -35,
+                                        maxValue: 150,
+                                        minStep: 0.5
+                                    })
+                                    .onGet(async () => {
+                                        const state = this.returnTemperatureZone2;
+                                        return state;
+                                    })
+                                accessory.addService(this.returnTemperatureZone2SensorService);
+                            };
+                            break;
                     };
                 };
 

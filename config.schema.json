@@ -227,17 +227,24 @@
               "required": true
             },
             "ataTemperatureSensor": {
-              "title": "Temperature Sensor",
+              "title": "Temperature Sensor Room",
               "type": "boolean",
               "default": false,
-              "description": "This enables extra temperature sensor to use with automations in HomeKit app.",
+              "description": "This enable extra room temperature sensor to use with automations in HomeKit app.",
+              "required": false
+            },
+            "ataTemperatureSensorOutdoor": {
+              "title": "Temperature Sensor Outdoor",
+              "type": "boolean",
+              "default": false,
+              "description": "This enable extra outdoor temperature sensor to use with automations in HomeKit app.",
               "required": false
             },
             "ataPresets": {
               "title": "Presets",
               "type": "boolean",
               "default": false,
-              "description": "This enables the display of device presets as extra buttons in HomeKit app.",
+              "description": "This enable extra buttons for configured presets and display it in HomeKit app.",
               "required": false
             },
             "ataDisableAutoMode": {
@@ -550,7 +557,7 @@
                         ]
                       }
                     ],
-                    "description": "Extra function/tile to be exposed in HomeKit app.",
+                    "description": "Select the characterristic type to be displayed in HomeKit app.",
                     "required": true
                   },
                   "namePrefix": {
@@ -606,21 +613,77 @@
                   ]
                 }
               ],
-              "description": "Main control mode.",
+              "description": "Select main control mode.",
               "required": true
             },
             "atwTemperatureSensor": {
-              "title": "Temperature Sensor",
+              "title": "Temperature Sensor Room",
               "type": "boolean",
               "default": false,
-              "description": "This enables extra temperature sensor for use with automations in HomeKit app.",
+              "description": "This enable extra room temperature sensor to use with automations in HomeKit app.",
+              "required": false
+            },
+            "atwTemperatureSensorFlow": {
+              "title": "Temperature Sensor Flow",
+              "type": "boolean",
+              "default": false,
+              "description": "This enable extra Flow temperature sensor to use with automations in HomeKit app.",
+              "required": false
+            },
+            "atwTemperatureSensorReturn": {
+              "title": "Temperature Sensor Return",
+              "type": "boolean",
+              "default": false,
+              "description": "This enable extra Return temperature sensor to use with automations in HomeKit app.",
+              "required": false
+            },
+            "atwTemperatureSensorFlowZone1": {
+              "title": "Temperature Sensor Flow Zone 1",
+              "type": "boolean",
+              "default": false,
+              "description": "This enable extra Flow Zone 1 temperature sensor to use with automations in HomeKit app.",
+              "required": false
+            },
+            "atwTemperatureSensorReturnZone1": {
+              "title": "Temperature Sensor Return Zone 1",
+              "type": "boolean",
+              "default": false,
+              "description": "This enable extra Return Zone 1 temperature sensor to use with automations in HomeKit app.",
+              "required": false
+            },
+            "atwTemperatureSensorFlowWaterTank": {
+              "title": "Temperature Sensor Flow Water Tank",
+              "type": "boolean",
+              "default": false,
+              "description": "This enable extra Flow Water Tank temperature sensor to use with automations in HomeKit app.",
+              "required": false
+            },
+            "atwTemperatureSensorReturnWaterTank": {
+              "title": "Temperature Sensor Return Water Tank",
+              "type": "boolean",
+              "default": false,
+              "description": "This enable extra Return Water Tank temperature sensor to use with automations in HomeKit app.",
+              "required": false
+            },
+            "atwTemperatureSensorFlowZone2": {
+              "title": "Temperature Sensor Flow Zone 2",
+              "type": "boolean",
+              "default": false,
+              "description": "This enable extra Flow Zone 2 temperature sensor to use with automations in HomeKit app.",
+              "required": false
+            },
+            "atwTemperatureSensorReturnZone2": {
+              "title": "Temperature Sensor Return Zone 2",
+              "type": "boolean",
+              "default": false,
+              "description": "This enable extra Return Zone 2 temperature sensor to use with automations in HomeKit app.",
               "required": false
             },
             "atwPresets": {
               "title": "Presets",
               "type": "boolean",
               "default": false,
-              "description": "This enables display of the device presets as extra buttons in HomeKit app.",
+              "description": "This enable extra buttons for configured presets and display it in HomeKit app.",
               "required": false
             },
             "atwButtons": {
@@ -821,7 +884,7 @@
                         ]
                       }
                     ],
-                    "description": "Select extra function/tile to be exposed in HomeKit app.",
+                    "description": "Select the characterristic type to be displayed in HomeKit app.",
                     "required": true
                   },
                   "namePrefix": {
@@ -881,17 +944,31 @@
               "required": true
             },
             "ervTemperatureSensor": {
-              "title": "Temperature Sensors",
+              "title": "Temperature Sensor Room",
               "type": "boolean",
               "default": false,
-              "description": "This enables extra temperature sensor to be used with automations in HomeKit app.",
+              "description": "This enable extra temperature sensor to use with automations in HomeKit app.",
+              "required": false
+            },
+            "ervTemperatureSensorOutdoor": {
+              "title": "Temperature Sensor Outdoor",
+              "type": "boolean",
+              "default": false,
+              "description": "This enable extra outdoor temperature sensor to use with automations in HomeKit app.",
+              "required": false
+            },
+            "ervTemperatureSensorSupply": {
+              "title": "Temperature Sensor Supply",
+              "type": "boolean",
+              "default": false,
+              "description": "This enable extra supply temperature sensor to use with automations in HomeKit app.",
               "required": false
             },
             "ervPresets": {
               "title": "Presets",
               "type": "boolean",
               "default": false,
-              "description": "This enable display of the device presets as extra buttons in HomeKit app.",
+              "description": "This enable extra buttons for configured presets and display it in HomeKit app.",
               "required": false
             },
             "ervButtons": {
@@ -1044,7 +1121,7 @@
                         ]
                       }
                     ],
-                    "description": "Select extra function/tile to be exposed in HomeKit app.",
+                    "description": "Select the characterristic type to be displayed in HomeKit app.",
                     "required": false
                   },
                   "namePrefix": {
@@ -1247,7 +1324,6 @@
                   "title": "Air Conditioner",
                   "items": [
                     "accounts[].ataDisplayMode",
-                    "accounts[].ataTemperatureSensor",
                     "accounts[].ataPresets",
                     "accounts[].ataDisableAutoMode",
                     "accounts[].ataDisableHeatMode",
@@ -1255,7 +1331,18 @@
                     {
                       "key": "accounts[]",
                       "type": "section",
-                      "title": "Buttons/Sensors",
+                      "title": "Temperature Sensors",
+                      "expandable": true,
+                      "expanded": false,
+                      "items": [
+                        "accounts[].ataTemperatureSensor",
+                        "accounts[].ataTemperatureSensorOutdoor"
+                      ]
+                    },
+                    {
+                      "key": "accounts[]",
+                      "type": "section",
+                      "title": "Buttons / Sensors",
                       "expandable": true,
                       "expanded": false,
                       "items": [
@@ -1297,12 +1384,29 @@
                   "title": "Heat Pump",
                   "items": [
                     "accounts[].atwDisplayMode",
-                    "accounts[].atwTemperatureSensor",
                     "accounts[].atwPresets",
                     {
                       "key": "accounts[]",
                       "type": "section",
-                      "title": "Buttons/Sensors",
+                      "title": "Temperature Sensors",
+                      "expandable": true,
+                      "expanded": false,
+                      "items": [
+                        "accounts[].atwTemperatureSensor",
+                        "accounts[].atwTemperatureSensorFlow",
+                        "accounts[].atwTemperatureSensorReturn",
+                        "accounts[].atwTemperatureSensorFlowZone1",
+                        "accounts[].atwTemperatureSensorReturnZone1",
+                        "accounts[].atwTemperatureSensorFlowWaterTank",
+                        "accounts[].atwTemperatureSensorReturnWaterTank",
+                        "accounts[].atwTemperatureSensorFlowZone2",
+                        "accounts[].atwTemperatureSensorReturnZone2"
+                      ]
+                    },
+                    {
+                      "key": "accounts[]",
+                      "type": "section",
+                      "title": "Buttons / Sensors",
                       "expandable": true,
                       "expanded": false,
                       "items": [
@@ -1344,12 +1448,23 @@
                   "title": "Energy Recovery Ventilation",
                   "items": [
                     "accounts[].ervDisplayMode",
-                    "accounts[].ervTemperatureSensor",
                     "accounts[].ervPresets",
                     {
                       "key": "accounts[]",
                       "type": "section",
-                      "title": "Buttons/Sensors",
+                      "title": "Temperature Sensors",
+                      "expandable": true,
+                      "expanded": false,
+                      "items": [
+                        "accounts[].ervTemperatureSensor",
+                        "accounts[].ervTemperatureSensorOutdoor",
+                        "accounts[].ervTemperatureSensorSupply"
+                      ]
+                    },
+                    {
+                      "key": "accounts[]",
+                      "type": "section",
+                      "title": "Buttons / Sensors",
                       "expandable": true,
                       "expanded": false,
                       "items": [

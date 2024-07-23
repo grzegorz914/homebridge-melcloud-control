@@ -19,6 +19,8 @@ class DeviceErv extends EventEmitter {
         //account config
         this.displayMode = account.ervDisplayMode || 0;
         this.temperatureSensor = account.ervTemperatureSensor || false;
+        this.temperatureSensorOutdoor = account.ervTemperatureSensorOutdoor || false;
+        this.temperatureSensorSupply = account.ervTemperatureSensorSupply || false;
         this.presetsEnabled = account.ervPresets || false;
         this.buttons = account.ervButtons || [];
         this.disableLogInfo = account.disableLogInfo || false;
@@ -367,22 +369,20 @@ class DeviceErv extends EventEmitter {
                 this.lockPhysicalControls = lockPhysicalControls;
 
                 //update temperature sensors
-                if (this.temperatureSensor) {
-                    if (hasRoomTemperature && this.roomTemperatureSensorService) {
-                        this.roomTemperatureSensorService
-                            .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-                    };
+                if (this.roomTemperatureSensorService) {
+                    this.roomTemperatureSensorService
+                        .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+                };
 
-                    if (hasOutdoorTemperature && this.outdoorTemperatureSensorService) {
-                        this.outdoorTemperatureSensorService
-                            .updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature)
-                    };
+                if (this.outdoorTemperatureSensorService) {
+                    this.outdoorTemperatureSensorService
+                        .updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature)
+                };
 
-                    if (hasSupplyTemperature && this.supplyTemperatureSensorService) {
-                        this.supplyTemperatureSensorService
-                            .updateCharacteristic(Characteristic.CurrentTemperature, supplyTemperature)
-                    };
-                }
+                if (this.supplyTemperatureSensorService) {
+                    this.supplyTemperatureSensorService
+                        .updateCharacteristic(Characteristic.CurrentTemperature, supplyTemperature)
+                };
 
                 //update core maintenance
                 if (this.coreMaintenanceService) {
@@ -397,14 +397,14 @@ class DeviceErv extends EventEmitter {
                 }
 
                 //update CO2 sensor
-                if (hasCO2Sensor && this.carbonDioxideSensorService) {
+                if (this.carbonDioxideSensorService) {
                     this.carbonDioxideSensorService
                         .updateCharacteristic(Characteristic.CarbonDioxideDetected, roomCO2Detected)
                         .updateCharacteristic(Characteristic.CarbonDioxideLevel, roomCO2Level)
                 }
 
                 //update PM2.5 sensor
-                if (hasPM25Sensor && this.airQualitySensorService) {
+                if (this.airQualitySensorService) {
                     this.airQualitySensorService
                         .updateCharacteristic(Characteristic.AirQuality, pM25AirQuality)
                         .updateCharacteristic(Characteristic.PM2_5Density, pM25Level)
@@ -563,6 +563,8 @@ class DeviceErv extends EventEmitter {
                 //melcloud services
                 const displayMode = this.displayMode;
                 const temperatureSensor = this.temperatureSensor;
+                const temperatureSensorOutdoor = this.temperatureSensorOutdoor;
+                const temperatureSensorSupply = this.temperatureSensorSupply;
                 const buttonsConfigured = this.buttonsConfigured;
                 const buttonsConfiguredCount = this.buttonsConfiguredCount;
                 const presets = this.presets;
@@ -860,61 +862,61 @@ class DeviceErv extends EventEmitter {
                         break;
                 };
 
-                //temperature sensor services
-                if (temperatureSensor) {
-                    if (this.hasRoomTemperature && this.roomTemperature !== null) {
-                        const debug = this.enableDebugMode ? this.emit('debug', `Prepare room temperature sensor service`) : false;
-                        this.roomTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Room`, `Room Temperature Sensor ${deviceId}`);
-                        this.roomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                        this.roomTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${serviceName} Room`);
-                        this.roomTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                            .setProps({
-                                minValue: -35,
-                                maxValue: 150,
-                                minStep: 0.5
-                            })
-                            .onGet(async () => {
-                                const state = this.roomTemperature;
-                                return state;
-                            })
-                        accessory.addService(this.roomTemperatureSensorService);
-                    };
+                //temperature sensor service room
+                if (temperatureSensor && this.hasRoomTemperature && this.roomTemperature !== null) {
+                    const debug = this.enableDebugMode ? this.emit('debug', `Prepare room temperature sensor service`) : false;
+                    this.roomTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Room`, `Room Temperature Sensor ${deviceId}`);
+                    this.roomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                    this.roomTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${serviceName} Room`);
+                    this.roomTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                        .setProps({
+                            minValue: -35,
+                            maxValue: 150,
+                            minStep: 0.5
+                        })
+                        .onGet(async () => {
+                            const state = this.roomTemperature;
+                            return state;
+                        })
+                    accessory.addService(this.roomTemperatureSensorService);
+                };
 
-                    if (this.hasSupplyTemperature && this.supplyTemperature !== null) {
-                        const debug = this.enableDebugMode ? this.emit('debug', `Prepare supply temperature sensor service`) : false;
-                        this.supplyTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Supply`, `Supply Temperature Sensor ${deviceId}`);
-                        this.supplyTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                        this.supplyTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${serviceName} Supply`);
-                        this.supplyTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                            .setProps({
-                                minValue: -35,
-                                maxValue: 150,
-                                minStep: 0.5
-                            })
-                            .onGet(async () => {
-                                const state = this.supplyTemperature;
-                                return state;
-                            })
-                        accessory.addService(this.supplyTemperatureSensorService);
-                    };
+                //temperature sensor service supply
+                if (temperatureSensorSupply && this.hasSupplyTemperature && this.supplyTemperature !== null) {
+                    const debug = this.enableDebugMode ? this.emit('debug', `Prepare supply temperature sensor service`) : false;
+                    this.supplyTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Supply`, `Supply Temperature Sensor ${deviceId}`);
+                    this.supplyTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                    this.supplyTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${serviceName} Supply`);
+                    this.supplyTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                        .setProps({
+                            minValue: -35,
+                            maxValue: 150,
+                            minStep: 0.5
+                        })
+                        .onGet(async () => {
+                            const state = this.supplyTemperature;
+                            return state;
+                        })
+                    accessory.addService(this.supplyTemperatureSensorService);
+                };
 
-                    if (this.hasOutdoorTemperature && this.outdoorTemperature !== null) {
-                        const debug = this.enableDebugMode ? this.emit('debug', `Prepare outdoor temperature sensor service`) : false;
-                        this.outdoorTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Outdoor`, `Outdoor Temperature Sensor ${deviceId}`);
-                        this.outdoorTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                        this.outdoorTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${serviceName} Outdoor`);
-                        this.outdoorTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                            .setProps({
-                                minValue: -35,
-                                maxValue: 150,
-                                minStep: 0.5
-                            })
-                            .onGet(async () => {
-                                const state = this.outdoorTemperature;
-                                return state;
-                            })
-                        accessory.addService(this.outdoorTemperatureSensorService);
-                    };
+                //temperature sensor service outdoor
+                if (temperatureSensorOutdoor && this.hasOutdoorTemperature && this.outdoorTemperature !== null) {
+                    const debug = this.enableDebugMode ? this.emit('debug', `Prepare outdoor temperature sensor service`) : false;
+                    this.outdoorTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Outdoor`, `Outdoor Temperature Sensor ${deviceId}`);
+                    this.outdoorTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                    this.outdoorTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${serviceName} Outdoor`);
+                    this.outdoorTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                        .setProps({
+                            minValue: -35,
+                            maxValue: 150,
+                            minStep: 0.5
+                        })
+                        .onGet(async () => {
+                            const state = this.outdoorTemperature;
+                            return state;
+                        })
+                    accessory.addService(this.outdoorTemperatureSensorService);
                 };
 
                 //core maintenance

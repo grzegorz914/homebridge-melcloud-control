@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * After update to this version the devices need to be added to the Home app again and the old unresponsive remove!!!
   * This devices will be removed from all automations and scenes!!!
 
+  ## [1.1.0] - (23.07.2024)
+## Changes  
+- allow enable/disable every extra temperature sensor indyvidually [#126](https://github.com/grzegorz914/homebridge-melcloud-control/issues/126)
+- cleanup
+- config.schema updated
+
 ## [1.0.7] - (06.07.2024)
 ## Changes  
 - refactor buttons code

@@ -177,11 +177,12 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `passwd` | Here set the MELCloud password. |
 | `language` | Here select the MELCloud language. |
 | `ataDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
-| `ataTemperatureSensor` | This enable extra temperature sensors to use with automations in HomeKit app. |
+| `ataTemperatureSensor` | This enable extra `Room` temperature sensors to use with automations in HomeKit app. |
+| `ataTemperatureSensorOutdoor` | This enable extra `Outdoor` temperature sensors to use with automations in HomeKit app. |
 | `ataDisableAutoMode` | This will disable `Auto` mode even this mode is supported by device. |
 | `ataDisableHeatMode` | This will disable `Heat` mode even this mode is supported by device. |
 | `ataAutoHeatMode` | Here select operation mode for `Auto/Heat`, if `Auto`, `Heat` or both modes are not supported by device will be used selected modes instead. |
-| `ataPresets` | This enable display Air Conditioner presets in HomeKit app. |
+| `ataPresets` | This enable extra buttons for configured presets and display it in HomeKit app. |
 | `ataButtons.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
 | `ataButtons.mode` | Here select button mode, VH - Vane Horizontal, VV - Vane Horizontal. |
 | `ataButtons.displayType` | Here select display type in HomeKit app, possible `None/Disabled`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`. |
@@ -189,8 +190,16 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ataHideDeviceById.name` | Here set Your own name. |
 | `ataHideDeviceById.id` | Here set `DeviceId` to be hidden and not exposed to the `Homebridge/Homekit`. |
 | `atwDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
-| `atwTemperatureSensor` | This enable extra temperature sensors to use with automations in HomeKit app. |
-| `atwPresets` | This enable display Heat Pump presets in HomeKit app. |
+| `atwTemperatureSensor` | This enable extra `Room` temperature sensors to use with automations in HomeKit app. |
+| `atwTemperatureSensorFlow` | This enable extra `Flow` temperature sensors to use with automations in HomeKit app. |
+| `atwTemperatureSensorReturn` | This enable extra `Return` temperature sensors to use with automations in HomeKit app. |
+| `atwTemperatureSensorFlowZone1` | This enable extra `Flow Zone 1` temperature sensors to use with automations in HomeKit app. |
+| `atwTemperatureSensorReturnZone1` | This enable extra `Return Zone 1` temperature sensors to use with automations in HomeKit app. |
+| `atwTemperatureSensorFlowWaterTank` | This enable extra `Flow Water Tank` temperature sensors to use with automations in HomeKit app. |
+| `atwTemperatureSensorReturnWaterTank` | This enable extra `Return Water Tank` temperature sensors to use with automations in HomeKit app. |
+| `atwTemperatureSensorFlowZone2` | This enable extra `Flow Zone 2` temperature sensors to use with automations in HomeKit app. |
+| `atwTemperatureSensorReturnZone2` | This enable extra `Return Zone 2` temperature sensors to use with automations in HomeKit app. |
+| `atwPresets` | This enable extra buttons for configured presets and display it in HomeKit app. |
 | `atwButtons.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
 | `atwButtons.mode` | Here select button mode. |
 | `atwButtons.displayType` | Here select display type in HomeKit app, possible `None/Disabled`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`. |
@@ -198,8 +207,10 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `atwHideDeviceById.name` | Here set Your own name. |
 | `atwHideDeviceById.id` | Here set `DeviceId` to be hidden and not exposed to the `Homebridge/Homekit`. |
 | `ervDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
-| `ervTemperatureSensor` | This enable extra temperature sensors to use with automations in HomeKit app. |
-| `ervPresets` | This enable display EnergyRecovery Ventilation presets in HomeKit app. |
+| `ervTemperatureSensor` | This enable extra `Room` temperature sensors to use with automations in HomeKit app. |
+| `ervTemperatureSensorOutdoor` | This enable extra `Outdoor` temperature sensors to use with automations in HomeKit app. |
+| `ervTemperatureSensorSupply` | This enable extra `Supply` temperature sensors to use with automations in HomeKit app. |
+| `ervPresets` | This enable extra buttons for configured presets and display it in HomeKit app. |
 | `ervButtons.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
 | `ervButtons.mode` | Here select button mode. |
 | `ervButtons.displayType` | Here select display type in HomeKit app, possible `None/Disabled`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`. |

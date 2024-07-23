@@ -19,6 +19,7 @@ class DeviceAta extends EventEmitter {
         //account config
         this.displayMode = account.ataDisplayMode || 0;
         this.temperatureSensor = account.ataTemperatureSensor || false;
+        this.temperatureSensorOutdoor = account.ataTemperatureSensorOutdoor || false;
         this.presetsEnabled = account.ataPresets || false;
         this.disableAutoMode = account.ataDisableAutoMode || false;
         this.disableHeatMode = account.ataDisableHeatMode || false;
@@ -372,16 +373,14 @@ class DeviceAta extends EventEmitter {
                 this.vaneVertical = vaneVertical;
                 this.lockPhysicalControls = lockPhysicalControls;
 
-                if (this.temperatureSensor) {
-                    if (this.roomTemperatureSensorService) {
-                        this.roomTemperatureSensorService
-                            .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-                    };
+                if (this.roomTemperatureSensorService) {
+                    this.roomTemperatureSensorService
+                        .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+                };
 
-                    if (hasOutdoorTemperature && this.outdoorTemperatureSensorService) {
-                        this.outdoorTemperatureSensorService
-                            .updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature)
-                    };
+                if (this.outdoorTemperatureSensorService) {
+                    this.outdoorTemperatureSensorService
+                        .updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature)
                 };
 
                 //update buttons state
@@ -596,6 +595,7 @@ class DeviceAta extends EventEmitter {
                 //melcloud services
                 const displayMode = this.displayMode;
                 const temperatureSensor = this.temperatureSensor;
+                const temperatureSensorOutdoor = this.temperatureSensorOutdoor;
                 const buttonsConfigured = this.buttonsConfigured;
                 const buttonsConfiguredCount = this.buttonsConfiguredCount;
                 const presets = this.presets;
@@ -922,42 +922,40 @@ class DeviceAta extends EventEmitter {
                 };
 
                 //temperature sensor services
-                if (temperatureSensor) {
-                    if (this.roomTemperature !== null) {
-                        const debug = this.enableDebugMode ? this.emit('debug', `Prepare room temperature sensor service`) : false;
-                        this.roomTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Room`, `Room Temperature Sensor ${deviceId}`);
-                        this.roomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                        this.roomTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Room`);
-                        this.roomTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                            .setProps({
-                                minValue: -35,
-                                maxValue: 150,
-                                minStep: 0.5
-                            })
-                            .onGet(async () => {
-                                const state = this.roomTemperature;
-                                return state;
-                            })
-                        accessory.addService(this.roomTemperatureSensorService);
-                    };
+                if (temperatureSensor && this.roomTemperature !== null) {
+                    const debug = this.enableDebugMode ? this.emit('debug', `Prepare room temperature sensor service`) : false;
+                    this.roomTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Room`, `Room Temperature Sensor ${deviceId}`);
+                    this.roomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                    this.roomTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Room`);
+                    this.roomTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                        .setProps({
+                            minValue: -35,
+                            maxValue: 150,
+                            minStep: 0.5
+                        })
+                        .onGet(async () => {
+                            const state = this.roomTemperature;
+                            return state;
+                        })
+                    accessory.addService(this.roomTemperatureSensorService);
+                };
 
-                    if (hasOutdoorTemperature && this.outdoorTemperature !== null) {
-                        const debug = this.enableDebugMode ? this.emit('debug', `Prepare outdoor temperature sensor service`) : false;
-                        this.outdoorTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Outdoor`, `Outdoor Temperature Sensor ${deviceId}`);
-                        this.outdoorTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                        this.outdoorTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Outdoor`);
-                        this.outdoorTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                            .setProps({
-                                minValue: -35,
-                                maxValue: 150,
-                                minStep: 0.5
-                            })
-                            .onGet(async () => {
-                                const state = this.outdoorTemperature;
-                                return state;
-                            })
-                        accessory.addService(this.outdoorTemperatureSensorService);
-                    };
+                if (temperatureSensorOutdoor && hasOutdoorTemperature && this.outdoorTemperature !== null) {
+                    const debug = this.enableDebugMode ? this.emit('debug', `Prepare outdoor temperature sensor service`) : false;
+                    this.outdoorTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Outdoor`, `Outdoor Temperature Sensor ${deviceId}`);
+                    this.outdoorTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                    this.outdoorTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Outdoor`);
+                    this.outdoorTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                        .setProps({
+                            minValue: -35,
+                            maxValue: 150,
+                            minStep: 0.5
+                        })
+                        .onGet(async () => {
+                            const state = this.outdoorTemperature;
+                            return state;
+                        })
+                    accessory.addService(this.outdoorTemperatureSensorService);
                 };
 
                 //buttons services
