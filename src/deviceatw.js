@@ -518,8 +518,8 @@ class DeviceAtw extends EventEmitter {
                     //update temperature sensors
                     switch (i) {
                         case 0: //Heat Pump
-                            if (this.roomTemperatureSensorServices) {
-                                this.roomTemperatureSensorServices[i]
+                            if (this.roomTemperatureSensorService) {
+                                this.roomTemperatureSensorService
                                     .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                             };
 
@@ -534,8 +534,8 @@ class DeviceAtw extends EventEmitter {
                             };
                             break;
                         case 1: //Zone 1
-                            if (this.roomTemperatureSensorServices) {
-                                this.roomTemperatureSensorServices[i]
+                            if (this.roomTemperatureZone1SensorService) {
+                                this.roomTemperatureZone1SensorService
                                     .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                             };
 
@@ -550,8 +550,8 @@ class DeviceAtw extends EventEmitter {
                             };
                             break;
                         case caseHotWater: //Hot Water
-                            if (this.roomTemperatureSensorServices) {
-                                this.roomTemperatureSensorServices[i]
+                            if (this.roomTemperatureWaterTankSensorService) {
+                                this.roomTemperatureWaterTankSensorService
                                     .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                             };
 
@@ -566,8 +566,8 @@ class DeviceAtw extends EventEmitter {
                             };
                             break;
                         case caseZone2: //Zone 2
-                            if (this.roomTemperatureSensorServices) {
-                                this.roomTemperatureSensorServices[i]
+                            if (this.roomTemperatureZone2SensorService) {
+                                this.roomTemperatureZone2SensorService
                                     .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                             };
 
@@ -815,7 +815,6 @@ class DeviceAtw extends EventEmitter {
                 const heatCoolModes = this.heatCoolModes;
 
                 this.melCloudServices = [];
-                this.roomTemperatureSensorServices = [];
                 for (let i = 0; i < zonesCount; i++) {
                     const zoneName = [this.heatPumpName, this.zone1Name, this.hotWaterName, this.zone2Name][i];
                     const serviceName = `${deviceTypeText} ${accessoryName}: ${zoneName}`;
@@ -1271,10 +1270,10 @@ class DeviceAtw extends EventEmitter {
                         case 0: //Heat Pump
                             if (temperatureSensor && this.roomTemperatures[i] !== null) {
                                 const debug = this.enableDebugMode ? this.emit('debug', `${zoneName}, Prepare temperature sensor service`) : false;
-                                const roomTemperatureSensorService = new Service.TemperatureSensor(`${serviceName}`, `${zoneName} Temperature Sensor ${deviceId} ${i}`);
-                                roomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                                roomTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName}`);
-                                roomTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                this.roomTemperatureSensorService = new Service.TemperatureSensor(`${serviceName}`, `${zoneName} Temperature Sensor ${deviceId} ${i}`);
+                                this.roomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                this.roomTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName}`);
+                                this.roomTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
                                     .setProps({
                                         minValue: -35,
                                         maxValue: 150,
@@ -1284,8 +1283,7 @@ class DeviceAtw extends EventEmitter {
                                         const state = this.roomTemperatures[i];
                                         return state;
                                     })
-                                this.roomTemperatureSensorServices.push(roomTemperatureSensorService);
-                                accessory.addService(roomTemperatureSensorService);
+                                accessory.addService(this.roomTemperatureSensorService);
                             };
 
                             if (temperatureSensorFlow && this.flowTemperature !== null) {
@@ -1327,10 +1325,10 @@ class DeviceAtw extends EventEmitter {
                         case 1: //Zone 1
                             if (temperatureSensor && this.roomTemperatures[i] !== null) {
                                 const debug = this.enableDebugMode ? this.emit('debug', `${zoneName}, Prepare temperature sensor service`) : false;
-                                const roomTemperatureSensorService = new Service.TemperatureSensor(`${serviceName}`, `${zoneName} Temperature Sensor ${deviceId} ${i}`);
-                                roomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                                roomTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName}`);
-                                roomTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                this.roomTemperatureZone1SensorService = new Service.TemperatureSensor(`${serviceName}`, `${zoneName} Temperature Sensor ${deviceId} ${i}`);
+                                this.roomTemperatureZone1SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                this.roomTemperatureZone1SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName}`);
+                                this.roomTemperatureZone1SensorService.getCharacteristic(Characteristic.CurrentTemperature)
                                     .setProps({
                                         minValue: -35,
                                         maxValue: 150,
@@ -1340,8 +1338,7 @@ class DeviceAtw extends EventEmitter {
                                         const state = this.roomTemperatures[i];
                                         return state;
                                     })
-                                this.roomTemperatureSensorServices.push(roomTemperatureSensorService);
-                                accessory.addService(roomTemperatureSensorService);
+                                accessory.addService(this.roomTemperatureZone1SensorService);
                             };
 
                             if (temperatureSensorFlowZone1 && this.flowTemperatureZone1 !== null) {
@@ -1383,10 +1380,10 @@ class DeviceAtw extends EventEmitter {
                         case caseHotWater: //Hot Water
                             if (temperatureSensor && this.roomTemperatures[i] !== null) {
                                 const debug = this.enableDebugMode ? this.emit('debug', `${zoneName}, Prepare temperature sensor service`) : false;
-                                const roomTemperatureSensorService = new Service.TemperatureSensor(`${serviceName}`, `${zoneName} Temperature Sensor ${deviceId} ${i}`);
-                                roomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                                roomTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName}`);
-                                roomTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                this.roomTemperatureWaterTankSensorService = new Service.TemperatureSensor(`${serviceName}`, `${zoneName} Temperature Sensor ${deviceId} ${i}`);
+                                this.roomTemperatureWaterTankSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                this.roomTemperatureWaterTankSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName}`);
+                                this.roomTemperatureWaterTankSensorService.getCharacteristic(Characteristic.CurrentTemperature)
                                     .setProps({
                                         minValue: -35,
                                         maxValue: 150,
@@ -1396,8 +1393,7 @@ class DeviceAtw extends EventEmitter {
                                         const state = this.roomTemperatures[i];
                                         return state;
                                     })
-                                this.roomTemperatureSensorServices.push(roomTemperatureSensorService);
-                                accessory.addService(roomTemperatureSensorService);
+                                accessory.addService(this.roomTemperatureWaterTankSensorService);
                             };
 
                             if (temperatureSensorFlowWaterTank && this.flowTemperatureWaterTank !== null) {
@@ -1439,10 +1435,10 @@ class DeviceAtw extends EventEmitter {
                         case caseZone2: //Zone 2
                             if (temperatureSensor && this.roomTemperatures[i] !== null) {
                                 const debug = this.enableDebugMode ? this.emit('debug', `${zoneName}, Prepare temperature sensor service`) : false;
-                                const roomTemperatureSensorService = new Service.TemperatureSensor(`${serviceName}`, `${zoneName} Temperature Sensor ${deviceId} ${i}`);
-                                roomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                                roomTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName}`);
-                                roomTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
+                                this.roomTemperatureZone2SensorService = new Service.TemperatureSensor(`${serviceName}`, `${zoneName} Temperature Sensor ${deviceId} ${i}`);
+                                this.roomTemperatureZone2SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                                this.roomTemperatureZone2SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName}`);
+                                this.roomTemperatureZone2SensorService.getCharacteristic(Characteristic.CurrentTemperature)
                                     .setProps({
                                         minValue: -35,
                                         maxValue: 150,
@@ -1452,8 +1448,7 @@ class DeviceAtw extends EventEmitter {
                                         const state = this.roomTemperatures[i];
                                         return state;
                                     })
-                                this.roomTemperatureSensorServices.push(roomTemperatureSensorService);
-                                accessory.addService(roomTemperatureSensorService);
+                                accessory.addService(this.roomTemperatureZone2SensorService);
                             };
 
                             if (temperatureSensorFlowZone2 && this.flowTemperatureZone2 !== null) {
