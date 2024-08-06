@@ -456,7 +456,7 @@ class MelCloudAtw extends EventEmitter {
                 const minTempZones = 10;
                 const maxTempZones = 31;
                 const minTempWaterTank = 16;
-                const maxTempWaterTank = this.deviceData.Device.MaxTankTemperature ?? 60;
+                const maxTempWaterTank = this.deviceData.Device.MaxTankTemperature ?? 70;
                 deviceState.SetTemperatureZone1 = deviceState.SetTemperatureZone1 < minTempZones ? minTempZones : deviceState.SetTemperatureZone1;
                 deviceState.SetTemperatureZone1 = deviceState.SetTemperatureZone1 > maxTempZones ? maxTempZones : deviceState.SetTemperatureZone1;
                 deviceState.SetTemperatureZone1 = deviceState.SetTemperatureZone2 < minTempZones ? minTempZones : deviceState.SetTemperatureZone2;

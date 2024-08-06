@@ -259,7 +259,7 @@ class DeviceAtw extends EventEmitter {
                 const temperatureIncrement = deviceData.Device.TemperatureIncrement ?? 1;
                 const minSetTemperature = deviceData.Device.MinSetTemperature ?? 10;
                 const maxSetTemperature = deviceData.Device.MaxSetTemperature ?? 30;
-                const maxTankTemperature = deviceData.Device.MaxTankTemperature ?? 60;
+                const maxTankTemperature = deviceData.Device.MaxTankTemperature ?? 70;
                 const flowTemperature = deviceData.Device.FlowTemperature;
                 const flowTemperatureZone1 = deviceData.Device.FlowTemperatureZone1;
                 const flowTemperatureZone2 = deviceData.Device.FlowTemperatureZone2;
@@ -398,7 +398,7 @@ class DeviceAtw extends EventEmitter {
                                     operationModeSetPropsMaxValue = 1;
                                     operationModeSetPropsValidValues = [0, 1];
                                     temperatureSetPropsMinValue = 0;
-                                    temperatureSetPropsMaxValue = 60;
+                                    temperatureSetPropsMaxValue = maxTankTemperature;
                                     break;
                                 case caseZone2: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
                                     currentOperationMode = !power ? 0 : idleZone2 ? 1 : [2, 2, 2, 3, 3, 2][operationModeZone2]; //INACTIVE, IDLE, HEATING, COOLING
