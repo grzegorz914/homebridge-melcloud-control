@@ -221,17 +221,20 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `enableDebugMode` | This enable deep log in homebridge console. |
 | `disableLogInfo` | This disable display log values and states on every it change. |
 | `disableLogDeviceInfo` | This disable display log device info on plugin start. |
-| `enableRestFul` | If enabled, RESTful server will start automatically and respond to any path request. |
-| `restFulDebug` | If enabled, deep log will be present in homebridge console for RESTFul server. |
-| `enableMqtt` | This enabled MQTT Broker, publish and subscribe all available data. |
-| `mqttDebug` | This enabled deep log in homebridge console for MQTT. |
-| `mqttHost` | Here set the `IP Address` or `Hostname` for MQTT Broker. |
-| `mqttPort` | Here set the `Port` for MQTT Broker, default 1883. |
-| `mqttClientId` | Here optional set the `Client Id` for MQTT broker or leave empty. |
-| `mqttPrefix` | Here set the `Prefix` for `Topic` or leave empty. |
-| `mqttAuth` | This enabled MQTT Broker authorization credentials. |
-| `mqttUser` | Here set the MQTT Broker user. |
-| `mqttPasswd` | Here set the MQTT Broker password. |
+| `restFul` | This is RSTful server. |
+| `enable` | If enabled, RESTful server will start automatically and respond to any path request. |
+| `port` | Here set the listening `Port` for RESTful server. |
+| `debug` | If enabled, deep log will be present in homebridge console for RESTFul server. |
+| `mqtt` | This is MQTT Broker. |
+| `enable` | If enabled, MQTT Broker will start automatically and publish all awailable PV data. |
+| `host` | Here set the `IP Address` or `Hostname` for MQTT Broker. |
+| `port` | Here set the `Port` for MQTT Broker, default 1883. |
+| `clientId` | Here optional set the `Client Id` of MQTT Broker. |
+| `prefix` | Here set the `Prefix` for `Topic` or leave empty. |
+| `auth` | If enabled, MQTT Broker will use authorization credentials. |
+| `user` | Here set the MQTT Broker user. |
+| `passwd` | Here set the MQTT Broker password. |
+| `debug` | If enabled, deep log will be present in homebridge console for MQTT. |
 | `Display Type Buttons` | 0 - `None/Disabled`, 1 - `Outlet`, 2 - `Switch`, 3 - `Motion Sensor`, 4 - `Occupancy Sensor`, 5 - `Contact Sensor`. |
 
 ### RESTful Integration

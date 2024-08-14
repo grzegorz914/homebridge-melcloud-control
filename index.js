@@ -56,10 +56,11 @@ class MelCloudPlatform {
 				//remove sensitive data
 				const debugData = {
 					...account,
-					user: 'removed',
 					passwd: 'removed',
-					mqttUser: 'removed',
-					mqttPasswd: 'removed'
+					mqtt: {
+						...account.mqtt,
+						passwd: 'removed'
+					}
 				};
 				const debug1 = enableDebugMode ? log(`Account: ${accountName}, Config: ${JSON.stringify(debugData, null, 2)}`) : false;
 
