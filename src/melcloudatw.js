@@ -437,45 +437,41 @@ class MelCloudAtw extends EventEmitter {
         impulseGenerator.start();
     };
 
-    readData(path) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                const savedData = await fsPromises.readFile(path)
-                const data = savedData.length > 0 ? JSON.parse(savedData) : false;
-                resolve(data);
-            } catch (error) {
-                reject(`Read data from path: ${path}, error: ${error}`);
-            }
-        });
+    async readData(path) {
+        try {
+            const savedData = await fsPromises.readFile(path)
+            const data = savedData.length > 0 ? JSON.parse(savedData) : false;
+            return data;
+        } catch (error) {
+            this.emit('error', `Read data from path: ${path}, error: ${error}`);
+        }
     }
 
-    send(deviceState) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                //prevent to set out of range temp
-                const minTempZones = 10;
-                const maxTempZones = 31;
-                const minTempWaterTank = 16;
-                const maxTempWaterTank = this.deviceData.Device.MaxTankTemperature ?? 70;
-                deviceState.SetTemperatureZone1 = deviceState.SetTemperatureZone1 < minTempZones ? minTempZones : deviceState.SetTemperatureZone1;
-                deviceState.SetTemperatureZone1 = deviceState.SetTemperatureZone1 > maxTempZones ? maxTempZones : deviceState.SetTemperatureZone1;
-                deviceState.SetTemperatureZone1 = deviceState.SetTemperatureZone2 < minTempZones ? minTempZones : deviceState.SetTemperatureZone2;
-                deviceState.SetTemperatureZone1 = deviceState.SetTemperatureZone2 > maxTempZones ? maxTempZones : deviceState.SetTemperatureZone2;
-                deviceState.SetTankWaterTemperature = deviceState.SetTankWaterTemperature < minTempWaterTank ? minTempWaterTank : deviceState.SetTankWaterTemperature;
-                deviceState.SetTankWaterTemperature = deviceState.SetTankWaterTemperature > maxTempWaterTank ? maxTempWaterTank : deviceState.SetTankWaterTemperature;
+    async send(deviceState) {
+        try {
+            //prevent to set out of range temp
+            const minTempZones = 10;
+            const maxTempZones = 31;
+            const minTempWaterTank = 16;
+            const maxTempWaterTank = this.deviceData.Device.MaxTankTemperature ?? 70;
+            deviceState.SetTemperatureZone1 = deviceState.SetTemperatureZone1 < minTempZones ? minTempZones : deviceState.SetTemperatureZone1;
+            deviceState.SetTemperatureZone1 = deviceState.SetTemperatureZone1 > maxTempZones ? maxTempZones : deviceState.SetTemperatureZone1;
+            deviceState.SetTemperatureZone1 = deviceState.SetTemperatureZone2 < minTempZones ? minTempZones : deviceState.SetTemperatureZone2;
+            deviceState.SetTemperatureZone1 = deviceState.SetTemperatureZone2 > maxTempZones ? maxTempZones : deviceState.SetTemperatureZone2;
+            deviceState.SetTankWaterTemperature = deviceState.SetTankWaterTemperature < minTempWaterTank ? minTempWaterTank : deviceState.SetTankWaterTemperature;
+            deviceState.SetTankWaterTemperature = deviceState.SetTankWaterTemperature > maxTempWaterTank ? maxTempWaterTank : deviceState.SetTankWaterTemperature;
 
-                deviceState.HasPendingCommand = true;
-                const options = {
-                    data: deviceState
-                };
-
-                await this.axiosInstancePost(CONSTANTS.ApiUrls.SetAtw, options);
-                this.emit('deviceState', this.deviceData, deviceState, this.useFahrenheit);
-                resolve();
-            } catch (error) {
-                reject(error);
+            deviceState.HasPendingCommand = true;
+            const options = {
+                data: deviceState
             };
-        });
+
+            await this.axiosInstancePost(CONSTANTS.ApiUrls.SetAtw, options);
+            this.emit('deviceState', this.deviceData, deviceState, this.useFahrenheit);
+            return true;
+        } catch (error) {
+            this.emit('error', error);
+        };
     };
 };
 module.exports = MelCloudAtw;

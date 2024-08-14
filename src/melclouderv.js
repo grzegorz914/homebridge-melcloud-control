@@ -354,39 +354,35 @@ class MelCloudErv extends EventEmitter {
         impulseGenerator.start();
     };
 
-    readData(path) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                const savedData = await fsPromises.readFile(path)
-                const data = savedData.length > 0 ? JSON.parse(savedData) : false;
-                resolve(data);
-            } catch (error) {
-                reject(`Read data from path: ${path}, error: ${error}`);
-            }
-        });
+    async readData(path) {
+        try {
+            const savedData = await fsPromises.readFile(path)
+            const data = savedData.length > 0 ? JSON.parse(savedData) : false;
+            return data;;
+        } catch (error) {
+            this.emit('error', `Read data from path: ${path}, error: ${error}`);
+        }
     }
 
-    send(deviceState) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                //prevent to set out of range temp
-                const minTemp = this.deviceData.Device.MinTempHeat ?? 10;
-                const maxTemp = this.deviceData.Device.MaxTempHeat ?? 31;
-                deviceState.SetTemperature = deviceState.SetTemperature < minTemp ? minTemp : deviceState.SetTemperature;
-                deviceState.SetTemperature = deviceState.SetTemperature > maxTemp ? maxTemp : deviceState.SetTemperature;
+    async send(deviceState) {
+        try {
+            //prevent to set out of range temp
+            const minTemp = this.deviceData.Device.MinTempHeat ?? 10;
+            const maxTemp = this.deviceData.Device.MaxTempHeat ?? 31;
+            deviceState.SetTemperature = deviceState.SetTemperature < minTemp ? minTemp : deviceState.SetTemperature;
+            deviceState.SetTemperature = deviceState.SetTemperature > maxTemp ? maxTemp : deviceState.SetTemperature;
 
-                deviceState.HasPendingCommand = true;
-                const options = {
-                    data: deviceState
-                };
-
-                await this.axiosInstancePost(CONSTANTS.ApiUrls.SetErv, options);
-                this.emit('deviceState', this.deviceData, deviceState, this.useFahrenheit);
-                resolve();
-            } catch (error) {
-                reject(error);
+            deviceState.HasPendingCommand = true;
+            const options = {
+                data: deviceState
             };
-        });
+
+            await this.axiosInstancePost(CONSTANTS.ApiUrls.SetErv, options);
+            this.emit('deviceState', this.deviceData, deviceState, this.useFahrenheit);
+            return true;
+        } catch (error) {
+            this.emit('error', error);
+        };
     };
 };
 module.exports = MelCloudErv;

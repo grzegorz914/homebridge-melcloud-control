@@ -188,31 +188,27 @@ class MelCloud extends EventEmitter {
         impulseGenerator.start();
     };
 
-    saveData(path, data) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                await fsPromises.writeFile(path, JSON.stringify(data, null, 2));
-                resolve();
-            } catch (error) {
-                reject(`Save data to path: ${path}, error: ${error}`);
-            }
-        });
+    async saveData(path, data) {
+        try {
+            await fsPromises.writeFile(path, JSON.stringify(data, null, 2));
+            return true;
+        } catch (error) {
+            this.emit('error', `Save data to path: ${path}, error: ${error}`);
+        }
     }
 
-    send(accountInfo) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                const options = {
-                    data: accountInfo
-                };
-
-                await this.axiosInstancePost(CONSTANTS.ApiUrls.UpdateApplicationOptions, options);
-                await this.saveData(this.accountInfoFile, accountInfo);
-                resolve();
-            } catch (error) {
-                reject(error);
+    async send(accountInfo) {
+        try {
+            const options = {
+                data: accountInfo
             };
-        });
+
+            await this.axiosInstancePost(CONSTANTS.ApiUrls.UpdateApplicationOptions, options);
+            await this.saveData(this.accountInfoFile, accountInfo);
+            return true;
+        } catch (error) {
+            this.emit('error', error);
+        };
     };
 };
 module.exports = MelCloud;

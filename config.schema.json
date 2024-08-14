@@ -33,6 +33,7 @@
               "type": "string",
               "placeholder": "Password",
               "description": "MELCloud account password.",
+              "format": "password",
               "required": true
             },
             "language": {
@@ -1305,7 +1306,10 @@
       "items": [
         "accounts[].name",
         "accounts[].user",
-        "accounts[].passwd",
+        {
+          "key": "accounts[].passwd",
+          "type": "password"
+        },
         "accounts[].language",
         {
           "key": "accounts[]",
