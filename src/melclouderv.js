@@ -349,7 +349,7 @@ class MelCloudErv extends EventEmitter {
             } catch (error) {
                 this.emit('error', `Check device error: ${error}.`);
             };
-        });
+        }).on('state', () => { });
 
         impulseGenerator.start();
     };
