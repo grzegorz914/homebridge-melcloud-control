@@ -30,9 +30,14 @@ class DeviceAta extends EventEmitter {
         this.enableDebugMode = account.enableDebugMode || false;
 
         //external integrations
-        const restFulEnabled = account.restFul.enable || false;
+        //restFull
+        const restFul = account.restFul || {};
+        const restFulEnabled = restFul.enable || false;
         this.restFulConnected = false;
-        const mqttEnabled = account.mqtt.enable || false;
+
+        //mqtt
+        const mqtt = account.mqtt || {};
+        const mqttEnabled = mqtt.enable || false;
         this.mqttConnected = false;
 
         //variables
@@ -74,7 +79,7 @@ class DeviceAta extends EventEmitter {
                 if (!this.restFulConnected) {
                     this.restFul = new RestFul({
                         port: deviceId.slice(-4),
-                        debug: account.restFul.debug || false
+                        debug: restFul.debug || false
                     });
 
                     this.restFul.on('connected', (message) => {
@@ -96,13 +101,13 @@ class DeviceAta extends EventEmitter {
             if (mqttEnabled) {
                 if (!this.mqttConnected) {
                     this.mqtt = new Mqtt({
-                        host: account.mqtt.host,
-                        port: account.mqtt.port || 1883,
-                        clientId: `${account.mqtt.clientId}_${deviceId}` || `${deviceTypeText}_${deviceName}_${deviceId}`,
-                        prefix: `${account.mqtt.prefix}/${deviceTypeText}/${deviceName}`,
-                        user: account.mqtt.user,
-                        passwd: account.mqtt.pass,
-                        debug: account.mqtt.debug || false
+                        host: mqtt.host,
+                        port: mqtt.port || 1883,
+                        clientId: `${mqtt.clientId}_${deviceId}` || `${deviceTypeText}_${deviceName}_${deviceId}`,
+                        prefix: `${mqtt.prefix}/${deviceTypeText}/${deviceName}`,
+                        user: mqtt.user,
+                        passwd: mqtt.passwd,
+                        debug: mqtt.debug || false
                     });
 
                     this.mqtt.on('connected', (message) => {
