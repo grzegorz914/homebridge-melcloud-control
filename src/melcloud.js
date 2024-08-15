@@ -38,9 +38,17 @@ class MelCloud extends EventEmitter {
         });
 
         const devicesId = [];
+        const timers = [
+            { name: 'connect', interval: refreshInterval },
+            { name: 'checkDevicesList', interval: refreshInterval }
+        ];
 
-        const impulseGenerator = new ImpulseGenerator();
+        const impulseGenerator = new ImpulseGenerator(timers);
         impulseGenerator.on('connect', async () => {
+            if (this.connectCompleted) {
+                return;
+            }
+
             try {
                 const debug = enableDebugMode ? this.emit('debug', `Connecting to MELCloud.`) : false;
                 const accountData = await axiosInstanceLogin(CONSTANTS.ApiUrls.ClientLogin, options);
@@ -107,13 +115,16 @@ class MelCloud extends EventEmitter {
                 await this.saveData(accountInfoFile, accountInfo);
 
                 //check devices list
+                this.connectCompleted = true;
                 impulseGenerator.emit('checkDevicesList');
             } catch (error) {
                 this.emit('error', `Connect to MELCloud error: ${error}, reconnect in  ${refreshInterval / 1000}s.`);
-                await new Promise(resolve => setTimeout(resolve, refreshInterval));
-                impulseGenerator.emit('connect');
             };
         }).on('checkDevicesList', async () => {
+            if (!this.connectCompleted) {
+                return;
+            }
+
             try {
                 const debug = enableDebugMode ? this.emit('debug', `Scanning for devices.`) : false;
                 const listDevicesData = await this.axiosInstanceGet(CONSTANTS.ApiUrls.ListDevices);
@@ -163,22 +174,18 @@ class MelCloud extends EventEmitter {
                     const debug = enableDebugMode ? this.emit('debug', `Device: ${deviceName} info saved.`) : false;
 
                     //prepare device if not in devices array
-                    await new Promise(resolve => setTimeout(resolve, 250));
+                    await new Promise(resolve => setTimeout(resolve, 500));
                     if (!devicesId.includes(deviceId)) {
                         this.emit('checkDevicesListComplete', this.accountInfo, this.contextKey, deviceInfo);
                         devicesId.push(deviceId);
                     }
                 }
-
-                impulseGenerator.start([{ name: 'checkDevicesList', interval: refreshInterval }]);
             } catch (error) {
                 this.emit('error', `Scanning for devices error: ${error}, check again in: ${refreshInterval / 1000}s.`);
-                await new Promise(resolve => setTimeout(resolve, refreshInterval));
-                impulseGenerator.emit('checkDevicesList');
             };
         })
 
-        impulseGenerator.emit('connect');
+        impulseGenerator.start();
     };
 
     async saveData(path, data) {

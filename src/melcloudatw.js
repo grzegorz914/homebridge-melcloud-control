@@ -38,7 +38,7 @@ class MelCloudAtw extends EventEmitter {
             { name: 'checkDevice', interval: 5000 },
         ];
 
-        const impulseGenerator = new ImpulseGenerator();
+        const impulseGenerator = new ImpulseGenerator(timers);
         impulseGenerator.on('checkDevice', async () => {
             try {
                 //read account info from file
@@ -432,10 +432,9 @@ class MelCloudAtw extends EventEmitter {
             } catch (error) {
                 this.emit('error', `Check device error: ${error}.`);
             };
-        })
-            .on('state', () => { });
+        });
 
-        impulseGenerator.start(timers);
+        impulseGenerator.start();
     };
 
     async readData(path) {
