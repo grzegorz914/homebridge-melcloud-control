@@ -68,6 +68,7 @@ class MelCloudPlatform {
 				const accountInfoFile = `${prefDir}/${accountName}_Account`;
 				const buildingsFile = `${prefDir}/${accountName}_Buildings`;
 				const refreshInterval = account.refreshInterval * 1000 || 120000;
+				const deviceRefreshInterval = account.deviceRefreshInterval * 1000 || 5000;
 
 				//melcloud account
 				const melCloud = new MelCloud(prefDir, accountName, user, passwd, language, enableDebugMode, accountInfoFile, buildingsFile, refreshInterval);
@@ -86,7 +87,7 @@ class MelCloudPlatform {
 								return;
 							};
 
-							const airConditioner = new DeviceAta(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile)
+							const airConditioner = new DeviceAta(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile, deviceRefreshInterval)
 							airConditioner.on('publishAccessory', (accessory) => {
 
 								//publish device
@@ -112,7 +113,7 @@ class MelCloudPlatform {
 								return;
 							};
 
-							const heatPump = new DeviceAtw(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile)
+							const heatPump = new DeviceAtw(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile, deviceRefreshInterval)
 							heatPump.on('publishAccessory', (accessory) => {
 
 								//publish device
@@ -138,7 +139,7 @@ class MelCloudPlatform {
 								return;
 							};
 
-							const energyRecoveryVentilation = new DeviceErv(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile)
+							const energyRecoveryVentilation = new DeviceErv(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile, deviceRefreshInterval)
 							energyRecoveryVentilation.on('publishAccessory', (accessory) => {
 
 								//publish device
@@ -169,8 +170,11 @@ class MelCloudPlatform {
 					.on('debug', (debug) => {
 						log(`Account ${accountName}, debug: ${debug}`);
 					})
-					.on('error', (error) => {
-						log.error(`Account ${accountName}, ${error}`);
+					.on('error', async (error) => {
+						log.error(`Account ${accountName}, ${error}, check again in: ${refreshInterval / 1000}s.`);
+						melCloud.impulseGenerator.stop();
+						await new Promise(resolve => setTimeout(resolve, refreshInterval));
+						melCloud.connect();
 					});
 			};
 		});

@@ -14,6 +14,7 @@ class MelCloudErv extends EventEmitter {
         const accountInfoFile = config.accountInfoFile;
         const deviceInfoFile = config.deviceInfoFile;
         const debugLog = config.debugLog;
+        const refreshInterval = config.refreshInterval;
 
         //set default values
         this.deviceData = {};
@@ -34,11 +35,7 @@ class MelCloudErv extends EventEmitter {
             })
         });
 
-        const timers = [
-            { name: 'checkDevice', interval: 5000 },
-        ];
-
-        const impulseGenerator = new ImpulseGenerator(timers);
+        const impulseGenerator = new ImpulseGenerator();
         impulseGenerator.on('checkDevice', async () => {
             try {
                 //read account info from file
@@ -351,7 +348,7 @@ class MelCloudErv extends EventEmitter {
             };
         }).on('state', () => { });
 
-        impulseGenerator.start();
+        impulseGenerator.start([{ name: 'checkDevice', sampling: refreshInterval }]);
     };
 
     async readData(path) {

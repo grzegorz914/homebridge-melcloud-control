@@ -7,7 +7,7 @@ const CONSTANTS = require('./constants.json');
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceAta extends EventEmitter {
-    constructor(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile) {
+    constructor(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile, deviceRefreshInterval) {
         super();
 
         Accessory = api.platformAccessory;
@@ -33,6 +33,8 @@ class DeviceAta extends EventEmitter {
         const restFul = account.restFul ?? {};
         const restFulEnabled = restFul.enable || false;
         this.restFulConnected = false;
+
+        //mqtt
         const mqtt = account.restFul ?? {};
         const mqttEnabled = mqtt.enable || false;
         this.mqttConnected = false;
@@ -67,7 +69,8 @@ class DeviceAta extends EventEmitter {
             contextKey: contextKey,
             accountInfoFile: accountInfoFile,
             deviceInfoFile: deviceInfoFile,
-            debugLog: account.enableDebugMode
+            debugLog: account.enableDebugMode,
+            refreshInterval: deviceRefreshInterval
         });
 
         this.melCloudAta.on('externalIntegrations', (deviceData, deviceState) => {

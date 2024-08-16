@@ -1159,11 +1159,20 @@
               "required": false
             },
             "refreshInterval": {
-              "title": "Refresh Interval",
+              "title": "Account Refresh Interval",
               "type": "integer",
               "default": 120,
               "minimum": 1,
               "maximum": 600,
+              "description": "Set the background account data refresh time in seconds.",
+              "required": false
+            },
+            "deviceRefreshInterval": {
+              "title": "Device Refresh Interval",
+              "type": "integer",
+              "default": 5,
+              "minimum": 1,
+              "maximum": 60,
               "description": "Set the background devices state refresh time in seconds.",
               "required": false
             },
@@ -1533,7 +1542,8 @@
                     "accounts[].enableDebugMode",
                     "accounts[].disableLogInfo",
                     "accounts[].disableLogDeviceInfo",
-                    "accounts[].refreshInterval"
+                    "accounts[].refreshInterval",
+                    "accounts[].deviceRefreshInterval"
                   ]
                 },
                 {

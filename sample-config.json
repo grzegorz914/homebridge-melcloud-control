@@ -89,6 +89,7 @@
             }
           ],
           "refreshInterval": 120,
+          "deviceRefreshInterval": 5,
           "disableLogInfo": false,
           "disableLogDeviceInfo": false,
           "enableDebugMode": false,

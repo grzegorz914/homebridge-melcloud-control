@@ -14,6 +14,7 @@ class MelCloudAta extends EventEmitter {
         const accountInfoFile = config.accountInfoFile;
         const deviceInfoFile = config.deviceInfoFile;
         const debugLog = config.debugLog;
+        const refreshInterval= config.refreshInterval;
 
         //set default values
         this.deviceData = {};
@@ -34,11 +35,7 @@ class MelCloudAta extends EventEmitter {
             })
         });
 
-        const timers = [
-            { name: 'checkDevice', interval: 5000 },
-        ];
-
-        const impulseGenerator = new ImpulseGenerator(timers);
+        const impulseGenerator = new ImpulseGenerator();
         impulseGenerator.on('checkDevice', async () => {
             try {
                 //read account info from file
@@ -361,9 +358,9 @@ class MelCloudAta extends EventEmitter {
             } catch (error) {
                 this.emit('error', `Check device error: ${error}.`);
             };
-        });
+        }).on('state', () => { });
 
-        impulseGenerator.start();
+        impulseGenerator.start([{ name: 'checkDevice', sampling: refreshInterval }]);
     };
 
     async readData(path) {

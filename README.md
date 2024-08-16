@@ -217,7 +217,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ervButtons.namePrefix` | Here enable/disable the accessory name as a prefix for button/sensor name. |
 | `ervHideDeviceById.name` | Here set Your own name. |
 | `ervHideDeviceById.id` | Here set `DeviceId` to be hidden and not exposed to the `Homebridge/Homekit`. |
-| `refreshInterval` | Here set the background devices state refresh time in (sec), default `120s`. |
+| `refreshInterval` | Here set the background account data refresh time in (sec), default `120s`. |
+| `deviceRefreshInterval` | Here set the background devices state refresh time in (sec), default `5s`. |
 | `enableDebugMode` | This enable deep log in homebridge console. |
 | `disableLogInfo` | This disable display log values and states on every it change. |
 | `disableLogDeviceInfo` | This disable display log device info on plugin start. |

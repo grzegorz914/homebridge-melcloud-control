@@ -7,7 +7,7 @@ const CONSTANTS = require('./constants.json');
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceAtw extends EventEmitter {
-    constructor(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile) {
+    constructor(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile, deviceRefreshInterval) {
         super();
 
         Accessory = api.platformAccessory;
@@ -71,7 +71,8 @@ class DeviceAtw extends EventEmitter {
             contextKey: contextKey,
             accountInfoFile: accountInfoFile,
             deviceInfoFile: deviceInfoFile,
-            debugLog: account.enableDebugMode
+            debugLog: account.enableDebugMode,
+            refreshInterval: deviceRefreshInterval
         });
 
         this.melCloudAtw.on('externalIntegrations', (deviceData, deviceState) => {
