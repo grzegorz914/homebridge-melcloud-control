@@ -60,6 +60,7 @@ class MelCloudAtw extends EventEmitter {
                 const debug1 = debugLog ? this.emit('debug', `Device Info: ${JSON.stringify(deviceData, null, 2)}`) : false;
 
                 if (!deviceData) {
+                    this.emit('warn', `Device not data found.`);
                     return;
                 }
 
@@ -440,7 +441,7 @@ class MelCloudAtw extends EventEmitter {
             const data = savedData.length > 0 ? JSON.parse(savedData) : false;
             return data;
         } catch (error) {
-            this.emit('error', `Read data from path: ${path}, error: ${error}`);
+            throw new Error(`Read data from path: ${path}, error: ${error}`);
         }
     }
 
@@ -467,7 +468,7 @@ class MelCloudAtw extends EventEmitter {
             this.emit('deviceState', this.deviceData, deviceState, this.useFahrenheit);
             return true;
         } catch (error) {
-            this.emit('error', error);
+            throw new Error(error);
         };
     };
 };

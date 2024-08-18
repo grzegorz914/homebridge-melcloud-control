@@ -51,7 +51,7 @@ class MelCloudPlatform {
 
 				//debug config
 				const enableDebugMode = account.enableDebugMode || false;
-				const debug = enableDebugMode ? log(`Account: ${accountName}, did finish launching.`) : false;
+				const debug = enableDebugMode ? log.info(`Account: ${accountName}, did finish launching.`) : false;
 
 				//remove sensitive data
 				const debugData = {
@@ -62,7 +62,7 @@ class MelCloudPlatform {
 						passwd: 'removed'
 					}
 				};
-				const debug1 = enableDebugMode ? log(`Account: ${accountName}, Config: ${JSON.stringify(debugData, null, 2)}`) : false;
+				const debug1 = enableDebugMode ? log.info(`Account: ${accountName}, Config: ${JSON.stringify(debugData, null, 2)}`) : false;
 
 				//set refresh interval
 				const accountInfoFile = `${prefDir}/${accountName}_Account`;
@@ -92,16 +92,19 @@ class MelCloudPlatform {
 
 								//publish device
 								api.publishExternalAccessories(CONSTANTS.PluginName, [accessory]);
-								const debug = enableDebugMode ? log(`${accountName}, ${deviceTypeText} ${deviceName}, published as external accessory.`) : false;
+								log.success(`${accountName}, ${deviceTypeText} ${deviceName}, published as external accessory.`);
 							})
 								.on('devInfo', (devInfo) => {
-									log(devInfo);
+									log.info(devInfo);
 								})
 								.on('message', (message) => {
-									log(`${deviceTypeText}, ${deviceName}, ${message}`);
+									log.info(`${deviceTypeText}, ${deviceName}, ${message}`);
 								})
 								.on('debug', (debug) => {
-									log(`${deviceTypeText}, ${deviceName}, debug: ${debug}`);
+									log.info(`${deviceTypeText}, ${deviceName}, debug: ${debug}`);
+								})
+								.on('warn', (warn) => {
+									log.warn(`${deviceTypeText}, ${deviceName}, ${warn}`);
 								})
 								.on('error', (error) => {
 									log.error(`${deviceTypeText}, ${deviceName}, ${error}`);
@@ -118,16 +121,19 @@ class MelCloudPlatform {
 
 								//publish device
 								api.publishExternalAccessories(CONSTANTS.PluginName, [accessory]);
-								const debug = enableDebugMode ? log(`${accountName}, ${deviceTypeText} ${deviceName}, published as external accessory.`) : false;
+								log.success(`${accountName}, ${deviceTypeText} ${deviceName}, published as external accessory.`);
 							})
 								.on('devInfo', (devInfo) => {
-									log(devInfo);
+									log.info(devInfo);
 								})
 								.on('message', (message) => {
-									log(`${deviceTypeText}, ${deviceName}, ${message}`);
+									log.info(`${deviceTypeText}, ${deviceName}, ${message}`);
 								})
 								.on('debug', (debug) => {
-									log(`${deviceTypeText}, ${deviceName}, debug: ${debug}`);
+									log.info(`${deviceTypeText}, ${deviceName}, debug: ${debug}`);
+								})
+								.on('warn', (warn) => {
+									log.warn(`${deviceTypeText}, ${deviceName}, ${warn}`);
 								})
 								.on('error', (error) => {
 									log.error(`${deviceTypeText}, ${deviceName}, ${error}`);
@@ -144,16 +150,19 @@ class MelCloudPlatform {
 
 								//publish device
 								api.publishExternalAccessories(CONSTANTS.PluginName, [accessory]);
-								const debug = enableDebugMode ? log(`${accountName}, ${deviceTypeText} ${deviceName}, published as external accessory.`) : false;
+								log.success(`${accountName}, ${deviceTypeText} ${deviceName}, published as external accessory.`);
 							})
 								.on('devInfo', (devInfo) => {
-									log(devInfo);
+									log.info(devInfo);
 								})
 								.on('message', (message) => {
-									log(`${deviceTypeText}, ${deviceName}, ${message}`);
+									log.info(`${deviceTypeText}, ${deviceName}, ${message}`);
 								})
 								.on('debug', (debug) => {
-									log(`${deviceTypeText}, ${deviceName}, debug: ${debug}`);
+									log.info(`${deviceTypeText}, ${deviceName}, debug: ${debug}`);
+								})
+								.on('warn', (warn) => {
+									log.warn(`${deviceTypeText}, ${deviceName}, ${warn}`);
 								})
 								.on('error', (error) => {
 									log.error(`${deviceTypeText}, ${deviceName}, ${error}`);
@@ -165,10 +174,13 @@ class MelCloudPlatform {
 					}
 				})
 					.on('message', (message) => {
-						log(`Account ${accountName}, ${message}`);
+						log.info(`Account ${accountName}, ${message}`);
 					})
 					.on('debug', (debug) => {
-						log(`Account ${accountName}, debug: ${debug}`);
+						log.info(`Account ${accountName}, debug: ${debug}`);
+					})
+					.on('warn', (warn) => {
+						log.warn(`${deviceTypeText}, ${deviceName}, ${warn}`);
 					})
 					.on('error', async (error) => {
 						log.error(`Account ${accountName}, ${error}, check again in: ${refreshInterval / 1000}s.`);

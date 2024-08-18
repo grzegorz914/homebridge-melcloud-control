@@ -79,7 +79,7 @@ class MelCloud extends EventEmitter {
             const debug1 = this.enableDebugMode ? this.emit('debug', `MELCloud Info: ${JSON.stringify(debugData, null, 2)}`) : false;
 
             if (contextKey === undefined || contextKey === null) {
-                this.emit('message', `Context key: ${contextKey}, missing.`)
+                this.emit('warn', `Context key: ${contextKey}, missing.`)
                 return;
             };
 
@@ -143,7 +143,7 @@ class MelCloud extends EventEmitter {
             const debug1 = this.enableDebugMode ? this.emit('debug', `Buildings: ${JSON.stringify(buildingsList, null, 2)}`) : false;
 
             if (!buildingsList) {
-                this.emit('message', `No building found.`);
+                this.emit('warn', `No building found.`);
                 return;
             }
 
@@ -169,7 +169,7 @@ class MelCloud extends EventEmitter {
 
             const devicesCount = devices.length;
             if (devicesCount === 0) {
-                this.emit('message', `No devices found.`);
+                this.emit('warn', `No devices found.`);
                 return;
             }
             const debug3 = this.enableDebugMode ? this.emit('debug', `Found: ${devicesCount} devices.`) : false;
@@ -192,7 +192,7 @@ class MelCloud extends EventEmitter {
             }
             return true;
         } catch (error) {
-            this.emit('error', `Scanning for devices error: ${error}.`);
+            throw new Error(`Scanning for devices error: ${error}.`);
         };
     }
 
@@ -202,7 +202,7 @@ class MelCloud extends EventEmitter {
             const debug3 = this.enableDebugMode ? this.emit('debug', `Data saved to path: ${path}.`) : false;
             return true;
         } catch (error) {
-            this.emit('error', `Save data to path: ${path}, error: ${error}`);
+            throw new Error(`Save data to path: ${path}, error: ${error}`);
         }
     }
 
@@ -216,7 +216,7 @@ class MelCloud extends EventEmitter {
             await this.saveData(this.accountInfoFile, accountInfo);
             return true;
         } catch (error) {
-            this.emit('error', error);
+            throw new Error(error);
         };
     };
 };

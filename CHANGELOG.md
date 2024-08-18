@@ -17,6 +17,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - After update to this version the devices need to be added to the Home app again and the old unresponsive remove!!!- This devices will be removed from all automations and scenes!!!
 
+### After update to v2.0.0 RESTFull and MQTT config settings need to be updated
+
+## [2.1.1] - (18.08.2024)
+
+## Changes
+
+- fix correct catch error
+- log improvements
+
 ## [2.1.0] - (16.08.2024)
 
 ## Changes
@@ -31,8 +40,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.0.0] - (14.08.2024)
 
 ## Changes
-
-### After update to v2.0.0 RESTFull and MQTT config settings need to be updated
 
 - RestFul and MQTT refactor
 - bump dependencies
