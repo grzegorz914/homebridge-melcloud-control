@@ -92,7 +92,7 @@ class DeviceAtw extends EventEmitter {
                             this.emit('debug', debug);
                         })
                         .on('error', (error) => {
-                            this.emit('error', error);
+                            this.emit('warn', error);
                         });
                 }
                 const restFul = this.restFulConnected ? this.restFul.update('info', deviceData) : false;
@@ -212,14 +212,14 @@ class DeviceAtw extends EventEmitter {
                                         break;
                                 };
                             } catch (error) {
-                                this.emit('error', `MQTT send error: ${error}.`);
+                                this.emit('warn', `MQTT send error: ${error}.`);
                             };
                         })
                         .on('debug', (debug) => {
                             this.emit('debug', debug);
                         })
                         .on('error', (error) => {
-                            this.emit('error', error);
+                            this.emit('warn', error);
                         });
                 }
                 const mqtt = this.mqttConnected ? this.mqtt.emit('publish', `Info`, deviceData) : false;
@@ -843,7 +843,7 @@ class DeviceAtw extends EventEmitter {
                                             break;
                                     };
                                 } catch (error) {
-                                    this.emit('error', `Set power error: ${error}`);
+                                    this.emit('warn', `Set power error: ${error}`);
                                     melCloudService.updateCharacteristic(Characteristic.Active, false)
                                 };
                             });
@@ -941,7 +941,7 @@ class DeviceAtw extends EventEmitter {
                                     await this.melCloudAtw.send(deviceState);
                                     const info = this.disableLogInfo ? false : this.emit('message', `${zoneName}, Set operation mode: ${operationModeText}`);
                                 } catch (error) {
-                                    this.emit('error', `${zoneName}, Set operation mode error: ${error}`);
+                                    this.emit('warn', `${zoneName}, Set operation mode error: ${error}`);
                                 };
                             });
                         melCloudService.getCharacteristic(Characteristic.CurrentTemperature)
@@ -990,7 +990,7 @@ class DeviceAtw extends EventEmitter {
                                         const set = i > 0 ? await this.melCloudAtw.send(deviceState) : false;
                                         const info = this.disableLogInfo || i === 0 ? false : this.emit('message', `${zoneName}, Set heating threshold temperature: ${value}${this.temperatureUnit}`);
                                     } catch (error) {
-                                        this.emit('error', `${zoneName}, Set heating threshold temperature error: ${error}`);
+                                        this.emit('warn', `${zoneName}, Set heating threshold temperature error: ${error}`);
                                     };
                                 });
                         };
@@ -1030,7 +1030,7 @@ class DeviceAtw extends EventEmitter {
                                         const set = i > 0 ? await this.melCloudAtw.send(deviceState) : false;
                                         const info = this.disableLogInfo || i === 0 ? false : this.emit('message', `${zoneName}, Set cooling threshold temperature: ${value}${this.temperatureUnit}`);
                                     } catch (error) {
-                                        this.emit('error', `${zoneName}, Set cooling threshold temperature error: ${error}`);
+                                        this.emit('warn', `${zoneName}, Set cooling threshold temperature error: ${error}`);
                                     };
                                 });
                         };
@@ -1066,7 +1066,7 @@ class DeviceAtw extends EventEmitter {
                                     await this.melCloudAtw.send(deviceState);
                                     const info = this.disableLogInfo ? false : this.emit('message', `${zoneName}, Set lock physical controls: ${value ? 'LOCK' : 'UNLOCK'}`);
                                 } catch (error) {
-                                    this.emit('error', `${zoneName}, Set lock physical controls error: ${error}`);
+                                    this.emit('warn', `${zoneName}, Set lock physical controls error: ${error}`);
                                 };
                             });
                         melCloudService.getCharacteristic(Characteristic.TemperatureDisplayUnits)
@@ -1081,7 +1081,7 @@ class DeviceAtw extends EventEmitter {
                                     await this.melCloud.send(accountInfo);
                                     const info = this.disableLogInfo ? false : this.emit('message', `Set temperature display unit: ${CONSTANTS.TemperatureDisplayUnits[value]}`);
                                 } catch (error) {
-                                    this.emit('error', `Set temperature display unit error: ${error}`);
+                                    this.emit('warn', `Set temperature display unit error: ${error}`);
                                 };
                             });
                         this.melCloudServices.push(melCloudService);
@@ -1200,7 +1200,7 @@ class DeviceAtw extends EventEmitter {
                                     await this.melCloudAtw.send(deviceState);
                                     const info = this.disableLogInfo ? false : this.emit('message', `${zoneName}, Set operation mode: ${operationModeText}`);
                                 } catch (error) {
-                                    this.emit('error', `${zoneName}, Set operation mode error: ${error}`);
+                                    this.emit('warn', `${zoneName}, Set operation mode error: ${error}`);
                                 };
                             });
                         melCloudServiceT.getCharacteristic(Characteristic.CurrentTemperature)
@@ -1247,7 +1247,7 @@ class DeviceAtw extends EventEmitter {
                                     const set = i > 0 ? await this.melCloudAtw.send(deviceState) : false;
                                     const info = this.disableLogInfo || i === 0 ? false : this.emit('message', `${zoneName}, Set temperature: ${value}${this.temperatureUnit}`);
                                 } catch (error) {
-                                    this.emit('error', `${zoneName}, Set temperature error: ${error}`);
+                                    this.emit('warn', `${zoneName}, Set temperature error: ${error}`);
                                 };
                             });
                         melCloudServiceT.getCharacteristic(Characteristic.TemperatureDisplayUnits)
@@ -1262,7 +1262,7 @@ class DeviceAtw extends EventEmitter {
                                     await this.melCloud.send(accountInfo);
                                     const info = this.disableLogInfo ? false : this.emit('message', `Set temperature display unit: ${CONSTANTS.TemperatureDisplayUnits[value]}`);
                                 } catch (error) {
-                                    this.emit('error', `Set temperature display unit error: ${error}`);
+                                    this.emit('warn', `Set temperature display unit error: ${error}`);
                                 };
                             });
                         this.melCloudServices.push(melCloudServiceT);
@@ -1649,7 +1649,7 @@ class DeviceAtw extends EventEmitter {
                                 await this.melCloudAtw.send(deviceState);
                                 const info = this.disableLogInfo ? false : this.emit('message', `Set: ${buttonName}`);
                             } catch (error) {
-                                this.emit('error', `Set button error: ${error}`);
+                                this.emit('warn', `Set button error: ${error}`);
                             };
                         });
                     this.buttonsServices.push(buttonService);
@@ -1702,7 +1702,7 @@ class DeviceAtw extends EventEmitter {
                                 await this.melCloudAtw.send(deviceState);
                                 const info = this.disableLogInfo ? false : this.emit('message', `Set: ${presetName}`);
                             } catch (error) {
-                                this.emit('error', `Set preset error: ${error}`);
+                                this.emit('warn', `Set preset error: ${error}`);
                             };
                         });
                     previousPresets.push(deviceState);
