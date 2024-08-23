@@ -526,47 +526,47 @@ class DeviceAta extends EventEmitter {
                 case 'Power':
                     deviceState[key] = value;
                     deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power;
-                    await this.melCloudAta.send(deviceState);
+                    set = await this.melCloudAta.send(deviceState);
                     break;
                 case 'OperationMode':
                     deviceState[key] = value;
                     deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.OperationMode;
-                    await this.melCloudAta.send(deviceState);
+                    set = await this.melCloudAta.send(deviceState);
                     break;
                 case 'SetTemperature':
                     deviceState[key] = value;
                     deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.SetTemperature;
-                    await this.melCloudAta.send(deviceState);
+                    set = await this.melCloudAta.send(deviceState);
                     break;
                 case 'DefaultCoolingSetTemperature':
                     deviceState[key] = value;
                     deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.SetTemperature;
-                    await this.melCloudAta.send(deviceState);
+                    set = await this.melCloudAta.send(deviceState);
                     break;
                 case 'DefaultHeatingSetTemperature':
                     deviceState[key] = value;
                     deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.SetTemperature;
-                    await this.melCloudAta.send(deviceState);
+                    set = await this.melCloudAta.send(deviceState);
                     break;
                 case 'SetFanSpeed':
                     deviceState[key] = value;
                     deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.SetFanSpeed;
-                    await this.melCloudAta.send(deviceState);
+                    set = await this.melCloudAta.send(deviceState);
                     break;
                 case 'VaneHorizontal':
                     deviceState[key] = value;
                     deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.VaneHorizontal;
-                    await this.melCloudAta.send(deviceState);
+                    set = await this.melCloudAta.send(deviceState);
                     break;
                 case 'VaneVertical':
                     deviceState[key] = value;
                     deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.VaneVertical;
-                    await this.melCloudAta.send(deviceState);
+                    set = await this.melCloudAta.send(deviceState);
                     break;
                 case 'HideVaneControls':
                     deviceState[key] = value;
                     deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Prohibit;
-                    await this.melCloudAta.send(deviceState);
+                    set = await this.melCloudAta.send(deviceState);
                     break;
                 case 'HideDryModeControl':
                     deviceState[key] = value;
@@ -576,7 +576,7 @@ class DeviceAta extends EventEmitter {
                 case 'ProhibitSetTemperature':
                     deviceState[key] = value;
                     deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Prohibit;
-                    await this.melCloudAta.send(deviceState);
+                    set = await this.melCloudAta.send(deviceState);
                     break;
                 case 'ProhibitOperationMode':
                     deviceState[key] = value;
@@ -586,7 +586,7 @@ class DeviceAta extends EventEmitter {
                 case 'ProhibitPower':
                     deviceState[key] = value;
                     deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Prohibit;
-                    await this.melCloudAta.send(deviceState);
+                    set = await this.melCloudAta.send(deviceState);
                     break;
                 default:
                     this.emit('warn', `${integration}, received key: ${key}, value: ${value}`);
