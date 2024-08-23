@@ -84,68 +84,9 @@ class DeviceErv extends EventEmitter {
                     })
                         .on('set', async (key, value) => {
                             try {
-                                switch (key) {
-                                    case 'Power':
-                                        deviceState[key] = value;
-                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power;
-                                        await this.melCloudErv.send(deviceState);
-                                        break;
-                                    case 'OperationMode':
-                                        deviceState[key] = value;
-                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.OperationMode;
-                                        await this.melCloudErv.send(deviceState);
-                                        break;
-                                    case 'VentilationMode':
-                                        deviceState[key] = value;
-                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.VentilationMode;
-                                        await this.melCloudErv.send(deviceState);
-                                        break;
-                                    case 'SetTemperature':
-                                        deviceState[key] = value;
-                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetTemperature;
-                                        await this.melCloudErv.send(deviceState);
-                                        break;
-                                    case 'DefaultCoolingSetTemperature':
-                                        deviceState[key] = value;
-                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetTemperature;
-                                        await this.melCloudErv.send(deviceState);
-                                        break;
-                                    case 'DefaultHeatingSetTemperature':
-                                        deviceState[key] = value;
-                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetTemperature;
-                                        await this.melCloudErv.send(deviceState);
-                                        break;
-                                    case 'NightPurgeMode':
-                                        deviceState[key] = value;
-                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.NightPurgeMode;
-                                        await this.melCloudErv.send(deviceState);
-                                        break;
-                                    case 'SetFanSpeed':
-                                        deviceState[key] = value;
-                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
-                                        await this.melCloudErv.send(deviceState);
-                                        break;
-                                    case 'HideRoomTemperature':
-                                        deviceState[key] = value;
-                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Prohibit;
-                                        await this.melCloudErv.send(deviceState);
-                                        break;
-                                    case 'HideSupplyTemperature':
-                                        deviceState[key] = value;
-                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Prohibit;
-                                        await this.melCloudErv.send(deviceState);
-                                        break;
-                                    case 'HideOutdoorTemperature':
-                                        deviceState[key] = value;
-                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Prohibit;
-                                        await this.melCloudErv.send(deviceState);
-                                        break;
-                                    default:
-                                        this.emit('warn', `MQTT Received key: ${key}, value: ${value}`);
-                                        break;
-                                };
+                                await this.setOverExternalIntegration('RESTFul', deviceState, key, value);
                             } catch (error) {
-                                this.emit('warn', `MQTT send error: ${error}.`);
+                                this.emit('warn', `RESTFul set error: ${error}.`);
                             };
                         })
                         .on('debug', (debug) => {
@@ -177,72 +118,13 @@ class DeviceErv extends EventEmitter {
                         this.emit('success', message);
                     })
                         .on('subscribed', (message) => {
-                            this.emit('message', message);
+                            this.emit('success', message);
                         })
                         .on('set', async (key, value) => {
                             try {
-                                switch (key) {
-                                    case 'Power':
-                                        deviceState[key] = value;
-                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power;
-                                        await this.melCloudErv.send(deviceState);
-                                        break;
-                                    case 'OperationMode':
-                                        deviceState[key] = value;
-                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.OperationMode;
-                                        await this.melCloudErv.send(deviceState);
-                                        break;
-                                    case 'VentilationMode':
-                                        deviceState[key] = value;
-                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.VentilationMode;
-                                        await this.melCloudErv.send(deviceState);
-                                        break;
-                                    case 'SetTemperature':
-                                        deviceState[key] = value;
-                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetTemperature;
-                                        await this.melCloudErv.send(deviceState);
-                                        break;
-                                    case 'DefaultCoolingSetTemperature':
-                                        deviceState[key] = value;
-                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetTemperature;
-                                        await this.melCloudErv.send(deviceState);
-                                        break;
-                                    case 'DefaultHeatingSetTemperature':
-                                        deviceState[key] = value;
-                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetTemperature;
-                                        await this.melCloudErv.send(deviceState);
-                                        break;
-                                    case 'NightPurgeMode':
-                                        deviceState[key] = value;
-                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.NightPurgeMode;
-                                        await this.melCloudErv.send(deviceState);
-                                        break;
-                                    case 'SetFanSpeed':
-                                        deviceState[key] = value;
-                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
-                                        await this.melCloudErv.send(deviceState);
-                                        break;
-                                    case 'HideRoomTemperature':
-                                        deviceState[key] = value;
-                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Prohibit;
-                                        await this.melCloudErv.send(deviceState);
-                                        break;
-                                    case 'HideSupplyTemperature':
-                                        deviceState[key] = value;
-                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Prohibit;
-                                        await this.melCloudErv.send(deviceState);
-                                        break;
-                                    case 'HideOutdoorTemperature':
-                                        deviceState[key] = value;
-                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Prohibit;
-                                        await this.melCloudErv.send(deviceState);
-                                        break;
-                                    default:
-                                        this.emit('warn', `MQTT Received key: ${key}, value: ${value}`);
-                                        break;
-                                };
+                                await this.setOverExternalIntegration('MQTT', deviceState, key, value);
                             } catch (error) {
-                                this.emit('warn', `MQTT send error: ${error}.`);
+                                this.emit('warn', `MQTT set error: ${error}.`);
                             };
                         })
                         .on('debug', (debug) => {
@@ -612,6 +494,75 @@ class DeviceErv extends EventEmitter {
                 this.emit('error', error);
             });
     };
+
+    async setOverExternalIntegration(integration, deviceState, key, value) {
+        try {
+            let set = false
+            switch (key) {
+                case 'Power':
+                    deviceState[key] = value;
+                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power;
+                    await this.melCloudErv.send(deviceState);
+                    break;
+                case 'OperationMode':
+                    deviceState[key] = value;
+                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.OperationMode;
+                    await this.melCloudErv.send(deviceState);
+                    break;
+                case 'VentilationMode':
+                    deviceState[key] = value;
+                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.VentilationMode;
+                    await this.melCloudErv.send(deviceState);
+                    break;
+                case 'SetTemperature':
+                    deviceState[key] = value;
+                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetTemperature;
+                    await this.melCloudErv.send(deviceState);
+                    break;
+                case 'DefaultCoolingSetTemperature':
+                    deviceState[key] = value;
+                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetTemperature;
+                    await this.melCloudErv.send(deviceState);
+                    break;
+                case 'DefaultHeatingSetTemperature':
+                    deviceState[key] = value;
+                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetTemperature;
+                    await this.melCloudErv.send(deviceState);
+                    break;
+                case 'NightPurgeMode':
+                    deviceState[key] = value;
+                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.NightPurgeMode;
+                    await this.melCloudErv.send(deviceState);
+                    break;
+                case 'SetFanSpeed':
+                    deviceState[key] = value;
+                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
+                    await this.melCloudErv.send(deviceState);
+                    break;
+                case 'HideRoomTemperature':
+                    deviceState[key] = value;
+                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Prohibit;
+                    await this.melCloudErv.send(deviceState);
+                    break;
+                case 'HideSupplyTemperature':
+                    deviceState[key] = value;
+                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Prohibit;
+                    await this.melCloudErv.send(deviceState);
+                    break;
+                case 'HideOutdoorTemperature':
+                    deviceState[key] = value;
+                    deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Prohibit;
+                    await this.melCloudErv.send(deviceState);
+                    break;
+                default:
+                    this.emit('warn', `${integration}, received key: ${key}, value: ${value}`);
+                    break;
+            };
+            return set;
+        } catch (error) {
+            throw new Error(`${integration} set key: ${key}, value: ${value}, error: ${error}`);
+        };
+    }
 
     //prepare accessory
     async prepareAccessory(accountInfo, deviceState, deviceId, deviceTypeText, deviceName, accountName) {
