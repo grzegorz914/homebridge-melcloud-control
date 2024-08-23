@@ -97,6 +97,9 @@ class MelCloudPlatform {
 								.on('devInfo', (devInfo) => {
 									log.info(devInfo);
 								})
+								.on('success', (message) => {
+									log.success(`${deviceTypeText}, ${deviceName}, ${message}`);
+								})
 								.on('message', (message) => {
 									log.info(`${deviceTypeText}, ${deviceName}, ${message}`);
 								})
@@ -125,6 +128,9 @@ class MelCloudPlatform {
 							})
 								.on('devInfo', (devInfo) => {
 									log.info(devInfo);
+								})
+								.on('success', (message) => {
+									log.success(`${deviceTypeText}, ${deviceName}, ${message}`);
 								})
 								.on('message', (message) => {
 									log.info(`${deviceTypeText}, ${deviceName}, ${message}`);
@@ -155,6 +161,9 @@ class MelCloudPlatform {
 								.on('devInfo', (devInfo) => {
 									log.info(devInfo);
 								})
+								.on('success', (message) => {
+									log.success(`${deviceTypeText}, ${deviceName}, ${message}`);
+								})
 								.on('message', (message) => {
 									log.info(`${deviceTypeText}, ${deviceName}, ${message}`);
 								})
@@ -173,6 +182,9 @@ class MelCloudPlatform {
 							break;
 					}
 				})
+					.on('success', (message) => {
+						log.success(`Account ${accountName}, ${message}`);
+					})
 					.on('message', (message) => {
 						log.info(`Account ${accountName}, ${message}`);
 					})

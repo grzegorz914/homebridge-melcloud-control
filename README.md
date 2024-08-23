@@ -240,61 +240,111 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 
 ### RESTful Integration
 
-* Request: `http//homebridge_ip_address:port/path`.
 * Port: last 4 numbers of `device Id`, displayed in HB log during start.
-* Path: `info`, `state`.
-* Response as JSON object.
+* POST data as a JSON Object `{OperationMode: 8}`
+
+| Method | URL | Path | Response | Type |
+| --- | --- | --- | --- | --- |
+| GET | `http//ip:port` | `Info`, `State` | `{"Power": true, "SetTemperature": 21.5}` | JSON object. |
+
+| Method | URL | Key | Value | Type | Description |
+| --- | --- | --- | --- | --- | --- |
+| Air Conditioner |     |     |     |      |      |
+| POST | `http//ip:port` | `Power` | `true`, `false` | boolean | Power state. |
+|     | `http//ip:port` | `HideVaneControls` | `true`, `false` | boolean | Hide vane controls. |
+|     | `http//ip:port` | `HideDryModeControl` | `true`, `false` | boolean | Hide dry mode control. |
+|     | `http//ip:port` | `ProhibitSetTemperature` | `true`, `false` | boolean | Lock set temperature. |
+|     | `http//ip:port` | `ProhibitOperationMode` | `true`, `false` | boolean | Lock set operation mode. |
+|     | `http//ip:port` | `ProhibitPower` | `true`, `false` | boolean | Lock set power. |
+|     | `http//ip:port` | `OperationMode` | `1 - Heat`, `2 - Dry`, `3 - Cool`, `7 - Fan`, `8 - Auto` | integer | Operation mode. |
+|     | `http//ip:port` | `SetFanSpeed` | `0 - Auto`, `1`, `2`, `3`, `4`, `5`, `6` | integer | Fan speed. |
+|     | `http//ip:port` | `VaneHorizontal` | `0`, `1`, `2`, `3`, `4`, `5`, `8 - Split`, `12 - Swing` | integer | Vane H mode. |
+|     | `http//ip:port` | `VaneVertical` | `0`, `1`, `2`, `3`, `4`, `5`, `7 - Swing` | integer | Vane V mode. |
+|     | `http//ip:port` | `SetTemperature` | `0.0` | float | Room temperature. |
+|     | `http//ip:port` | `DefaultCoolingSetTemperature` | `0.0` | float | Default cooling temperature. |
+|     | `http//ip:port` | `DefaultHeatingSetTemperature` | `0.0` | float | Default heating temperature. |
+| Heat Pump |     |     |     |      |     |
+| POST | `http//ip:port` | `Power` | `true`, `false` | boolean | Power state. |
+|     | `http//ip:port` | `ForcedHotWaterMode` | `true`, `false` | boolean | Force hot water. |
+|     | `http//ip:port` | `EcoHotWater` | `true`, `false` | boolean | Eco hot water. |
+|     | `http//ip:port` | `HolidayMode` | `true`, `false` | boolean | Holiday mode. |
+|     | `http//ip:port` | `ProhibitZone1` | `true`, `false` | boolean | Lock control zone 1. |
+|     | `http//ip:port` | `ProhibitZone2` | `true`, `false` | boolean | Lock control zone 2. |
+|     | `http//ip:port` | `ProhibitHotWater` | `true`, `false` | boolean | Lock control hot water. |
+|     | `http//ip:port` | `OperationMode` | `0 - Auto`, `1 - Heat`, `2 - Cool` | integer | Operation mode heat pump. |
+|     | `http//ip:port` | `OperationModeZone1` | `0 - Heat Thermostat`, `1 - Heat Flow`, `2 - Heat Curve`, `3 - Cool Thermostat`, `4 - Cool Flow`, `5 - Flor Dry Up` | integer | Operation mode zone 1. |
+|     | `http//ip:port` | `OperationModeZone2` | `0 - Heat Thermostat`, `1 - Heat Flow`, `2 - Heat Curve`, `3 - Cool Thermostat`, `4 - Cool Flow`, `5 - Flor Dry Up` | integer | Operation mode zone 2. |
+|     | `http//ip:port` | `SetTemperatureZone1` | `0.0` | float | Temperature zone 1. |
+|     | `http//ip:port` | `SetTemperatureZone2` | `0.0` | float | Temperature zone 2. |
+|     | `http//ip:port` | `SetHeatFlowTemperatureZone1` | `0.0` | float | Heat flow temperature zone 1. |
+|     | `http//ip:port` | `SetHeatFlowTemperatureZone2` | `0.0` | float | Heat flow temperature zone 2. |
+|     | `http//ip:port` | `SetCoolFlowTemperatureZone1` | `0.0` | float | Cool flow temperature zone 1. |
+|     | `http//ip:port` | `SetCoolFlowTemperatureZone2` | `0.0` | float | Cool flow temperature zone 2. |
+|     | `http//ip:port` | `SetTankWaterTemperature` | `0.0` | float | Hot water temperature. |
+| Energy Recovery Ventilation |     |     |     |      |     |
+| POST | `http//ip:port` | `Power` | `true`, `false` | boolean | Power state. |
+|     | `http//ip:port` | `NightPurgeMode` | `true`, `false` | boolean | Night purge mode. |
+|     | `http//ip:port` | `HideRoomTemperature` | `true`, `false` | boolean | Hide room temperature. |
+|     | `http//ip:port` | `HideSupplyTemperature` | `true`, `false` | boolean | Hide supply temperature. |
+|     | `http//ip:port` | `HideOutdoorTemperature` | `true`, `false` | boolean | Hide outdoor temperature. |
+|     | `http//ip:port` | `OperationMode` | `1 - Heat`, `3 - Cool`, `7 - Fan`, `8 - Auto` | integer | Operation mode. |
+|     | `http//ip:port` | `VentilationMode` | `0 - Lossnay`, `1 - Bypass`, `2 - Auto` | integer | Ventilation mode. |
+|     | `http//ip:port` | `SetFanSpeed` | `0 - Auto`, `1`, `2`, `3`, `4` | integer | Fan speed. |
+|     | `http//ip:port` | `SetTemperature` | `0.0` | float | Room temperature. |
+|     | `http//ip:port` | `DefaultCoolingSetTemperature` | `0.0` | float | Default cooling temperature. |
+|     | `http//ip:port` | `DefaultHeatingSetTemperature` | `0.0` | float | Default heating temperature. |
 
 ### MQTT Integration
 
-| Direction | Topic | Message | Payload Data |
+* Subscribe data as a JSON Object `{"Power": true}`
+
+| Direction | Topic | Message | Type |
 | --- | --- | --- | --- |
 |  Publish   | `Info`, `State` | `{"Power": true, "SetTemperature": 21.5}` | JSON object. |
-|  Subscribe   | `Set` | `{"Power": true}` | JSON object. |
- 
-| Subscribe | Key | Value | Type | Description |
-| --- | --- | --- | --- | --- |
-| Air Conditioner |     |     |     |      |
-|     | `Power` | `true`, `false` | boolean | Power state. |
-|     | `HideVaneControls` | `true`, `false` | boolean | Hide vane controls. |
-|     | `HideDryModeControl` | `true`, `false` | boolean | Hide dry mode control. |
-|     | `ProhibitSetTemperature` | `true`, `false` | boolean | Lock set temperature. |
-|     | `ProhibitOperationMode` | `true`, `false` | boolean | Lock set operation mode. |
-|     | `ProhibitPower` | `true`, `false` | boolean | Lock set power. |
-|     | `OperationMode` | `1 - Heat`, `2 - Dry`, `3 - Cool`, `7 - Fan`, `8 - Auto` | integer | Operation mode. |
-|     | `SetFanSpeed` | `0 - Auto`, `1`, `2`, `3`, `4`, `5`, `6` | integer | Fan speed. |
-|     | `VaneHorizontal` | `0`, `1`, `2`, `3`, `4`, `5`, `8 - Split`, `12 - Swing` | integer | Vane H mode. |
-|     | `VaneVertical` | `0`, `1`, `2`, `3`, `4`, `5`, `7 - Swing` | integer | Vane V mode. |
-|     | `SetTemperature` | `0.0` | float | Room temperature. |
-|     | `DefaultCoolingSetTemperature` | `0.0` | float | Default cooling temperature. |
-|     | `DefaultHeatingSetTemperature` | `0.0` | float | Default heating temperature. |
-| Heat Pump |     |     |     |      |
-|     | `Power` | `true`, `false` | boolean | Power state. |
-|     | `ForcedHotWaterMode` | `true`, `false` | boolean | Force hot water. |
-|     | `EcoHotWater` | `true`, `false` | boolean | Eco hot water. |
-|     | `HolidayMode` | `true`, `false` | boolean | Holiday mode. |
-|     | `ProhibitZone1` | `true`, `false` | boolean | Lock control zone 1. |
-|     | `ProhibitZone2` | `true`, `false` | boolean | Lock control zone 2. |
-|     | `ProhibitHotWater` | `true`, `false` | boolean | Lock control hot water. |
-|     | `OperationMode` | `0 - Auto`, `1 - Heat`, `2 - Cool` | integer | Operation mode heat pump. |
-|     | `OperationModeZone1` | `0 - Heat Thermostat`, `1 - Heat Flow`, `2 - Heat Curve`, `3 - Cool Thermostat`, `4 - Cool Flow`, `5 - Flor Dry Up` | integer | Operation mode zone 1. |
-|     | `OperationModeZone2` | `0 - Heat Thermostat`, `1 - Heat Flow`, `2 - Heat Curve`, `3 - Cool Thermostat`, `4 - Cool Flow`, `5 - Flor Dry Up` | integer | Operation mode zone 2. |
-|     | `SetTemperatureZone1` | `0.0` | float | Temperature zone 1. |
-|     | `SetTemperatureZone2` | `0.0` | float | Temperature zone 2. |
-|     | `SetHeatFlowTemperatureZone1` | `0.0` | float | Heat flow temperature zone 1. |
-|     | `SetHeatFlowTemperatureZone2` | `0.0` | float | Heat flow temperature zone 2. |
-|     | `SetCoolFlowTemperatureZone1` | `0.0` | float | Cool flow temperature zone 1. |
-|     | `SetCoolFlowTemperatureZone2` | `0.0` | float | Cool flow temperature zone 2. |
-|     | `SetTankWaterTemperature` | `0.0` | float | Hot water temperature. |
-| Energy Recovery Ventilation |     |     |     |      |
-|     | `Power` | `true`, `false` | boolean | Power state. |
-|     | `NightPurgeMode` | `true`, `false` | boolean | Night purge mode. |
-|     | `HideRoomTemperature` | `true`, `false` | boolean | Hide room temperature. |
-|     | `HideSupplyTemperature` | `true`, `false` | boolean | Hide supply temperature. |
-|     | `HideOutdoorTemperature` | `true`, `false` | boolean | Hide outdoor temperature. |
-|     | `OperationMode` | `1 - Heat`, `3 - Cool`, `7 - Fan`, `8 - Auto` | integer | Operation mode. |
-|     | `VentilationMode` | `0 - Lossnay`, `1 - Bypass`, `2 - Auto` | integer | Ventilation mode. |
-|     | `SetFanSpeed` | `0 - Auto`, `1`, `2`, `3`, `4` | integer | Fan speed. |
-|     | `SetTemperature` | `0.0` | float | Room temperature. |
-|     | `DefaultCoolingSetTemperature` | `0.0` | float | Default cooling temperature. |
-|     | `DefaultHeatingSetTemperature` | `0.0` | float | Default heating temperature. |
+
+| Method | Topic | Key | Value | Type | Description |
+| --- | --- | --- | --- | --- | --- |
+| Air Conditioner |     |     |     |      |      |
+| Subscribe | `Set` | `Power` | `true`, `false` | boolean | Power state. |
+|     | `Set` | `HideVaneControls` | `true`, `false` | boolean | Hide vane controls. |
+|     | `Set` | `HideDryModeControl` | `true`, `false` | boolean | Hide dry mode control. |
+|     | `Set` | `ProhibitSetTemperature` | `true`, `false` | boolean | Lock set temperature. |
+|     | `Set` | `ProhibitOperationMode` | `true`, `false` | boolean | Lock set operation mode. |
+|     | `Set` | `ProhibitPower` | `true`, `false` | boolean | Lock set power. |
+|     | `Set` | `OperationMode` | `1 - Heat`, `2 - Dry`, `3 - Cool`, `7 - Fan`, `8 - Auto` | integer | Operation mode. |
+|     | `Set` | `SetFanSpeed` | `0 - Auto`, `1`, `2`, `3`, `4`, `5`, `6` | integer | Fan speed. |
+|     | `Set` | `VaneHorizontal` | `0`, `1`, `2`, `3`, `4`, `5`, `8 - Split`, `12 - Swing` | integer | Vane H mode. |
+|     | `Set` | `VaneVertical` | `0`, `1`, `2`, `3`, `4`, `5`, `7 - Swing` | integer | Vane V mode. |
+|     | `Set` | `SetTemperature` | `0.0` | float | Room temperature. |
+|     | `Set` | `DefaultCoolingSetTemperature` | `0.0` | float | Default cooling temperature. |
+|     | `Set` | `DefaultHeatingSetTemperature` | `0.0` | float | Default heating temperature. |
+| Heat Pump |     |     |     |      |     |
+| Subscribe | `Set` | `Power` | `true`, `false` | boolean | Power state. |
+|     | `Set` | `ForcedHotWaterMode` | `true`, `false` | boolean | Force hot water. |
+|     | `Set` | `EcoHotWater` | `true`, `false` | boolean | Eco hot water. |
+|     | `Set` | `HolidayMode` | `true`, `false` | boolean | Holiday mode. |
+|     | `Set` | `ProhibitZone1` | `true`, `false` | boolean | Lock control zone 1. |
+|     | `Set` | `ProhibitZone2` | `true`, `false` | boolean | Lock control zone 2. |
+|     | `Set` | `ProhibitHotWater` | `true`, `false` | boolean | Lock control hot water. |
+|     | `Set` | `OperationMode` | `0 - Auto`, `1 - Heat`, `2 - Cool` | integer | Operation mode heat pump. |
+|     | `Set` | `OperationModeZone1` | `0 - Heat Thermostat`, `1 - Heat Flow`, `2 - Heat Curve`, `3 - Cool Thermostat`, `4 - Cool Flow`, `5 - Flor Dry Up` | integer | Operation mode zone 1. |
+|     | `Set` | `OperationModeZone2` | `0 - Heat Thermostat`, `1 - Heat Flow`, `2 - Heat Curve`, `3 - Cool Thermostat`, `4 - Cool Flow`, `5 - Flor Dry Up` | integer | Operation mode zone 2. |
+|     | `Set` | `SetTemperatureZone1` | `0.0` | float | Temperature zone 1. |
+|     | `Set` | `SetTemperatureZone2` | `0.0` | float | Temperature zone 2. |
+|     | `Set` | `SetHeatFlowTemperatureZone1` | `0.0` | float | Heat flow temperature zone 1. |
+|     | `Set` | `SetHeatFlowTemperatureZone2` | `0.0` | float | Heat flow temperature zone 2. |
+|     | `Set` | `SetCoolFlowTemperatureZone1` | `0.0` | float | Cool flow temperature zone 1. |
+|     | `Set` | `SetCoolFlowTemperatureZone2` | `0.0` | float | Cool flow temperature zone 2. |
+|     | `Set` | `SetTankWaterTemperature` | `0.0` | float | Hot water temperature. |
+| Energy Recovery Ventilation |     |     |     |      |     |
+| Subscribe | `Set` | `Power` | `true`, `false` | boolean | Power state. |
+|     | `Set` | `NightPurgeMode` | `true`, `false` | boolean | Night purge mode. |
+|     | `Set` | `HideRoomTemperature` | `true`, `false` | boolean | Hide room temperature. |
+|     | `Set` | `HideSupplyTemperature` | `true`, `false` | boolean | Hide supply temperature. |
+|     | `Set` | `HideOutdoorTemperature` | `true`, `false` | boolean | Hide outdoor temperature. |
+|     | `Set` | `OperationMode` | `1 - Heat`, `3 - Cool`, `7 - Fan`, `8 - Auto` | integer | Operation mode. |
+|     | `Set` | `VentilationMode` | `0 - Lossnay`, `1 - Bypass`, `2 - Auto` | integer | Ventilation mode. |
+|     | `Set` | `SetFanSpeed` | `0 - Auto`, `1`, `2`, `3`, `4` | integer | Fan speed. |
+|     | `Set` | `SetTemperature` | `0.0` | float | Room temperature. |
+|     | `Set` | `DefaultCoolingSetTemperature` | `0.0` | float | Default cooling temperature. |
+|     | `Set` | `DefaultHeatingSetTemperature` | `0.0` | float | Default heating temperature. |

@@ -20,8 +20,23 @@ class RestFul extends EventEmitter {
         try {
             const restFul = express();
             restFul.set('json spaces', 2);
+            restFul.use(express.json());
             restFul.get('/info', (req, res) => { res.json(this.restFulData.info) });
             restFul.get('/state', (req, res) => { res.json(this.restFulData.state) });
+
+            //post data
+            restFul.post('/', (req, res) => {
+                try {
+                    const obj = req.body;
+                    const emitDebug = this.restFulDebug ? this.emit('debug', `RESTFul post data: ${JSON.stringify(obj, null, 2)}`) : false;
+                    const key = Object.keys(obj)[0];
+                    const value = Object.values(obj)[0];
+                    this.emit('set', key, value);
+                    res.send('OK');
+                } catch (error) {
+                    this.emit('error', `RESTFul Parse object error: ${error}`);
+                };
+            });
 
             restFul.listen(this.restFulPort, () => {
                 this.emit('connected', `RESTful started on port: ${this.restFulPort}`)
@@ -41,7 +56,7 @@ class RestFul extends EventEmitter {
                 this.restFulData.state = data;
                 break;
             default:
-                this.emit('error', `RESTFul update unknown path: ${path}, data: ${data}`)
+                this.emit('error', `RESTFul update path: ${path}, data: ${data}`)
                 break;
         };
         const emitDebug = this.restFulDebug ? this.emit('debug', `RESTFul update path: ${path}, data: ${data}`) : false;

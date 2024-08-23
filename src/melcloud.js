@@ -83,6 +83,9 @@ class MelCloud extends EventEmitter {
                 return;
             };
 
+            //emit connect success
+            this.emit('success', `Connect to MELCloud Success.`)
+
             //create axios instance get
             this.axiosInstanceGet = axios.create({
                 method: 'GET',

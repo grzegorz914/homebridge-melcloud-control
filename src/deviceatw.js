@@ -37,7 +37,7 @@ class DeviceAtw extends EventEmitter {
         const restFul = account.restFul ?? {};
         const restFulEnabled = restFul.enable || false;
         this.restFulConnected = false;
-        const mqtt = account.restFul ?? {};
+        const mqtt = account.mqtt ?? {};
         const mqttEnabled = mqtt.enable || false;
         this.mqttConnected = false;
 
@@ -86,40 +86,9 @@ class DeviceAtw extends EventEmitter {
 
                     this.restFul.on('connected', (message) => {
                         this.restFulConnected = true;
-                        this.emit('message', message);
+                        this.emit('success', message);
                     })
-                        .on('debug', (debug) => {
-                            this.emit('debug', debug);
-                        })
-                        .on('error', (error) => {
-                            this.emit('warn', error);
-                        });
-                }
-                const restFul = this.restFulConnected ? this.restFul.update('info', deviceData) : false;
-                const restFul1 = this.restFulConnected ? this.restFul.update('state', deviceState) : false;
-            }
-
-            //MQTT client
-            if (mqttEnabled) {
-                if (!this.mqttConnected) {
-                    this.mqtt = new Mqtt({
-                        host: mqtt.host,
-                        port: mqtt.port || 1883,
-                        clientId: `${mqtt.clientId}_${deviceId}` || `${deviceTypeText}_${deviceName}_${deviceId}`,
-                        prefix: `${mqtt.prefix}/${deviceTypeText}/${deviceName}`,
-                        user: mqtt.user,
-                        passwd: mqtt.pass,
-                        debug: mqtt.debug || false
-                    });
-
-                    this.mqtt.on('connected', (message) => {
-                        this.mqttConnected = true;
-                        this.emit('message', message);
-                    })
-                        .on('subscribed', (message) => {
-                            this.emit('message', message);
-                        })
-                        .on('subscribedMessage', async (key, value) => {
+                        .on('set', async (key, value) => {
                             try {
                                 switch (key) {
                                     case 'Power':
@@ -208,7 +177,7 @@ class DeviceAtw extends EventEmitter {
                                         await this.melCloudAtw.send(deviceState);
                                         break;
                                     default:
-                                        this.emit('message', `MQTT Received unknown key: ${key}, value: ${value}`);
+                                        this.emit('warn', `MQTT Received key: ${key}, value: ${value}`);
                                         break;
                                 };
                             } catch (error) {
@@ -222,7 +191,134 @@ class DeviceAtw extends EventEmitter {
                             this.emit('warn', error);
                         });
                 }
-                const mqtt = this.mqttConnected ? this.mqtt.emit('publish', `Info`, deviceData) : false;
+                const restFul0 = this.restFulConnected ? this.restFul.update('info', deviceData) : false;
+                const restFul1 = this.restFulConnected ? this.restFul.update('state', deviceState) : false;
+            }
+
+            //MQTT client
+            if (mqttEnabled) {
+                if (!this.mqttConnected) {
+                    this.mqtt = new Mqtt({
+                        host: mqtt.host,
+                        port: mqtt.port || 1883,
+                        clientId: `${mqtt.clientId}_${deviceId}` || `${deviceTypeText}_${deviceName}_${deviceId}`,
+                        prefix: `${mqtt.prefix}/${deviceTypeText}/${deviceName}`,
+                        user: mqtt.user,
+                        passwd: mqtt.pass,
+                        debug: mqtt.debug || false
+                    });
+
+                    this.mqtt.on('connected', (message) => {
+                        this.mqttConnected = true;
+                        this.emit('success', message);
+                    })
+                        .on('subscribed', (message) => {
+                            this.emit('message', message);
+                        })
+                        .on('set', async (key, value) => {
+                            try {
+                                switch (key) {
+                                    case 'Power':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'OperationMode':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.OperationMode;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'OperationModeZone1':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone1;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'OperationModeZone2':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone2;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'SetTemperatureZone1':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone2;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'SetTemperatureZone2':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone2;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'SetHeatFlowTemperatureZone1':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetHeatFlowTemperatureZone1;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'SetHeatFlowTemperatureZone2':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetHeatFlowTemperatureZone2;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'SetCoolFlowTemperatureZone1':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetCoolFlowTemperatureZone1;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'SetCoolFlowTemperatureZone2':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetCoolFlowTemperatureZone2;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'SetTankWaterTemperature':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTankWaterTemperature;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'ForcedHotWaterMode':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.ForcedHotWaterMode;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'EcoHotWater':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.EcoHotWater;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'HolidayMode':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.HolidayMode;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'ProhibitZone1':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.ProhibitZone1;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'ProhibitZone2':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.ProhibitZone2;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    case 'ProhibitHotWater':
+                                        deviceState[key] = value;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.ProhibitHotWater;
+                                        await this.melCloudAtw.send(deviceState);
+                                        break;
+                                    default:
+                                        this.emit('warn', `MQTT Received key: ${key}, value: ${value}`);
+                                        break;
+                                };
+                            } catch (error) {
+                                this.emit('warn', `MQTT send error: ${error}.`);
+                            };
+                        })
+                        .on('debug', (debug) => {
+                            this.emit('debug', debug);
+                        })
+                        .on('error', (error) => {
+                            this.emit('warn', error);
+                        });
+                }
+                const mqtt0 = this.mqttConnected ? this.mqtt.emit('publish', `Info`, deviceData) : false;
                 const mqtt1 = this.mqttConnected ? this.mqtt.emit('publish', `State`, deviceState) : false;
             }
         })

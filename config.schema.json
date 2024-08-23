@@ -1213,7 +1213,7 @@
                   "default": false,
                   "description": "This enable debug mode for RESTFul.",
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].restFul.enable === true;"
+                    "functionBody": "return model.accounts[arrayIndices].restFul.enable === true;"
                   },
                   "required": false
                 },
@@ -1223,7 +1223,7 @@
                   "placeholder": 3000,
                   "description": "Here set the listening Port for RESTful server.",
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].restFul.enable === true;"
+                    "functionBody": "return model.accounts[arrayIndices].restFul.enable === true;"
                   },
                   "required": false
                 }
@@ -1245,7 +1245,7 @@
                   "default": false,
                   "description": "This enable debug mode for MQTT.",
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].mqtt.enable === true;"
+                    "functionBody": "return model.accounts[arrayIndices].mqtt.enable === true;"
                   },
                   "required": false
                 },
@@ -1256,7 +1256,7 @@
                   "format": "hostname",
                   "description": "Here set the IP/Hostname of MQTT Broker.",
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].mqtt.enable === true;"
+                    "functionBody": "return model.accounts[arrayIndices].mqtt.enable === true;"
                   },
                   "required": false
                 },
@@ -1266,7 +1266,7 @@
                   "placeholder": 1883,
                   "description": "Here set the port of MQTT Broker.",
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].mqtt.enable === true;"
+                    "functionBody": "return model.accounts[arrayIndices].mqtt.enable === true;"
                   },
                   "required": false
                 },
@@ -1276,7 +1276,7 @@
                   "placeholder": "client id",
                   "description": "Here optional set the Client ID of MQTT Broker.",
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].mqtt.enable === true"
+                    "functionBody": "return model.accounts[arrayIndices].mqtt.enable === true"
                   },
                   "required": false
                 },
@@ -1286,7 +1286,7 @@
                   "placeholder": "home/envoy",
                   "description": "Here set the prefix.",
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].mqtt.enable === true;"
+                    "functionBody": "return model.accounts[arrayIndices].mqtt.enable === true;"
                   },
                   "required": false
                 },
@@ -1296,7 +1296,7 @@
                   "default": false,
                   "description": "This enable authorization for MQTT Broker.",
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].mqtt.enable === true;"
+                    "functionBody": "return model.accounts[arrayIndices].mqtt.enable === true;"
                   },
                   "required": false
                 },
@@ -1306,7 +1306,7 @@
                   "placeholder": "user",
                   "description": "Here set the user of MQTT Broker.",
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].mqtt.enable === true && model.devices[arrayIndices].mqtt.auth === true;"
+                    "functionBody": "return model.accounts[arrayIndices].mqtt.enable === true && model.accounts[arrayIndices].mqtt.auth === true;"
                   },
                   "required": false
                 },
@@ -1317,7 +1317,7 @@
                   "description": "Here set the password of MQTT Broker.",
                   "format": "password",
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].mqtt.enable === true && model.devices[arrayIndices].mqtt.auth === true;"
+                    "functionBody": "return model.accounts[arrayIndices].mqtt.enable === true && model.accounts[arrayIndices].mqtt.auth === true;"
                   },
                   "required": false
                 }
