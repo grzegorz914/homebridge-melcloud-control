@@ -17,12 +17,6 @@ class MelCloudPlatform {
 		this.accessories = [];
 		const accountsName = [];
 
-		//check if the directory exists, if not then create it
-		const prefDir = path.join(api.user.storagePath(), 'melcloud');
-		if (!fs.existsSync(prefDir)) {
-			fs.mkdirSync(prefDir);
-		};
-
 		api.on('didFinishLaunching', () => {
 			//loop through accounts
 			for (const account of config.accounts) {
@@ -64,9 +58,21 @@ class MelCloudPlatform {
 				};
 				const debug1 = enableDebugMode ? log.info(`Account: ${accountName}, Config: ${JSON.stringify(debugData, null, 2)}`) : false;
 
-				//set refresh interval
+				//define directory and file paths
+				const prefDir = path.join(api.user.storagePath(), 'melcloud');
 				const accountInfoFile = `${prefDir}/${accountName}_Account`;
 				const buildingsFile = `${prefDir}/${accountName}_Buildings`;
+
+				//create directory if it doesn't exist
+				try {
+					//create directory if it doesn't exist
+					fs.mkdirSync(prefDir, { recursive: true });
+				} catch (error) {
+					log.error(`Account: ${accountName}, prepare directory error: ${error.message ?? error}`);
+					return;
+				}
+
+				//set refresh interval
 				const refreshInterval = account.refreshInterval * 1000 || 120000;
 				const deviceRefreshInterval = account.deviceRefreshInterval * 1000 || 5000;
 

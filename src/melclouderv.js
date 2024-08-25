@@ -345,7 +345,7 @@ class MelCloudErv extends EventEmitter {
                 const debug2 = debugLog ? this.emit('debug', `Device State: ${JSON.stringify(deviceState, null, 2)}`) : false;
                 this.emit('deviceState', deviceData, deviceState, useFahrenheit);
             } catch (error) {
-                this.emit('error', `Check device error: ${error}.`);
+                this.emit('error', `Check device error: ${error.message ?? error}.`);
             };
         }).on('state', () => { });
 
@@ -358,7 +358,7 @@ class MelCloudErv extends EventEmitter {
             const data = savedData.length > 0 ? JSON.parse(savedData) : false;
             return data;;
         } catch (error) {
-            throw new Error(`Read data from path: ${path}, error: ${error}`);
+            throw new Error(`Read data from path: ${path}, error: ${error.message ?? error}`);
         }
     }
 
@@ -379,7 +379,7 @@ class MelCloudErv extends EventEmitter {
             this.emit('deviceState', this.deviceData, deviceState, this.useFahrenheit);
             return true;
         } catch (error) {
-            throw new Error(error);
+            throw new Error(error.message ?? error);
         };
     };
 };

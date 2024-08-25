@@ -32,8 +32,9 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * Support temperature display units `Celsius/Fahrenheit`.
 * Support hide device by `DeviceId`.
 * Support control device `Presets`.
-* Support direct device control creating extra `Buttons`, applied for all devices of same type in account.
-* Support identify all states of device creating `Sensors`, applied for all devices of same type in account.
+* Support assing inividual operating mode for `Heat/Cool/Auto`.
+* Support direct device control using extra `Buttons`, applied for all devices of same type in account.
+* Support detect all device states using extra `Sensors`, applied for all devices of same type in account.
 * Support automations, shortcuts and Siri.
 * Support external integrations, [RESTFul](https://github.com/grzegorz914/homebridge-melcloud-control?tab=readme-ov-file#restful-integration), [MQTT](https://github.com/grzegorz914/homebridge-melcloud-control?tab=readme-ov-file#mqtt-integration).
 
@@ -48,13 +49,12 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
     * Swing mode `AUTO/SWING`.
     * Physical lock controls `LOCK/UNLOCK`.
     * Temperature display unit `°F/°C`.
-    * If `AUTO/HEAT` or both modes are not supported by device will use `DRY/FAN` or `FAN/DRY` modes instead.
   * Thermostat:
     * Power `ON/OFF`.
     * Operating mode `POWER OFF/HEAT/COOL/AUTO`.
     * Temperature `HEATING/COOLING`.
     * Temperature display unit `°F/°C`.
-    * If `AUTO/HEAT` or both modes are not supported by device will use `DRY/FAN` or `FAN/DRY` modes instead.
+    * Assign operating mode for `HEAT/AUTO`
   * Buttons:
     * For direct device control.
       * Power `ON/OFF`.
@@ -164,7 +164,6 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * Run this plugin as a [Child Bridge](https://github.com/homebridge/homebridge/wiki/Child-Bridges) (Highly Recommended), this prevent crash Homebridge if plugin crashes.
 * Install and use [Homebridge Config UI X](https://github.com/homebridge/homebridge-config-ui-x/wiki) to configure this plugin (Highly Recommended).
 * The `sample-config.json` can be edited and used as an alternative.
-* Be sure to always make a backup copy of your config.json file before making any changes to it.
 
 <p align="center">
   <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/ustawienia.png" width="840"></a>
@@ -176,12 +175,12 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `user` | Here set the MELCloud username. |
 | `passwd` | Here set the MELCloud password. |
 | `language` | Here select the MELCloud language. |
-| `ataDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
+| `ataDisplayMode` | Here select device control mode `Heater/Cooler`, `Thermostat`. |
+| `ataHeatDryFanMode` | Here select the operatiing mode for `Heat`, if this mode is not supported, it will be disabled. |
+| `ataCoolDryFanMode` | Here select the operatiing mode for `Cool`, if this mode is not supported, it will be disabled. |
+| `ataAutoDryFanMode` | Here select the operatiing mode for `Auto`, if this mode is not supported, it will be disabled.. |
 | `ataTemperatureSensor` | This enable extra `Room` temperature sensors to use with automations in HomeKit app. |
 | `ataTemperatureSensorOutdoor` | This enable extra `Outdoor` temperature sensors to use with automations in HomeKit app. |
-| `ataDisableAutoMode` | This will disable `Auto` mode even this mode is supported by device. |
-| `ataDisableHeatMode` | This will disable `Heat` mode even this mode is supported by device. |
-| `ataAutoHeatMode` | Here select operation mode for `Auto/Heat`, if `Auto`, `Heat` or both modes are not supported by device will be used selected modes instead. |
 | `ataPresets` | This enable extra buttons for configured presets and display it in HomeKit app. |
 | `ataButtons.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
 | `ataButtons.mode` | Here select button mode, VH - Vane Horizontal, VV - Vane Horizontal. |

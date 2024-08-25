@@ -21,6 +21,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - After update to v2 from v1 only RESTFull and MQTT config settings need to be updated in config.
 
+## [2.3.0] - (25.08.2024)
+
+## Changes
+
+- removed from config.json `ataDisableAutoMode`, `ataDisableHeatMode`, `ataAutoHeatMode`
+- added to config.json `ataHeatDryFanMode`, `ataCoolDryFanMode`, `ataAutoDryFanMode`
+- added individual operating mode assingn for `Heat/Cool/Auto`, [#132](https://github.com/grzegorz914/homebridge-melcloud-control/issues/132)
+- unfortunatelly disabled operating mode cannot be hiden in HomeKit app due to HomeKit app limitations
+- cleanup
+- config schema updated
+
 ## [2.2.0] - (18.08.2024)
 
 ## Changes

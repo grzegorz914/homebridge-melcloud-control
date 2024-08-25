@@ -134,7 +134,7 @@ class MelCloud extends EventEmitter {
             this.impulseGenerator.start(timers);
             return true;
         } catch (error) {
-            this.emit('error', `Connect to MELCloud error: ${error}.`);
+            this.emit('error', `Connect to MELCloud error: ${error.message ?? error}.`);
         };
     }
 
@@ -195,7 +195,7 @@ class MelCloud extends EventEmitter {
             }
             return true;
         } catch (error) {
-            throw new Error(`Scanning for devices error: ${error}.`);
+            throw new Error(`Scanning for devices error: ${error.message ?? error}.`);
         };
     }
 
@@ -205,7 +205,7 @@ class MelCloud extends EventEmitter {
             const debug3 = this.enableDebugMode ? this.emit('debug', `Data saved to path: ${path}.`) : false;
             return true;
         } catch (error) {
-            throw new Error(`Save data to path: ${path}, error: ${error}`);
+            throw new Error(`Save data to path: ${path}, error: ${error.message ?? error}`);
         }
     }
 
@@ -219,7 +219,7 @@ class MelCloud extends EventEmitter {
             await this.saveData(this.accountInfoFile, accountInfo);
             return true;
         } catch (error) {
-            throw new Error(error);
+            throw new Error(error.message ?? error);
         };
     };
 };

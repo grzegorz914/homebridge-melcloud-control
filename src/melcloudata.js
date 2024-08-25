@@ -14,7 +14,7 @@ class MelCloudAta extends EventEmitter {
         const accountInfoFile = config.accountInfoFile;
         const deviceInfoFile = config.deviceInfoFile;
         const debugLog = config.debugLog;
-        const refreshInterval= config.refreshInterval;
+        const refreshInterval = config.refreshInterval;
 
         //set default values
         this.deviceData = {};
@@ -127,13 +127,13 @@ class MelCloudAta extends EventEmitter {
                 const legacyDevice = device.LegacyDevice;
                 const unitSupportsStandbyMode = device.UnitSupportsStandbyMode;
                 const isSplitSystem = device.IsSplitSystem;
-                const hasHalfDegreeIncrements = device.HasHalfDegreeIncrements ?? false;
-                const hasOutdoorTemperature = device.HasOutdoorTemperature ?? false
+                const hasHalfDegreeIncrements = device.HasHalfDegreeIncrements;
+                const hasOutdoorTemperature = device.HasOutdoorTemperature;
                 const modelIsAirCurtain = device.ModelIsAirCurtain;
-                const modelSupportsFanSpeed = device.ModelSupportsFanSpeed ?? false;
-                const modelSupportsAuto = device.ModelSupportsAuto ?? false;
-                const modelSupportsHeat = device.ModelSupportsHeat ?? false;
-                const modelSupportsDry = device.ModelSupportsDry ?? false;
+                const modelSupportsFanSpeed = device.ModelSupportsFanSpeed;
+                const modelSupportsAuto = device.ModelSupportsAuto;
+                const modelSupportsHeat = device.ModelSupportsHeat;
+                const modelSupportsDry = device.ModelSupportsDry;
                 const modelSupportsVaneVertical = device.ModelSupportsVaneVertical;
                 const modelSupportsVaneHorizontal = device.ModelSupportsVaneHorizontal;
                 const modelSupportsWideVane = device.ModelSupportsWideVane;
@@ -357,7 +357,7 @@ class MelCloudAta extends EventEmitter {
                 const debug2 = debugLog ? this.emit('debug', `Device State: ${JSON.stringify(deviceState, null, 2)}`) : false;
                 this.emit('deviceState', deviceData, deviceState, useFahrenheit);
             } catch (error) {
-                this.emit('error', `Check device error: ${error}.`);
+                this.emit('error', `Check device error: ${error.message ?? error}.`);
             };
         }).on('state', () => { });
 
@@ -370,7 +370,7 @@ class MelCloudAta extends EventEmitter {
             const data = savedData.length > 0 ? JSON.parse(savedData) : false;
             return data;
         } catch (error) {
-            throw new Error(`Read data from path: ${path}, error: ${error}`);
+            throw new Error(`Read data from path: ${path}, error: ${error.message ?? error}`);
         }
     }
 
@@ -415,7 +415,7 @@ class MelCloudAta extends EventEmitter {
             this.emit('deviceState', this.deviceData, deviceState, this.useFahrenheit);
             return true;;
         } catch (error) {
-            throw new Error(error);
+            throw new Error(error.message ?? error);
         };
     };
 };

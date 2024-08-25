@@ -676,7 +676,6 @@ class DeviceAtw extends EventEmitter {
                 //start prepare accessory
                 if (this.startPrepareAccessory) {
                     try {
-                        await new Promise(resolve => setTimeout(resolve, 150));
                         const accessory = await this.prepareAccessory(accountInfo, deviceState, deviceId, deviceTypeText, deviceName, accountName);
                         this.emit('publishAccessory', accessory);
                         this.startPrepareAccessory = false;
@@ -794,7 +793,7 @@ class DeviceAtw extends EventEmitter {
             };
             return set;
         } catch (error) {
-            throw new Error(`${integration} set key: ${key}, value: ${value}, error: ${error}`);
+            throw new Error(`${integration} set key: ${key}, value: ${value}, error: ${error.message ?? error}`);
         };
     }
     //prepare accessory
@@ -1729,7 +1728,7 @@ class DeviceAtw extends EventEmitter {
 
             return accessory;
         } catch (error) {
-            throw new Error(error);
+            throw new Error(error.message ?? error);
         };
     };
 };

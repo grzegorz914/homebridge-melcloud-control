@@ -205,7 +205,7 @@
               "required": true
             },
             "ataDisplayMode": {
-              "title": "Control Mode",
+              "title": "Control",
               "type": "integer",
               "minimum": 0,
               "maximum": 1,
@@ -224,22 +224,113 @@
                   ]
                 }
               ],
-              "description": "Select main control mode.",
+              "description": "Select device control mode displayed in HomeKit app.",
               "required": true
             },
-            "ataTemperatureSensor": {
-              "title": "Temperature Sensor Room",
-              "type": "boolean",
-              "default": false,
-              "description": "This enable extra room temperature sensor to use with automations in HomeKit app.",
-              "required": false
+            "ataHeatDryFanMode": {
+              "title": "Heat",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3,
+              "default": 1,
+              "oneOf": [
+                {
+                  "title": "None/Disabled",
+                  "enum": [
+                    0
+                  ]
+                },
+                {
+                  "title": "Heat",
+                  "enum": [
+                    1
+                  ]
+                },
+                {
+                  "title": "Dry",
+                  "enum": [
+                    2
+                  ]
+                },
+                {
+                  "title": "Fan",
+                  "enum": [
+                    3
+                  ]
+                }
+              ],
+              "description": "Select the operatiing mode for Heat, if this mode is not supported, it will be disabled.",
+              "required": true
             },
-            "ataTemperatureSensorOutdoor": {
-              "title": "Temperature Sensor Outdoor",
-              "type": "boolean",
-              "default": false,
-              "description": "This enable extra outdoor temperature sensor to use with automations in HomeKit app.",
-              "required": false
+            "ataCoolDryFanMode": {
+              "title": "Cool",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3,
+              "default": 1,
+              "oneOf": [
+                {
+                  "title": "None/Disabled",
+                  "enum": [
+                    0
+                  ]
+                },
+                {
+                  "title": "Cool",
+                  "enum": [
+                    1
+                  ]
+                },
+                {
+                  "title": "Dry",
+                  "enum": [
+                    2
+                  ]
+                },
+                {
+                  "title": "Fan",
+                  "enum": [
+                    3
+                  ]
+                }
+              ],
+              "description": "Select the operatiing mode for Cool, if this mode is not supported, it will be disabled.",
+              "required": true
+            },
+            "ataAutoDryFanMode": {
+              "title": "Auto",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 3,
+              "default": 1,
+              "oneOf": [
+                {
+                  "title": "None/Disabled",
+                  "enum": [
+                    0
+                  ]
+                },
+                {
+                  "title": "Auto",
+                  "enum": [
+                    1
+                  ]
+                },
+                {
+                  "title": "Dry",
+                  "enum": [
+                    2
+                  ]
+                },
+                {
+                  "title": "Fan",
+                  "enum": [
+                    3
+                  ]
+                }
+              ],
+              "description": "Select the operatiing mode for Auto, if this mode is not supported, it will be disabled.",
+              "required": true
             },
             "ataPresets": {
               "title": "Presets",
@@ -248,39 +339,19 @@
               "description": "This enable extra buttons for configured presets and display it in HomeKit app.",
               "required": false
             },
-            "ataDisableAutoMode": {
-              "title": "Disable Auto Mode",
+            "ataTemperatureSensor": {
+              "title": "Room",
               "type": "boolean",
               "default": false,
-              "description": "This will disable Auto mode even if this mode is supported by device.",
+              "description": "This enable extra room temperature sensor to use with automations in HomeKit app.",
               "required": false
             },
-            "ataDisableHeatMode": {
-              "title": "Disable Heat Mode",
+            "ataTemperatureSensorOutdoor": {
+              "title": "Outdoor",
               "type": "boolean",
               "default": false,
-              "description": "This will disable Heat mode even if this mode is supported by device.",
+              "description": "This enable extra outdoor temperature sensor to use with automations in HomeKit app.",
               "required": false
-            },
-            "ataAutoHeatMode": {
-              "title": "Auto/Heat Mode",
-              "type": "integer",
-              "oneOf": [
-                {
-                  "title": "Auto - Dry / Heat - Fan",
-                  "enum": [
-                    0
-                  ]
-                },
-                {
-                  "title": "Auto - Fan / Heat - Dry",
-                  "enum": [
-                    1
-                  ]
-                }
-              ],
-              "description": "Operation mode for Auto/Heat option, if Auto, Heat or both modes are not supported by the device this will be used for selected modes instead.",
-              "required": true
             },
             "ataButtons": {
               "title": "Button / Sensor",
@@ -1359,9 +1430,18 @@
                   "items": [
                     "accounts[].ataDisplayMode",
                     "accounts[].ataPresets",
-                    "accounts[].ataDisableAutoMode",
-                    "accounts[].ataDisableHeatMode",
-                    "accounts[].ataAutoHeatMode",
+                    {
+                      "key": "accounts[]",
+                      "type": "section",
+                      "title": "Operation Modes",
+                      "expandable": true,
+                      "expanded": false,
+                      "items": [
+                        "accounts[].ataHeatDryFanMode",
+                        "accounts[].ataCoolDryFanMode",
+                        "accounts[].ataAutoDryFanMode"
+                      ]
+                    },
                     {
                       "key": "accounts[]",
                       "type": "section",

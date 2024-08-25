@@ -24,11 +24,11 @@
           "passwd": "password",
           "language": "0",
           "ataDisplayMode": 0,
+          "ataHeatDryFanMode": 1,
+          "ataCoolDryFanMode": 1,
+          "ataAutoDryFanMode": 1,
           "ataTemperatureSensor": false,
           "ataTemperatureSensorOutdoor": false,
-          "ataDisableAutoMode": false,
-          "ataDisableHeatMode": false,
-          "ataAutoHeatMode": 0,
           "ataPresets": false,
           "ataButtons": [
             {

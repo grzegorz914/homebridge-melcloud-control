@@ -472,7 +472,6 @@ class DeviceErv extends EventEmitter {
                         this.operationModeSetPropsValidValues = operationModeSetPropsValidValues;
                         this.fanSpeedSetPropsMaxValue = fanSpeedSetPropsMaxValue;
 
-                        await new Promise(resolve => setTimeout(resolve, 150));
                         const accessory = await this.prepareAccessory(accountInfo, deviceState, deviceId, deviceTypeText, deviceName, accountName);
                         this.emit('publishAccessory', accessory);
                         this.startPrepareAccessory = false;
@@ -560,7 +559,7 @@ class DeviceErv extends EventEmitter {
             };
             return set;
         } catch (error) {
-            throw new Error(`${integration} set key: ${key}, value: ${value}, error: ${error}`);
+            throw new Error(`${integration} set key: ${key}, value: ${value}, error: ${error.message ?? error}`);
         };
     }
 
@@ -1170,7 +1169,7 @@ class DeviceErv extends EventEmitter {
 
             return accessory;
         } catch (error) {
-            throw new Error(error);
+            throw new Error(error.message ?? error);
         };
     };
 };
