@@ -5,19 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Important changes v0.1.x and above
+## Important changes v0.1.x
 
 - The old plugin and config need to be first removed from Homebridge and HomeKit and added again.
 
-## Important changes v0.4.0 and above
+## Important changes v0.4.0
 
 - Main control mode, buttons and presets need to be configured again!!!
   
-## Important changes v1.0.0 and above
+## Important changes v1
 
-- After update to this version the devices need to be added to the Home app again and the old unresponsive remove!!!- This devices will be removed from all automations and scenes!!!
+- After update to v1 and above from v0 the devices need to be added to the Home app again and the old unresponsive remove!!! This devices will be removed from all automations and scenes!!!
 
-### After update to v2.0.0 RESTFull and MQTT config settings need to be updated
+## Important changes v2
+
+- After update to v2 from v1 only RESTFull and MQTT config settings need to be updated in config.
 
 ## [2.2.0] - (18.08.2024)
 
@@ -94,7 +96,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Changes
 
-- added [#120](https://github.com/grzegorz914/homebridge-melcloud-control/issues/120) püossibility run same device many times in other account or in other homebridge instance
+- added [#120](https://github.com/grzegorz914/homebridge-melcloud-control/issues/120) possibility run same device many times in other account or in other homebridge instance
 - cleanup
 
 ## [1.0.0] - (21.06.2024)
