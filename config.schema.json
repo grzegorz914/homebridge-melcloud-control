@@ -259,7 +259,7 @@
                   ]
                 }
               ],
-              "description": "Select the operatiing mode for Heat, if this mode is not supported, it will be disabled.",
+              "description": "Select the operating mode for Heat, if this mode is not supported, it will be disabled.",
               "required": true
             },
             "ataCoolDryFanMode": {
@@ -294,7 +294,7 @@
                   ]
                 }
               ],
-              "description": "Select the operatiing mode for Cool, if this mode is not supported, it will be disabled.",
+              "description": "Select the operating mode for Cool, if this mode is not supported, it will be disabled.",
               "required": true
             },
             "ataAutoDryFanMode": {
@@ -329,7 +329,7 @@
                   ]
                 }
               ],
-              "description": "Select the operatiing mode for Auto, if this mode is not supported, it will be disabled.",
+              "description": "Select the operating mode for Auto, if this mode is not supported, it will be disabled.",
               "required": true
             },
             "ataPresets": {
@@ -1433,7 +1433,7 @@
                     {
                       "key": "accounts[]",
                       "type": "section",
-                      "title": "Operation Modes",
+                      "title": "Operating Modes",
                       "expandable": true,
                       "expanded": false,
                       "items": [
