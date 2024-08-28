@@ -21,6 +21,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - After update to v2 from v1 only RESTFull and MQTT config settings need to be updated in config.
 
+## [2.3.1] - (28.08.2024)
+
+## Changes
+
+- cleanup and refactor accessory code
+
 ## [2.3.0] - (25.08.2024)
 
 ## Changes
