@@ -29,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - bump dependencies
 - config schema updated
 
-## [2.3.1] - (28.08.2024)
+## [2.3.3] - (28.08.2024)
 
 ## Changes
 
