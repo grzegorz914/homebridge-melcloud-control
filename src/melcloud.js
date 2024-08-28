@@ -35,7 +35,7 @@ class MelCloud extends EventEmitter {
             try {
                 await this.chackDevicesList();
             } catch (error) {
-                this.emit('error', `Scheck devices list: ${error}.`);
+                this.emit('error', `Check devices list: ${error}.`);
             };
         }).on('state', (state) => { });
 
@@ -52,7 +52,7 @@ class MelCloud extends EventEmitter {
             const axiosInstanceLogin = axios.create({
                 method: 'POST',
                 baseURL: CONSTANTS.ApiUrls.BaseURL,
-                timeout: 25000,
+                timeout: 5000,
                 withCredentials: true,
                 maxContentLength: 100000000,
                 maxBodyLength: 1000000000,
@@ -90,7 +90,7 @@ class MelCloud extends EventEmitter {
             this.axiosInstanceGet = axios.create({
                 method: 'GET',
                 baseURL: CONSTANTS.ApiUrls.BaseURL,
-                timeout: 15000,
+                timeout: 5000,
                 headers: {
                     'X-MitsContextKey': contextKey
                 },
@@ -107,7 +107,7 @@ class MelCloud extends EventEmitter {
             this.axiosInstancePost = axios.create({
                 method: 'POST',
                 baseURL: CONSTANTS.ApiUrls.BaseURL,
-                timeout: 15000,
+                timeout: 5000,
                 headers: {
                     'X-MitsContextKey': contextKey,
                     'content-type': 'application/json'
@@ -202,10 +202,10 @@ class MelCloud extends EventEmitter {
     async saveData(path, data) {
         try {
             await fsPromises.writeFile(path, JSON.stringify(data, null, 2));
-            const debug3 = this.enableDebugMode ? this.emit('debug', `Data saved to path: ${path}.`) : false;
+            const debug3 = this.enableDebugMode ? this.emit('debug', `Data saved to: ${path}.`) : false;
             return true;
         } catch (error) {
-            throw new Error(`Save data to path: ${path}, error: ${error.message ?? error}`);
+            throw new Error(`Save data to: ${path}, error: ${error.message ?? error}`);
         }
     }
 
