@@ -629,7 +629,7 @@
                         ]
                       }
                     ],
-                    "description": "Select the characterristic type to be displayed in HomeKit app.",
+                    "description": "Select the characteristic type to be displayed in HomeKit app.",
                     "required": true
                   },
                   "namePrefix": {
@@ -956,7 +956,7 @@
                         ]
                       }
                     ],
-                    "description": "Select the characterristic type to be displayed in HomeKit app.",
+                    "description": "Select the characteristic type to be displayed in HomeKit app.",
                     "required": true
                   },
                   "namePrefix": {
@@ -1193,7 +1193,7 @@
                         ]
                       }
                     ],
-                    "description": "Select the characterristic type to be displayed in HomeKit app.",
+                    "description": "Select the characteristic type to be displayed in HomeKit app.",
                     "required": false
                   },
                   "namePrefix": {
