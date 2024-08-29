@@ -862,7 +862,7 @@ class DeviceAta extends EventEmitter {
                                 deviceState.SetTemperature = value;
                                 deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.SetTemperature;
                                 await this.melCloudAta.send(deviceState);
-                                const info = this.disableLogInfo ? false : this.emit('message', `Set heating threshold temperature: ${value}${this.temperatureUnit}`);
+                                const info = this.disableLogInfo ? false : this.emit('message', `Set heating threshold temperature: ${value}${this.accessory.temperatureUnit}`);
                             } catch (error) {
                                 this.emit('warn', `Set heating threshold temperature error: ${error}`);
                             };
@@ -882,7 +882,7 @@ class DeviceAta extends EventEmitter {
                                 deviceState.SetTemperature = value;
                                 deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.SetTemperature;
                                 await this.melCloudAta.send(deviceState);
-                                const info = this.disableLogInfo ? false : this.emit('message', `Set cooling threshold temperature: ${value}${this.temperatureUnit}`);
+                                const info = this.disableLogInfo ? false : this.emit('message', `Set cooling threshold temperature: ${value}${this.accessory.temperatureUnit}`);
                             } catch (error) {
                                 this.emit('warn', `Set cooling threshold temperature error: ${error}`);
                             };
@@ -996,7 +996,7 @@ class DeviceAta extends EventEmitter {
                                 deviceState.SetTemperature = value;
                                 deviceState.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.SetTemperature;
                                 await this.melCloudAta.send(deviceState);
-                                const info = this.disableLogInfo ? false : this.emit('message', `Set temperature: ${value}${this.temperatureUnit}`);
+                                const info = this.disableLogInfo ? false : this.emit('message', `Set temperature: ${value}${this.accessory.temperatureUnit}`);
                             } catch (error) {
                                 this.emit('warn', `Set temperature error: ${error}`);
                             };
