@@ -7,7 +7,7 @@ const CONSTANTS = require('./constants.json');
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceErv extends EventEmitter {
-    constructor(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile, deviceRefreshInterval) {
+    constructor(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile, refreshInterval) {
         super();
 
         Accessory = api.platformAccessory;
@@ -17,12 +17,12 @@ class DeviceErv extends EventEmitter {
         AccessoryUUID = api.hap.uuid;
 
         //account config
-        this.displayMode = account.ervDisplayMode || 0;
-        this.temperatureSensor = account.ervTemperatureSensor || false;
-        this.temperatureSensorOutdoor = account.ervTemperatureSensorOutdoor || false;
-        this.temperatureSensorSupply = account.ervTemperatureSensorSupply || false;
-        this.presetsEnabled = account.ervPresets || false;
-        this.buttons = account.ervButtons || [];
+        this.displayMode = device.displayMode || 0;
+        this.temperatureSensor = device.temperatureSensor || false;
+        this.temperatureSensorOutdoor = device.temperatureSensorOutdoor || false;
+        this.temperatureSensorSupply = device.temperatureSensorSupply || false;
+        this.presetsEnabled = device.presets || false;
+        this.buttons = device.buttonsSensors || [];
         this.disableLogInfo = account.disableLogInfo || false;
         this.disableLogDeviceInfo = account.disableLogDeviceInfo || false;
         this.enableDebugMode = account.enableDebugMode || false;
@@ -67,7 +67,7 @@ class DeviceErv extends EventEmitter {
             accountInfoFile: accountInfoFile,
             deviceInfoFile: deviceInfoFile,
             debugLog: account.enableDebugMode,
-            refreshInterval: deviceRefreshInterval
+            refreshInterval: refreshInterval
         });
 
         this.melCloudErv.on('externalIntegrations', (deviceData, deviceState) => {
@@ -253,7 +253,7 @@ class DeviceErv extends EventEmitter {
 
                 //operation mode - 0, HEAT, 2, COOL, 4, 5, 6, FAN, AUTO
                 switch (displayMode) {
-                    case 0: //Heater Cooler
+                    case 1: //Heater Cooler
                         switch (power) {
                             case true:
                                 switch (ventilationMode) {
@@ -323,7 +323,7 @@ class DeviceErv extends EventEmitter {
                             const updateCOM = hasCoolOperationMode ? this.melCloudService.updateCharacteristic(Characteristic.CoolingThresholdTemperature, targetTemperature) : false;
                         };
                         break;
-                    case 1: //Thermostat
+                    case 2: //Thermostat
                         //operation mode - 0, HEAT, 2, COOL, 4, 5, 6, FAN, AUTO
                         switch (power) {
                             case true:
@@ -650,7 +650,7 @@ class DeviceErv extends EventEmitter {
             const serviceName = `${deviceTypeText} ${accessoryName}`;
 
             switch (displayMode) {
-                case 0: //Heater Cooler
+                case 1: //Heater Cooler
                     const debug = this.enableDebugMode ? this.emit('debug', `Prepare heather/cooler service`) : false;
                     this.melCloudService = accessory.addService(Service.HeaterCooler, serviceName, `HeaterCooler ${deviceId}`);
                     this.melCloudService.getCharacteristic(Characteristic.Active)
@@ -837,7 +837,7 @@ class DeviceErv extends EventEmitter {
                             };
                         });
                     break;
-                case 1: //Thermostat
+                case 2: //Thermostat
                     const debug1 = this.enableDebugMode ? this.emit('debug', `Prepare thermostat service`) : false;
                     this.melCloudService = accessory.addService(Service.Thermostat, serviceName, `Thermostat ${deviceId}`);
                     this.melCloudService.getCharacteristic(Characteristic.CurrentHeatingCoolingState)

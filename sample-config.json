@@ -19,91 +19,29 @@
       "platform": "melcloudcontrol",
       "accounts": [
         {
-          "name": "My House",
+          "name": "name",
           "user": "user",
           "passwd": "password",
-          "language": "0",
-          "ataDisplayMode": 0,
-          "ataHeatDryFanMode": 1,
-          "ataCoolDryFanMode": 1,
-          "ataAutoDryFanMode": 1,
-          "ataTemperatureSensor": false,
-          "ataTemperatureSensorOutdoor": false,
-          "ataPresets": false,
-          "ataButtons": [
-            {
-              "name": "ON/OFF",
-              "mode": 0,
-              "displayType": 0,
-              "namePrefix": false
-            }
-          ],
-          "ataHideDeviceById": [
-            {
-              "name": "A.C. Kitchen",
-              "id": "65456432"
-            }
-          ],
-          "atwDisplayMode": 0,
-          "atwTemperatureSensor": false,
-          "atwTemperatureSensorFlow": false,
-          "atwTemperatureSensorReturn": false,
-          "atwTemperatureSensorFlowZone1": false,
-          "atwTemperatureSensorReturnZone1": false,
-          "atwTemperatureSensorFlowWatertank": false,
-          "atwTemperatureSensorReturnWaterTank": false,
-          "atwTemperatureSensorFlowZone2": false,
-          "atwTemperatureSensorReturnZone2": false,
-          "atwPresets": false,
-          "atwButtons": [
-            {
-              "name": "ON/OFF",
-              "mode": 0,
-              "displayType": 0,
-              "namePrefix": false
-            }
-          ],
-          "atwHideDeviceById": [
-            {
-              "name": "Heat Pump",
-              "id": "6545678"
-            }
-          ],
-          "ervDisplayMode": 0,
-          "ervTemperatureSensor": false,
-          "ervTemperatureSensorOutdoor": false,
-          "ervTemperatureSensorSupply": false,
-          "ervPresets": false,
-          "ervButtons": [
-            {
-              "name": "ON/OFF",
-              "mode": 0,
-              "displayType": 0,
-              "namePrefix": false
-            }
-          ],
-          "ervHideDeviceById": [
-            {
-              "name": "E.R.V. Kitchen",
-              "id": "65456432"
-            }
-          ],
+          "language": "14",
+          "ataDevices": [],
+          "atwDevices": [],
+          "ervDevices": [],
           "refreshInterval": 120,
           "deviceRefreshInterval": 5,
-          "disableLogInfo": false,
-          "disableLogDeviceInfo": false,
           "enableDebugMode": false,
-          "mqttDebug": false,
-          "enableRestFul": false,
-          "restFulDebug": false,
-          "enableMqtt": false,
-          "mqttHost": "192.168.1.33",
-          "mqttPort": 1883,
-          "mqttClientId": "1234321",
-          "mqttPrefix": "home/My House",
-          "mqttAuth": false,
-          "mqttUser": "user",
-          "mqttPass": "password"
+          "disableLogInfo": true,
+          "disableLogDeviceInfo": false,
+          "restFul": {
+            "enable": false,
+            "debug": false
+          },
+          "mqtt": {
+            "enable": false,
+            "debug": false,
+            "auth": false,
+            "user": "user",
+            "passwd": "password"
+          }
         }
       ]
     }

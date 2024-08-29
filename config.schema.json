@@ -3,6 +3,7 @@
   "pluginType": "platform",
   "singular": true,
   "fixArrays": true,
+  "customUi": true,
   "headerDisplay": "This plugin works with Mitsubishi Air Conditioner, Heat Pump and Energy Recovery Ventilation connected to MELCloud service. Devices are exposed to HomeKit as separate accessories and each needs to be manually paired.",
   "footerDisplay": "For documentation please see [GitHub repository](https://github.com/grzegorz914/homebridge-melcloud-control).",
   "schema": {
@@ -11,7 +12,6 @@
       "accounts": {
         "type": "array",
         "items": {
-          "title": "MELCloud accounts",
           "type": "object",
           "properties": {
             "name": {
@@ -204,393 +204,33 @@
               "description": "Here select the language used in MELCloud account.",
               "required": true
             },
-            "ataDisplayMode": {
-              "title": "Control",
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 1,
-              "default": 0,
-              "oneOf": [
-                {
-                  "title": "Heater/Cooler",
-                  "enum": [
-                    0
-                  ]
-                },
-                {
-                  "title": "Thermostat",
-                  "enum": [
-                    1
-                  ]
-                }
-              ],
-              "description": "Select device control mode displayed in HomeKit app.",
-              "required": true
-            },
-            "ataHeatDryFanMode": {
-              "title": "Heat",
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 3,
-              "default": 1,
-              "oneOf": [
-                {
-                  "title": "None/Disabled",
-                  "enum": [
-                    0
-                  ]
-                },
-                {
-                  "title": "Heat",
-                  "enum": [
-                    1
-                  ]
-                },
-                {
-                  "title": "Dry",
-                  "enum": [
-                    2
-                  ]
-                },
-                {
-                  "title": "Fan",
-                  "enum": [
-                    3
-                  ]
-                }
-              ],
-              "description": "Select the operating mode for Heat, if this mode is not supported, it will be disabled.",
-              "required": true
-            },
-            "ataCoolDryFanMode": {
-              "title": "Cool",
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 3,
-              "default": 1,
-              "oneOf": [
-                {
-                  "title": "None/Disabled",
-                  "enum": [
-                    0
-                  ]
-                },
-                {
-                  "title": "Cool",
-                  "enum": [
-                    1
-                  ]
-                },
-                {
-                  "title": "Dry",
-                  "enum": [
-                    2
-                  ]
-                },
-                {
-                  "title": "Fan",
-                  "enum": [
-                    3
-                  ]
-                }
-              ],
-              "description": "Select the operating mode for Cool, if this mode is not supported, it will be disabled.",
-              "required": true
-            },
-            "ataAutoDryFanMode": {
-              "title": "Auto",
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 3,
-              "default": 1,
-              "oneOf": [
-                {
-                  "title": "None/Disabled",
-                  "enum": [
-                    0
-                  ]
-                },
-                {
-                  "title": "Auto",
-                  "enum": [
-                    1
-                  ]
-                },
-                {
-                  "title": "Dry",
-                  "enum": [
-                    2
-                  ]
-                },
-                {
-                  "title": "Fan",
-                  "enum": [
-                    3
-                  ]
-                }
-              ],
-              "description": "Select the operating mode for Auto, if this mode is not supported, it will be disabled.",
-              "required": true
-            },
-            "ataPresets": {
-              "title": "Presets",
-              "type": "boolean",
-              "default": false,
-              "description": "This enable extra buttons for configured presets and display it in HomeKit app.",
-              "required": false
-            },
-            "ataTemperatureSensor": {
-              "title": "Room",
-              "type": "boolean",
-              "default": false,
-              "description": "This enable extra room temperature sensor to use with automations in HomeKit app.",
-              "required": false
-            },
-            "ataTemperatureSensorOutdoor": {
-              "title": "Outdoor",
-              "type": "boolean",
-              "default": false,
-              "description": "This enable extra outdoor temperature sensor to use with automations in HomeKit app.",
-              "required": false
-            },
-            "ataButtons": {
-              "title": "Button / Sensor",
+            "ataDevices": {
+              "title": "Devices ATA",
               "type": "array",
               "items": {
                 "type": "object",
                 "properties": {
+                  "id": {
+                    "title": "ID",
+                    "type": "integer",
+                    "required": false
+                  },
+                  "type": {
+                    "title": "Type",
+                    "type": "integer",
+                    "required": false
+                  },
                   "name": {
                     "title": "Name",
                     "type": "string",
-                    "placeholder": "Button name",
-                    "description": "Your own name displayed in Homebridge/HomeKit app.",
-                    "required": true
+                    "required": false
                   },
-                  "mode": {
-                    "title": "Mode",
+                  "displayMode": {
+                    "title": "Control",
                     "type": "integer",
                     "minimum": 0,
-                    "maximum": 40,
-                    "description": "Function, VH - Vane Horizontal, VV - Vane Vertical.",
-                    "oneOf": [
-                      {
-                        "title": "POWER ON/OFF",
-                        "enum": [
-                          0
-                        ]
-                      },
-                      {
-                        "title": "MODE HEAT",
-                        "enum": [
-                          1
-                        ]
-                      },
-                      {
-                        "title": "MODE DRY",
-                        "enum": [
-                          2
-                        ]
-                      },
-                      {
-                        "title": "MODE COOL",
-                        "enum": [
-                          3
-                        ]
-                      },
-                      {
-                        "title": "MODE FAN",
-                        "enum": [
-                          4
-                        ]
-                      },
-                      {
-                        "title": "MODE AUTO",
-                        "enum": [
-                          5
-                        ]
-                      },
-                      {
-                        "title": "MODE PURIFY",
-                        "enum": [
-                          6
-                        ]
-                      },
-                      {
-                        "title": "MODE DRY CONTROL HIDE",
-                        "enum": [
-                          7
-                        ]
-                      },
-                      {
-                        "title": "VH MODE AUTO",
-                        "enum": [
-                          10
-                        ]
-                      },
-                      {
-                        "title": "VH MODE 1 / LEFT",
-                        "enum": [
-                          11
-                        ]
-                      },
-                      {
-                        "title": "VH MODE 2",
-                        "enum": [
-                          12
-                        ]
-                      },
-                      {
-                        "title": "VH MODE 3 / CENTER",
-                        "enum": [
-                          13
-                        ]
-                      },
-                      {
-                        "title": "VH MODE 4",
-                        "enum": [
-                          14
-                        ]
-                      },
-                      {
-                        "title": "VH MODE 5 / RIGHT",
-                        "enum": [
-                          15
-                        ]
-                      },
-                      {
-                        "title": "VH MODE SPLIT",
-                        "enum": [
-                          16
-                        ]
-                      },
-                      {
-                        "title": "VH MODE SWING",
-                        "enum": [
-                          17
-                        ]
-                      },
-                      {
-                        "title": "VV MODE AUTO",
-                        "enum": [
-                          20
-                        ]
-                      },
-                      {
-                        "title": "VV MODE 1 / UP",
-                        "enum": [
-                          21
-                        ]
-                      },
-                      {
-                        "title": "VV MODE 2",
-                        "enum": [
-                          22
-                        ]
-                      },
-                      {
-                        "title": "VV MODE 3 / CENTER",
-                        "enum": [
-                          23
-                        ]
-                      },
-                      {
-                        "title": "VV MODE 4",
-                        "enum": [
-                          24
-                        ]
-                      },
-                      {
-                        "title": "VV MODE 5 / DOWN",
-                        "enum": [
-                          25
-                        ]
-                      },
-                      {
-                        "title": "VV SWING",
-                        "enum": [
-                          26
-                        ]
-                      },
-                      {
-                        "title": "VH/VV CONTROLS HIDE",
-                        "enum": [
-                          27
-                        ]
-                      },
-                      {
-                        "title": "FAN MODE AUTO",
-                        "enum": [
-                          30
-                        ]
-                      },
-                      {
-                        "title": "FAN MODE 1",
-                        "enum": [
-                          31
-                        ]
-                      },
-                      {
-                        "title": "FAN MODE 2",
-                        "enum": [
-                          32
-                        ]
-                      },
-                      {
-                        "title": "FAN MODE 3",
-                        "enum": [
-                          33
-                        ]
-                      },
-                      {
-                        "title": "FAN MODE 4",
-                        "enum": [
-                          34
-                        ]
-                      },
-                      {
-                        "title": "FAN MODE 5",
-                        "enum": [
-                          35
-                        ]
-                      },
-                      {
-                        "title": "FAN MODE 6",
-                        "enum": [
-                          36
-                        ]
-                      },
-                      {
-                        "title": "LOCK CONTROL All",
-                        "enum": [
-                          37
-                        ]
-                      },
-                      {
-                        "title": "LOCK CONTROL POWER",
-                        "enum": [
-                          38
-                        ]
-                      },
-                      {
-                        "title": "LOCK CONTROL MODE",
-                        "enum": [
-                          39
-                        ]
-                      },
-                      {
-                        "title": "LOCK CONTROL TEMPERATURE",
-                        "enum": [
-                          40
-                        ]
-                      }
-                    ],
-                    "required": true
-                  },
-                  "displayType": {
-                    "title": "Type",
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 5,
+                    "maximum": 1,
+                    "default": 0,
                     "oneOf": [
                       {
                         "title": "None/Disabled",
@@ -599,325 +239,27 @@
                         ]
                       },
                       {
-                        "title": "Outlet",
+                        "title": "Heater/Cooler",
                         "enum": [
                           1
                         ]
                       },
                       {
-                        "title": "Switch",
-                        "enum": [
-                          2
-                        ]
-                      },
-                      {
-                        "title": "Motion Sensor",
-                        "enum": [
-                          3
-                        ]
-                      },
-                      {
-                        "title": "Occupancy Sensor",
-                        "enum": [
-                          4
-                        ]
-                      },
-                      {
-                        "title": "Contact Sensor",
-                        "enum": [
-                          5
-                        ]
-                      }
-                    ],
-                    "description": "Select the characteristic type to be displayed in HomeKit app.",
-                    "required": true
-                  },
-                  "namePrefix": {
-                    "title": "Prefix",
-                    "type": "boolean",
-                    "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
-                    "required": false
-                  }
-                }
-              },
-              "required": false
-            },
-            "ataHideDeviceById": {
-              "title": "Hide Device By Id",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "title": "Name",
-                    "type": "string",
-                    "placeholder": "Device name",
-                    "description": "Your own name.",
-                    "required": false
-                  },
-                  "id": {
-                    "title": "Id",
-                    "type": "string",
-                    "description": "Set device Id to be hidden and not exposed to the Homebridge/Homekit.",
-                    "required": false
-                  }
-                }
-              },
-              "required": false
-            },
-            "atwDisplayMode": {
-              "title": "Control Mode",
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 1,
-              "default": 0,
-              "oneOf": [
-                {
-                  "title": "Heater/Cooler",
-                  "enum": [
-                    0
-                  ]
-                },
-                {
-                  "title": "Thermostat",
-                  "enum": [
-                    1
-                  ]
-                }
-              ],
-              "description": "Select main control mode.",
-              "required": true
-            },
-            "atwTemperatureSensor": {
-              "title": "Temperature Sensor Room",
-              "type": "boolean",
-              "default": false,
-              "description": "This enable extra room temperature sensor to use with automations in HomeKit app.",
-              "required": false
-            },
-            "atwTemperatureSensorFlow": {
-              "title": "Temperature Sensor Flow",
-              "type": "boolean",
-              "default": false,
-              "description": "This enable extra Flow temperature sensor to use with automations in HomeKit app.",
-              "required": false
-            },
-            "atwTemperatureSensorReturn": {
-              "title": "Temperature Sensor Return",
-              "type": "boolean",
-              "default": false,
-              "description": "This enable extra Return temperature sensor to use with automations in HomeKit app.",
-              "required": false
-            },
-            "atwTemperatureSensorFlowZone1": {
-              "title": "Temperature Sensor Flow Zone 1",
-              "type": "boolean",
-              "default": false,
-              "description": "This enable extra Flow Zone 1 temperature sensor to use with automations in HomeKit app.",
-              "required": false
-            },
-            "atwTemperatureSensorReturnZone1": {
-              "title": "Temperature Sensor Return Zone 1",
-              "type": "boolean",
-              "default": false,
-              "description": "This enable extra Return Zone 1 temperature sensor to use with automations in HomeKit app.",
-              "required": false
-            },
-            "atwTemperatureSensorFlowWaterTank": {
-              "title": "Temperature Sensor Flow Water Tank",
-              "type": "boolean",
-              "default": false,
-              "description": "This enable extra Flow Water Tank temperature sensor to use with automations in HomeKit app.",
-              "required": false
-            },
-            "atwTemperatureSensorReturnWaterTank": {
-              "title": "Temperature Sensor Return Water Tank",
-              "type": "boolean",
-              "default": false,
-              "description": "This enable extra Return Water Tank temperature sensor to use with automations in HomeKit app.",
-              "required": false
-            },
-            "atwTemperatureSensorFlowZone2": {
-              "title": "Temperature Sensor Flow Zone 2",
-              "type": "boolean",
-              "default": false,
-              "description": "This enable extra Flow Zone 2 temperature sensor to use with automations in HomeKit app.",
-              "required": false
-            },
-            "atwTemperatureSensorReturnZone2": {
-              "title": "Temperature Sensor Return Zone 2",
-              "type": "boolean",
-              "default": false,
-              "description": "This enable extra Return Zone 2 temperature sensor to use with automations in HomeKit app.",
-              "required": false
-            },
-            "atwPresets": {
-              "title": "Presets",
-              "type": "boolean",
-              "default": false,
-              "description": "This enable extra buttons for configured presets and display it in HomeKit app.",
-              "required": false
-            },
-            "atwButtons": {
-              "title": "Button",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "title": "Name",
-                    "type": "string",
-                    "placeholder": "Button name",
-                    "description": "Your own name displayed in Homebridge/HomeKit app.",
-                    "required": true
-                  },
-                  "mode": {
-                    "title": "Mode",
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 70,
-                    "description": "Select the function.",
-                    "oneOf": [
-                      {
-                        "title": "POWER ON/OFF",
-                        "enum": [
-                          0
-                        ]
-                      },
-                      {
-                        "title": "MODE HEAT",
+                        "title": "Thermostat",
                         "enum": [
                           1
                         ]
-                      },
-                      {
-                        "title": "MODE COOL",
-                        "enum": [
-                          2
-                        ]
-                      },
-                      {
-                        "title": "MODE HOLIDAY",
-                        "enum": [
-                          3
-                        ]
-                      },
-                      {
-                        "title": "LOCK CONTROL ALL",
-                        "enum": [
-                          10
-                        ]
-                      },
-                      {
-                        "title": "Z1 MODE HEAT THERMOSTAT",
-                        "enum": [
-                          20
-                        ]
-                      },
-                      {
-                        "title": "Z1 MODE HEAT FLOW",
-                        "enum": [
-                          21
-                        ]
-                      },
-                      {
-                        "title": "Z1 MODE HEAT CURVE",
-                        "enum": [
-                          22
-                        ]
-                      },
-                      {
-                        "title": "Z1 MODE COOL THERMOSTAT",
-                        "enum": [
-                          23
-                        ]
-                      },
-                      {
-                        "title": "Z1 MODE COOL FLOW",
-                        "enum": [
-                          24
-                        ]
-                      },
-                      {
-                        "title": "Z1 MODE FLOOR DRY UP",
-                        "enum": [
-                          25
-                        ]
-                      },
-                      {
-                        "title": "Z1 LOCK CONTROL",
-                        "enum": [
-                          30
-                        ]
-                      },
-                      {
-                        "title": "HW MODE FORCE",
-                        "enum": [
-                          40
-                        ]
-                      },
-                      {
-                        "title": "HW MODE ECO",
-                        "enum": [
-                          41
-                        ]
-                      },
-                      {
-                        "title": "HW LOCK CONTROL",
-                        "enum": [
-                          50
-                        ]
-                      },
-                      {
-                        "title": "Z2 MODE HEAT THERMOSTAT",
-                        "enum": [
-                          60
-                        ]
-                      },
-                      {
-                        "title": "Z2 MODE HEAT FLOW",
-                        "enum": [
-                          61
-                        ]
-                      },
-                      {
-                        "title": "Z2 MODE HEAT CURVE",
-                        "enum": [
-                          62
-                        ]
-                      },
-                      {
-                        "title": "Z2 MODE COOL THERMOSTAT",
-                        "enum": [
-                          63
-                        ]
-                      },
-                      {
-                        "title": "Z2 MODE COOL FLOW",
-                        "enum": [
-                          64
-                        ]
-                      },
-                      {
-                        "title": "Z2 MODE FLOOR DRY UP",
-                        "enum": [
-                          65
-                        ]
-                      },
-                      {
-                        "title": "Z2 LOCK CONTROL",
-                        "enum": [
-                          70
-                        ]
                       }
                     ],
+                    "description": "Select device control mode displayed in HomeKit app.",
                     "required": true
                   },
-                  "displayType": {
-                    "title": "Type",
+                  "heatDryFanMode": {
+                    "title": "Heat",
                     "type": "integer",
                     "minimum": 0,
-                    "maximum": 5,
+                    "maximum": 3,
+                    "default": 1,
                     "oneOf": [
                       {
                         "title": "None/Disabled",
@@ -926,235 +268,32 @@
                         ]
                       },
                       {
-                        "title": "Outlet",
+                        "title": "Heat",
                         "enum": [
                           1
                         ]
                       },
                       {
-                        "title": "Switch",
+                        "title": "Dry",
                         "enum": [
                           2
                         ]
                       },
                       {
-                        "title": "Motion Sensor",
+                        "title": "Fan",
                         "enum": [
                           3
                         ]
-                      },
-                      {
-                        "title": "Occupancy Sensor",
-                        "enum": [
-                          4
-                        ]
-                      },
-                      {
-                        "title": "Contact Sensor",
-                        "enum": [
-                          5
-                        ]
                       }
                     ],
-                    "description": "Select the characteristic type to be displayed in HomeKit app.",
+                    "description": "Select the operating mode for Heat, if this mode is not supported, it will be disabled.",
                     "required": true
                   },
-                  "namePrefix": {
-                    "title": "Prefix",
-                    "type": "boolean",
-                    "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
-                    "required": false
-                  }
-                }
-              },
-              "required": false
-            },
-            "atwHideDeviceById": {
-              "title": "Hide Device By Id",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "title": "Name",
-                    "type": "string",
-                    "placeholder": "Device name",
-                    "description": "Your own name.",
-                    "required": false
-                  },
-                  "id": {
-                    "title": "Id",
-                    "type": "string",
-                    "description": "Set device Id to be hidden and not exposed to the Homebridge/Homekit.",
-                    "required": false
-                  }
-                }
-              },
-              "required": false
-            },
-            "ervDisplayMode": {
-              "title": "Control Mode",
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 1,
-              "default": 0,
-              "oneOf": [
-                {
-                  "title": "Heater/Cooler",
-                  "enum": [
-                    0
-                  ]
-                },
-                {
-                  "title": "Thermostat",
-                  "enum": [
-                    1
-                  ]
-                }
-              ],
-              "description": "Select main control mode.",
-              "required": true
-            },
-            "ervTemperatureSensor": {
-              "title": "Temperature Sensor Room",
-              "type": "boolean",
-              "default": false,
-              "description": "This enable extra temperature sensor to use with automations in HomeKit app.",
-              "required": false
-            },
-            "ervTemperatureSensorOutdoor": {
-              "title": "Temperature Sensor Outdoor",
-              "type": "boolean",
-              "default": false,
-              "description": "This enable extra outdoor temperature sensor to use with automations in HomeKit app.",
-              "required": false
-            },
-            "ervTemperatureSensorSupply": {
-              "title": "Temperature Sensor Supply",
-              "type": "boolean",
-              "default": false,
-              "description": "This enable extra supply temperature sensor to use with automations in HomeKit app.",
-              "required": false
-            },
-            "ervPresets": {
-              "title": "Presets",
-              "type": "boolean",
-              "default": false,
-              "description": "This enable extra buttons for configured presets and display it in HomeKit app.",
-              "required": false
-            },
-            "ervButtons": {
-              "title": "Button",
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "title": "Name",
-                    "type": "string",
-                    "placeholder": "Button name",
-                    "description": "Your own name displayed in Homebridge/HomeKit app.",
-                    "required": true
-                  },
-                  "mode": {
-                    "title": "Mode",
+                  "coolDryFanMode": {
+                    "title": "Cool",
                     "type": "integer",
                     "minimum": 0,
-                    "maximum": 18,
-                    "description": "Select the function.",
-                    "oneOf": [
-                      {
-                        "title": "POWER ON/OFF",
-                        "enum": [
-                          0
-                        ]
-                      },
-                      {
-                        "title": "MODE LOSSNAY",
-                        "enum": [
-                          1
-                        ]
-                      },
-                      {
-                        "title": "MODE BYPASS",
-                        "enum": [
-                          2
-                        ]
-                      },
-                      {
-                        "title": "MODE AUTO",
-                        "enum": [
-                          3
-                        ]
-                      },
-                      {
-                        "title": "MODE NIGHT PURGE",
-                        "enum": [
-                          4
-                        ]
-                      },
-                      {
-                        "title": "FAN MODE AUTO",
-                        "enum": [
-                          10
-                        ]
-                      },
-                      {
-                        "title": "FAN MODE 1",
-                        "enum": [
-                          11
-                        ]
-                      },
-                      {
-                        "title": "FAN MODE 2",
-                        "enum": [
-                          12
-                        ]
-                      },
-                      {
-                        "title": "FAN MODE 3",
-                        "enum": [
-                          13
-                        ]
-                      },
-                      {
-                        "title": "FAN MODE 4",
-                        "enum": [
-                          14
-                        ]
-                      },
-                      {
-                        "title": "LOCK CONTROL",
-                        "enum": [
-                          15
-                        ]
-                      },
-                      {
-                        "title": "ROOM TEMP HIDE",
-                        "enum": [
-                          16
-                        ]
-                      },
-                      {
-                        "title": "SUPPLY TEMP HIDE",
-                        "enum": [
-                          17
-                        ]
-                      },
-                      {
-                        "title": "OUTDOOR TEMP HIDE",
-                        "enum": [
-                          18
-                        ]
-                      }
-                    ],
-                    "required": true
-                  },
-                  "displayType": {
-                    "title": "Type",
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 5,
+                    "maximum": 3,
                     "oneOf": [
                       {
                         "title": "None/Disabled",
@@ -1163,71 +302,964 @@
                         ]
                       },
                       {
-                        "title": "Outlet",
+                        "title": "Cool",
                         "enum": [
                           1
                         ]
                       },
                       {
-                        "title": "Switch",
+                        "title": "Dry",
                         "enum": [
                           2
                         ]
                       },
                       {
-                        "title": "Motion Sensor",
+                        "title": "Fan",
                         "enum": [
                           3
                         ]
-                      },
+                      }
+                    ],
+                    "description": "Select the operating mode for Cool, if this mode is not supported, it will be disabled.",
+                    "required": true
+                  },
+                  "autoDryFanMode": {
+                    "title": "Auto",
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 3,
+                    "default": 1,
+                    "oneOf": [
                       {
-                        "title": "Occupancy Sensor",
+                        "title": "None/Disabled",
                         "enum": [
-                          4
+                          0
                         ]
                       },
                       {
-                        "title": "Contact Sensor",
+                        "title": "Auto",
                         "enum": [
-                          5
+                          1
+                        ]
+                      },
+                      {
+                        "title": "Dry",
+                        "enum": [
+                          2
+                        ]
+                      },
+                      {
+                        "title": "Fan",
+                        "enum": [
+                          3
                         ]
                       }
                     ],
-                    "description": "Select the characteristic type to be displayed in HomeKit app.",
+                    "description": "Select the operating mode for Auto, if this mode is not supported, it will be disabled.",
+                    "required": true
+                  },
+                  "presets": {
+                    "title": "Presets",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable extra buttons for configured presets and display it in HomeKit app.",
                     "required": false
                   },
-                  "namePrefix": {
-                    "title": "Prefix",
+                  "temperatureSensor": {
+                    "title": "Room",
                     "type": "boolean",
-                    "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
+                    "default": false,
+                    "description": "This enable extra room temperature sensor to use with automations in HomeKit app.",
                     "required": false
+                  },
+                  "temperatureSensorOutdoor": {
+                    "title": "Outdoor",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable extra outdoor temperature sensor to use with automations in HomeKit app.",
+                    "required": false
+                  },
+                  "buttonsSensors": {
+                    "title": "Button / Sensor",
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "title": "Name",
+                          "type": "string",
+                          "placeholder": "Button name",
+                          "description": "Your own name displayed in Homebridge/HomeKit app.",
+                          "required": true
+                        },
+                        "mode": {
+                          "title": "Mode",
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 40,
+                          "description": "Function, VH - Vane Horizontal, VV - Vane Vertical.",
+                          "oneOf": [
+                            {
+                              "title": "POWER ON/OFF",
+                              "enum": [
+                                0
+                              ]
+                            },
+                            {
+                              "title": "MODE HEAT",
+                              "enum": [
+                                1
+                              ]
+                            },
+                            {
+                              "title": "MODE DRY",
+                              "enum": [
+                                2
+                              ]
+                            },
+                            {
+                              "title": "MODE COOL",
+                              "enum": [
+                                3
+                              ]
+                            },
+                            {
+                              "title": "MODE FAN",
+                              "enum": [
+                                4
+                              ]
+                            },
+                            {
+                              "title": "MODE AUTO",
+                              "enum": [
+                                5
+                              ]
+                            },
+                            {
+                              "title": "MODE PURIFY",
+                              "enum": [
+                                6
+                              ]
+                            },
+                            {
+                              "title": "MODE DRY CONTROL HIDE",
+                              "enum": [
+                                7
+                              ]
+                            },
+                            {
+                              "title": "VH MODE AUTO",
+                              "enum": [
+                                10
+                              ]
+                            },
+                            {
+                              "title": "VH MODE 1 / LEFT",
+                              "enum": [
+                                11
+                              ]
+                            },
+                            {
+                              "title": "VH MODE 2",
+                              "enum": [
+                                12
+                              ]
+                            },
+                            {
+                              "title": "VH MODE 3 / CENTER",
+                              "enum": [
+                                13
+                              ]
+                            },
+                            {
+                              "title": "VH MODE 4",
+                              "enum": [
+                                14
+                              ]
+                            },
+                            {
+                              "title": "VH MODE 5 / RIGHT",
+                              "enum": [
+                                15
+                              ]
+                            },
+                            {
+                              "title": "VH MODE SPLIT",
+                              "enum": [
+                                16
+                              ]
+                            },
+                            {
+                              "title": "VH MODE SWING",
+                              "enum": [
+                                17
+                              ]
+                            },
+                            {
+                              "title": "VV MODE AUTO",
+                              "enum": [
+                                20
+                              ]
+                            },
+                            {
+                              "title": "VV MODE 1 / UP",
+                              "enum": [
+                                21
+                              ]
+                            },
+                            {
+                              "title": "VV MODE 2",
+                              "enum": [
+                                22
+                              ]
+                            },
+                            {
+                              "title": "VV MODE 3 / CENTER",
+                              "enum": [
+                                23
+                              ]
+                            },
+                            {
+                              "title": "VV MODE 4",
+                              "enum": [
+                                24
+                              ]
+                            },
+                            {
+                              "title": "VV MODE 5 / DOWN",
+                              "enum": [
+                                25
+                              ]
+                            },
+                            {
+                              "title": "VV SWING",
+                              "enum": [
+                                26
+                              ]
+                            },
+                            {
+                              "title": "VH/VV CONTROLS HIDE",
+                              "enum": [
+                                27
+                              ]
+                            },
+                            {
+                              "title": "FAN MODE AUTO",
+                              "enum": [
+                                30
+                              ]
+                            },
+                            {
+                              "title": "FAN MODE 1",
+                              "enum": [
+                                31
+                              ]
+                            },
+                            {
+                              "title": "FAN MODE 2",
+                              "enum": [
+                                32
+                              ]
+                            },
+                            {
+                              "title": "FAN MODE 3",
+                              "enum": [
+                                33
+                              ]
+                            },
+                            {
+                              "title": "FAN MODE 4",
+                              "enum": [
+                                34
+                              ]
+                            },
+                            {
+                              "title": "FAN MODE 5",
+                              "enum": [
+                                35
+                              ]
+                            },
+                            {
+                              "title": "FAN MODE 6",
+                              "enum": [
+                                36
+                              ]
+                            },
+                            {
+                              "title": "LOCK CONTROL All",
+                              "enum": [
+                                37
+                              ]
+                            },
+                            {
+                              "title": "LOCK CONTROL POWER",
+                              "enum": [
+                                38
+                              ]
+                            },
+                            {
+                              "title": "LOCK CONTROL MODE",
+                              "enum": [
+                                39
+                              ]
+                            },
+                            {
+                              "title": "LOCK CONTROL TEMPERATURE",
+                              "enum": [
+                                40
+                              ]
+                            }
+                          ],
+                          "required": true
+                        },
+                        "displayType": {
+                          "title": "Type",
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 5,
+                          "default": 0,
+                          "oneOf": [
+                            {
+                              "title": "None/Disabled",
+                              "enum": [
+                                0
+                              ]
+                            },
+                            {
+                              "title": "Outlet",
+                              "enum": [
+                                1
+                              ]
+                            },
+                            {
+                              "title": "Switch",
+                              "enum": [
+                                2
+                              ]
+                            },
+                            {
+                              "title": "Motion Sensor",
+                              "enum": [
+                                3
+                              ]
+                            },
+                            {
+                              "title": "Occupancy Sensor",
+                              "enum": [
+                                4
+                              ]
+                            },
+                            {
+                              "title": "Contact Sensor",
+                              "enum": [
+                                5
+                              ]
+                            }
+                          ],
+                          "description": "Select the characteristic type to be displayed in HomeKit app.",
+                          "required": true
+                        },
+                        "namePrefix": {
+                          "title": "Prefix",
+                          "type": "boolean",
+                          "default": false,
+                          "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
+                          "required": false
+                        }
+                      }
+                    }
                   }
                 }
               },
-              "required": false
+              "condition": {
+                "functionBody": "const devices = model.accounts[arrayIndices]?.ataDevices || []; return devices.length > 0 && devices.every(device => device.id != null && device.id !== '');"
+              }
             },
-            "ervHideDeviceById": {
-              "title": "Hide Device By Id",
+            "atwDevices": {
+              "title": "Devices ATW",
               "type": "array",
               "items": {
                 "type": "object",
                 "properties": {
+                  "id": {
+                    "title": "Mode",
+                    "type": "integer",
+                    "required": false
+                  },
+                  "type": {
+                    "title": "Type",
+                    "type": "integer",
+                    "required": false
+                  },
                   "name": {
                     "title": "Name",
                     "type": "string",
-                    "placeholder": "Device name",
-                    "description": "Your own name.",
                     "required": false
                   },
-                  "id": {
-                    "title": "Id",
-                    "type": "string",
-                    "description": "Set device Id to be hidden and not exposed to the Homebridge/Homekit.",
+                  "displayMode": {
+                    "title": "Control",
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 2,
+                    "default": 1,
+                    "oneOf": [
+                      {
+                        "title": "None/Disabled",
+                        "enum": [
+                          0
+                        ]
+                      },
+                      {
+                        "title": "Heater/Cooler",
+                        "enum": [
+                          1
+                        ]
+                      },
+                      {
+                        "title": "Thermostat",
+                        "enum": [
+                          2
+                        ]
+                      }
+                    ],
+                    "description": "Select device control mode displayed in HomeKit app.",
+                    "required": true
+                  },
+                  "temperatureSensor": {
+                    "title": "Temperature Sensor Room",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable extra temperature sensor to use with automations in HomeKit app.",
                     "required": false
+                  },
+                  "temperatureSensorFlow": {
+                    "title": "Temperature Sensor Flow",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable extra Flow temperature sensor to use with automations in HomeKit app.",
+                    "required": false
+                  },
+                  "temperatureSensorReturn": {
+                    "title": "Temperature Sensor Return",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable extra Return temperature sensor to use with automations in HomeKit app.",
+                    "required": false
+                  },
+                  "temperatureSensorFlowZone1": {
+                    "title": "Temperature Sensor Flow Zone 1",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable extra Flow Zone 1 temperature sensor to use with automations in HomeKit app.",
+                    "required": false
+                  },
+                  "temperatureSensorReturnZone1": {
+                    "title": "Temperature Sensor Return Zone 1",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable extra Return Zone 1 temperature sensor to use with automations in HomeKit app.",
+                    "required": false
+                  },
+                  "temperatureSensorFlowWaterTank": {
+                    "title": "Temperature Sensor Flow Water Tank",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable extra Flow Water Tank temperature sensor to use with automations in HomeKit app.",
+                    "required": false
+                  },
+                  "temperatureSensorReturnWaterTank": {
+                    "title": "Temperature Sensor Return Water Tank",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable extra Return Water Tank temperature sensor to use with automations in HomeKit app.",
+                    "required": false
+                  },
+                  "temperatureSensorFlowZone2": {
+                    "title": "Temperature Sensor Flow Zone 2",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable extra Flow Zone 2 temperature sensor to use with automations in HomeKit app.",
+                    "required": false
+                  },
+                  "temperatureSensorReturnZone2": {
+                    "title": "Temperature Sensor Return Zone 2",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable extra Return Zone 2 temperature sensor to use with automations in HomeKit app.",
+                    "required": false
+                  },
+                  "presets": {
+                    "title": "Presets",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable extra buttons for configured presets and display it in HomeKit app.",
+                    "required": false
+                  },
+                  "buttonsSensors": {
+                    "title": "Button",
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "title": "Name",
+                          "type": "string",
+                          "placeholder": "Button name",
+                          "description": "Your own name displayed in Homebridge/HomeKit app.",
+                          "required": true
+                        },
+                        "mode": {
+                          "title": "Mode",
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 70,
+                          "description": "Select the function.",
+                          "oneOf": [
+                            {
+                              "title": "POWER ON/OFF",
+                              "enum": [
+                                0
+                              ]
+                            },
+                            {
+                              "title": "MODE HEAT",
+                              "enum": [
+                                1
+                              ]
+                            },
+                            {
+                              "title": "MODE COOL",
+                              "enum": [
+                                2
+                              ]
+                            },
+                            {
+                              "title": "MODE HOLIDAY",
+                              "enum": [
+                                3
+                              ]
+                            },
+                            {
+                              "title": "LOCK CONTROL ALL",
+                              "enum": [
+                                10
+                              ]
+                            },
+                            {
+                              "title": "Z1 MODE HEAT THERMOSTAT",
+                              "enum": [
+                                20
+                              ]
+                            },
+                            {
+                              "title": "Z1 MODE HEAT FLOW",
+                              "enum": [
+                                21
+                              ]
+                            },
+                            {
+                              "title": "Z1 MODE HEAT CURVE",
+                              "enum": [
+                                22
+                              ]
+                            },
+                            {
+                              "title": "Z1 MODE COOL THERMOSTAT",
+                              "enum": [
+                                23
+                              ]
+                            },
+                            {
+                              "title": "Z1 MODE COOL FLOW",
+                              "enum": [
+                                24
+                              ]
+                            },
+                            {
+                              "title": "Z1 MODE FLOOR DRY UP",
+                              "enum": [
+                                25
+                              ]
+                            },
+                            {
+                              "title": "Z1 LOCK CONTROL",
+                              "enum": [
+                                30
+                              ]
+                            },
+                            {
+                              "title": "HW MODE FORCE",
+                              "enum": [
+                                40
+                              ]
+                            },
+                            {
+                              "title": "HW MODE ECO",
+                              "enum": [
+                                41
+                              ]
+                            },
+                            {
+                              "title": "HW LOCK CONTROL",
+                              "enum": [
+                                50
+                              ]
+                            },
+                            {
+                              "title": "Z2 MODE HEAT THERMOSTAT",
+                              "enum": [
+                                60
+                              ]
+                            },
+                            {
+                              "title": "Z2 MODE HEAT FLOW",
+                              "enum": [
+                                61
+                              ]
+                            },
+                            {
+                              "title": "Z2 MODE HEAT CURVE",
+                              "enum": [
+                                62
+                              ]
+                            },
+                            {
+                              "title": "Z2 MODE COOL THERMOSTAT",
+                              "enum": [
+                                63
+                              ]
+                            },
+                            {
+                              "title": "Z2 MODE COOL FLOW",
+                              "enum": [
+                                64
+                              ]
+                            },
+                            {
+                              "title": "Z2 MODE FLOOR DRY UP",
+                              "enum": [
+                                65
+                              ]
+                            },
+                            {
+                              "title": "Z2 LOCK CONTROL",
+                              "enum": [
+                                70
+                              ]
+                            }
+                          ],
+                          "required": true
+                        },
+                        "displayType": {
+                          "title": "Type",
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 5,
+                          "default": 0,
+                          "oneOf": [
+                            {
+                              "title": "None/Disabled",
+                              "enum": [
+                                0
+                              ]
+                            },
+                            {
+                              "title": "Outlet",
+                              "enum": [
+                                1
+                              ]
+                            },
+                            {
+                              "title": "Switch",
+                              "enum": [
+                                2
+                              ]
+                            },
+                            {
+                              "title": "Motion Sensor",
+                              "enum": [
+                                3
+                              ]
+                            },
+                            {
+                              "title": "Occupancy Sensor",
+                              "enum": [
+                                4
+                              ]
+                            },
+                            {
+                              "title": "Contact Sensor",
+                              "enum": [
+                                5
+                              ]
+                            }
+                          ],
+                          "description": "Select the characteristic type to be displayed in HomeKit app.",
+                          "required": true
+                        },
+                        "namePrefix": {
+                          "title": "Prefix",
+                          "type": "boolean",
+                          "default": false,
+                          "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
+                          "required": false
+                        }
+                      }
+                    }
                   }
                 }
               },
-              "required": false
+              "condition": {
+                "functionBody": "const devices = model.accounts[arrayIndices]?.atwDevices || []; return devices.length > 0 && devices.every(device => device.id != null && device.id !== '');"
+              }
+            },
+            "ervDevices": {
+              "title": "Devices ERV",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "title": "Mode",
+                    "type": "integer",
+                    "required": false
+                  },
+                  "type": {
+                    "title": "Type",
+                    "type": "integer",
+                    "required": false
+                  },
+                  "name": {
+                    "title": "Name",
+                    "type": "string",
+                    "required": false
+                  },
+                  "displayMode": {
+                    "title": "Control",
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 2,
+                    "default": 0,
+                    "oneOf": [
+                      {
+                        "title": "None/Disabled",
+                        "enum": [
+                          0
+                        ]
+                      },
+                      {
+                        "title": "Heater/Cooler",
+                        "enum": [
+                          1
+                        ]
+                      },
+                      {
+                        "title": "Thermostat",
+                        "enum": [
+                          2
+                        ]
+                      }
+                    ],
+                    "description": "Select device control mode displayed in HomeKit app.",
+                    "required": true
+                  },
+                  "temperatureSensor": {
+                    "title": "Temperature Sensor Room",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable extra temperature sensor to use with automations in HomeKit app.",
+                    "required": false
+                  },
+                  "temperatureSensorOutdoor": {
+                    "title": "Temperature Sensor Outdoor",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable extra outdoor temperature sensor to use with automations in HomeKit app.",
+                    "required": false
+                  },
+                  "temperatureSensorSupply": {
+                    "title": "Temperature Sensor Supply",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable extra supply temperature sensor to use with automations in HomeKit app.",
+                    "required": false
+                  },
+                  "presets": {
+                    "title": "Presets",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable extra buttons for configured presets and display it in HomeKit app.",
+                    "required": false
+                  },
+                  "buttonsSensors": {
+                    "title": "Button",
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "title": "Name",
+                          "type": "string",
+                          "placeholder": "Button name",
+                          "description": "Your own name displayed in Homebridge/HomeKit app.",
+                          "required": true
+                        },
+                        "mode": {
+                          "title": "Mode",
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 18,
+                          "description": "Select the function.",
+                          "oneOf": [
+                            {
+                              "title": "POWER ON/OFF",
+                              "enum": [
+                                0
+                              ]
+                            },
+                            {
+                              "title": "MODE LOSSNAY",
+                              "enum": [
+                                1
+                              ]
+                            },
+                            {
+                              "title": "MODE BYPASS",
+                              "enum": [
+                                2
+                              ]
+                            },
+                            {
+                              "title": "MODE AUTO",
+                              "enum": [
+                                3
+                              ]
+                            },
+                            {
+                              "title": "MODE NIGHT PURGE",
+                              "enum": [
+                                4
+                              ]
+                            },
+                            {
+                              "title": "FAN MODE AUTO",
+                              "enum": [
+                                10
+                              ]
+                            },
+                            {
+                              "title": "FAN MODE 1",
+                              "enum": [
+                                11
+                              ]
+                            },
+                            {
+                              "title": "FAN MODE 2",
+                              "enum": [
+                                12
+                              ]
+                            },
+                            {
+                              "title": "FAN MODE 3",
+                              "enum": [
+                                13
+                              ]
+                            },
+                            {
+                              "title": "FAN MODE 4",
+                              "enum": [
+                                14
+                              ]
+                            },
+                            {
+                              "title": "LOCK CONTROL",
+                              "enum": [
+                                15
+                              ]
+                            },
+                            {
+                              "title": "ROOM TEMP HIDE",
+                              "enum": [
+                                16
+                              ]
+                            },
+                            {
+                              "title": "SUPPLY TEMP HIDE",
+                              "enum": [
+                                17
+                              ]
+                            },
+                            {
+                              "title": "OUTDOOR TEMP HIDE",
+                              "enum": [
+                                18
+                              ]
+                            }
+                          ],
+                          "required": true
+                        },
+                        "displayType": {
+                          "title": "Type",
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 5,
+                          "default": 0,
+                          "oneOf": [
+                            {
+                              "title": "None/Disabled",
+                              "enum": [
+                                0
+                              ]
+                            },
+                            {
+                              "title": "Outlet",
+                              "enum": [
+                                1
+                              ]
+                            },
+                            {
+                              "title": "Switch",
+                              "enum": [
+                                2
+                              ]
+                            },
+                            {
+                              "title": "Motion Sensor",
+                              "enum": [
+                                3
+                              ]
+                            },
+                            {
+                              "title": "Occupancy Sensor",
+                              "enum": [
+                                4
+                              ]
+                            },
+                            {
+                              "title": "Contact Sensor",
+                              "enum": [
+                                5
+                              ]
+                            }
+                          ],
+                          "description": "Select the characteristic type to be displayed in HomeKit app.",
+                          "required": true
+                        },
+                        "namePrefix": {
+                          "title": "Prefix",
+                          "type": "boolean",
+                          "default": false,
+                          "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
+                          "required": false
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "condition": {
+                "functionBody": "const devices = model.accounts[arrayIndices]?.ervDevices || []; return devices.length > 0 && devices.every(device => device.id != null && device.id !== '');"
+              }
             },
             "refreshInterval": {
               "title": "Account Refresh Interval",
@@ -1414,252 +1446,228 @@
         "accounts[].language",
         {
           "key": "accounts[]",
-          "type": "section",
-          "title": "Advanced Settings",
-          "expandable": true,
-          "expanded": false,
+          "type": "tabarray",
+          "title": "{{ value.title }}",
           "items": [
             {
               "key": "accounts[]",
-              "type": "tabarray",
-              "title": "{{ value.title }}",
+              "title": "Air Conditioner",
+              "items": [
+                {
+                  "key": "accounts[].ataDevices",
+                  "type": "tabarray",
+                  "title": "{{ value.name }}",
+                  "items": [
+                    {
+                      "key": "accounts[].ataDevices[].id",
+                      "readonly": true
+                    },
+                    {
+                      "key": "accounts[].ataDevices[].type",
+                      "readonly": true
+                    },
+                    "accounts[].ataDevices[].name",
+                    "accounts[].ataDevices[].displayMode",
+                    "accounts[].ataDevices[].heatDryFanMode",
+                    "accounts[].ataDevices[].coolDryFanMode",
+                    "accounts[].ataDevices[].autoDryFanMode",
+                    "accounts[].ataDevices[].presets",
+                    {
+                      "key": "accounts[].ataDevices[]",
+                      "type": "section",
+                      "title": "Temperature Sensors",
+                      "expandable": true,
+                      "expanded": false,
+                      "items": [
+                        "accounts[].ataDevices[].temperatureSensor",
+                        "accounts[].ataDevices[].temperatureSensorOutdoor"
+                      ]
+                    },
+                    {
+                      "key": "accounts[].ataDevices[]",
+                      "type": "section",
+                      "title": "Buttons / Sensors",
+                      "expandable": true,
+                      "expanded": false,
+                      "items": [
+                        {
+                          "key": "accounts[].ataDevices[].buttonsSensors",
+                          "type": "tabarray",
+                          "title": "{{ value.name || 'button/sensor' }}",
+                          "items": [
+                            "accounts[].ataDevices[].buttonsSensors[].name",
+                            "accounts[].ataDevices[].buttonsSensors[].mode",
+                            "accounts[].ataDevices[].buttonsSensors[].displayType",
+                            "accounts[].ataDevices[].buttonsSensors[].namePrefix"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "key": "accounts[]",
+              "title": "Heat Pump",
+              "items": [
+                {
+                  "key": "accounts[].atwDevices",
+                  "type": "tabarray",
+                  "title": "{{ value.name }}",
+                  "items": [
+                    {
+                      "key": "accounts[].atwDevices[].id",
+                      "readonly": true
+                    },
+                    {
+                      "key": "accounts[].atwDevices[].type",
+                      "readonly": true
+                    },
+                    "accounts[].atwDevices[].name",
+                    "accounts[].atwDevices[].displayMode",
+                    "accounts[].atwDevices[].presets",
+                    {
+                      "key": "accounts[].atwDevices[]",
+                      "type": "section",
+                      "title": "Temperature Sensors",
+                      "expandable": true,
+                      "expanded": false,
+                      "items": [
+                        "accounts[].atwDevices[].temperatureSensor",
+                        "accounts[].atwDevices[].temperatureSensorFlow",
+                        "accounts[].atwDevices[].temperatureSensorReturn",
+                        "accounts[].atwDevices[].temperatureSensorFlowZone1",
+                        "accounts[].atwDevices[].temperatureSensorReturnZone1",
+                        "accounts[].atwDevices[].temperatureSensorFlowWaterTank",
+                        "accounts[].atwDevices[].temperatureSensorReturnWaterTank",
+                        "accounts[].atwDevices[].temperatureSensorFlowZone2",
+                        "accounts[].atwDevices[].temperatureSensorReturnZone2"
+                      ]
+                    },
+                    {
+                      "key": "accounts[].atwDevices[]",
+                      "type": "section",
+                      "title": "Buttons / Sensors",
+                      "expandable": true,
+                      "expanded": false,
+                      "items": [
+                        {
+                          "key": "accounts[].atwDevices[].buttonsSensors",
+                          "type": "tabarray",
+                          "title": "{{ value.name || 'button/sensor' }}",
+                          "items": [
+                            "accounts[].atwDevices[].buttonsSensors[].name",
+                            "accounts[].atwDevices[].buttonsSensors[].mode",
+                            "accounts[].atwDevices[].buttonsSensors[].displayType",
+                            "accounts[].atwDevices[].buttonsSensors[].namePrefix"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "key": "accounts[]",
+              "title": "Energy Recovery Ventilation",
+              "items": [
+                {
+                  "key": "accounts[].ervDevices",
+                  "type": "tabarray",
+                  "title": "{{ value.name }}",
+                  "items": [
+                    {
+                      "key": "accounts[].ervDevices[].id",
+                      "readonly": true
+                    },
+                    {
+                      "key": "accounts[].ervDevices[].type",
+                      "readonly": true
+                    },
+                    "accounts[].ervDevices[].name",
+                    "accounts[].ervDevices[].displayMode",
+                    "accounts[].ervDevices[].presets",
+                    {
+                      "key": "accounts[].ervDevices[]",
+                      "type": "section",
+                      "title": "Temperature Sensors",
+                      "expandable": true,
+                      "expanded": false,
+                      "items": [
+                        "accounts[].ervDevices[].temperatureSensor",
+                        "accounts[].ervDevices[].temperatureSensorOutdoor",
+                        "accounts[].ervDevices[].temperatureSensorSupply"
+                      ]
+                    },
+                    {
+                      "key": "accounts[].ervDevices[]",
+                      "type": "section",
+                      "title": "Buttons / Sensors",
+                      "expandable": true,
+                      "expanded": false,
+                      "items": [
+                        {
+                          "key": "accounts[].ervDevices[].buttonsSensors",
+                          "type": "tabarray",
+                          "title": "{{ value.name || 'button/sensor' }}",
+                          "items": [
+                            "accounts[].ervDevices[].buttonsSensors[].name",
+                            "accounts[].ervDevices[].buttonsSensors[].mode",
+                            "accounts[].ervDevices[].buttonsSensors[].displayType",
+                            "accounts[].ervDevices[].buttonsSensors[].namePrefix"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "key": "accounts[]",
+              "title": "System",
+              "items": [
+                "accounts[].enableDebugMode",
+                "accounts[].disableLogInfo",
+                "accounts[].disableLogDeviceInfo",
+                "accounts[].refreshInterval",
+                "accounts[].deviceRefreshInterval"
+              ]
+            },
+            {
+              "key": "accounts[]",
+              "title": "External Integrations",
               "items": [
                 {
                   "key": "accounts[]",
-                  "title": "Air Conditioner",
-                  "items": [
-                    "accounts[].ataDisplayMode",
-                    "accounts[].ataPresets",
-                    {
-                      "key": "accounts[]",
-                      "type": "section",
-                      "title": "Operating Modes",
-                      "expandable": true,
-                      "expanded": false,
-                      "items": [
-                        "accounts[].ataHeatDryFanMode",
-                        "accounts[].ataCoolDryFanMode",
-                        "accounts[].ataAutoDryFanMode"
-                      ]
-                    },
-                    {
-                      "key": "accounts[]",
-                      "type": "section",
-                      "title": "Temperature Sensors",
-                      "expandable": true,
-                      "expanded": false,
-                      "items": [
-                        "accounts[].ataTemperatureSensor",
-                        "accounts[].ataTemperatureSensorOutdoor"
-                      ]
-                    },
-                    {
-                      "key": "accounts[]",
-                      "type": "section",
-                      "title": "Buttons / Sensors",
-                      "expandable": true,
-                      "expanded": false,
-                      "items": [
-                        {
-                          "key": "accounts[].ataButtons",
-                          "type": "tabarray",
-                          "title": "{{ value.name || 'button/sensor' }}",
-                          "items": [
-                            "accounts[].ataButtons[].name",
-                            "accounts[].ataButtons[].mode",
-                            "accounts[].ataButtons[].displayType",
-                            "accounts[].ataButtons[].namePrefix"
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "key": "accounts[]",
-                      "type": "section",
-                      "title": "Hide Device By Id",
-                      "expandable": true,
-                      "expanded": false,
-                      "items": [
-                        {
-                          "key": "accounts[].ataHideDeviceById",
-                          "type": "tabarray",
-                          "title": "{{ value.name || 'device' }}",
-                          "items": [
-                            "accounts[].ataHideDeviceById[].name",
-                            "accounts[].ataHideDeviceById[].id"
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "key": "accounts[]",
-                  "title": "Heat Pump",
-                  "items": [
-                    "accounts[].atwDisplayMode",
-                    "accounts[].atwPresets",
-                    {
-                      "key": "accounts[]",
-                      "type": "section",
-                      "title": "Temperature Sensors",
-                      "expandable": true,
-                      "expanded": false,
-                      "items": [
-                        "accounts[].atwTemperatureSensor",
-                        "accounts[].atwTemperatureSensorFlow",
-                        "accounts[].atwTemperatureSensorReturn",
-                        "accounts[].atwTemperatureSensorFlowZone1",
-                        "accounts[].atwTemperatureSensorReturnZone1",
-                        "accounts[].atwTemperatureSensorFlowWaterTank",
-                        "accounts[].atwTemperatureSensorReturnWaterTank",
-                        "accounts[].atwTemperatureSensorFlowZone2",
-                        "accounts[].atwTemperatureSensorReturnZone2"
-                      ]
-                    },
-                    {
-                      "key": "accounts[]",
-                      "type": "section",
-                      "title": "Buttons / Sensors",
-                      "expandable": true,
-                      "expanded": false,
-                      "items": [
-                        {
-                          "key": "accounts[].atwButtons",
-                          "type": "tabarray",
-                          "title": "{{ value.name || 'button/sensor' }}",
-                          "items": [
-                            "accounts[].atwButtons[].name",
-                            "accounts[].atwButtons[].mode",
-                            "accounts[].atwButtons[].displayType",
-                            "accounts[].atwButtons[].namePrefix"
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "key": "accounts[]",
-                      "type": "section",
-                      "title": "Hide Device By Id",
-                      "expandable": true,
-                      "expanded": false,
-                      "items": [
-                        {
-                          "key": "accounts[].atwHideDeviceById",
-                          "type": "tabarray",
-                          "title": "{{ value.name || 'device' }}",
-                          "items": [
-                            "accounts[].atwHideDeviceById[].name",
-                            "accounts[].atwHideDeviceById[].id"
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "key": "accounts[]",
-                  "title": "Energy Recovery Ventilation",
-                  "items": [
-                    "accounts[].ervDisplayMode",
-                    "accounts[].ervPresets",
-                    {
-                      "key": "accounts[]",
-                      "type": "section",
-                      "title": "Temperature Sensors",
-                      "expandable": true,
-                      "expanded": false,
-                      "items": [
-                        "accounts[].ervTemperatureSensor",
-                        "accounts[].ervTemperatureSensorOutdoor",
-                        "accounts[].ervTemperatureSensorSupply"
-                      ]
-                    },
-                    {
-                      "key": "accounts[]",
-                      "type": "section",
-                      "title": "Buttons / Sensors",
-                      "expandable": true,
-                      "expanded": false,
-                      "items": [
-                        {
-                          "key": "accounts[].ervButtons",
-                          "type": "tabarray",
-                          "title": "{{ value.name || 'button/sensor' }}",
-                          "items": [
-                            "accounts[].ervButtons[].name",
-                            "accounts[].ervButtons[].mode",
-                            "accounts[].ervButtons[].displayType",
-                            "accounts[].ervButtons[].namePrefix"
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "key": "accounts[]",
-                      "type": "section",
-                      "title": "Hide Device By Id",
-                      "expandable": true,
-                      "expanded": false,
-                      "items": [
-                        {
-                          "key": "accounts[].ervHideDeviceById",
-                          "type": "tabarray",
-                          "title": "{{ value.name || 'device' }}",
-                          "items": [
-                            "accounts[].ervHideDeviceById[].name",
-                            "accounts[].ervHideDeviceById[].id"
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "key": "accounts[]",
-                  "title": "System",
-                  "items": [
-                    "accounts[].enableDebugMode",
-                    "accounts[].disableLogInfo",
-                    "accounts[].disableLogDeviceInfo",
-                    "accounts[].refreshInterval",
-                    "accounts[].deviceRefreshInterval"
-                  ]
-                },
-                {
-                  "key": "accounts[]",
-                  "title": "External Integrations",
+                  "type": "tabarray",
+                  "title": "{{ value.title }}",
                   "items": [
                     {
-                      "key": "accounts[]",
-                      "type": "tabarray",
-                      "title": "{{ value.title }}",
+                      "key": "accounts[].restFul",
+                      "title": "RESTFul",
                       "items": [
+                        "accounts[].restFul.enable",
+                        "accounts[].restFul.debug"
+                      ]
+                    },
+                    {
+                      "key": "accounts[].mqtt",
+                      "title": "MQTT",
+                      "items": [
+                        "accounts[].mqtt.enable",
+                        "accounts[].mqtt.debug",
+                        "accounts[].mqtt.host",
+                        "accounts[].mqtt.port",
+                        "accounts[].mqtt.clientId",
+                        "accounts[].mqtt.prefix",
+                        "accounts[].mqtt.auth",
+                        "accounts[].mqtt.user",
                         {
-                          "key": "accounts[].restFul",
-                          "title": "RESTFul",
-                          "items": [
-                            "accounts[].restFul.enable",
-                            "accounts[].restFul.debug"
-                          ]
-                        },
-                        {
-                          "key": "accounts[].mqtt",
-                          "title": "MQTT",
-                          "items": [
-                            "accounts[].mqtt.enable",
-                            "accounts[].mqtt.debug",
-                            "accounts[].mqtt.host",
-                            "accounts[].mqtt.port",
-                            "accounts[].mqtt.clientId",
-                            "accounts[].mqtt.prefix",
-                            "accounts[].mqtt.auth",
-                            "accounts[].mqtt.user",
-                            {
-                              "key": "accounts[].mqtt.passwd",
-                              "type": "password"
-                            }
-                          ]
+                          "key": "accounts[].mqtt.passwd",
+                          "type": "password"
                         }
                       ]
                     }

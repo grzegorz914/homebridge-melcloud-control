@@ -7,7 +7,7 @@ const CONSTANTS = require('./constants.json');
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceAtw extends EventEmitter {
-    constructor(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile, deviceRefreshInterval) {
+    constructor(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile, refreshInterval) {
         super();
 
         Accessory = api.platformAccessory;
@@ -17,18 +17,18 @@ class DeviceAtw extends EventEmitter {
         AccessoryUUID = api.hap.uuid;
 
         //account config
-        this.displayMode = account.atwDisplayMode || 0;
-        this.temperatureSensor = account.atwTemperatureSensor || false;
-        this.temperatureSensorFlow = account.atwTemperatureSensorFlow || false;
-        this.temperatureSensorReturn = account.atwTemperatureSensorReturn || false;
-        this.temperatureSensorFlowZone1 = account.atwTemperatureSensorFlowZone1 || false;
-        this.temperatureSensorReturnZone1 = account.atwTemperatureSensorFlowWaterTank || false;
-        this.temperatureSensorFlowWaterTank = account.atwTemperatureSensorFlowZone1 || false;
-        this.temperatureSensorReturnWaterTank = account.atwTemperatureSensorReturnWaterTank || false;
-        this.temperatureSensorFlowZone2 = account.atwTemperatureSensorFlowZone2 || false;
-        this.temperatureSensorReturnZone2 = account.atwTemperatureSensorReturnZone2 || false;
-        this.presetsEnabled = account.atwPresets || false;
-        this.buttons = account.atwButtons || [];
+        this.displayMode = device.displayMode || 0;
+        this.temperatureSensor = device.temperatureSensor || false;
+        this.temperatureSensorFlow = device.temperatureSensorFlow || false;
+        this.temperatureSensorReturn = device.temperatureSensorReturn || false;
+        this.temperatureSensorFlowZone1 = device.temperatureSensorFlowZone1 || false;
+        this.temperatureSensorReturnZone1 = device.temperatureSensorFlowWaterTank || false;
+        this.temperatureSensorFlowWaterTank = device.temperatureSensorFlowZone1 || false;
+        this.temperatureSensorReturnWaterTank = device.temperatureSensorReturnWaterTank || false;
+        this.temperatureSensorFlowZone2 = device.temperatureSensorFlowZone2 || false;
+        this.temperatureSensorReturnZone2 = device.temperatureSensorReturnZone2 || false;
+        this.presetsEnabled = device.presets || false;
+        this.buttons = device.buttonsSensors || [];
         this.disableLogInfo = account.disableLogInfo || false;
         this.disableLogDeviceInfo = account.disableLogDeviceInfo || false;
         this.enableDebugMode = account.enableDebugMode || false;
@@ -73,7 +73,7 @@ class DeviceAtw extends EventEmitter {
             accountInfoFile: accountInfoFile,
             deviceInfoFile: deviceInfoFile,
             debugLog: account.enableDebugMode,
-            refreshInterval: deviceRefreshInterval
+            refreshInterval: refreshInterval
         });
 
         this.melCloudAtw.on('externalIntegrations', (deviceData, deviceState) => {
@@ -266,7 +266,7 @@ class DeviceAtw extends EventEmitter {
 
                 for (let i = 0; i < zonesCount; i++) {
                     switch (displayMode) {
-                        case 0: //Heater Cooler
+                        case 1: //Heater Cooler
                             switch (i) {
                                 case 0: //Heat Pump Operation Mode - IDLE, HOT WATER, HEATING ZONES, COOLING, HOT WATER STORAGE, FREEZE STAT, LEGIONELLA, HEATING ECO, MODE 1, MODE 2, MODE 3, HEATING UP /// Unit Status - HEAT, COOL
                                     name = heatPumpName;
@@ -350,7 +350,7 @@ class DeviceAtw extends EventEmitter {
                                 const updateCT = heatCoolModes === 0 || heatCoolModes === 2 ? this.melCloudServices[i].updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature) : false;
                             }
                             break;
-                        case 1: //Thermostat
+                        case 2: //Thermostat
                             switch (i) {
                                 case 0: //Heat Pump Operation Mode - IDLE, HOT WATER, HEATING ZONES, COOLING, HOT WATER STORAGE, FREEZE STAT, LEGIONELLA, HEATING ECO, MODE 1, MODE 2, MODE 3, HEATING UP /// Unit Status - HEAT, COOL
                                     currentOperationMode = !power ? 0 : [0, 1, 1, 2, 1, 0, 0, 1, 0, 0, 0, 1][operationMode]; //OFF, HEAT, COOL
@@ -835,7 +835,7 @@ class DeviceAtw extends EventEmitter {
                 const zoneName = this.accessory.zones[i].name
                 const serviceName = `${deviceTypeText} ${accessoryName}: ${zoneName}`;
                 switch (displayMode) {
-                    case 0: //Heater Cooler
+                    case 1: //Heater Cooler
                         const debug = this.enableDebugMode ? this.emit('debug', `Prepare heather/cooler ${zoneName} service`) : false;
                         const melCloudService = new Service.HeaterCooler(serviceName, `HeaterCooler ${deviceId} ${i}`);
                         melCloudService.getCharacteristic(Characteristic.Active)
@@ -1098,7 +1098,7 @@ class DeviceAtw extends EventEmitter {
                         this.melCloudServices.push(melCloudService);
                         accessory.addService(melCloudService);
                         break;
-                    case 1: //Thermostat
+                    case 2: //Thermostat
                         const debug3 = this.enableDebugMode ? this.emit('debug', `Prepare thermostat ${zoneName} service`) : false;
                         const melCloudServiceT = new Service.Thermostat(serviceName, `Thermostat ${deviceId} ${i}`);
                         melCloudServiceT.getCharacteristic(Characteristic.CurrentHeatingCoolingState)

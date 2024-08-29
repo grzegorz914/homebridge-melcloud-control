@@ -7,7 +7,7 @@ const CONSTANTS = require('./constants.json');
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceAta extends EventEmitter {
-    constructor(api, account, melCloud, accountInfo, accountName, contextKey, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile, deviceRefreshInterval) {
+    constructor(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile, refreshInterval) {
         super();
 
         Accessory = api.platformAccessory;
@@ -17,14 +17,14 @@ class DeviceAta extends EventEmitter {
         AccessoryUUID = api.hap.uuid;
 
         //account config
-        this.displayMode = account.ataDisplayMode || 0;
-        this.temperatureSensor = account.ataTemperatureSensor || false;
-        this.temperatureSensorOutdoor = account.ataTemperatureSensorOutdoor || false;
-        this.presetsEnabled = account.ataPresets || false;
-        this.heatDryFanMode = account.ataHeatDryFanMode || 1; //NONE, HEAT, DRY, FAN
-        this.coolDryFanMode = account.ataCoolDryFanMode || 1; //NONE, COOL, DRY, FAN
-        this.autoDryFanMode = account.ataAutoDryFanMode || 1; //NONE, AUTO, DRY, FAN
-        this.buttons = account.ataButtons || [];
+        this.displayMode = device.displayMode || 0;
+        this.temperatureSensor = device.temperatureSensor || false;
+        this.temperatureSensorOutdoor = device.temperatureSensorOutdoor || false;
+        this.presetsEnabled = device.presets || false;
+        this.heatDryFanMode = device.heatDryFanMode || 1; //NONE, HEAT, DRY, FAN
+        this.coolDryFanMode = device.coolDryFanMode || 1; //NONE, COOL, DRY, FAN
+        this.autoDryFanMode = device.autoDryFanMode || 1; //NONE, AUTO, DRY, FAN
+        this.buttons = device.buttonsSensors || [];
         this.disableLogInfo = account.disableLogInfo || false;
         this.disableLogDeviceInfo = account.disableLogDeviceInfo || false;
         this.enableDebugMode = account.enableDebugMode || false;
@@ -69,7 +69,7 @@ class DeviceAta extends EventEmitter {
             accountInfoFile: accountInfoFile,
             deviceInfoFile: deviceInfoFile,
             debugLog: account.enableDebugMode,
-            refreshInterval: deviceRefreshInterval
+            refreshInterval: refreshInterval
         });
 
         this.melCloudAta.on('externalIntegrations', (deviceData, deviceState) => {
@@ -230,7 +230,7 @@ class DeviceAta extends EventEmitter {
 
                 //operating mode
                 switch (displayMode) {
-                    case 0: //Heater Cooler
+                    case 1: //Heater Cooler
                         //operating mode 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
                         switch (power) {
                             case true:
@@ -328,7 +328,7 @@ class DeviceAta extends EventEmitter {
                             const updateSM = swingFunction ? this.melCloudService.updateCharacteristic(Characteristic.SwingMode, this.accessory.swingMode) : false;
                         };
                         break;
-                    case 1: //Thermostat
+                    case 2: //Thermostat
                         switch (power) {
                             case true:
                                 switch (!inStandbyMode) {
@@ -710,7 +710,7 @@ class DeviceAta extends EventEmitter {
             const serviceName = `${deviceTypeText} ${accessoryName}`;
 
             switch (displayMode) {
-                case 0: //Heater Cooler
+                case 1: //Heater Cooler
                     const debug = this.enableDebugMode ? this.emit('debug', `Prepare heater/cooler service`) : false;
                     this.melCloudService = new Service.HeaterCooler(serviceName, `HeaterCooler ${deviceId}`);
                     this.melCloudService.getCharacteristic(Characteristic.Active)
@@ -922,7 +922,7 @@ class DeviceAta extends EventEmitter {
                         });
                     accessory.addService(this.melCloudService);
                     break;
-                case 1: //Thermostat
+                case 2: //Thermostat
                     const debug1 = this.enableDebugMode ? this.emit('debug', `Prepare thermostat service`) : false;
                     this.melCloudService = accessory.addService(Service.Thermostat, serviceName, `Thermostat ${deviceId}`);
                     this.melCloudService.getCharacteristic(Characteristic.CurrentHeatingCoolingState)

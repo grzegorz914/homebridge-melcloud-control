@@ -5,21 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Important changes v0.1.x
+## Important changes
 
-- The old plugin and config need to be first removed from Homebridge and HomeKit and added again.
+- v0.1.x The old plugin and config need to be first removed from Homebridge and HomeKit and added again.
+- v0.4.0 Main control mode, buttons and presets need to be configured again!!!
+- v1 After update to v1 and above from v0 the devices need to be added to the Home app again and the old unresponsive remove!!! This devices will be removed from all automations and scenes!!!
+- v2 After update to v2 from v1 only RESTFull and MQTT config settings need to be updated in config.
+  - v2.4 and above require upcomming homebridge v2
+- v3 After update to v3 from previous versions the plugin need to be configured using Config UI X.
+  - do not configure it manually, always using Config UI X
 
-## Important changes v0.4.0
+## [3.0.0] - (29.08.2024)
 
-- Main control mode, buttons and presets need to be configured again!!!
-  
-## Important changes v1
+## Changes
 
-- After update to v1 and above from v0 the devices need to be added to the Home app again and the old unresponsive remove!!! This devices will be removed from all automations and scenes!!!
-
-## Important changes v2
-
-- After update to v2 from v1 only RESTFull and MQTT config settings need to be updated in config.
+- added homebridge UI server
+- whole new concept get all devices from melcloud usin config UI X
+- added indyvidual configuration of every device
+- config schema updated
+- cleanup
 
 ## [2.4.0] - (28.08.2024)
 

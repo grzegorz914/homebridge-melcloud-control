@@ -8,14 +8,15 @@ const ImpulseGenerator = require('./impulsegenerator.js');
 const CONSTANTS = require('./constants.json');
 
 class MelCloud extends EventEmitter {
-    constructor(prefDir, accountName, user, passwd, language, enableDebugMode, accountInfoFile, buildingsFile, refreshInterval) {
+    constructor(user, passwd, language, accountInfoFile, deviceInfoFile, buildingsFile, enableDebugMode, refreshInterval, requestConfig) {
         super();
-        this.prefDir = prefDir;
-        this.accountName = accountName;
-        this.enableDebugMode = enableDebugMode;
         this.accountInfoFile = accountInfoFile;
         this.buildingsFile = buildingsFile;
+        this.deviceInfoFile = deviceInfoFile;
+        this.enableDebugMode = enableDebugMode;
         this.refreshInterval = refreshInterval;
+        this.requestConfig = requestConfig;
+        this.contextKey = '';
         this.devicesId = [];
 
         this.options = {
@@ -30,25 +31,24 @@ class MelCloud extends EventEmitter {
             }
         };
 
-        this.impulseGenerator = new ImpulseGenerator();
-        this.impulseGenerator.on('checkDevicesList', async () => {
-            try {
-                await this.chackDevicesList();
-            } catch (error) {
-                this.emit('error', `Check devices list: ${error}.`);
-            };
-        }).on('state', (state) => { });
+        if (!requestConfig) {
+            this.impulseGenerator = new ImpulseGenerator();
+            this.impulseGenerator.on('checkDevicesList', async () => {
+                try {
+                    const devices = await this.chackDevicesList(this.contextKey);
+                } catch (error) {
+                    this.emit('error', `Check devices list: ${error}.`);
+                };
+            }).on('state', (state) => { });
 
-        this.connect();
+            this.connect();
+        };
     };
 
     async connect() {
         const debug = this.enableDebugMode ? this.emit('debug', `Connecting to MELCloud.`) : false;
 
         try {
-            //create timers array
-            const timers = [{ name: 'checkDevicesList', sampling: this.refreshInterval }];
-
             const axiosInstanceLogin = axios.create({
                 method: 'POST',
                 baseURL: CONSTANTS.ApiUrls.BaseURL,
@@ -65,6 +65,7 @@ class MelCloud extends EventEmitter {
             const account = accountData.data;
             const accountInfo = account.LoginData;
             const contextKey = accountInfo.ContextKey;
+            this.contextKey = contextKey;
 
             //remove sensitive data
             const debugData = {
@@ -83,11 +84,27 @@ class MelCloud extends EventEmitter {
                 return;
             };
 
+            //save melcloud info to the file
+            await this.saveData(this.accountInfoFile, accountInfo);
+
             //emit connect success
             this.emit('success', `Connect to MELCloud Success.`)
 
+            const obj = {
+                accountInfo: accountInfo,
+                contextKey: contextKey
+            }
+
+            return obj;
+        } catch (error) {
+            throw new Error(`Connect to MELCloud error: ${error.message ?? error}.`);
+        };
+    }
+
+    async chackDevicesList(contextKey) {
+        try {
             //create axios instance get
-            this.axiosInstanceGet = axios.create({
+            const axiosInstanceGet = axios.create({
                 method: 'GET',
                 baseURL: CONSTANTS.ApiUrls.BaseURL,
                 timeout: 5000,
@@ -103,45 +120,8 @@ class MelCloud extends EventEmitter {
                 })
             });
 
-            //create axios instance post
-            this.axiosInstancePost = axios.create({
-                method: 'POST',
-                baseURL: CONSTANTS.ApiUrls.BaseURL,
-                timeout: 5000,
-                headers: {
-                    'X-MitsContextKey': contextKey,
-                    'content-type': 'application/json'
-                },
-                maxContentLength: 100000000,
-                maxBodyLength: 1000000000,
-                withCredentials: true,
-                httpsAgent: new https.Agent({
-                    keepAlive: false,
-                    rejectUnauthorized: false
-                })
-            });
-
-            this.accountInfo = accountInfo;
-            this.contextKey = contextKey;
-
-            //save melcloud info to the file
-            await this.saveData(this.accountInfoFile, accountInfo);
-
-            //check devices list
-            await this.chackDevicesList();
-
-            //start impulse generator
-            this.impulseGenerator.start(timers);
-            return true;
-        } catch (error) {
-            this.emit('error', `Connect to MELCloud error: ${error.message ?? error}.`);
-        };
-    }
-
-    async chackDevicesList() {
-        try {
             const debug = this.enableDebugMode ? this.emit('debug', `Scanning for devices.`) : false;
-            const listDevicesData = await this.axiosInstanceGet(CONSTANTS.ApiUrls.ListDevices);
+            const listDevicesData = await axiosInstanceGet(CONSTANTS.ApiUrls.ListDevices);
             const buildingsList = listDevicesData.data;
             const debug1 = this.enableDebugMode ? this.emit('debug', `Buildings: ${JSON.stringify(buildingsList, null, 2)}`) : false;
 
@@ -183,18 +163,20 @@ class MelCloud extends EventEmitter {
                 const deviceName = deviceInfo.DeviceName;
 
                 //save every device info to the file
-                const deviceInfoFile = `${this.prefDir}/${this.accountName}_Device_${deviceId}`;
+                const deviceInfoFile = `${this.deviceInfoFile}${deviceId}`;
                 await this.saveData(deviceInfoFile, deviceInfo);
                 const debug = this.enableDebugMode ? this.emit('debug', `Device: ${deviceName} info saved.`) : false;
+            };
 
-                //prepare device if not in devices array
-                if (!this.devicesId.includes(deviceId)) {
-                    this.devicesId.push(deviceId);
-                    this.emit('checkDevicesListComplete', this.accountInfo, this.contextKey, deviceInfo);
-                }
+            if (!this.requestConfig) {
+                //start impulse generator
+                const timers = [{ name: 'checkDevicesList', sampling: this.refreshInterval }];
+                this.impulseGenerator.start(timers);
             }
-            return true;
+
+            return devices;
         } catch (error) {
+            const stop = !this.requestConfig ? false : this.impulseGenerator.stop();
             throw new Error(`Scanning for devices error: ${error.message ?? error}.`);
         };
     }
@@ -211,11 +193,29 @@ class MelCloud extends EventEmitter {
 
     async send(accountInfo) {
         try {
+            //create axios instance post
+            const axiosInstancePost = axios.create({
+                method: 'POST',
+                baseURL: CONSTANTS.ApiUrls.BaseURL,
+                timeout: 5000,
+                headers: {
+                    'X-MitsContextKey': this.contextKey,
+                    'content-type': 'application/json'
+                },
+                maxContentLength: 100000000,
+                maxBodyLength: 1000000000,
+                withCredentials: true,
+                httpsAgent: new https.Agent({
+                    keepAlive: false,
+                    rejectUnauthorized: false
+                })
+            });
+
             const options = {
                 data: accountInfo
             };
 
-            await this.axiosInstancePost(CONSTANTS.ApiUrls.UpdateApplicationOptions, options);
+            await axiosInstancePost(CONSTANTS.ApiUrls.UpdateApplicationOptions, options);
             await this.saveData(this.accountInfoFile, accountInfo);
             return true;
         } catch (error) {

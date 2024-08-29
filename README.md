@@ -30,11 +30,10 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * All devices are detected automatically.
 * Support multiple MELCloud accounts, buildings, floors, areas.
 * Support temperature display units `Celsius/Fahrenheit`.
-* Support hide device by `DeviceId`.
 * Support control device `Presets`.
 * Support assing inividual operating mode for `Heat/Cool/Auto`.
-* Support direct device control using extra `Buttons`, applied for all devices of same type in account.
-* Support detect all device states using extra `Sensors`, applied for all devices of same type in account.
+* Support direct device control using extra `Buttons`.
+* Support detect all device states using extra `Sensors`.
 * Support automations, shortcuts and Siri.
 * Support external integrations, [RESTFul](https://github.com/grzegorz914/homebridge-melcloud-control?tab=readme-ov-file#restful-integration), [MQTT](https://github.com/grzegorz914/homebridge-melcloud-control?tab=readme-ov-file#mqtt-integration).
 
@@ -175,67 +174,75 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `user` | Here set the MELCloud username. |
 | `passwd` | Here set the MELCloud password. |
 | `language` | Here select the MELCloud language. |
-| `ataDisplayMode` | Here select device control mode `Heater/Cooler`, `Thermostat`. |
-| `ataHeatDryFanMode` | Here select the operatiing mode for `Heat`, if this mode is not supported, it will be disabled. |
-| `ataCoolDryFanMode` | Here select the operatiing mode for `Cool`, if this mode is not supported, it will be disabled. |
-| `ataAutoDryFanMode` | Here select the operatiing mode for `Auto`, if this mode is not supported, it will be disabled.. |
-| `ataTemperatureSensor` | This enable extra `Room` temperature sensors to use with automations in HomeKit app. |
-| `ataTemperatureSensorOutdoor` | This enable extra `Outdoor` temperature sensors to use with automations in HomeKit app. |
-| `ataPresets` | This enable extra buttons for configured presets and display it in HomeKit app. |
-| `ataButtons.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
-| `ataButtons.mode` | Here select button mode, VH - Vane Horizontal, VV - Vane Horizontal. |
-| `ataButtons.displayType` | Here select display type in HomeKit app, possible `None/Disabled`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`. |
-| `ataButtons.namePrefix` | Here enable/disable the accessory name as a prefix for button/sensor name. |
-| `ataHideDeviceById.name` | Here set Your own name. |
-| `ataHideDeviceById.id` | Here set `DeviceId` to be hidden and not exposed to the `Homebridge/Homekit`. |
-| `atwDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
-| `atwTemperatureSensor` | This enable extra `Room` temperature sensors to use with automations in HomeKit app. |
-| `atwTemperatureSensorFlow` | This enable extra `Flow` temperature sensors to use with automations in HomeKit app. |
-| `atwTemperatureSensorReturn` | This enable extra `Return` temperature sensors to use with automations in HomeKit app. |
-| `atwTemperatureSensorFlowZone1` | This enable extra `Flow Zone 1` temperature sensors to use with automations in HomeKit app. |
-| `atwTemperatureSensorReturnZone1` | This enable extra `Return Zone 1` temperature sensors to use with automations in HomeKit app. |
-| `atwTemperatureSensorFlowWaterTank` | This enable extra `Flow Water Tank` temperature sensors to use with automations in HomeKit app. |
-| `atwTemperatureSensorReturnWaterTank` | This enable extra `Return Water Tank` temperature sensors to use with automations in HomeKit app. |
-| `atwTemperatureSensorFlowZone2` | This enable extra `Flow Zone 2` temperature sensors to use with automations in HomeKit app. |
-| `atwTemperatureSensorReturnZone2` | This enable extra `Return Zone 2` temperature sensors to use with automations in HomeKit app. |
-| `atwPresets` | This enable extra buttons for configured presets and display it in HomeKit app. |
-| `atwButtons.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
-| `atwButtons.mode` | Here select button mode. |
-| `atwButtons.displayType` | Here select display type in HomeKit app, possible `None/Disabled`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`. |
-| `atwButtons.namePrefix` | Here enable/disable the accessory name as a prefix for button/sensor name. |
-| `atwHideDeviceById.name` | Here set Your own name. |
-| `atwHideDeviceById.id` | Here set `DeviceId` to be hidden and not exposed to the `Homebridge/Homekit`. |
-| `ervDisplayMode` | Here select main control mode `Heater/Cooler`, `Thermostat`. |
-| `ervTemperatureSensor` | This enable extra `Room` temperature sensors to use with automations in HomeKit app. |
-| `ervTemperatureSensorOutdoor` | This enable extra `Outdoor` temperature sensors to use with automations in HomeKit app. |
-| `ervTemperatureSensorSupply` | This enable extra `Supply` temperature sensors to use with automations in HomeKit app. |
-| `ervPresets` | This enable extra buttons for configured presets and display it in HomeKit app. |
-| `ervButtons.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
-| `ervButtons.mode` | Here select button mode. |
-| `ervButtons.displayType` | Here select display type in HomeKit app, possible `None/Disabled`, `Outlet`, `Switch`, `Motion Sensor`, `Occupancy Sensor`, `Contact Sensor`. |
-| `ervButtons.namePrefix` | Here enable/disable the accessory name as a prefix for button/sensor name. |
-| `ervHideDeviceById.name` | Here set Your own name. |
-| `ervHideDeviceById.id` | Here set `DeviceId` to be hidden and not exposed to the `Homebridge/Homekit`. |
+| `ataDevices` | Array of ATA devices created automatically after login to MELCloud from plugin config UI. |
+| `ataDevices.id` | Read only data, do not change it. |
+| `ataDevices.type` | Read only data, do not change it. |
+| `ataDevices.name` | Here You can schange the `Accessory Name` which is exposed to the `Homebridge/HomeKit`. |
+| `ataDevices.displayMode` | Here select device control mode `None/Disabled`, `Heater/Cooler`, `Thermostat`. |
+| `ataDevices.heatDryFanMode` | Here select the operatiing mode for `Heat`, if this mode is not supported, it will be disabled. |
+| `ataDevices.coolDryFanMode` | Here select the operatiing mode for `Cool`, if this mode is not supported, it will be disabled. |
+| `ataDevices.autoDryFanMode` | Here select the operatiing mode for `Auto`, if this mode is not supported, it will be disabled.. |
+| `ataDevices.temperatureSensor` | This enable extra `Room` temperature sensors to use with automations in HomeKit app. |
+| `ataDevices.temperatureSensorOutdoor` | This enable extra `Outdoor` temperature sensors to use with automations in HomeKit app. |
+| `ataDevices.presets` | This enable extra buttons for configured presets and display it in HomeKit app. |
+| `buttonsSensors` | Array of buttons sensors. |
+| `buttonsSensors.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
+| `buttonsSensors.mode` | Here select button mode, VH - Vane Horizontal, VV - Vane Horizontal. |
+| `buttonsSensors.displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Outlet`, `2 - Switch`, `3 - Motion Sensor`, `4 - Occupancy Sensor`, `5 - Contact Sensor`. |
+| `buttonsSensors.namePrefix` | Here enable/disable the accessory name as a prefix for button/sensor name. |
+| `atwDevices` | Array of ATA devices created automatically after login to MELCloud from plugin config UI. |
+| `atwDevices.id` | Read only data, do not change it. |
+| `atwDevices.type` | Read only data, do not change it. |
+| `atwDevices.name` | Here You can schange the `Accessory Name` which is exposed to the `Homebridge/HomeKit`. |
+| `atwDevices.displayMode` | Here select main control mode `None/Disabled`, `Heater/Cooler`, `Thermostat`. |
+| `atwDevices.temperatureSensor` | This enable extra `Room` temperature sensors to use with automations in HomeKit app. |
+| `atwDevices.temperatureSensorFlow` | This enable extra `Flow` temperature sensors to use with automations in HomeKit app. |
+| `atwDevices.temperatureSensorReturn` | This enable extra `Return` temperature sensors to use with automations in HomeKit app. |
+| `atwDevices.temperatureSensorFlowZone1` | This enable extra `Flow Zone 1` temperature sensors to use with automations in HomeKit app. |
+| `atwDevices.temperatureSensorReturnZone1` | This enable extra `Return Zone 1` temperature sensors to use with automations in HomeKit app. |
+| `atwDevices.temperatureSensorFlowWaterTank` | This enable extra `Flow Water Tank` temperature sensors to use with automations in HomeKit app. |
+| `atwDevices.temperatureSensorReturnWaterTank` | This enable extra `Return Water Tank` temperature sensors to use with automations in HomeKit app. |
+| `atwDevices.temperatureSensorFlowZone2` | This enable extra `Flow Zone 2` temperature sensors to use with automations in HomeKit app. |
+| `atwDevices.temperatureSensorReturnZone2` | This enable extra `Return Zone 2` temperature sensors to use with automations in HomeKit app. |
+| `atwDevices.presets` | This enable extra buttons for configured presets and display it in HomeKit app. |
+| `buttonsSensors` | Array of buttons sensors. |
+| `buttonsSensors.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
+| `buttonsSensors.mode` | Here select button mode. |
+| `buttonsSensors.displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Outlet`, `2 - Switch`, `3 - Motion Sensor`, `4 - Occupancy Sensor`, `5 - Contact Sensor`. |
+| `buttonsSensors.namePrefix` | Here enable/disable the accessory name as a prefix for button/sensor name. |
+| `ervDevices` | Array of ATA devices created automatically after login to MELCloud from plugin config UI. |
+| `ervDevices.id` | Read only data, do not change it. |
+| `ervDevices.type` | Read only data, do not change it. |
+| `ervDevices.name` | Here You can schange the `Accessory Name` which is exposed to the `Homebridge/HomeKit`. |
+| `ervDevices.displayMode` | Here select main control mode `None/Disabled`, `Heater/Cooler`, `Thermostat`. |
+| `ervDevices.temperatureSensor` | This enable extra `Room` temperature sensors to use with automations in HomeKit app. |
+| `ervDevices.temperatureSensorOutdoor` | This enable extra `Outdoor` temperature sensors to use with automations in HomeKit app. |
+| `ervDevices.temperatureSensorSupply` | This enable extra `Supply` temperature sensors to use with automations in HomeKit app. |
+| `ervDevices.presets` | This enable extra buttons for configured presets and display it in HomeKit app. |
+| `buttonsSensors` | Array of buttons sensors. |
+| `buttonsSensors.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
+| `buttonsSensors.mode` | Here select button mode. |
+| `buttonsSensors.displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Outlet`, `2 - Switch`, `3 - Motion Sensor`, `4 - Occupancy Sensor`, `5 - Contact Sensor`. |
+| `buttonsSensors.namePrefix` | Here enable/disable the accessory name as a prefix for button/sensor name. |
 | `refreshInterval` | Here set the background account data refresh time in (sec), default `120s`. |
 | `deviceRefreshInterval` | Here set the background devices state refresh time in (sec), default `5s`. |
 | `enableDebugMode` | This enable deep log in homebridge console. |
 | `disableLogInfo` | This disable display log values and states on every it change. |
 | `disableLogDeviceInfo` | This disable display log device info on plugin start. |
 | `restFul` | This is RSTful server. |
-| `enable` | If enabled, RESTful server will start automatically and respond to any path request. |
-| `port` | Here set the listening `Port` for RESTful server. |
-| `debug` | If enabled, deep log will be present in homebridge console for RESTFul server. |
+| `restFul.enable` | If enabled, RESTful server will start automatically and respond to any path request. |
+| `restFul.port` | Here set the listening `Port` for RESTful server. |
+| `restFul.debug` | If enabled, deep log will be present in homebridge console for RESTFul server. |
 | `mqtt` | This is MQTT Broker. |
-| `enable` | If enabled, MQTT Broker will start automatically and publish all awailable PV data. |
-| `host` | Here set the `IP Address` or `Hostname` for MQTT Broker. |
-| `port` | Here set the `Port` for MQTT Broker, default 1883. |
-| `clientId` | Here optional set the `Client Id` of MQTT Broker. |
-| `prefix` | Here set the `Prefix` for `Topic` or leave empty. |
-| `auth` | If enabled, MQTT Broker will use authorization credentials. |
-| `user` | Here set the MQTT Broker user. |
-| `passwd` | Here set the MQTT Broker password. |
-| `debug` | If enabled, deep log will be present in homebridge console for MQTT. |
-| `Display Type Buttons` | 0 - `None/Disabled`, 1 - `Outlet`, 2 - `Switch`, 3 - `Motion Sensor`, 4 - `Occupancy Sensor`, 5 - `Contact Sensor`. |
+| `mqtt.enable` | If enabled, MQTT Broker will start automatically and publish all awailable PV data. |
+| `mqtt.host` | Here set the `IP Address` or `Hostname` for MQTT Broker. |
+| `mqtt.port` | Here set the `Port` for MQTT Broker, default 1883. |
+| `mqtt.clientId` | Here optional set the `Client Id` of MQTT Broker. |
+| `mqtt.prefix` | Here set the `Prefix` for `Topic` or leave empty. |
+| `mqtt.auth` | If enabled, MQTT Broker will use authorization credentials. |
+| `mqtt.user` | Here set the MQTT Broker user. |
+| `mqtt.passwd` | Here set the MQTT Broker password. |
+| `mqtt.debug` | If enabled, deep log will be present in homebridge console for MQTT. |
 
 ### RESTful Integration
 

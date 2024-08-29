@@ -1,0 +1,263 @@
+<div>
+  <img src="homebridge-melcloud-control.png" style="text-align: center;" height="150" />
+</div>
+<div id="accounts">
+</div>
+<div id="melCloudAccount" style="display: none;" class="card card-body">
+  <form id="configForm">
+    <div class="text-center">
+      <label id="accountName" style="font-size: 23px">Account</label><br>
+      <label id="info" style="text-align: center; font-size: 17px;">MELCloud</label><br><br>
+    </div>
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input id="name" type="text" class="form-control"><br>
+      <label for="user">User Name</label>
+      <input id="user" type="text" class="form-control"><br>
+      <label for="passwd">Password</label>
+      <input id="passwd" type="password" class="form-control"><br>
+      <label for="language">Language</label>
+      <select id="language" name="language" class="form-control"><br>
+        <option value="0">English</option>
+        <option value="1">Български</option>
+        <option value="2">Čeština</option>
+        <option value="3">Dansk</option>
+        <option value="4">Deutsch</option>
+        <option value="5">Eesti</option>
+        <option value="6">Español</option>
+        <option value="7">Français</option>
+        <option value="8">Հայերեն</option>
+        <option value="9">Latviešu</option>
+        <option value="10">Lietuvių</option>
+        <option value="11">Magyar</option>
+        <option value="12">Nederlands</option>
+        <option value="13">Norwegian</option>
+        <option value="14">Polski</option>
+        <option value="15">Português</option>
+        <option value="16">Русский</option>
+        <option value="17">Suomi</option>
+        <option value="18">Svenska</option>
+        <option value="19">Svenska</option>
+        <option value="20">Українська</option>
+        <option value="21">Türkçe</option>
+        <option value="22">Ελληνικά</option>
+        <option value="23">Hrvatski</option>
+        <option value="24">Română</option>
+        <option value="25">Slovenščina</option>
+      </select>
+    </div>
+    <div class="text-center">
+      <button id="logIn" type="button" class="btn btn-primary">Connect to MELCloud</button>
+      <button id="configButton" type="button" class="btn btn-primary"><i class="fas fa-gear"></i></button>
+    </div>
+  </form>
+</div>
+
+<script>
+  (async () => {
+    //get the plugin config array
+    const pluginConfig = await homebridge.getPluginConfig();
+
+    if (!pluginConfig.length) {
+      pluginConfig.push({});
+      await homebridge.updatePluginConfig(pluginConfig);
+      homebridge.showSchemaForm();
+      return;
+    }
+
+    //get accounts count
+    const accountsCount = pluginConfig[0].accounts.length;
+    this.deviceIndex = 0;
+    for (let i = 0; i < accountsCount; i++) {
+      //create buttons
+      const button = document.createElement("button");
+      button.setAttribute("type", "button");
+      button.setAttribute("id", `button${i}`);
+      button.setAttribute("class", "btn btn-primary");
+      button.innerText = pluginConfig[0].accounts[i].name;
+      document.getElementById("accounts").appendChild(button);
+
+      //get actuall value on account select
+      document.getElementById(`button${i}`).addEventListener('click', async () => {
+        for (let j = 0; j < accountsCount; j++) {
+          const setRemoveAtribute = j === i ? document.getElementById(`button${j}`).setAttribute("class", "btn btn-secondary") : document.getElementById(`button${j}`).setAttribute("class", "btn btn-primary");
+        }
+
+        //const devicesCount = pluginConfig[0].accounts[i].devicesAta.length ?? 0;
+        //document.getElementById('info').innerHTML = `MELCloud configured ${devicesCount} ${devicesCount} ${devicesCount !== 1 ? 'devices' : 'device'}.`;
+        document.getElementById('accountName').innerHTML = pluginConfig[0].accounts[i].name || '';
+        document.getElementById('name').value = pluginConfig[0].accounts[i].name || '';
+        document.getElementById('user').value = pluginConfig[0].accounts[i].user || '';
+        document.getElementById('passwd').value = pluginConfig[0].accounts[i].passwd || '';
+        document.getElementById('language').value = pluginConfig[0].accounts[i].language || '';
+
+        const accountConfigured = pluginConfig[0].accounts[i].name && pluginConfig[0].accounts[i].user && pluginConfig[0].accounts[i].passwd && pluginConfig[0].accounts[i].language;
+        const setButtonState = accountConfigured ? document.getElementById('logIn').removeAttribute('disabled') : document.getElementById('logIn').setAttribute('disabled');
+        document.getElementById('configButton').setAttribute('disabled');
+        await homebridge.updatePluginConfig(pluginConfig);
+        this.deviceIndex = i;
+      });
+      const click = i === accountsCount - 1 ? document.getElementById(`button0`).click() : false;
+      const update = i === accountsCount - 1 ? await homebridge.updatePluginConfig(pluginConfig) : false;
+    };
+
+    //load melCloudAccount form
+    document.getElementById('melCloudAccount').style.display = 'block';
+
+    //watch for changes to the form
+    document.getElementById('configForm').addEventListener('input', async () => {
+      pluginConfig[0].accounts[this.deviceIndex].name = document.querySelector('#name').value;
+      pluginConfig[0].accounts[this.deviceIndex].user = document.querySelector('#user').value;
+      pluginConfig[0].accounts[this.deviceIndex].passwd = document.querySelector('#passwd').value;
+      pluginConfig[0].accounts[this.deviceIndex].language = document.querySelector('#language').value;
+
+      const accountConfigured = pluginConfig[0].accounts[i].name && pluginConfig[0].accounts[i].user && pluginConfig[0].accounts[i].passwd && pluginConfig[0].accounts[i].language;
+      const setButtonState = accountConfigured ? document.getElementById('logIn').removeAttribute('disabled') : document.getElementById('logIn').setAttribute('disabled');
+
+      await homebridge.updatePluginConfig(pluginConfig);
+      await homebridge.savePluginConfig(pluginConfig);
+    });
+
+    //watch for changes to the config button
+    document.getElementById('configButton').addEventListener('click', async () => {
+      const showHideSettings = this.configButtonState ? homebridge.hideSchemaForm() : homebridge.showSchemaForm();
+      this.configButtonState = !this.configButtonState;
+    });
+
+    //watch for click on the login button
+    document.getElementById('logIn').addEventListener('click', async () => {
+      homebridge.showSpinner();
+
+      try {
+        await homebridge.updatePluginConfig(pluginConfig)
+        document.getElementById('info').innerHTML = 'Connecting...';
+
+        const accountName = pluginConfig[0].accounts[this.deviceIndex].name;
+        const user = pluginConfig[0].accounts[this.deviceIndex].user;
+        const passwd = pluginConfig[0].accounts[this.deviceIndex].passwd;
+        const language = pluginConfig[0].accounts[this.deviceIndex].language;
+
+        const payload = {
+          accountName: accountName,
+          user: user,
+          passwd: passwd,
+          language: language
+        };
+        const response = await homebridge.request('/connect', payload);
+        const info = response.info ?? '';
+        const status = response.status;
+        const devices = response.data ?? [];
+        const newDevices = [];
+
+        switch (status) {
+          case 0:
+            //get device info fom devices
+            devices.forEach((deviceInfo, index) => {
+              const deviceType = deviceInfo.Type;
+              const deviceId = deviceInfo.DeviceID;
+              const deviceName = deviceInfo.DeviceName;
+
+              //config account keys
+              const accountKeys = Object.keys(pluginConfig[0].accounts[this.deviceIndex]);
+
+              //devices ata
+              if (deviceType === 0) {
+                const deviceAta = {
+                  name: deviceName,
+                  id: deviceId,
+                  type: deviceType,
+                  displayMode: 0,
+                  heatDryFanMode: 0,
+                  coolDryFanMode: 0,
+                  autoDryFanMode: 0,
+                  presets: false,
+                  temperatureSensor: false,
+                  temperatureSensorOutdoor: false,
+                  buttonsSensors: []
+                };
+
+                const ataDevicesExist = pluginConfig[0].accounts[this.deviceIndex].ataDevices ?? false;
+                const ataDevices = ataDevicesExist ? pluginConfig[0].accounts[this.deviceIndex].ataDevices : pluginConfig[0].accounts[this.deviceIndex].ataDevices = [];
+                const ataDeviceIdExist = ataDevices.some(device => device.id === deviceId);
+                const pushTypeAta = ataDeviceIdExist ? false : ataDevices.push(deviceAta);
+                const pushNewDevice = ataDeviceIdExist ? false : newDevices.push(deviceId);
+              };
+
+              //devices atw
+              if (deviceType === 1) {
+                const deviceAtw = {
+                  name: deviceName,
+                  id: deviceId,
+                  type: deviceType,
+                  displayMode: 0,
+                  temperatureSensor: false,
+                  temperatureSensorFlow: false,
+                  temperatureSensorReturn: false,
+                  temperatureSensorFlowZone1: false,
+                  temperatureSensorReturnZone1: false,
+                  temperatureSensorFlowWaterTank: false,
+                  temperatureSensorReturnWaterTank: false,
+                  temperatureSensorFlowZone2: false,
+                  temperatureSensorReturnZone2: false,
+                  presets: false,
+                  temperatureSensor: false,
+                  temperatureSensorOutdoor: false,
+                  buttonsSensors: []
+                };
+                const atwDevicesExist = pluginConfig[0].accounts[this.deviceIndex].atwDevices ?? false;
+                const atwDevices = atwDevicesExist ? pluginConfig[0].accounts[this.deviceIndex].atwDevices : pluginConfig[0].accounts[this.deviceIndex].atwDevices = [];
+                const atwDeviceIdExist = atwDevices.some(device => device.id === deviceId);
+                const pushTypeatw = atwDeviceIdExist ? false : atwDevices.push(deviceAtw);
+                const pushNewDevice = atwDeviceIdExist ? false : newDevices.push(deviceId);
+              };
+
+              //devices erv
+              if (deviceType === 3) {
+                const deviceErv = {
+                  name: deviceName,
+                  id: deviceId,
+                  type: deviceType,
+                  displayMode: 0,
+                  temperatureSensor: false,
+                  temperatureSensorOutdoor: false,
+                  temperatureSensorSupply: false,
+                  presets: false,
+                  temperatureSensor: false,
+                  temperatureSensorOutdoor: false,
+                  buttonsSensors: []
+                };
+                const ervDevicesExist = pluginConfig[0].accounts[this.deviceIndex].ervDevices ?? false;
+                const ervDevices = ervDevicesExist ? pluginConfig[0].accounts[this.deviceIndex].ervDevices : pluginConfig[0].accounts[this.deviceIndex].ervDevices = [];
+                const ervDeviceIdExist = ervDevices.some(device => device.id === deviceId);
+                const pushTypeerv = ervDeviceIdExist ? false : ervDevices.push(deviceErv);
+                const pushNewDevice = ervDeviceIdExist ? false : newDevices.push(deviceId);
+              };
+            });
+
+            const devicesCount = newDevices.length;
+            document.getElementById('info').innerHTML = `Check devices complete, found ${devicesCount} ${devicesCount !== 1 ? 'new devices' : 'new device'}. ${devicesCount === 0 ? '' : 'Now You can start to configure it.'}`;
+            document.getElementById('info').style.color = 'green';
+
+            await homebridge.updatePluginConfig(pluginConfig);
+            await homebridge.savePluginConfig(pluginConfig);
+            break;
+          case 1:
+            document.getElementById('info').innerHTML = info;
+            document.getElementById('info').style.color = 'red';
+            break;
+          default:
+            document.getElementById('info').innerHTML = `Received unknown status: ${status}, please try again.`;
+            document.getElementById('info').style.color = 'yellow';
+            break;
+        };
+
+        homebridge.hideSpinner();
+      } catch (e) {
+        document.getElementById('info').innerHTML = 'Please try again.';
+        homebridge.toast.error(`Data error: ${e.message}`);
+      } finally {
+        homebridge.hideSpinner();
+      };
+    });
+  })();
+</script>
