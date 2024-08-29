@@ -62,6 +62,9 @@ class DeviceAta extends EventEmitter {
         //accessory
         this.startPrepareAccessory = true;
         this.accessory = {};
+        this.accessory.currentOperationMode = 0;
+        this.accessory.targetOperationMode = 0;
+        this.accessory.fanSpeed = 0;
 
         //melcloud device
         this.melCloudAta = new MelCloudAta({
@@ -189,7 +192,7 @@ class DeviceAta extends EventEmitter {
                 const vaneVertical = deviceState.VaneVertical;
                 const hideVaneControls = deviceState.HideVaneControls;
                 const hideDryModeControl = deviceState.HideDryModeControl;
-                const inStandbyMode = deviceData.Device.InStandbyMode;
+                const inStandbyMode = deviceState.InStandbyMode;
                 const prohibitSetTemperature = deviceState.ProhibitSetTemperature;
                 const prohibitOperationMode = deviceState.ProhibitOperationMode;
                 const prohibitPower = deviceState.ProhibitPower;
@@ -205,10 +208,7 @@ class DeviceAta extends EventEmitter {
                 this.accessory.roomTemperature = roomTemperature;
                 this.accessory.outdoorTemperature = outdoorTemperature;
                 this.accessory.setTemperature = setTemperature;
-                this.accessory.fanSpeed = 0;
                 this.accessory.setFanSpeed = setFanSpeed;
-                this.accessory.currentOperationMode = 0;
-                this.accessory.targetOperationMode = 0;
                 this.accessory.vaneHorizontal = vaneHorizontal;
                 this.accessory.vaneVertical = vaneVertical;
                 this.accessory.swingMode = swingFunction && vaneHorizontal === 12 && vaneVertical === 7 ? 1 : 0;
@@ -336,7 +336,7 @@ class DeviceAta extends EventEmitter {
                                     case true:
                                         switch (operationMode) {
                                             case 1: //HEAT
-                                                this.accessory.currentOperationMode = 1;  //OFF, HEAT, COOL
+                                                this.accessory.currentOperationMode = 1; //OFF, HEAT, COOL
                                                 this.accessory.targetOperationMode = 1; //OFF, HEAT, COOL, AUTO
                                                 break;
                                             case 2: //DRY

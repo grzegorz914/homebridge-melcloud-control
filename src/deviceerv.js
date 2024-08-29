@@ -60,6 +60,10 @@ class DeviceErv extends EventEmitter {
         //accessory
         this.startPrepareAccessory = true;
         this.accessory = {};
+        this.accessory.currentOperationMode = 0;
+        this.accessory.targetOperationMode = 0;
+        this.accessory.fanSpeed = 0;
+        this.accessory.lockPhysicalControl = 0;
 
         //melcloud device
         this.melCloudErv = new MelCloudErv({
@@ -216,14 +220,10 @@ class DeviceErv extends EventEmitter {
                 this.accessory.outdoorTemperature = outdoorTemperature;
                 this.accessory.supplyTemperature = supplyTemperature;
                 this.accessory.setTemperature = targetTemperature;
-                this.accessory.fanSpeed = 0;
                 this.accessory.setFanSpeed = setFanSpeed;
-                this.accessory.currentOperationMode = 0;
-                this.accessory.targetOperationMode = 0;
                 this.accessory.temperatureIncrement = temperatureIncrement;
                 this.accessory.useFahrenheit = useFahrenheit;
                 this.accessory.temperatureUnit = temperatureUnit;
-                this.accessory.lockPhysicalControl = 0;
                 this.accessory.hasAutomaticFanSpeed = hasAutomaticFanSpeed;
                 this.accessory.hasOutdoorTemperature = hasOutdoorTemperature;
                 this.accessory.numberOfFanSpeeds = numberOfFanSpeeds;
