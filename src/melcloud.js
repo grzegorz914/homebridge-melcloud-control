@@ -8,11 +8,11 @@ const ImpulseGenerator = require('./impulsegenerator.js');
 const CONSTANTS = require('./constants.json');
 
 class MelCloud extends EventEmitter {
-    constructor(user, passwd, language, accountInfoFile, deviceInfoFile, buildingsFile, enableDebugMode, refreshInterval, requestConfig) {
+    constructor(user, passwd, language, accountInfoFile, buildingsFile, deviceFile, enableDebugMode, refreshInterval, requestConfig) {
         super();
         this.accountInfoFile = accountInfoFile;
         this.buildingsFile = buildingsFile;
-        this.deviceInfoFile = deviceInfoFile;
+        this.deviceFile = deviceFile;
         this.enableDebugMode = enableDebugMode;
         this.refreshInterval = refreshInterval;
         this.requestConfig = requestConfig;
@@ -169,14 +169,13 @@ class MelCloud extends EventEmitter {
                 const deviceName = deviceInfo.DeviceName;
 
                 //save every device info to the file
-                const deviceInfoFile = `${this.deviceInfoFile}${deviceId}`;
-                await this.saveData(deviceInfoFile, deviceInfo);
+                const deviceFile = `${this.deviceFile}${deviceId}`;
+                await this.saveData(deviceFile, deviceInfo);
                 const debug = this.enableDebugMode ? this.emit('debug', `Device: ${deviceName} info saved.`) : false;
             };
 
             return devices;
         } catch (error) {
-            const stop = !this.requestConfig ? false : this.impulseGenerator.stop();
             throw new Error(`Scanning for devices error: ${error.message ?? error}.`);
         };
     }
