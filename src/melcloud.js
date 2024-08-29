@@ -90,6 +90,12 @@ class MelCloud extends EventEmitter {
             //emit connect success
             this.emit('success', `Connect to MELCloud Success.`)
 
+            if (!this.requestConfig) {
+                //start impulse generator
+                const timers = [{ name: 'checkDevicesList', sampling: this.refreshInterval }];
+                this.impulseGenerator.start(timers);
+            };
+
             const obj = {
                 accountInfo: accountInfo,
                 contextKey: contextKey
@@ -167,12 +173,6 @@ class MelCloud extends EventEmitter {
                 await this.saveData(deviceInfoFile, deviceInfo);
                 const debug = this.enableDebugMode ? this.emit('debug', `Device: ${deviceName} info saved.`) : false;
             };
-
-            if (!this.requestConfig) {
-                //start impulse generator
-                const timers = [{ name: 'checkDevicesList', sampling: this.refreshInterval }];
-                this.impulseGenerator.start(timers);
-            }
 
             return devices;
         } catch (error) {
