@@ -215,6 +215,7 @@ class DeviceAta extends EventEmitter {
                 this.accessory.lockPhysicalControl = prohibitSetTemperature && prohibitOperationMode && prohibitPower ? 1 : 0;
                 this.accessory.temperatureIncrement = temperatureIncrement;
                 this.accessory.useFahrenheit = useFahrenheit;
+                this.accessory.temperatureUnit = temperatureUnit;
                 this.accessory.hasAutomaticFanSpeed = hasAutomaticFanSpeed;
                 this.accessory.airDirectionFunction = airDirectionFunction;
                 this.accessory.hasOutdoorTemperature = hasOutdoorTemperature;
