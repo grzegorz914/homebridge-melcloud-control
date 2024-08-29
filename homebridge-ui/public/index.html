@@ -83,8 +83,6 @@
           const setRemoveAtribute = j === i ? document.getElementById(`button${j}`).setAttribute("class", "btn btn-secondary") : document.getElementById(`button${j}`).setAttribute("class", "btn btn-primary");
         }
 
-        //const devicesCount = pluginConfig[0].accounts[i].devicesAta.length ?? 0;
-        //document.getElementById('info').innerHTML = `MELCloud configured ${devicesCount} ${devicesCount} ${devicesCount !== 1 ? 'devices' : 'device'}.`;
         document.getElementById('accountName').innerHTML = pluginConfig[0].accounts[i].name || '';
         document.getElementById('name').value = pluginConfig[0].accounts[i].name || '';
         document.getElementById('user').value = pluginConfig[0].accounts[i].user || '';
@@ -92,8 +90,9 @@
         document.getElementById('language').value = pluginConfig[0].accounts[i].language || '';
 
         const accountConfigured = pluginConfig[0].accounts[i].name && pluginConfig[0].accounts[i].user && pluginConfig[0].accounts[i].passwd && pluginConfig[0].accounts[i].language;
-        const setButtonState = accountConfigured ? document.getElementById('logIn').removeAttribute('disabled') : document.getElementById('logIn').setAttribute('disabled');
-        document.getElementById('configButton').setAttribute('disabled');
+        const button = document.getElementById('logIn');
+        const setButtonState = accountConfigured ? button.disabled = false : button.disabled = true;
+
         await homebridge.updatePluginConfig(pluginConfig);
         this.deviceIndex = i;
       });
@@ -111,8 +110,9 @@
       pluginConfig[0].accounts[this.deviceIndex].passwd = document.querySelector('#passwd').value;
       pluginConfig[0].accounts[this.deviceIndex].language = document.querySelector('#language').value;
 
-      const accountConfigured = pluginConfig[0].accounts[i].name && pluginConfig[0].accounts[i].user && pluginConfig[0].accounts[i].passwd && pluginConfig[0].accounts[i].language;
-      const setButtonState = accountConfigured ? document.getElementById('logIn').removeAttribute('disabled') : document.getElementById('logIn').setAttribute('disabled');
+      const accountConfigured = pluginConfig[0].accounts[this.deviceIndex].name && pluginConfig[0].accounts[this.deviceIndex].user && pluginConfig[0].accounts[this.deviceIndex].passwd && pluginConfig[0].accounts[this.deviceIndex].language;
+      const button = document.getElementById('logIn');
+      const setButtonState = accountConfigured ? button.disabled = false : button.disabled = true;
 
       await homebridge.updatePluginConfig(pluginConfig);
       await homebridge.savePluginConfig(pluginConfig);
