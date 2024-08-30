@@ -87,7 +87,6 @@ class MelCloudPlatform {
 						};
 
 						const deviceId = device.id.toString();
-						const deviceType = device.type ?? 0;
 						const deviceName = device.name;
 						const deviceTypeText = device.typeString;
 						const deviceInfoFile = `${prefDir}/${accountName}_Device_${deviceId}`;

@@ -60,7 +60,7 @@ class MelCloudAta extends EventEmitter {
                 const debug1 = debugLog ? this.emit('debug', `Device Info: ${JSON.stringify(deviceData, null, 2)}`) : false;
 
                 if (!deviceData) {
-                    this.emit('warn', `Device not data found.`);
+                    this.emit('warn', `Device data not found.`);
                     return;
                 }
 
