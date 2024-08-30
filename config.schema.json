@@ -15,7 +15,7 @@
           "type": "object",
           "properties": {
             "name": {
-              "title": "Account",
+              "title": "Name",
               "type": "string",
               "placeholder": "Account name",
               "description": "Your own account name.",
@@ -218,6 +218,11 @@
                   "type": {
                     "title": "Type",
                     "type": "integer",
+                    "required": false
+                  },
+                  "typeString": {
+                    "title": "Type",
+                    "type": "string",
                     "required": false
                   },
                   "name": {
@@ -691,6 +696,11 @@
                     "type": "integer",
                     "required": false
                   },
+                  "typeString": {
+                    "title": "Type",
+                    "type": "string",
+                    "required": false
+                  },
                   "name": {
                     "title": "Name",
                     "type": "string",
@@ -1027,6 +1037,11 @@
                   "type": {
                     "title": "Type",
                     "type": "integer",
+                    "required": false
+                  },
+                  "typeString": {
+                    "title": "Type",
+                    "type": "string",
                     "required": false
                   },
                   "name": {
@@ -1463,15 +1478,24 @@
                       "readonly": true
                     },
                     {
-                      "key": "accounts[].ataDevices[].type",
+                      "key": "accounts[].ataDevices[].typeString",
                       "readonly": true
                     },
-                    "accounts[].ataDevices[].name",
-                    "accounts[].ataDevices[].displayMode",
-                    "accounts[].ataDevices[].heatDryFanMode",
-                    "accounts[].ataDevices[].coolDryFanMode",
-                    "accounts[].ataDevices[].autoDryFanMode",
-                    "accounts[].ataDevices[].presets",
+                    {
+                      "key": "accounts[].ataDevices[]",
+                      "type": "section",
+                      "title": "Configuration",
+                      "expandable": true,
+                      "expanded": false,
+                      "items": [
+                        "accounts[].ataDevices[].name",
+                        "accounts[].ataDevices[].displayMode",
+                        "accounts[].ataDevices[].heatDryFanMode",
+                        "accounts[].ataDevices[].coolDryFanMode",
+                        "accounts[].ataDevices[].autoDryFanMode",
+                        "accounts[].ataDevices[].presets"
+                      ]
+                    },
                     {
                       "key": "accounts[].ataDevices[]",
                       "type": "section",
@@ -1521,12 +1545,21 @@
                       "readonly": true
                     },
                     {
-                      "key": "accounts[].atwDevices[].type",
+                      "key": "accounts[].atwDevices[].typeString",
                       "readonly": true
                     },
-                    "accounts[].atwDevices[].name",
-                    "accounts[].atwDevices[].displayMode",
-                    "accounts[].atwDevices[].presets",
+                    {
+                      "key": "accounts[].atwDevices[]",
+                      "type": "section",
+                      "title": "Configuration",
+                      "expandable": true,
+                      "expanded": false,
+                      "items": [
+                        "accounts[].atwDevices[].name",
+                        "accounts[].atwDevices[].displayMode",
+                        "accounts[].atwDevices[].presets"
+                      ]
+                    },
                     {
                       "key": "accounts[].atwDevices[]",
                       "type": "section",
@@ -1583,12 +1616,21 @@
                       "readonly": true
                     },
                     {
-                      "key": "accounts[].ervDevices[].type",
+                      "key": "accounts[].ervDevices[].typeString",
                       "readonly": true
                     },
-                    "accounts[].ervDevices[].name",
-                    "accounts[].ervDevices[].displayMode",
-                    "accounts[].ervDevices[].presets",
+                    {
+                      "key": "accounts[].ervDevices[]",
+                      "type": "section",
+                      "title": "Configuration",
+                      "expandable": true,
+                      "expanded": false,
+                      "items": [
+                        "accounts[].ervDevices[].name",
+                        "accounts[].ervDevices[].displayMode",
+                        "accounts[].ervDevices[].presets"
+                      ]
+                    },
                     {
                       "key": "accounts[].ervDevices[]",
                       "type": "section",
@@ -1624,50 +1666,72 @@
                   ]
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "key": "accounts[]",
+          "type": "section",
+          "title": "Advanced Settings",
+          "expandable": true,
+          "expanded": false,
+          "items": [
             {
               "key": "accounts[]",
-              "title": "System",
-              "items": [
-                "accounts[].enableDebugMode",
-                "accounts[].disableLogInfo",
-                "accounts[].disableLogDeviceInfo",
-                "accounts[].refreshInterval",
-                "accounts[].deviceRefreshInterval"
-              ]
-            },
-            {
-              "key": "accounts[]",
-              "title": "External Integrations",
+              "type": "tabarray",
+              "title": "{{ value.name }}",
               "items": [
                 {
                   "key": "accounts[]",
-                  "type": "tabarray",
-                  "title": "{{ value.title }}",
+                  "title": "Data Refresh",
+                  "items": [
+                    "accounts[].refreshInterval",
+                    "accounts[].deviceRefreshInterval"
+                  ]
+                },
+                {
+                  "key": "accounts[]",
+                  "title": "Log",
+                  "items": [
+                    "accounts[].enableDebugMode",
+                    "accounts[].disableLogInfo",
+                    "accounts[].disableLogDeviceInfo"
+                  ]
+                },
+                {
+                  "key": "accounts[]",
+                  "title": "External Integrations",
                   "items": [
                     {
-                      "key": "accounts[].restFul",
-                      "title": "RESTFul",
+                      "key": "accounts[]",
+                      "type": "tabarray",
+                      "title": "{{ value.title }}",
                       "items": [
-                        "accounts[].restFul.enable",
-                        "accounts[].restFul.debug"
-                      ]
-                    },
-                    {
-                      "key": "accounts[].mqtt",
-                      "title": "MQTT",
-                      "items": [
-                        "accounts[].mqtt.enable",
-                        "accounts[].mqtt.debug",
-                        "accounts[].mqtt.host",
-                        "accounts[].mqtt.port",
-                        "accounts[].mqtt.clientId",
-                        "accounts[].mqtt.prefix",
-                        "accounts[].mqtt.auth",
-                        "accounts[].mqtt.user",
                         {
-                          "key": "accounts[].mqtt.passwd",
-                          "type": "password"
+                          "key": "accounts[].restFul",
+                          "title": "RESTFul",
+                          "items": [
+                            "accounts[].restFul.enable",
+                            "accounts[].restFul.debug"
+                          ]
+                        },
+                        {
+                          "key": "accounts[].mqtt",
+                          "title": "MQTT",
+                          "items": [
+                            "accounts[].mqtt.enable",
+                            "accounts[].mqtt.debug",
+                            "accounts[].mqtt.host",
+                            "accounts[].mqtt.port",
+                            "accounts[].mqtt.clientId",
+                            "accounts[].mqtt.prefix",
+                            "accounts[].mqtt.auth",
+                            "accounts[].mqtt.user",
+                            {
+                              "key": "accounts[].mqtt.passwd",
+                              "type": "password"
+                            }
+                          ]
                         }
                       ]
                     }

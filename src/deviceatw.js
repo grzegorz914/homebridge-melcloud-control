@@ -17,7 +17,7 @@ class DeviceAtw extends EventEmitter {
         AccessoryUUID = api.hap.uuid;
 
         //account config
-        this.displayMode = device.displayMode || 0;
+        this.displayMode = device.displayMode;
         this.temperatureSensor = device.temperatureSensor || false;
         this.temperatureSensorFlow = device.temperatureSensorFlow || false;
         this.temperatureSensorReturn = device.temperatureSensorReturn || false;

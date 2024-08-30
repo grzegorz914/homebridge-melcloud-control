@@ -89,7 +89,7 @@ class MelCloudPlatform {
 						const deviceId = device.id.toString();
 						const deviceType = device.type ?? 0;
 						const deviceName = device.name;
-						const deviceTypeText = CONSTANTS.DeviceType[deviceType];
+						const deviceTypeText = device.typeString;
 						const deviceInfoFile = `${prefDir}/${accountName}_Device_${deviceId}`;
 						const airConditioner = new DeviceAta(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile, deviceRefreshInterval)
 						airConditioner.on('publishAccessory', (accessory) => {
@@ -205,7 +205,7 @@ class MelCloudPlatform {
 						.on('warn', (warn) => {
 							log.warn(`Account ${accountName}, ${warn}`);
 						})
-						.on('error', async (error) => {
+						.on('error', (error) => {
 							log.error(`Account ${accountName}, ${error}.`);
 						});
 				} catch (error) {

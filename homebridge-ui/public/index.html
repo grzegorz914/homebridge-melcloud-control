@@ -1,13 +1,13 @@
-<div>
-  <img src="homebridge-melcloud-control.png" style="text-align: center;" height="150" />
-</div>
-<div id="accounts">
-</div>
+<div style="text-align: center;">
+  </divstyle>
+  <img src="homebridge-melcloud-control.png" alt="Image" height="120" />
+</div><br>
+
 <div id="melCloudAccount" style="display: none;" class="card card-body">
   <form id="configForm">
     <div class="text-center">
       <label id="accountName" style="font-size: 23px">Account</label><br>
-      <label id="info" style="text-align: center; font-size: 17px;">MELCloud</label><br><br>
+      <label id="info" style="text-align: center; font-size: 17px;"></label><br>
     </div>
     <div class="form-group">
       <label for="name">Name</label>
@@ -44,11 +44,13 @@
         <option value="23">Hrvatski</option>
         <option value="24">Română</option>
         <option value="25">Slovenščina</option>
-      </select>
+      </select><br>
     </div>
     <div class="text-center">
       <button id="logIn" type="button" class="btn btn-primary">Connect to MELCloud</button>
       <button id="configButton" type="button" class="btn btn-primary"><i class="fas fa-gear"></i></button>
+    </div>
+    <div id="accountButton">
     </div>
   </form>
 </div>
@@ -74,8 +76,9 @@
       button.setAttribute("type", "button");
       button.setAttribute("id", `button${i}`);
       button.setAttribute("class", "btn btn-primary");
+      button.style.textTransform = 'none';
       button.innerText = pluginConfig[0].accounts[i].name;
-      document.getElementById("accounts").appendChild(button);
+      document.getElementById("accountButton").appendChild(button);
 
       //get actuall value on account select
       document.getElementById(`button${i}`).addEventListener('click', async () => {
@@ -147,15 +150,23 @@
         const info = response.info ?? '';
         const status = response.status;
         const devices = response.data ?? [];
-        const newDevices = [];
+        const newDevices = {
+          ata: [],
+          atw: [],
+          erv: []
+        };
+        let textAta = 'ATA: 0';
+        let textAtw = 'ATW: 0';
+        let textErv = 'ERV: 0';
 
         switch (status) {
           case 0:
             //get device info fom devices
-            devices.forEach((deviceInfo, index) => {
-              const deviceType = deviceInfo.Type;
-              const deviceId = deviceInfo.DeviceID;
-              const deviceName = deviceInfo.DeviceName;
+            devices.forEach((device, index) => {
+              const deviceId = device.DeviceID;
+              const deviceType = device.Type;
+              const deviceTypeText = ["Air Conditioner", "Heat Pump", "Unknown", "Energy Recovery Ventilation"][deviceType];
+              const deviceName = device.DeviceName;
 
               //config account keys
               const accountKeys = Object.keys(pluginConfig[0].accounts[this.deviceIndex]);
@@ -163,9 +174,10 @@
               //devices ata
               if (deviceType === 0) {
                 const deviceAta = {
-                  name: deviceName,
                   id: deviceId,
                   type: deviceType,
+                  typeString: deviceTypeText,
+                  name: deviceName,
                   displayMode: 0,
                   heatDryFanMode: 0,
                   coolDryFanMode: 0,
@@ -180,15 +192,18 @@
                 const ataDevices = ataDevicesExist ? pluginConfig[0].accounts[this.deviceIndex].ataDevices : pluginConfig[0].accounts[this.deviceIndex].ataDevices = [];
                 const ataDeviceIdExist = ataDevices.some(device => device.id === deviceId);
                 const pushTypeAta = ataDeviceIdExist ? false : ataDevices.push(deviceAta);
-                const pushNewDevice = ataDeviceIdExist ? false : newDevices.push(deviceId);
+                const pushNewDevice = ataDeviceIdExist ? false : newDevices.ata.push(device);
+                const devicesCount = newDevices.ata.length;
+                textAta = `ATA: ${devicesCount}`
               };
 
               //devices atw
               if (deviceType === 1) {
                 const deviceAtw = {
-                  name: deviceName,
                   id: deviceId,
                   type: deviceType,
+                  typeString: deviceTypeText,
+                  name: deviceName,
                   displayMode: 0,
                   temperatureSensor: false,
                   temperatureSensorFlow: false,
@@ -208,15 +223,18 @@
                 const atwDevices = atwDevicesExist ? pluginConfig[0].accounts[this.deviceIndex].atwDevices : pluginConfig[0].accounts[this.deviceIndex].atwDevices = [];
                 const atwDeviceIdExist = atwDevices.some(device => device.id === deviceId);
                 const pushTypeatw = atwDeviceIdExist ? false : atwDevices.push(deviceAtw);
-                const pushNewDevice = atwDeviceIdExist ? false : newDevices.push(deviceId);
+                const pushNewDevice = atwDeviceIdExist ? false : newDevices.atw.push(device);
+                const devicesCount = newDevices.ata.length;
+                textAtw = `ATW: ${devicesCount}`
               };
 
               //devices erv
               if (deviceType === 3) {
                 const deviceErv = {
-                  name: deviceName,
                   id: deviceId,
                   type: deviceType,
+                  typeString: deviceTypeText,
+                  name: deviceName,
                   displayMode: 0,
                   temperatureSensor: false,
                   temperatureSensorOutdoor: false,
@@ -230,12 +248,14 @@
                 const ervDevices = ervDevicesExist ? pluginConfig[0].accounts[this.deviceIndex].ervDevices : pluginConfig[0].accounts[this.deviceIndex].ervDevices = [];
                 const ervDeviceIdExist = ervDevices.some(device => device.id === deviceId);
                 const pushTypeerv = ervDeviceIdExist ? false : ervDevices.push(deviceErv);
-                const pushNewDevice = ervDeviceIdExist ? false : newDevices.push(deviceId);
+                const pushNewDevice = ervDeviceIdExist ? false : newDevices.erv.push(device);
+                const devicesCount = newDevices.ata.length;
+                textErv = `ERV: ${devicesCount}`
               };
             });
 
-            const devicesCount = newDevices.length;
-            document.getElementById('info').innerHTML = `Check devices complete, found ${devicesCount} ${devicesCount !== 1 ? 'new devices' : 'new device'}. ${devicesCount === 0 ? '' : 'Now You can start to configure it.'}`;
+            const newDevicesCount = newDevices.ata.length + newDevices.atw.length + newDevices.erv.length;
+            document.getElementById('info').innerHTML = `Found in MELCloud, ${textAta}, ${textAtw}, ${textErv}. ${newDevicesCount === 0 ? '' : 'Now You can start to configure it.'}`;
             document.getElementById('info').style.color = 'green';
 
             await homebridge.updatePluginConfig(pluginConfig);

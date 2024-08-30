@@ -17,7 +17,7 @@ class DeviceErv extends EventEmitter {
         AccessoryUUID = api.hap.uuid;
 
         //account config
-        this.displayMode = device.displayMode || 0;
+        this.displayMode = device.displayMode;
         this.temperatureSensor = device.temperatureSensor || false;
         this.temperatureSensorOutdoor = device.temperatureSensorOutdoor || false;
         this.temperatureSensorSupply = device.temperatureSensorSupply || false;

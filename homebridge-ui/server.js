@@ -38,7 +38,8 @@ class PluginUiServer extends HomebridgePluginUiServer {
     } catch (error) {
       return data = {
         info: error,
-        status: 1
+        status: 1,
+        data: data
       };
     };
   };

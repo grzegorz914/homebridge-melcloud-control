@@ -15,6 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - v3 After update to v3 from previous versions the plugin need to be configured using Config UI X.
   - do not configure it manually, always using Config UI X
 
+## [3.0.7] - (30.08.2024)
+
+## Changes
+
+- improvements in plugin config UI
+- config schema update
+- cleanup
+
 ## [3.0.0] - (29.08.2024)
 
 ## Changes
