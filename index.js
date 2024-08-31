@@ -105,7 +105,9 @@ class MelCloudPlatform {
 
 					//Air Conditioner
 					for (const device of account.ataDevices) {
-						if (!device.id || device.displayMode === 0) {
+						//chack device from config exist on melcloud
+						const deviceExistInMelCloud = devices.some(dev => dev.DeviceID === device.id);
+						if (!deviceExistInMelCloud || device.displayMode === 0) {
 							continue;
 						};
 
@@ -142,7 +144,9 @@ class MelCloudPlatform {
 
 					//Heat Pump
 					for (const device of account.atwDevices) {
-						if (!device.id || device.displayMode === 0) {
+						//chack device from config exist on melcloud
+						const deviceExistInMelCloud = devices.some(dev => dev.DeviceID === device.id);
+						if (!deviceExistInMelCloud || device.displayMode === 0) {
 							continue;
 						};
 
@@ -180,7 +184,9 @@ class MelCloudPlatform {
 
 					//Energy Recovery Ventilation
 					for (const device of account.ervDevices) {
-						if (!device.id || device.displayMode === 0) {
+						//chack device from config exist on melcloud
+						const deviceExistInMelCloud = devices.some(dev => dev.DeviceID === device.id);
+						if (!deviceExistInMelCloud || device.displayMode === 0) {
 							continue;
 						};
 

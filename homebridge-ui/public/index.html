@@ -151,33 +151,26 @@
         const info = response.info ?? '';
         const status = response.status;
         const devices = response.data ?? [];
-        const devicesByType = {
-          ata: [],
-          atw: [],
-          erv: []
-        };
-
-        //new found devices
-        const newDevices = {
-          ata: [],
-          ataPresets: [],
-          atw: [],
-          atwPresets: [],
-          erv: [],
-          ervPresets: [],
-        };
-
-        //info text
-        let textAta = 'ATA: 0';
-        let textAtaPresets = 'ATA Presets: 0';
-        let textAtw = 'ATW: 0';
-        let textAtwPresets = 'ATW Presets: 0';
-        let textErv = 'ERV: 0';
-        let textErvPresets = 'ERV Presets: 0';
 
         //response status
         switch (status) {
           case 0:
+            //new found devices
+            const newDevices = {
+              ata: [],
+              ataPresets: [],
+              atw: [],
+              atwPresets: [],
+              erv: [],
+              ervPresets: [],
+            };
+
+            const devicesByType = {
+              ata: [],
+              atw: [],
+              erv: []
+            };
+
             //get devices by type
             for (const device of devices) {
               const deviceType = device.Type;
@@ -186,19 +179,33 @@
               const pusDeviceTypeErv = deviceType === 3 ? devicesByType.erv.push(device) : false;
             };
 
-            //get device info fom devices ata
+            //devices from config
+            const ataDevices = pluginConfig[0].accounts[this.deviceIndex].ataDevices ?? [];
+            const atwDevices = pluginConfig[0].accounts[this.deviceIndex].atwDevices ?? [];
+            const ervDevices = pluginConfig[0].accounts[this.deviceIndex].ervDevices ?? [];
+
+            //info text
+            let textAta = 'ATA: 0';
+            let textAtaPresets = 'ATA Presets: 0';
+            let ataPresetsCount = 0;
+            let textAtw = 'ATW: 0';
+            let textAtwPresets = 'ATW Presets: 0';
+            let atwPresetsCount = 0;
+            let textErv = 'ERV: 0';
+            let textErvPresets = 'ERV Presets: 0';
+            let ervPresetsCount = 0;
+
+            //device ata
             devicesByType.ata.forEach((device, index) => {
               const deviceId = device.DeviceID;
               const deviceType = device.Type;
-              const deviceTypeText = "Air Conditioner";
               const deviceName = device.DeviceName;
               const devicePresets = device.Presets ?? [];
 
-              //device ata
               const deviceAta = {
                 id: deviceId,
                 type: deviceType,
-                typeString: deviceTypeText,
+                typeString: "Air Conditioner",
                 name: deviceName,
                 displayMode: 1,
                 heatDryFanMode: 1,
@@ -210,13 +217,11 @@
                 buttonsSensors: []
               };
 
-              const ataDevicesExist = pluginConfig[0].accounts[this.deviceIndex].ataDevices ?? false;
-              const ataDevices = ataDevicesExist ? pluginConfig[0].accounts[this.deviceIndex].ataDevices : pluginConfig[0].accounts[this.deviceIndex].ataDevices = [];
-              const ataDeviceIdExist = ataDevices.some(device => device.id === deviceId);
-              const pushTypeAta = ataDeviceIdExist ? false : ataDevices.push(deviceAta);
-              const pushNewDevice = ataDeviceIdExist ? false : newDevices.ata.push(device);
-              const devicesCount = newDevices.ata.length;
-              textAta = `ATA: ${devicesCount}`
+              const deviceExistsInConfig = ataDevices.find(device => device.id === deviceId);
+              if (!deviceExistsInConfig) {
+                ataDevices.push(deviceAta);
+                newDevices.ata.push(deviceAta);
+              };
 
               //presets
               for (const preset of devicePresets) {
@@ -228,29 +233,35 @@
                 preset.displayType == 0;
                 preset.namePrefix = false;
 
-                const ataPresetsExist = pluginConfig[0].accounts[this.deviceIndex].ataDevices[index].presets ?? false;
-                const ataPresets = ataPresetsExist ? pluginConfig[0].accounts[this.deviceIndex].ataDevices[index].presets : pluginConfig[0].accounts[this.deviceIndex].ataDevices[index].presets = [];
-                const ataPresetIdExist = ataPresets.some(preset => preset.id === presetId);
-                const pushPresetAta = ataPresetIdExist ? false : ataPresets.push(preset);
-                const pushNewPreset = ataPresetIdExist ? false : newDevices.ataPresets.push(preset);
-                const presetsCount = newDevices.ataPresets.length;
-                textAtaPresets = `ATA Presets: ${presetsCount}`
-              };
-            });
+                let presetExistsInConfig = false;
+                for (const ataDevice of ataDevices) {
+                  if (ataDevice.presets?.some(preset => preset.id === presetId)) {
+                    presetExistsInConfig = true;
+                    break;
+                  }
+                }
 
-            //get device info fom devices atw
+                if (!presetExistsInConfig) {
+                  ataDevices[index].presets.push(preset);
+                  newDevices.ataPresets.push(preset);
+                };
+              };
+              ataPresetsCount = newDevices.ataPresets.length;
+              textAtaPresets = `ATA Presets: ${ataPresetsCount}`
+            });
+            textAta = `ATA: ${newDevices.ata.length}`
+
+            //device atw
             devicesByType.atw.forEach((device, index) => {
               const deviceId = device.DeviceID;
               const deviceType = device.Type;
-              const deviceTypeText = "Heat Pump";
               const deviceName = device.DeviceName;
               const devicePresets = device.Presets ?? [];
 
-              //device atw
               const deviceAtw = {
                 id: deviceId,
                 type: deviceType,
-                typeString: deviceTypeText,
+                typeString: "Heat Pump",
                 name: deviceName,
                 displayMode: 1,
                 temperatureSensor: false,
@@ -267,64 +278,12 @@
                 presets: [],
                 buttonsSensors: []
               };
-              const atwDevicesExist = pluginConfig[0].accounts[this.deviceIndex].atwDevices ?? false;
-              const atwDevices = atwDevicesExist ? pluginConfig[0].accounts[this.deviceIndex].atwDevices : pluginConfig[0].accounts[this.deviceIndex].atwDevices = [];
-              const atwDeviceIdExist = atwDevices.some(device => device.id === deviceId);
-              const pushTypeAtw = atwDeviceIdExist ? false : atwDevices.push(deviceAtw);
-              const pushNewDevice = atwDeviceIdExist ? false : newDevices.atw.push(device);
-              const devicesCount = newDevices.atw.length;
-              textAtw = `ATW: ${devicesCount}`
 
-              //presetzs
-              for (const preset of devicePresets) {
-                const presetId = preset.ID;
-                const presetName = preset.NumberDescription;
-
-                preset.id = presetId;
-                preset.name = presetName;
-                preset.displayType == 0;
-                preset.namePrefix = false;
-
-                const atwPresetsExist = pluginConfig[0].accounts[this.deviceIndex].atwDevices[index].presets ?? false;
-                const atwPresets = atwPresetsExist ? pluginConfig[0].accounts[this.deviceIndex].atwDevices[index].presets : pluginConfig[0].accounts[this.deviceIndex].atwDevices[index].presets = [];
-                const atwPresetIdExist = atwPresets.some(preset => preset.id === presetId);
-                const pushPresetAtw = atwPresetIdExist ? false : atwPresets.push(preset);
-                const pushNewPreset = atwPresetIdExist ? false : newDevices.atwPresets.push(preset);
-                const presetsCount = newDevices.atwPresets.length;
-                textAtwPresets = `ATW Presets: ${presetsCount}`
+              const deviceExistsInConfig = atwDevices.find(device => device.id === deviceId);
+              if (!deviceExistsInConfig) {
+                atwDevices.push(deviceAtw);
+                newDevices.atw.push(deviceAtw);
               };
-            });
-
-            //get device info fom devices erv
-            devicesByType.erv.forEach((device, index) => {
-              const deviceId = device.DeviceID;
-              const deviceType = device.Type;
-              const deviceTypeText = "Energy Recovery Ventilation";
-              const deviceName = device.DeviceName;
-              const devicePresets = device.Presets ?? [];
-
-              //device erv
-              const deviceErv = {
-                id: deviceId,
-                type: deviceType,
-                typeString: deviceTypeText,
-                name: deviceName,
-                displayMode: 1,
-                temperatureSensor: false,
-                temperatureSensorOutdoor: false,
-                temperatureSensorSupply: false,
-                temperatureSensor: false,
-                temperatureSensorOutdoor: false,
-                presets: [],
-                buttonsSensors: []
-              };
-              const ervDevicesExist = pluginConfig[0].accounts[this.deviceIndex].ervDevices ?? false;
-              const ervDevices = ervDevicesExist ? pluginConfig[0].accounts[this.deviceIndex].ervDevices : pluginConfig[0].accounts[this.deviceIndex].ervDevices = [];
-              const ervDeviceIdExist = ervDevices.some(device => device.id === deviceId);
-              const pushTypeerv = ervDeviceIdExist ? false : ervDevices.push(deviceErv);
-              const pushNewDevice = ervDeviceIdExist ? false : newDevices.erv.push(device);
-              const devicesCount = newDevices.erv.length;
-              textErv = `ERV: ${devicesCount}`
 
               //presets
               for (const preset of devicePresets) {
@@ -336,18 +295,82 @@
                 preset.displayType == 0;
                 preset.namePrefix = false;
 
-                const ervPresetsExist = pluginConfig[0].accounts[this.deviceIndex].ervDevices[index].presets ?? false;
-                const ervPresets = ervPresetsExist ? pluginConfig[0].accounts[this.deviceIndex].ervDevices[index].presets : pluginConfig[0].accounts[this.deviceIndex].ervDevices[index].presets = [];
-                const ervPresetIdExist = ervPresets.some(preset => preset.id === presetId);
-                const pushPresetErv = ervPresetIdExist ? false : ervPresets.push(preset);
-                const pushNewPreset = ervPresetIdExist ? false : newDevices.ervPresets.push(preset);
-                const presetsCount = newDevices.ervPresets.length;
-                textErvPresets = `ERV Presets: ${presetsCount}`
+                let presetExistsInConfig = false;
+                for (const atwDevice of atwDevices) {
+                  if (atwDevice.presets?.some(preset => preset.id === presetId)) {
+                    presetExistsInConfig = true;
+                    break;
+                  }
+                }
+
+                if (!presetExistsInConfig) {
+                  atwDevices[index].presets.push(preset);
+                  newDevices.atwPresets.push(preset);
+                };
               };
+              atwPresetsCount = newDevices.atwPresets.length;
+              textAtwPresets = `ATW Presets: ${atwPresetsCount}`
             });
+            textAtw = `ATW: ${newDevices.atw.length}`
+
+            //device erv
+            devicesByType.erv.forEach((device, index) => {
+              const deviceId = device.DeviceID;
+              const deviceType = device.Type;
+              const deviceName = device.DeviceName;
+              const devicePresets = device.Presets ?? [];
+
+              const deviceErv = {
+                id: deviceId,
+                type: deviceType,
+                typeString: "Energy Recovery Ventilation",
+                name: deviceName,
+                displayMode: 1,
+                temperatureSensor: false,
+                temperatureSensorOutdoor: false,
+                temperatureSensorSupply: false,
+                temperatureSensor: false,
+                temperatureSensorOutdoor: false,
+                presets: [],
+                buttonsSensors: []
+              };
+
+              const deviceExistsInConfig = ervDevices.find(device => device.id === deviceId);
+              if (!deviceExistsInConfig) {
+                ervDevices.push(deviceErv);
+                newDevices.erv.push(deviceErv);
+              };
+
+              //presets
+              for (const preset of devicePresets) {
+                const presetId = preset.ID;
+                const presetName = preset.NumberDescription;
+
+                preset.id = presetId;
+                preset.name = presetName;
+                preset.displayType == 0;
+                preset.namePrefix = false;
+
+                let presetExistsInConfig = false;
+                for (const ervDevice of ervDevices) {
+                  if (ervDevice.presets?.some(preset => preset.id === presetId)) {
+                    presetExistsInConfig = true;
+                    break;
+                  }
+                }
+
+                if (!presetExistsInConfig) {
+                  ervDevices[index].presets.push(preset);
+                  newDevices.ervPresets.push(preset);
+                };
+              };
+              ervPresetsCount = newDevices.ervPresets.length;
+              textErvPresets = `ERV Presets: ${ervPresetsCount}`
+            });
+            textErv = `ERV: ${newDevices.erv.length}`
 
             const newDevicesCount = newDevices.ata.length + newDevices.atw.length + newDevices.erv.length ?? 0;
-            const newPresetsCount = newDevices.ataPresets.length + newDevices.atwPresets.length + newDevices.ervPresets.length ?? 0;
+            const newPresetsCount = ataPresetsCount + atwPresetsCount + ervPresetsCount ?? 0;
             if (newDevicesCount === 0 && newPresetsCount === 0) {
               document.getElementById('info').innerHTML = 'No new devices found.';
               document.getElementById('info').style.color = 'white';
