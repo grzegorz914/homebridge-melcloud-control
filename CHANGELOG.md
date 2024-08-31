@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changes
 
 - improvements in plugin config UI
-- added possibility indyvidual presets control
+- added presets config indyvidually
 - config schema update
 - bump dependencies
 - cleanup  
@@ -40,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - added homebridge UI server
 - whole new concept get all devices from melcloud usin config UI X
-- added individual configuration of every device
+- added device config indyvidually
 - config schema updated
 - cleanup
 
