@@ -72,13 +72,36 @@ class MelCloudPlatform {
 				const refreshInterval = account.refreshInterval * 1000 || 120000;
 				const deviceRefreshInterval = account.deviceRefreshInterval * 1000 || 5000;
 
-				//melcloud account
 				try {
-					const melCloud = new MelCloud(user, passwd, language, accountInfoFile, buildingsFile, deviceFile, enableDebugMode, refreshInterval, false);
+					//melcloud account
+					const melCloud = new MelCloud(user, passwd, language, accountInfoFile, buildingsFile, deviceFile, enableDebugMode, false);
+					melCloud.on('success', (message) => {
+						log.success(`Account ${accountName}, ${message}`);
+					})
+						.on('message', (message) => {
+							log.info(`Account ${accountName}, ${message}`);
+						})
+						.on('debug', (debug) => {
+							log.info(`Account ${accountName}, debug: ${debug}`);
+						})
+						.on('warn', (warn) => {
+							log.warn(`Account ${accountName}, ${warn}`);
+						})
+						.on('error', (error) => {
+							log.error(`Account ${accountName}, ${error}.`);
+						});
+
+					//connect
 					const response = await melCloud.connect();
 					const accountInfo = response.accountInfo;
 					const contextKey = response.contextKey;
+
+					//check devices list
 					const devices = await melCloud.chackDevicesList(contextKey);
+
+					//start impulse generator
+					const timers = [{ name: 'checkDevicesList', sampling: refreshInterval }];
+					melCloud.impulseGenerator.start(timers);
 
 					//Air Conditioner
 					for (const device of account.ataDevices) {
@@ -192,21 +215,6 @@ class MelCloudPlatform {
 								log.error(`${deviceTypeText}, ${deviceName}, ${error}`);
 							});
 					};
-					melCloud.on('success', (message) => {
-						log.success(`Account ${accountName}, ${message}`);
-					})
-						.on('message', (message) => {
-							log.info(`Account ${accountName}, ${message}`);
-						})
-						.on('debug', (debug) => {
-							log.info(`Account ${accountName}, debug: ${debug}`);
-						})
-						.on('warn', (warn) => {
-							log.warn(`Account ${accountName}, ${warn}`);
-						})
-						.on('error', (error) => {
-							log.error(`Account ${accountName}, ${error}.`);
-						});
 				} catch (error) {
 					log.error(`Account: ${accountName}, MELCloud error: ${error.message ?? error}`);
 				}

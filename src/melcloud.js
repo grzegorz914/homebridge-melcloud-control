@@ -8,13 +8,12 @@ const ImpulseGenerator = require('./impulsegenerator.js');
 const CONSTANTS = require('./constants.json');
 
 class MelCloud extends EventEmitter {
-    constructor(user, passwd, language, accountInfoFile, buildingsFile, deviceFile, enableDebugMode, refreshInterval, requestConfig) {
+    constructor(user, passwd, language, accountInfoFile, buildingsFile, deviceFile, enableDebugMode, requestConfig) {
         super();
         this.accountInfoFile = accountInfoFile;
         this.buildingsFile = buildingsFile;
         this.deviceFile = deviceFile;
         this.enableDebugMode = enableDebugMode;
-        this.refreshInterval = refreshInterval;
         this.requestConfig = requestConfig;
         this.contextKey = '';
         this.devicesId = [];
@@ -35,13 +34,11 @@ class MelCloud extends EventEmitter {
             this.impulseGenerator = new ImpulseGenerator();
             this.impulseGenerator.on('checkDevicesList', async () => {
                 try {
-                    const devices = await this.chackDevicesList(this.contextKey);
+                    await this.chackDevicesList(this.contextKey);
                 } catch (error) {
                     this.emit('error', `Check devices list: ${error}.`);
                 };
             }).on('state', (state) => { });
-
-            this.connect();
         };
     };
 
@@ -89,12 +86,6 @@ class MelCloud extends EventEmitter {
 
             //emit connect success
             this.emit('success', `Connect to MELCloud Success.`)
-
-            if (!this.requestConfig) {
-                //start impulse generator
-                const timers = [{ name: 'checkDevicesList', sampling: this.refreshInterval }];
-                this.impulseGenerator.start(timers);
-            };
 
             const obj = {
                 accountInfo: accountInfo,
