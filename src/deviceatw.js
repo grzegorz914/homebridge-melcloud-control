@@ -42,25 +42,25 @@ class DeviceAtw extends EventEmitter {
         //function
         this.melCloud = melCloud; //function
 
-        //presets configured
-        this.presetsConfigured = [];
-        for (const preset of this.presets) {
-            const presetName = preset.name ?? false;
-            const presetDisplayType = preset.displayType ?? 0;
-            const presetNamePrefix = preset.namePrefix ?? false;
-            if (presetName && presetDisplayType > 0) {
-                const buttonServiceType = ['', Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][presetDisplayType];
-                const buttonCharacteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][presetDisplayType];
-                preset.namePrefix = presetNamePrefix;
-                preset.serviceType = buttonServiceType;
-                preset.characteristicType = buttonCharacteristicType;
-                preset.state = false;
-                this.buttonsConfigured.push(preset);
-            } else {
-                const log = presetDisplayType === 0 ? false : this.emit('message', `Preset Name: ${preset ? preset : 'Missing'}.`);
-            };
-        }
-        this.presetsConfiguredCount = this.presetsConfigured.length || 0;
+         //presets configured
+         this.presetsConfigured = [];
+         for (const preset of this.presets) {
+             const presetName = preset.name ?? false;
+             const presetDisplayType = preset.displayType ?? 0;
+             const presetNamePrefix = preset.namePrefix ?? false;
+             if (presetName && presetDisplayType > 0) {
+                 const presetyServiceType = ['', Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][presetDisplayType];
+                 const presetCharacteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][presetDisplayType];
+                 preset.namePrefix = presetNamePrefix;
+                 preset.serviceType = presetyServiceType;
+                 preset.characteristicType = presetCharacteristicType;
+                 preset.state = false;
+                 this.presetsConfigured.push(preset);
+             } else {
+                 const log = presetDisplayType === 0 ? false : this.emit('message', `Preset Name: ${preset ? preset : 'Missing'}.`);
+             };
+         }
+         this.presetsConfiguredCount = this.presetsConfigured.length || 0;
 
         //buttons configured
         this.buttonsConfigured = [];

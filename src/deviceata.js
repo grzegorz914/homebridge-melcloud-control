@@ -20,7 +20,6 @@ class DeviceAta extends EventEmitter {
         this.displayMode = device.displayMode;
         this.temperatureSensor = device.temperatureSensor || false;
         this.temperatureSensorOutdoor = device.temperatureSensorOutdoor || false;
-        this.presetsEnabled = device.presets || false;
         this.heatDryFanMode = device.heatDryFanMode || 1; //NONE, HEAT, DRY, FAN
         this.coolDryFanMode = device.coolDryFanMode || 1; //NONE, COOL, DRY, FAN
         this.autoDryFanMode = device.autoDryFanMode || 1; //NONE, AUTO, DRY, FAN
@@ -46,13 +45,13 @@ class DeviceAta extends EventEmitter {
             const presetDisplayType = preset.displayType ?? 0;
             const presetNamePrefix = preset.namePrefix ?? false;
             if (presetName && presetDisplayType > 0) {
-                const buttonServiceType = ['', Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][presetDisplayType];
-                const buttonCharacteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][presetDisplayType];
+                const presetyServiceType = ['', Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][presetDisplayType];
+                const presetCharacteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][presetDisplayType];
                 preset.namePrefix = presetNamePrefix;
-                preset.serviceType = buttonServiceType;
-                preset.characteristicType = buttonCharacteristicType;
+                preset.serviceType = presetyServiceType;
+                preset.characteristicType = presetCharacteristicType;
                 preset.state = false;
-                this.buttonsConfigured.push(preset);
+                this.presetsConfigured.push(preset);
             } else {
                 const log = presetDisplayType === 0 ? false : this.emit('message', `Preset Name: ${preset ? preset : 'Missing'}.`);
             };

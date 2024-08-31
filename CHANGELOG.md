@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - do not configure it manually, always using Config UI X
   - required Homebridge v2.0.0 and above
 
+## [3.1.2] - (31.08.2024)
+
+## Changes
+
+- fix presets configured array
+
 ## [3.1.0] - (31.08.2024)
 
 ## Changes
