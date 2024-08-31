@@ -12,8 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - v1 After update to v1 and above from v0 the devices need to be added to the Home app again and the old unresponsive remove!!! This devices will be removed from all automations and scenes!!!
 - v2 After update to v2 from v1 only RESTFull and MQTT config settings need to be updated in config.
   - v2.4 and above require upcomming homebridge v2
-- v3 After update to v3 from previous versions the plugin need to be configured using Config UI X.
+- v3 After update to v3 the plugin need to be configured using Config UI X.
   - do not configure it manually, always using Config UI X
+  - required Homebridge v2.0.0 and above
 
 ## [3.1.0] - (31.08.2024)
 
