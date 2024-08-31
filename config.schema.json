@@ -213,22 +213,25 @@
                   "id": {
                     "title": "ID",
                     "type": "integer",
-                    "required": false
+                    "required": true,
+                    "readonly": true
                   },
                   "type": {
                     "title": "Type",
                     "type": "integer",
-                    "required": false
+                    "required": true,
+                    "readonly": true
                   },
                   "typeString": {
                     "title": "Type",
                     "type": "string",
-                    "required": false
+                    "required": true,
+                    "readonly": true
                   },
                   "name": {
                     "title": "Name",
                     "type": "string",
-                    "required": false
+                    "required": true
                   },
                   "displayMode": {
                     "title": "Control",
@@ -363,13 +366,6 @@
                     "description": "Select the operating mode for Auto, if this mode is not supported, it will be disabled.",
                     "required": true
                   },
-                  "presets": {
-                    "title": "Presets",
-                    "type": "boolean",
-                    "default": false,
-                    "description": "This enable extra buttons for configured presets and display it in HomeKit app.",
-                    "required": false
-                  },
                   "temperatureSensor": {
                     "title": "Room",
                     "type": "boolean",
@@ -383,6 +379,81 @@
                     "default": false,
                     "description": "This enable extra outdoor temperature sensor to use with automations in HomeKit app.",
                     "required": false
+                  },
+                  "presets": {
+                    "title": "Presets",
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "title": "ID",
+                          "type": "integer",
+                          "required": true
+                        },
+                        "name": {
+                          "title": "Name",
+                          "type": "string",
+                          "placeholder": "Preset name",
+                          "description": "Your own name displayed in Homebridge/HomeKit app.",
+                          "required": true
+                        },
+                        "displayType": {
+                          "title": "Type",
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 5,
+                          "default": 0,
+                          "oneOf": [
+                            {
+                              "title": "None/Disabled",
+                              "enum": [
+                                0
+                              ]
+                            },
+                            {
+                              "title": "Outlet",
+                              "enum": [
+                                1
+                              ]
+                            },
+                            {
+                              "title": "Switch",
+                              "enum": [
+                                2
+                              ]
+                            },
+                            {
+                              "title": "Motion Sensor",
+                              "enum": [
+                                3
+                              ]
+                            },
+                            {
+                              "title": "Occupancy Sensor",
+                              "enum": [
+                                4
+                              ]
+                            },
+                            {
+                              "title": "Contact Sensor",
+                              "enum": [
+                                5
+                              ]
+                            }
+                          ],
+                          "description": "Select the characteristic type to be displayed in HomeKit app.",
+                          "required": true
+                        },
+                        "namePrefix": {
+                          "title": "Prefix",
+                          "type": "boolean",
+                          "default": false,
+                          "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
+                          "required": false
+                        }
+                      }
+                    }
                   },
                   "buttonsSensors": {
                     "title": "Button / Sensor",
@@ -677,7 +748,7 @@
                 }
               },
               "condition": {
-                "functionBody": "const devices = model.accounts[arrayIndices]?.ataDevices || []; return devices.length > 0 && devices.every(device => device.id != null && device.id !== '');"
+                "functionBody": "const devices = model.accounts[arrayIndices]?.ataDevices || []; return devices.length > 0 && devices.every(device => device.id != null);"
               }
             },
             "atwDevices": {
@@ -689,22 +760,25 @@
                   "id": {
                     "title": "Mode",
                     "type": "integer",
-                    "required": false
+                    "required": true,
+                    "readonly": true
                   },
                   "type": {
                     "title": "Type",
                     "type": "integer",
-                    "required": false
+                    "required": true,
+                    "readonly": true
                   },
                   "typeString": {
                     "title": "Type",
                     "type": "string",
-                    "required": false
+                    "required": true,
+                    "readonly": true
                   },
                   "name": {
                     "title": "Name",
                     "type": "string",
-                    "required": false
+                    "required": true
                   },
                   "displayMode": {
                     "title": "Control",
@@ -800,10 +874,78 @@
                   },
                   "presets": {
                     "title": "Presets",
-                    "type": "boolean",
-                    "default": false,
-                    "description": "This enable extra buttons for configured presets and display it in HomeKit app.",
-                    "required": false
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "title": "ID",
+                          "type": "integer",
+                          "required": true
+                        },
+                        "name": {
+                          "title": "Name",
+                          "type": "string",
+                          "placeholder": "Preset name",
+                          "description": "Your own name displayed in Homebridge/HomeKit app.",
+                          "required": true
+                        },
+                        "displayType": {
+                          "title": "Type",
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 5,
+                          "default": 0,
+                          "oneOf": [
+                            {
+                              "title": "None/Disabled",
+                              "enum": [
+                                0
+                              ]
+                            },
+                            {
+                              "title": "Outlet",
+                              "enum": [
+                                1
+                              ]
+                            },
+                            {
+                              "title": "Switch",
+                              "enum": [
+                                2
+                              ]
+                            },
+                            {
+                              "title": "Motion Sensor",
+                              "enum": [
+                                3
+                              ]
+                            },
+                            {
+                              "title": "Occupancy Sensor",
+                              "enum": [
+                                4
+                              ]
+                            },
+                            {
+                              "title": "Contact Sensor",
+                              "enum": [
+                                5
+                              ]
+                            }
+                          ],
+                          "description": "Select the characteristic type to be displayed in HomeKit app.",
+                          "required": true
+                        },
+                        "namePrefix": {
+                          "title": "Prefix",
+                          "type": "boolean",
+                          "default": false,
+                          "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
+                          "required": false
+                        }
+                      }
+                    }
                   },
                   "buttonsSensors": {
                     "title": "Button",
@@ -1020,7 +1162,7 @@
                 }
               },
               "condition": {
-                "functionBody": "const devices = model.accounts[arrayIndices]?.atwDevices || []; return devices.length > 0 && devices.every(device => device.id != null && device.id !== '');"
+                "functionBody": "const devices = model.accounts[arrayIndices]?.atwDevices || []; return devices.length > 0 && devices.every(device => device.id != null);"
               }
             },
             "ervDevices": {
@@ -1032,29 +1174,32 @@
                   "id": {
                     "title": "Mode",
                     "type": "integer",
-                    "required": false
+                    "required": true,
+                    "readonly": true
                   },
                   "type": {
                     "title": "Type",
                     "type": "integer",
-                    "required": false
+                    "required": true,
+                    "readonly": true
                   },
                   "typeString": {
                     "title": "Type",
                     "type": "string",
-                    "required": false
+                    "required": true,
+                    "readonly": true
                   },
                   "name": {
                     "title": "Name",
                     "type": "string",
-                    "required": false
+                    "required": true
                   },
                   "displayMode": {
                     "title": "Control",
                     "type": "integer",
                     "minimum": 0,
                     "maximum": 2,
-                    "default": 0,
+                    "default": 1,
                     "oneOf": [
                       {
                         "title": "None/Disabled",
@@ -1101,13 +1246,82 @@
                   },
                   "presets": {
                     "title": "Presets",
-                    "type": "boolean",
-                    "default": false,
-                    "description": "This enable extra buttons for configured presets and display it in HomeKit app.",
-                    "required": false
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "title": "ID",
+                          "type": "integer",
+                          "required": true,
+                          "readonly": true
+                        },
+                        "name": {
+                          "title": "Name",
+                          "type": "string",
+                          "placeholder": "Preset name",
+                          "description": "Your own name displayed in Homebridge/HomeKit app.",
+                          "required": true
+                        },
+                        "displayType": {
+                          "title": "Type",
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 5,
+                          "default": 0,
+                          "oneOf": [
+                            {
+                              "title": "None/Disabled",
+                              "enum": [
+                                0
+                              ]
+                            },
+                            {
+                              "title": "Outlet",
+                              "enum": [
+                                1
+                              ]
+                            },
+                            {
+                              "title": "Switch",
+                              "enum": [
+                                2
+                              ]
+                            },
+                            {
+                              "title": "Motion Sensor",
+                              "enum": [
+                                3
+                              ]
+                            },
+                            {
+                              "title": "Occupancy Sensor",
+                              "enum": [
+                                4
+                              ]
+                            },
+                            {
+                              "title": "Contact Sensor",
+                              "enum": [
+                                5
+                              ]
+                            }
+                          ],
+                          "description": "Select the characteristic type to be displayed in HomeKit app.",
+                          "required": true
+                        },
+                        "namePrefix": {
+                          "title": "Prefix",
+                          "type": "boolean",
+                          "default": false,
+                          "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
+                          "required": false
+                        }
+                      }
+                    }
                   },
                   "buttonsSensors": {
-                    "title": "Button",
+                    "title": "Buttons",
                     "type": "array",
                     "items": {
                       "type": "object",
@@ -1273,7 +1487,7 @@
                 }
               },
               "condition": {
-                "functionBody": "const devices = model.accounts[arrayIndices]?.ervDevices || []; return devices.length > 0 && devices.every(device => device.id != null && device.id !== '');"
+                "functionBody": "const devices = model.accounts[arrayIndices]?.ervDevices || []; return devices.length > 0 && devices.every(device => device.id != null);"
               }
             },
             "refreshInterval": {
@@ -1484,7 +1698,7 @@
                     {
                       "key": "accounts[].ataDevices[]",
                       "type": "section",
-                      "title": "Configuration",
+                      "title": "Settings",
                       "expandable": true,
                       "expanded": false,
                       "items": [
@@ -1492,8 +1706,30 @@
                         "accounts[].ataDevices[].displayMode",
                         "accounts[].ataDevices[].heatDryFanMode",
                         "accounts[].ataDevices[].coolDryFanMode",
-                        "accounts[].ataDevices[].autoDryFanMode",
-                        "accounts[].ataDevices[].presets"
+                        "accounts[].ataDevices[].autoDryFanMode"
+                      ]
+                    },
+                    {
+                      "key": "accounts[].ataDevices[]",
+                      "type": "section",
+                      "title": "Presets",
+                      "expandable": true,
+                      "expanded": false,
+                      "items": [
+                        {
+                          "key": "accounts[].ataDevices[].presets",
+                          "type": "tabarray",
+                          "title": "{{ value.name }}",
+                          "items": [
+                            {
+                              "key": "accounts[].ataDevices[].presets[].id",
+                              "readonly": true
+                            },
+                            "accounts[].ataDevices[].presets[].name",
+                            "accounts[].ataDevices[].presets[].displayType",
+                            "accounts[].ataDevices[].presets[].namePrefix"
+                          ]
+                        }
                       ]
                     },
                     {
@@ -1551,13 +1787,35 @@
                     {
                       "key": "accounts[].atwDevices[]",
                       "type": "section",
-                      "title": "Configuration",
+                      "title": "Settings",
                       "expandable": true,
                       "expanded": false,
                       "items": [
                         "accounts[].atwDevices[].name",
-                        "accounts[].atwDevices[].displayMode",
-                        "accounts[].atwDevices[].presets"
+                        "accounts[].atwDevices[].displayMode"
+                      ]
+                    },
+                    {
+                      "key": "accounts[].atwDevices[]",
+                      "type": "section",
+                      "title": "Presets",
+                      "expandable": true,
+                      "expanded": false,
+                      "items": [
+                        {
+                          "key": "accounts[].atwDevices[].presets",
+                          "type": "tabarray",
+                          "title": "{{ value.name }}",
+                          "items": [
+                            {
+                              "key": "accounts[].atwDevices[].presets[].id",
+                              "readonly": true
+                            },
+                            "accounts[].atwDevices[].presets[].name",
+                            "accounts[].atwDevices[].presets[].displayType",
+                            "accounts[].atwDevices[].presets[].namePrefix"
+                          ]
+                        }
                       ]
                     },
                     {
@@ -1622,13 +1880,35 @@
                     {
                       "key": "accounts[].ervDevices[]",
                       "type": "section",
-                      "title": "Configuration",
+                      "title": "Settings",
                       "expandable": true,
                       "expanded": false,
                       "items": [
                         "accounts[].ervDevices[].name",
-                        "accounts[].ervDevices[].displayMode",
-                        "accounts[].ervDevices[].presets"
+                        "accounts[].ervDevices[].displayMode"
+                      ]
+                    },
+                    {
+                      "key": "accounts[].ervDevices[]",
+                      "type": "section",
+                      "title": "Presets",
+                      "expandable": true,
+                      "expanded": false,
+                      "items": [
+                        {
+                          "key": "accounts[].ervDevices[].presets",
+                          "type": "tabarray",
+                          "title": "{{ value.name }}",
+                          "items": [
+                            {
+                              "key": "accounts[].ervDevices[].presets[].id",
+                              "readonly": true
+                            },
+                            "accounts[].ervDevices[].presets[].name",
+                            "accounts[].ervDevices[].presets[].displayType",
+                            "accounts[].ervDevices[].presets[].namePrefix"
+                          ]
+                        }
                       ]
                     },
                     {

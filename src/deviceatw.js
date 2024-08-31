@@ -27,7 +27,7 @@ class DeviceAtw extends EventEmitter {
         this.temperatureSensorReturnWaterTank = device.temperatureSensorReturnWaterTank || false;
         this.temperatureSensorFlowZone2 = device.temperatureSensorFlowZone2 || false;
         this.temperatureSensorReturnZone2 = device.temperatureSensorReturnZone2 || false;
-        this.presetsEnabled = device.presets || false;
+        this.presets = device.presets || [];
         this.buttons = device.buttonsSensors || [];
         this.disableLogInfo = account.disableLogInfo || false;
         this.disableLogDeviceInfo = account.disableLogDeviceInfo || false;
@@ -41,6 +41,26 @@ class DeviceAtw extends EventEmitter {
 
         //function
         this.melCloud = melCloud; //function
+
+        //presets configured
+        this.presetsConfigured = [];
+        for (const preset of this.presets) {
+            const presetName = preset.name ?? false;
+            const presetDisplayType = preset.displayType ?? 0;
+            const presetNamePrefix = preset.namePrefix ?? false;
+            if (presetName && presetDisplayType > 0) {
+                const buttonServiceType = ['', Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][presetDisplayType];
+                const buttonCharacteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][presetDisplayType];
+                preset.namePrefix = presetNamePrefix;
+                preset.serviceType = buttonServiceType;
+                preset.characteristicType = buttonCharacteristicType;
+                preset.state = false;
+                this.buttonsConfigured.push(preset);
+            } else {
+                const log = presetDisplayType === 0 ? false : this.emit('message', `Preset Name: ${preset ? preset : 'Missing'}.`);
+            };
+        }
+        this.presetsConfiguredCount = this.presetsConfigured.length || 0;
 
         //buttons configured
         this.buttonsConfigured = [];
@@ -194,6 +214,9 @@ class DeviceAtw extends EventEmitter {
                 const returnTemperatureZone2 = deviceData.Device.ReturnTemperatureZone2;
                 const returnTemperatureWaterTank = deviceData.Device.ReturnTemperatureBoiler;
 
+                //presets
+                const presetsOnServer = deviceData.Presets ?? [];
+
                 //zones
                 const hotWater = hasHotWaterTank ? 1 : 0;
                 const zone2 = hasZone2 ? 1 : 0;
@@ -233,10 +256,8 @@ class DeviceAtw extends EventEmitter {
                 const power = deviceState.Power;
                 const offline = deviceState.Offline;
 
-                //presets
-                const presets = this.presetsEnabled ? deviceData.Presets : [];
-
                 //accessory
+                this.accessory.presetsOnServer = presetsOnServer;
                 this.accessory.power = power;
                 this.accessory.offline = offline;
                 this.accessory.unitStatus = unitStatus;
@@ -247,7 +268,6 @@ class DeviceAtw extends EventEmitter {
                 this.accessory.temperatureIncrement = temperatureIncrement;
                 this.accessory.hasHotWaterTank = hasHotWaterTank;
                 this.accessory.hasZone2 = hasZone2;
-                this.accessory.presets = presets;
 
                 //default values
                 let name = 'Heat Pump'
@@ -554,6 +574,34 @@ class DeviceAtw extends EventEmitter {
                     };
                 };
 
+                //update presets state
+                if (this.presetsConfigured.length > 0) {
+                    for (let i = 0; i < this.presetsConfigured.length; i++) {
+                        const preset = this.presetsConfigured[i];
+                        const index = presetsOnServer.findIndex(p => p.ID === preset.Id);
+                        const presetData = presetsOnServer[index];
+
+                        preset.state = presetData ? (presetData.Power === power
+                            && presetData.EcoHotWater === ecoHotWater
+                            && presetData.OperationModeZone1 === operationModeZone1
+                            && presetData.OperationModeZone2 === operationModeZone2
+                            && presetData.SetTankWaterTemperature === setTankWaterTemperature
+                            && presetData.SetTemperatureZone1 === setTemperatureZone1
+                            && presetData.SetTemperatureZone2 === setTemperatureZone2
+                            && presetData.ForcedHotWaterMode === forcedHotWaterMode
+                            && presetData.SetHeatFlowTemperatureZone1 === setHeatFlowTemperatureZone1
+                            && presetData.SetHeatFlowTemperatureZone2 === setHeatFlowTemperatureZone2
+                            && presetData.SetCoolFlowTemperatureZone1 === setCoolFlowTemperatureZone1
+                            && presetData.SetCoolFlowTemperatureZone2 === setCoolFlowTemperatureZone2) : false;
+
+                        if (this.presetsServices) {
+                            const characteristicType = preset.characteristicType;
+                            this.presetsServices[i]
+                                .updateCharacteristic(characteristicType, preset.state)
+                        };
+                    };
+                };
+
                 //update buttons state
                 if (this.buttonsConfiguredCount > 0) {
                     for (let i = 0; i < this.buttonsConfiguredCount; i++) {
@@ -639,33 +687,6 @@ class DeviceAtw extends EventEmitter {
                             const characteristicType = button.characteristicType;
                             this.buttonsServices[i]
                                 .updateCharacteristic(characteristicType, button.state)
-                        };
-                    };
-                };
-
-                //update presets state
-                if (presets.length > 0) {
-                    this.presetsStates = [];
-
-                    for (let i = 0; i < presets.length; i++) {
-                        const preset = presets[i];
-                        const state = preset.Power === power
-                            && preset.EcoHotWater === ecoHotWater
-                            && preset.OperationModeZone1 === operationModeZone1
-                            && preset.OperationModeZone2 === operationModeZone2
-                            && preset.SetTankWaterTemperature === setTankWaterTemperature
-                            && preset.SetTemperatureZone1 === setTemperatureZone1
-                            && preset.SetTemperatureZone2 === setTemperatureZone2
-                            && preset.ForcedHotWaterMode === forcedHotWaterMode
-                            && preset.SetHeatFlowTemperatureZone1 === setHeatFlowTemperatureZone1
-                            && preset.SetHeatFlowTemperatureZone2 === setHeatFlowTemperatureZone2
-                            && preset.SetCoolFlowTemperatureZone1 === setCoolFlowTemperatureZone1
-                            && preset.SetCoolFlowTemperatureZone2 === setCoolFlowTemperatureZone2;
-                        this.presetsStates.push(state);
-
-                        if (this.presetsServices) {
-                            this.presetsServices[i]
-                                .updateCharacteristic(Characteristic.On, state)
                         };
                     };
                 };
@@ -813,6 +834,7 @@ class DeviceAtw extends EventEmitter {
 
             //melcloud services
             const zonesCount = this.zonesCount;
+            const presetsOnServer = this.accessory.presetsOnServer;
             const temperatureSensor = this.temperatureSensor;
             const temperatureSensorFlow = this.temperatureSensorFlow;
             const temperatureSensorReturn = this.temperatureSensorReturn;
@@ -822,9 +844,10 @@ class DeviceAtw extends EventEmitter {
             const temperatureSensorReturnWaterTank = this.temperatureSensorReturnWaterTank;
             const temperatureSensorFlowZone2 = this.temperatureSensorFlowZone2;
             const temperatureSensorReturnZone2 = this.temperatureSensorReturnZone2;
+            const presetsConfigured = this.presetsConfigured;
+            const presetsConfiguredCount = this.presetsConfiguredCount;
             const buttonsConfigured = this.buttonsConfigured;
             const buttonsConfiguredCount = this.buttonsConfiguredCount;
-            const presets = this.accessory.presets;
             const displayMode = this.displayMode;
             const caseHotWater = this.caseHotWater;
             const caseZone2 = this.caseZone2;
@@ -1506,9 +1529,80 @@ class DeviceAtw extends EventEmitter {
                 };
             };
 
+            //presets services
+            if (presetsConfiguredCount > 0) {
+                const debug = this.enableDebugMode ? this.emit('debug', `Prepare presets services`) : false;
+                this.presetsServices = [];
+                const previousPresets = [];
+
+                for (let i = 0; i < presetsConfiguredCount; i++) {
+                    const preset = presetsConfigured[i];
+                    const index = presetsOnServer.findIndex(p => p.ID === preset.Id);
+                    const presetData = presetsOnServer[index];
+
+                    //get preset name
+                    const presetName = preset.name;
+
+                    //get preset display type
+                    const displayType = button.displayType;
+
+                    //get preset name prefix
+                    const presetNamePrefix = preset.namePrefix;
+
+                    const serviceName = presetNamePrefix ? `${accessoryName} ${presetName}` : presetName;
+                    const serviceType = preset.serviceType;
+                    const characteristicType = preset.characteristicType;
+                    const presetService = new serviceType(serviceName, `Preset ${deviceId} ${i}`);
+                    presetService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                    presetService.setCharacteristic(Characteristic.ConfiguredName, serviceName);
+                    presetService.getCharacteristic(characteristicType)
+                        .onGet(async () => {
+                            const state = this.presetsStates[i];
+                            return state;
+                        })
+                        .onSet(async (state) => {
+                            if (displayType > 2) {
+                                return;
+                            };
+
+                            try {
+                                switch (state) {
+                                    case true:
+                                        previousPresets[i] = deviceState;
+                                        deviceState.Power = presetData.Power;
+                                        deviceState.EcoHotWater = presetData.EcoHotWater;
+                                        deviceState.OperationModeZone1 = presetData.OperationModeZone1;
+                                        deviceState.OperationModeZone2 = presetData.OperationModeZone2;
+                                        deviceState.SetTankWaterTemperature = presetData.SetTankWaterTemperature;
+                                        deviceState.SetTemperatureZone1 = presetData.SetTemperatureZone1;
+                                        deviceState.SetTemperatureZone2 = presetData.SetTemperatureZone2;
+                                        deviceState.ForcedHotWaterMode = presetData.ForcedHotWaterMode;
+                                        deviceState.SetHeatFlowTemperatureZone1 = presetData.SetHeatFlowTemperatureZone1;
+                                        deviceState.SetHeatFlowTemperatureZone2 = presetData.SetHeatFlowTemperatureZone2;
+                                        deviceState.SetCoolFlowTemperatureZone1 = presetData.SetCoolFlowTemperatureZone1;
+                                        deviceState.SetCoolFlowTemperatureZone2 = presetData.SetCoolFlowTemperatureZone2;
+                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power;
+                                        break;
+                                    case false:
+                                        deviceState = previousPresets[i];
+                                        break;
+                                };
+
+                                await this.melCloudAtw.send(deviceState);
+                                const info = this.disableLogInfo ? false : this.emit('message', `Set: ${presetName}`);
+                            } catch (error) {
+                                this.emit('warn', `Set preset error: ${error}`);
+                            };
+                        });
+                    previousPresets.push(deviceState);
+                    this.presetsServices.push(presetService);
+                    accessory.addService(presetService);
+                };
+            };
+
             //buttons services
             if (buttonsConfiguredCount > 0) {
-                const debug = this.enableDebugMode ? this.emit('debug', `Prepare buttons service`) : false;
+                const debug = this.enableDebugMode ? this.emit('debug', `Prepare buttons services`) : false;
                 this.buttonsServices = [];
 
                 for (let i = 0; i < buttonsConfiguredCount; i++) {
@@ -1526,15 +1620,13 @@ class DeviceAtw extends EventEmitter {
                     //get button name prefix
                     const buttonNamePrefix = button.namePrefix;
 
-                    const buttonServiceName = buttonNamePrefix ? `${accessoryName} ${buttonName}` : buttonName;
-                    const buttonServiceType = button.serviceType;
-                    const buttomCharacteristicType = button.characteristicType;
-                    const buttonService = new buttonServiceType(buttonServiceName, `Button ${deviceId} ${i}`);
+                    const serviceName = buttonNamePrefix ? `${accessoryName} ${buttonName}` : buttonName;
+                    const serviceType = button.serviceType;
+                    const characteristicType = button.characteristicType;
+                    const buttonService = new serviceType(serviceName, `Button ${deviceId} ${i}`);
                     buttonService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                    buttonService.setCharacteristic(Characteristic.ConfiguredName, buttonServiceName);
-                    buttonService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                    buttonService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${buttonName}`);
-                    buttonService.getCharacteristic(buttomCharacteristicType)
+                    buttonService.setCharacteristic(Characteristic.ConfiguredName, serviceName);
+                    buttonService.getCharacteristic(characteristicType)
                         .onGet(async () => {
                             const state = button.state;
                             return state;
@@ -1665,60 +1757,6 @@ class DeviceAtw extends EventEmitter {
                         });
                     this.buttonsServices.push(buttonService);
                     accessory.addService(buttonService)
-                };
-            };
-
-            //presets services
-            if (presets.length > 0) {
-                const debug = this.enableDebugMode ? this.emit('debug', `Prepare presets service`) : false;
-                this.presetsServices = [];
-                const previousPresets = [];
-
-                for (let i = 0; i < presets.length; i++) {
-                    const preset = presets[i];
-                    const presetName = preset.NumberDescription;
-
-                    const presetService = new Service.Outlet(`${accessoryName} ${presetName}`, `Preset ${deviceId} ${i}`);
-                    presetService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                    presetService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${presetName}`);
-                    presetService.getCharacteristic(Characteristic.On)
-                        .onGet(async () => {
-                            const state = this.presetsStates[i];
-                            return state;
-                        })
-                        .onSet(async (state) => {
-                            try {
-                                switch (state) {
-                                    case true:
-                                        previousPresets[i] = deviceState;
-                                        deviceState.Power = preset.Power;
-                                        deviceState.EcoHotWater = preset.EcoHotWater;
-                                        deviceState.OperationModeZone1 = preset.OperationModeZone1;
-                                        deviceState.OperationModeZone2 = preset.OperationModeZone2;
-                                        deviceState.SetTankWaterTemperature = preset.SetTankWaterTemperature;
-                                        deviceState.SetTemperatureZone1 = preset.SetTemperatureZone1;
-                                        deviceState.SetTemperatureZone2 = preset.SetTemperatureZone2;
-                                        deviceState.ForcedHotWaterMode = preset.ForcedHotWaterMode;
-                                        deviceState.SetHeatFlowTemperatureZone1 = preset.SetHeatFlowTemperatureZone1;
-                                        deviceState.SetHeatFlowTemperatureZone2 = preset.SetHeatFlowTemperatureZone2;
-                                        deviceState.SetCoolFlowTemperatureZone1 = preset.SetCoolFlowTemperatureZone1;
-                                        deviceState.SetCoolFlowTemperatureZone2 = preset.SetCoolFlowTemperatureZone2;
-                                        deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power;
-                                        break;
-                                    case false:
-                                        deviceState = previousPresets[i];
-                                        break;
-                                };
-
-                                await this.melCloudAtw.send(deviceState);
-                                const info = this.disableLogInfo ? false : this.emit('message', `Set: ${presetName}`);
-                            } catch (error) {
-                                this.emit('warn', `Set preset error: ${error}`);
-                            };
-                        });
-                    previousPresets.push(deviceState);
-                    this.presetsServices.push(presetService);
-                    accessory.addService(presetService);
                 };
             };
 

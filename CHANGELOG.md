@@ -15,6 +15,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - v3 After update to v3 from previous versions the plugin need to be configured using Config UI X.
   - do not configure it manually, always using Config UI X
 
+## [3.1.0] - (31.08.2024)
+
+## Changes
+
+- improvements in plugin config UI
+- added possibility indyvidual presets control
+- config schema update
+- bump dependencies
+- cleanup  
+
 ## [3.0.7] - (30.08.2024)
 
 ## Changes
@@ -29,7 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - added homebridge UI server
 - whole new concept get all devices from melcloud usin config UI X
-- added indyvidual configuration of every device
+- added individual configuration of every device
 - config schema updated
 - cleanup
 

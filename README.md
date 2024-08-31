@@ -185,7 +185,10 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ataDevices.autoDryFanMode` | Here select the operatiing mode for `Auto`, if this mode is not supported, it will be disabled.. |
 | `ataDevices.temperatureSensor` | This enable extra `Room` temperature sensors to use with automations in HomeKit app. |
 | `ataDevices.temperatureSensorOutdoor` | This enable extra `Outdoor` temperature sensors to use with automations in HomeKit app. |
-| `ataDevices.presets` | This enable extra buttons for configured presets and display it in HomeKit app. |
+| `ataDevices.presets` | Array of ATA device Presets created automatically after login to MELCloud from plugin config UI. |
+| `ataDevices.presets.id` | Read only data, do not change it. |
+| `ataDevices.presets.name` | Here You can schange the `Preset Name` which is exposed to the `Homebridge/HomeKit`. |
+| `ataDevices.presets.displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Outlet`, `2 - Switch`, `3 - Motion Sensor`, `4 - Occupancy Sensor`, `5 - Contact Sensor`. |
 | `buttonsSensors` | Array of buttons sensors. |
 | `buttonsSensors.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
 | `buttonsSensors.mode` | Here select button mode, VH - Vane Horizontal, VV - Vane Horizontal. |
@@ -206,7 +209,10 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `atwDevices.temperatureSensorReturnWaterTank` | This enable extra `Return Water Tank` temperature sensors to use with automations in HomeKit app. |
 | `atwDevices.temperatureSensorFlowZone2` | This enable extra `Flow Zone 2` temperature sensors to use with automations in HomeKit app. |
 | `atwDevices.temperatureSensorReturnZone2` | This enable extra `Return Zone 2` temperature sensors to use with automations in HomeKit app. |
-| `atwDevices.presets` | This enable extra buttons for configured presets and display it in HomeKit app. |
+| `atwDevices.presets` | Array of ATA device Presets created automatically after login to MELCloud from plugin config UI. |
+| `atwDevices.presets.id` | Read only data, do not change it. |
+| `atwDevices.presets.name` | Here You can schange the `Preset Name` which is exposed to the `Homebridge/HomeKit`. |
+| `atwDevices.presets.displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Outlet`, `2 - Switch`, `3 - Motion Sensor`, `4 - Occupancy Sensor`, `5 - Contact Sensor`. |
 | `buttonsSensors` | Array of buttons sensors. |
 | `buttonsSensors.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
 | `buttonsSensors.mode` | Here select button mode. |
@@ -221,7 +227,10 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ervDevices.temperatureSensor` | This enable extra `Room` temperature sensors to use with automations in HomeKit app. |
 | `ervDevices.temperatureSensorOutdoor` | This enable extra `Outdoor` temperature sensors to use with automations in HomeKit app. |
 | `ervDevices.temperatureSensorSupply` | This enable extra `Supply` temperature sensors to use with automations in HomeKit app. |
-| `ervDevices.presets` | This enable extra buttons for configured presets and display it in HomeKit app. |
+| `ervDevices.presets` | Array of ATA device Presets created automatically after login to MELCloud from plugin config UI. |
+| `ervDevices.presets.id` | Read only data, do not change it. |
+| `ervDevices.presets.name` | Here You can schange the `Preset Name` which is exposed to the `Homebridge/HomeKit`. |
+| `ervDevices.presets.displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Outlet`, `2 - Switch`, `3 - Motion Sensor`, `4 - Occupancy Sensor`, `5 - Contact Sensor`. |
 | `buttonsSensors` | Array of buttons sensors. |
 | `buttonsSensors.name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
 | `buttonsSensors.mode` | Here select button mode. |

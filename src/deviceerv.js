@@ -21,7 +21,7 @@ class DeviceErv extends EventEmitter {
         this.temperatureSensor = device.temperatureSensor || false;
         this.temperatureSensorOutdoor = device.temperatureSensorOutdoor || false;
         this.temperatureSensorSupply = device.temperatureSensorSupply || false;
-        this.presetsEnabled = device.presets || false;
+        this.presets = device.presets || [];
         this.buttons = device.buttonsSensors || [];
         this.disableLogInfo = account.disableLogInfo || false;
         this.disableLogDeviceInfo = account.disableLogDeviceInfo || false;
@@ -35,6 +35,26 @@ class DeviceErv extends EventEmitter {
 
         //function
         this.melCloud = melCloud; //function
+
+        //presets configured
+        this.presetsConfigured = [];
+        for (const preset of this.presets) {
+            const presetName = preset.name ?? false;
+            const presetDisplayType = preset.displayType ?? 0;
+            const presetNamePrefix = preset.namePrefix ?? false;
+            if (presetName && presetDisplayType > 0) {
+                const buttonServiceType = ['', Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][presetDisplayType];
+                const buttonCharacteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][presetDisplayType];
+                preset.namePrefix = presetNamePrefix;
+                preset.serviceType = buttonServiceType;
+                preset.characteristicType = buttonCharacteristicType;
+                preset.state = false;
+                this.buttonsConfigured.push(preset);
+            } else {
+                const log = presetDisplayType === 0 ? false : this.emit('message', `Preset Name: ${preset ? preset : 'Missing'}.`);
+            };
+        }
+        this.presetsConfiguredCount = this.presetsConfigured.length || 0;
 
         //buttons configured
         this.buttonsConfigured = [];
@@ -191,6 +211,9 @@ class DeviceErv extends EventEmitter {
                 const numberOfFanSpeeds = deviceData.Device.NumberOfFanSpeeds ?? 0;
                 const temperatureIncrement = deviceData.Device.TemperatureIncrement ?? 1;
 
+                //presets
+                const presetsOnServer = deviceData.Presets ?? [];
+
                 //device state
                 const roomTemperature = deviceState.RoomTemperature;
                 const supplyTemperature = deviceState.SupplyTemperature;
@@ -207,13 +230,11 @@ class DeviceErv extends EventEmitter {
                 const offline = deviceState.Offline;
                 const temperatureUnit = CONSTANTS.TemperatureDisplayUnits[useFahrenheit];
 
-                //presets
-                const presets = this.presetsEnabled ? deviceData.Presets : [];
-
                 //set temperature
                 const targetTemperature = hasCoolOperationMode || hasHeatOperationMode ? setTemperature : 20;
 
                 //accessory
+                this.accessory.presetsOnServer = presetsOnServer;
                 this.accessory.power = power;
                 this.accessory.offline = offline;
                 this.accessory.roomTemperature = roomTemperature;
@@ -245,7 +266,6 @@ class DeviceErv extends EventEmitter {
                 this.accessory.coreMaintenanceRequired = coreMaintenanceRequired;
                 this.accessory.filterMaintenanceRequired = filterMaintenanceRequired;
                 this.accessory.actualVentilationMode = actualVentilationMode;
-                this.accessory.accessory.presets = presets;
                 this.accessory.operationModeSetPropsMinValue = 0;
                 this.accessory.operationModeSetPropsMaxValue = 3;
                 this.accessory.operationModeSetPropsValidValues = [0];
@@ -418,6 +438,27 @@ class DeviceErv extends EventEmitter {
                         .updateCharacteristic(Characteristic.PM2_5Density, pM25Level)
                 }
 
+                //update presets state
+                if (this.presetsConfigured.length > 0) {
+                    for (let i = 0; i < this.presetsConfigured.length; i++) {
+                        const preset = this.presetsConfigured[i];
+                        const index = presetsOnServer.findIndex(p => p.ID === preset.Id);
+                        const presetData = presetsOnServer[index];
+
+                        preset.state = presetData ? (presetData.Power === power
+                            && presetData.SetTemperature === targetTemperature
+                            && presetData.OperationMode === operationMode
+                            && presetData.VentilationMode === ventilationMode
+                            && presetData.FanSpeed === setFanSpeed) : false;
+
+                        if (this.presetsServices) {
+                            const characteristicType = preset.characteristicType;
+                            this.presetsServices[i]
+                                .updateCharacteristic(characteristicType, preset.state)
+                        };
+                    };
+                };
+
                 //update buttons state
                 if (this.buttonsConfiguredCount > 0) {
                     for (let i = 0; i < this.buttonsConfiguredCount; i++) {
@@ -476,26 +517,6 @@ class DeviceErv extends EventEmitter {
                             const characteristicType = button.characteristicType;
                             this.buttonsServices[i]
                                 .updateCharacteristic(characteristicType, button.state)
-                        };
-                    };
-                };
-
-                //update presets state
-                if (presets.length > 0) {
-                    this.presetsStates = [];
-
-                    for (let i = 0; i < presets.length; i++) {
-                        const preset = presets[i];
-                        const state = preset.Power === power
-                            && preset.SetTemperature === targetTemperature
-                            && preset.OperationMode === operationMode
-                            && preset.VentilationMode === ventilationMode
-                            && preset.FanSpeed === setFanSpeed;
-                        this.presetsStates.push(state);
-
-                        if (this.presetsServices) {
-                            this.presetsServices[i]
-                                .updateCharacteristic(Characteristic.On, state)
                         };
                     };
                 };
@@ -634,13 +655,15 @@ class DeviceErv extends EventEmitter {
                 .setCharacteristic(Characteristic.FirmwareRevision, this.firmwareRevision);
 
             //melcloud services
+            const presetsOnServer = this.accessory.presetsOnServer;
             const displayMode = this.displayMode;
             const temperatureSensor = this.temperatureSensor;
             const temperatureSensorOutdoor = this.temperatureSensorOutdoor;
             const temperatureSensorSupply = this.temperatureSensorSupply;
+            const presetsConfigured = this.presetsConfigured;
+            const presetsConfiguredCount = this.presetsConfiguredCount;
             const buttonsConfigured = this.buttonsConfigured;
             const buttonsConfiguredCount = this.buttonsConfiguredCount;
-            const presets = this.accessory.presets;
             const hasCoolOperationMode = this.accessory.hasCoolOperationMode;
             const hasHeatOperationMode = this.accessory.hasHeatOperationMode;
             const hasCO2Sensor = this.accessory.hasCO2Sensor;
@@ -1055,9 +1078,73 @@ class DeviceErv extends EventEmitter {
                 accessory.addService(this.airQualitySensorService);
             }
 
+            //presets services
+            if (presetsConfiguredCount > 0) {
+                const debug = this.enableDebugMode ? this.emit('debug', `Prepare presets services`) : false;
+                this.presetsServices = [];
+                const previousPresets = [];
+
+                for (let i = 0; i < presetsConfiguredCount; i++) {
+                    const preset = presetsConfigured[i];
+                    const index = presetsOnServer.findIndex(p => p.ID === preset.Id);
+                    const presetData = presetsOnServer[index]
+
+                    //get preset name
+                    const presetName = preset.name;
+
+                    //get preset display type
+                    const displayType = button.displayType;
+
+                    //get preset name prefix
+                    const presetNamePrefix = preset.namePrefix;
+
+                    const serviceName = presetNamePrefix ? `${accessoryName} ${presetName}` : presetName;
+                    const serviceType = preset.serviceType;
+                    const characteristicType = preset.characteristicType;
+                    const presetService = new serviceType(serviceName, `Preset ${deviceId} ${i}`);
+                    presetService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                    presetService.setCharacteristic(Characteristic.ConfiguredName, serviceName);
+                    presetService.getCharacteristic(characteristicType)
+                        .onGet(async () => {
+                            const state = this.presetsStates[i];
+                            return state;
+                        })
+                        .onSet(async (state) => {
+                            if (displayType > 2) {
+                                return;
+                            };
+
+                            try {
+                                switch (state) {
+                                    case true:
+                                        previousPresets[i] = deviceState;
+                                        deviceState.SetTemperature = presetData.SetTemperature;
+                                        deviceState.Power = presetData.Power;
+                                        deviceState.OperationMode = presetData.OperationMode;
+                                        deviceState.VentilationMode = presetData.VentilationMode;
+                                        deviceState.SetFanSpeed = presetData.FanSpeed;
+                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power;
+                                        break;
+                                    case false:
+                                        deviceState = previousPresets[i];
+                                        break;
+                                };
+
+                                await this.melCloudErv.send(deviceState);
+                                const info = this.disableLogInfo ? false : this.emit('message', `Set: ${presetName}`);
+                            } catch (error) {
+                                this.emit('warn', `Set preset error: ${error}`);
+                            };
+                        });
+                    previousPresets.push(deviceState);
+                    this.presetsServices.push(presetService);
+                    accessory.addService(presetService);
+                };
+            };
+
             //buttons services
             if (buttonsConfiguredCount > 0) {
-                const debug = this.enableDebugMode ? this.emit('debug', `Prepare buttons service`) : false;
+                const debug = this.enableDebugMode ? this.emit('debug', `Prepare buttons services`) : false;
                 this.buttonsServices = [];
 
                 for (let i = 0; i < buttonsConfiguredCount; i++) {
@@ -1075,13 +1162,13 @@ class DeviceErv extends EventEmitter {
                     //get button name prefix
                     const buttonNamePrefix = button.namePrefix;
 
-                    const buttonServiceName = buttonNamePrefix ? `${accessoryName} ${buttonName}` : buttonName;
-                    const buttonServiceType = button.serviceType;
-                    const buttomCharacteristicType = button.characteristicType;
-                    const buttonService = new buttonServiceType(buttonServiceName, `Button ${deviceId} ${i}`);
+                    const serviceName = buttonNamePrefix ? `${accessoryName} ${buttonName}` : buttonName;
+                    const serviceType = button.serviceType;
+                    const characteristicType = button.characteristicType;
+                    const buttonService = new serviceType(serviceName, `Button ${deviceId} ${i}`);
                     buttonService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                    buttonService.setCharacteristic(Characteristic.ConfiguredName, buttonServiceName);
-                    buttonService.getCharacteristic(buttomCharacteristicType)
+                    buttonService.setCharacteristic(Characteristic.ConfiguredName, serviceName);
+                    buttonService.getCharacteristic(characteristicType)
                         .onGet(async () => {
                             const state = button.state;
                             return state;
@@ -1168,53 +1255,6 @@ class DeviceErv extends EventEmitter {
                         });
                     this.buttonsServices.push(buttonService);
                     accessory.addService(buttonService);
-                };
-            };
-
-            //presets services
-            if (presets.length > 0) {
-                const debug = this.enableDebugMode ? this.emit('debug', `Prepare presets service`) : false;
-                this.presetsServices = [];
-                const previousPresets = [];
-
-                for (let i = 0; i < presets.length; i++) {
-                    const preset = presets[i];
-                    const presetName = preset.NumberDescription;
-
-                    const presetService = new Service.Outlet(`${accessoryName} ${presetName}`, `Preset ${deviceId} ${i}`);
-                    presetService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                    presetService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${presetName}`);
-                    presetService.getCharacteristic(Characteristic.On)
-                        .onGet(async () => {
-                            const state = this.presetsStates[i];
-                            return state;
-                        })
-                        .onSet(async (state) => {
-                            try {
-                                switch (state) {
-                                    case true:
-                                        previousPresets[i] = deviceState;
-                                        deviceState.SetTemperature = preset.SetTemperature;
-                                        deviceState.Power = preset.Power;
-                                        deviceState.OperationMode = preset.OperationMode;
-                                        deviceState.VentilationMode = preset.VentilationMode;
-                                        deviceState.SetFanSpeed = preset.FanSpeed;
-                                        deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power;
-                                        break;
-                                    case false:
-                                        deviceState = previousPresets[i];
-                                        break;
-                                };
-
-                                await this.melCloudErv.send(deviceState);
-                                const info = this.disableLogInfo ? false : this.emit('message', `Set: ${presetName}`);
-                            } catch (error) {
-                                this.emit('warn', `Set preset error: ${error}`);
-                            };
-                        });
-                    previousPresets.push(deviceState);
-                    this.presetsServices.push(presetService);
-                    accessory.addService(presetService);
                 };
             };
 
