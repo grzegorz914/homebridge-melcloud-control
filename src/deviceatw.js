@@ -7,7 +7,7 @@ const CONSTANTS = require('./constants.json');
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceAtw extends EventEmitter {
-    constructor(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile, refreshInterval) {
+    constructor(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, accountFile, devicesFile, refreshInterval) {
         super();
 
         Accessory = api.platformAccessory;
@@ -42,25 +42,25 @@ class DeviceAtw extends EventEmitter {
         //function
         this.melCloud = melCloud; //function
 
-         //presets configured
-         this.presetsConfigured = [];
-         for (const preset of this.presets) {
-             const presetName = preset.name ?? false;
-             const presetDisplayType = preset.displayType ?? 0;
-             const presetNamePrefix = preset.namePrefix ?? false;
-             if (presetName && presetDisplayType > 0) {
-                 const presetyServiceType = ['', Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][presetDisplayType];
-                 const presetCharacteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][presetDisplayType];
-                 preset.namePrefix = presetNamePrefix;
-                 preset.serviceType = presetyServiceType;
-                 preset.characteristicType = presetCharacteristicType;
-                 preset.state = false;
-                 this.presetsConfigured.push(preset);
-             } else {
-                 const log = presetDisplayType === 0 ? false : this.emit('message', `Preset Name: ${preset ? preset : 'Missing'}.`);
-             };
-         }
-         this.presetsConfiguredCount = this.presetsConfigured.length || 0;
+        //presets configured
+        this.presetsConfigured = [];
+        for (const preset of this.presets) {
+            const presetName = preset.name ?? false;
+            const presetDisplayType = preset.displayType ?? 0;
+            const presetNamePrefix = preset.namePrefix ?? false;
+            if (presetName && presetDisplayType > 0) {
+                const presetyServiceType = ['', Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][presetDisplayType];
+                const presetCharacteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][presetDisplayType];
+                preset.namePrefix = presetNamePrefix;
+                preset.serviceType = presetyServiceType;
+                preset.characteristicType = presetCharacteristicType;
+                preset.state = false;
+                this.presetsConfigured.push(preset);
+            } else {
+                const log = presetDisplayType === 0 ? false : this.emit('message', `Preset Name: ${preset ? preset : 'Missing'}.`);
+            };
+        }
+        this.presetsConfiguredCount = this.presetsConfigured.length || 0;
 
         //buttons configured
         this.buttonsConfigured = [];
@@ -90,8 +90,9 @@ class DeviceAtw extends EventEmitter {
         //melcloud device
         this.melCloudAtw = new MelCloudAtw({
             contextKey: contextKey,
-            accountInfoFile: accountInfoFile,
-            deviceInfoFile: deviceInfoFile,
+            accountFile: accountFile,
+            devicesFile: devicesFile,
+            deviceId: deviceId,
             debugLog: account.enableDebugMode,
             refreshInterval: refreshInterval
         });
@@ -360,7 +361,7 @@ class DeviceAtw extends EventEmitter {
                             //update characteristics
                             if (this.melCloudServices && currentOperationMode !== undefined && targetOperationMode !== undefined) {
                                 this.melCloudServices[i]
-                                    .updateCharacteristic(Characteristic.Active, power)
+                                    .updateCharacteristic(Characteristic.Active, power ? 1 : 0)
                                     .updateCharacteristic(Characteristic.CurrentHeaterCoolerState, currentOperationMode)
                                     .updateCharacteristic(Characteristic.TargetHeaterCoolerState, targetOperationMode)
                                     .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
@@ -453,11 +454,15 @@ class DeviceAtw extends EventEmitter {
                     this.accessory.zones[i].lockPhysicalControl = lockPhysicalControl;
                     this.accessory.zones[i].flowTemperature = flowTemperature;
                     this.accessory.zones[i].returnTemperature = returnTemperature;
-                    this.accessory.zones[i].operationModesSetPropsMinValue = operationModeSetPropsMinValue;
-                    this.accessory.zones[i].operationModesSetPropsMaxValue = operationModeSetPropsMaxValue;
-                    this.accessory.zones[i].operationModesSetPropsValidValues = operationModeSetPropsValidValues;
-                    this.accessory.zones[i].temperaturesSetPropsMinValue = temperatureSetPropsMinValue;
-                    this.accessory.zones[i].temperaturesSetPropsMaxValue = temperatureSetPropsMaxValue;
+
+                    //only on first run
+                    if (this.startPrepareAccessory) {
+                        this.accessory.zones[i].operationModesSetPropsMinValue = operationModeSetPropsMinValue;
+                        this.accessory.zones[i].operationModesSetPropsMaxValue = operationModeSetPropsMaxValue;
+                        this.accessory.zones[i].operationModesSetPropsValidValues = operationModeSetPropsValidValues;
+                        this.accessory.zones[i].temperaturesSetPropsMinValue = temperatureSetPropsMinValue;
+                        this.accessory.zones[i].temperaturesSetPropsMaxValue = temperatureSetPropsMaxValue;
+                    };
 
                     //update temperature sensors
                     switch (i) {
@@ -870,7 +875,7 @@ class DeviceAtw extends EventEmitter {
                                 try {
                                     switch (i) {
                                         case 0: //Heat Pump
-                                            deviceState.Power = state;
+                                            deviceState.Power = [false, true][state];
                                             deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power;
                                             await this.melCloudAtw.send(deviceState);
                                             const info = this.disableLogInfo ? false : this.emit('message', `${zoneName}, Set power: ${state ? 'ON' : 'OFF'}`);
@@ -878,7 +883,6 @@ class DeviceAtw extends EventEmitter {
                                     };
                                 } catch (error) {
                                     this.emit('warn', `Set power error: ${error}`);
-                                    melCloudService.updateCharacteristic(Characteristic.Active, false)
                                 };
                             });
                         melCloudService.getCharacteristic(Characteristic.CurrentHeaterCoolerState)

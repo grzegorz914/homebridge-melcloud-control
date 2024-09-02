@@ -55,9 +55,9 @@ class MelCloudPlatform {
 
 				//define directory and file paths
 				const prefDir = path.join(api.user.storagePath(), 'melcloud');
-				const accountInfoFile = `${prefDir}/${accountName}_Account`;
+				const accountFile = `${prefDir}/${accountName}_Account`;
 				const buildingsFile = `${prefDir}/${accountName}_Buildings`;
-				const deviceFile = `${prefDir}/${accountName}_Device_`;
+				const devicesFile = `${prefDir}/${accountName}_Devices`;
 
 				//create directory if it doesn't exist
 				try {
@@ -74,7 +74,7 @@ class MelCloudPlatform {
 
 				try {
 					//melcloud account
-					const melCloud = new MelCloud(user, passwd, language, accountInfoFile, buildingsFile, deviceFile, enableDebugMode, false);
+					const melCloud = new MelCloud(user, passwd, language, accountFile, buildingsFile, devicesFile, enableDebugMode, false);
 					melCloud.on('success', (message) => {
 						log.success(`Account ${accountName}, ${message}`);
 					})
@@ -103,19 +103,18 @@ class MelCloudPlatform {
 					const timers = [{ name: 'checkDevicesList', sampling: refreshInterval }];
 					melCloud.impulseGenerator.start(timers);
 
-					//Air Conditioner
+					//Air Conditioner 0
 					for (const device of account.ataDevices) {
 						//chack device from config exist on melcloud
-						const deviceExistInMelCloud = devices.some(dev => dev.DeviceID === device.id);
+						const deviceId = device.id;
+						const deviceExistInMelCloud = devices.some(dev => dev.DeviceID === deviceId);
 						if (!deviceExistInMelCloud || device.displayMode === 0) {
 							continue;
 						};
 
-						const deviceId = device.id.toString();
 						const deviceName = device.name;
 						const deviceTypeText = device.typeString;
-						const deviceInfoFile = `${prefDir}/${accountName}_Device_${deviceId}`;
-						const airConditioner = new DeviceAta(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile, deviceRefreshInterval)
+						const airConditioner = new DeviceAta(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, accountFile, devicesFile, deviceRefreshInterval)
 						airConditioner.on('publishAccessory', (accessory) => {
 
 							//publish device
@@ -142,20 +141,18 @@ class MelCloudPlatform {
 							});
 					};
 
-					//Heat Pump
+					//Heat Pump 1
 					for (const device of account.atwDevices) {
 						//chack device from config exist on melcloud
+						const deviceId = device.id;
 						const deviceExistInMelCloud = devices.some(dev => dev.DeviceID === device.id);
 						if (!deviceExistInMelCloud || device.displayMode === 0) {
 							continue;
 						};
 
-						const deviceId = device.id.toString();
-						const deviceType = device.type ?? 1;
 						const deviceName = device.name;
-						const deviceTypeText = CONSTANTS.DeviceType[deviceType];
-						const deviceInfoFile = `${prefDir}/${accountName}_Device_${deviceId}`;
-						const heatPump = new DeviceAtw(api, account, melCloud, device, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile, deviceRefreshInterval)
+						const deviceTypeText = device.typeString;
+						const heatPump = new DeviceAtw(api, account, melCloud, device, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, accountFile, devicesFile, deviceRefreshInterval)
 						heatPump.on('publishAccessory', (accessory) => {
 
 							//publish device
@@ -182,20 +179,18 @@ class MelCloudPlatform {
 							});
 					};
 
-					//Energy Recovery Ventilation
+					//Energy Recovery Ventilation 3
 					for (const device of account.ervDevices) {
 						//chack device from config exist on melcloud
+						const deviceId = device.id;
 						const deviceExistInMelCloud = devices.some(dev => dev.DeviceID === device.id);
 						if (!deviceExistInMelCloud || device.displayMode === 0) {
 							continue;
 						};
 
-						const deviceId = device.id.toString();
-						const deviceType = device.type ?? 3;
 						const deviceName = device.name;
-						const deviceTypeText = CONSTANTS.DeviceType[deviceType];
-						const deviceInfoFile = `${prefDir}/${accountName}_Device_${deviceId}`;
-						const energyRecoveryVentilation = new DeviceErv(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile, deviceRefreshInterval)
+						const deviceTypeText = device.typeString;
+						const energyRecoveryVentilation = new DeviceErv(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, accountFile, devicesFile, deviceRefreshInterval)
 						energyRecoveryVentilation.on('publishAccessory', (accessory) => {
 
 							//publish device
@@ -222,7 +217,7 @@ class MelCloudPlatform {
 							});
 					};
 				} catch (error) {
-					log.error(`Account: ${accountName}, MELCloud error: ${error.message ?? error}`);
+					log.error(`Account: ${accountName}, Did finish launching error: ${error.message ?? error}`);
 				}
 			};
 		});

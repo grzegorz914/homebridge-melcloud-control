@@ -11,8 +11,9 @@ class MelCloudErv extends EventEmitter {
     constructor(config) {
         super();
         const contextKey = config.contextKey;
-        const accountInfoFile = config.accountInfoFile;
-        const deviceInfoFile = config.deviceInfoFile;
+        const accountFile = config.accountFile;
+        const devicesFile = config.devicesFile;
+        const deviceId = config.deviceId;
         const debugLog = config.debugLog;
         const refreshInterval = config.refreshInterval;
 
@@ -39,7 +40,7 @@ class MelCloudErv extends EventEmitter {
         impulseGenerator.on('checkDevice', async () => {
             try {
                 //read account info from file
-                const accountInfo = await this.readData(accountInfoFile);
+                const accountInfo = await this.readData(accountFile);
 
                 //remove sensitive data
                 const debugData = {
@@ -56,8 +57,9 @@ class MelCloudErv extends EventEmitter {
                 this.useFahrenheit = useFahrenheit;
 
                 //read device info from file
-                const deviceData = await this.readData(deviceInfoFile);
-                const debug1 = debugLog ? this.emit('debug', `Device Info: ${JSON.stringify(deviceData, null, 2)}`) : false;
+                const devicesData = await this.readData(devicesFile);
+                const debug1 = debugLog ? this.emit('debug', `Device Info: ${JSON.stringify(devicesData, null, 2)}`) : false;
+                const deviceData = devicesData.find((device) => device.DeviceID === deviceId);
 
                 if (!deviceData) {
                     this.emit('warn', `Device data not found.`);
@@ -65,7 +67,6 @@ class MelCloudErv extends EventEmitter {
                 }
 
                 //deviceData
-                const deviceId = deviceData.DeviceID.toString();
                 const deviceName = deviceData.DeviceName;
                 const buildingId = deviceData.BuildingID;
                 const buildingName = deviceData.BuildingName;

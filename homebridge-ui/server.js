@@ -21,8 +21,8 @@ class PluginUiServer extends HomebridgePluginUiServer {
     const language = payload.language;
     const accountInfoFile = `${this.homebridgeStoragePath}/melcloud/${accountName}_Account`;
     const buildingsFile = `${this.homebridgeStoragePath}/melcloud/${accountName}_Buildings`;
-    const deviceFile = `${this.homebridgeStoragePath}/melcloud/${accountName}_Device_`;
-    const melCloud = new MelCloud(user, passwd, language, accountInfoFile, buildingsFile, deviceFile, false, true);
+    const devicesFile = `${this.homebridgeStoragePath}/melcloud/${accountName}_Devices`;
+    const melCloud = new MelCloud(user, passwd, language, accountInfoFile, buildingsFile, devicesFile, false, true);
     let data = {};
 
     try {

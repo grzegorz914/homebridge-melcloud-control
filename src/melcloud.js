@@ -8,14 +8,15 @@ const ImpulseGenerator = require('./impulsegenerator.js');
 const CONSTANTS = require('./constants.json');
 
 class MelCloud extends EventEmitter {
-    constructor(user, passwd, language, accountInfoFile, buildingsFile, deviceFile, enableDebugMode, requestConfig) {
+    constructor(user, passwd, language, accountFile, buildingsFile, devicesFile, enableDebugMode, requestConfig) {
         super();
-        this.accountInfoFile = accountInfoFile;
+        this.accountFile = accountFile;
         this.buildingsFile = buildingsFile;
-        this.deviceFile = deviceFile;
+        this.devicesFile = devicesFile;
         this.enableDebugMode = enableDebugMode;
         this.requestConfig = requestConfig;
         this.contextKey = '';
+        this.useFahrenheit = 0;
         this.devicesId = [];
 
         this.options = {
@@ -62,6 +63,7 @@ class MelCloud extends EventEmitter {
             const account = accountData.data;
             const accountInfo = account.LoginData;
             const contextKey = accountInfo.ContextKey;
+            this.useFahrenheit = accountInfo.UseFahrenheit
             this.contextKey = contextKey;
 
             //remove sensitive data
@@ -82,7 +84,7 @@ class MelCloud extends EventEmitter {
             };
 
             //save melcloud info to the file
-            await this.saveData(this.accountInfoFile, accountInfo);
+            await this.saveData(this.accountFile, accountInfo);
 
             //emit connect success
             this.emit('success', `Connect to MELCloud Success.`)
@@ -152,18 +154,10 @@ class MelCloud extends EventEmitter {
                 this.emit('warn', `No devices found.`);
                 return;
             }
-            const debug3 = this.enableDebugMode ? this.emit('debug', `Found: ${devicesCount} devices.`) : false;
 
-            //get device info fom devices
-            for (const deviceInfo of devices) {
-                const deviceId = deviceInfo.DeviceID
-                const deviceName = deviceInfo.DeviceName;
-
-                //save every device info to the file
-                const deviceFile = `${this.deviceFile}${deviceId}`;
-                await this.saveData(deviceFile, deviceInfo);
-                const debug = this.enableDebugMode ? this.emit('debug', `Device: ${deviceName} info saved.`) : false;
-            };
+            //save buildings to the file
+            await this.saveData(this.devicesFile, devices);
+            const debug3 = this.enableDebugMode ? this.emit('debug', `${devicesCount} devices saved.`) : false;
 
             return devices;
         } catch (error) {

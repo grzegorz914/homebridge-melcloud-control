@@ -7,7 +7,7 @@ const CONSTANTS = require('./constants.json');
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceErv extends EventEmitter {
-    constructor(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, accountInfoFile, deviceInfoFile, refreshInterval) {
+    constructor(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, accountFile, devicesFile, refreshInterval) {
         super();
 
         Accessory = api.platformAccessory;
@@ -85,11 +85,17 @@ class DeviceErv extends EventEmitter {
         this.accessory.fanSpeed = 0;
         this.accessory.lockPhysicalControl = 0;
 
+        this.accessory.operationModeSetPropsMinValue = 0;
+        this.accessory.operationModeSetPropsMaxValue = 3;
+        this.accessory.operationModeSetPropsValidValues = [0];
+        this.accessory.fanSpeedSetPropsMaxValue = 2;
+
         //melcloud device
         this.melCloudErv = new MelCloudErv({
             contextKey: contextKey,
-            accountInfoFile: accountInfoFile,
-            deviceInfoFile: deviceInfoFile,
+            accountFile: accountFile,
+            devicesFile: devicesFile,
+            deviceId: deviceId,
             debugLog: account.enableDebugMode,
             refreshInterval: refreshInterval
         });
@@ -266,10 +272,6 @@ class DeviceErv extends EventEmitter {
                 this.accessory.coreMaintenanceRequired = coreMaintenanceRequired;
                 this.accessory.filterMaintenanceRequired = filterMaintenanceRequired;
                 this.accessory.actualVentilationMode = actualVentilationMode;
-                this.accessory.operationModeSetPropsMinValue = 0;
-                this.accessory.operationModeSetPropsMaxValue = 3;
-                this.accessory.operationModeSetPropsValidValues = [0];
-                this.accessory.fanSpeedSetPropsMaxValue = 2;
 
                 //operation mode - 0, HEAT, 2, COOL, 4, 5, 6, FAN, AUTO
                 switch (displayMode) {
@@ -332,7 +334,7 @@ class DeviceErv extends EventEmitter {
                         //update characteristics
                         if (this.melCloudService) {
                             this.melCloudService
-                                .updateCharacteristic(Characteristic.Active, power)
+                                .updateCharacteristic(Characteristic.Active, power ? 1 : 0)
                                 .updateCharacteristic(Characteristic.CurrentHeaterCoolerState, this.accessory.currentOperationMode)
                                 .updateCharacteristic(Characteristic.TargetHeaterCoolerState, this.accessory.targetOperationMode)
                                 .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
@@ -683,13 +685,12 @@ class DeviceErv extends EventEmitter {
                         })
                         .onSet(async (state) => {
                             try {
-                                deviceState.Power = state;
+                                deviceState.Power = [false, true][state];
                                 deviceState.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power;
                                 await this.melCloudErv.send(deviceState);
                                 const info = this.disableLogInfo ? false : this.emit('message', `Set power: ${state ? 'ON' : 'OFF'}`);
                             } catch (error) {
                                 this.emit('warn', `Set power error: ${error}`);
-                                melCloudService.updateCharacteristic(Characteristic.Active, false)
                             };
                         });
                     this.melCloudService.getCharacteristic(Characteristic.CurrentHeaterCoolerState)
