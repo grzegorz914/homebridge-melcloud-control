@@ -173,7 +173,7 @@
 
             //get devices from melcloud by type
             for (const deviceInMelcloud of devicesInMelCloud) {
-              const deviceType = devicesInMelCloud.Type;
+              const deviceType = deviceInMelcloud.Type;
               const pusDeviceTypeAta = deviceType === 0 ? devicesByTypeInMelCloud.ata.push(deviceInMelcloud) : false;
               const pusDeviceTypeAtw = deviceType === 1 ? devicesByTypeInMelCloud.atw.push(deviceInMelcloud) : false;
               const pusDeviceTypeErv = deviceType === 3 ? devicesByTypeInMelCloud.erv.push(deviceInMelcloud) : false;
