@@ -180,9 +180,14 @@
             };
 
             //devices in config
-            const ataDevicesInConfig = pluginConfig[0].accounts[this.deviceIndex].ataDevices ?? [];
-            const atwDevicesInConfig = pluginConfig[0].accounts[this.deviceIndex].atwDevices ?? [];
-            const ervDevicesInConfig = pluginConfig[0].accounts[this.deviceIndex].ervDevices ?? [];
+            const ataDevicesInConfigExist = pluginConfig[0].accounts[this.deviceIndex].ataDevices ?? false;
+            const atwDevicesInConfigExist = pluginConfig[0].accounts[this.deviceIndex].atwDevices ?? false;
+            const ervDevicesInConfigExist = pluginConfig[0].accounts[this.deviceIndex].ervDevices ?? false;
+
+            //check key of devices in config exist
+            const ataDevicesInConfig = !ataDevicesInConfigExist ? pluginConfig[0].accounts[this.deviceIndex].ataDevices = [] : ataDevicesInConfigExist;
+            const atwDevicesInConfig = !atwDevicesInConfigExist ? pluginConfig[0].accounts[this.deviceIndex].atwDevices = [] : atwDevicesInConfigExist;
+            const ervDevicesInConfig = !ervDevicesInConfigExist ? pluginConfig[0].accounts[this.deviceIndex].ervDevices = [] : ervDevicesInConfigExist;
 
             //info text
             let textAta = 'ATA: 0';
