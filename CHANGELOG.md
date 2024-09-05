@@ -16,6 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - do not configure it manually, always using Config UI X
   - required Homebridge v2.0.0 and above
 
+  ## [3.1.9] - (05.08.2024)
+
+## Changes
+
+- prevent load device if display mode set to 0 or unknown [#150](https://github.com/grzegorz914/homebridge-melcloud-control/issues/150)
+- cleanup
+
 ## [3.1.8] - (03.08.2024)
 
 ## Changes

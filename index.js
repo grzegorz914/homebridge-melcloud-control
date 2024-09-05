@@ -107,8 +107,9 @@ class MelCloudPlatform {
 					for (const device of account.ataDevices) {
 						//chack device from config exist on melcloud
 						const deviceId = device.id;
+						const displayMode = device.displayMode > 0 ?? false;
 						const deviceExistInMelCloud = devices.some(dev => dev.DeviceID === deviceId);
-						if (!deviceExistInMelCloud || device.displayMode === 0) {
+						if (!deviceExistInMelCloud || !displayMode) {
 							continue;
 						};
 
@@ -145,8 +146,9 @@ class MelCloudPlatform {
 					for (const device of account.atwDevices) {
 						//chack device from config exist on melcloud
 						const deviceId = device.id;
-						const deviceExistInMelCloud = devices.some(dev => dev.DeviceID === device.id);
-						if (!deviceExistInMelCloud || device.displayMode === 0) {
+						const displayMode = device.displayMode > 0 ?? false;
+						const deviceExistInMelCloud = devices.some(dev => dev.DeviceID === deviceId);
+						if (!deviceExistInMelCloud || !displayMode) {
 							continue;
 						};
 
@@ -183,8 +185,9 @@ class MelCloudPlatform {
 					for (const device of account.ervDevices) {
 						//chack device from config exist on melcloud
 						const deviceId = device.id;
-						const deviceExistInMelCloud = devices.some(dev => dev.DeviceID === device.id);
-						if (!deviceExistInMelCloud || device.displayMode === 0) {
+						const displayMode = device.displayMode > 0 ?? false;
+						const deviceExistInMelCloud = devices.some(dev => dev.DeviceID === deviceId);
+						if (!deviceExistInMelCloud || !displayMode) {
 							continue;
 						};
 

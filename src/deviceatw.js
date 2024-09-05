@@ -440,9 +440,6 @@ class DeviceAtw extends EventEmitter {
                                     .updateCharacteristic(Characteristic.TemperatureDisplayUnits, useFahrenheit);
                             }
                             break;
-                        default: //unknown display type detected
-                            this.emit('message', `Unknown display type: ${displayType} detected.`);
-                            break;
                     };
 
                     //push value to arrays
