@@ -171,7 +171,7 @@ class MelCloud extends EventEmitter {
             const debug3 = this.enableDebugMode ? this.emit('debug', `Data saved to: ${path}.`) : false;
             return true;
         } catch (error) {
-            throw new Error(`Save data to: ${path}, error: ${error.message ?? error}`);
+            throw new Error(`Save data error: ${error.message ?? error}`);
         }
     }
 

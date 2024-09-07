@@ -52,9 +52,10 @@
       <button id="logIn" type="button" class="btn btn-primary">Connect to MELCloud</button>
       <button id="configButton" type="button" class="btn btn-primary"><i class="fas fa-gear"></i></button>
     </div>
-    <div id="accountButton">
-    </div>
   </form>
+</div>
+
+<div id="accountButton"></div>
 </div>
 
 <script>
@@ -133,7 +134,7 @@
     document.getElementById('logIn').addEventListener('click', async () => {
       homebridge.showSpinner();
       document.getElementById('info').innerHTML = 'Connecting...';
-      await homebridge.updatePluginConfig(pluginConfig)
+      document.getElementById('info').style.color = 'yellow';
 
       try {
         const accountName = pluginConfig[0].accounts[this.deviceIndex].name;
@@ -147,265 +148,238 @@
           passwd: passwd,
           language: language
         };
-        const response = await homebridge.request('/connect', payload);
-        const info = response.info ?? '';
-        const status = response.status;
-        const devicesInMelCloud = response.data ?? [];
+        const devicesInMelCloud = await homebridge.request('/connect', payload);
 
-        //response status
-        switch (status) {
-          case 0:
-            //new found devices
-            const newDevices = {
-              ata: [],
-              ataPresets: [],
-              atw: [],
-              atwPresets: [],
-              erv: [],
-              ervPresets: [],
-            };
-
-            const devicesByTypeInMelCloud = {
-              ata: [],
-              atw: [],
-              erv: []
-            };
-
-            //get devices from melcloud by type
-            for (const deviceInMelcloud of devicesInMelCloud) {
-              const deviceType = deviceInMelcloud.Type;
-              const pusDeviceTypeAta = deviceType === 0 ? devicesByTypeInMelCloud.ata.push(deviceInMelcloud) : false;
-              const pusDeviceTypeAtw = deviceType === 1 ? devicesByTypeInMelCloud.atw.push(deviceInMelcloud) : false;
-              const pusDeviceTypeErv = deviceType === 3 ? devicesByTypeInMelCloud.erv.push(deviceInMelcloud) : false;
-            };
-
-            //devices in config
-            const ataDevicesInConfigExist = pluginConfig[0].accounts[this.deviceIndex].ataDevices ?? false;
-            const atwDevicesInConfigExist = pluginConfig[0].accounts[this.deviceIndex].atwDevices ?? false;
-            const ervDevicesInConfigExist = pluginConfig[0].accounts[this.deviceIndex].ervDevices ?? false;
-
-            //check key of devices in config exist
-            const ataDevicesInConfig = !ataDevicesInConfigExist ? pluginConfig[0].accounts[this.deviceIndex].ataDevices = [] : ataDevicesInConfigExist;
-            const atwDevicesInConfig = !atwDevicesInConfigExist ? pluginConfig[0].accounts[this.deviceIndex].atwDevices = [] : atwDevicesInConfigExist;
-            const ervDevicesInConfig = !ervDevicesInConfigExist ? pluginConfig[0].accounts[this.deviceIndex].ervDevices = [] : ervDevicesInConfigExist;
-
-            //info text
-            let textAta = 'ATA: 0';
-            let textAtaPresets = 'ATA Presets: 0';
-            let ataPresetsCount = 0;
-            let textAtw = 'ATW: 0';
-            let textAtwPresets = 'ATW Presets: 0';
-            let atwPresetsCount = 0;
-            let textErv = 'ERV: 0';
-            let textErvPresets = 'ERV Presets: 0';
-            let ervPresetsCount = 0;
-
-            //device ata
-            devicesByTypeInMelCloud.ata.forEach((device, index) => {
-              const deviceId = device.DeviceID;
-              const deviceType = device.Type;
-              const deviceName = device.DeviceName;
-              const devicePresets = device.Presets ?? [];
-
-              const deviceAta = {
-                id: deviceId,
-                type: deviceType,
-                typeString: "Air Conditioner",
-                name: deviceName,
-                displayMode: 1,
-                heatDryFanMode: 1,
-                coolDryFanMode: 1,
-                autoDryFanMode: 1,
-                temperatureSensor: false,
-                temperatureSensorOutdoor: false,
-                presets: [],
-                buttonsSensors: []
-              };
-
-              const deviceExistsInConfig = ataDevicesInConfig.some(device => device.id === deviceId);
-              if (!deviceExistsInConfig) {
-                ataDevicesInConfig.push(deviceAta);
-                newDevices.ata.push(deviceAta);
-              };
-
-              //presets of device in melcloud
-              devicePresets.forEach((preset) => {
-                const presetId = preset.ID;
-                const presetName = preset.NumberDescription;
-
-                preset.id = presetId;
-                preset.name = presetName;
-                preset.displayType == 0;
-                preset.namePrefix = false;
-
-                //find the specific ataDevice to which the preset belongs
-                const ataDevice = ataDevicesInConfig.find((device) => device.id === deviceId);
-                if (ataDevice && !ataDevice.presets.some((p) => p.id === presetId)) {
-                  ataDevice.presets.push(preset);
-                  newDevices.ataPresets.push(preset);
-                }
-
-              });
-              ataPresetsCount = newDevices.ataPresets.length;
-              textAtaPresets = `ATA Presets: ${ataPresetsCount}`
-            });
-            textAta = `ATA: ${newDevices.ata.length}`
-
-            //device atw
-            devicesByTypeInMelCloud.atw.forEach((device, index) => {
-              const deviceId = device.DeviceID;
-              const deviceType = device.Type;
-              const deviceName = device.DeviceName;
-              const devicePresets = device.Presets ?? [];
-
-              const deviceAtw = {
-                id: deviceId,
-                type: deviceType,
-                typeString: "Heat Pump",
-                name: deviceName,
-                displayMode: 1,
-                temperatureSensor: false,
-                temperatureSensorFlow: false,
-                temperatureSensorReturn: false,
-                temperatureSensorFlowZone1: false,
-                temperatureSensorReturnZone1: false,
-                temperatureSensorFlowWaterTank: false,
-                temperatureSensorReturnWaterTank: false,
-                temperatureSensorFlowZone2: false,
-                temperatureSensorReturnZone2: false,
-                temperatureSensor: false,
-                temperatureSensorOutdoor: false,
-                presets: [],
-                buttonsSensors: []
-              };
-
-              const deviceExistsInConfig = atwDevicesInConfig.some(device => device.id === deviceId);
-              if (!deviceExistsInConfig) {
-                atwDevicesInConfig.push(deviceAtw);
-                newDevices.atw.push(deviceAtw);
-              };
-
-              //presets of device in melcloud
-              devicePresets.forEach((preset) => {
-                const presetId = preset.ID;
-                const presetName = preset.NumberDescription;
-
-                preset.id = presetId;
-                preset.name = presetName;
-                preset.displayType == 0;
-                preset.namePrefix = false;
-
-                //find the specific ataDevice to which the preset belongs
-                const atwDevice = atwDevicesInConfig.find((device) => device.id === deviceId);
-                if (atwDevice && !atwDevice.presets.some((p) => p.id === presetId)) {
-                  atwDevice.presets.push(preset);
-                  newDevices.atwPresets.push(preset);
-                }
-
-              });
-              atwPresetsCount = newDevices.atwPresets.length;
-              textAtwPresets = `ATW Presets: ${atwPresetsCount}`
-            });
-            textAtw = `ATW: ${newDevices.atw.length}`
-
-            //device erv
-            devicesByTypeInMelCloud.erv.forEach((device, index) => {
-              const deviceId = device.DeviceID;
-              const deviceType = device.Type;
-              const deviceName = device.DeviceName;
-              const devicePresets = device.Presets ?? [];
-
-              const deviceErv = {
-                id: deviceId,
-                type: deviceType,
-                typeString: "Energy Recovery Ventilation",
-                name: deviceName,
-                displayMode: 1,
-                temperatureSensor: false,
-                temperatureSensorOutdoor: false,
-                temperatureSensorSupply: false,
-                temperatureSensor: false,
-                temperatureSensorOutdoor: false,
-                presets: [],
-                buttonsSensors: []
-              };
-
-              const deviceExistsInConfig = ervDevicesInConfig.some(device => device.id === deviceId);
-              if (!deviceExistsInConfig) {
-                ervDevicesInConfig.push(deviceErv);
-                newDevices.erv.push(deviceErv);
-              };
-
-              //presets of device in melcloud
-              devicePresets.forEach((preset) => {
-                const presetId = preset.ID;
-                const presetName = preset.NumberDescription;
-
-                preset.id = presetId;
-                preset.name = presetName;
-                preset.displayType == 0;
-                preset.namePrefix = false;
-
-                //find the specific ataDevice to which the preset belongs
-                const ervDevice = ervDevicesInConfig.find((device) => device.id === deviceId);
-                if (ervDevice && !ervDevice.presets.some((p) => p.id === presetId)) {
-                  ervDevice.presets.push(preset);
-                  newDevices.ervPresets.push(preset);
-                }
-
-              });
-              ervPresetsCount = newDevices.ervPresets.length;
-              textErvPresets = `ERV Presets: ${ervPresetsCount}`
-            });
-            textErv = `ERV: ${newDevices.erv.length}`
-
-            const newDevicesCount = newDevices.ata.length + newDevices.atw.length + newDevices.erv.length ?? 0;
-            const newPresetsCount = ataPresetsCount + atwPresetsCount + ervPresetsCount ?? 0;
-            if (newDevicesCount === 0 && newPresetsCount === 0) {
-              document.getElementById('info').innerHTML = 'No new devices found.';
-              document.getElementById('info').style.color = 'white';
-            };
-
-            if (newDevicesCount > 0 && newPresetsCount > 0) {
-              document.getElementById('info').innerHTML = `Found, ${textAta}, ${textAtw}, ${textErv}.`;
-              document.getElementById('info').style.color = 'green';
-              document.getElementById('info1').innerHTML = `${textAtaPresets}, ${textAtwPresets}, ${textErvPresets}.`;
-              document.getElementById('info1').style.color = 'green';
-              document.getElementById('info2').innerHTML = 'Now You can configure it.';
-              document.getElementById('info2').style.color = 'green';
-            };
-
-            if (newDevicesCount > 0 && newPresetsCount === 0) {
-              document.getElementById('info').innerHTML = `Found, ${textAta}, ${textAtw}, ${textErv}.`;
-              document.getElementById('info').style.color = 'green';
-              document.getElementById('info1').innerHTML = 'Now You can configure it.';
-              document.getElementById('info1').style.color = 'green';
-            };
-
-            if (newDevicesCount === 0 && newPresetsCount > 0) {
-              document.getElementById('info').innerHTML = `Found, ${textAtaPresets}, ${textAtwPresets}, ${textErvPresets}.`;
-              document.getElementById('info').style.color = 'green';
-              document.getElementById('info1').innerHTML = 'Now You can configure it.';
-              document.getElementById('info1').style.color = 'green';
-            }
-
-            await homebridge.updatePluginConfig(pluginConfig);
-            await homebridge.savePluginConfig(pluginConfig);
-            break;
-          case 1:
-            document.getElementById('info').innerHTML = info;
-            document.getElementById('info').style.color = 'red';
-            break;
-          default:
-            document.getElementById('info').innerHTML = `Received unknown status: ${status}, please try again.`;
-            document.getElementById('info').style.color = 'yellow';
-            break;
+        //new found devices
+        const newDevices = {
+          ata: [],
+          ataPresets: [],
+          atw: [],
+          atwPresets: [],
+          erv: [],
+          ervPresets: [],
         };
 
+        //get devices from melcloud by type
+        const devicesByTypeInMelCloud = {
+          ata: [],
+          atw: [],
+          erv: []
+        };
+
+        for (const deviceInMelcloud of devicesInMelCloud) {
+          const deviceType = deviceInMelcloud.Type;
+          const pusDeviceTypeAta = deviceType === 0 ? devicesByTypeInMelCloud.ata.push(deviceInMelcloud) : false;
+          const pusDeviceTypeAtw = deviceType === 1 ? devicesByTypeInMelCloud.atw.push(deviceInMelcloud) : false;
+          const pusDeviceTypeErv = deviceType === 3 ? devicesByTypeInMelCloud.erv.push(deviceInMelcloud) : false;
+        };
+
+        //devices in config
+        const ataDevicesInConfigExist = pluginConfig[0].accounts[this.deviceIndex].ataDevices ?? false;
+        const atwDevicesInConfigExist = pluginConfig[0].accounts[this.deviceIndex].atwDevices ?? false;
+        const ervDevicesInConfigExist = pluginConfig[0].accounts[this.deviceIndex].ervDevices ?? false;
+
+        //check key of devices in config exist
+        const ataDevicesInConfig = !ataDevicesInConfigExist ? pluginConfig[0].accounts[this.deviceIndex].ataDevices = [] : ataDevicesInConfigExist;
+        const atwDevicesInConfig = !atwDevicesInConfigExist ? pluginConfig[0].accounts[this.deviceIndex].atwDevices = [] : atwDevicesInConfigExist;
+        const ervDevicesInConfig = !ervDevicesInConfigExist ? pluginConfig[0].accounts[this.deviceIndex].ervDevices = [] : ervDevicesInConfigExist;
+
+        //device ata
+        devicesByTypeInMelCloud.ata.forEach((device, index) => {
+          const deviceId = device.DeviceID;
+          const deviceType = device.Type;
+          const deviceName = device.DeviceName;
+          const devicePresets = device.Presets ?? [];
+
+          const deviceAta = {
+            id: deviceId,
+            type: deviceType,
+            typeString: "Air Conditioner",
+            name: deviceName,
+            displayMode: 1,
+            heatDryFanMode: 1,
+            coolDryFanMode: 1,
+            autoDryFanMode: 1,
+            temperatureSensor: false,
+            temperatureSensorOutdoor: false,
+            presets: [],
+            buttonsSensors: []
+          };
+
+          const deviceExistsInConfig = ataDevicesInConfig.some(device => device.id === deviceId);
+          if (!deviceExistsInConfig) {
+            ataDevicesInConfig.push(deviceAta);
+            newDevices.ata.push(deviceAta);
+          };
+
+          //presets of device in melcloud
+          devicePresets.forEach((preset) => {
+            const presetId = preset.ID;
+            const presetName = preset.NumberDescription;
+
+            preset.id = presetId;
+            preset.name = presetName;
+            preset.displayType == 0;
+            preset.namePrefix = false;
+
+            //find the specific ataDevice to which the preset belongs
+            const ataDevice = ataDevicesInConfig.find((device) => device.id === deviceId);
+            if (ataDevice && !ataDevice.presets.some((p) => p.id === presetId)) {
+              ataDevice.presets.push(preset);
+              newDevices.ataPresets.push(preset);
+            }
+
+          });
+        });
+        const textAta = `ATA: ${newDevices.ata.length}`;
+        const textAtaPresets = `ATA Presets: ${newDevices.ataPresets.length}`;
+
+        //device atw
+        devicesByTypeInMelCloud.atw.forEach((device, index) => {
+          const deviceId = device.DeviceID;
+          const deviceType = device.Type;
+          const deviceName = device.DeviceName;
+          const devicePresets = device.Presets ?? [];
+
+          const deviceAtw = {
+            id: deviceId,
+            type: deviceType,
+            typeString: "Heat Pump",
+            name: deviceName,
+            displayMode: 1,
+            temperatureSensor: false,
+            temperatureSensorFlow: false,
+            temperatureSensorReturn: false,
+            temperatureSensorFlowZone1: false,
+            temperatureSensorReturnZone1: false,
+            temperatureSensorFlowWaterTank: false,
+            temperatureSensorReturnWaterTank: false,
+            temperatureSensorFlowZone2: false,
+            temperatureSensorReturnZone2: false,
+            temperatureSensor: false,
+            temperatureSensorOutdoor: false,
+            presets: [],
+            buttonsSensors: []
+          };
+
+          const deviceExistsInConfig = atwDevicesInConfig.some(device => device.id === deviceId);
+          if (!deviceExistsInConfig) {
+            atwDevicesInConfig.push(deviceAtw);
+            newDevices.atw.push(deviceAtw);
+          };
+
+          //presets of device in melcloud
+          devicePresets.forEach((preset) => {
+            const presetId = preset.ID;
+            const presetName = preset.NumberDescription;
+
+            preset.id = presetId;
+            preset.name = presetName;
+            preset.displayType == 0;
+            preset.namePrefix = false;
+
+            //find the specific ataDevice to which the preset belongs
+            const atwDevice = atwDevicesInConfig.find((device) => device.id === deviceId);
+            if (atwDevice && !atwDevice.presets.some((p) => p.id === presetId)) {
+              atwDevice.presets.push(preset);
+              newDevices.atwPresets.push(preset);
+            }
+
+          });
+        });
+        const textAtw = `ATW: ${newDevices.atw.length}`;
+        const textAtwPresets = `ATW Presets: ${newDevices.atwPresets.length}`;
+
+        //device erv
+        devicesByTypeInMelCloud.erv.forEach((device, index) => {
+          const deviceId = device.DeviceID;
+          const deviceType = device.Type;
+          const deviceName = device.DeviceName;
+          const devicePresets = device.Presets ?? [];
+
+          const deviceErv = {
+            id: deviceId,
+            type: deviceType,
+            typeString: "Energy Recovery Ventilation",
+            name: deviceName,
+            displayMode: 1,
+            temperatureSensor: false,
+            temperatureSensorOutdoor: false,
+            temperatureSensorSupply: false,
+            temperatureSensor: false,
+            temperatureSensorOutdoor: false,
+            presets: [],
+            buttonsSensors: []
+          };
+
+          const deviceExistsInConfig = ervDevicesInConfig.some(device => device.id === deviceId);
+          if (!deviceExistsInConfig) {
+            ervDevicesInConfig.push(deviceErv);
+            newDevices.erv.push(deviceErv);
+          };
+
+          //presets of device in melcloud
+          devicePresets.forEach((preset) => {
+            const presetId = preset.ID;
+            const presetName = preset.NumberDescription;
+
+            preset.id = presetId;
+            preset.name = presetName;
+            preset.displayType == 0;
+            preset.namePrefix = false;
+
+            //find the specific ataDevice to which the preset belongs
+            const ervDevice = ervDevicesInConfig.find((device) => device.id === deviceId);
+            if (ervDevice && !ervDevice.presets.some((p) => p.id === presetId)) {
+              ervDevice.presets.push(preset);
+              newDevices.ervPresets.push(preset);
+            }
+
+          });
+        });
+        const textErv = `ERV: ${newDevices.erv.length}`;
+        const textErvPresets = `ERV Presets: ${newDevices.ervPresets.length}`;
+
+        //display info
+        const newDevicesCount = newDevices.ata.length + newDevices.atw.length + newDevices.erv.length ?? 0;
+        const newPresetsCount = newDevices.ataPresets.length + newDevices.atwPresets.length + newDevices.ervPresets.length ?? 0;
+        if (newDevicesCount === 0 && newPresetsCount === 0) {
+          document.getElementById('info').innerHTML = 'No new devices found.';
+          document.getElementById('info').style.color = 'white';
+        };
+
+        if (newDevicesCount > 0 && newPresetsCount > 0) {
+          document.getElementById('info').innerHTML = `Found, ${textAta}, ${textAtw}, ${textErv}.`;
+          document.getElementById('info').style.color = 'green';
+          document.getElementById('info1').innerHTML = `${textAtaPresets}, ${textAtwPresets}, ${textErvPresets}.`;
+          document.getElementById('info1').style.color = 'green';
+          document.getElementById('info2').innerHTML = 'Now You can configure it.';
+          document.getElementById('info2').style.color = 'green';
+        };
+
+        if (newDevicesCount > 0 && newPresetsCount === 0) {
+          document.getElementById('info').innerHTML = `Found, ${textAta}, ${textAtw}, ${textErv}.`;
+          document.getElementById('info').style.color = 'green';
+          document.getElementById('info1').innerHTML = 'Now You can configure it.';
+          document.getElementById('info1').style.color = 'green';
+        };
+
+        if (newDevicesCount === 0 && newPresetsCount > 0) {
+          document.getElementById('info').innerHTML = `Found, ${textAtaPresets}, ${textAtwPresets}, ${textErvPresets}.`;
+          document.getElementById('info').style.color = 'green';
+          document.getElementById('info1').innerHTML = 'Now You can configure it.';
+          document.getElementById('info1').style.color = 'green';
+        }
+
+        //update ans save plugin config
+        await homebridge.updatePluginConfig(pluginConfig);
+        await homebridge.savePluginConfig(pluginConfig);
         homebridge.hideSpinner();
-      } catch (e) {
-        document.getElementById('info').innerHTML = 'Please try again.';
-        homebridge.toast.error(`Data error: ${e.message}`);
+      } catch (error) {
+        document.getElementById('info').innerHTML = 'Check Your credentials data and try again.';
+        document.getElementById('info').style.color = 'yellow';
+        document.getElementById('info1').innerHTML = `Error: ${error}`;
+        document.getElementById('info1').style.color = 'red';
       } finally {
         homebridge.hideSpinner();
       };
