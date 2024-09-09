@@ -10,7 +10,6 @@ const CONSTANTS = require('./constants.json');
 class MelCloudErv extends EventEmitter {
     constructor(config) {
         super();
-        this.accountFile = config.accountFile;
         this.devicesFile = config.devicesFile;
         this.deviceId = config.deviceId;
         this.debugLog = config.debugLog;
@@ -47,31 +46,13 @@ class MelCloudErv extends EventEmitter {
 
     async checkState() {
         try {
-            //read account info from file
-            const accountInfo = await this.readData(this.accountFile);
-
-            //remove sensitive data
-            const debugData = {
-                ...accountInfo,
-                ContextKey: 'removed',
-                ClientId: 'removed',
-                Client: 'removed',
-                Name: 'removed',
-                MapLongitude: 'removed',
-                MapLatitude: 'removed'
-            };
-            const debug = this.debugLog ? this.emit('debug', `Account Info: ${JSON.stringify(debugData, null, 2)}`) : false;
-            const useFahrenheit = accountInfo.UseFahrenheit ? 1 : 0;
-            this.useFahrenheit = useFahrenheit;
-
             //read device info from file
             const devicesData = await this.readData(this.devicesFile);
             const debug1 = this.debugLog ? this.emit('debug', `Device Info: ${JSON.stringify(devicesData, null, 2)}`) : false;
             const deviceData = devicesData.find((device) => device.DeviceID === this.deviceId);
 
             if (!deviceData) {
-                await this.impulseGenerator.stop();
-                this.emit('error', `Device data not found, check again in 15s.`);
+                this.emit('warn', `Device data not found.`);
                 return;
             }
 
@@ -354,7 +335,7 @@ class MelCloudErv extends EventEmitter {
             //emit state 
             this.deviceData = deviceData;
             const debug2 = this.debugLog ? this.emit('debug', `Device State: ${JSON.stringify(deviceState, null, 2)}`) : false;
-            this.emit('deviceState', deviceData, deviceState, useFahrenheit);
+            this.emit('deviceState', deviceData, deviceState);
 
             return true;
         } catch (error) {
@@ -387,7 +368,7 @@ class MelCloudErv extends EventEmitter {
             };
 
             await this.axiosInstancePost(CONSTANTS.ApiUrls.SetErv, options);
-            this.emit('deviceState', this.deviceData, deviceState, this.useFahrenheit);
+            this.emit('deviceState', this.deviceData, deviceState);
             return true;
         } catch (error) {
             throw new Error(error.message ?? error);

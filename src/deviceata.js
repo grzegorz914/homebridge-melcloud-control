@@ -7,7 +7,7 @@ const CONSTANTS = require('./constants.json');
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceAta extends EventEmitter {
-    constructor(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, accountFile, devicesFile, refreshInterval) {
+    constructor(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, refreshInterval, useFahrenheit) {
         super();
 
         Accessory = api.platformAccessory;
@@ -34,9 +34,9 @@ class DeviceAta extends EventEmitter {
         this.deviceId = deviceId;
         this.deviceName = deviceName;
         this.deviceTypeText = deviceTypeText;
-        this.accountFile = accountFile;
         this.devicesFile = devicesFile;
         this.refreshInterval = refreshInterval;
+        this.useFahrenheit = useFahrenheit;
         this.startPrepareAccessory = true;
 
         //external integrations
@@ -106,7 +106,6 @@ class DeviceAta extends EventEmitter {
             //melcloud device
             this.melCloudAta = new MelCloudAta({
                 contextKey: this.contextKey,
-                accountFile: this.accountFile,
                 devicesFile: this.devicesFile,
                 deviceId: this.deviceId,
                 debugLog: this.enableDebugMode
@@ -206,7 +205,7 @@ class DeviceAta extends EventEmitter {
                     this.serialNumber = serialNumber;
                     this.firmwareRevision = firmwareAppVersion;
                 })
-                .on('deviceState', async (deviceData, deviceState, useFahrenheit) => {
+                .on('deviceState', async (deviceData, deviceState) => {
                     //device info
                     const displayMode = this.displayMode;
                     const hasAutomaticFanSpeed = deviceData.Device.HasAutomaticFanSpeed ?? false;
@@ -223,7 +222,7 @@ class DeviceAta extends EventEmitter {
                     const modelSupportsDry = deviceData.Device.ModelSupportsDry ?? false;
                     const temperatureIncrement = deviceData.Device.TemperatureIncrement ?? 1;
                     const outdoorTemperature = deviceData.Device.OutdoorTemperature;
-                    const temperatureUnit = CONSTANTS.TemperatureDisplayUnits[useFahrenheit];
+                    const temperatureUnit = CONSTANTS.TemperatureDisplayUnits[this.useFahrenheit];
 
                     //presets
                     const presetsOnServer = deviceData.Presets ?? [];
@@ -257,7 +256,7 @@ class DeviceAta extends EventEmitter {
                     this.accessory.swingMode = swingFunction && vaneHorizontal === 12 && vaneVertical === 7 ? 1 : 0;
                     this.accessory.lockPhysicalControl = prohibitSetTemperature && prohibitOperationMode && prohibitPower ? 1 : 0;
                     this.accessory.temperatureIncrement = temperatureIncrement;
-                    this.accessory.useFahrenheit = useFahrenheit;
+                    this.accessory.useFahrenheit = this.useFahrenheit;
                     this.accessory.temperatureUnit = temperatureUnit;
                     this.accessory.hasAutomaticFanSpeed = hasAutomaticFanSpeed;
                     this.accessory.airDirectionFunction = airDirectionFunction;
@@ -355,14 +354,14 @@ class DeviceAta extends EventEmitter {
                             //update characteristics
                             if (this.melCloudService) {
                                 this.melCloudService
-                                    .updateCharacteristic(Characteristic.Active, power ? 1 : 0)
+                                    .updateCharacteristic(Characteristic.Active, this.accessory.power)
                                     .updateCharacteristic(Characteristic.CurrentHeaterCoolerState, this.accessory.currentOperationMode)
                                     .updateCharacteristic(Characteristic.TargetHeaterCoolerState, this.accessory.targetOperationMode)
                                     .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                                     .updateCharacteristic(Characteristic.HeatingThresholdTemperature, setTemperature)
                                     .updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature)
                                     .updateCharacteristic(Characteristic.LockPhysicalControls, this.accessory.lockPhysicalControl)
-                                    .updateCharacteristic(Characteristic.TemperatureDisplayUnits, useFahrenheit);
+                                    .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.accessory.useFahrenheit);
                                 const updateRS = modelSupportsFanSpeed ? this.melCloudService.updateCharacteristic(Characteristic.RotationSpeed, this.accessory.fanSpeed) : false;
                                 const updateSM = swingFunction ? this.melCloudService.updateCharacteristic(Characteristic.SwingMode, this.accessory.swingMode) : false;
                             };
@@ -431,7 +430,7 @@ class DeviceAta extends EventEmitter {
                                     .updateCharacteristic(Characteristic.TargetHeatingCoolingState, this.accessory.targetOperationMode)
                                     .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                                     .updateCharacteristic(Characteristic.TargetTemperature, setTemperature)
-                                    .updateCharacteristic(Characteristic.TemperatureDisplayUnits, useFahrenheit);
+                                    .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.accessory.useFahrenheit);
                             };
                             break;
                     };

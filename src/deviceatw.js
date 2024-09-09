@@ -7,7 +7,7 @@ const CONSTANTS = require('./constants.json');
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceAtw extends EventEmitter {
-    constructor(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, accountFile, devicesFile, refreshInterval) {
+    constructor(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, refreshInterval, useFahrenheit) {
         super();
 
         Accessory = api.platformAccessory;
@@ -38,9 +38,9 @@ class DeviceAtw extends EventEmitter {
         this.deviceId = deviceId;
         this.deviceName = deviceName;
         this.deviceTypeText = deviceTypeText;
-        this.accountFile = accountFile;
         this.devicesFile = devicesFile;
         this.refreshInterval = refreshInterval;
+        this.useFahrenheit = useFahrenheit;
         this.startPrepareAccessory = true;
 
         //external integrations
@@ -102,7 +102,6 @@ class DeviceAtw extends EventEmitter {
             //melcloud device
             this.melCloudAtw = new MelCloudAtw({
                 contextKey: this.contextKey,
-                accountFile: this.accountFile,
                 devicesFile: this.devicesFile,
                 deviceId: this.deviceId,
                 debugLog: this.enableDebugMode
@@ -204,7 +203,7 @@ class DeviceAtw extends EventEmitter {
                     this.serialNumber = serialNumber;
                     this.firmwareRevision = firmwareAppVersion;
                 })
-                .on('deviceState', async (deviceData, deviceState, useFahrenheit) => {
+                .on('deviceState', async (deviceData, deviceState) => {
                     //device info
                     const displayMode = this.displayMode;
                     const heatPumpName = 'Heat Pump';
@@ -217,7 +216,7 @@ class DeviceAtw extends EventEmitter {
                     const canCool = deviceData.Device.CanCool ?? false;
                     const heatCoolModes = canHeat && canCool ? 0 : canHeat ? 1 : canCool ? 2 : 3;
                     const temperatureIncrement = deviceData.Device.TemperatureIncrement ?? 1;
-                    const temperatureUnit = CONSTANTS.TemperatureDisplayUnits[useFahrenheit];
+                    const temperatureUnit = CONSTANTS.TemperatureDisplayUnits[this.useFahrenheit];
                     const minSetTemperature = deviceData.Device.MinSetTemperature ?? 10;
                     const maxSetTemperature = deviceData.Device.MaxSetTemperature ?? 30;
                     const maxTankTemperature = deviceData.Device.MaxTankTemperature ?? 70;
@@ -274,12 +273,12 @@ class DeviceAtw extends EventEmitter {
 
                     //accessory
                     this.accessory.presetsOnServer = presetsOnServer;
-                    this.accessory.power = power;
+                    this.accessory.power = power ? 1 : 0;
                     this.accessory.offline = offline;
                     this.accessory.unitStatus = unitStatus;
                     this.accessory.idleZone1 = idleZone1;
                     this.accessory.idleZone2 = idleZone2;
-                    this.accessory.useFahrenheit = useFahrenheit;
+                    this.accessory.useFahrenheit = this.useFahrenheit;
                     this.accessory.temperatureUnit = temperatureUnit;
                     this.accessory.temperatureIncrement = temperatureIncrement;
                     this.accessory.hasHotWaterTank = hasHotWaterTank;
@@ -381,7 +380,7 @@ class DeviceAtw extends EventEmitter {
                                         .updateCharacteristic(Characteristic.TargetHeaterCoolerState, targetOperationMode)
                                         .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                                         .updateCharacteristic(Characteristic.LockPhysicalControls, lockPhysicalControl)
-                                        .updateCharacteristic(Characteristic.TemperatureDisplayUnits, useFahrenheit);
+                                        .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.accessory.useFahrenheit);
                                     const updateHT = heatCoolModes === 0 || heatCoolModes === 1 ? this.melCloudServices[i].updateCharacteristic(Characteristic.HeatingThresholdTemperature, setTemperature) : false;
                                     const updateCT = heatCoolModes === 0 || heatCoolModes === 2 ? this.melCloudServices[i].updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature) : false;
                                 }
@@ -452,7 +451,7 @@ class DeviceAtw extends EventEmitter {
                                         .updateCharacteristic(Characteristic.TargetHeatingCoolingState, targetOperationMode)
                                         .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                                         .updateCharacteristic(Characteristic.TargetTemperature, setTemperature)
-                                        .updateCharacteristic(Characteristic.TemperatureDisplayUnits, useFahrenheit);
+                                        .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.accessory.useFahrenheit);
                                 }
                                 break;
                         };
@@ -948,7 +947,7 @@ class DeviceAtw extends EventEmitter {
                                                     deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationMode;
                                                     break;
                                             };
-                                            operationModeText = !this.accessory.power ? CONSTANTS.HeatPump.System[0] : CONSTANTS.HeatPump.System[deviceState.UnitStatus];
+                                            operationModeText = [CONSTANTS.HeatPump.System[0], CONSTANTS.HeatPump.System[deviceState.UnitStatus]][this.accessory.power];
                                             break;
                                         case 1: //Zone 1 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
                                             switch (value) {
@@ -1194,7 +1193,7 @@ class DeviceAtw extends EventEmitter {
                                                     deviceState.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power;
                                                     break;
                                             };
-                                            operationModeText = !this.accessory.power ? CONSTANTS.HeatPump.System[0] : CONSTANTS.HeatPump.System[deviceState.UnitStatus];
+                                            operationModeText = [CONSTANTS.HeatPump.System[0], CONSTANTS.HeatPump.System[deviceState.UnitStatus]][this.accessory.power];
                                             break;
                                         case 1: //Zone 1 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
                                             switch (value) {

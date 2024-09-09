@@ -7,7 +7,7 @@ const CONSTANTS = require('./constants.json');
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceErv extends EventEmitter {
-    constructor(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, accountFile, devicesFile, refreshInterval) {
+    constructor(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, refreshInterval, useFahrenheit) {
         super();
 
         Accessory = api.platformAccessory;
@@ -32,9 +32,9 @@ class DeviceErv extends EventEmitter {
         this.deviceId = deviceId;
         this.deviceName = deviceName;
         this.deviceTypeText = deviceTypeText;
-        this.accountFile = accountFile;
         this.devicesFile = devicesFile;
         this.refreshInterval = refreshInterval;
+        this.useFahrenheit = useFahrenheit;
         this.startPrepareAccessory = true;
 
         //external integrations
@@ -105,7 +105,6 @@ class DeviceErv extends EventEmitter {
             //melcloud device
             this.melCloudErv = new MelCloudErv({
                 contextKey: this.contextKey,
-                accountFile: this.accountFile,
                 devicesFile: this.devicesFile,
                 deviceId: this.deviceId,
                 debugLog: this.enableDebugMode
@@ -207,7 +206,7 @@ class DeviceErv extends EventEmitter {
                     //device info
 
                 })
-                .on('deviceState', async (deviceData, deviceState, useFahrenheit) => {
+                .on('deviceState', async (deviceData, deviceState) => {
                     //device info
                     const displayMode = this.displayMode;
                     const hasCoolOperationMode = deviceData.Device.HasCoolOperationMode ?? false;
@@ -249,14 +248,14 @@ class DeviceErv extends EventEmitter {
                     const hideOutdoorTemperature = deviceState.HideOutdoorTemperature;
                     const power = deviceState.Power;
                     const offline = deviceState.Offline;
-                    const temperatureUnit = CONSTANTS.TemperatureDisplayUnits[useFahrenheit];
+                    const temperatureUnit = CONSTANTS.TemperatureDisplayUnits[this.useFahrenheit];
 
                     //set temperature
                     const targetTemperature = hasCoolOperationMode || hasHeatOperationMode ? setTemperature : 20;
 
                     //accessory
                     this.accessory.presetsOnServer = presetsOnServer;
-                    this.accessory.power = power;
+                    this.accessory.power = power ? 1 : 0;
                     this.accessory.offline = offline;
                     this.accessory.roomTemperature = roomTemperature;
                     this.accessory.outdoorTemperature = outdoorTemperature;
@@ -264,7 +263,7 @@ class DeviceErv extends EventEmitter {
                     this.accessory.setTemperature = targetTemperature;
                     this.accessory.setFanSpeed = setFanSpeed;
                     this.accessory.temperatureIncrement = temperatureIncrement;
-                    this.accessory.useFahrenheit = useFahrenheit;
+                    this.accessory.useFahrenheit = this.useFahrenheit;
                     this.accessory.temperatureUnit = temperatureUnit;
                     this.accessory.hasAutomaticFanSpeed = hasAutomaticFanSpeed;
                     this.accessory.hasOutdoorTemperature = hasOutdoorTemperature;
@@ -349,13 +348,13 @@ class DeviceErv extends EventEmitter {
                             //update characteristics
                             if (this.melCloudService) {
                                 this.melCloudService
-                                    .updateCharacteristic(Characteristic.Active, power ? 1 : 0)
+                                    .updateCharacteristic(Characteristic.Active, this.accessory.power)
                                     .updateCharacteristic(Characteristic.CurrentHeaterCoolerState, this.accessory.currentOperationMode)
                                     .updateCharacteristic(Characteristic.TargetHeaterCoolerState, this.accessory.targetOperationMode)
                                     .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                                     .updateCharacteristic(Characteristic.RotationSpeed, this.accessory.fanSpeed)
                                     .updateCharacteristic(Characteristic.LockPhysicalControls, this.accessory.lockPhysicalControl)
-                                    .updateCharacteristic(Characteristic.TemperatureDisplayUnits, useFahrenheit);
+                                    .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.accessory.useFahrenheit);
                                 const updateHOM = hasHeatOperationMode ? this.melCloudService.updateCharacteristic(Characteristic.HeatingThresholdTemperature, targetTemperature) : false;
                                 const updateCOM = hasCoolOperationMode ? this.melCloudService.updateCharacteristic(Characteristic.CoolingThresholdTemperature, targetTemperature) : false;
                             };
@@ -408,7 +407,7 @@ class DeviceErv extends EventEmitter {
                                     .updateCharacteristic(Characteristic.TargetHeatingCoolingState, this.accessory.targetOperationMode)
                                     .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                                     .updateCharacteristic(Characteristic.TargetTemperature, targetTemperature)
-                                    .updateCharacteristic(Characteristic.TemperatureDisplayUnits, useFahrenheit);
+                                    .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.accessory.useFahrenheit);
                             };
                             break;
                     };

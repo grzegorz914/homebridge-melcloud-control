@@ -15,9 +15,8 @@ class MelCloud extends EventEmitter {
         this.devicesFile = devicesFile;
         this.enableDebugMode = enableDebugMode;
         this.requestConfig = requestConfig;
-        this.contextKey = '';
-        this.useFahrenheit = 0;
         this.devicesId = [];
+        this.contextKey = '';
 
         this.options = {
             data: {
@@ -50,7 +49,7 @@ class MelCloud extends EventEmitter {
             const axiosInstanceLogin = axios.create({
                 method: 'POST',
                 baseURL: CONSTANTS.ApiUrls.BaseURL,
-                timeout: 5000,
+                timeout: 10000,
                 withCredentials: true,
                 maxContentLength: 100000000,
                 maxBodyLength: 1000000000,
@@ -63,7 +62,7 @@ class MelCloud extends EventEmitter {
             const account = accountData.data;
             const accountInfo = account.LoginData;
             const contextKey = accountInfo.ContextKey;
-            this.useFahrenheit = accountInfo.UseFahrenheit
+            const useFahrenheit = accountInfo.UseFahrenheit ? 1 : 0;
             this.contextKey = contextKey;
 
             //remove sensitive data
@@ -83,6 +82,24 @@ class MelCloud extends EventEmitter {
                 return;
             };
 
+            //create axios instance post
+            this.axiosInstancePost = axios.create({
+                method: 'POST',
+                baseURL: CONSTANTS.ApiUrls.BaseURL,
+                timeout: 10000,
+                headers: {
+                    'X-MitsContextKey': contextKey,
+                    'content-type': 'application/json'
+                },
+                maxContentLength: 100000000,
+                maxBodyLength: 1000000000,
+                withCredentials: true,
+                httpsAgent: new https.Agent({
+                    keepAlive: false,
+                    rejectUnauthorized: false
+                })
+            });
+
             //save melcloud info to the file
             await this.saveData(this.accountFile, accountInfo);
 
@@ -91,7 +108,8 @@ class MelCloud extends EventEmitter {
 
             const obj = {
                 accountInfo: accountInfo,
-                contextKey: contextKey
+                contextKey: contextKey,
+                useFahrenheit: useFahrenheit
             }
 
             return obj;
@@ -106,7 +124,7 @@ class MelCloud extends EventEmitter {
             const axiosInstanceGet = axios.create({
                 method: 'GET',
                 baseURL: CONSTANTS.ApiUrls.BaseURL,
-                timeout: 5000,
+                timeout: 10000,
                 headers: {
                     'X-MitsContextKey': contextKey
                 },
@@ -177,29 +195,11 @@ class MelCloud extends EventEmitter {
 
     async send(accountInfo) {
         try {
-            //create axios instance post
-            const axiosInstancePost = axios.create({
-                method: 'POST',
-                baseURL: CONSTANTS.ApiUrls.BaseURL,
-                timeout: 5000,
-                headers: {
-                    'X-MitsContextKey': this.contextKey,
-                    'content-type': 'application/json'
-                },
-                maxContentLength: 100000000,
-                maxBodyLength: 1000000000,
-                withCredentials: true,
-                httpsAgent: new https.Agent({
-                    keepAlive: false,
-                    rejectUnauthorized: false
-                })
-            });
-
             const options = {
                 data: accountInfo
             };
 
-            await axiosInstancePost(CONSTANTS.ApiUrls.UpdateApplicationOptions, options);
+            await this.axiosInstancePost(CONSTANTS.ApiUrls.UpdateApplicationOptions, options);
             await this.saveData(this.accountInfoFile, accountInfo);
             return true;
         } catch (error) {

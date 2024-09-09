@@ -95,6 +95,7 @@ class MelCloudPlatform {
 					const response = await melCloud.connect();
 					const accountInfo = response.accountInfo;
 					const contextKey = response.contextKey;
+					const useFahrenheit = response.useFahrenheit;
 
 					//check devices list
 					const devices = await melCloud.chackDevicesList(contextKey);
@@ -116,7 +117,7 @@ class MelCloudPlatform {
 
 							const deviceName = device.name;
 							const deviceTypeText = device.typeString;
-							const airConditioner = new DeviceAta(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, accountFile, devicesFile, deviceRefreshInterval)
+							const airConditioner = new DeviceAta(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit)
 							airConditioner.on('publishAccessory', (accessory) => {
 
 								//publish device
@@ -161,7 +162,7 @@ class MelCloudPlatform {
 
 							const deviceName = device.name;
 							const deviceTypeText = device.typeString;
-							const heatPump = new DeviceAtw(api, account, melCloud, device, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, accountFile, devicesFile, deviceRefreshInterval)
+							const heatPump = new DeviceAtw(api, account, melCloud, device, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit)
 							heatPump.on('publishAccessory', (accessory) => {
 
 								//publish device
@@ -206,7 +207,7 @@ class MelCloudPlatform {
 
 							const deviceName = device.name;
 							const deviceTypeText = device.typeString;
-							const energyRecoveryVentilation = new DeviceErv(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, accountFile, devicesFile, deviceRefreshInterval)
+							const energyRecoveryVentilation = new DeviceErv(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit)
 							energyRecoveryVentilation.on('publishAccessory', (accessory) => {
 
 								//publish device
