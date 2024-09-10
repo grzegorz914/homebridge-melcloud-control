@@ -15,7 +15,7 @@ class MelCloudAtw extends EventEmitter {
         this.debugLog = config.debugLog;
 
         //set default values
-        this.deviceData = {};
+        this.deviceState = {};
 
         this.axiosInstancePost = axios.create({
             method: 'POST',
@@ -369,12 +369,39 @@ class MelCloudAtw extends EventEmitter {
                 this.emit('message', `Units are not configured in MELCloud service.`);
             };
 
+            const deviceState = {
+                SetTemperatureZone1: setTemperatureZone1,
+                SetTemperatureZone2: setTemperatureZone2,
+                RoomTemperatureZone1: roomTemperatureZone1,
+                RoomTemperatureZone2: roomTemperatureZone2,
+                OperationMode: operationMode,
+                OperationModeZone1: operationModeZone1,
+                OperationModeZone2: operationModeZone2,
+                SetHeatFlowTemperatureZone1: setHeatFlowTemperatureZone1,
+                SetHeatFlowTemperatureZone2: setHeatFlowTemperatureZone2,
+                SetCoolFlowTemperatureZone1: setCoolFlowTemperatureZone1,
+                SetCoolFlowTemperatureZone2: setCoolFlowTemperatureZone2,
+                TankWaterTemperature: tankWaterTemperature,
+                SetTankWaterTemperature: setTankWaterTemperature,
+                ForcedHotWaterMode: forcedHotWaterMode,
+                OutdoorTemperature: outdoorTemperature,
+                EcoHotWater: ecoHotWater,
+                HolidayMode: holidayMode,
+                ProhibitZone1: prohibitHeatingZone1,
+                ProhibitZone2: prohibitHeatingZone2,
+                ProhibitHotWater: prohibitHotWater,
+                IdleZone1: idleZone1,
+                IdleZone2: idleZone2,
+                UnitStatus: unitStatus,
+                Power: power
+            }
+
             //check state changes
-            const deviceDataHasNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);
+            const deviceDataHasNotChanged = JSON.stringify(deviceState) === JSON.stringify(this.deviceState);
             if (deviceDataHasNotChanged) {
                 return;
             }
-            this.deviceData = deviceData;
+            this.deviceState = deviceState;
 
             //external integrations
             this.emit('externalIntegrations', deviceData);

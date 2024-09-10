@@ -15,7 +15,7 @@ class MelCloudErv extends EventEmitter {
         this.debugLog = config.debugLog;
 
         //set default values
-        this.deviceData = {};
+        this.deviceState = {};
 
         this.axiosInstancePost = axios.create({
             method: 'POST',
@@ -296,12 +296,27 @@ class MelCloudErv extends EventEmitter {
                 this.emit('message', `Units are not configured in MELCloud service.`);
             };
 
+            const deviceState = {
+                RoomTemperature: roomTemperature,
+                SupplyTemperature: supplyTemperature,
+                OutdoorTemperature: outdoorTemperature,
+                NightPurgeMode: nightPurgeMode,
+                SetTemperature: setTemperature,
+                SetFanSpeed: setFanSpeed,
+                OperationMode: operationMode,
+                VentilationMode: ventilationMode,
+                HideRoomTemperature: hideRoomTemperature,
+                HideSupplyTemperature: hideSupplyTemperature,
+                HideOutdoorTemperature: hideOutdoorTemperature,
+                Power: power
+            }
+
             //check state changes
-            const deviceDataHasNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);
+            const deviceDataHasNotChanged = JSON.stringify(deviceState) === JSON.stringify(this.deviceState);
             if (deviceDataHasNotChanged) {
                 return;
             }
-            this.deviceData = deviceData;
+            this.deviceState = deviceState;
 
             //external integrations
             this.emit('externalIntegrations', deviceData);

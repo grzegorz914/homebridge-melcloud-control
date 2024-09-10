@@ -15,7 +15,7 @@ class MelCloudAta extends EventEmitter {
         this.debugLog = config.debugLog;
 
         //set default values
-        this.deviceData = {};
+        this.deviceState = {};
 
         this.axiosInstancePost = axios.create({
             method: 'POST',
@@ -130,15 +130,15 @@ class MelCloudAta extends EventEmitter {
             const modelDisableEnergyReport = device.ModelDisableEnergyReport;
             const modelSupportsStandbyMode = device.ModelSupportsStandbyMode;
             const modelSupportsEnergyReporting = device.ModelSupportsEnergyReporting;
-            const prohibitSetTemperature = device.ProhibitSetTemperature ?? false;
-            const prohibitOperationMode = device.ProhibitOperationMode ?? false;
-            const prohibitPower = device.ProhibitPower ?? false;
-            const power = device.Power ?? false;
+            const prohibitSetTemperature = device.ProhibitSetTemperature;
+            const prohibitOperationMode = device.ProhibitOperationMode;
+            const prohibitPower = device.ProhibitPower;
+            const power = device.Power;
             const roomTemperature = device.RoomTemperature;
             const outdoorTemperature = device.OutdoorTemperature;
             const setTemperature = device.SetTemperature;
             const actualFanSpeed = device.ActualFanSpeed;
-            const fanSpeed = device.FanSpeed ?? 0;
+            const fanSpeed = device.FanSpeed;
             const automaticFanSpeed = device.AutomaticFanSpeed;
             const vaneVerticalDirection = device.VaneVerticalDirection;
             const vaneVerticalSwing = device.VaneVerticalSwing;
@@ -146,7 +146,7 @@ class MelCloudAta extends EventEmitter {
             const vaneHorizontalSwing = device.VaneHorizontalSwing;
             const operationMode = device.OperationMode;
             const effectiveFlags = device.EffectiveFlags;
-            const inStandbyMode = device.InStandbyMode ?? false;
+            const inStandbyMode = device.InStandbyMode;
             const demandPercentage = device.DemandPercentage;
             const configuredDemandPercentage = device.ConfiguredDemandPercentage;
             const hasDemandSideControl = device.HasDemandSideControl;
@@ -307,12 +307,28 @@ class MelCloudAta extends EventEmitter {
                 this.emit('warn', `Units are not configured in MELCloud service.`);
             };
 
+            const deviceState = {
+                RoomTemperature: roomTemperature,
+                SetTemperature: setTemperature,
+                FanSpeed: fanSpeed,
+                OperationMode: operationMode,
+                VaneHorizontalDirection: vaneHorizontalDirection,
+                VaneVerticalDirection: vaneVerticalDirection,
+                HideVaneControls: hideVaneControls,
+                HideDryModeControl: hideDryModeControl,
+                InStandbyMode: inStandbyMode,
+                ProhibitSetTemperature: prohibitSetTemperature,
+                ProhibitOperationMode: prohibitOperationMode,
+                ProhibitPower: prohibitPower,
+                Power: power
+            }
+
             //check state changes
-            const deviceDataHasNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);
+            const deviceDataHasNotChanged = JSON.stringify(deviceState) === JSON.stringify(this.deviceState);
             if (deviceDataHasNotChanged) {
                 return;
             }
-            this.deviceData = deviceData;
+            this.deviceState = deviceState;
 
             //external integrations
             this.emit('externalIntegrations', deviceData);
@@ -380,7 +396,7 @@ class MelCloudAta extends EventEmitter {
                     EffectiveFlags: deviceData.Device.EffectiveFlags,
                     RoomTemperature: deviceData.Device.RoomTemperature,
                     SetTemperature: deviceData.Device.SetTemperature,
-                    SetFanSpeed: deviceData.Device.SetFanSpeed,
+                    SetFanSpeed: deviceData.Device.FanSpeed,
                     OperationMode: deviceData.Device.OperationMode,
                     VaneHorizontal: deviceData.Device.VaneHorizontalDirection,
                     VaneVertical: deviceData.Device.VaneVerticalDirection,
