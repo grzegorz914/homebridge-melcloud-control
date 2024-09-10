@@ -16,7 +16,6 @@ class MelCloudErv extends EventEmitter {
 
         //set default values
         this.deviceData = {};
-        this.displayDeviceInfo = true;
 
         this.axiosInstancePost = axios.create({
             method: 'POST',
@@ -48,13 +47,13 @@ class MelCloudErv extends EventEmitter {
         try {
             //read device info from file
             const devicesData = await this.readData(this.devicesFile);
-            const debug1 = this.debugLog ? this.emit('debug', `Device Info: ${JSON.stringify(devicesData, null, 2)}`) : false;
             const deviceData = devicesData.find((device) => device.DeviceID === this.deviceId);
 
             if (!deviceData) {
                 this.emit('warn', `Device data not found.`);
                 return;
             }
+            const debug = this.debugLog ? this.emit('debug', `Device Data: ${JSON.stringify(deviceData, null, 2)}`) : false;
 
             //deviceData
             const deviceId = deviceData.DeviceID;
@@ -298,44 +297,21 @@ class MelCloudErv extends EventEmitter {
                 this.emit('message', `Units are not configured in MELCloud service.`);
             };
 
-            //emit info
-            const emitInfo = this.displayDeviceInfo ? this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) : false;
-            this.displayDeviceInfo = false;
-
-            //device state
-            const deviceState = {
-                DeviceId: deviceId,
-                EffectiveFlags: effectiveFlags,
-                RoomTemperature: roomTemperature,
-                SupplyTemperature: supplyTemperature,
-                OutdoorTemperature: outdoorTemperature,
-                NightPurgeMode: nightPurgeMode,
-                SetTemperature: setTemperature,
-                SetFanSpeed: setFanSpeed,
-                OperationMode: operationMode,
-                VentilationMode: ventilationMode,
-                DefaultCoolingSetTemperature: defaultCoolingSetTemperature,
-                DefaultHeatingSetTemperature: defaultHeatingSetTemperature,
-                HideRoomTemperature: hideRoomTemperature,
-                HideSupplyTemperature: hideSupplyTemperature,
-                HideOutdoorTemperature: hideOutdoorTemperature,
-                Power: power,
-                Offline: offline,
-            }
-
-            //external integrations
-            this.emit('externalIntegrations', deviceData, deviceState, deviceId);
-
             //check state changes
-            const stateHasNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);
-            if (stateHasNotChanged) {
+            const deviceDataHasNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);
+            if (deviceDataHasNotChanged) {
                 return;
             }
+            this.deviceData = deviceData;
+
+            //external integrations
+            this.emit('externalIntegrations', deviceData);
+
+            //emit info
+            this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion);
 
             //emit state 
-            this.deviceData = deviceData;
-            const debug2 = this.debugLog ? this.emit('debug', `Device State: ${JSON.stringify(deviceState, null, 2)}`) : false;
-            this.emit('deviceState', deviceData, deviceState);
+            this.emit('deviceState', deviceData);
 
             return true;
         } catch (error) {
@@ -354,21 +330,40 @@ class MelCloudErv extends EventEmitter {
         }
     }
 
-    async send(deviceState) {
+    async send(deviceData) {
         try {
             //prevent to set out of range temp
-            const minTemp = this.deviceData.Device.MinTempHeat ?? 10;
-            const maxTemp = this.deviceData.Device.MaxTempHeat ?? 31;
-            deviceState.SetTemperature = deviceState.SetTemperature < minTemp ? minTemp : deviceState.SetTemperature;
-            deviceState.SetTemperature = deviceState.SetTemperature > maxTemp ? maxTemp : deviceState.SetTemperature;
+            const minTemp = deviceData.Device.MinTempHeat ?? 10;
+            const maxTemp = deviceData.Device.MaxTempHeat ?? 31;
+            deviceData.Device.SetTemperature = deviceData.Device.SetTemperature < minTemp ? minTemp : deviceData.Device.SetTemperature;
+            deviceData.Device.SetTemperature = deviceData.Device.SetTemperature > maxTemp ? maxTemp : deviceData.Device.SetTemperature;
 
-            deviceState.HasPendingCommand = true;
-            const options = {
-                data: deviceState
-            };
+            //device state
+            const payload = {
+                data: {
+                    DeviceID: deviceData.Device.DeviceID,
+                    EffectiveFlags: deviceData.Device.EffectiveFlags,
+                    RoomTemperature: deviceData.Device.RoomTemperature,
+                    SupplyTemperature: deviceData.Device.SupplyTemperature,
+                    OutdoorTemperature: deviceData.Device.OutdoorTemperature,
+                    NightPurgeMode: deviceData.Device.NightPurgeMode,
+                    SetTemperature: deviceData.Device.SetTemperature,
+                    SetFanSpeed: deviceData.Device.SetFanSpeed,
+                    OperationMode: deviceData.Device.OperationMode,
+                    VentilationMode: deviceData.Device.VentilationMode,
+                    DefaultCoolingSetTemperature: deviceData.Device.DefaultCoolingSetTemperature ?? 23,
+                    DefaultHeatingSetTemperature: deviceData.Device.DefaultHeatingSetTemperature ?? 21,
+                    HideRoomTemperature: deviceData.Device.HideRoomTemperature,
+                    HideSupplyTemperature: deviceData.Device.HideSupplyTemperature,
+                    HideOutdoorTemperature: deviceData.Device.HideOutdoorTemperature,
+                    Power: deviceData.Device.Power,
+                    Offline: deviceData.Device.Offline,
+                    HasPendingCommand: true
+                }
+            }
 
-            await this.axiosInstancePost(CONSTANTS.ApiUrls.SetErv, options);
-            this.emit('deviceState', this.deviceData, deviceState);
+            await this.axiosInstancePost(CONSTANTS.ApiUrls.SetErv, payload);
+            this.emit('deviceState', deviceData);
             return true;
         } catch (error) {
             throw new Error(error.message ?? error);

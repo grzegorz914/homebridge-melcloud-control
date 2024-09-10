@@ -276,8 +276,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 |     | `http//ip:port` | `ProhibitPower` | `true`, `false` | boolean | Lock set power. |
 |     | `http//ip:port` | `OperationMode` | `1 - Heat`, `2 - Dry`, `3 - Cool`, `7 - Fan`, `8 - Auto` | integer | Operating mode. |
 |     | `http//ip:port` | `SetFanSpeed` | `0 - Auto`, `1`, `2`, `3`, `4`, `5`, `6` | integer | Fan speed. |
-|     | `http//ip:port` | `VaneHorizontal` | `0`, `1`, `2`, `3`, `4`, `5`, `8 - Split`, `12 - Swing` | integer | Vane H mode. |
-|     | `http//ip:port` | `VaneVertical` | `0`, `1`, `2`, `3`, `4`, `5`, `7 - Swing` | integer | Vane V mode. |
+|     | `http//ip:port` | `VaneHorizontalDirection` | `0`, `1`, `2`, `3`, `4`, `5`, `8 - Split`, `12 - Swing` | integer | Vane H mode. |
+|     | `http//ip:port` | `VaneVerticalDirection` | `0`, `1`, `2`, `3`, `4`, `5`, `7 - Swing` | integer | Vane V mode. |
 |     | `http//ip:port` | `SetTemperature` | `0.0` | float | Room temperature. |
 |     | `http//ip:port` | `DefaultCoolingSetTemperature` | `0.0` | float | Default cooling temperature. |
 |     | `http//ip:port` | `DefaultHeatingSetTemperature` | `0.0` | float | Default heating temperature. |
@@ -331,11 +331,11 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 |     | `Set` | `ProhibitPower` | `true`, `false` | boolean | Lock set power. |
 |     | `Set` | `OperationMode` | `1 - Heat`, `2 - Dry`, `3 - Cool`, `7 - Fan`, `8 - Auto` | integer | Operating mode. |
 |     | `Set` | `SetFanSpeed` | `0 - Auto`, `1`, `2`, `3`, `4`, `5`, `6` | integer | Fan speed. |
-|     | `Set` | `VaneHorizontal` | `0`, `1`, `2`, `3`, `4`, `5`, `8 - Split`, `12 - Swing` | integer | Vane H mode. |
-|     | `Set` | `VaneVertical` | `0`, `1`, `2`, `3`, `4`, `5`, `7 - Swing` | integer | Vane V mode. |
+|     | `Set` | `VaneHorizontalDirection` | `0`, `1`, `2`, `3`, `4`, `5`, `8 - Split`, `12 - Swing` | integer | Vane H mode. |
+|     | `Set` | `VaneVerticalDirection` | `0`, `1`, `2`, `3`, `4`, `5`, `7 - Swing` | integer | Vane V mode. |
 |     | `Set` | `SetTemperature` | `0.0` | float | Room temperature. |
-|     | `Set` | `DefaultCoolingSetTemperature` | `0.0` | float | Default cooling temperature. |
-|     | `Set` | `DefaultHeatingSetTemperature` | `0.0` | float | Default heating temperature. |
+|     | `Set` | `DefaultCoolingSetTemperature` | `23.0` | float | Default cooling temperature. |
+|     | `Set` | `DefaultHeatingSetTemperature` | `21.0` | float | Default heating temperature. |
 | Heat Pump |     |     |     |      |     |
 | Subscribe | `Set` | `Power` | `true`, `false` | boolean | Power state. |
 |     | `Set` | `ForcedHotWaterMode` | `true`, `false` | boolean | Force hot water. |
@@ -364,5 +364,5 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 |     | `Set` | `VentilationMode` | `0 - Lossnay`, `1 - Bypass`, `2 - Auto` | integer | Ventilation mode. |
 |     | `Set` | `SetFanSpeed` | `0 - Auto`, `1`, `2`, `3`, `4` | integer | Fan speed. |
 |     | `Set` | `SetTemperature` | `0.0` | float | Room temperature. |
-|     | `Set` | `DefaultCoolingSetTemperature` | `0.0` | float | Default cooling temperature. |
-|     | `Set` | `DefaultHeatingSetTemperature` | `0.0` | float | Default heating temperature. |
+|     | `Set` | `DefaultCoolingSetTemperature` | `23.0` | float | Default cooling temperature. |
+|     | `Set` | `DefaultHeatingSetTemperature` | `21.0` | float | Default heating temperature. |

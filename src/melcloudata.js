@@ -16,7 +16,6 @@ class MelCloudAta extends EventEmitter {
 
         //set default values
         this.deviceData = {};
-        this.displayDeviceInfo = true;
 
         this.axiosInstancePost = axios.create({
             method: 'POST',
@@ -48,13 +47,13 @@ class MelCloudAta extends EventEmitter {
         try {
             //read device info from file
             const devicesData = await this.readData(this.devicesFile);
-            const debug1 = this.debugLog ? this.emit('debug', `Device Info: ${JSON.stringify(devicesData, null, 2)}`) : false;
             const deviceData = devicesData.find((device) => device.DeviceID === this.deviceId);
 
             if (!deviceData) {
                 this.emit('warn', `Device data not found.`);
                 return;
             }
+            const debug = this.debugLog ? this.emit('debug', `Device Data: ${JSON.stringify(deviceData, null, 2)}`) : false;
 
             //device info
             const deviceId = deviceData.DeviceID;
@@ -152,8 +151,8 @@ class MelCloudAta extends EventEmitter {
             const demandPercentage = device.DemandPercentage;
             const configuredDemandPercentage = device.ConfiguredDemandPercentage;
             const hasDemandSideControl = device.HasDemandSideControl;
-            const defaultCoolingSetTemperature = device.DefaultCoolingSetTemperature ?? 23;
-            const defaultHeatingSetTemperature = device.DefaultHeatingSetTemperature ?? 21;
+            const defaultCoolingSetTemperature = device.DefaultCoolingSetTemperature;
+            const defaultHeatingSetTemperature = device.DefaultHeatingSetTemperature;
             const roomTemperatureLabel = device.RoomTemperatureLabel;
             const heatingEnergyConsumedRate1 = device.HeatingEnergyConsumedRate1;
             const heatingEnergyConsumedRate2 = device.HeatingEnergyConsumedRate2;
@@ -309,45 +308,21 @@ class MelCloudAta extends EventEmitter {
                 this.emit('warn', `Units are not configured in MELCloud service.`);
             };
 
-            //emit info
-            const emitInfo = this.displayDeviceInfo ? this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) : false;
-            this.displayDeviceInfo = false;
-
-            //device state
-            const deviceState = {
-                DeviceId: deviceId,
-                EffectiveFlags: effectiveFlags,
-                RoomTemperature: roomTemperature,
-                SetTemperature: setTemperature,
-                SetFanSpeed: fanSpeed,
-                OperationMode: operationMode,
-                VaneHorizontal: vaneHorizontalDirection,
-                VaneVertical: vaneVerticalDirection,
-                HideVaneControls: hideVaneControls,
-                HideDryModeControl: hideDryModeControl,
-                DefaultCoolingSetTemperature: defaultCoolingSetTemperature,
-                DefaultHeatingSetTemperature: defaultHeatingSetTemperature,
-                InStandbyMode: inStandbyMode,
-                ProhibitSetTemperature: prohibitSetTemperature,
-                ProhibitOperationMode: prohibitOperationMode,
-                ProhibitPower: prohibitPower,
-                Power: power,
-                Offline: offline
-            }
-
-            //external integrations
-            this.emit('externalIntegrations', deviceData, deviceState);
-
             //check state changes
-            const stateHasNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);
-            if (stateHasNotChanged) {
+            const deviceDataHasNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);
+            if (deviceDataHasNotChanged) {
                 return;
             }
+            this.deviceData = deviceData;
+
+            //external integrations
+            this.emit('externalIntegrations', deviceData);
+
+            //emit info
+            this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion);
 
             //emit state
-            this.deviceData = deviceData;
-            const debug2 = this.debugLog ? this.emit('debug', `Device State: ${JSON.stringify(deviceState, null, 2)}`) : false;
-            this.emit('deviceState', deviceData, deviceState);
+            this.emit('deviceState', deviceData);
 
             return true;
         } catch (error) {
@@ -367,45 +342,66 @@ class MelCloudAta extends EventEmitter {
         }
     }
 
-    async send(deviceState) {
+    async send(deviceData) {
         try {
             //prevent to set out of range temp
-            const minTempHeat = this.deviceData.Device.MinTempHeat ?? 10;
-            const maxTempHeat = this.deviceData.Device.MaxTempHeat ?? 31;
-            const minTempCoolDry = this.deviceData.Device.MinTempCoolDry ?? 16;
-            const maxTempCoolDry = this.deviceData.Device.MaxTempCoolDry ?? 31;
-            const minTempAutomatic = this.deviceData.Device.MinTempAutomatic ?? 16;
-            const maxTempAutomatic = this.deviceData.Device.MaxTempAutomatic ?? 31;
-            switch (deviceState.OperationMode) {//operating mode 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
+            const minTempHeat = deviceData.Device.MinTempHeat ?? 10;
+            const maxTempHeat = deviceData.Device.MaxTempHeat ?? 31;
+            const minTempCoolDry = deviceData.Device.MinTempCoolDry ?? 16;
+            const maxTempCoolDry = deviceData.Device.MaxTempCoolDry ?? 31;
+            const minTempAutomatic = deviceData.Device.MinTempAutomatic ?? 16;
+            const maxTempAutomatic = deviceData.Device.MaxTempAutomatic ?? 31;
+
+
+            switch (deviceData.Device.OperationMode) {//operating mode 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
                 case 1:
-                    deviceState.SetTemperature = deviceState.SetTemperature < minTempHeat ? minTempHeat : deviceState.SetTemperature;
-                    deviceState.SetTemperature = deviceState.SetTemperature > maxTempHeat ? maxTempHeat : deviceState.SetTemperature;
+                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature < minTempHeat ? minTempHeat : deviceData.Device.SetTemperature;
+                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature > maxTempHeat ? maxTempHeat : deviceData.Device.SetTemperature;
                     break;
                 case 2:
-                    deviceState.SetTemperature = deviceState.SetTemperature < minTempCoolDry ? minTempCoolDry : deviceState.SetTemperature;
-                    deviceState.SetTemperature = deviceState.SetTemperature > maxTempCoolDry ? maxTempCoolDry : deviceState.SetTemperature;
+                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature < minTempCoolDry ? minTempCoolDry : deviceData.Device.SetTemperature;
+                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature > maxTempCoolDry ? maxTempCoolDry : deviceData.Device.SetTemperature;
                     break;
                 case 3:
-                    deviceState.SetTemperature = deviceState.SetTemperature < minTempCoolDry ? minTempCoolDry : deviceState.SetTemperature;
-                    deviceState.SetTemperature = deviceState.SetTemperature > maxTempCoolDry ? maxTempCoolDry : deviceState.SetTemperature;
+                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature < minTempCoolDry ? minTempCoolDry : deviceData.Device.SetTemperature;
+                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature > maxTempCoolDry ? maxTempCoolDry : deviceData.Device.SetTemperature;
                     break;
                 case 8:
-                    deviceState.SetTemperature = deviceState.SetTemperature < minTempAutomatic ? minTempAutomatic : deviceState.SetTemperature;
-                    deviceState.SetTemperature = deviceState.SetTemperature > maxTempAutomatic ? maxTempAutomatic : deviceState.SetTemperature;
+                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature < minTempAutomatic ? minTempAutomatic : deviceData.Device.SetTemperature;
+                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature > maxTempAutomatic ? maxTempAutomatic : deviceData.Device.SetTemperature;
                     break;
                 default:
-                    deviceState.SetTemperature = deviceState.SetTemperature < 10 ? 10 : deviceState.SetTemperature;
-                    deviceState.SetTemperature = deviceState.SetTemperature > 31 ? 31 : deviceState.SetTemperature;
+                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature < 10 ? 10 : deviceData.Device.SetTemperature;
+                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature > 31 ? 31 : deviceData.Device.SetTemperature;
                     break;
             };
 
-            deviceState.HasPendingCommand = true;
-            const options = {
-                data: deviceState
-            };
+            const payload = {
+                data: {
+                    DeviceID: deviceData.Device.DeviceID,
+                    EffectiveFlags: deviceData.Device.EffectiveFlags,
+                    RoomTemperature: deviceData.Device.RoomTemperature,
+                    SetTemperature: deviceData.Device.SetTemperature,
+                    SetFanSpeed: deviceData.Device.SetFanSpeed,
+                    OperationMode: deviceData.Device.OperationMode,
+                    VaneHorizontal: deviceData.Device.VaneHorizontalDirection,
+                    VaneVertical: deviceData.Device.VaneVerticalDirection,
+                    HideVaneControls: deviceData.Device.HideVaneControls,
+                    HideDryModeControl: deviceData.Device.HideDryModeControl,
+                    DefaultCoolingSetTemperature: deviceData.Device.DefaultCoolingSetTemperature ?? 23,
+                    DefaultHeatingSetTemperature: deviceData.Device.DefaultHeatingSetTemperature ?? 21,
+                    InStandbyMode: deviceData.Device.InStandbyMode,
+                    ProhibitSetTemperature: deviceData.Device.ProhibitSetTemperature,
+                    ProhibitOperationMode: deviceData.Device.ProhibitOperationMode,
+                    ProhibitPower: deviceData.Device.ProhibitPower,
+                    Power: deviceData.Device.Power,
+                    Offline: deviceData.Device.Offline,
+                    HasPendingCommand: true
+                }
+            }
 
-            await this.axiosInstancePost(CONSTANTS.ApiUrls.SetAta, options);
-            this.emit('deviceState', this.deviceData, deviceState);
+            await this.axiosInstancePost(CONSTANTS.ApiUrls.SetAta, payload);
+            this.emit('deviceState', deviceData);
             return true;
         } catch (error) {
             throw new Error(error.message ?? error);
