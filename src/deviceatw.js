@@ -739,8 +739,6 @@ class DeviceAtw extends EventEmitter {
                 })
                 .on('error', async (error) => {
                     this.emit('error', error);
-                    await new Promise(resolve => setTimeout(resolve, 15000));
-                    await this.melCloudAtw.impulseGenerator.start([{ name: 'checkState', sampling: this.refreshInterval }]);
                 });
 
             //check state

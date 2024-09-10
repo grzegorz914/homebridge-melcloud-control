@@ -584,8 +584,6 @@ class DeviceErv extends EventEmitter {
                 })
                 .on('error', async (error) => {
                     this.emit('error', error);
-                    await new Promise(resolve => setTimeout(resolve, 15000));
-                    await this.melCloudErv.impulseGenerator.start([{ name: 'checkState', sampling: this.refreshInterval }]);
                 });
 
             //check state

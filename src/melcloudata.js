@@ -37,8 +37,7 @@ class MelCloudAta extends EventEmitter {
             try {
                 await this.checkState();
             } catch (error) {
-                await this.impulseGenerator.stop();
-                this.emit('error', `Impulse generator check state error: ${error.message || error}, check again in 15s.`);
+                this.emit('error', `Impulse generator check state error: ${error.message || error}.`);
             };
         }).on('state', (state) => { });
     };
@@ -326,7 +325,6 @@ class MelCloudAta extends EventEmitter {
 
             return true;
         } catch (error) {
-            await this.impulseGenerator.stop();
             throw new Error(`Check state error: ${error.message || error}.`);
         };
     };
