@@ -1193,84 +1193,84 @@ class DeviceErv extends EventEmitter {
                             const state = button.state;
                             return state;
                         })
-                    if (displayType > 0 && displayType < 3) {
-                        buttonService.onSet(async (state) => {
-                            try {
-                                switch (mode) {
-                                    case 0: //POWER ON,OFF
-                                        deviceData.Device.Power = state;
-                                        deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power;
-                                        break;
-                                    case 1: //OPERATING MODE RECOVERY
-                                        deviceData.Device.Power = true;
-                                        deviceData.Device.VentilationMode = 0;
-                                        deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.VentilationMode;
-                                        break;
-                                    case 2: //OPERATING MODE BYPASS
-                                        deviceData.Device.Power = true;
-                                        deviceData.Device.VentilationMode = 1;
-                                        deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.VentilationMode;
-                                        break
-                                    case 3: //OPERATING MODE AUTO
-                                        deviceData.Device.Power = true;
-                                        deviceData.Device.VentilationMode = 2;
-                                        deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.VentilationMode;
-                                        break;
-                                    case 4: //NIGHT PURGE MODE
-                                        deviceData.Device.Power = true;
-                                        deviceData.Device.NightPurgeMode = state;
-                                        deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power
-                                        break;
-                                    case 10: //FAN SPEED MODE AUTO
-                                        deviceData.Device.Power = true;
-                                        deviceData.Device.SetFanSpeed = 0;
-                                        deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
-                                        break;
-                                    case 11: //FAN SPEED MODE 1
-                                        deviceData.Device.Power = true;
-                                        deviceData.Device.SetFanSpeed = 1;
-                                        deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
-                                        break;
-                                    case 12: //FAN SPEED MODE 2
-                                        deviceData.Device.Power = true;
-                                        deviceData.Device.SetFanSpeed = 2;
-                                        deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
-                                        break;
-                                    case 13: //FAN SPEED MODE 3
-                                        deviceData.Device.Power = true;
-                                        deviceData.Device.SetFanSpeed = 3;
-                                        deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
-                                        break;
-                                    case 14: //FAN MODE 4
-                                        deviceData.Device.Power = true;
-                                        deviceData.Device.SetFanSpeed = 4;
-                                        deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
-                                        break;
-                                    case 15: //PHYSICAL LOCK CONTROLS
-                                        deviceData.Device = deviceData.Device;
-                                        deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Prohibit;
-                                        break;
-                                    case 16: //ROOM TEMP HIDE
-                                        deviceData.Device.HideRoomTemperature = state;
-                                        break;
-                                    case 17: //SUPPLY TEMP HIDE
-                                        deviceData.Device.HideSupplyTemperature = state;
-                                        break;
-                                    case 18: //OUTDOOR EMP HIDE
-                                        deviceData.Device.hideOutdoorTemperature = state;
-                                        break;
-                                    default:
-                                        this.emit('message', `Unknown button mode: ${mode}`);
-                                        break;
-                                };
+                        .onSet(async (state) => {
+                            if (displayType > 0 && displayType < 3) {
+                                try {
+                                    switch (mode) {
+                                        case 0: //POWER ON,OFF
+                                            deviceData.Device.Power = state;
+                                            deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power;
+                                            break;
+                                        case 1: //OPERATING MODE RECOVERY
+                                            deviceData.Device.Power = true;
+                                            deviceData.Device.VentilationMode = 0;
+                                            deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.VentilationMode;
+                                            break;
+                                        case 2: //OPERATING MODE BYPASS
+                                            deviceData.Device.Power = true;
+                                            deviceData.Device.VentilationMode = 1;
+                                            deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.VentilationMode;
+                                            break
+                                        case 3: //OPERATING MODE AUTO
+                                            deviceData.Device.Power = true;
+                                            deviceData.Device.VentilationMode = 2;
+                                            deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.VentilationMode;
+                                            break;
+                                        case 4: //NIGHT PURGE MODE
+                                            deviceData.Device.Power = true;
+                                            deviceData.Device.NightPurgeMode = state;
+                                            deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power
+                                            break;
+                                        case 10: //FAN SPEED MODE AUTO
+                                            deviceData.Device.Power = true;
+                                            deviceData.Device.SetFanSpeed = 0;
+                                            deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
+                                            break;
+                                        case 11: //FAN SPEED MODE 1
+                                            deviceData.Device.Power = true;
+                                            deviceData.Device.SetFanSpeed = 1;
+                                            deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
+                                            break;
+                                        case 12: //FAN SPEED MODE 2
+                                            deviceData.Device.Power = true;
+                                            deviceData.Device.SetFanSpeed = 2;
+                                            deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
+                                            break;
+                                        case 13: //FAN SPEED MODE 3
+                                            deviceData.Device.Power = true;
+                                            deviceData.Device.SetFanSpeed = 3;
+                                            deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
+                                            break;
+                                        case 14: //FAN MODE 4
+                                            deviceData.Device.Power = true;
+                                            deviceData.Device.SetFanSpeed = 4;
+                                            deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
+                                            break;
+                                        case 15: //PHYSICAL LOCK CONTROLS
+                                            deviceData.Device = deviceData.Device;
+                                            deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Prohibit;
+                                            break;
+                                        case 16: //ROOM TEMP HIDE
+                                            deviceData.Device.HideRoomTemperature = state;
+                                            break;
+                                        case 17: //SUPPLY TEMP HIDE
+                                            deviceData.Device.HideSupplyTemperature = state;
+                                            break;
+                                        case 18: //OUTDOOR EMP HIDE
+                                            deviceData.Device.hideOutdoorTemperature = state;
+                                            break;
+                                        default:
+                                            this.emit('message', `Unknown button mode: ${mode}`);
+                                            break;
+                                    };
 
-                                await this.melCloudErv.send(deviceData);
-                                const info = this.disableLogInfo ? false : this.emit('message', `Set: ${buttonName}`);
-                            } catch (error) {
-                                this.emit('warn', `Set button error: ${error}`);
+                                    await this.melCloudErv.send(deviceData);
+                                    const info = this.disableLogInfo ? false : this.emit('message', `Set: ${buttonName}`);
+                                } catch (error) {
+                                    this.emit('warn', `Set button error: ${error}`);
+                                };
                             };
                         });
-                    };
                     this.buttonsServices.push(buttonService);
                     accessory.addService(buttonService);
                 };
