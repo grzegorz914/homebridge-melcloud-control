@@ -237,8 +237,8 @@
                     "title": "Control",
                     "type": "integer",
                     "minimum": 0,
-                    "maximum": 1,
-                    "default": 0,
+                    "maximum": 2,
+                    "default": 1,
                     "oneOf": [
                       {
                         "title": "None/Disabled",
@@ -255,7 +255,7 @@
                       {
                         "title": "Thermostat",
                         "enum": [
-                          1
+                          2
                         ]
                       }
                     ],
