@@ -77,10 +77,10 @@ class DeviceAtw extends EventEmitter {
         this.buttonsConfigured = [];
         for (const button of this.buttons) {
             const buttonName = button.name ?? false;
-            const buttonMode = button.mode ?? false;
+            const buttonMode = button.mode ?? -1;
             const buttonDisplayType = button.displayType ?? 0;
             const buttonNamePrefix = button.namePrefix ?? false;
-            if (buttonName && buttonMode && buttonDisplayType > 0) {
+            if (buttonName && buttonMode >= 0 && buttonDisplayType > 0) {
                 const buttonServiceType = ['', Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][buttonDisplayType];
                 const buttonCharacteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
                 button.namePrefix = buttonNamePrefix;
