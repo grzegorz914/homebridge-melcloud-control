@@ -32,7 +32,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * Support temperature display units `Celsius/Fahrenheit`.
 * Support control device `Presets`.
 * Support assing inividual operating mode for `Heat/Cool/Auto`.
-* Support direct device control using extra `Buttons`.
+* Support direct device control using extra `Buttons`, switch it to `OFF` restore previous device state.
 * Support detect all device states using extra `Sensors`.
 * Support automations, shortcuts and Siri.
 * Support external integrations, [RESTFul](https://github.com/grzegorz914/homebridge-melcloud-control?tab=readme-ov-file#restful-integration), [MQTT](https://github.com/grzegorz914/homebridge-melcloud-control?tab=readme-ov-file#mqtt-integration).
