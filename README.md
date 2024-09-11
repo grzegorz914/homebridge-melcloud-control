@@ -330,7 +330,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 |     | `Set` | `ProhibitOperationMode` | `true`, `false` | boolean | Lock set operating mode. |
 |     | `Set` | `ProhibitPower` | `true`, `false` | boolean | Lock set power. |
 |     | `Set` | `OperationMode` | `1 - Heat`, `2 - Dry`, `3 - Cool`, `7 - Fan`, `8 - Auto` | integer | Operating mode. |
-|     | `Set` | `SetFanSpeed` | `0 - Auto`, `1`, `2`, `3`, `4`, `5`, `6` | integer | Fan speed. |
+|     | `Set` | `FanSpeed` | `0 - Auto`, `1`, `2`, `3`, `4`, `5`, `6` | integer | Fan speed. |
 |     | `Set` | `VaneHorizontalDirection` | `0`, `1`, `2`, `3`, `4`, `5`, `8 - Split`, `12 - Swing` | integer | Vane H mode. |
 |     | `Set` | `VaneVerticalDirection` | `0`, `1`, `2`, `3`, `4`, `5`, `7 - Swing` | integer | Vane V mode. |
 |     | `Set` | `SetTemperature` | `0.0` | float | Room temperature. |
