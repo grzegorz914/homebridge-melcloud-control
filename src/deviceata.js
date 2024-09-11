@@ -1146,7 +1146,7 @@ class DeviceAta extends EventEmitter {
                                 };
 
                                 await this.melCloudAta.send(deviceData);
-                                const info = this.disableLogInfo ? false : this.emit('message', `Set: ${presetName}`);
+                                const info = this.disableLogInfo ? false : this.emit('message', `${set ? 'Set:' : 'Unset:'} ${presetName}`);
                             } catch (error) {
                                 this.emit('warn', `Set preset error: ${error}`);
                             };
@@ -1389,7 +1389,7 @@ class DeviceAta extends EventEmitter {
                                 };
 
                                 await this.melCloudAta.send(deviceData);
-                                const info = this.disableLogInfo ? false : this.emit('message', `Set: ${buttonName}`);
+                                const info = this.disableLogInfo ? false : this.emit('message', `${set ? 'Set:' : 'Unset:'} ${buttonName}, Value: ${button.previousValue}`);
                             } catch (error) {
                                 this.emit('warn', `Set button error: ${error}`);
                             };

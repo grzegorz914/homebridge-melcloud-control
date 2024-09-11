@@ -1624,7 +1624,7 @@ class DeviceAtw extends EventEmitter {
                                 };
 
                                 await this.melCloudAtw.send(deviceData);
-                                const info = this.disableLogInfo ? false : this.emit('message', `Set: ${presetName}`);
+                                const info = this.disableLogInfo ? false : this.emit('message', `${state ? 'Set:' : 'Unset:'} ${presetName}`);
                             } catch (error) {
                                 this.emit('warn', `Set preset error: ${error}`);
                             };
@@ -1795,7 +1795,7 @@ class DeviceAtw extends EventEmitter {
                                     };
 
                                     await this.melCloudAtw.send(deviceData);
-                                    const info = this.disableLogInfo ? false : this.emit('message', `Set: ${buttonName}`);
+                                    const info = this.disableLogInfo ? false : this.emit('message', `${state ? 'Set:' : 'Unset:'} ${buttonName}, Value: ${button.previousValue}`);
                                 } catch (error) {
                                     this.emit('warn', `Set button error: ${error}`);
                                 };
