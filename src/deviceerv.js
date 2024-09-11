@@ -82,7 +82,7 @@ class DeviceErv extends EventEmitter {
                 button.serviceType = buttonServiceType;
                 button.characteristicType = buttonCharacteristicType;
                 button.state = false;
-                button.previousValue = 0;
+                button.previousValue = null;
                 this.buttonsConfigured.push(button);
             } else {
                 const log = buttonDisplayType === 0 ? false : this.emit('warn', `Button Name: ${buttonName ? buttonName : 'Missing'}, Mode: ${buttonMode ? buttonMode : 'Missing'}.`);
@@ -482,7 +482,7 @@ class DeviceErv extends EventEmitter {
                     if (this.buttonsConfiguredCount > 0) {
                         for (let i = 0; i < this.buttonsConfiguredCount; i++) {
                             const button = this.buttonsConfigured[i];
-                            const mode = this.buttonsConfigured[i].mode;;
+                            const mode = button.mode;;
                             switch (mode) {
                                 case 0: //POWER ON,OFF
                                     button.state = (power === true);
@@ -1186,19 +1186,19 @@ class DeviceErv extends EventEmitter {
                                         deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power;
                                         break;
                                     case 1: //OPERATING MODE RECOVERY
-                                        button.previousValue = state ? deviceData.Device.VentilationMode : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.VentilationMode : button.previousValue ?? deviceData.Device.VentilationMode;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.VentilationMode = state ? 0 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.VentilationMode;
                                         break;
                                     case 2: //OPERATING MODE BYPASS
-                                        button.previousValue = state ? deviceData.Device.VentilationMode : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.VentilationMode : button.previousValue ?? deviceData.Device.VentilationMode;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.VentilationMode = state ? 1 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.VentilationMode;
                                         break
                                     case 3: //OPERATING MODE AUTO
-                                        button.previousValue = state ? deviceData.Device.VentilationMode : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.VentilationMode : button.previousValue ?? deviceData.Device.VentilationMode;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.VentilationMode = state ? 2 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.VentilationMode;
@@ -1209,31 +1209,31 @@ class DeviceErv extends EventEmitter {
                                         deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power
                                         break;
                                     case 10: //FAN SPEED MODE AUTO
-                                        button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue ?? deviceData.Device.SetFanSpeed;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.SetFanSpeed = state ? 0 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
                                         break;
                                     case 11: //FAN SPEED MODE 1
-                                        button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue ?? deviceData.Device.SetFanSpeed;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.SetFanSpeed = state ? 1 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
                                         break;
                                     case 12: //FAN SPEED MODE 2
-                                        button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue ?? deviceData.Device.SetFanSpeed;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.SetFanSpeed = state ? 2 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
                                         break;
                                     case 13: //FAN SPEED MODE 3
-                                        button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue ?? deviceData.Device.SetFanSpeed;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.SetFanSpeed = state ? 3 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
                                         break;
                                     case 14: //FAN MODE 4
-                                        button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue ?? deviceData.Device.SetFanSpeed;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.SetFanSpeed = state ? 4 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
@@ -1257,7 +1257,7 @@ class DeviceErv extends EventEmitter {
                                 };
 
                                 await this.melCloudErv.send(deviceData);
-                                const info = this.disableLogInfo ? false : this.emit('message', `${state ? 'Set:' : 'Unset:'} ${buttonName}, Value: ${button.previousValue}`);
+                                const info = this.disableLogInfo ? false : this.emit('message', `${state ? `Set: ${buttonName}` : `Unset: ${buttonName}, Set: ${button.previousValue}`}`);
                             } catch (error) {
                                 this.emit('warn', `Set button error: ${error}`);
                             };

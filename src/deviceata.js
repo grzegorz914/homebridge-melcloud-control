@@ -84,7 +84,7 @@ class DeviceAta extends EventEmitter {
                 button.serviceType = buttonServiceType;
                 button.characteristicType = buttonCharacteristicType;
                 button.state = false;
-                button.previousValue = 0;
+                button.previousValue = null;
                 this.buttonsConfigured.push(button);
             } else {
                 const log = buttonDisplayType === 0 ? false : this.emit('warn', `Button Name: ${buttonName ? buttonName : 'Missing'}, Mode: ${buttonMode ? buttonMode : 'Missing'}.`);
@@ -311,8 +311,8 @@ class DeviceAta extends EventEmitter {
                                                     this.accessory.targetOperationMode = 2;
                                                     break;
                                                 default:
-                                                    this.emit('warn', `Unknown operating mode: ${operationMode}`);
-                                                    break;
+                                                    this.emit('warn', `Received unknown operating mode: ${operationMode}`);
+                                                    return
                                             };
                                             break;
                                         case false:
@@ -462,7 +462,7 @@ class DeviceAta extends EventEmitter {
                                 && presetData.SetTemperature === setTemperature
                                 && presetData.OperationMode === operationMode
                                 && presetData.VaneHorizontal === vaneHorizontalDirection
-                                && presetData.VaneVertical === VaneVerticalDirection
+                                && presetData.VaneVertical === vaneVerticalDirection
                                 && presetData.FanSpeed === fanSpeed) : false;
 
                             if (this.presetsServices) {
@@ -477,19 +477,20 @@ class DeviceAta extends EventEmitter {
                     if (this.buttonsConfiguredCount > 0) {
                         for (let i = 0; i < this.buttonsConfiguredCount; i++) {
                             const button = this.buttonsConfigured[i];
-                            const mode = this.buttonsConfigured[i].mode;
+                            const mode = button.mode;
+                            let setPreviousValue = false;
                             switch (mode) {
                                 case 0: //POWER ON,OFF
                                     button.state = (power === true);
                                     break;
                                 case 1: //OPERATING MODE HEAT
-                                    button.state = power ? (operationMode === 1) : false;
+                                    button.state = power ? (operationMode === 1 || operationMode === 9) : false;
                                     break;
                                 case 2: //OPERATING MODE DRY
-                                    button.state = power ? (operationMode === 2) : false;
+                                    button.state = power ? (operationMode === 2 || operationMode === 10) : false;
                                     break
                                 case 3: //OPERATING MODE COOL
-                                    button.state = power ? (operationMode === 3) : false;
+                                    button.state = power ? (operationMode === 3 || operationMode === 11) : false;
                                     break;
                                 case 4: //OPERATING MODE FAN
                                     button.state = power ? (operationMode === 7) : false;
@@ -498,7 +499,7 @@ class DeviceAta extends EventEmitter {
                                     button.state = power ? (operationMode === 8) : false;
                                     break;
                                 case 6: //OPERATING MODE PURIFY
-                                    button.state = power ? (operationMode === 9) : false;
+                                    button.state = power ? (operationMode === 12) : false;
                                     break;
                                 case 7: //OPERATING MODE DRY CONTROL HIDE
                                     button.state = power ? (hideDryModeControl === true) : false;
@@ -528,25 +529,25 @@ class DeviceAta extends EventEmitter {
                                     button.state = power ? (vaneHorizontalDirection === 12) : false;
                                     break;
                                 case 20: //VANE V SWING MODE AUTO
-                                    button.state = power ? (VaneVerticalDirection === 0) : false;
+                                    button.state = power ? (vaneVerticalDirection === 0) : false;
                                     break;
                                 case 21: //VANE V SWING MODE 1
-                                    button.state = power ? (VaneVerticalDirection === 1) : false;
+                                    button.state = power ? (vaneVerticalDirection === 1) : false;
                                     break;
                                 case 22: //VANE V SWING MODE 2
-                                    button.state = power ? (VaneVerticalDirection === 2) : false;
+                                    button.state = power ? (vaneVerticalDirection === 2) : false;
                                     break;
                                 case 23: //VANE V SWING MODE 3
-                                    button.state = power ? (VaneVerticalDirection === 3) : false;
+                                    button.state = power ? (vaneVerticalDirection === 3) : false;
                                     break;
                                 case 24: //VANE V SWING MODE 4
-                                    button.state = power ? (VaneVerticalDirection === 4) : false;
+                                    button.state = power ? (vaneVerticalDirection === 4) : false;
                                     break;
                                 case 25: //VANE V SWING MODE 5
-                                    button.state = power ? (VaneVerticalDirection === 5) : false;
+                                    button.state = power ? (vaneVerticalDirection === 5) : false;
                                     break;
                                 case 26: //VANE V SWING MODE SWING
-                                    button.state = power ? (VaneVerticalDirection === 7) : false;
+                                    button.state = power ? (vaneVerticalDirection === 7) : false;
                                     break;
                                 case 27: //VANE H/V CONTROLS HIDE
                                     button.state = power ? (hideVaneControls === true) : false;
@@ -1192,130 +1193,130 @@ class DeviceAta extends EventEmitter {
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power;
                                         break;
                                     case 1: //OPERATING MODE HEAT
-                                        button.previousValue = state ? deviceData.Device.OperationMode : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.OperationMode : button.previousValue ?? deviceData.Device.OperationMode;
                                         deviceData.Device.Power = true;
-                                        deviceData.Device.OperationMode = state ? 1 : button.previousValue;
+                                        deviceData.Device.OperationMode = state ? 1 : button.previousValue === 9 ? 1 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.OperationMode;
                                         break;
                                     case 2: //OPERATING MODE DRY
-                                        button.previousValue = state ? deviceData.Device.OperationMode : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.OperationMode : button.previousValue ?? deviceData.Device.OperationMode;
                                         deviceData.Device.Power = true;
-                                        deviceData.Device.OperationMode = state ? 2 : button.previousValue;
+                                        deviceData.Device.OperationMode = state ? 2 : button.previousValue === 10 ? 2 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.OperationMode;
                                         break
                                     case 3: //OPERATING MODE COOL
-                                        button.previousValue = state ? deviceData.Device.OperationMode : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.OperationMode : button.previousValue ?? deviceData.Device.OperationMode;
                                         deviceData.Device.Power = true;
-                                        deviceData.Device.OperationMode = state ? 3 : button.previousValue;
+                                        deviceData.Device.OperationMode = state ? 3 : button.previousValue === 11 ? 3 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.OperationMode;
                                         break;
                                     case 4: //OPERATING MODE FAN
-                                        button.previousValue = state ? deviceData.Device.OperationMode : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.OperationMode : button.previousValue ?? deviceData.Device.OperationMode;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.OperationMode = state ? 7 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.OperationMode;
                                         break;
                                     case 5: //OPERATING MODE AUTO
-                                        button.previousValue = state ? deviceData.Device.OperationMode : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.OperationMode : button.previousValue ?? deviceData.Device.OperationMode;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.OperationMode = state ? 8 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.OperationMode;
                                         break;
                                     case 6: //OPERATING MODE PURIFY
-                                        button.previousValue = state ? deviceData.Device.OperationMode : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.OperationMode : button.previousValue ?? deviceData.Device.OperationMode;
                                         deviceData.Device.Power = true;
-                                        deviceData.Device.OperationMode = state ? 9 : button.previousValue;
+                                        deviceData.Device.OperationMode = state ? 12 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.OperationMode;
                                         break;
                                     case 7: //OPERATING MODE DRY CONTROL HIDE
                                         deviceData.Device.HideDryModeControl = state;
                                         break;
                                     case 10: //VANE H SWING MODE AUTO
-                                        button.previousValue = state ? deviceData.Device.VaneHorizontalDirection : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.VaneHorizontalDirection : button.previousValue ?? deviceData.Device.VaneHorizontalDirection;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.VaneHorizontalDirection = state ? 0 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.VaneHorizontal;
                                         break;
                                     case 11: //VANE H SWING MODE 1
-                                        button.previousValue = state ? deviceData.Device.VaneHorizontalDirection : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.VaneHorizontalDirection : button.previousValue ?? deviceData.Device.VaneHorizontalDirection;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.VaneHorizontalDirection = state ? 1 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.VaneHorizontal;
                                         break;
                                     case 12: //VANE H SWING MODE 2
-                                        button.previousValue = state ? deviceData.Device.VaneHorizontalDirection : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.VaneHorizontalDirection : button.previousValue ?? deviceData.Device.VaneHorizontalDirection;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.VaneHorizontalDirection = state ? 2 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.VaneHorizontal;
                                         break;
                                     case 13: //VANE H SWING MODE 3
-                                        button.previousValue = state ? deviceData.Device.VaneHorizontalDirection : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.VaneHorizontalDirection : button.previousValue ?? deviceData.Device.VaneHorizontalDirection;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.VaneHorizontalDirection = state ? 3 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.VaneHorizontal;
                                         break;
                                     case 14: //VANE H SWING MODE 4
-                                        button.previousValue = state ? deviceData.Device.VaneHorizontalDirection : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.VaneHorizontalDirection : button.previousValue ?? deviceData.Device.VaneHorizontalDirection;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.VaneHorizontalDirection = state ? 4 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.VaneHorizontal;
                                         break;
                                     case 15: //VANE H SWING MODE 5
-                                        button.previousValue = state ? deviceData.Device.VaneHorizontalDirection : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.VaneHorizontalDirection : button.previousValue ?? deviceData.Device.VaneHorizontalDirection;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.VaneHorizontalDirection = state ? 5 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.VaneHorizontal;
                                         break;
                                     case 16: //VANE H SWING MODE SPLIT
-                                        button.previousValue = state ? deviceData.Device.VaneHorizontalDirection : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.VaneHorizontalDirection : button.previousValue ?? deviceData.Device.VaneHorizontalDirection;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.VaneHorizontalDirection = state ? 8 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.VaneHorizontal;
                                         break;
                                     case 17: //VANE H SWING MODE SWING
-                                        button.previousValue = state ? deviceData.Device.VaneHorizontalDirection : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.VaneHorizontalDirection : button.previousValue ?? deviceData.Device.VaneHorizontalDirection;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.VaneHorizontalDirection = state ? 12 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.VaneHorizontal;
                                         break;
                                     case 20: //VANE V SWING MODE AUTO
-                                        button.previousValue = state ? deviceData.Device.VaneVerticalDirection : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.VaneVerticalDirection : button.previousValue ?? deviceData.Device.VaneVerticalDirection;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.VaneVerticalDirection = state ? 0 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.VaneVertical;
                                         break;
                                     case 21: //VANE V SWING MODE 1
-                                        button.previousValue = state ? deviceData.Device.VaneVerticalDirection : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.VaneVerticalDirection : button.previousValue ?? deviceData.Device.VaneVerticalDirection;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.VaneVerticalDirection = state ? 1 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.VaneVertical;
                                         break;
                                     case 22: //VANE V SWING MODE 2
-                                        button.previousValue = state ? deviceData.Device.VaneVerticalDirection : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.VaneVerticalDirection : button.previousValue ?? deviceData.Device.VaneVerticalDirection;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.VaneVerticalDirection = state ? 2 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.VaneVertical;
                                         break;
                                     case 23: //VANE V SWING MODE 3
-                                        button.previousValue = state ? deviceData.Device.VaneVerticalDirection : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.VaneVerticalDirection : button.previousValue ?? deviceData.Device.VaneVerticalDirection;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.VaneVerticalDirection = state ? 3 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.VaneVertical;
                                         break;
                                     case 24: //VANE V SWING MODE 4
-                                        button.previousValue = state ? deviceData.Device.VaneVerticalDirection : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.VaneVerticalDirection : button.previousValue ?? deviceData.Device.VaneVerticalDirection;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.VaneVerticalDirection = state ? 4 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.VaneVertical;
                                         break;
                                     case 25: //VANE V SWING MODE 5
-                                        button.previousValue = state ? deviceData.Device.VaneVerticalDirection : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.VaneVerticalDirection : button.previousValue ?? deviceData.Device.VaneVerticalDirection;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.VaneVerticalDirection = state ? 5 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.VaneVertical;
                                         break;
                                     case 26: //VANE V SWING MODE SWING
-                                        button.previousValue = state ? deviceData.Device.VaneVerticalDirection : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.VaneVerticalDirection : button.previousValue ?? deviceData.Device.VaneVerticalDirection;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.VaneVerticalDirection = state ? 7 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.VaneVertical;
@@ -1324,43 +1325,43 @@ class DeviceAta extends EventEmitter {
                                         deviceData.Device.HideVaneControls = state;
                                         break;
                                     case 30: //FAN SPEED MODE AUTO
-                                        button.previousValue = state ? deviceData.Device.FanSpeed : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.FanSpeed : button.previousValue ?? deviceData.Device.FanSpeed;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.FanSpeed = state ? 0 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.SetFanSpeed;
                                         break;
                                     case 31: //FAN SPEED MODE 1
-                                        button.previousValue = state ? deviceData.Device.FanSpeed : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.FanSpeed : button.previousValue ?? deviceData.Device.FanSpeed;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.FanSpeed = state ? 1 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.SetFanSpeed;
                                         break;
                                     case 32: //FAN SPEED MODE 2
-                                        button.previousValue = state ? deviceData.Device.FanSpeed : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.FanSpeed : button.previousValue ?? deviceData.Device.FanSpeed;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.FanSpeed = state ? 2 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.SetFanSpeed;
                                         break;
                                     case 33: //FAN SPEED MODE 3
-                                        button.previousValue = state ? deviceData.Device.FanSpeed : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.FanSpeed : button.previousValue ?? deviceData.Device.FanSpeed;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.FanSpeed = state ? 3 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.SetFanSpeed;
                                         break;
                                     case 34: //FAN MODE 4
-                                        button.previousValue = state ? deviceData.Device.FanSpeed : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.FanSpeed : button.previousValue ?? deviceData.Device.FanSpeed;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.FanSpeed = state ? 4 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.SetFanSpeed;
                                         break;
                                     case 35: //FAN SPEED MODE 5
-                                        button.previousValue = state ? deviceData.Device.FanSpeed : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.FanSpeed : button.previousValue ?? deviceData.Device.FanSpeed;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.FanSpeed = state ? 5 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.SetFanSpeed;
                                         break;
                                     case 36: //FAN SPEED MODE 6
-                                        button.previousValue = state ? deviceData.Device.FanSpeed : button.previousValue;
+                                        button.previousValue = state ? deviceData.Device.FanSpeed : button.previousValue ?? deviceData.Device.FanSpeed;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.FanSpeed = state ? 6 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.SetFanSpeed;
@@ -1389,7 +1390,7 @@ class DeviceAta extends EventEmitter {
                                 };
 
                                 await this.melCloudAta.send(deviceData);
-                                const info = this.disableLogInfo ? false : this.emit('message', `${state ? 'Set: ' : 'Unset:'} ${buttonName}, Value: ${button.previousValue}`);
+                                const info = this.disableLogInfo ? false : this.emit('message', `${state ? `Set: ${buttonName}` : `Unset: ${buttonName}, Set: ${button.previousValue}`}`);
                             } catch (error) {
                                 this.emit('warn', `Set button error: ${error}`);
                             };

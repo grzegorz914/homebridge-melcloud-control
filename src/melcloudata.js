@@ -380,14 +380,17 @@ class MelCloudAta extends EventEmitter {
                     deviceData.Device.SetTemperature = deviceData.Device.SetTemperature < minTempCoolDry ? minTempCoolDry : deviceData.Device.SetTemperature;
                     deviceData.Device.SetTemperature = deviceData.Device.SetTemperature > maxTempCoolDry ? maxTempCoolDry : deviceData.Device.SetTemperature;
                     break;
+                case 7:
+                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature < 10 ? 10 : deviceData.Device.SetTemperature;
+                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature > 31 ? 31 : deviceData.Device.SetTemperature;
+                    break;
                 case 8:
                     deviceData.Device.SetTemperature = deviceData.Device.SetTemperature < minTempAutomatic ? minTempAutomatic : deviceData.Device.SetTemperature;
                     deviceData.Device.SetTemperature = deviceData.Device.SetTemperature > maxTempAutomatic ? maxTempAutomatic : deviceData.Device.SetTemperature;
                     break;
                 default:
-                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature < 10 ? 10 : deviceData.Device.SetTemperature;
-                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature > 31 ? 31 : deviceData.Device.SetTemperature;
-                    break;
+                    this.emit('warn', `Trying to set nknown operating mode: ${deviceData.Device.OperationMode}`);
+                    return;
             };
 
             const payload = {
