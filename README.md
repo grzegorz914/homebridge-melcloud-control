@@ -275,7 +275,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 |     | `http//ip:port` | `ProhibitOperationMode` | `true`, `false` | boolean | Lock set operating mode. |
 |     | `http//ip:port` | `ProhibitPower` | `true`, `false` | boolean | Lock set power. |
 |     | `http//ip:port` | `OperationMode` | `1 - Heat`, `2 - Dry`, `3 - Cool`, `7 - Fan`, `8 - Auto` | integer | Operating mode. |
-|     | `http//ip:port` | `SetFanSpeed` | `0 - Auto`, `1`, `2`, `3`, `4`, `5`, `6` | integer | Fan speed. |
+|     | `http//ip:port` | `FanSpeed` | `0 - Auto`, `1`, `2`, `3`, `4`, `5`, `6` | integer | Fan speed. |
 |     | `http//ip:port` | `VaneHorizontalDirection` | `0`, `1`, `2`, `3`, `4`, `5`, `8 - Split`, `12 - Swing` | integer | Vane H mode. |
 |     | `http//ip:port` | `VaneVerticalDirection` | `0`, `1`, `2`, `3`, `4`, `5`, `7 - Swing` | integer | Vane V mode. |
 |     | `http//ip:port` | `SetTemperature` | `0.0` | float | Room temperature. |
