@@ -1186,19 +1186,19 @@ class DeviceErv extends EventEmitter {
                                         deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power;
                                         break;
                                     case 1: //OPERATING MODE RECOVERY
-                                        button.previousValue = deviceData.Device.VentilationMode;
+                                        button.previousValue = state ? deviceData.Device.VentilationMode : button.previousValue;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.VentilationMode = state ? 0 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.VentilationMode;
                                         break;
                                     case 2: //OPERATING MODE BYPASS
-                                        button.previousValue = deviceData.Device.VentilationMode;
+                                        button.previousValue = state ? deviceData.Device.VentilationMode : button.previousValue;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.VentilationMode = state ? 1 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.VentilationMode;
                                         break
                                     case 3: //OPERATING MODE AUTO
-                                        button.previousValue = deviceData.Device.VentilationMode;
+                                        button.previousValue = state ? deviceData.Device.VentilationMode : button.previousValue;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.VentilationMode = state ? 2 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.VentilationMode;
@@ -1209,31 +1209,31 @@ class DeviceErv extends EventEmitter {
                                         deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power
                                         break;
                                     case 10: //FAN SPEED MODE AUTO
-                                        button.previousValue = deviceData.Device.SetFanSpeed;
+                                        button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.SetFanSpeed = state ? 0 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
                                         break;
                                     case 11: //FAN SPEED MODE 1
-                                        button.previousValue = deviceData.Device.SetFanSpeed;
+                                        button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.SetFanSpeed = state ? 1 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
                                         break;
                                     case 12: //FAN SPEED MODE 2
-                                        button.previousValue = deviceData.Device.SetFanSpeed;
+                                        button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.SetFanSpeed = state ? 2 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
                                         break;
                                     case 13: //FAN SPEED MODE 3
-                                        button.previousValue = deviceData.Device.SetFanSpeed;
+                                        button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.SetFanSpeed = state ? 3 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
                                         break;
                                     case 14: //FAN MODE 4
-                                        button.previousValue = deviceData.Device.SetFanSpeed;
+                                        button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue;
                                         deviceData.Device.Power = true;
                                         deviceData.Device.SetFanSpeed = state ? 4 : button.previousValue;
                                         deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Power + CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;

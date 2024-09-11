@@ -1674,13 +1674,13 @@ class DeviceAtw extends EventEmitter {
                                             deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power;
                                             break;
                                         case 1: //HEAT PUMP HEAT
-                                            button.previousValue = deviceData.Device.UnitStatus;
+                                            button.previousValue = state ? deviceData.Device.UnitStatus : button.previousValue;
                                             deviceData.Device.Power = true;
                                             deviceData.Device.UnitStatus = state ? 0 : button.previousValue;
                                             deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationMode;
                                             break;
                                         case 2: //COOL
-                                            button.previousValue = deviceData.Device.UnitStatus;
+                                            button.previousValue = state ? deviceData.Device.UnitStatus : button.previousValue;
                                             deviceData.Device.Power = true;
                                             deviceData.Device.UnitStatus = state ? 1 : button.previousValue;
                                             deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationMode;
@@ -1696,37 +1696,37 @@ class DeviceAtw extends EventEmitter {
                                             deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.ProhibitHeatingZone1 + CONSTANTS.HeatPump.EffectiveFlags.ProhibitHotWater + CONSTANTS.HeatPump.EffectiveFlags.ProhibitHeatingZone2;
                                             break;
                                         case 20: //ZONE 1 HEAT THERMOSTAT
-                                            button.previousValue = deviceData.Device.OperationModeZone1;
+                                            button.previousValue = state ? deviceData.Device.OperationModeZone1 : button.previousValue;
                                             deviceData.Device.Power = true;
                                             deviceData.Device.OperationModeZone1 = state ? 0 : button.previousValue;
                                             deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone1;
                                             break;
                                         case 21: //HEAT FLOW
-                                            button.previousValue = deviceData.Device.OperationModeZone1;
+                                            button.previousValue = state ? deviceData.Device.OperationModeZone1 : button.previousValue;
                                             deviceData.Device.Power = true;
                                             deviceData.Device.OperationModeZone1 = state ? 1 : button.previousValue;
                                             deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone1;
                                             break;
                                         case 22: //HEAT CURVE
-                                            button.previousValue = deviceData.Device.OperationModeZone1;
+                                            button.previousValue = state ? deviceData.Device.OperationModeZone1 : button.previousValue;
                                             deviceData.Device.Power = true;
                                             deviceData.Device.OperationModeZone1 = state ? 2 : button.previousValue;
                                             deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone1;
                                             break;
                                         case 23: //COOL THERMOSTAT
-                                            button.previousValue = deviceData.Device.OperationModeZone1;
+                                            button.previousValue = state ? deviceData.Device.OperationModeZone1 : button.previousValue;
                                             deviceData.Device.Power = true;
                                             deviceData.Device.OperationModeZone1 = state ? 3 : button.previousValue;
                                             deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone1;
                                             break;
                                         case 24: //COOL FLOW
-                                            button.previousValue = deviceData.Device.OperationModeZone1;
+                                            button.previousValue = state ? deviceData.Device.OperationModeZone1 : button.previousValue;
                                             deviceData.Device.Power = true;
                                             deviceData.Device.OperationModeZone1 = state ? 4 : button.previousValue;
                                             deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone1;
                                             break;
                                         case 25: //FLOOR DRY UP
-                                            button.previousValue = deviceData.Device.OperationModeZone1;
+                                            button.previousValue = state ? deviceData.Device.OperationModeZone1 : button.previousValue;
                                             deviceData.Device.Power = true;
                                             deviceData.Device.OperationModeZone1 = state ? 5 : button.previousValue;
                                             deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone1;
@@ -1750,37 +1750,37 @@ class DeviceAtw extends EventEmitter {
                                             CONSTANTS.HeatPump.EffectiveFlags.ProhibitHotWater;
                                             break;
                                         case 60: //ZONE 2 HEAT THERMOSTAT
-                                            button.previousValue = deviceData.Device.OperationModeZone2;
+                                            button.previousValue = state ? deviceData.Device.OperationModeZone2 : button.previousValue;
                                             deviceData.Device.Power = true;
                                             deviceData.Device.OperationModeZone2 = state ? 0 : button.previousValue;
                                             deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone2;
                                             break;
                                         case 61: // HEAT FLOW
-                                            button.previousValue = deviceData.Device.OperationModeZone2;
+                                            button.previousValue = state ? deviceData.Device.OperationModeZone2 : button.previousValue;
                                             deviceData.Device.Power = true;
                                             deviceData.Device.OperationModeZone2 = state ? 1 : button.previousValue;
                                             deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone2;
                                             break;
                                         case 62: //HEAT CURVE
-                                            button.previousValue = deviceData.Device.OperationModeZone2;
+                                            button.previousValue = state ? deviceData.Device.OperationModeZone2 : button.previousValue;
                                             deviceData.Device.Power = true;
                                             deviceData.Device.OperationModeZone2 = state ? 2 : button.previousValue;
                                             deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone2;
                                             break;
                                         case 63: //COOL THERMOSTAT
-                                            button.previousValue = deviceData.Device.OperationModeZone2;
+                                            button.previousValue = state ? deviceData.Device.OperationModeZone2 : button.previousValue;
                                             deviceData.Device.Power = true;
                                             deviceData.Device.OperationModeZone2 = state ? 3 : button.previousValue;
                                             deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone2;
                                             break;
                                         case 64: //COOL FLOW
-                                            button.previousValue = deviceData.Device.OperationModeZone2;
+                                            button.previousValue = state ? deviceData.Device.OperationModeZone2 : button.previousValue;
                                             deviceData.Device.Power = true;
                                             deviceData.Device.OperationModeZone2 = state ? 4 : button.previousValue;
                                             deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone2;
                                             break;
                                         case 65: //FLOOR DRY UP
-                                            button.previousValue = deviceData.Device.OperationModeZone2;
+                                            button.previousValue = state ? deviceData.Device.OperationModeZone2 : button.previousValue;
                                             deviceData.Device.Power = true;
                                             deviceData.Device.OperationModeZone2 = state ? 5 : button.previousValue;
                                             deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.Power + CONSTANTS.HeatPump.EffectiveFlags.OperationModeZone2;
