@@ -163,7 +163,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 
 * If the room temperature `<` Heating Setpoint the unit will be set to HEAT with a setpoint of 28°C.
   * In HEAT, if the room temperature `>` Heating Setpoint `+` 1°C the unit will be set to FAN.
-  * In FAN, if the temperature `>` Cooling Setpoint the unit will be set to COOL with a setpoint of 19°C.
+  * In FAN, if the room temperature `>` Cooling Setpoint the unit will be set to COOL with a setpoint of 19°C.
   * In COOL, if the room temperature `<` Cooling Setpoint `-` 1°C the unit will be set to FAN.
   * In FAN, if the room temperature `<` Heating Setpoint the unit will be set to HEAT with a setpoint of 28°C.
 * The image shows Heating Setpoint of 19°C and a Cooling Setpoint of 23°C.
