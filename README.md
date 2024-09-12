@@ -160,6 +160,13 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 
 ### Mode AUTO
 
+* While the room temperature is less than the Heating Setpoint the unit will be set to HEAT mode with a setpoint of 28°C.
+* Whilst in HEAT mode, if the room temperature rises above the Heating Setpoint + 1°C the unit will be set to FAN mode.
+* Whilst in FAN mode, if the temperature rises above the Cooling Setpoint the unit will be set to COOL mode with a setpoint of 19°C.
+* Whilst in COOL mode, if the room temperature falls below the Cooling Setpoint - 1°C the unit will be set to FAN mode.
+* Whilst in FAN mode, if the room temperature falls below the Heating Setpoint the unit will be set to HEAT mode with a setpoint of 28°C.
+* The following image shows this graphically (assuming a Heating Setpoint of 19°C and a Cooling Setpoint of
+
 <p align="center">
   <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/auto.png" width="840"></a>
 </p>
