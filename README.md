@@ -165,7 +165,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
   * In FAN, if the temperature `>` Cooling Setpoint the unit will be set to COOL with a setpoint of 19°C.
   * In COOL, if the room temperature `<` Cooling Setpoint `-` 1°C the unit will be set to FAN.
   * In FAN, if the room temperature `<` Heating Setpoint the unit will be set to HEAT with a setpoint of 28°C.
-* The following image shows this graphically, Heating Setpoint of 19°C and a Cooling Setpoint  of 23°C.
+* The image shows Heating Setpoint of 19°C and a Cooling Setpoint of 23°C.
 
 <p align="center">
   <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/auto.png" width="840"></a>
