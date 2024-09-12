@@ -158,7 +158,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
   <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/settings2.png" width="135"></a>
 </p>
 
-### Mode AUTO
+### AUTO Mode
 
 * If the room temperature `<` Heating Setpoint the unit will be set to HEAT with a setpoint of 28°C.
   * In HEAT, if the room temperature `>` Heating Setpoint `+` 1°C the unit will be set to FAN.
