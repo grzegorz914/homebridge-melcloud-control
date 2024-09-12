@@ -560,7 +560,7 @@ class DeviceAtw extends EventEmitter {
                             switch (i) {
                                 case 0: //Heat Pump - HEAT, COOL, OFF
                                     this.emit('message', `${heatPumpName}, Power: ${power ? 'ON' : 'OFF'}`)
-                                    this.emit('message', `${heatPumpName}, Operation mode: ${!power ? CONSTANTS.HeatPump.System[0] : CONSTANTS.HeatPump.System[unitStatus]}`);
+                                    this.emit('message', `${heatPumpName}, Operation mode: ${CONSTANTS.HeatPump.System[unitStatus]}`);
                                     this.emit('message', `${heatPumpName},'Outdoor temperature: ${roomTemperature}${temperatureUnit}`);
                                     const info = flowTemperature !== null ? this.emit('message', `${heatPumpName}, Flow temperature: ${flowTemperature}${temperatureUnit}`) : false;
                                     const info1 = returnTemperature !== null ? this.emit('message', `${heatPumpName}, Return temperature: ${returnTemperature}${temperatureUnit}`) : false;
@@ -569,7 +569,7 @@ class DeviceAtw extends EventEmitter {
                                     break;
                                 case 1: //Zone 1 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
                                     operationModeText = idleZone1 ? CONSTANTS.HeatPump.ZoneOperation[6] : CONSTANTS.HeatPump.ZoneOperation[operationModeZone1];
-                                    this.emit('message', `${zone1Name}, Operation mode: ${!power ? CONSTANTS.HeatPump.System[0] : operationModeText}`);
+                                    this.emit('message', `${zone1Name}, Operation mode: ${operationModeText}`);
                                     this.emit('message', `${zone1Name}, Temperature: ${roomTemperature}${temperatureUnit}`);
                                     this.emit('message', `${zone1Name}, Target temperature: ${setTemperature}${temperatureUnit}`)
                                     const info2 = flowTemperatureZone1 !== null ? this.emit('message', `${zone1Name}, Flow temperature: ${flowTemperatureZone1}${temperatureUnit}`) : false;
@@ -579,7 +579,7 @@ class DeviceAtw extends EventEmitter {
                                     break;
                                 case caseHotWater: //Hot Water - AUTO, HEAT NOW
                                     operationModeText = operationMode === 1 ? CONSTANTS.HeatPump.ForceDhw[1] : CONSTANTS.HeatPump.ForceDhw[forcedHotWaterMode ? 1 : 0];
-                                    this.emit('message', `${hotWaterName}, Operation mode: ${!power ? CONSTANTS.HeatPump.System[0] : operationModeText}`);
+                                    this.emit('message', `${hotWaterName}, Operation mode: ${operationModeText}`);
                                     this.emit('message', `${hotWaterName}, Temperature: ${roomTemperature}${temperatureUnit}`);
                                     this.emit('message', `${hotWaterName}, Target temperature: ${setTemperature}${temperatureUnit}`)
                                     const info4 = flowTemperatureWaterTank !== null ? this.emit('message', `${hotWaterName}, Flow temperature: ${flowTemperatureWaterTank}${temperatureUnit}`) : false;
@@ -589,7 +589,7 @@ class DeviceAtw extends EventEmitter {
                                     break;
                                 case caseZone2: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
                                     operationModeText = idleZone2 ? CONSTANTS.HeatPump.ZoneOperation[6] : CONSTANTS.HeatPump.ZoneOperation[operationModeZone2];
-                                    this.emit('message', `${zone2Name}, Operation mode: ${!power ? CONSTANTS.HeatPump.System[0] : operationModeText}`);
+                                    this.emit('message', `${zone2Name}, Operation mode: ${operationModeText}`);
                                     this.emit('message', `${zone2Name}, Temperature: ${roomTemperature}${temperatureUnit}`);
                                     this.emit('message', `${zone2Name}, Target temperature: ${setTemperature}${temperatureUnit}`)
                                     const info6 = flowTemperatureZone2 !== null ? this.emit('message', `${zone2Name}, Flow temperature: ${flowTemperatureZone2}${temperatureUnit}`) : false;

@@ -542,15 +542,14 @@ class DeviceErv extends EventEmitter {
 
                     //log current state
                     if (!this.disableLogInfo) {
-                        const operationModeText = !power ? CONSTANTS.Ventilation.System[0] : CONSTANTS.Ventilation.OperationMode[ventilationMode];
                         this.emit('message', `Power: ${power ? 'ON' : 'OFF'}`);
-                        this.emit('message', `Operation mode: ${operationModeText}`);
+                        this.emit('message', `Operation mode: ${CONSTANTS.Ventilation.OperationMode[ventilationMode]}`);
                         this.emit('message', `Room temperature: ${roomTemperature}${temperatureUnit}`);
                         const info = hasCoolOperationMode || hasHeatOperationMode ? this.emit('message', `Target temperature: ${targetTemperature}${temperatureUnit}`) : false;
                         const info1 = hasSupplyTemperature && this.accessory.supplyTemperature !== null ? this.emit('message', `Supply temperature: ${roomTemperature}${temperatureUnit}`) : false;
                         const info2 = hasOutdoorTemperature && this.accessory.outdoorTemperature !== null ? this.emit('message', `Outdoor temperature: ${roomTemperature}${temperatureUnit}`) : false;
-                        const info3 = hasHeatOperationMode && displayMode === 0 ? this.emit('message', `Heating threshold temperature: ${targetTemperature}${temperatureUnit}`) : false;
-                        const info4 = hasCoolOperationMode && displayMode === 0 ? this.emit('message', `Cooling threshold temperature: ${targetTemperature}${temperatureUnit}`) : false;
+                        const info3 = hasHeatOperationMode ? this.emit('message', `Heating threshold temperature: ${targetTemperature}${temperatureUnit}`) : false;
+                        const info4 = hasCoolOperationMode ? this.emit('message', `Cooling threshold temperature: ${targetTemperature}${temperatureUnit}`) : false;
                         this.emit('message', `Fan speed mode: ${CONSTANTS.Ventilation.FanSpeed[setFanSpeed]}`);
                         this.emit('message', `Temperature display unit: ${temperatureUnit}`);
                         this.emit('message', `Core maintenance: ${CONSTANTS.Ventilation.CoreMaintenance[coreMaintenanceRequired]}`);

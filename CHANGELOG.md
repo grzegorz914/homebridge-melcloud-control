@@ -16,6 +16,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - do not configure it manually, always using Config UI X
   - required Homebridge v2.0.0 and above
 
+## [3.3.0] - (12.09.2024)
+
+## Changes
+
+- added full support for AUTO mode with dead band, low and high temperature
+- fix some log info message
+- bump dependencies
+- cleanup
+
 ## [3.2.0] - (11.09.2024)
 
 ## Changes
