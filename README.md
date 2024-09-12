@@ -43,7 +43,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
   * Heater Cooler:
     * Power `ON/OFF`.
     * Operating mode `AUTO/HEAT/COOL/POWER OFF`.
-    * Temperature `HEATING/COOLING`.
+    * Temperature `HEATING/COOLING/AUTO`.
     * Fan speed `OFF/1/2/3/4/5/AUTO`.
     * Swing mode `AUTO/SWING`.
     * Physical lock controls `LOCK/UNLOCK`.
@@ -51,7 +51,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
   * Thermostat:
     * Power `ON/OFF`.
     * Operating mode `POWER OFF/HEAT/COOL/AUTO`.
-    * Temperature `HEATING/COOLING`.
+    * Temperature `HEATING/COOLING/AUTO`.
     * Temperature display unit `°F/°C`.
     * Assign operating mode for `HEAT/AUTO`
   * Buttons:
@@ -166,6 +166,12 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 
 <p align="center">
   <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/ustawienia.png" width="840"></a>
+</p>
+
+### Mode AUTO
+
+<p align="center">
+  <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/auto.png" width="540"></a>
 </p>
 
 | Key | Description |
