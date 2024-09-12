@@ -158,6 +158,12 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
   <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/settings2.png" width="135"></a>
 </p>
 
+### Mode AUTO
+
+<p align="center">
+  <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/auto.png" width="840"></a>
+</p>
+
 ### Configuration
 
 * Run this plugin as a [Child Bridge](https://github.com/homebridge/homebridge/wiki/Child-Bridges) (Highly Recommended), this prevent crash Homebridge if plugin crashes.
@@ -166,12 +172,6 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 
 <p align="center">
   <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/ustawienia.png" width="840"></a>
-</p>
-
-### Mode AUTO
-
-<p align="center">
-  <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/auto.png" width="540"></a>
 </p>
 
 | Key | Description |
