@@ -16,6 +16,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - do not configure it manually, always using Config UI X
   - required Homebridge v2.0.0 and above
 
+## [3.3.2] - (13.09.2024)
+
+## Changes
+
+- corrct setProps for heating/cooling threshold
+- update ERV code to support heating/cooling threshold in auto mode
+- cleanup
+
 ## [3.3.1] - (13.09.2024)
 
 ## Changes

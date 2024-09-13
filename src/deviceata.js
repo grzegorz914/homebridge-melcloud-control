@@ -287,7 +287,7 @@ class DeviceAta extends EventEmitter {
                                             switch (operationMode) {
                                                 case 1: //HEAT
                                                     this.accessory.currentOperationMode = roomTemperature > setTemperature ? 1 : 2; //INACTIVE, IDLE, HEATING, COOLING
-                                                    this.accessory.targetOperationMode = 1;  //AUTO, HEAT, COOL
+                                                    this.accessory.targetOperationMode = 1; //AUTO, HEAT, COOL
                                                     break;
                                                 case 2: //DRY
                                                     this.accessory.currentOperationMode = roomTemperature < setTemperature ? 1 : 3;
@@ -909,7 +909,7 @@ class DeviceAta extends EventEmitter {
                     if (modelSupportsAuto && modelSupportsHeat) {
                         this.melCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
                             .setProps({
-                                minValue: 0,
+                                minValue: 10,
                                 maxValue: 31,
                                 minStep: this.accessory.temperatureIncrement
                             })
@@ -931,7 +931,7 @@ class DeviceAta extends EventEmitter {
                     if (modelSupportsAuto && modelSupportsCool) {
                         this.melCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
                             .setProps({
-                                minValue: 10,
+                                minValue: 16,
                                 maxValue: 31,
                                 minStep: this.accessory.temperatureIncrement
                             })
@@ -1061,7 +1061,7 @@ class DeviceAta extends EventEmitter {
                     if (modelSupportsAuto && modelSupportsHeat) {
                         this.melCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
                             .setProps({
-                                minValue: 0,
+                                minValue: 10,
                                 maxValue: 31,
                                 minStep: this.accessory.temperatureIncrement
                             })
@@ -1083,7 +1083,7 @@ class DeviceAta extends EventEmitter {
                     if (modelSupportsAuto && modelSupportsCool) {
                         this.melCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
                             .setProps({
-                                minValue: 10,
+                                minValue: 16,
                                 maxValue: 31,
                                 minStep: this.accessory.temperatureIncrement
                             })
