@@ -291,7 +291,7 @@ class DeviceAta extends EventEmitter {
                                                     break;
                                                 case 2: //DRY
                                                     this.accessory.currentOperationMode = roomTemperature < setTemperature ? 1 : 3;
-                                                    this.accessory.targetOperationMode = this.autoDryFanMode === 2 ? 0 : this.heatDryFanMode === 1 ? 1 : this.coolDryFanMode === 2 ? 2 : this.accessory.targetOperationMode;
+                                                    this.accessory.targetOperationMode = this.autoDryFanMode === 2 ? 0 : this.heatDryFanMode === 2 ? 1 : this.coolDryFanMode === 2 ? 2 : this.accessory.targetOperationMode;
                                                     break;
                                                 case 3: //COOL
                                                     this.accessory.currentOperationMode = roomTemperature < setTemperature ? 1 : 3;
@@ -311,7 +311,7 @@ class DeviceAta extends EventEmitter {
                                                     break;
                                                 case 10: //ISEE DRY
                                                     this.accessory.currentOperationMode = roomTemperature < setTemperature ? 1 : 3;
-                                                    this.accessory.targetOperationMode = this.autoDryFanMode === 2 ? 0 : this.heatDryFanMode === 1 ? 1 : this.coolDryFanMode === 2 ? 2 : this.accessory.targetOperationMode;
+                                                    this.accessory.targetOperationMode = this.autoDryFanMode === 2 ? 0 : this.heatDryFanMode === 2 ? 1 : this.coolDryFanMode === 2 ? 2 : this.accessory.targetOperationMode;
                                                     break;
                                                 case 11: //ISEE COOL;
                                                     this.accessory.currentOperationMode = roomTemperature < setTemperature ? 1 : 3;
@@ -389,7 +389,7 @@ class DeviceAta extends EventEmitter {
                                                     break;
                                                 case 2: //DRY
                                                     this.accessory.currentOperationMode = 2;
-                                                    this.accessory.targetOperationMode = this.autoDryFanMode === 3 ? 3 : this.heatDryFanMode === 1 ? 1 : this.coolDryFanMode === 2 ? 2 : this.accessory.targetOperationMode;
+                                                    this.accessory.targetOperationMode = this.autoDryFanMode === 2 ? 3 : this.heatDryFanMode === 2 ? 1 : this.coolDryFanMode === 2 ? 2 : this.accessory.targetOperationMode;
                                                     break;
                                                 case 3: //COOL
                                                     this.accessory.currentOperationMode = 2;
@@ -397,7 +397,7 @@ class DeviceAta extends EventEmitter {
                                                     break;
                                                 case 7: //FAN
                                                     this.accessory.currentOperationMode = 2;
-                                                    this.accessory.targetOperationMode = this.autoDryFanMode === 3 ? 0 : this.heatDryFanMode === 3 ? 1 : this.coolDryFanMode === 3 ? 2 : this.accessory.targetOperationMode;
+                                                    this.accessory.targetOperationMode = this.autoDryFanMode === 3 ? 3 : this.heatDryFanMode === 3 ? 1 : this.coolDryFanMode === 3 ? 2 : this.accessory.targetOperationMode;
                                                     break;
                                                 case 8: //AUTO
                                                     this.accessory.currentOperationMode = roomTemperature > defaultHeatingSetTemperature && roomTemperature < defaultCoolingSetTemperature ? this.accessory.currentOperationMode : roomTemperature <= defaultHeatingSetTemperature ? 1 : roomTemperature >= defaultCoolingSetTemperature ? 2 : 0;
@@ -409,7 +409,7 @@ class DeviceAta extends EventEmitter {
                                                     break;
                                                 case 10: //ISEE DRY
                                                     this.accessory.currentOperationMode = 2;
-                                                    this.accessory.targetOperationMode = this.autoDryFanMode === 3 ? 3 : this.heatDryFanMode === 1 ? 1 : this.coolDryFanMode === 2 ? 2 : this.accessory.targetOperationMode;
+                                                    this.accessory.targetOperationMode = this.autoDryFanMode === 2 ? 3 : this.heatDryFanMode === 2 ? 1 : this.coolDryFanMode === 2 ? 2 : this.accessory.targetOperationMode;
                                                     break;
                                                 case 11: //ISEE COOL;
                                                     this.accessory.currentOperationMode = 2;
