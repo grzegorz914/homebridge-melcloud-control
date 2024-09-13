@@ -162,7 +162,7 @@ class MelCloudPlatform {
 
 							const deviceName = device.name;
 							const deviceTypeText = device.typeString;
-							const heatPump = new DeviceAtw(api, account, melCloud, device, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit)
+							const heatPump = new DeviceAtw(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit)
 							heatPump.on('publishAccessory', (accessory) => {
 
 								//publish device

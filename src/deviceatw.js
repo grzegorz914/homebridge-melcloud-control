@@ -381,7 +381,7 @@ class DeviceAtw extends EventEmitter {
                                 };
 
                                 //update characteristics
-                                if (this.melCloudServices && currentOperationMode !== undefined && targetOperationMode !== undefined) {
+                                if (this.melCloudServices) {
                                     this.melCloudServices[i]
                                         .updateCharacteristic(Characteristic.Active, power ? 1 : 0)
                                         .updateCharacteristic(Characteristic.CurrentHeaterCoolerState, currentOperationMode)
@@ -453,7 +453,7 @@ class DeviceAtw extends EventEmitter {
                                 };
 
                                 //update characteristics
-                                if (this.melCloudServices && currentOperationMode !== undefined && targetOperationMode !== undefined) {
+                                if (this.melCloudServices) {
                                     this.melCloudServices[i]
                                         .updateCharacteristic(Characteristic.CurrentHeatingCoolingState, currentOperationMode)
                                         .updateCharacteristic(Characteristic.TargetHeatingCoolingState, targetOperationMode)
@@ -462,9 +462,6 @@ class DeviceAtw extends EventEmitter {
                                         .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.accessory.useFahrenheit);
                                 }
                                 break;
-                            default:
-                                this.emit('warn', `Unknown display mode: ${displayMode}`);
-                                return;
                         };
 
                         //push value to arrays

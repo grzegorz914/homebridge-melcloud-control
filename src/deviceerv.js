@@ -417,9 +417,6 @@ class DeviceErv extends EventEmitter {
                                 const updateDefCool = hasAutoVentilationMode && hasCoolOperationMode ? this.melCloudService.updateCharacteristic(Characteristic.CoolingThresholdTemperature, defaultCoolingSetTemperature) : false;
                             };
                             break;
-                        default:
-                            this.emit('warn', `Unknown display mode: ${displayMode}`);
-                            return;
                     };
 
                     //update temperature sensors
@@ -939,7 +936,7 @@ class DeviceErv extends EventEmitter {
                         });
                     this.melCloudService.getCharacteristic(Characteristic.TargetTemperature)
                         .setProps({
-                            minValue: 0,
+                            minValue: 10,
                             maxValue: 31,
                             minStep: this.accessory.temperatureIncrement
                         })

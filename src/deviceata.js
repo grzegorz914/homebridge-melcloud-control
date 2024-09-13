@@ -446,9 +446,6 @@ class DeviceAta extends EventEmitter {
                                 const updateDefCool = modelSupportsAuto && modelSupportsCool ? this.melCloudService.updateCharacteristic(Characteristic.CoolingThresholdTemperature, defaultCoolingSetTemperature) : false;
                             };
                             break;
-                        default:
-                            this.emit('warn', `Unknown display mode: ${displayMode}`);
-                            return;
                     };
 
                     if (this.roomTemperatureSensorService) {
@@ -1040,7 +1037,7 @@ class DeviceAta extends EventEmitter {
                         });
                     this.melCloudService.getCharacteristic(Characteristic.TargetTemperature)
                         .setProps({
-                            minValue: 0,
+                            minValue: 10,
                             maxValue: 31,
                             minStep: this.accessory.temperatureIncrement
                         })
