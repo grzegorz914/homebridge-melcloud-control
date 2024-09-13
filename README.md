@@ -152,8 +152,19 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * CO2 detected and level.
       * PM2.5 air quality and level.
 
+### HOME app current device mode display
+
+* In AUTO mode, the tile display current state based on current mode:
+* In HEATING mode, th tile display current state as HEATING - orange
+* In COOLING mode, the tile display current state as COOLING - blue
+* In DRY mode, the tile display current state as IDLE - black
+* In FAN mode, the tile display current state as IDLE - black
+* In IDLE mode, the tile display current state as IDLE - black
+* In INACTIVE mode, the tile display current state as INACTIVE - transparent
+
 ### AUTO Mode
-* The dead band between Heating and Cooling setpoint must be 2°C or greater.
+
+* The AUTO mode tile in Home app display current state as HEATING/COOLING - orange/blue based on actual mode.
 * If the room temperature `<` Heating Setpoint, the unit will be set to HEAT with a setpoint of 23°C.
   * In HEAT, if the room temperature `>` Heating Setpoint `+` 1°C, the unit will be set to FAN.
   * In FAN, if the room temperature `>` Cooling Setpoint, the unit will be set to COOL with a setpoint of 19°C.
@@ -177,7 +188,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 
 <p align="center">
   <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/homekit.png" width="375"></a>
-  <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/settings.png" width="132"></a> 
+  <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/settings.png" width="132"></a>
   <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/settings1.png" width="132"></a>
   <a href="https://github.com/grzegorz914/homebridge-melcloud-control"><img src="https://raw.githubusercontent.com/grzegorz914/homebridge-melcloud-control/main/graphics/settings2.png" width="132"></a>
 </p>

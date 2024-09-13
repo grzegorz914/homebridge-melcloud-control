@@ -16,6 +16,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - do not configure it manually, always using Config UI X
   - required Homebridge v2.0.0 and above
 
+## [3.3.1] - (13.09.2024)
+
+## Changes
+
+- fix update default Heating/Cooling characteristic temp
+- fix display current state of operation mode:
+  - in AUTO mode, tile in Home app display current state as HEATING - orange/COOLING - blue, based on current device mode
+  - in HEAT mode, the tile in Home app display current state as HEATING - orange
+  - in COOL mode, the tile in Home app display current state as COOLING - blue
+  - in DRY mode, the tile in Home app display current state as IDLE - black
+  - in FAN mode, the tile in Home app display current state as IDLE - black
+  - in IDLE mode, the tile display current state as IDLE - black
+  - in INACTIVE mode, the tile display current state as INACTIVE - transparent
+- readme update  
+- cleanup
+
 ## [3.3.0] - (12.09.2024)
 
 ## Changes
