@@ -40,7 +40,6 @@ class DeviceAtw extends EventEmitter {
         this.deviceTypeText = deviceTypeText;
         this.devicesFile = devicesFile;
         this.refreshInterval = refreshInterval;
-        this.useFahrenheit = useFahrenheit;
         this.startPrepareAccessory = true;
         this.displayDeviceInfo = true;
 
@@ -98,6 +97,8 @@ class DeviceAtw extends EventEmitter {
 
         //accessory
         this.accessory = { zones: [{}, {}, {}, {}] };
+        this.accessory.useFahrenheit = useFahrenheit;
+        this.accessory.temperatureUnit = CONSTANTS.TemperatureDisplayUnits[useFahrenheit];
     };
 
     async start() {
@@ -213,7 +214,6 @@ class DeviceAtw extends EventEmitter {
                 })
                 .on('deviceState', async (deviceData) => {
                     //device info
-                    const displayMode = this.displayMode;
                     const heatPumpName = 'Heat Pump';
                     const hotWaterName = 'Hot Water';
                     const zone1Name = deviceData.Zone1Name ?? 'Zone 1';
@@ -224,7 +224,6 @@ class DeviceAtw extends EventEmitter {
                     const canCool = deviceData.Device.CanCool ?? false;
                     const heatCoolModes = canHeat && canCool ? 0 : canHeat ? 1 : canCool ? 2 : 3;
                     const temperatureIncrement = deviceData.Device.TemperatureIncrement ?? 1;
-                    const temperatureUnit = CONSTANTS.TemperatureDisplayUnits[this.useFahrenheit];
                     const minSetTemperature = deviceData.Device.MinSetTemperature ?? 10;
                     const maxSetTemperature = deviceData.Device.MaxSetTemperature ?? 30;
                     const maxTankTemperature = deviceData.Device.MaxTankTemperature ?? 70;
@@ -236,6 +235,7 @@ class DeviceAtw extends EventEmitter {
                     const returnTemperatureZone1 = deviceData.Device.ReturnTemperatureZone1;
                     const returnTemperatureZone2 = deviceData.Device.ReturnTemperatureZone2;
                     const returnTemperatureWaterTank = deviceData.Device.ReturnTemperatureBoiler;
+                    const temperatureUnit = this.accessory.temperatureUnit;
 
                     //presets
                     const presetsOnServer = deviceData.Presets ?? [];
@@ -286,8 +286,6 @@ class DeviceAtw extends EventEmitter {
                     this.accessory.unitStatus = unitStatus;
                     this.accessory.idleZone1 = idleZone1;
                     this.accessory.idleZone2 = idleZone2;
-                    this.accessory.useFahrenheit = this.useFahrenheit;
-                    this.accessory.temperatureUnit = temperatureUnit;
                     this.accessory.temperatureIncrement = temperatureIncrement;
                     this.accessory.hasHotWaterTank = hasHotWaterTank;
                     this.accessory.hasZone2 = hasZone2;
@@ -308,7 +306,7 @@ class DeviceAtw extends EventEmitter {
                     let temperatureSetPropsMaxValue = 140;
 
                     for (let i = 0; i < zonesCount; i++) {
-                        switch (displayMode) {
+                        switch (this.displayMode) {
                             case 1: //Heater Cooler
                                 switch (i) {
                                     case 0: //Heat Pump Operation Mode - IDLE, HOT WATER, HEATING ZONES, COOLING, HOT WATER STORAGE, FREEZE STAT, LEGIONELLA, HEATING ECO, MODE 1, MODE 2, MODE 3, HEATING UP /// Unit Status - HEAT, COOL
@@ -383,14 +381,14 @@ class DeviceAtw extends EventEmitter {
                                 //update characteristics
                                 if (this.melCloudServices) {
                                     this.melCloudServices[i]
-                                        .updateCharacteristic(Characteristic.Active, power ? 1 : 0)
+                                        .updateCharacteristic(Characteristic.Active, power)
                                         .updateCharacteristic(Characteristic.CurrentHeaterCoolerState, currentOperationMode)
                                         .updateCharacteristic(Characteristic.TargetHeaterCoolerState, targetOperationMode)
                                         .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                                         .updateCharacteristic(Characteristic.LockPhysicalControls, lockPhysicalControl)
                                         .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.accessory.useFahrenheit);
-                                    const updateHT = heatCoolModes === 0 || heatCoolModes === 1 ? this.melCloudServices[i].updateCharacteristic(Characteristic.HeatingThresholdTemperature, setTemperature) : false;
-                                    const updateCT = heatCoolModes === 0 || heatCoolModes === 2 ? this.melCloudServices[i].updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature) : false;
+                                    const updateDefHeat = heatCoolModes === 0 || heatCoolModes === 1 ? this.melCloudServices[i].updateCharacteristic(Characteristic.HeatingThresholdTemperature, setTemperature) : false;
+                                    const updateDefCool = heatCoolModes === 0 || heatCoolModes === 2 ? this.melCloudServices[i].updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature) : false;
                                 }
                                 break;
                             case 2: //Thermostat
@@ -460,6 +458,8 @@ class DeviceAtw extends EventEmitter {
                                         .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                                         .updateCharacteristic(Characteristic.TargetTemperature, setTemperature)
                                         .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.accessory.useFahrenheit);
+                                    const updateDefHeat = heatCoolModes === 0 || heatCoolModes === 1 ? this.melCloudServices[i].updateCharacteristic(Characteristic.HeatingThresholdTemperature, setTemperature) : false;
+                                    const updateDefCool = heatCoolModes === 0 || heatCoolModes === 2 ? this.melCloudServices[i].updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature) : false;
                                 }
                                 break;
                         };
@@ -869,7 +869,6 @@ class DeviceAtw extends EventEmitter {
                 .setCharacteristic(Characteristic.FirmwareRevision, this.firmwareRevision);
 
             //melcloud services
-            const displayMode = this.displayMode;
             const zonesCount = this.zonesCount;
             const caseHotWater = this.caseHotWater;
             const caseZone2 = this.caseZone2;
@@ -889,13 +888,13 @@ class DeviceAtw extends EventEmitter {
             for (let i = 0; i < zonesCount; i++) {
                 const zoneName = this.accessory.zones[i].name
                 const serviceName = `${deviceTypeText} ${accessoryName}: ${zoneName}`;
-                switch (displayMode) {
+                switch (this.displayMode) {
                     case 1: //Heater Cooler
                         const debug = this.enableDebugMode ? this.emit('debug', `Prepare heather/cooler ${zoneName} service`) : false;
                         const melCloudService = new Service.HeaterCooler(serviceName, `HeaterCooler ${deviceId} ${i}`);
                         melCloudService.getCharacteristic(Characteristic.Active)
                             .onGet(async () => {
-                                const state = this.accessory.power;
+                                const state = deviceData.Device.Power;
                                 return state;
                             })
                             .onSet(async (state) => {
@@ -1314,6 +1313,86 @@ class DeviceAtw extends EventEmitter {
                                     this.emit('warn', `${zoneName}, Set temperature error: ${error}`);
                                 };
                             });
+                        //device can heat/cool or only heat
+                        if (heatCoolModes === 0 || heatCoolModes === 1) {
+                            melCloudServiceT.getCharacteristic(Characteristic.HeatingThresholdTemperature)
+                                .setProps({
+                                    minValue: this.accessory.zones[i].temperaturesSetPropsMinValue,
+                                    maxValue: this.accessory.zones[i].temperaturesSetPropsMaxValue,
+                                    minStep: this.accessory.temperatureIncrement
+                                })
+                                .onGet(async () => {
+                                    const value = this.accessory.zones[i].setTemperature;
+                                    return value;
+                                })
+                                .onSet(async (value) => {
+                                    try {
+                                        switch (i) {
+                                            case 0: //Heat Pump
+                                                //deviceData.Device.SetTemperatureZone1 = value;
+                                                //deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone1;
+                                                break;
+                                            case 1: //Zone 1
+                                                deviceData.Device.SetTemperatureZone1 = value;
+                                                deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone1;
+                                                break;
+                                            case caseHotWater: //Hot Water
+                                                deviceData.Device.SetTankWaterTemperature = value;
+                                                deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTankWaterTemperature;
+                                                break;
+                                            case caseZone2: //Zone 2
+                                                deviceData.Device.SetTemperatureZone2 = value;
+                                                deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone2;
+                                                break;
+                                        };
+
+                                        const set = i > 0 ? await this.melCloudAtw.send(deviceData) : false;
+                                        const info = this.disableLogInfo || i === 0 ? false : this.emit('message', `${zoneName}, Set heating threshold temperature: ${value}${this.accessory.temperatureUnit}`);
+                                    } catch (error) {
+                                        this.emit('warn', `${zoneName}, Set heating threshold temperature error: ${error}`);
+                                    };
+                                });
+                        };
+                        //only for heat/cool, only cool and not for hot water tank
+                        if ((heatCoolModes === 0 || heatCoolModes === 2) && i !== caseHotWater) {
+                            melCloudServiceT.getCharacteristic(Characteristic.CoolingThresholdTemperature)
+                                .setProps({
+                                    minValue: this.accessory.zones[i].temperaturesSetPropsMinValue,
+                                    maxValue: this.accessory.zones[i].temperaturesSetPropsMaxValue,
+                                    minStep: this.accessory.temperatureIncrement
+                                })
+                                .onGet(async () => {
+                                    const value = this.accessory.zones[i].setTemperature;
+                                    return value;
+                                })
+                                .onSet(async (value) => {
+                                    try {
+                                        switch (i) {
+                                            case 0: //Heat Pump
+                                                //deviceData.Device.SetTemperatureZone1 = value;
+                                                //deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone1;
+                                                break;
+                                            case 1: //Zone 1
+                                                deviceData.Device.SetTemperatureZone1 = value;
+                                                deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone1;
+                                                break;
+                                            case caseHotWater: //Hot Water
+                                                deviceData.Device.SetTankWaterTemperature = value;
+                                                deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTankWaterTemperature;
+                                                break;
+                                            case caseZone2: //Zone 2
+                                                deviceData.Device.SetTemperatureZone2 = value;
+                                                deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone2;
+                                                break;
+                                        };
+
+                                        const set = i > 0 ? await this.melCloudAtw.send(deviceData) : false;
+                                        const info = this.disableLogInfo || i === 0 ? false : this.emit('message', `${zoneName}, Set cooling threshold temperature: ${value}${this.accessory.temperatureUnit}`);
+                                    } catch (error) {
+                                        this.emit('warn', `${zoneName}, Set cooling threshold temperature error: ${error}`);
+                                    };
+                                });
+                        };
                         melCloudServiceT.getCharacteristic(Characteristic.TemperatureDisplayUnits)
                             .onGet(async () => {
                                 const value = this.accessory.useFahrenheit;

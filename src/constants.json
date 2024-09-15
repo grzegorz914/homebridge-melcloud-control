@@ -90,6 +90,17 @@
             "VERY STRONG",
             "OFF"
         ],
+        "CurrentOperationModeHeatherCooler": [
+            "INACTIVE",
+            "IDLE",
+            "HEATING",
+            "COOLING"
+        ],
+        "CurrentOperationModeThermostat": [
+            "INACTIVE",
+            "HEATING",
+            "COOLING"
+        ],
         "EffectiveFlags": {
             "Power": 1,
             "OperationMode": 2,
