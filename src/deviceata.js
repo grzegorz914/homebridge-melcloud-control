@@ -610,7 +610,7 @@ class DeviceAta extends EventEmitter {
                     if (!this.disableLogInfo) {
                         this.emit('message', `Power: ${power ? 'ON' : 'OFF'}`);
                         this.emit('message', `Target operation mode: ${CONSTANTS.AirConditioner.DriveMode[operationMode]}`);
-                        this.emit('message', `Current operation mode: ${displayMode === 1 ? CONSTANTS.AirConditioner.CurrentOperationModeHeatherCooler[this.accessory.currentOperationMode] : CONSTANTS.AirConditioner.CurrentOperationModeThermostat[this.accessory.currentOperationMode]}`);
+                        this.emit('message', `Current operation mode: ${this.displayMode === 1 ? CONSTANTS.AirConditioner.CurrentOperationModeHeatherCooler[this.accessory.currentOperationMode] : CONSTANTS.AirConditioner.CurrentOperationModeThermostat[this.accessory.currentOperationMode]}`);
                         this.emit('message', `Room temperature: ${roomTemperature}${temperatureUnit}`);
                         const info = hasOutdoorTemperature && deviceData.Device.OutdoorTemperature !== null ? this.emit('message', `Outdoor temperature: ${outdoorTemperature}${temperatureUnit}`) : false;
                         const info0 = operationMode !== 8 ? this.emit('message', `Target temperature: ${setTemperature}${temperatureUnit}`) : false;
