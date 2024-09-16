@@ -431,10 +431,11 @@ class MelCloudAtw extends EventEmitter {
     async send(deviceData) {
         try {
             //prevent to set out of range temp
-            const minTempZones = 10;
-            const maxTempZones = 31;
+            const minTempZones = 0;
+            const maxTempZones = 60;
             const minTempWaterTank = 16;
             const maxTempWaterTank = deviceData.Device.MaxTankTemperature ?? 70;
+
             deviceData.Device.SetTemperatureZone1 = deviceData.Device.SetTemperatureZone1 < minTempZones ? minTempZones : deviceData.Device.SetTemperatureZone1;
             deviceData.Device.SetTemperatureZone1 = deviceData.Device.SetTemperatureZone1 > maxTempZones ? maxTempZones : deviceData.Device.SetTemperatureZone1;
             deviceData.Device.SetTemperatureZone1 = deviceData.Device.SetTemperatureZone2 < minTempZones ? minTempZones : deviceData.Device.SetTemperatureZone2;

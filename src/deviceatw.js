@@ -97,7 +97,7 @@ class DeviceAtw extends EventEmitter {
 
         //accessory
         this.accessory = { zones: [{}, {}, {}, {}] };
-        this.accessory.useFahrenheit = useFahrenheit;
+        this.accessory.useFahrenheit = useFahrenheit ? 1 : 0;
         this.accessory.temperatureUnit = CONSTANTS.TemperatureDisplayUnits[useFahrenheit];
     };
 
@@ -235,7 +235,6 @@ class DeviceAtw extends EventEmitter {
                     const returnTemperatureZone1 = deviceData.Device.ReturnTemperatureZone1;
                     const returnTemperatureZone2 = deviceData.Device.ReturnTemperatureZone2;
                     const returnTemperatureWaterTank = deviceData.Device.ReturnTemperatureBoiler;
-                    const temperatureUnit = this.accessory.temperatureUnit;
 
                     //presets
                     const presetsOnServer = deviceData.Presets ?? [];
@@ -303,7 +302,7 @@ class DeviceAtw extends EventEmitter {
                     let operationModeSetPropsMaxValue = 3;
                     let operationModeSetPropsValidValues = [0];
                     let temperatureSetPropsMinValue = -35;
-                    let temperatureSetPropsMaxValue = 140;
+                    let temperatureSetPropsMaxValue = 100;
 
                     for (let i = 0; i < zonesCount; i++) {
                         switch (this.displayMode) {
@@ -329,8 +328,28 @@ class DeviceAtw extends EventEmitter {
                                         name = zone1Name;
                                         currentOperationMode = !power ? 0 : idleZone1 ? 1 : [2, 2, 2, 3, 3, 2][operationModeZone1]; //INACTIVE, IDLE, HEATING, COOLING
                                         targetOperationMode = [1, 2, 0, 1, 2, 1][operationModeZone1]; //AUTO, HEAT, COOL
-                                        roomTemperature = roomTemperatureZone1;
-                                        setTemperature = setTemperatureZone1;
+
+                                        switch (operationModeZone1) {
+                                            case 1: //HEAT FLOW
+                                                setTemperature = setHeatFlowTemperatureZone1;
+                                                roomTemperature = flowTemperatureZone1;
+                                                temperatureSetPropsMinValue = 25;
+                                                temperatureSetPropsMaxValue = 60;
+                                                break;
+                                            case 4: //COOL FLOW
+                                                setTemperature = setCoolFlowTemperatureZone1;
+                                                roomTemperature = flowTemperatureZone1;
+                                                temperatureSetPropsMinValue = 16;
+                                                temperatureSetPropsMaxValue = 31;
+                                                break;
+                                            default:
+                                                setTemperature = setTemperatureZone1;
+                                                roomTemperature = roomTemperatureZone1;
+                                                temperatureSetPropsMinValue = 10;
+                                                temperatureSetPropsMaxValue = 31;
+                                                break
+                                        };
+
                                         lockPhysicalControl = prohibitZone1 ? 1 : 0;
                                         flowTemperature = flowTemperatureZone1;
                                         returnTemperature = returnTemperatureZone1;
@@ -338,8 +357,6 @@ class DeviceAtw extends EventEmitter {
                                         operationModeSetPropsMinValue = [0, 0, 1, 0][heatCoolModes];
                                         operationModeSetPropsMaxValue = [2, 2, 2, 0][heatCoolModes];
                                         operationModeSetPropsValidValues = [[0, 1, 2], [0, 1, 2], [1, 2], [0]][heatCoolModes];
-                                        temperatureSetPropsMinValue = 0;
-                                        temperatureSetPropsMaxValue = 31;
                                         break;
                                     case caseHotWater: //Hot Water - NORMAL, HEAT NOW
                                         name = hotWaterName;
@@ -361,8 +378,28 @@ class DeviceAtw extends EventEmitter {
                                         name = zone2Name;
                                         currentOperationMode = !power ? 0 : idleZone2 ? 1 : [2, 2, 2, 3, 3, 2][operationModeZone2]; //INACTIVE, IDLE, HEATING, COOLING
                                         targetOperationMode = [1, 2, 0, 1, 2, 1][operationModeZone2]; //AUTO, HEAT, COOL
-                                        roomTemperature = roomTemperatureZone2;
-                                        setTemperature = setTemperatureZone2;
+
+                                        switch (operationModeZone2) {
+                                            case 1: //HEAT FLOW
+                                                setTemperature = setHeatFlowTemperatureZone2;
+                                                roomTemperature = flowTemperatureZone2;
+                                                temperatureSetPropsMinValue = 25;
+                                                temperatureSetPropsMaxValue = 60;
+                                                break;
+                                            case 4: //COOL FLOW
+                                                setTemperature = setCoolFlowTemperatureZone2;
+                                                roomTemperature = flowTemperatureZone2;
+                                                temperatureSetPropsMinValue = 16;
+                                                temperatureSetPropsMaxValue = 31;
+                                                break;
+                                            default:
+                                                setTemperature = setTemperatureZone2;
+                                                roomTemperature = roomTemperatureZone2;
+                                                temperatureSetPropsMinValue = 10;
+                                                temperatureSetPropsMaxValue = 31;
+                                                break
+                                        };
+
                                         lockPhysicalControl = prohibitZone2 ? 1 : 0;
                                         flowTemperature = flowTemperatureZone2;
                                         returnTemperature = returnTemperatureZone2;
@@ -370,8 +407,6 @@ class DeviceAtw extends EventEmitter {
                                         operationModeSetPropsMinValue = [0, 0, 1, 0][heatCoolModes];
                                         operationModeSetPropsMaxValue = [2, 2, 2, 0][heatCoolModes];
                                         operationModeSetPropsValidValues = [[0, 1, 2], [0, 1, 2], [1, 2], [0]][heatCoolModes];
-                                        temperatureSetPropsMinValue = 0;
-                                        temperatureSetPropsMaxValue = 31;
                                         break;
                                     default: //unknown zone detected
                                         this.emit('message', `Unknown zone: ${i} detected.`);
@@ -402,21 +437,38 @@ class DeviceAtw extends EventEmitter {
                                         operationModeSetPropsMinValue = [0, 0, 0, 0][heatCoolModes];
                                         operationModeSetPropsMaxValue = [2, 1, 2, 0][heatCoolModes];
                                         operationModeSetPropsValidValues = [[0, 1, 2], [0, 1], [0, 2], [0]][heatCoolModes];
-                                        temperatureSetPropsMinValue = -35;
-                                        temperatureSetPropsMaxValue = 100;
+                                        temperatureSetPropsMinValue = 10;
+                                        temperatureSetPropsMaxValue = 70;
                                         this.accessory.zones[i].name = heatPumpName;
                                         break;
                                     case 1: //Zone 1 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
                                         currentOperationMode = !power ? 0 : idleZone1 ? 0 : [1, 1, 1, 2, 2, 1][operationModeZone1]; //OFF, HEAT, COOL
                                         targetOperationMode = [1, 2, 3, 1, 2, 1][operationModeZone1]; //OFF, HEAT, COOL, AUTO
-                                        roomTemperature = roomTemperatureZone1;
-                                        setTemperature = setTemperatureZone1;
+
+                                        switch (operationModeZone1) {
+                                            case 1: //HEAT FLOW
+                                                setTemperature = setHeatFlowTemperatureZone1;
+                                                roomTemperature = flowTemperatureZone1;
+                                                temperatureSetPropsMinValue = 25;
+                                                temperatureSetPropsMaxValue = 60;
+                                                break;
+                                            case 4: //COOL FLOW
+                                                setTemperature = setCoolFlowTemperatureZone1;
+                                                roomTemperature = flowTemperatureZone1;
+                                                temperatureSetPropsMinValue = 16;
+                                                temperatureSetPropsMaxValue = 31;
+                                                break;
+                                            default:
+                                                setTemperature = setTemperatureZone1;
+                                                roomTemperature = roomTemperatureZone1;
+                                                temperatureSetPropsMinValue = 10;
+                                                temperatureSetPropsMaxValue = 31;
+                                                break
+                                        };
 
                                         operationModeSetPropsMinValue = [1, 1, 1, 0][heatCoolModes];
                                         operationModeSetPropsMaxValue = [3, 3, 2, 0][heatCoolModes];
                                         operationModeSetPropsValidValues = [[1, 2, 3], [1, 2, 3], [1, 2], [0]][heatCoolModes];
-                                        temperatureSetPropsMinValue = 0;
-                                        temperatureSetPropsMaxValue = 31;
                                         this.accessory.zones[i].name = heatPumpName;
                                         break;
                                     case caseHotWater: //Hot Water - NORMAL, HEAT NOW
@@ -435,14 +487,31 @@ class DeviceAtw extends EventEmitter {
                                     case caseZone2: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
                                         currentOperationMode = !power ? 0 : idleZone2 ? 0 : [1, 1, 1, 2, 2, 1][operationModeZone2]; //OFF, HEAT, COOL
                                         targetOperationMode = [1, 2, 3, 1, 2, 1][operationModeZone2]; //OFF, HEAT, COOL, AUTO
-                                        roomTemperature = roomTemperatureZone2;
-                                        setTemperature = setTemperatureZone2;
+
+                                        switch (operationModeZone2) {
+                                            case 1: //HEAT FLOW
+                                                setTemperature = setHeatFlowTemperatureZone2;
+                                                roomTemperature = flowTemperatureZone2;
+                                                temperatureSetPropsMinValue = 25;
+                                                temperatureSetPropsMaxValue = 60;
+                                                break;
+                                            case 4: //COOL FLOW
+                                                setTemperature = setCoolFlowTemperatureZone2;
+                                                roomTemperature = flowTemperatureZone2;
+                                                temperatureSetPropsMinValue = 16;
+                                                temperatureSetPropsMaxValue = 31;
+                                                break;
+                                            default:
+                                                setTemperature = setTemperatureZone2;
+                                                roomTemperature = roomTemperatureZone2;
+                                                temperatureSetPropsMinValue = 10;
+                                                temperatureSetPropsMaxValue = 31;
+                                                break
+                                        };
 
                                         operationModeSetPropsMinValue = [1, 1, 1, 0][heatCoolModes];
                                         operationModeSetPropsMaxValue = [3, 3, 2, 0][heatCoolModes];
                                         operationModeSetPropsValidValues = [[1, 2, 3], [1, 2, 3], [1, 2], [0]][heatCoolModes];
-                                        temperatureSetPropsMinValue = 0;
-                                        temperatureSetPropsMaxValue = 31;
                                         this.accessory.zones[i].name = heatPumpName;
                                         break;
                                     default: //unknown zone detected
@@ -458,8 +527,6 @@ class DeviceAtw extends EventEmitter {
                                         .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                                         .updateCharacteristic(Characteristic.TargetTemperature, setTemperature)
                                         .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.accessory.useFahrenheit);
-                                    const updateDefHeat = heatCoolModes === 0 || heatCoolModes === 1 ? this.melCloudServices[i].updateCharacteristic(Characteristic.HeatingThresholdTemperature, setTemperature) : false;
-                                    const updateDefCool = heatCoolModes === 0 || heatCoolModes === 2 ? this.melCloudServices[i].updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature) : false;
                                 }
                                 break;
                         };
@@ -473,14 +540,14 @@ class DeviceAtw extends EventEmitter {
                         this.accessory.zones[i].lockPhysicalControl = lockPhysicalControl;
                         this.accessory.zones[i].flowTemperature = flowTemperature;
                         this.accessory.zones[i].returnTemperature = returnTemperature;
+                        this.accessory.zones[i].temperaturesSetPropsMinValue = temperatureSetPropsMinValue;
+                        this.accessory.zones[i].temperaturesSetPropsMaxValue = temperatureSetPropsMaxValue;
 
                         //only on first run
                         if (this.startPrepareAccessory) {
                             this.accessory.zones[i].operationModesSetPropsMinValue = operationModeSetPropsMinValue;
                             this.accessory.zones[i].operationModesSetPropsMaxValue = operationModeSetPropsMaxValue;
                             this.accessory.zones[i].operationModesSetPropsValidValues = operationModeSetPropsValidValues;
-                            this.accessory.zones[i].temperaturesSetPropsMinValue = temperatureSetPropsMinValue;
-                            this.accessory.zones[i].temperaturesSetPropsMaxValue = temperatureSetPropsMaxValue;
                         };
 
                         //update temperature sensors
@@ -558,40 +625,40 @@ class DeviceAtw extends EventEmitter {
                                 case 0: //Heat Pump - HEAT, COOL, OFF
                                     this.emit('message', `${heatPumpName}, Power: ${power ? 'ON' : 'OFF'}`)
                                     this.emit('message', `${heatPumpName}, Operation mode: ${CONSTANTS.HeatPump.System[unitStatus]}`);
-                                    this.emit('message', `${heatPumpName},'Outdoor temperature: ${roomTemperature}${temperatureUnit}`);
-                                    const info = flowTemperature !== null ? this.emit('message', `${heatPumpName}, Flow temperature: ${flowTemperature}${temperatureUnit}`) : false;
-                                    const info1 = returnTemperature !== null ? this.emit('message', `${heatPumpName}, Return temperature: ${returnTemperature}${temperatureUnit}`) : false;
-                                    this.emit('message', `${heatPumpName}, Temperature display unit: ${temperatureUnit}`);
+                                    this.emit('message', `${heatPumpName},'Outdoor temperature: ${roomTemperature}${this.accessory.temperatureUnit}`);
+                                    const info = flowTemperature !== null ? this.emit('message', `${heatPumpName}, Flow temperature: ${flowTemperature}${this.accessory.temperatureUnit}`) : false;
+                                    const info1 = returnTemperature !== null ? this.emit('message', `${heatPumpName}, Return temperature: ${returnTemperature}${this.accessory.temperatureUnit}`) : false;
+                                    this.emit('message', `${heatPumpName}, Temperature display unit: ${this.accessory.temperatureUnit}`);
                                     this.emit('message', `${heatPumpName}, Lock physical controls: ${lockPhysicalControl ? 'LOCKED' : 'UNLOCKED'}`);
                                     break;
                                 case 1: //Zone 1 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
                                     operationModeText = idleZone1 ? CONSTANTS.HeatPump.ZoneOperation[6] : CONSTANTS.HeatPump.ZoneOperation[operationModeZone1];
                                     this.emit('message', `${zone1Name}, Operation mode: ${operationModeText}`);
-                                    this.emit('message', `${zone1Name}, Temperature: ${roomTemperature}${temperatureUnit}`);
-                                    this.emit('message', `${zone1Name}, Target temperature: ${setTemperature}${temperatureUnit}`)
-                                    const info2 = flowTemperatureZone1 !== null ? this.emit('message', `${zone1Name}, Flow temperature: ${flowTemperatureZone1}${temperatureUnit}`) : false;
-                                    const info3 = returnTemperatureZone1 !== null ? this.emit('message', `${zone1Name}, Return temperature: ${returnTemperatureZone1}${temperatureUnit}`) : false;
-                                    this.emit('message', `${zone1Name}, Temperature display unit: ${temperatureUnit}`);
+                                    this.emit('message', `${zone1Name}, Temperature: ${roomTemperature}${this.accessory.temperatureUnit}`);
+                                    this.emit('message', `${zone1Name}, Target temperature: ${setTemperature}${this.accessory.temperatureUnit}`)
+                                    const info2 = flowTemperatureZone1 !== null ? this.emit('message', `${zone1Name}, Flow temperature: ${flowTemperatureZone1}${this.accessory.temperatureUnit}`) : false;
+                                    const info3 = returnTemperatureZone1 !== null ? this.emit('message', `${zone1Name}, Return temperature: ${returnTemperatureZone1}${this.accessory.temperatureUnit}`) : false;
+                                    this.emit('message', `${zone1Name}, Temperature display unit: ${this.accessory.temperatureUnit}`);
                                     this.emit('message', `${zone1Name}, Lock physical controls: ${lockPhysicalControl ? 'LOCKED' : 'UNLOCKED'}`);
                                     break;
                                 case caseHotWater: //Hot Water - AUTO, HEAT NOW
                                     operationModeText = operationMode === 1 ? CONSTANTS.HeatPump.ForceDhw[1] : CONSTANTS.HeatPump.ForceDhw[forcedHotWaterMode ? 1 : 0];
                                     this.emit('message', `${hotWaterName}, Operation mode: ${operationModeText}`);
-                                    this.emit('message', `${hotWaterName}, Temperature: ${roomTemperature}${temperatureUnit}`);
-                                    this.emit('message', `${hotWaterName}, Target temperature: ${setTemperature}${temperatureUnit}`)
-                                    const info4 = flowTemperatureWaterTank !== null ? this.emit('message', `${hotWaterName}, Flow temperature: ${flowTemperatureWaterTank}${temperatureUnit}`) : false;
-                                    const info5 = returnTemperatureWaterTank !== null ? this.emit('message', `${hotWaterName}, Return temperature: ${returnTemperatureWaterTank}${temperatureUnit}`) : false;
-                                    this.emit('message', `${hotWaterName}, Temperature display unit: ${temperatureUnit}`);
+                                    this.emit('message', `${hotWaterName}, Temperature: ${roomTemperature}${this.accessory.temperatureUnit}`);
+                                    this.emit('message', `${hotWaterName}, Target temperature: ${setTemperature}${this.accessory.temperatureUnit}`)
+                                    const info4 = flowTemperatureWaterTank !== null ? this.emit('message', `${hotWaterName}, Flow temperature: ${flowTemperatureWaterTank}${this.accessory.temperatureUnit}`) : false;
+                                    const info5 = returnTemperatureWaterTank !== null ? this.emit('message', `${hotWaterName}, Return temperature: ${returnTemperatureWaterTank}${this.accessory.temperatureUnit}`) : false;
+                                    this.emit('message', `${hotWaterName}, Temperature display unit: ${this.accessory.temperatureUnit}`);
                                     this.emit('message', `${hotWaterName}, Lock physical controls: ${lockPhysicalControl ? 'LOCKED' : 'UNLOCKED'}`);
                                     break;
                                 case caseZone2: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
                                     operationModeText = idleZone2 ? CONSTANTS.HeatPump.ZoneOperation[6] : CONSTANTS.HeatPump.ZoneOperation[operationModeZone2];
                                     this.emit('message', `${zone2Name}, Operation mode: ${operationModeText}`);
-                                    this.emit('message', `${zone2Name}, Temperature: ${roomTemperature}${temperatureUnit}`);
-                                    this.emit('message', `${zone2Name}, Target temperature: ${setTemperature}${temperatureUnit}`)
-                                    const info6 = flowTemperatureZone2 !== null ? this.emit('message', `${zone2Name}, Flow temperature: ${flowTemperatureZone2}${temperatureUnit}`) : false;
-                                    const info7 = roomTemperatureZone2 !== null ? this.emit('message', `${zone2Name}, Return temperature: ${roomTemperatureZone2}${temperatureUnit}`) : false;
-                                    this.emit('message', `${zone2Name}, Temperature display unit: ${temperatureUnit}`);
+                                    this.emit('message', `${zone2Name}, Temperature: ${roomTemperature}${this.accessory.temperatureUnit}`);
+                                    this.emit('message', `${zone2Name}, Target temperature: ${setTemperature}${this.accessory.temperatureUnit}`)
+                                    const info6 = flowTemperatureZone2 !== null ? this.emit('message', `${zone2Name}, Flow temperature: ${flowTemperatureZone2}${this.accessory.temperatureUnit}`) : false;
+                                    const info7 = roomTemperatureZone2 !== null ? this.emit('message', `${zone2Name}, Return temperature: ${roomTemperatureZone2}${this.accessory.temperatureUnit}`) : false;
+                                    this.emit('message', `${zone2Name}, Temperature display unit: ${this.accessory.temperatureUnit}`);
                                     this.emit('message', `${zone2Name}, Lock physical controls: ${lockPhysicalControl ? 'LOCKED' : 'UNLOCKED'}`);
                                     break;
                             };
@@ -1018,46 +1085,6 @@ class DeviceAtw extends EventEmitter {
                                 const value = this.accessory.zones[i].roomTemperature;
                                 return value;
                             });
-                        //device can heat/cool or only heat
-                        if (heatCoolModes === 0 || heatCoolModes === 1) {
-                            melCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
-                                .setProps({
-                                    minValue: this.accessory.zones[i].temperaturesSetPropsMinValue,
-                                    maxValue: this.accessory.zones[i].temperaturesSetPropsMaxValue,
-                                    minStep: this.accessory.temperatureIncrement
-                                })
-                                .onGet(async () => {
-                                    const value = this.accessory.zones[i].setTemperature;
-                                    return value;
-                                })
-                                .onSet(async (value) => {
-                                    try {
-                                        switch (i) {
-                                            case 0: //Heat Pump
-                                                //deviceData.Device.SetTemperatureZone1 = value;
-                                                //deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone1;
-                                                break;
-                                            case 1: //Zone 1
-                                                deviceData.Device.SetTemperatureZone1 = value;
-                                                deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone1;
-                                                break;
-                                            case caseHotWater: //Hot Water
-                                                deviceData.Device.SetTankWaterTemperature = value;
-                                                deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTankWaterTemperature;
-                                                break;
-                                            case caseZone2: //Zone 2
-                                                deviceData.Device.SetTemperatureZone2 = value;
-                                                deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone2;
-                                                break;
-                                        };
-
-                                        const set = i > 0 ? await this.melCloudAtw.send(deviceData) : false;
-                                        const info = this.disableLogInfo || i === 0 ? false : this.emit('message', `${zoneName}, Set heating threshold temperature: ${value}${this.accessory.temperatureUnit}`);
-                                    } catch (error) {
-                                        this.emit('warn', `${zoneName}, Set heating threshold temperature error: ${error}`);
-                                    };
-                                });
-                        };
                         //only for heat/cool, only cool and not for hot water tank
                         if ((heatCoolModes === 0 || heatCoolModes === 2) && i !== caseHotWater) {
                             melCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
@@ -1078,16 +1105,40 @@ class DeviceAtw extends EventEmitter {
                                                 //deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone1;
                                                 break;
                                             case 1: //Zone 1
-                                                deviceData.Device.SetTemperatureZone1 = value;
-                                                deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone1;
+                                                switch (deviceData.Device.OperationModeZone1) {
+                                                    case 1: //HEAT FLOW
+                                                        deviceData.Device.SetHeatFlowTemperatureZone1 = value;
+                                                        deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetHeatFlowTemperatureZone1;
+                                                        break;
+                                                    case 4: //COOL FLOW
+                                                        deviceData.Device.SetCoolFlowTemperatureZone1 = value;
+                                                        deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetCoolFlowTemperatureZone1;
+                                                        break;
+                                                    default:
+                                                        deviceData.Device.SetTemperatureZone1 = value;
+                                                        deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone1;
+                                                        break
+                                                };
                                                 break;
                                             case caseHotWater: //Hot Water
                                                 deviceData.Device.SetTankWaterTemperature = value;
                                                 deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTankWaterTemperature;
                                                 break;
                                             case caseZone2: //Zone 2
-                                                deviceData.Device.SetTemperatureZone2 = value;
-                                                deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone2;
+                                                switch (deviceData.Device.OperationModeZone2) {
+                                                    case 1: //HEAT FLOW
+                                                        deviceData.Device.SetHeatFlowTemperatureZone2 = value;
+                                                        deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetHeatFlowTemperatureZone2;
+                                                        break;
+                                                    case 4: //COOL FLOW
+                                                        deviceData.Device.SetCoolFlowTemperatureZone2 = value;
+                                                        deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetCoolFlowTemperatureZone2;
+                                                        break;
+                                                    default:
+                                                        deviceData.Device.SetTemperatureZone2 = value;
+                                                        deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone2;
+                                                        break
+                                                };
                                                 break;
                                         };
 
@@ -1098,6 +1149,68 @@ class DeviceAtw extends EventEmitter {
                                     };
                                 });
                         };
+                        //device can heat/cool or only heat
+                        melCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
+                            .setProps({
+                                minValue: this.accessory.zones[i].temperaturesSetPropsMinValue,
+                                maxValue: this.accessory.zones[i].temperaturesSetPropsMaxValue,
+                                minStep: this.accessory.temperatureIncrement
+                            })
+                            .onGet(async () => {
+                                const value = this.accessory.zones[i].setTemperature;
+                                return value;
+                            })
+                            .onSet(async (value) => {
+                                try {
+                                    switch (i) {
+                                        case 0: //Heat Pump
+                                            //deviceData.Device.SetTemperatureZone1 = value;
+                                            //deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone1;
+                                            break;
+                                        case 1: //Zone 1
+                                            switch (deviceData.Device.OperationModeZone1) {
+                                                case 1: //HEAT FLOW
+                                                    deviceData.Device.SetHeatFlowTemperatureZone1 = value;
+                                                    deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetHeatFlowTemperatureZone1;
+                                                    break;
+                                                case 4: //COOL FLOW
+                                                    deviceData.Device.SetCoolFlowTemperatureZone1 = value;
+                                                    deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetCoolFlowTemperatureZone1;
+                                                    break;
+                                                default:
+                                                    deviceData.Device.SetTemperatureZone1 = value;
+                                                    deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone1;
+                                                    break
+                                            };
+                                            break;
+                                        case caseHotWater: //Hot Water
+                                            deviceData.Device.SetTankWaterTemperature = value;
+                                            deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTankWaterTemperature;
+                                            break;
+                                        case caseZone2: //Zone 2
+                                            switch (deviceData.Device.OperationModeZone2) {
+                                                case 1: //HEAT FLOW
+                                                    deviceData.Device.SetHeatFlowTemperatureZone2 = value;
+                                                    deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetHeatFlowTemperatureZone2;
+                                                    break;
+                                                case 4: //COOL FLOW
+                                                    deviceData.Device.SetCoolFlowTemperatureZone2 = value;
+                                                    deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetCoolFlowTemperatureZone2;
+                                                    break;
+                                                default:
+                                                    deviceData.Device.SetTemperatureZone2 = value;
+                                                    deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone2;
+                                                    break
+                                            };
+                                            break;
+                                    };
+
+                                    const set = i > 0 ? await this.melCloudAtw.send(deviceData) : false;
+                                    const info = this.disableLogInfo || i === 0 ? false : this.emit('message', `${zoneName}, Set heating threshold temperature: ${value}${this.accessory.temperatureUnit}`);
+                                } catch (error) {
+                                    this.emit('warn', `${zoneName}, Set heating threshold temperature error: ${error}`);
+                                };
+                            });
                         melCloudService.getCharacteristic(Characteristic.LockPhysicalControls)
                             .onGet(async () => {
                                 const value = this.accessory.zones[i].lockPhysicalControl;
@@ -1140,7 +1253,7 @@ class DeviceAtw extends EventEmitter {
                             })
                             .onSet(async (value) => {
                                 try {
-                                    accountInfo.UseFahrenheit = value ? true : false;
+                                    accountInfo.UseFahrenheit = [false, true][value];
                                     await this.melCloud.send(accountInfo);
                                     const info = this.disableLogInfo ? false : this.emit('message', `Set temperature display unit: ${CONSTANTS.TemperatureDisplayUnits[value]}`);
                                 } catch (error) {
@@ -1294,16 +1407,40 @@ class DeviceAtw extends EventEmitter {
                                             //deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone1;
                                             break;
                                         case 1: //Zone 1
-                                            deviceData.Device.SetTemperatureZone1 = value;
-                                            deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone1;
+                                            switch (deviceData.Device.OperationModeZone1) {
+                                                case 1: //HEAT FLOW
+                                                    deviceData.Device.SetHeatFlowTemperatureZone1 = value;
+                                                    deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetHeatFlowTemperatureZone1;
+                                                    break;
+                                                case 4: //COOL FLOW
+                                                    deviceData.Device.SetCoolFlowTemperatureZone1 = value;
+                                                    deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetCoolFlowTemperatureZone1;
+                                                    break;
+                                                default:
+                                                    deviceData.Device.SetTemperatureZone1 = value;
+                                                    deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone1;
+                                                    break
+                                            };
                                             break;
                                         case caseHotWater: //Hot Water
                                             deviceData.Device.SetTankWaterTemperature = value;
                                             deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTankWaterTemperature;
                                             break;
                                         case caseZone2: //Zone 2
-                                            deviceData.Device.SetTemperatureZone2 = value;
-                                            deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone2;
+                                            switch (deviceData.Device.OperationModeZone2) {
+                                                case 1: //HEAT FLOW
+                                                    deviceData.Device.SetHeatFlowTemperatureZone2 = value;
+                                                    deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetHeatFlowTemperatureZone2;
+                                                    break;
+                                                case 4: //COOL FLOW
+                                                    deviceData.Device.SetCoolFlowTemperatureZone2 = value;
+                                                    deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetCoolFlowTemperatureZone2;
+                                                    break;
+                                                default:
+                                                    deviceData.Device.SetTemperatureZone2 = value;
+                                                    deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone2;
+                                                    break
+                                            };
                                             break;
                                     };
 
@@ -1313,86 +1450,6 @@ class DeviceAtw extends EventEmitter {
                                     this.emit('warn', `${zoneName}, Set temperature error: ${error}`);
                                 };
                             });
-                        //device can heat/cool or only heat
-                        if (heatCoolModes === 0 || heatCoolModes === 1) {
-                            melCloudServiceT.getCharacteristic(Characteristic.HeatingThresholdTemperature)
-                                .setProps({
-                                    minValue: this.accessory.zones[i].temperaturesSetPropsMinValue,
-                                    maxValue: this.accessory.zones[i].temperaturesSetPropsMaxValue,
-                                    minStep: this.accessory.temperatureIncrement
-                                })
-                                .onGet(async () => {
-                                    const value = this.accessory.zones[i].setTemperature;
-                                    return value;
-                                })
-                                .onSet(async (value) => {
-                                    try {
-                                        switch (i) {
-                                            case 0: //Heat Pump
-                                                //deviceData.Device.SetTemperatureZone1 = value;
-                                                //deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone1;
-                                                break;
-                                            case 1: //Zone 1
-                                                deviceData.Device.SetTemperatureZone1 = value;
-                                                deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone1;
-                                                break;
-                                            case caseHotWater: //Hot Water
-                                                deviceData.Device.SetTankWaterTemperature = value;
-                                                deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTankWaterTemperature;
-                                                break;
-                                            case caseZone2: //Zone 2
-                                                deviceData.Device.SetTemperatureZone2 = value;
-                                                deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone2;
-                                                break;
-                                        };
-
-                                        const set = i > 0 ? await this.melCloudAtw.send(deviceData) : false;
-                                        const info = this.disableLogInfo || i === 0 ? false : this.emit('message', `${zoneName}, Set heating threshold temperature: ${value}${this.accessory.temperatureUnit}`);
-                                    } catch (error) {
-                                        this.emit('warn', `${zoneName}, Set heating threshold temperature error: ${error}`);
-                                    };
-                                });
-                        };
-                        //only for heat/cool, only cool and not for hot water tank
-                        if ((heatCoolModes === 0 || heatCoolModes === 2) && i !== caseHotWater) {
-                            melCloudServiceT.getCharacteristic(Characteristic.CoolingThresholdTemperature)
-                                .setProps({
-                                    minValue: this.accessory.zones[i].temperaturesSetPropsMinValue,
-                                    maxValue: this.accessory.zones[i].temperaturesSetPropsMaxValue,
-                                    minStep: this.accessory.temperatureIncrement
-                                })
-                                .onGet(async () => {
-                                    const value = this.accessory.zones[i].setTemperature;
-                                    return value;
-                                })
-                                .onSet(async (value) => {
-                                    try {
-                                        switch (i) {
-                                            case 0: //Heat Pump
-                                                //deviceData.Device.SetTemperatureZone1 = value;
-                                                //deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone1;
-                                                break;
-                                            case 1: //Zone 1
-                                                deviceData.Device.SetTemperatureZone1 = value;
-                                                deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone1;
-                                                break;
-                                            case caseHotWater: //Hot Water
-                                                deviceData.Device.SetTankWaterTemperature = value;
-                                                deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTankWaterTemperature;
-                                                break;
-                                            case caseZone2: //Zone 2
-                                                deviceData.Device.SetTemperatureZone2 = value;
-                                                deviceData.Device.EffectiveFlags = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone2;
-                                                break;
-                                        };
-
-                                        const set = i > 0 ? await this.melCloudAtw.send(deviceData) : false;
-                                        const info = this.disableLogInfo || i === 0 ? false : this.emit('message', `${zoneName}, Set cooling threshold temperature: ${value}${this.accessory.temperatureUnit}`);
-                                    } catch (error) {
-                                        this.emit('warn', `${zoneName}, Set cooling threshold temperature error: ${error}`);
-                                    };
-                                });
-                        };
                         melCloudServiceT.getCharacteristic(Characteristic.TemperatureDisplayUnits)
                             .onGet(async () => {
                                 const value = this.accessory.useFahrenheit;
@@ -1400,7 +1457,7 @@ class DeviceAtw extends EventEmitter {
                             })
                             .onSet(async (value) => {
                                 try {
-                                    accountInfo.UseFahrenheit = value ? true : false;
+                                    accountInfo.UseFahrenheit = [false, true][value];
                                     await this.melCloud.send(accountInfo);
                                     const info = this.disableLogInfo ? false : this.emit('message', `Set temperature display unit: ${CONSTANTS.TemperatureDisplayUnits[value]}`);
                                 } catch (error) {

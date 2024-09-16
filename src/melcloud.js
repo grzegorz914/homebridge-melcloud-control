@@ -62,7 +62,7 @@ class MelCloud extends EventEmitter {
             const account = accountData.data;
             const accountInfo = account.LoginData;
             const contextKey = accountInfo.ContextKey;
-            const useFahrenheit = accountInfo.UseFahrenheit ? 1 : 0;
+            const useFahrenheit = accountInfo.UseFahrenheit ?? false;
             this.contextKey = contextKey;
 
             //remove sensitive data
