@@ -200,7 +200,7 @@ class MelCloud extends EventEmitter {
             };
 
             await this.axiosInstancePost(CONSTANTS.ApiUrls.UpdateApplicationOptions, options);
-            await this.saveData(this.accountInfoFile, accountInfo);
+            await this.saveData(this.accountFile, accountInfo);
             return true;
         } catch (error) {
             throw new Error(error.message ?? error);

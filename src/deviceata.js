@@ -97,7 +97,7 @@ class DeviceAta extends EventEmitter {
         this.accessory.targetOperationMode = 0;
         this.accessory.fanSpeed = 0;
         this.accessory.useFahrenheit = useFahrenheit ? 1 : 0;
-        this.accessory.temperatureUnit = CONSTANTS.TemperatureDisplayUnits[useFahrenheit];
+        this.accessory.temperatureUnit = CONSTANTS.TemperatureDisplayUnits[this.accessory.useFahrenheit];
     };
 
     async start() {
