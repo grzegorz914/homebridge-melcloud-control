@@ -210,6 +210,13 @@ class DeviceAta extends EventEmitter {
                     this.displayDeviceInfo = false;
                 })
                 .on('deviceState', async (deviceData) => {
+                    //presets
+                    const presetsOnServer = deviceData.Presets ?? [];
+
+                    //device control
+                    const hideVaneControls = deviceData.HideVaneControls ?? false;
+                    const hideDryModeControl = deviceData.HideDryModeControl ?? false;
+
                     //device info
                     const hasAutomaticFanSpeed = deviceData.Device.HasAutomaticFanSpeed ?? false;
                     const airDirectionFunction = deviceData.Device.AirDirectionFunction ?? false;
@@ -224,9 +231,6 @@ class DeviceAta extends EventEmitter {
                     const modelSupportsAuto = this.autoDryFanMode >= 1 && modelSupportsAuto1;
                     const modelSupportsDry = deviceData.Device.ModelSupportsDry ?? false;
 
-                    //presets
-                    const presetsOnServer = deviceData.Presets ?? [];
-
                     //device state
                     const power = deviceData.Device.Power ?? false;
                     const inStandbyMode = deviceData.Device.InStandbyMode ?? false;
@@ -234,12 +238,11 @@ class DeviceAta extends EventEmitter {
                     const setTemperature = deviceData.Device.SetTemperature;
                     const defaultHeatingSetTemperature = deviceData.Device.DefaultHeatingSetTemperature;
                     const defaultCoolingSetTemperature = deviceData.Device.DefaultCoolingSetTemperature;
+                    const actualFanSpeed = deviceData.Device.ActualFanSpeed;
                     const fanSpeed = deviceData.Device.FanSpeed;
                     const operationMode = deviceData.Device.OperationMode;
                     const vaneHorizontalDirection = deviceData.Device.VaneHorizontalDirection;
                     const vaneVerticalDirection = deviceData.Device.VaneVerticalDirection;
-                    const hideVaneControls = deviceData.Device.HideVaneControls ?? false;
-                    const hideDryModeControl = deviceData.Device.HideDryModeControl ?? false;
                     const prohibitSetTemperature = deviceData.Device.ProhibitSetTemperature ?? false;
                     const prohibitOperationMode = deviceData.Device.ProhibitOperationMode ?? false;
                     const prohibitPower = deviceData.Device.ProhibitPower ?? false;
@@ -256,9 +259,7 @@ class DeviceAta extends EventEmitter {
                     this.accessory.hasOutdoorTemperature = hasOutdoorTemperature;
                     this.accessory.numberOfFanSpeeds = numberOfFanSpeeds;
                     this.accessory.swingFunction = swingFunction;
-
                     this.accessory.presets = presetsOnServer;
-
                     this.accessory.power = power ? 1 : 0;
                     this.accessory.inStandbyMode = inStandbyMode;
                     this.accessory.operationMode = operationMode;
@@ -267,7 +268,7 @@ class DeviceAta extends EventEmitter {
                     this.accessory.outdoorTemperature = outdoorTemperature;
                     this.accessory.defaultHeatingSetTemperature = defaultHeatingSetTemperature;
                     this.accessory.defaultCoolingSetTemperature = defaultCoolingSetTemperature;
-                    this.accessory.fanSpeed = fanSpeed;
+                    this.accessory.actualFanSpeed = actualFanSpeed;
                     this.accessory.swingMode = swingFunction && vaneHorizontalDirection === 12 && vaneVerticalDirection === 7 ? 1 : 0;
                     this.accessory.lockPhysicalControl = prohibitSetTemperature && prohibitOperationMode && prohibitPower ? 1 : 0;
                     this.accessory.temperatureIncrement = temperatureIncrement;
@@ -630,15 +631,16 @@ class DeviceAta extends EventEmitter {
                         this.emit('message', `Power: ${power ? 'ON' : 'OFF'}`);
                         this.emit('message', `Target operation mode: ${CONSTANTS.AirConditioner.DriveMode[operationMode]}`);
                         this.emit('message', `Current operation mode: ${this.displayMode === 1 ? CONSTANTS.AirConditioner.CurrentOperationModeHeatherCooler[this.accessory.currentOperationMode] : CONSTANTS.AirConditioner.CurrentOperationModeThermostat[this.accessory.currentOperationMode]}`);
-                        this.emit('message', `Room temperature: ${roomTemperature}${this.accessory.temperatureUnit}`);
-                        const info = hasOutdoorTemperature && deviceData.Device.OutdoorTemperature !== null ? this.emit('message', `Outdoor temperature: ${outdoorTemperature}${this.accessory.temperatureUnit}`) : false;
                         const info0 = operationMode !== 8 ? this.emit('message', `Target temperature: ${setTemperature}${this.accessory.temperatureUnit}`) : false;
+                        this.emit('message', `Current temperature: ${roomTemperature}${this.accessory.temperatureUnit}`);
+                        const info = hasOutdoorTemperature && deviceData.Device.OutdoorTemperature !== null ? this.emit('message', `Outdoor temperature: ${outdoorTemperature}${this.accessory.temperatureUnit}`) : false;
                         const info1 = operationMode === 8 && modelSupportsHeat ? this.emit('message', `Heating threshold temperature: ${defaultHeatingSetTemperature}${this.accessory.temperatureUnit}`) : false;
                         const info2 = operationMode === 8 && modelSupportsCool ? this.emit('message', `Cooling threshold temperature: ${defaultCoolingSetTemperature}${this.accessory.temperatureUnit}`) : false;
-                        const info3 = modelSupportsFanSpeed ? this.emit('message', `Fan speed mode: ${CONSTANTS.AirConditioner.FanSpeed[fanSpeed]}`) : false;
-                        const info4 = vaneHorizontalDirection !== null ? this.emit('message', `Vane horizontal: ${CONSTANTS.AirConditioner.HorizontalVane[vaneHorizontalDirection]}`) : false;
-                        const info5 = vaneVerticalDirection !== null ? this.emit('message', `Vane vertical: ${CONSTANTS.AirConditioner.VerticalVane[vaneVerticalDirection]}`) : false;
-                        const info6 = swingFunction ? this.emit('message', `Air direction: ${CONSTANTS.AirConditioner.AirDirection[this.accessory.swingMode ? 7 : 0]}`) : false;
+                        const info3 = modelSupportsFanSpeed ? this.emit('message', `Target fan speed: ${CONSTANTS.AirConditioner.FanSpeed[fanSpeed]}`) : false;
+                        const info4 = modelSupportsFanSpeed ? this.emit('message', `Current fan speed: ${CONSTANTS.AirConditioner.FanSpeed[actualFanSpeed]}`) : false;
+                        const info5 = vaneHorizontalDirection !== null ? this.emit('message', `Vane horizontal: ${CONSTANTS.AirConditioner.HorizontalVane[vaneHorizontalDirection]}`) : false;
+                        const info6 = vaneVerticalDirection !== null ? this.emit('message', `Vane vertical: ${CONSTANTS.AirConditioner.VerticalVane[vaneVerticalDirection]}`) : false;
+                        const info7 = swingFunction ? this.emit('message', `Air direction: ${CONSTANTS.AirConditioner.AirDirection[this.accessory.swingMode ? 7 : 0]}`) : false;
                         this.emit('message', `Temperature display unit: ${this.accessory.temperatureUnit}`);
                         this.emit('message', `Lock physical controls: ${this.accessory.lockPhysicalControl ? 'LOCKED' : 'UNLOCKED'}`);
                     };
@@ -1319,7 +1321,7 @@ class DeviceAta extends EventEmitter {
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.OperationMode;
                                         break;
                                     case 7: //OPERATING MODE DRY CONTROL HIDE
-                                        deviceData.Device.HideDryModeControl = state;
+                                        deviceData.HideDryModeControl = state;
                                         break;
                                     case 10: //VANE H SWING MODE AUTO
                                         button.previousValue = state ? deviceData.Device.VaneHorizontalDirection : button.previousValue ?? deviceData.Device.VaneHorizontalDirection;
@@ -1412,7 +1414,7 @@ class DeviceAta extends EventEmitter {
                                         deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.VaneVertical;
                                         break;
                                     case 27: //VANE H/V CONTROLS HIDE
-                                        deviceData.Device.HideVaneControls = state;
+                                        deviceData.HideVaneControls = state;
                                         break;
                                     case 30: //FAN SPEED MODE AUTO
                                         button.previousValue = state ? deviceData.Device.FanSpeed : button.previousValue ?? deviceData.Device.FanSpeed;

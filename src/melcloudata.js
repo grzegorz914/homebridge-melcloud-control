@@ -101,6 +101,7 @@ class MelCloudAta extends EventEmitter {
             const canCool = device.CanCool;
             const canHeat = device.CanHeat;
             const canDry = device.CanDry;
+            const canAuto = device.CanAuto;
             const hasAutomaticFanSpeed = device.HasAutomaticFanSpeed;
             const airDirectionFunction = device.AirDirectionFunction;
             const swingFunction = device.SwingFunction;
@@ -309,7 +310,9 @@ class MelCloudAta extends EventEmitter {
 
             const deviceState = {
                 RoomTemperature: roomTemperature,
+                OutdoorTemperature: outdoorTemperature,
                 SetTemperature: setTemperature,
+                ActualFanSpeed: actualFanSpeed,
                 FanSpeed: fanSpeed,
                 OperationMode: operationMode,
                 VaneHorizontalDirection: vaneHorizontalDirection,
@@ -403,8 +406,6 @@ class MelCloudAta extends EventEmitter {
                     OperationMode: deviceData.Device.OperationMode,
                     VaneHorizontal: deviceData.Device.VaneHorizontalDirection,
                     VaneVertical: deviceData.Device.VaneVerticalDirection,
-                    HideVaneControls: deviceData.Device.HideVaneControls,
-                    HideDryModeControl: deviceData.Device.HideDryModeControl,
                     DefaultHeatingSetTemperature: deviceData.Device.DefaultHeatingSetTemperature,
                     DefaultCoolingSetTemperature: deviceData.Device.DefaultCoolingSetTemperature,
                     InStandbyMode: deviceData.Device.InStandbyMode,
@@ -413,6 +414,8 @@ class MelCloudAta extends EventEmitter {
                     ProhibitPower: deviceData.Device.ProhibitPower,
                     Power: deviceData.Device.Power,
                     Offline: deviceData.Device.Offline,
+                    HideVaneControls: deviceData.HideVaneControls,
+                    HideDryModeControl: deviceData.HideDryModeControl,
                     HasPendingCommand: true
                 }
             }
