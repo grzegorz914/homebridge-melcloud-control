@@ -34,17 +34,17 @@
         ],
         "DriveMode": [
             "0",
-            "HEATING",
+            "HEAT",
             "DRY",
-            "COOLING",
+            "COOL",
             "4",
             "5",
             "6",
             "FAN",
             "AUTO",
-            "ISEE HEATING",
+            "ISEE HEAT",
             "ISEE DRY",
-            "ISEE COOLING"
+            "ISEE COOL"
         ],
         "VerticalVane": [
             "AUTO",
@@ -128,8 +128,8 @@
             "Zone 2"
         ],
         "ControlType": [
-            "HEATING",
-            "COOLING"
+            "HEAT",
+            "COOL"
         ],
         "Defrost": [
             "NORMAL",
@@ -140,16 +140,16 @@
         "OperationMode": [
             "IDLE",
             "HOT WATER",
-            "HEATING ZONES",
-            "COOLING",
+            "HEAT ZONES",
+            "COOL",
             "HOT WATER STORAGE",
             "FREEZE STAT",
             "LEGIONELLA",
-            "HEATING ECO",
+            "HEAT ECO",
             "MODE 1",
             "MODE 2",
             "MODE 3",
-            "HEATING UP"
+            "HEAT UP"
         ],
         "OperationModeDhw": [
             "NORMAL",
