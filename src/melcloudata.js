@@ -46,12 +46,12 @@ class MelCloudAta extends EventEmitter {
         try {
             //read device info from file
             const devicesData = await this.readData(this.devicesFile);
-            const deviceData = devicesData.find((device) => device.DeviceID === this.deviceId);
 
-            if (!deviceData) {
+            if (!Array.isArray(devicesData)) {
                 this.emit('warn', `Device data not found.`);
                 return;
             }
+            const deviceData = devicesData.find(device => device.DeviceID === this.deviceId);
             const debug = this.debugLog ? this.emit('debug', `Device Data: ${JSON.stringify(deviceData, null, 2)}`) : false;
 
             //device info
@@ -341,7 +341,7 @@ class MelCloudAta extends EventEmitter {
 
             return true;
         } catch (error) {
-            throw new Error(`Check state error: ${error.message || error}.`);
+            throw new Error(`Check state error: ${error.message || error}`);
         };
     };
 
