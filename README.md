@@ -164,7 +164,13 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 
 ### AUTO Mode
 
-* Here we can only set target temperature and the rest is calculated internally:
+* Heather/Coolert
+  * In this mode we can set heathing threshold and cooling threshold temperature:
+  * Target temperature is calculated as a middle value between `LO` and `HI` and the rest is calculated internally.
+* Thermostat
+  * In this mode we can set only target temperature:
+  * Target temperature issend to device and calculated internally:
+* Calculation method in device internally:  
   * If the room temperature `<` Heating Setpoint, the unit will be set to HEAT with a setpoint of 23°C.
   * In HEAT, if the room temperature `>` Heating Setpoint `+` 1°C, the unit will be set to FAN.
   * In FAN, if the room temperature `>` Cooling Setpoint, the unit will be set to COOL with a setpoint of 19°C.

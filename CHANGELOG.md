@@ -16,6 +16,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - do not configure it manually, always using Config UI X
   - required Homebridge v2.0.0 and above
 
+## [3.3.13] - (20.09.2024)
+
+## Changes
+
+- fix [#166](https://github.com/grzegorz914/homebridge-melcloud-control/issues/166)
+- redme update with explanation of AUTO mode in Heather/Cooler and Thermostat mode
+- cleanup
+
 ## [3.3.5] - (15.09.2024)
 
 ## Changes

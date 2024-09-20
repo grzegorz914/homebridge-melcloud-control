@@ -367,41 +367,41 @@ class MelCloudAta extends EventEmitter {
         }
     }
 
-    async send(deviceData) {
+    async send(deviceData, displayMode) {
         try {
-            //prevent to set out of range temp
-            const minTempHeat = deviceData.Device.MinTempHeat ?? 10;
-            const maxTempHeat = deviceData.Device.MaxTempHeat ?? 31;
-            const minTempCoolDry = deviceData.Device.MinTempCoolDry ?? 16;
-            const maxTempCoolDry = deviceData.Device.MaxTempCoolDry ?? 31;
-            const minTempAutomatic = deviceData.Device.MinTempAutomatic ?? 16;
-            const maxTempAutomatic = deviceData.Device.MaxTempAutomatic ?? 31;
-
-
-            switch (deviceData.Device.OperationMode) {//operating mode 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
+            //set target temp based on current mode
+            switch (displayMode) {
                 case 1:
-                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature < minTempHeat ? minTempHeat : deviceData.Device.SetTemperature;
-                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature > maxTempHeat ? maxTempHeat : deviceData.Device.SetTemperature;
-                    break;
+                    switch (deviceData.Device.OperationMode) {//operating mode 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
+                        case 1:
+                            deviceData.Device.SetTemperature = deviceData.Device.DefaultHeatingSetTemperature;
+                            break;
+                        case 2:
+                            deviceData.Device.SetTemperature = deviceData.Device.DefaultCoolingSetTemperature;
+                            break;
+                        case 3:
+                            deviceData.Device.SetTemperature = deviceData.Device.DefaultCoolingSetTemperature;
+                            break;
+                        case 7:
+                            deviceData.Device.SetTemperature = deviceData.Device.DefaultCoolingSetTemperature;
+                            break;
+                        case 8:
+                            const setTemp = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
+                            deviceData.Device.SetTemperature = setTemp;
+                            break;
+                        case 9:
+                            deviceData.Device.SetTemperature = deviceData.Device.DefaultHeatingSetTemperature;
+                            break;
+                        case 10:
+                            deviceData.Device.SetTemperature = deviceData.Device.DefaultCoolingSetTemperature;
+                            break;
+                        case 11:
+                            deviceData.Device.SetTemperature = deviceData.Device.DefaultCoolingSetTemperature;
+                            break;
+                    };
                 case 2:
-                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature < minTempCoolDry ? minTempCoolDry : deviceData.Device.SetTemperature;
-                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature > maxTempCoolDry ? maxTempCoolDry : deviceData.Device.SetTemperature;
+                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature;
                     break;
-                case 3:
-                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature < minTempCoolDry ? minTempCoolDry : deviceData.Device.SetTemperature;
-                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature > maxTempCoolDry ? maxTempCoolDry : deviceData.Device.SetTemperature;
-                    break;
-                case 7:
-                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature < 10 ? 10 : deviceData.Device.SetTemperature;
-                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature > 31 ? 31 : deviceData.Device.SetTemperature;
-                    break;
-                case 8:
-                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature < minTempAutomatic ? minTempAutomatic : deviceData.Device.SetTemperature;
-                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature > maxTempAutomatic ? maxTempAutomatic : deviceData.Device.SetTemperature;
-                    break;
-                default:
-                    this.emit('warn', `Trying to set nknown operating mode: ${deviceData.Device.OperationMode}`);
-                    return;
             };
 
             const payload = {

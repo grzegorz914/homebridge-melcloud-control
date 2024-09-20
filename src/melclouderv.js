@@ -354,14 +354,27 @@ class MelCloudErv extends EventEmitter {
             throw new Error(`Read data error: ${error.message ?? error}`);
         }
     }
-
-    async send(deviceData) {
+    async send(deviceData, displayMode) {
         try {
-            //prevent to set out of range temp
-            const minTemp = deviceData.Device.MinTempHeat ?? 10;
-            const maxTemp = deviceData.Device.MaxTempHeat ?? 31;
-            deviceData.Device.SetTemperature = deviceData.Device.SetTemperature < minTemp ? minTemp : deviceData.Device.SetTemperature;
-            deviceData.Device.SetTemperature = deviceData.Device.SetTemperature > maxTemp ? maxTemp : deviceData.Device.SetTemperature;
+            //set target temp based on current mode
+            switch (displayMode) {
+                case 1:
+                    switch (deviceData.Device.VentilationMode) {//LOSNAY, BYPASS, AUTO
+                        case 0:
+                            deviceData.Device.SetTemperature = deviceData.Device.DefaultHeatingSetTemperature;
+                            break;
+                        case 1:
+                            deviceData.Device.SetTemperature = deviceData.Device.DefaultCoolingSetTemperature;
+                            break;
+                        case 2:
+                            const setTemp = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
+                            deviceData.Device.SetTemperature = setTemp;
+                            break;
+                    };
+                case 2:
+                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature;
+                    break;
+            };
 
             //device state
             const payload = {
