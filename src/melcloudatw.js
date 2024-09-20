@@ -370,6 +370,11 @@ class MelCloudAtw extends EventEmitter {
             };
 
             const deviceState = {
+                Power: power,
+                Offlin: offline,
+                IdleZone1: idleZone1,
+                IdleZone2: idleZone2,
+                UnitStatus: unitStatus,
                 SetTemperatureZone1: setTemperatureZone1,
                 SetTemperatureZone2: setTemperatureZone2,
                 RoomTemperatureZone1: roomTemperatureZone1,
@@ -385,15 +390,13 @@ class MelCloudAtw extends EventEmitter {
                 SetTankWaterTemperature: setTankWaterTemperature,
                 ForcedHotWaterMode: forcedHotWaterMode,
                 OutdoorTemperature: outdoorTemperature,
+                TemperatureIncrement: temperatureIncrement,
                 EcoHotWater: ecoHotWater,
                 HolidayMode: holidayMode,
                 ProhibitZone1: prohibitHeatingZone1,
                 ProhibitZone2: prohibitHeatingZone2,
                 ProhibitHotWater: prohibitHotWater,
-                IdleZone1: idleZone1,
-                IdleZone2: idleZone2,
-                UnitStatus: unitStatus,
-                Power: power
+                EffectiveFlags: effectiveFlags
             }
 
             //check state changes

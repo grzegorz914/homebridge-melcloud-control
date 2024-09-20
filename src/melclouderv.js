@@ -297,6 +297,8 @@ class MelCloudErv extends EventEmitter {
             };
 
             const deviceState = {
+                Power: power,
+                Offlin: offline,
                 RoomTemperature: roomTemperature,
                 SupplyTemperature: supplyTemperature,
                 OutdoorTemperature: outdoorTemperature,
@@ -305,10 +307,20 @@ class MelCloudErv extends EventEmitter {
                 SetFanSpeed: setFanSpeed,
                 OperationMode: operationMode,
                 VentilationMode: ventilationMode,
+                RoomCO2Level: roomCO2Level,
+                ActualSupplyFanSpeed: actualSupplyFanSpeed,
+                ActualExhaustFanSpeed: actualExhaustFanSpeed,
+                CoreMaintenanceRequired: coreMaintenanceRequired,
+                FilterMaintenanceRequired: filterMaintenanceRequired,
+                TemperatureIncrement: temperatureIncrement,
+                DefaultCoolingSetTemperature: defaultCoolingSetTemperature,
+                DefaultHeatingSetTemperature: defaultHeatingSetTemperature,
+                PM25SensorStatus: pM25SensorStatus,
+                PM25Level: pM25Level,
                 HideRoomTemperature: hideRoomTemperature,
                 HideSupplyTemperature: hideSupplyTemperature,
                 HideOutdoorTemperature: hideOutdoorTemperature,
-                Power: power
+                EffectiveFlags: effectiveFlags
             }
 
             //check state changes

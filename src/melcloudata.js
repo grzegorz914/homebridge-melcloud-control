@@ -309,21 +309,29 @@ class MelCloudAta extends EventEmitter {
             };
 
             const deviceState = {
+                Power: power,
+                Offlin: offline,
+                InStandbyMode: inStandbyMode,
                 RoomTemperature: roomTemperature,
                 OutdoorTemperature: outdoorTemperature,
                 SetTemperature: setTemperature,
                 ActualFanSpeed: actualFanSpeed,
                 FanSpeed: fanSpeed,
+                AutomaticFanSpeed: automaticFanSpeed,
                 OperationMode: operationMode,
-                VaneHorizontalDirection: vaneHorizontalDirection,
                 VaneVerticalDirection: vaneVerticalDirection,
+                VaneVerticalSwing: vaneVerticalSwing,
+                VaneHorizontalDirection: vaneHorizontalDirection,
+                VaneHorizontalSwing: vaneHorizontalSwing,
+                DefaultCoolingSetTemperature: defaultCoolingSetTemperature,
+                DefaultHeatingSetTemperature: defaultHeatingSetTemperature,
+                TemperatureIncrement: temperatureIncrement,
                 HideVaneControls: hideVaneControls,
                 HideDryModeControl: hideDryModeControl,
-                InStandbyMode: inStandbyMode,
                 ProhibitSetTemperature: prohibitSetTemperature,
                 ProhibitOperationMode: prohibitOperationMode,
                 ProhibitPower: prohibitPower,
-                Power: power
+                EffectiveFlags: effectiveFlags
             }
 
             //check state changes
@@ -406,8 +414,8 @@ class MelCloudAta extends EventEmitter {
                     OperationMode: deviceData.Device.OperationMode,
                     VaneHorizontal: deviceData.Device.VaneHorizontalDirection,
                     VaneVertical: deviceData.Device.VaneVerticalDirection,
-                    DefaultHeatingSetTemperature: deviceData.Device.DefaultHeatingSetTemperature,
-                    DefaultCoolingSetTemperature: deviceData.Device.DefaultCoolingSetTemperature,
+                    DefaultHeatingSetTemperature: deviceData.Device.DefaultHeatingSetTemperature ?? 21,
+                    DefaultCoolingSetTemperature: deviceData.Device.DefaultCoolingSetTemperature ?? 23,
                     InStandbyMode: deviceData.Device.InStandbyMode,
                     ProhibitSetTemperature: deviceData.Device.ProhibitSetTemperature,
                     ProhibitOperationMode: deviceData.Device.ProhibitOperationMode,

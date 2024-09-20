@@ -220,16 +220,16 @@ class DeviceAta extends EventEmitter {
                     //device info
                     const hasAutomaticFanSpeed = deviceData.Device.HasAutomaticFanSpeed ?? false;
                     const airDirectionFunction = deviceData.Device.AirDirectionFunction ?? false;
-                    const hasOutdoorTemperature = deviceData.Device.HasOutdoorTemperature ?? false;
                     const swingFunction = deviceData.Device.SwingFunction ?? false;
+                    const hasOutdoorTemperature = deviceData.Device.HasOutdoorTemperature ?? false;
                     const numberOfFanSpeeds = deviceData.Device.NumberOfFanSpeeds ?? 0;
                     const modelSupportsFanSpeed = deviceData.Device.ModelSupportsFanSpeed ?? false;
+                    const modelSupportsAuto1 = deviceData.Device.ModelSupportsAuto ?? false;
+                    const modelSupportsAuto = this.autoDryFanMode >= 1 && modelSupportsAuto1
                     const modelSupportsHeat1 = deviceData.Device.ModelSupportsHeat ?? false;
                     const modelSupportsHeat = this.heatDryFanMode >= 1 && modelSupportsHeat1;
-                    const modelSupportsCool = this.coolDryFanMode >= 1;
-                    const modelSupportsAuto1 = deviceData.Device.ModelSupportsAuto ?? false;
-                    const modelSupportsAuto = this.autoDryFanMode >= 1 && modelSupportsAuto1;
                     const modelSupportsDry = deviceData.Device.ModelSupportsDry ?? false;
+                    const modelSupportsCool = this.coolDryFanMode >= 1;
 
                     //device state
                     const power = deviceData.Device.Power ?? false;
@@ -239,10 +239,13 @@ class DeviceAta extends EventEmitter {
                     const defaultHeatingSetTemperature = deviceData.Device.DefaultHeatingSetTemperature;
                     const defaultCoolingSetTemperature = deviceData.Device.DefaultCoolingSetTemperature;
                     const actualFanSpeed = deviceData.Device.ActualFanSpeed;
+                    const automaticFanSpeed = deviceData.Device.AutomaticFanSpeed;
                     const fanSpeed = deviceData.Device.FanSpeed;
                     const operationMode = deviceData.Device.OperationMode;
-                    const vaneHorizontalDirection = deviceData.Device.VaneHorizontalDirection;
                     const vaneVerticalDirection = deviceData.Device.VaneVerticalDirection;
+                    const vaneVerticalSwing = deviceData.Device.VaneVerticalSwing;
+                    const vaneHorizontalDirection = deviceData.Device.VaneHorizontalDirection;
+                    const vaneHorizontalSwing = deviceData.Device.VaneHorizontalSwing;
                     const prohibitSetTemperature = deviceData.Device.ProhibitSetTemperature ?? false;
                     const prohibitOperationMode = deviceData.Device.ProhibitOperationMode ?? false;
                     const prohibitPower = deviceData.Device.ProhibitPower ?? false;
@@ -250,25 +253,29 @@ class DeviceAta extends EventEmitter {
                     const outdoorTemperature = deviceData.Device.OutdoorTemperature;
 
                     //accessory
+                    this.accessory.presets = presetsOnServer;
+                    this.accessory.hasAutomaticFanSpeed = hasAutomaticFanSpeed;
+                    this.accessory.airDirectionFunction = airDirectionFunction;
+                    this.accessory.swingFunction = swingFunction;
+                    this.accessory.hasOutdoorTemperature = hasOutdoorTemperature;
+                    this.accessory.numberOfFanSpeeds = numberOfFanSpeeds;
+                    this.accessory.modelSupportsFanSpeed = modelSupportsFanSpeed;
+                    this.accessory.modelSupportsAuto = modelSupportsAuto;
                     this.accessory.modelSupportsHeat = modelSupportsHeat;
                     this.accessory.modelSupportsDry = modelSupportsDry;
                     this.accessory.modelSupportsCool = modelSupportsCool;
-                    this.accessory.modelSupportsAuto = modelSupportsAuto;
-                    this.accessory.modelSupportsFanSpeed = modelSupportsFanSpeed;
-                    this.accessory.hasAutomaticFanSpeed = hasAutomaticFanSpeed;
-                    this.accessory.hasOutdoorTemperature = hasOutdoorTemperature;
-                    this.accessory.numberOfFanSpeeds = numberOfFanSpeeds;
-                    this.accessory.swingFunction = swingFunction;
-                    this.accessory.presets = presetsOnServer;
                     this.accessory.power = power ? 1 : 0;
                     this.accessory.inStandbyMode = inStandbyMode;
                     this.accessory.operationMode = operationMode;
-                    this.accessory.setTemperature = setTemperature;
                     this.accessory.roomTemperature = roomTemperature;
                     this.accessory.outdoorTemperature = outdoorTemperature;
+                    this.accessory.setTemperature = setTemperature;
                     this.accessory.defaultHeatingSetTemperature = defaultHeatingSetTemperature;
                     this.accessory.defaultCoolingSetTemperature = defaultCoolingSetTemperature;
                     this.accessory.actualFanSpeed = actualFanSpeed;
+                    this.accessory.automaticFanSpeed = automaticFanSpeed;
+                    this.accessory.vaneVerticalSwing = vaneVerticalSwing;
+                    this.accessory.vaneHorizontalSwing = vaneHorizontalSwing;
                     this.accessory.swingMode = swingFunction && vaneHorizontalDirection === 12 && vaneVerticalDirection === 7 ? 1 : 0;
                     this.accessory.lockPhysicalControl = prohibitSetTemperature && prohibitOperationMode && prohibitPower ? 1 : 0;
                     this.accessory.temperatureIncrement = temperatureIncrement;
@@ -287,7 +294,7 @@ class DeviceAta extends EventEmitter {
                                                     this.accessory.targetOperationMode = 1; //AUTO, HEAT, COOL
                                                     break;
                                                 case 2: //DRY
-                                                    this.accessory.currentOperationMode = roomTemperature < setTemperature ? 1 : 3;
+                                                    this.accessory.currentOperationMode = 1;
                                                     this.accessory.targetOperationMode = this.autoDryFanMode === 2 ? 0 : this.heatDryFanMode === 2 ? 1 : this.coolDryFanMode === 2 ? 2 : this.accessory.targetOperationMode;
                                                     break;
                                                 case 3: //COOL
@@ -299,20 +306,7 @@ class DeviceAta extends EventEmitter {
                                                     this.accessory.targetOperationMode = this.autoDryFanMode === 3 ? 0 : this.heatDryFanMode === 3 ? 1 : this.coolDryFanMode === 3 ? 2 : this.accessory.targetOperationMode;
                                                     break;
                                                 case 8: //AUTO
-                                                    const curentModeInAuto = roomTemperature < defaultHeatingSetTemperature ? 'HEATING' : roomTemperature > defaultCoolingSetTemperature ? 'COOLING' : '';
-                                                    switch (curentModeInAuto) {
-                                                        case 'HEATING': //HEATING
-                                                            const heatingToFan = roomTemperature > defaultHeatingSetTemperature + 1;
-                                                            this.accessory.currentOperationMode = heatingToFan ? 1 : 2;
-                                                            break;
-                                                        case 'COOLING': //COOLING
-                                                            const coolingToFan = roomTemperature < defaultCoolingSetTemperature - 1;
-                                                            this.accessory.currentOperationMode = coolingToFan ? 1 : 3;
-                                                            break;
-                                                        default: //FAN
-                                                            this.accessory.currentOperationMode = roomTemperature <= defaultHeatingSetTemperature ? 2 : roomTemperature >= defaultCoolingSetTemperature ? 3 : 1;
-                                                            break;
-                                                    };
+                                                    this.accessory.currentOperationMode = roomTemperature < setTemperature ? 2 : roomTemperature > setTemperature ? 3 : 1;
                                                     this.accessory.targetOperationMode = 0;
                                                     break;
                                                 case 9: //ISEE HEAT
@@ -320,7 +314,7 @@ class DeviceAta extends EventEmitter {
                                                     this.accessory.targetOperationMode = 1;
                                                     break;
                                                 case 10: //ISEE DRY
-                                                    this.accessory.currentOperationMode = roomTemperature < setTemperature ? 1 : 3;
+                                                    this.accessory.currentOperationMode = 1;
                                                     this.accessory.targetOperationMode = this.autoDryFanMode === 2 ? 0 : this.heatDryFanMode === 2 ? 1 : this.coolDryFanMode === 2 ? 2 : this.accessory.targetOperationMode;
                                                     break;
                                                 case 11: //ISEE COOL;
@@ -380,9 +374,9 @@ class DeviceAta extends EventEmitter {
                                     .updateCharacteristic(Characteristic.TargetHeaterCoolerState, this.accessory.targetOperationMode)
                                     .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                                     .updateCharacteristic(Characteristic.LockPhysicalControls, this.accessory.lockPhysicalControl)
-                                    .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.accessory.useFahrenheit);
-                                const updateDefHeat = modelSupportsHeat ? this.melCloudService.updateCharacteristic(Characteristic.HeatingThresholdTemperature, operationMode === 8 ? defaultHeatingSetTemperature : setTemperature) : false;
-                                const updateDefCool = modelSupportsCool ? this.melCloudService.updateCharacteristic(Characteristic.CoolingThresholdTemperature, operationMode === 8 ? defaultCoolingSetTemperature : setTemperature) : false;
+                                    .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.accessory.useFahrenheit)
+                                    .updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature);
+                                const updateDefHeat = modelSupportsHeat ? this.melCloudService.updateCharacteristic(Characteristic.HeatingThresholdTemperature, this.accessory.targetOperationMode !== 1 ? 10 : setTemperature) : false;
                                 const updateRS = modelSupportsFanSpeed ? this.melCloudService.updateCharacteristic(Characteristic.RotationSpeed, this.accessory.fanSpeed) : false;
                                 const updateSM = swingFunction ? this.melCloudService.updateCharacteristic(Characteristic.SwingMode, this.accessory.swingMode) : false;
                             };
@@ -394,48 +388,35 @@ class DeviceAta extends EventEmitter {
                                         case true:
                                             switch (operationMode) {
                                                 case 1: //HEAT
-                                                    this.accessory.currentOperationMode = 1; //OFF, HEATING, COOLING
+                                                    this.accessory.currentOperationMode = roomTemperature > setTemperature ? 0 : 1; //OFF, HEATING, COOLING
                                                     this.accessory.targetOperationMode = 1; //OFF, HEAT, COOL, AUTO
                                                     break;
                                                 case 2: //DRY
-                                                    this.accessory.currentOperationMode = 2;
+                                                    this.accessory.currentOperationMode = 0;
                                                     this.accessory.targetOperationMode = this.autoDryFanMode === 2 ? 3 : this.heatDryFanMode === 2 ? 1 : this.coolDryFanMode === 2 ? 2 : this.accessory.targetOperationMode;
                                                     break;
                                                 case 3: //COOL
-                                                    this.accessory.currentOperationMode = 2;
+                                                    this.accessory.currentOperationMode = roomTemperature < setTemperature ? 0 : 2;
                                                     this.accessory.targetOperationMode = 2;
                                                     break;
                                                 case 7: //FAN
-                                                    this.accessory.currentOperationMode = 2;
+                                                    this.accessory.currentOperationMode = 0;
                                                     this.accessory.targetOperationMode = this.autoDryFanMode === 3 ? 3 : this.heatDryFanMode === 3 ? 1 : this.coolDryFanMode === 3 ? 2 : this.accessory.targetOperationMode;
                                                     break;
                                                 case 8: //AUTO
-                                                    const curentModeInAuto = roomTemperature < defaultHeatingSetTemperature ? 'HEATING' : roomTemperature > defaultCoolingSetTemperature ? 'COOLING' : '';
-                                                    switch (curentModeInAuto) {
-                                                        case 'HEATING': //HEATING
-                                                            const heatingToFan = roomTemperature > defaultHeatingSetTemperature + 1;
-                                                            this.accessory.currentOperationMode = heatingToFan ? 0 : 1;
-                                                            break;
-                                                        case 'COOLING': //COOLING
-                                                            const coolingToFan = roomTemperature < defaultCoolingSetTemperature - 1;
-                                                            this.accessory.currentOperationMode = cooling ? 0 : 2;
-                                                            break;
-                                                        default: //FAN
-                                                            this.accessory.currentOperationMode = roomTemperature <= defaultHeatingSetTemperature ? 1 : roomTemperature >= defaultCoolingSetTemperature ? 2 : 0;
-                                                            break;
-                                                    };
+                                                    this.accessory.currentOperationMode = roomTemperature < setTemperature ? 1 : roomTemperature > setTemperature ? 2 : 0;
                                                     this.accessory.targetOperationMode = 3;
                                                     break;
                                                 case 9: //ISEE HEAT
-                                                    this.accessory.currentOperationMode = 1
+                                                    this.accessory.currentOperationMode = roomTemperature > setTemperature ? 0 : 1;
                                                     this.accessory.targetOperationMode = 1;
                                                     break;
                                                 case 10: //ISEE DRY
-                                                    this.accessory.currentOperationMode = 2;
+                                                    this.accessory.currentOperationMode = 0;
                                                     this.accessory.targetOperationMode = this.autoDryFanMode === 2 ? 3 : this.heatDryFanMode === 2 ? 1 : this.coolDryFanMode === 2 ? 2 : this.accessory.targetOperationMode;
                                                     break;
                                                 case 11: //ISEE COOL;
-                                                    this.accessory.currentOperationMode = 2;
+                                                    this.accessory.currentOperationMode = roomTemperature < setTemperature ? 0 : 2;
                                                     this.accessory.targetOperationMode = 2;
                                                     break;
                                                 default:
@@ -463,8 +444,6 @@ class DeviceAta extends EventEmitter {
                                     .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                                     .updateCharacteristic(Characteristic.TargetTemperature, setTemperature)
                                     .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.accessory.useFahrenheit);
-                                const updateDefHeat = modelSupportsAuto && modelSupportsHeat ? this.melCloudService.updateCharacteristic(Characteristic.HeatingThresholdTemperature, defaultHeatingSetTemperature) : false;
-                                const updateDefCool = modelSupportsAuto && modelSupportsCool ? this.melCloudService.updateCharacteristic(Characteristic.CoolingThresholdTemperature, defaultCoolingSetTemperature) : false;
                             };
                             break;
                     };
@@ -631,16 +610,14 @@ class DeviceAta extends EventEmitter {
                         this.emit('message', `Power: ${power ? 'ON' : 'OFF'}`);
                         this.emit('message', `Target operation mode: ${CONSTANTS.AirConditioner.DriveMode[operationMode]}`);
                         this.emit('message', `Current operation mode: ${this.displayMode === 1 ? CONSTANTS.AirConditioner.CurrentOperationModeHeatherCooler[this.accessory.currentOperationMode] : CONSTANTS.AirConditioner.CurrentOperationModeThermostat[this.accessory.currentOperationMode]}`);
-                        const info0 = operationMode !== 8 ? this.emit('message', `Target temperature: ${setTemperature}${this.accessory.temperatureUnit}`) : false;
+                        this.emit('message', `Target temperature: ${setTemperature}${this.accessory.temperatureUnit}`);
                         this.emit('message', `Current temperature: ${roomTemperature}${this.accessory.temperatureUnit}`);
-                        const info = hasOutdoorTemperature && deviceData.Device.OutdoorTemperature !== null ? this.emit('message', `Outdoor temperature: ${outdoorTemperature}${this.accessory.temperatureUnit}`) : false;
-                        const info1 = operationMode === 8 && modelSupportsHeat ? this.emit('message', `Heating threshold temperature: ${defaultHeatingSetTemperature}${this.accessory.temperatureUnit}`) : false;
-                        const info2 = operationMode === 8 && modelSupportsCool ? this.emit('message', `Cooling threshold temperature: ${defaultCoolingSetTemperature}${this.accessory.temperatureUnit}`) : false;
+                        const info = hasOutdoorTemperature && outdoorTemperature !== null ? this.emit('message', `Outdoor temperature: ${outdoorTemperature}${this.accessory.temperatureUnit}`) : false;
                         const info3 = modelSupportsFanSpeed ? this.emit('message', `Target fan speed: ${CONSTANTS.AirConditioner.FanSpeed[fanSpeed]}`) : false;
                         const info4 = modelSupportsFanSpeed ? this.emit('message', `Current fan speed: ${CONSTANTS.AirConditioner.FanSpeed[actualFanSpeed]}`) : false;
                         const info5 = vaneHorizontalDirection !== null ? this.emit('message', `Vane horizontal: ${CONSTANTS.AirConditioner.HorizontalVane[vaneHorizontalDirection]}`) : false;
                         const info6 = vaneVerticalDirection !== null ? this.emit('message', `Vane vertical: ${CONSTANTS.AirConditioner.VerticalVane[vaneVerticalDirection]}`) : false;
-                        const info7 = swingFunction ? this.emit('message', `Air direction: ${CONSTANTS.AirConditioner.AirDirection[this.accessory.swingMode ? 7 : 0]}`) : false;
+                        const info7 = swingFunction ? this.emit('message', `Air direction: ${CONSTANTS.AirConditioner.AirDirection[this.accessory.swingMode]}`) : false;
                         this.emit('message', `Temperature display unit: ${this.accessory.temperatureUnit}`);
                         this.emit('message', `Lock physical controls: ${this.accessory.lockPhysicalControl ? 'LOCKED' : 'UNLOCKED'}`);
                     };
@@ -727,12 +704,12 @@ class DeviceAta extends EventEmitter {
                     set = await this.melCloudAta.send(deviceData);
                     break;
                 case 'HideVaneControls':
-                    deviceData.Device[key] = value;
+                    deviceData[key] = value;
                     deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Prohibit;
                     set = await this.melCloudAta.send(deviceData);
                     break;
                 case 'HideDryModeControl':
-                    deviceData.Device[key] = value;
+                    deviceData[key] = value;
                     deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Prohibit;
                     await this.melCloudAta.send(deviceData);
                     break;
@@ -914,41 +891,32 @@ class DeviceAta extends EventEmitter {
                                     deviceData.Device.VaneVertical = value ? 7 : 0;
                                     deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.VaneHorizontal + CONSTANTS.AirConditioner.EffectiveFlags.VaneVertical;
                                     await this.melCloudAta.send(deviceData);
-                                    const info = this.disableLogInfo ? false : this.emit('message', `Set air direction mode: ${CONSTANTS.AirConditioner.AirDirection[value ? 7 : 0]}`);
+                                    const info = this.disableLogInfo ? false : this.emit('message', `Set air direction mode: ${CONSTANTS.AirConditioner.AirDirection[value]}`);
                                 } catch (error) {
                                     this.emit('warn', `Set vane swing mode error: ${error}`);
                                 };
                             });
                     };
-                    if (modelSupportsCool) {
-                        this.melCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
-                            .setProps({
-                                minValue: 16,
-                                maxValue: 31,
-                                minStep: this.accessory.temperatureIncrement
-                            })
-                            .onGet(async () => {
-                                const value = this.accessory.operationMode === 8 ? this.accessory.defaultCoolingSetTemperature : this.accessory.setTemperature;
-                                return value;
-                            })
-                            .onSet(async (value) => {
-                                try {
-                                    switch (this.accessory.operationMode) {
-                                        case 8: //AUTO - AUTO
-                                            deviceData.Device.DefaultCoolingSetTemperature = value;
-                                            break;
-                                        default:
-                                            deviceData.Device.SetTemperature = value;
-                                            break
-                                    };
-                                    deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.SetTemperature;
-                                    await this.melCloudAta.send(deviceData);
-                                    const info = this.disableLogInfo ? false : this.emit('message', `Set cooling threshold temperature: ${value}${this.accessory.temperatureUnit}`);
-                                } catch (error) {
-                                    this.emit('warn', `Set cooling threshold temperature error: ${error}`);
-                                };
-                            });
-                    };
+                    this.melCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
+                        .setProps({
+                            minValue: 16,
+                            maxValue: 31,
+                            minStep: this.accessory.temperatureIncrement
+                        })
+                        .onGet(async () => {
+                            const value = this.accessory.setTemperature;
+                            return value;
+                        })
+                        .onSet(async (value) => {
+                            try {
+                                deviceData.Device.SetTemperature = value;
+                                deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.SetTemperature;
+                                await this.melCloudAta.send(deviceData);
+                                const info = this.disableLogInfo ? false : this.emit('message', `Set temperature: ${value}${this.accessory.temperatureUnit}`);
+                            } catch (error) {
+                                this.emit('warn', `Set cooling threshold temperature error: ${error}`);
+                            };
+                        });
                     if (modelSupportsHeat) {
                         this.melCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
                             .setProps({
@@ -957,23 +925,19 @@ class DeviceAta extends EventEmitter {
                                 minStep: this.accessory.temperatureIncrement
                             })
                             .onGet(async () => {
-                                const value = this.accessory.operationMode === 8 ? this.accessory.defaultHeatingSetTemperature : this.accessory.setTemperature;
+                                const value = this.accessory.targetOperationMode !== 1 ? 10 : this.accessory.setTemperature;
                                 return value;
                             })
                             .onSet(async (value) => {
                                 try {
-                                    switch (this.accessory.operationMode) {
-                                        case 8: //AUTO - AUTO
-                                            deviceData.Device.DefaultHeatingSetTemperature = value;
-                                            break;
-                                        default:
-                                            deviceData.Device.SetTemperature = value;
-                                            break
+                                    if (this.accessory.targetOperationMode !== 1) {
+                                        this.melCloudService.updateCharacteristic(Characteristic.HeatingThresholdTemperature, 10)
+                                        return;
                                     };
 
                                     deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.SetTemperature;
                                     await this.melCloudAta.send(deviceData);
-                                    const info = this.disableLogInfo ? false : this.emit('message', `Set heating threshold temperature: ${value}${this.accessory.temperatureUnit}`);
+                                    const info = this.disableLogInfo ? false : this.emit('message', `Set temperature: ${value}${this.accessory.temperatureUnit}`);
                                 } catch (error) {
                                     this.emit('warn', `Set heating threshold temperature error: ${error}`);
                                 };
@@ -1006,6 +970,7 @@ class DeviceAta extends EventEmitter {
                             try {
                                 accountInfo.UseFahrenheit = [false, true][value];
                                 await this.melCloud.send(accountInfo);
+                                this.accessory.useFahrenheit = value;
                                 const info = this.disableLogInfo ? false : this.emit('message', `Set temperature display unit: ${CONSTANTS.TemperatureDisplayUnits[value]}`);
                             } catch (error) {
                                 this.emit('warn', `Set temperature display unit error: ${error}`);
@@ -1087,52 +1052,6 @@ class DeviceAta extends EventEmitter {
                                 this.emit('warn', `Set temperature error: ${error}`);
                             };
                         });
-                    if (modelSupportsAuto) {
-                        if (modelSupportsHeat) {
-                            this.melCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
-                                .setProps({
-                                    minValue: 10,
-                                    maxValue: 31,
-                                    minStep: this.accessory.temperatureIncrement
-                                })
-                                .onGet(async () => {
-                                    const value = this.accessory.defaultHeatingSetTemperature;
-                                    return value;
-                                })
-                                .onSet(async (value) => {
-                                    try {
-                                        deviceData.Device.DefaultHeatingSetTemperature = value;
-                                        deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.SetTemperature;
-                                        await this.melCloudAta.send(deviceData);
-                                        const info = this.disableLogInfo ? false : this.emit('message', `Set heating threshold temperature: ${value}${this.accessory.temperatureUnit}`);
-                                    } catch (error) {
-                                        this.emit('warn', `Set heating threshold temperature error: ${error}`);
-                                    };
-                                });
-                        };
-                        if (modelSupportsCool) {
-                            this.melCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
-                                .setProps({
-                                    minValue: 16,
-                                    maxValue: 31,
-                                    minStep: this.accessory.temperatureIncrement
-                                })
-                                .onGet(async () => {
-                                    const value = this.accessory.defaultCoolingSetTemperature;
-                                    return value;
-                                })
-                                .onSet(async (value) => {
-                                    try {
-                                        deviceData.Device.DefaultCoolingSetTemperature = value;
-                                        deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.SetTemperature;
-                                        await this.melCloudAta.send(deviceData);
-                                        const info = this.disableLogInfo ? false : this.emit('message', `Set cooling threshold temperature: ${value}${this.accessory.temperatureUnit}`);
-                                    } catch (error) {
-                                        this.emit('warn', `Set cooling threshold temperature error: ${error}`);
-                                    };
-                                });
-                        };
-                    };
                     this.melCloudService.getCharacteristic(Characteristic.TemperatureDisplayUnits)
                         .onGet(async () => {
                             const value = this.accessory.useFahrenheit;
@@ -1142,6 +1061,7 @@ class DeviceAta extends EventEmitter {
                             try {
                                 accountInfo.UseFahrenheit = [false, true][value];
                                 await this.melCloud.send(accountInfo);
+                                this.accessory.useFahrenheit = value;
                                 const info = this.disableLogInfo ? false : this.emit('message', `Set temperature display unit: ${CONSTANTS.TemperatureDisplayUnits[value]}`);
                             } catch (error) {
                                 this.emit('warn', `Set temperature display unit error: ${error}`);
