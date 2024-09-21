@@ -164,7 +164,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 
 ### AUTO Mode
 
-* Heather/Coolert
+* Heather/Cooler
   * In this mode we can set heathing threshold and cooling threshold temperature:
   * Target temperature is calculated as a middle value between `LO` and `HI` and the rest is calculated internally.
 * Thermostat
