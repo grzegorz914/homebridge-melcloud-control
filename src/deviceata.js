@@ -913,7 +913,7 @@ class DeviceAta extends EventEmitter {
                             minStep: this.accessory.temperatureIncrement
                         })
                         .onGet(async () => {
-                            const value = this.accessory.defaultCoolingSetTemperature;
+                            const value = this.accessory.operationMode === 8 ? this.accessory.defaultCoolingSetTemperature : this.accessory.setTemperature;
                             return value;
                         })
                         .onSet(async (value) => {
@@ -934,7 +934,7 @@ class DeviceAta extends EventEmitter {
                                 minStep: this.accessory.temperatureIncrement
                             })
                             .onGet(async () => {
-                                const value = this.accessory.defaultHeatingSetTemperature;
+                                const value = this.accessory.operationMode === 8 ? this.accessory.defaultHeatingSetTemperature : this.accessory.setTemperature;
                                 return value;
                             })
                             .onSet(async (value) => {

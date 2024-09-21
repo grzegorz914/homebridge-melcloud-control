@@ -805,7 +805,7 @@ class DeviceErv extends EventEmitter {
                                 minStep: this.accessory.temperatureIncrement
                             })
                             .onGet(async () => {
-                                const value = this.accessory.defaultCoolingSetTemperature;
+                                const value = this.accessory.ventilationMode === 2 ? this.accessory.defaultHeatingSetTemperature : this.accessory.setTemperature;
                                 return value;
                             })
                             .onSet(async (value) => {
@@ -828,7 +828,7 @@ class DeviceErv extends EventEmitter {
                                 minStep: this.accessory.temperatureIncrement
                             })
                             .onGet(async () => {
-                                const value = this.accessory.defaultHeatingSetTemperature;
+                                const value = this.accessory.ventilationMode === 2 ? this.accessory.defaultHeatingSetTemperature : this.accessory.setTemperature;
                                 return value;
                             })
                             .onSet(async (value) => {
