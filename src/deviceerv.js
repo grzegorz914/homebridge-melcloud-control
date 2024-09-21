@@ -248,10 +248,9 @@ class DeviceErv extends EventEmitter {
                     const supplyTemperature = deviceData.Device.SupplyTemperature;
                     const outdoorTemperature = deviceData.Device.OutdoorTemperature;
                     const nightPurgeMode = deviceData.Device.NightPurgeMode;
-                    const setTemperature = deviceData.Device.SetTemperature;
-                    const targetTemperature = hasCoolOperationMode || hasHeatOperationMode ? setTemperature : 20;
-                    const defaultHeatingSetTemperature = deviceData.Device.DefaultHeatingSetTemperature;
-                    const defaultCoolingSetTemperature = deviceData.Device.DefaultCoolingSetTemperature;
+                    const setTemperature = deviceData.Device.SetTemperature ?? 20;
+                    const defaultHeatingSetTemperature = deviceData.Device.DefaultHeatingSetTemperature ?? 20;
+                    const defaultCoolingSetTemperature = deviceData.Device.DefaultCoolingSetTemperature ?? 23;
                     const setFanSpeed = deviceData.Device.SetFanSpeed;
                     const operationMode = deviceData.Device.OperationMode;
                     const ventilationMode = deviceData.Device.VentilationMode;
@@ -283,7 +282,7 @@ class DeviceErv extends EventEmitter {
                     this.accessory.roomTemperature = roomTemperature;
                     this.accessory.supplyTemperature = supplyTemperature;
                     this.accessory.outdoorTemperature = outdoorTemperature;
-                    this.accessory.setTemperature = targetTemperature;
+                    this.accessory.setTemperature = setTemperature;
                     this.accessory.defaultHeatingSetTemperature = defaultHeatingSetTemperature;
                     this.accessory.defaultCoolingSetTemperature = defaultCoolingSetTemperature;
                     this.accessory.lockPhysicalControl = 0;
@@ -413,7 +412,7 @@ class DeviceErv extends EventEmitter {
                                     .updateCharacteristic(Characteristic.CurrentHeatingCoolingState, this.accessory.currentOperationMode)
                                     .updateCharacteristic(Characteristic.TargetHeatingCoolingState, this.accessory.targetOperationMode)
                                     .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-                                    .updateCharacteristic(Characteristic.TargetTemperature, targetTemperature)
+                                    .updateCharacteristic(Characteristic.TargetTemperature, setTemperature)
                                     .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.accessory.useFahrenheit);
                             };
                             break;
@@ -468,7 +467,7 @@ class DeviceErv extends EventEmitter {
                             const presetData = presetsOnServer.find(p => p.ID === preset.Id);
 
                             preset.state = presetData ? (presetData.Power === power
-                                && presetData.SetTemperature === targetTemperature
+                                && presetData.SetTemperature === setTemperature
                                 && presetData.OperationMode === operationMode
                                 && presetData.VentilationMode === ventilationMode
                                 && presetData.FanSpeed === setFanSpeed) : false;
@@ -548,7 +547,7 @@ class DeviceErv extends EventEmitter {
                         this.emit('message', `Power: ${power ? 'ON' : 'OFF'}`);
                         this.emit('message', `Target ventilation mode: ${CONSTANTS.Ventilation.OperationMode[ventilationMode]}`);
                         this.emit('message', `Current ventilation mode: ${CONSTANTS.Ventilation.OperationMode[actualVentilationMode]}`);
-                        this.emit('message', `Target temperature: ${targetTemperature}${this.accessory.temperatureUnit}`);
+                        this.emit('message', `Target temperature: ${setTemperature}${this.accessory.temperatureUnit}`);
                         this.emit('message', `Room temperature: ${roomTemperature}${this.accessory.temperatureUnit}`);
                         const info1 = hasSupplyTemperature && deviceData.Device.SupplyTemperature !== null ? this.emit('message', `Supply temperature: ${roomTemperature}${this.accessory.temperatureUnit}`) : false;
                         const info2 = hasOutdoorTemperature && deviceData.Device.OutdoorTemperature !== null ? this.emit('message', `Outdoor temperature: ${roomTemperature}${this.accessory.temperatureUnit}`) : false;
@@ -672,7 +671,7 @@ class DeviceErv extends EventEmitter {
     //prepare accessory
     async prepareAccessory(accountInfo, deviceData, deviceId, deviceTypeText, deviceName, accountName) {
         try {
-            const presetsOnServer = deviceData.Presets;
+            const presetsOnServer = this.accessory.presets;
             const hasRoomTemperature = this.accessory.hasRoomTemperature;
             const hasSupplyTemperature = this.accessory.hasSupplyTemperature;
             const hasOutdoorTemperature = this.accessory.hasOutdoorTemperature;
@@ -806,7 +805,7 @@ class DeviceErv extends EventEmitter {
                                 minStep: this.accessory.temperatureIncrement
                             })
                             .onGet(async () => {
-                                const value = this.accessory.setTemperature;
+                                const value = this.accessory.defaultCoolingSetTemperature;
                                 return value;
                             })
                             .onSet(async (value) => {
@@ -829,7 +828,7 @@ class DeviceErv extends EventEmitter {
                                 minStep: this.accessory.temperatureIncrement
                             })
                             .onGet(async () => {
-                                const value = this.accessory.targetOperationMode !== 1 ? 10 : this.accessory.setTemperature;
+                                const value = this.accessory.defaultHeatingSetTemperature;
                                 return value;
                             })
                             .onSet(async (value) => {

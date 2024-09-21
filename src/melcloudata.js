@@ -369,37 +369,37 @@ class MelCloudAta extends EventEmitter {
 
     async send(deviceData, displayMode) {
         try {
-            //set target temp based on current mode
+            //set target temp based on display mode and operation mode
             switch (displayMode) {
-                case 1:
-                    switch (deviceData.Device.OperationMode) {//operating mode 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
-                        case 1:
+                case 1: //Heather/Cooler
+                    switch (deviceData.Device.OperationMode) {
+                        case 1: //HEAT
                             deviceData.Device.SetTemperature = deviceData.Device.DefaultHeatingSetTemperature;
                             break;
-                        case 2:
+                        case 2: //DRY
                             deviceData.Device.SetTemperature = deviceData.Device.DefaultCoolingSetTemperature;
                             break;
-                        case 3:
+                        case 3: //COOL
                             deviceData.Device.SetTemperature = deviceData.Device.DefaultCoolingSetTemperature;
                             break;
-                        case 7:
-                            deviceData.Device.SetTemperature = deviceData.Device.DefaultCoolingSetTemperature;
+                        case 7: //FAN
+                            deviceData.Device.SetTemperature = deviceData.Device.SetTemperature;
                             break;
-                        case 8:
-                            const setTemp = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
-                            deviceData.Device.SetTemperature = setTemp;
+                        case 8: //AUTO
+                            const setTemperature = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
+                            deviceData.Device.SetTemperature = setTemperature;
                             break;
-                        case 9:
+                        case 9: //HISEE HEAT
                             deviceData.Device.SetTemperature = deviceData.Device.DefaultHeatingSetTemperature;
                             break;
-                        case 10:
+                        case 10: //ISEE DRY
                             deviceData.Device.SetTemperature = deviceData.Device.DefaultCoolingSetTemperature;
                             break;
-                        case 11:
+                        case 11: //ISEE COOL
                             deviceData.Device.SetTemperature = deviceData.Device.DefaultCoolingSetTemperature;
                             break;
                     };
-                case 2:
+                case 2: //Thermostat
                     deviceData.Device.SetTemperature = deviceData.Device.SetTemperature;
                     break;
             };
@@ -414,8 +414,8 @@ class MelCloudAta extends EventEmitter {
                     OperationMode: deviceData.Device.OperationMode,
                     VaneHorizontal: deviceData.Device.VaneHorizontalDirection,
                     VaneVertical: deviceData.Device.VaneVerticalDirection,
-                    DefaultHeatingSetTemperature: deviceData.Device.DefaultHeatingSetTemperature ?? 21,
-                    DefaultCoolingSetTemperature: deviceData.Device.DefaultCoolingSetTemperature ?? 23,
+                    DefaultHeatingSetTemperature: deviceData.Device.DefaultHeatingSetTemperature,
+                    DefaultCoolingSetTemperature: deviceData.Device.DefaultCoolingSetTemperature,
                     InStandbyMode: deviceData.Device.InStandbyMode,
                     ProhibitSetTemperature: deviceData.Device.ProhibitSetTemperature,
                     ProhibitOperationMode: deviceData.Device.ProhibitOperationMode,

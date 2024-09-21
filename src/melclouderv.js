@@ -356,22 +356,22 @@ class MelCloudErv extends EventEmitter {
     }
     async send(deviceData, displayMode) {
         try {
-            //set target temp based on current mode
+            //set target temp based on display mode and ventilation mode
             switch (displayMode) {
-                case 1:
-                    switch (deviceData.Device.VentilationMode) {//LOSNAY, BYPASS, AUTO
-                        case 0:
+                case 1: //Heather/Cooler
+                    switch (deviceData.Device.VentilationMode) {
+                        case 0: //LOSNAY
                             deviceData.Device.SetTemperature = deviceData.Device.DefaultHeatingSetTemperature;
                             break;
-                        case 1:
+                        case 1: //BYPASS
                             deviceData.Device.SetTemperature = deviceData.Device.DefaultCoolingSetTemperature;
                             break;
-                        case 2:
-                            const setTemp = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
-                            deviceData.Device.SetTemperature = setTemp;
+                        case 2: //AUTO
+                            const setTemperature = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
+                            deviceData.Device.SetTemperature = setTemperature;
                             break;
                     };
-                case 2:
+                case 2: //Thermostat
                     deviceData.Device.SetTemperature = deviceData.Device.SetTemperature;
                     break;
             };
@@ -389,8 +389,8 @@ class MelCloudErv extends EventEmitter {
                     SetFanSpeed: deviceData.Device.SetFanSpeed,
                     OperationMode: deviceData.Device.OperationMode,
                     VentilationMode: deviceData.Device.VentilationMode,
-                    DefaultCoolingSetTemperature: deviceData.Device.DefaultCoolingSetTemperature ?? 23,
-                    DefaultHeatingSetTemperature: deviceData.Device.DefaultHeatingSetTemperature ?? 21,
+                    DefaultCoolingSetTemperature: deviceData.Device.DefaultCoolingSetTemperature,
+                    DefaultHeatingSetTemperature: deviceData.Device.DefaultHeatingSetTemperature,
                     HideRoomTemperature: deviceData.Device.HideRoomTemperature,
                     HideSupplyTemperature: deviceData.Device.HideSupplyTemperature,
                     HideOutdoorTemperature: deviceData.Device.HideOutdoorTemperature,

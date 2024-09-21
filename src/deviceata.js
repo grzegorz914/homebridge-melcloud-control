@@ -239,9 +239,9 @@ class DeviceAta extends EventEmitter {
                     const power = deviceData.Device.Power ?? false;
                     const inStandbyMode = deviceData.Device.InStandbyMode ?? false;
                     const roomTemperature = deviceData.Device.RoomTemperature;
-                    const setTemperature = deviceData.Device.SetTemperature;
-                    const defaultHeatingSetTemperature = deviceData.Device.DefaultHeatingSetTemperature;
-                    const defaultCoolingSetTemperature = deviceData.Device.DefaultCoolingSetTemperature;
+                    const setTemperature = deviceData.Device.SetTemperature ?? 20;
+                    const defaultHeatingSetTemperature = deviceData.Device.DefaultHeatingSetTemperature ?? 20;
+                    const defaultCoolingSetTemperature = deviceData.Device.DefaultCoolingSetTemperature ?? 23;
                     const actualFanSpeed = deviceData.Device.ActualFanSpeed;
                     const automaticFanSpeed = deviceData.Device.AutomaticFanSpeed;
                     const fanSpeed = deviceData.Device.FanSpeed;
@@ -750,6 +750,7 @@ class DeviceAta extends EventEmitter {
     //prepare accessory
     async prepareAccessory(accountInfo, deviceData, deviceId, deviceTypeText, deviceName, accountName) {
         try {
+            const presetsOnServer = this.accessory.presets;
             const modelSupportsHeat = this.accessory.modelSupportsHeat;
             const modelSupportsDry = this.accessory.modelSupportsDry;
             const modelSupportsCool = this.accessory.modelSupportsCool;
@@ -759,7 +760,6 @@ class DeviceAta extends EventEmitter {
             const hasOutdoorTemperature = this.accessory.hasOutdoorTemperature;
             const numberOfFanSpeeds = this.accessory.numberOfFanSpeeds;
             const swingFunction = this.accessory.swingFunction;
-            const presetsOnServer = this.accessory.presets;
             const autoDryFanMode = [this.accessory.operationMode, 8, modelSupportsDry ? 2 : 8, 7][this.autoDryFanMode]; //NONE, AUTO - 8, DRY - 2, FAN - 7
             const heatDryFanMode = [this.accessory.operationMode, 1, modelSupportsDry ? 2 : 1, 7][this.heatDryFanMode]; //NONE, HEAT - 1, DRY - 2, FAN - 7
             const coolDryFanMode = [this.accessory.operationMode, 3, modelSupportsDry ? 2 : 3, 7][this.coolDryFanMode]; //NONE, COOL - 3, DRY - 2, FAN - 7
