@@ -93,9 +93,6 @@ class DeviceAta extends EventEmitter {
 
         //accessory
         this.accessory = {};
-        this.accessory.currentOperationMode = 0;
-        this.accessory.targetOperationMode = 0;
-        this.accessory.fanSpeed = 0;
         this.accessory.useFahrenheit = useFahrenheit ? 1 : 0;
         this.accessory.temperatureUnit = CONSTANTS.TemperatureDisplayUnits[this.accessory.useFahrenheit];
     };
@@ -293,64 +290,51 @@ class DeviceAta extends EventEmitter {
                     switch (this.displayMode) {
                         case 1: //Heater Cooler
                             //operating mode 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
-                            switch (power) {
-                                case true:
-                                    switch (!inStandbyMode) {
-                                        case true:
-                                            switch (operationMode) {
-                                                case 1: //HEAT
-                                                    this.accessory.currentOperationMode = roomTemperature > setTemperature ? 1 : 2; //INACTIVE, IDLE, HEATING, COOLING
-                                                    this.accessory.targetOperationMode = 1; //AUTO, HEAT, COOL
-                                                    break;
-                                                case 2: //DRY
-                                                    this.accessory.currentOperationMode = 1;
-                                                    this.accessory.targetOperationMode = this.autoDryFanMode === 2 ? 0 : this.heatDryFanMode === 2 ? 1 : this.coolDryFanMode === 2 ? 2 : this.accessory.targetOperationMode;
-                                                    break;
-                                                case 3: //COOL
-                                                    this.accessory.currentOperationMode = roomTemperature < setTemperature ? 1 : 3;
-                                                    this.accessory.targetOperationMode = 2;
-                                                    break;
-                                                case 7: //FAN
-                                                    this.accessory.currentOperationMode = 1;
-                                                    this.accessory.targetOperationMode = this.autoDryFanMode === 3 ? 0 : this.heatDryFanMode === 3 ? 1 : this.coolDryFanMode === 3 ? 2 : this.accessory.targetOperationMode;
-                                                    break;
-                                                case 8: //AUTO
-                                                    this.accessory.currentOperationMode = roomTemperature < setTemperature ? 2 : roomTemperature > setTemperature ? 3 : 1;
-                                                    this.accessory.targetOperationMode = 0;
-                                                    break;
-                                                case 9: //ISEE HEAT
-                                                    this.accessory.currentOperationMode = roomTemperature > setTemperature ? 1 : 2
-                                                    this.accessory.targetOperationMode = 1;
-                                                    break;
-                                                case 10: //ISEE DRY
-                                                    this.accessory.currentOperationMode = 1;
-                                                    this.accessory.targetOperationMode = this.autoDryFanMode === 2 ? 0 : this.heatDryFanMode === 2 ? 1 : this.coolDryFanMode === 2 ? 2 : this.accessory.targetOperationMode;
-                                                    break;
-                                                case 11: //ISEE COOL;
-                                                    this.accessory.currentOperationMode = roomTemperature < setTemperature ? 1 : 3;
-                                                    this.accessory.targetOperationMode = 2;
-                                                    break;
-                                                default:
-                                                    this.emit('warn', `Received unknown operating mode: ${operationMode}`);
-                                                    return
-                                            };
-                                            break;
-                                        case false:
-                                            this.accessory.currentOperationMode = 1;
-                                            break;
-                                    };
+                            switch (operationMode) {
+                                case 1: //HEAT
+                                    this.accessory.currentOperationMode = roomTemperature > setTemperature ? 1 : 2; //INACTIVE, IDLE, HEATING, COOLING
+                                    this.accessory.targetOperationMode = 1; //AUTO, HEAT, COOL
                                     break;
-                                case false:
-                                    this.accessory.currentOperationMode = 0;
+                                case 2: //DRY
+                                    this.accessory.currentOperationMode = 1;
+                                    this.accessory.targetOperationMode = this.autoDryFanMode === 2 ? 0 : this.heatDryFanMode === 2 ? 1 : this.coolDryFanMode === 2 ? 2 : this.accessory.targetOperationMode;
                                     break;
+                                case 3: //COOL
+                                    this.accessory.currentOperationMode = roomTemperature < setTemperature ? 1 : 3;
+                                    this.accessory.targetOperationMode = 2;
+                                    break;
+                                case 7: //FAN
+                                    this.accessory.currentOperationMode = 1;
+                                    this.accessory.targetOperationMode = this.autoDryFanMode === 3 ? 0 : this.heatDryFanMode === 3 ? 1 : this.coolDryFanMode === 3 ? 2 : this.accessory.targetOperationMode;
+                                    break;
+                                case 8: //AUTO
+                                    this.accessory.currentOperationMode = roomTemperature < setTemperature ? 2 : roomTemperature > setTemperature ? 3 : 1;
+                                    this.accessory.targetOperationMode = 0;
+                                    break;
+                                case 9: //ISEE HEAT
+                                    this.accessory.currentOperationMode = roomTemperature > setTemperature ? 1 : 2
+                                    this.accessory.targetOperationMode = 1;
+                                    break;
+                                case 10: //ISEE DRY
+                                    this.accessory.currentOperationMode = 1;
+                                    this.accessory.targetOperationMode = this.autoDryFanMode === 2 ? 0 : this.heatDryFanMode === 2 ? 1 : this.coolDryFanMode === 2 ? 2 : this.accessory.targetOperationMode;
+                                    break;
+                                case 11: //ISEE COOL;
+                                    this.accessory.currentOperationMode = roomTemperature < setTemperature ? 1 : 3;
+                                    this.accessory.targetOperationMode = 2;
+                                    break;
+                                default:
+                                    this.emit('warn', `Received unknown operating mode: ${operationMode}`);
+                                    return
                             };
+
+                            this.accessory.currentOperationMode = !power ? 0 : inStandbyMode ? 1 : this.accessory.currentOperationMode;
                             this.accessory.operationModeSetPropsMinValue = modelSupportsAuto && modelSupportsHeat ? 0 : !modelSupportsAuto && modelSupportsHeat ? 1 : modelSupportsAuto && !modelSupportsHeat ? 0 : 2;
                             this.accessory.operationModeSetPropsMaxValue = 2
                             this.accessory.operationModeSetPropsValidValues = modelSupportsAuto && modelSupportsHeat ? [0, 1, 2] : !modelSupportsAuto && modelSupportsHeat ? [1, 2] : modelSupportsAuto && !modelSupportsHeat ? [0, 2] : [2];
 
                             //fan speed mode
                             if (modelSupportsFanSpeed) {
-                                this.accessory.fanSpeedSetPropsMaxValue = 2;
                                 switch (numberOfFanSpeeds) {
                                     case 2: //Fan speed mode 2
                                         this.accessory.fanSpeed = hasAutomaticFanSpeed ? [3, 1, 2][fanSpeed] : [0, 1, 2][fanSpeed];
@@ -391,56 +375,45 @@ class DeviceAta extends EventEmitter {
                             };
                             break;
                         case 2: //Thermostat
-                            switch (power) {
-                                case true:
-                                    switch (!inStandbyMode) {
-                                        case true:
-                                            switch (operationMode) {
-                                                case 1: //HEAT
-                                                    this.accessory.currentOperationMode = roomTemperature > setTemperature ? 0 : 1; //OFF, HEATING, COOLING
-                                                    this.accessory.targetOperationMode = 1; //OFF, HEAT, COOL, AUTO
-                                                    break;
-                                                case 2: //DRY
-                                                    this.accessory.currentOperationMode = 0;
-                                                    this.accessory.targetOperationMode = this.autoDryFanMode === 2 ? 3 : this.heatDryFanMode === 2 ? 1 : this.coolDryFanMode === 2 ? 2 : this.accessory.targetOperationMode;
-                                                    break;
-                                                case 3: //COOL
-                                                    this.accessory.currentOperationMode = roomTemperature < setTemperature ? 0 : 2;
-                                                    this.accessory.targetOperationMode = 2;
-                                                    break;
-                                                case 7: //FAN
-                                                    this.accessory.currentOperationMode = 0;
-                                                    this.accessory.targetOperationMode = this.autoDryFanMode === 3 ? 3 : this.heatDryFanMode === 3 ? 1 : this.coolDryFanMode === 3 ? 2 : this.accessory.targetOperationMode;
-                                                    break;
-                                                case 8: //AUTO
-                                                    this.accessory.currentOperationMode = roomTemperature < setTemperature ? 1 : roomTemperature > setTemperature ? 2 : 0;
-                                                    this.accessory.targetOperationMode = 3;
-                                                    break;
-                                                case 9: //ISEE HEAT
-                                                    this.accessory.currentOperationMode = roomTemperature > setTemperature ? 0 : 1;
-                                                    this.accessory.targetOperationMode = 1;
-                                                    break;
-                                                case 10: //ISEE DRY
-                                                    this.accessory.currentOperationMode = 0;
-                                                    this.accessory.targetOperationMode = this.autoDryFanMode === 2 ? 3 : this.heatDryFanMode === 2 ? 1 : this.coolDryFanMode === 2 ? 2 : this.accessory.targetOperationMode;
-                                                    break;
-                                                case 11: //ISEE COOL;
-                                                    this.accessory.currentOperationMode = roomTemperature < setTemperature ? 0 : 2;
-                                                    this.accessory.targetOperationMode = 2;
-                                                    break;
-                                                default:
-                                                    this.emit('warn', `Unknown operating mode: ${operationMode}`);
-                                                    break;
-                                            };
-                                            break;
-                                        case false:
-                                            this.accessory.currentOperationMode = 0;
-                                            break;
-                                    };
-                                case false:
+                            switch (operationMode) {
+                                case 1: //HEAT
+                                    this.accessory.currentOperationMode = roomTemperature > setTemperature ? 0 : 1; //OFF, HEATING, COOLING
+                                    this.accessory.targetOperationMode = 1; //OFF, HEAT, COOL, AUTO
+                                    break;
+                                case 2: //DRY
                                     this.accessory.currentOperationMode = 0;
+                                    this.accessory.targetOperationMode = this.autoDryFanMode === 2 ? 3 : this.heatDryFanMode === 2 ? 1 : this.coolDryFanMode === 2 ? 2 : this.accessory.targetOperationMode;
+                                    break;
+                                case 3: //COOL
+                                    this.accessory.currentOperationMode = roomTemperature < setTemperature ? 0 : 2;
+                                    this.accessory.targetOperationMode = 2;
+                                    break;
+                                case 7: //FAN
+                                    this.accessory.currentOperationMode = 0;
+                                    this.accessory.targetOperationMode = this.autoDryFanMode === 3 ? 3 : this.heatDryFanMode === 3 ? 1 : this.coolDryFanMode === 3 ? 2 : this.accessory.targetOperationMode;
+                                    break;
+                                case 8: //AUTO
+                                    this.accessory.currentOperationMode = roomTemperature < setTemperature ? 1 : roomTemperature > setTemperature ? 2 : 0;
+                                    this.accessory.targetOperationMode = 3;
+                                    break;
+                                case 9: //ISEE HEAT
+                                    this.accessory.currentOperationMode = roomTemperature > setTemperature ? 0 : 1;
+                                    this.accessory.targetOperationMode = 1;
+                                    break;
+                                case 10: //ISEE DRY
+                                    this.accessory.currentOperationMode = 0;
+                                    this.accessory.targetOperationMode = this.autoDryFanMode === 2 ? 3 : this.heatDryFanMode === 2 ? 1 : this.coolDryFanMode === 2 ? 2 : this.accessory.targetOperationMode;
+                                    break;
+                                case 11: //ISEE COOL;
+                                    this.accessory.currentOperationMode = roomTemperature < setTemperature ? 0 : 2;
+                                    this.accessory.targetOperationMode = 2;
+                                    break;
+                                default:
+                                    this.emit('warn', `Unknown operating mode: ${operationMode}`);
                                     break;
                             };
+
+                            this.accessory.currentOperationMode = !power ? 0 : inStandbyMode ? 0 : this.accessory.currentOperationMode;
                             this.accessory.operationModeSetPropsMinValue = 0
                             this.accessory.operationModeSetPropsMaxValue = modelSupportsAuto && modelSupportsHeat ? 3 : !modelSupportsAuto && modelSupportsHeat ? 2 : modelSupportsAuto && !modelSupportsHeat ? 3 : 2;
                             this.accessory.operationModeSetPropsValidValues = modelSupportsAuto && modelSupportsHeat ? [0, 1, 2, 3] : !modelSupportsAuto && modelSupportsHeat ? [0, 1, 2] : modelSupportsAuto && !modelSupportsHeat ? [0, 2, 3] : [0, 2];

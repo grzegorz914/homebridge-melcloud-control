@@ -91,9 +91,6 @@ class DeviceErv extends EventEmitter {
 
         //accessory
         this.accessory = {};
-        this.accessory.currentOperationMode = 0;
-        this.accessory.targetOperationMode = 0;
-        this.accessory.fanSpeed = 0;
         this.accessory.useFahrenheit = useFahrenheit ? 1 : 0;
         this.accessory.temperatureUnit = CONSTANTS.TemperatureDisplayUnits[this.accessory.useFahrenheit];
     };
@@ -295,41 +292,35 @@ class DeviceErv extends EventEmitter {
                     //ventilation mode - 0, HEAT, 2, COOL, 4, 5, 6, FAN, AUTO
                     switch (this.displayMode) {
                         case 1: //Heater Cooler
-                            switch (power) {
-                                case true:
-                                    switch (ventilationMode) {
+                            switch (ventilationMode) {
+                                case 0: //LOSSNAY
+                                    this.accessory.currentOperationMode = 2; //INACTIVE, IDLE, HEATING, COOLIN
+                                    this.accessory.targetOperationMode = 1; //AUTO, HEAT, COOL
+                                    break;
+                                case 1: //BYPASS
+                                    this.accessory.currentOperationMode = 3;
+                                    this.accessory.targetOperationMode = 2;
+                                    break;
+                                case 2: //AUTO
+                                    switch (actualVentilationMode) {
                                         case 0: //LOSSNAY
-                                            this.accessory.currentOperationMode = 2; //INACTIVE, IDLE, HEATING, COOLIN
-                                            this.accessory.targetOperationMode = 1; //AUTO, HEAT, COOL
+                                            this.accessory.currentOperationMode = 2;
                                             break;
                                         case 1: //BYPASS
                                             this.accessory.currentOperationMode = 3;
-                                            this.accessory.targetOperationMode = 2;
-                                            break;
-                                        case 2: //AUTO
-                                            switch (actualVentilationMode) {
-                                                case 0: //LOSSNAY
-                                                    this.accessory.currentOperationMode = 2;
-                                                    break;
-                                                case 1: //BYPASS
-                                                    this.accessory.currentOperationMode = 3;
-                                                    break;
-                                                default:
-                                                    this.emit('warn', `Unknown actual ventilation mode: ${actualVentilationMode}`);
-                                                    break;
-                                            };
-                                            this.accessory.targetOperationMode = 0;
                                             break;
                                         default:
-                                            this.emit('warn', `Unknown ventilation mode: ${ventilationMode}`);
+                                            this.emit('warn', `Unknown actual ventilation mode: ${actualVentilationMode}`);
                                             break;
                                     };
+                                    this.accessory.targetOperationMode = 0;
                                     break;
-                                case false:
-                                    this.accessory.currentOperationMode = 0;
+                                default:
+                                    this.emit('warn', `Unknown ventilation mode: ${ventilationMode}`);
                                     break;
                             };
 
+                            this.accessory.currentOperationMode = !power ? 0 : this.accessory.currentOperationMode;
                             this.accessory.operationModeSetPropsMinValue = hasAutoVentilationMode ? 0 : 1;
                             this.accessory.operationModeSetPropsMaxValue = hasAutoVentilationMode ? 2 : 2;
                             this.accessory.operationModeSetPropsValidValues = hasAutoVentilationMode ? (hasBypassVentilationMode ? [0, 1, 2] : [0, 2]) : (hasBypassVentilationMode ? [1, 2] : [2]);
@@ -367,41 +358,33 @@ class DeviceErv extends EventEmitter {
                             break;
                         case 2: //Thermostat
                             //operation mode - 0, HEAT, 2, COOL, 4, 5, 6, FAN, AUTO
-                            switch (power) {
-                                case true:
-                                    switch (ventilationMode) {
+                            switch (ventilationMode) {
+                                case 0: //LOSSNAY
+                                    this.accessory.currentOperationMode = 1; //OFF, HEAT, COOL
+                                    this.accessory.targetOperationMode = 1; //OFF, HEAT, COOL, AUTO
+                                    break;
+                                case 1: //BYPASS
+                                    this.accessory.currentOperationMode = 2;
+                                    this.accessory.targetOperationMode = 2;
+                                    break;
+                                case 2: //AUTO
+                                    switch (actualVentilationMode) {
                                         case 0: //LOSSNAY
-                                            this.accessory.currentOperationMode = 1; //OFF, HEAT, COOL
-                                            this.accessory.targetOperationMode = 1; //OFF, HEAT, COOL, AUTO
+                                            this.accessory.currentOperationMode = 1;
                                             break;
                                         case 1: //BYPASS
                                             this.accessory.currentOperationMode = 2;
-                                            this.accessory.targetOperationMode = 2;
-                                            break;
-                                        case 2: //AUTO
-                                            switch (actualVentilationMode) {
-                                                case 0: //LOSSNAY
-                                                    this.accessory.currentOperationMode = 1;
-                                                    break;
-                                                case 1: //BYPASS
-                                                    this.accessory.currentOperationMode = 2;
-                                                    break;
-                                                default:
-                                                    this.emit('warn', `Unknown actual ventilation mode: ${actualVentilationMode}`);
-                                                    break;
-                                            };
-                                            this.accessory.targetOperationMode = 3;
                                             break;
                                         default:
-                                            this.emit('warn', `Unknown ventilation mode: ${ventilationMode}`);
+                                            this.emit('warn', `Unknown actual ventilation mode: ${actualVentilationMode}`);
                                             break;
                                     };
-                                    break;
-                                case false:
-                                    this.accessory.currentOperationMode = 0;
-                                    this.accessory.targetOperationMode = 0;
+                                    this.accessory.targetOperationMode = 3;
                                     break;
                             };
+
+                            this.accessory.currentOperationMode = !power ? 0 : this.accessory.currentOperationMode;
+                            this.accessory.targetOperationMode = !power ? 0 : this.accessory.targetOperationMode;
                             this.accessory.operationModeSetPropsMinValue = hasAutoVentilationMode ? 0 : 0;
                             this.accessory.operationModeSetPropsMaxValue = hasAutoVentilationMode ? 3 : 2;
                             this.accessory.operationModeSetPropsValidValues = hasAutoVentilationMode ? (hasBypassVentilationMode ? [0, 1, 2, 3] : [0, 2, 3]) : (hasBypassVentilationMode ? [0, 1, 2] : [0, 2]);
