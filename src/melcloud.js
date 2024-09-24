@@ -36,7 +36,7 @@ class MelCloud extends EventEmitter {
                 try {
                     await this.chackDevicesList(this.contextKey);
                 } catch (error) {
-                    this.emit('error', `Check devices list: ${error}.`);
+                    this.emit('error', `Impulse generator error: ${error}.`);
                 };
             }).on('state', (state) => { });
         };
@@ -114,7 +114,7 @@ class MelCloud extends EventEmitter {
 
             return obj;
         } catch (error) {
-            throw new Error(`Connect to MELCloud error: ${error.message ?? error}.`);
+            throw new Error(`Connect to MELCloud error: ${error.message || error}.`);
         };
     }
 
@@ -179,7 +179,7 @@ class MelCloud extends EventEmitter {
 
             return devices;
         } catch (error) {
-            throw new Error(`Scanning for devices error: ${error.message ?? error}.`);
+            throw new Error(`Check devices list error: ${error.message || error}.`);
         };
     }
 
@@ -189,7 +189,7 @@ class MelCloud extends EventEmitter {
             const debug3 = this.enableDebugMode ? this.emit('debug', `Data saved to: ${path}.`) : false;
             return true;
         } catch (error) {
-            throw new Error(`Save data error: ${error.message ?? error}`);
+            throw new Error(`Save data error: ${error.message || error}`);
         }
     }
 
@@ -203,7 +203,7 @@ class MelCloud extends EventEmitter {
             await this.saveData(this.accountFile, accountInfo);
             return true;
         } catch (error) {
-            throw new Error(error.message ?? error);
+            throw new Error(`Send data error: ${error.message || error}`);
         };
     };
 };

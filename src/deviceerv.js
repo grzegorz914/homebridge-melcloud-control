@@ -124,7 +124,7 @@ class DeviceErv extends EventEmitter {
                                     try {
                                         await this.setOverExternalIntegration('RESTFul', deviceData, key, value);
                                     } catch (error) {
-                                        this.emit('warn', `RESTFul set error: ${error}.`);
+                                        this.emit('warn', error);
                                     };
                                 })
                                 .on('debug', (debug) => {
@@ -163,7 +163,7 @@ class DeviceErv extends EventEmitter {
                                     try {
                                         await this.setOverExternalIntegration('MQTT', deviceData, key, value);
                                     } catch (error) {
-                                        this.emit('warn', `MQTT set error: ${error}.`);
+                                        this.emit('warn', error);
                                     };
                                 })
                                 .on('debug', (debug) => {
@@ -177,7 +177,7 @@ class DeviceErv extends EventEmitter {
                         const mqtt1 = this.mqttConnected ? this.mqtt1.emit('publish', `State`, deviceData.Device) : false;
                     }
                 } catch (error) {
-                    this.emit('warn', `External integration start error: ${error.message || error}.`);
+                    this.emit('warn', `External integration start error: ${error}.`);
                 };
             })
                 .on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) => {
@@ -381,6 +381,9 @@ class DeviceErv extends EventEmitter {
                                     };
                                     this.accessory.targetOperationMode = 3;
                                     break;
+                                default:
+                                    this.emit('warn', `Unknown ventilation mode: ${ventilationMode}`);
+                                    break;
                             };
 
                             this.accessory.currentOperationMode = !power ? 0 : this.accessory.currentOperationMode;
@@ -512,7 +515,7 @@ class DeviceErv extends EventEmitter {
                                     button.state = (hideOutdoorTemperature === true);
                                     break;
                                 default: //Unknown button
-                                    this.emit('message', `Unknown button mode: ${mode} detected.`);
+                                    this.emit('warn', `Unknown button mode: ${mode} detected.`);
                                     break;
                             };
 
@@ -554,7 +557,7 @@ class DeviceErv extends EventEmitter {
                         this.emit('publishAccessory', accessory);
                         this.startPrepareAccessory = false;
                     } catch (error) {
-                        this.emit('error', `Prepare accessory error: ${error}`);
+                        this.emit('error', error);
                     };
                 })
                 .on('message', (message) => {
@@ -578,7 +581,7 @@ class DeviceErv extends EventEmitter {
 
             return true;
         } catch (error) {
-            throw new Error(`start error: ${error}`);
+            throw new Error(`Start error: ${error}`);
         };
     };
 
@@ -1251,7 +1254,7 @@ class DeviceErv extends EventEmitter {
 
             return accessory;
         } catch (error) {
-            throw new Error(error.message ?? error);
+            throw new Error(`Prepare accessory error: ${error.message || error}`);
         };
     };
 };

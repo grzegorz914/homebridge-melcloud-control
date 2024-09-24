@@ -146,7 +146,7 @@ class MelCloudPlatform {
 							await airConditioner.start();
 						};
 					} catch (error) {
-						log.error(`Account: ${accountName}, ATA did finish launching error: ${error.message ?? error}`);
+						log.error(`Account: ${accountName}, ATA did finish launching error: ${error}`);
 					}
 
 					//Heat Pump 1
@@ -191,7 +191,7 @@ class MelCloudPlatform {
 							await heatPump.start();
 						};
 					} catch (error) {
-						log.error(`Account: ${accountName}, ATW did finish launching error: ${error.message ?? error}`);
+						log.error(`Account: ${accountName}, ATW did finish launching error: ${error}`);
 					}
 
 					//Energy Recovery Ventilation 3
@@ -236,10 +236,10 @@ class MelCloudPlatform {
 							await energyRecoveryVentilation.start();
 						};
 					} catch (error) {
-						log.error(`Account: ${accountName}, ERV did finish launching error: ${error.message ?? error}`);
+						log.error(`Account: ${accountName}, ERV did finish launching error: ${error}`);
 					}
 				} catch (error) {
-					log.error(`Account: ${accountName}, did finish launching error: ${error.message ?? error}`);
+					log.error(`Account: ${accountName}, did finish launching error: ${error}`);
 				}
 			};
 		});

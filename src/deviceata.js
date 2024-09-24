@@ -126,7 +126,7 @@ class DeviceAta extends EventEmitter {
                                     try {
                                         await this.setOverExternalIntegration('RESTFul', deviceData, key, value);
                                     } catch (error) {
-                                        this.emit('warn', `RESTFul set error: ${error}.`);
+                                        this.emit('warn', error);
                                     };
                                 })
                                 .on('debug', (debug) => {
@@ -165,7 +165,7 @@ class DeviceAta extends EventEmitter {
                                     try {
                                         await this.setOverExternalIntegration('MQTT', deviceData, key, value);
                                     } catch (error) {
-                                        this.emit('warn', `MQTT set error: ${error}.`);
+                                        this.emit('warn', error);
                                     };
                                 })
                                 .on('debug', (debug) => {
@@ -180,7 +180,7 @@ class DeviceAta extends EventEmitter {
                     }
 
                 } catch (error) {
-                    this.emit('warn', `External integration start error: ${error.message || error}.`);
+                    this.emit('warn', `External integration start error: ${error}.`);
                 };
             })
                 .on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) => {
@@ -324,7 +324,7 @@ class DeviceAta extends EventEmitter {
                                     this.accessory.targetOperationMode = 2;
                                     break;
                                 default:
-                                    this.emit('warn', `Received unknown operating mode: ${operationMode}`);
+                                    this.emit('warn', `Unknown operating mode: ${operationMode}`);
                                     return
                             };
 
@@ -413,7 +413,8 @@ class DeviceAta extends EventEmitter {
                                     break;
                             };
 
-                            this.accessory.currentOperationMode = !power ? 0 : inStandbyMode ? 0 : this.accessory.currentOperationMode;
+                            this.accessory.currentOperationMode = !power ? 0 : this.accessory.currentOperationMode;
+                            this.accessory.targetOperationMode = !power ? 0 : this.accessory.targetOperationMode;
                             this.accessory.operationModeSetPropsMinValue = 0
                             this.accessory.operationModeSetPropsMaxValue = modelSupportsAuto && modelSupportsHeat ? 3 : !modelSupportsAuto && modelSupportsHeat ? 2 : modelSupportsAuto && !modelSupportsHeat ? 3 : 2;
                             this.accessory.operationModeSetPropsValidValues = modelSupportsAuto && modelSupportsHeat ? [0, 1, 2, 3] : !modelSupportsAuto && modelSupportsHeat ? [0, 1, 2] : modelSupportsAuto && !modelSupportsHeat ? [0, 2, 3] : [0, 2];
@@ -613,7 +614,7 @@ class DeviceAta extends EventEmitter {
                         this.emit('publishAccessory', accessory);
                         this.startPrepareAccessory = false;
                     } catch (error) {
-                        this.emit('error', `Prepare accessory error: ${error.message ?? error}`);
+                        this.emit('error', error);
                     };
                 })
                 .on('message', (message) => {
@@ -637,7 +638,7 @@ class DeviceAta extends EventEmitter {
 
             return true;
         } catch (error) {
-            throw new Error(`Start error: ${error.message ?? error}`);
+            throw new Error(`Start error: ${error}`);
         };
     };
 
@@ -1392,7 +1393,7 @@ class DeviceAta extends EventEmitter {
 
             return accessory;
         } catch (error) {
-            throw new Error(error);
+            throw new Error(`Prepare accessory error: ${error.message || error}`);
         };
     };
 };

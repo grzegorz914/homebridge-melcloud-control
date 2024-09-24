@@ -37,7 +37,7 @@ class MelCloudErv extends EventEmitter {
             try {
                 await this.checkState();
             } catch (error) {
-                this.emit('error', `Impulse generator check state error: ${error.message || error}.`);
+                this.emit('error', `Impulse generator error: ${error}.`);
             };
         }).on('state', (state) => { });
     };
@@ -351,9 +351,10 @@ class MelCloudErv extends EventEmitter {
             const data = savedData.length > 0 ? JSON.parse(savedData) : false;
             return data;;
         } catch (error) {
-            throw new Error(`Read data error: ${error.message ?? error}`);
+            throw new Error(`Read data error: ${error.message || error}`);
         }
     }
+
     async send(deviceData, displayMode) {
         try {
             //set target temp based on display mode and ventilation mode
@@ -404,7 +405,7 @@ class MelCloudErv extends EventEmitter {
             this.emit('deviceState', deviceData);
             return true;
         } catch (error) {
-            throw new Error(error.message ?? error);
+            throw new Error(`Send data error: ${error.message || error}`);
         };
     };
 };
