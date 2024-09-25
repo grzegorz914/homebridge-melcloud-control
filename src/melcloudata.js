@@ -408,7 +408,6 @@ class MelCloudAta extends EventEmitter {
                 data: {
                     DeviceID: deviceData.Device.DeviceID,
                     EffectiveFlags: deviceData.Device.EffectiveFlags,
-                    RoomTemperature: deviceData.Device.RoomTemperature,
                     SetTemperature: deviceData.Device.SetTemperature,
                     SetFanSpeed: deviceData.Device.FanSpeed,
                     OperationMode: deviceData.Device.OperationMode,
@@ -416,12 +415,10 @@ class MelCloudAta extends EventEmitter {
                     VaneVertical: deviceData.Device.VaneVerticalDirection,
                     DefaultHeatingSetTemperature: deviceData.Device.DefaultHeatingSetTemperature,
                     DefaultCoolingSetTemperature: deviceData.Device.DefaultCoolingSetTemperature,
-                    InStandbyMode: deviceData.Device.InStandbyMode,
                     ProhibitSetTemperature: deviceData.Device.ProhibitSetTemperature,
                     ProhibitOperationMode: deviceData.Device.ProhibitOperationMode,
                     ProhibitPower: deviceData.Device.ProhibitPower,
                     Power: deviceData.Device.Power,
-                    Offline: deviceData.Device.Offline,
                     HideVaneControls: deviceData.HideVaneControls,
                     HideDryModeControl: deviceData.HideDryModeControl,
                     HasPendingCommand: true

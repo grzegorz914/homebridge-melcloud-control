@@ -105,9 +105,14 @@
             "OperationModeSetTemperature": 6,
             "PowerOperationModeSetTemperature": 7,
             "SetFanSpeed": 8,
+            "PowerSetFanSpeed": 9,
             "VaneVertical": 16,
+            "PowerVaneVertical": 17,
             "Prohibit": 64,
             "VaneHorizontal": 256,
+            "PowerVaneHorizontal": 257,
+            "VaneVerticalVaneHorizontal": 272,
+            "Presets": 287,
             "HolidayMode": 131072,
             "All": 281483566710825
         }
