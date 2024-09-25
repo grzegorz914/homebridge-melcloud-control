@@ -717,7 +717,7 @@ class DeviceErv extends EventEmitter {
                             validValues: this.accessory.operationModeSetPropsValidValues
                         })
                         .onGet(async () => {
-                            const value = this.accessory.targetOperationMode; //LOSSNAY, BYPASS, AUTO
+                            const value = this.accessory.targetOperationMode ?? 0; //LOSSNAY, BYPASS, AUTO
                             return value;
                         })
                         .onSet(async (value) => {
@@ -877,7 +877,7 @@ class DeviceErv extends EventEmitter {
                             validValues: this.accessory.operationModeSetPropsValidValues
                         })
                         .onGet(async () => {
-                            const value = this.accessory.targetOperationMode; //LOSSNAY, BYPASS, AUTO
+                            const value = this.accessory.targetOperationMode ?? 0; //LOSSNAY, BYPASS, AUTO
                             return value;
                         })
                         .onSet(async (value) => {

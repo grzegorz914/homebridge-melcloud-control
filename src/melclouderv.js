@@ -382,10 +382,7 @@ class MelCloudErv extends EventEmitter {
                 data: {
                     DeviceID: deviceData.Device.DeviceID,
                     EffectiveFlags: deviceData.Device.EffectiveFlags,
-                    RoomTemperature: deviceData.Device.RoomTemperature,
-                    SupplyTemperature: deviceData.Device.SupplyTemperature,
-                    OutdoorTemperature: deviceData.Device.OutdoorTemperature,
-                    NightPurgeMode: deviceData.Device.NightPurgeMode,
+                    Power: deviceData.Device.Power,
                     SetTemperature: deviceData.Device.SetTemperature,
                     SetFanSpeed: deviceData.Device.SetFanSpeed,
                     OperationMode: deviceData.Device.OperationMode,
@@ -395,8 +392,7 @@ class MelCloudErv extends EventEmitter {
                     HideRoomTemperature: deviceData.Device.HideRoomTemperature,
                     HideSupplyTemperature: deviceData.Device.HideSupplyTemperature,
                     HideOutdoorTemperature: deviceData.Device.HideOutdoorTemperature,
-                    Power: deviceData.Device.Power,
-                    Offline: deviceData.Device.Offline,
+                    NightPurgeMode: deviceData.Device.NightPurgeMode,
                     HasPendingCommand: true
                 }
             }

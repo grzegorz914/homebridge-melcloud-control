@@ -223,6 +223,8 @@ class MelCloudAta extends EventEmitter {
             const firmwareAppVersion = device.FirmwareAppVersion?.toString() ?? 'Undefined';
             const firmwareWebVersion = device.FirmwareWebVersion;
             const firmwareWlanVersion = device.FirmwareWlanVersion;
+            const linkToMELCloudHome = device.LinkToMELCloudHome;
+            const linkedByUserFromMELCloudHome = device.LinkedByUserFromMELCloudHome;
             const mqttFlags = device.MqttFlags;
             const hasErrorMessages = device.HasErrorMessages;
             const hasZone2 = device.HasZone2;

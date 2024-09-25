@@ -286,10 +286,9 @@ class DeviceAta extends EventEmitter {
                     this.accessory.lockPhysicalControl = prohibitSetTemperature && prohibitOperationMode && prohibitPower ? 1 : 0;
                     this.accessory.temperatureIncrement = temperatureIncrement;
 
-                    //operating mode
+                    //operating mode 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
                     switch (this.displayMode) {
                         case 1: //Heater Cooler
-                            //operating mode 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
                             switch (operationMode) {
                                 case 1: //HEAT
                                     this.accessory.currentOperationMode = roomTemperature > setTemperature ? 1 : 2; //INACTIVE, IDLE, HEATING, COOLING
@@ -786,7 +785,7 @@ class DeviceAta extends EventEmitter {
                             validValues: this.accessory.operationModeSetPropsValidValues
                         })
                         .onGet(async () => {
-                            const value = this.accessory.targetOperationMode; //1 = HEAT, 2 = DRY 3 = COOL, 7 = FAN, 8 = AUTO
+                            const value = this.accessory.targetOperationMode ?? 0; //1 = HEAT, 2 = DRY 3 = COOL, 7 = FAN, 8 = AUTO
                             return value;
                         })
                         .onSet(async (value) => {
@@ -972,7 +971,7 @@ class DeviceAta extends EventEmitter {
                             validValues: this.accessory.operationModeSetPropsValidValues
                         })
                         .onGet(async () => {
-                            const value = this.accessory.targetOperationMode; //1 = HEAT, 2 = DRY 3 = COOL, 7 = FAN, 8 = AUTO
+                            const value = this.accessory.targetOperationMode ?? 0; //1 = HEAT, 2 = DRY 3 = COOL, 7 = FAN, 8 = AUTO
                             return value;
                         })
                         .onSet(async (value) => {

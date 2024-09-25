@@ -450,10 +450,9 @@ class MelCloudAtw extends EventEmitter {
                 data: {
                     DeviceID: deviceData.Device.DeviceID,
                     EffectiveFlags: deviceData.Device.EffectiveFlags,
+                    Power: deviceData.Device.Power,
                     SetTemperatureZone1: deviceData.Device.SetTemperatureZone1,
                     SetTemperatureZone2: deviceData.Device.SetTemperatureZone2,
-                    RoomTemperatureZone1: deviceData.Device.RoomTemperatureZone1,
-                    RoomTemperatureZone2: deviceData.Device.RoomTemperatureZone2,
                     OperationMode: deviceData.Device.OperationMode,
                     OperationModeZone1: deviceData.Device.OperationModeZone1,
                     OperationModeZone2: deviceData.Device.OperationModeZone2,
@@ -461,20 +460,13 @@ class MelCloudAtw extends EventEmitter {
                     SetHeatFlowTemperatureZone2: deviceData.Device.SetHeatFlowTemperatureZone2,
                     SetCoolFlowTemperatureZone1: deviceData.Device.SetCoolFlowTemperatureZone1,
                     SetCoolFlowTemperatureZone2: deviceData.Device.SetCoolFlowTemperatureZone2,
-                    TankWaterTemperature: deviceData.Device.TankWaterTemperature,
                     SetTankWaterTemperature: deviceData.Device.SetTankWaterTemperature,
                     ForcedHotWaterMode: deviceData.Device.ForcedHotWaterMode,
-                    OutdoorTemperature: deviceData.Device.OutdoorTemperature,
                     EcoHotWater: deviceData.Device.EcoHotWater,
                     HolidayMode: deviceData.Device.HolidayMode,
                     ProhibitZone1: deviceData.Device.ProhibitHeatingZone1,
                     ProhibitZone2: deviceData.Device.ProhibitHeatingZone2,
                     ProhibitHotWater: deviceData.Device.ProhibitHotWater,
-                    IdleZone1: deviceData.Device.IdleZone1,
-                    IdleZone2: deviceData.Device.IdleZone2,
-                    UnitStatus: deviceData.Device.UnitStatus,
-                    Power: deviceData.Device.Power,
-                    Offline: deviceData.Device.Offline,
                     HasPendingCommand: true
                 }
             }
