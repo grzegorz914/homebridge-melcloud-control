@@ -99,7 +99,11 @@
         "EffectiveFlags": {
             "Power": 1,
             "OperationMode": 2,
+            "PowerOperationMode": 3,
             "SetTemperature": 4,
+            "PowerSetTemperature": 5,
+            "OperationModeSetTemperature": 6,
+            "PowerOperationModeSetTemperature": 7,
             "SetFanSpeed": 8,
             "VaneVertical": 16,
             "Prohibit": 64,

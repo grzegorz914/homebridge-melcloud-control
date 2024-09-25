@@ -648,12 +648,12 @@ class DeviceAta extends EventEmitter {
             switch (key) {
                 case 'Power':
                     deviceData.Device[key] = value;
-                    deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power;
+                    deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.PowerSetTemperature;
                     set = await this.melCloudAta.send(deviceData, this.displayMode);
                     break;
                 case 'OperationMode':
                     deviceData.Device[key] = value;
-                    deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.OperationMode;
+                    deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.OperationModeSetTemperature;
                     set = await this.melCloudAta.send(deviceData, this.displayMode);
                     break;
                 case 'SetTemperature':
@@ -767,7 +767,7 @@ class DeviceAta extends EventEmitter {
                         .onSet(async (state) => {
                             try {
                                 deviceData.Device.Power = [false, true][state];
-                                deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power;
+                                deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.PowerSetTemperature;
                                 await this.melCloudAta.send(deviceData, this.displayMode);
                                 const info = this.disableLogInfo ? false : this.emit('message', `Set power: ${state ? 'ON' : 'OFF'}`);
                             } catch (error) {
@@ -803,7 +803,7 @@ class DeviceAta extends EventEmitter {
                                         break;
                                 };
 
-                                deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.OperationMode;
+                                deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.OperationModeSetTemperature;
                                 await this.melCloudAta.send(deviceData, this.displayMode);
                                 const operationModeText = CONSTANTS.AirConditioner.DriveMode[deviceData.Device.OperationMode];
                                 const info = this.disableLogInfo ? false : this.emit('message', `Set operation mode: ${operationModeText}`);
@@ -980,22 +980,22 @@ class DeviceAta extends EventEmitter {
                                 switch (value) {
                                     case 0: //OFF - POWER OFF
                                         deviceData.Device.Power = false;
-                                        deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power;
+                                        deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.PowerSetTemperature;
                                         break;
                                     case 1: //HEAT - HEAT
                                         deviceData.Device.Power = true;
                                         deviceData.Device.OperationMode = heatDryFanMode;
-                                        deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.OperationMode;
+                                        deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.PowerOperationModeSetTemperature;
                                         break;
                                     case 2: //COOL - COOL
                                         deviceData.Device.Power = true;
                                         deviceData.Device.OperationMode = coolDryFanMode;
-                                        deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.OperationMode;
+                                        deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.PowerOperationModeSetTemperature
                                         break;
                                     case 3: //AUTO - AUTO
                                         deviceData.Device.Power = true;
                                         deviceData.Device.OperationMode = autoDryFanMode;
-                                        deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.Power + CONSTANTS.AirConditioner.EffectiveFlags.OperationMode;
+                                        deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.PowerOperationModeSetTemperature;
                                         break;
                                 };
 
