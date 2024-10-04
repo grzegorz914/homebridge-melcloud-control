@@ -28,7 +28,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 ### About The Plugin
 
 * All devices are detected automatically.
-* Support multiple MELCloud accounts, buildings, floors, areas.
+* Control devices over MELCloud server.
+* Support multiple accounts, buildings, floors, areas.
 * Support temperature display units `Celsius/Fahrenheit`.
 * Support assing inividual operating mode for `Heat/Cool/Auto`.
 * Support direct `Presets` control using extra `Buttons`, switch it to `OFF` restore previous device state.
@@ -36,6 +37,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * Support detect all device states using extra `Sensors`.
 * Support automations, shortcuts and Siri.
 * Support external integrations, [RESTFul](https://github.com/grzegorz914/homebridge-melcloud-control?tab=readme-ov-file#restful-integration), [MQTT](https://github.com/grzegorz914/homebridge-melcloud-control?tab=readme-ov-file#mqtt-integration).
+* Control devices over local network You need use ESP module and [Tasmota Control](https://github.com/grzegorz914/homebridge-tasmota-control) plugin.
 
 ### Control Mode
 
