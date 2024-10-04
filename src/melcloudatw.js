@@ -371,7 +371,6 @@ class MelCloudAtw extends EventEmitter {
 
             const deviceState = {
                 Power: power,
-                Offlin: offline,
                 IdleZone1: idleZone1,
                 IdleZone2: idleZone2,
                 UnitStatus: unitStatus,
@@ -395,8 +394,7 @@ class MelCloudAtw extends EventEmitter {
                 HolidayMode: holidayMode,
                 ProhibitZone1: prohibitHeatingZone1,
                 ProhibitZone2: prohibitHeatingZone2,
-                ProhibitHotWater: prohibitHotWater,
-                EffectiveFlags: effectiveFlags
+                ProhibitHotWater: prohibitHotWater
             }
 
             //check state changes
@@ -472,11 +470,18 @@ class MelCloudAtw extends EventEmitter {
             }
 
             await this.axiosInstancePost(CONSTANTS.ApiUrls.SetAtw, payload);
-            this.emit('deviceState', deviceData);
+            this.updateData(deviceData);
             return true;
         } catch (error) {
             throw new Error(`Send data error: ${error.message || error}`);
         };
     };
+
+    updateData(deviceData) {
+        setTimeout(() => {
+            this.emit('externalIntegrations', deviceData);
+            this.emit('deviceState', deviceData);
+        }, 500);
+    }
 };
 module.exports = MelCloudAtw;

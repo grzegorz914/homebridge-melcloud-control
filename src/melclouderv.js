@@ -298,7 +298,6 @@ class MelCloudErv extends EventEmitter {
 
             const deviceState = {
                 Power: power,
-                Offlin: offline,
                 RoomTemperature: roomTemperature,
                 SupplyTemperature: supplyTemperature,
                 OutdoorTemperature: outdoorTemperature,
@@ -319,8 +318,7 @@ class MelCloudErv extends EventEmitter {
                 PM25Level: pM25Level,
                 HideRoomTemperature: hideRoomTemperature,
                 HideSupplyTemperature: hideSupplyTemperature,
-                HideOutdoorTemperature: hideOutdoorTemperature,
-                EffectiveFlags: effectiveFlags
+                HideOutdoorTemperature: hideOutdoorTemperature
             }
 
             //check state changes
@@ -398,11 +396,18 @@ class MelCloudErv extends EventEmitter {
             }
 
             await this.axiosInstancePost(CONSTANTS.ApiUrls.SetErv, payload);
-            this.emit('deviceState', deviceData);
+            this.updateData(deviceData);
             return true;
         } catch (error) {
             throw new Error(`Send data error: ${error.message || error}`);
         };
     };
+
+    updateData(deviceData) {
+        setTimeout(() => {
+            this.emit('externalIntegrations', deviceData);
+            this.emit('deviceState', deviceData);
+        }, 500);
+    }
 };
 module.exports = MelCloudErv;

@@ -312,7 +312,6 @@ class MelCloudAta extends EventEmitter {
 
             const deviceState = {
                 Power: power,
-                Offlin: offline,
                 InStandbyMode: inStandbyMode,
                 RoomTemperature: roomTemperature,
                 OutdoorTemperature: outdoorTemperature,
@@ -327,13 +326,11 @@ class MelCloudAta extends EventEmitter {
                 VaneHorizontalSwing: vaneHorizontalSwing,
                 DefaultCoolingSetTemperature: defaultCoolingSetTemperature,
                 DefaultHeatingSetTemperature: defaultHeatingSetTemperature,
-                TemperatureIncrement: temperatureIncrement,
-                HideVaneControls: hideVaneControls,
-                HideDryModeControl: hideDryModeControl,
+                ProhibitPower: prohibitPower,
                 ProhibitSetTemperature: prohibitSetTemperature,
                 ProhibitOperationMode: prohibitOperationMode,
-                ProhibitPower: prohibitPower,
-                EffectiveFlags: effectiveFlags
+                HideVaneControls: hideVaneControls,
+                HideDryModeControl: hideDryModeControl
             }
 
             //check state changes
@@ -410,6 +407,7 @@ class MelCloudAta extends EventEmitter {
                 data: {
                     DeviceID: deviceData.Device.DeviceID,
                     EffectiveFlags: deviceData.Device.EffectiveFlags,
+                    Power: deviceData.Device.Power,
                     SetTemperature: deviceData.Device.SetTemperature,
                     SetFanSpeed: deviceData.Device.FanSpeed,
                     OperationMode: deviceData.Device.OperationMode,
@@ -420,7 +418,6 @@ class MelCloudAta extends EventEmitter {
                     ProhibitSetTemperature: deviceData.Device.ProhibitSetTemperature,
                     ProhibitOperationMode: deviceData.Device.ProhibitOperationMode,
                     ProhibitPower: deviceData.Device.ProhibitPower,
-                    Power: deviceData.Device.Power,
                     HideVaneControls: deviceData.HideVaneControls,
                     HideDryModeControl: deviceData.HideDryModeControl,
                     HasPendingCommand: true
@@ -428,11 +425,18 @@ class MelCloudAta extends EventEmitter {
             }
 
             await this.axiosInstancePost(CONSTANTS.ApiUrls.SetAta, payload);
-            this.emit('deviceState', deviceData);
+            this.updateData(deviceData);
             return true;
         } catch (error) {
             throw new Error(`Send data error: ${error.message || error}`);
         };
     };
+
+    updateData(deviceData) {
+        setTimeout(() => {
+            this.emit('externalIntegrations', deviceData);
+            this.emit('deviceState', deviceData);
+        }, 500);
+    }
 };
 module.exports = MelCloudAta;
