@@ -466,7 +466,6 @@ class DeviceAta extends EventEmitter {
                         for (let i = 0; i < this.buttonsConfiguredCount; i++) {
                             const button = this.buttonsConfigured[i];
                             const mode = button.mode;
-                            let setPreviousValue = false;
                             switch (mode) {
                                 case 0: //POWER ON,OFF
                                     button.state = (power === true);

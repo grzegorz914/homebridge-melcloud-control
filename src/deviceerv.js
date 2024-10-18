@@ -139,7 +139,7 @@ class DeviceErv extends EventEmitter {
                     }
 
                     //MQTT client
-                    const mqttEnabled = thi.smqtt.enable || false;
+                    const mqttEnabled = this.mqtt.enable || false;
                     if (mqttEnabled) {
                         if (!this.mqttConnected) {
                             this.mqtt1 = new Mqtt({
@@ -198,7 +198,7 @@ class DeviceErv extends EventEmitter {
 
                     //accessory info
                     this.manufacturer = manufacturer;
-                    this.model = modelIndoor ? modelIndoor : modelOutdoor ? modelOutdoor : `${deviceTypeText} ${this.deviceId}`;
+                    this.model = modelIndoor ? modelIndoor : modelOutdoor ? modelOutdoor : `${this.deviceTypeText} ${this.deviceId}`;
                     this.serialNumber = serialNumber;
                     this.firmwareRevision = firmwareAppVersion;
                     this.displayDeviceInfo = false;
