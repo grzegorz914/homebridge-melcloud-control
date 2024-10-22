@@ -227,10 +227,10 @@ class DeviceAta extends EventEmitter {
                     const modelSupportsHeat = this.heatDryFanMode >= 1 && modelSupportsHeat1;
                     const modelSupportsDry = deviceData.Device.ModelSupportsDry ?? false;
                     const modelSupportsCool = this.coolDryFanMode >= 1;
-                    const minTempHeat = deviceData.Device.MinTempHeat ?? 10;
-                    const maxTempHeat = deviceData.Device.MaxTempHeat ?? 31;
-                    const minTempCoolDry = deviceData.Device.MinTempCoolDry ?? 16;
-                    const maxTempCoolDry = deviceData.Device.MaxTempCoolDry ?? 31;
+                    const minTempHeat = 10;
+                    const maxTempHeat = 31;
+                    const minTempCoolDry = 16;
+                    const maxTempCoolDry = 31;
 
                     //device state
                     const power = deviceData.Device.Power ?? false;

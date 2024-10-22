@@ -234,10 +234,10 @@ class DeviceErv extends EventEmitter {
                     const actualVentilationMode = deviceData.Device.ActualVentilationMode;
                     const numberOfFanSpeeds = deviceData.Device.NumberOfFanSpeeds ?? 0;
                     const temperatureIncrement = deviceData.Device.TemperatureIncrement ?? 1;
-                    const minTempHeat = deviceData.Device.MinTempHeat ?? 10;
-                    const maxTempHeat = deviceData.Device.MaxTempHeat ?? 31;
-                    const minTempCoolDry = deviceData.Device.MinTempCoolDry ?? 16;
-                    const maxTempCoolDry = deviceData.Device.MaxTempCoolDry ?? 31;
+                    const minTempHeat = 10;
+                    const maxTempHeat = 31;
+                    const minTempCoolDry = 16;
+                    const maxTempCoolDry = 31;
 
                     //device state
                     const power = deviceData.Device.Power ?? false;
