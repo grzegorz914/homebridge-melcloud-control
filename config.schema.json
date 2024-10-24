@@ -213,25 +213,25 @@
                   "id": {
                     "title": "ID",
                     "type": "integer",
-                    "required": true,
+                    "required": false,
                     "readonly": true
                   },
                   "type": {
                     "title": "Type",
                     "type": "integer",
-                    "required": true,
+                    "required": false,
                     "readonly": true
                   },
                   "typeString": {
                     "title": "Type",
                     "type": "string",
-                    "required": true,
+                    "required": false,
                     "readonly": true
                   },
                   "name": {
                     "title": "Name",
                     "type": "string",
-                    "required": true
+                    "required": false
                   },
                   "displayMode": {
                     "title": "Control",
@@ -302,6 +302,7 @@
                     "type": "integer",
                     "minimum": 0,
                     "maximum": 3,
+                    "default": 1,
                     "oneOf": [
                       {
                         "title": "None/Disabled",
@@ -389,14 +390,14 @@
                         "id": {
                           "title": "ID",
                           "type": "integer",
-                          "required": true
+                          "required": false
                         },
                         "name": {
                           "title": "Name",
                           "type": "string",
                           "placeholder": "Preset name",
                           "description": "Your own name displayed in Homebridge/HomeKit app.",
-                          "required": true
+                          "required": false
                         },
                         "displayType": {
                           "title": "Type",
@@ -466,13 +467,14 @@
                           "type": "string",
                           "placeholder": "Button name",
                           "description": "Your own name displayed in Homebridge/HomeKit app.",
-                          "required": true
+                          "required": false
                         },
                         "mode": {
                           "title": "Mode",
                           "type": "integer",
                           "minimum": 0,
                           "maximum": 40,
+                          "default": 0,
                           "description": "Function, VH - Vane Horizontal, VV - Vane Vertical.",
                           "oneOf": [
                             {
@@ -760,25 +762,25 @@
                   "id": {
                     "title": "Mode",
                     "type": "integer",
-                    "required": true,
+                    "required": false,
                     "readonly": true
                   },
                   "type": {
                     "title": "Type",
                     "type": "integer",
-                    "required": true,
+                    "required": false,
                     "readonly": true
                   },
                   "typeString": {
                     "title": "Type",
                     "type": "string",
-                    "required": true,
+                    "required": false,
                     "readonly": true
                   },
                   "name": {
                     "title": "Name",
                     "type": "string",
-                    "required": true
+                    "required": false
                   },
                   "displayMode": {
                     "title": "Control",
@@ -881,14 +883,14 @@
                         "id": {
                           "title": "ID",
                           "type": "integer",
-                          "required": true
+                          "required": false
                         },
                         "name": {
                           "title": "Name",
                           "type": "string",
                           "placeholder": "Preset name",
                           "description": "Your own name displayed in Homebridge/HomeKit app.",
-                          "required": true
+                          "required": false
                         },
                         "displayType": {
                           "title": "Type",
@@ -958,13 +960,14 @@
                           "type": "string",
                           "placeholder": "Button name",
                           "description": "Your own name displayed in Homebridge/HomeKit app.",
-                          "required": true
+                          "required": false
                         },
                         "mode": {
                           "title": "Mode",
                           "type": "integer",
                           "minimum": 0,
                           "maximum": 70,
+                          "default": 0,
                           "description": "Select the function.",
                           "oneOf": [
                             {
@@ -1174,25 +1177,25 @@
                   "id": {
                     "title": "Mode",
                     "type": "integer",
-                    "required": true,
+                    "required": false,
                     "readonly": true
                   },
                   "type": {
                     "title": "Type",
                     "type": "integer",
-                    "required": true,
+                    "required": false,
                     "readonly": true
                   },
                   "typeString": {
                     "title": "Type",
                     "type": "string",
-                    "required": true,
+                    "required": false,
                     "readonly": true
                   },
                   "name": {
                     "title": "Name",
                     "type": "string",
-                    "required": true
+                    "required": false
                   },
                   "displayMode": {
                     "title": "Control",
@@ -1253,7 +1256,7 @@
                         "id": {
                           "title": "ID",
                           "type": "integer",
-                          "required": true,
+                          "required": false,
                           "readonly": true
                         },
                         "name": {
@@ -1261,7 +1264,7 @@
                           "type": "string",
                           "placeholder": "Preset name",
                           "description": "Your own name displayed in Homebridge/HomeKit app.",
-                          "required": true
+                          "required": false
                         },
                         "displayType": {
                           "title": "Type",
@@ -1331,13 +1334,14 @@
                           "type": "string",
                           "placeholder": "Button name",
                           "description": "Your own name displayed in Homebridge/HomeKit app.",
-                          "required": true
+                          "required": false
                         },
                         "mode": {
                           "title": "Mode",
                           "type": "integer",
                           "minimum": 0,
                           "maximum": 18,
+                          "default": 0,
                           "description": "Select the function.",
                           "oneOf": [
                             {
@@ -1537,7 +1541,8 @@
                   "title": "Enable",
                   "type": "boolean",
                   "default": false,
-                  "description": "This enable RESTful server."
+                  "description": "This enable RESTful server.",
+                  "required": false
                 },
                 "debug": {
                   "title": "Debug",
