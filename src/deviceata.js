@@ -749,7 +749,8 @@ class DeviceAta extends EventEmitter {
                 .setCharacteristic(Characteristic.Manufacturer, this.manufacturer)
                 .setCharacteristic(Characteristic.Model, this.model)
                 .setCharacteristic(Characteristic.SerialNumber, this.serialNumber)
-                .setCharacteristic(Characteristic.FirmwareRevision, this.firmwareRevision);
+                .setCharacteristic(Characteristic.FirmwareRevision, this.firmwareRevision)
+                .setCharacteristic(Characteristic.ConfiguredName, accessoryName);
 
             //melcloud services
             const serviceName = `${deviceTypeText} ${accessoryName}`;
