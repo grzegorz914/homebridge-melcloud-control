@@ -241,7 +241,7 @@ class DeviceAta extends EventEmitter {
                     const defaultCoolingSetTemperature = deviceData.Device.DefaultCoolingSetTemperature ?? 23;
                     const actualFanSpeed = deviceData.Device.ActualFanSpeed;
                     const automaticFanSpeed = deviceData.Device.AutomaticFanSpeed;
-                    const fanSpeed = deviceData.Device.FanSpeed;
+                    const fanSpeed = deviceData.Device.FanSpeed ?? 0;
                     const operationMode = deviceData.Device.OperationMode;
                     const vaneVerticalDirection = deviceData.Device.VaneVerticalDirection;
                     const vaneVerticalSwing = deviceData.Device.VaneVerticalSwing;
@@ -828,8 +828,29 @@ class DeviceAta extends EventEmitter {
                             })
                             .onSet(async (value) => {
                                 try {
-                                    const fanSpeedModeText = hasAutomaticFanSpeed ? [7, 1, 2, 3, 4, 5, 6, 0][value] : [7, 1, 2, 3, 4, 5, 6][value];
-                                    deviceData.Device.FanSpeed = hasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 6, 0][value] : [1, 1, 2, 3, 4, 5, 6][value];
+                                    let fanSpeedModeText = '';
+                                    switch (numberOfFanSpeeds) {
+                                        case 2: //Fan speed mode 2
+                                            fanSpeedModeText = hasAutomaticFanSpeed ? [7, 1, 2, 0][value] : [7, 1, 2][value];
+                                            deviceData.Device.FanSpeed = hasAutomaticFanSpeed ? [0, 1, 2, 0][value] : [1, 1, 2][value];
+                                            break;
+                                        case 3: //Fan speed mode 3
+                                            fanSpeedModeText = hasAutomaticFanSpeed ? [7, 1, 2, 3, 0][value] : [7, 1, 2, 3][value];
+                                            deviceData.Device.FanSpeed = hasAutomaticFanSpeed ? [0, 1, 2, 3, 0][value] : [1, 1, 2, 3][value];
+                                            break;
+                                        case 4: //Fan speed mode 4
+                                            fanSpeedModeText = hasAutomaticFanSpeed ? [7, 1, 2, 3, 4, 0][value] : [7, 1, 2, 3, 4][value];
+                                            deviceData.Device.FanSpeed = hasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 0][value] : [1, 1, 2, 3, 4][value];
+                                            break;
+                                        case 5: //Fan speed mode 5
+                                            5; fanSpeedModeText = hasAutomaticFanSpeed ? [7, 1, 2, 3, 4, 5, 0][value] : [7, 1, 2, 3, 4, 5][value];
+                                            deviceData.Device.FanSpeed = hasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 0][value] : [1, 1, 2, 3, 4, 5][value];
+                                            break;
+                                        case 6: //Fan speed mode 6
+                                            fanSpeedModeText = hasAutomaticFanSpeed ? [7, 1, 2, 3, 4, 5, 6, 0][value] : [7, 1, 2, 3, 4, 5, 6][value];
+                                            deviceData.Device.FanSpeed = hasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 6, 0][value] : [1, 1, 2, 3, 4, 5, 6][value];
+                                            break;
+                                    };
                                     deviceData.Device.EffectiveFlags = CONSTANTS.AirConditioner.EffectiveFlags.SetFanSpeed;
                                     await this.melCloudAta.send(deviceData, this.displayMode);
                                     const info = this.disableLogInfo ? false : this.emit('message', `Set fan speed mode: ${CONSTANTS.AirConditioner.FanSpeed[fanSpeedModeText]}`);

@@ -668,6 +668,7 @@ class DeviceErv extends EventEmitter {
             const hasAutomaticFanSpeed = this.accessory.hasAutomaticFanSpeed;
             const hasCO2Sensor = this.accessory.hasCO2Sensor;
             const hasPM25Sensor = this.accessory.hasPM25Sensor;
+            const numberOfFanSpeeds = this.accessory.numberOfFanSpeeds;
 
             //accessory
             const debug = this.enableDebugMode ? this.emit('debug', `Prepare accessory`) : false;
@@ -760,8 +761,25 @@ class DeviceErv extends EventEmitter {
                         })
                         .onSet(async (value) => {
                             try {
-                                const fanSpeedModeText = hasAutomaticFanSpeed ? [5, 1, 2, 3, 4, 0][value] : [5, 1, 2, 3, 4][value];
-                                deviceData.Device.SetFanSpeed = hasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 0][value] : [1, 1, 2, 3, 4][value];
+                                let fanSpeedModeText = '';
+                                switch (numberOfFanSpeeds) {
+                                    case 2: //Fan speed mode 2
+                                        fanSpeedModeText = hasAutomaticFanSpeed ? [5, 1, 2, 0][value] : [5, 1, 2][value];
+                                        deviceData.Device.SetFanSpeed = hasAutomaticFanSpeed ? [0, 1, 2, 0][value] : [1, 1, 2][value];
+                                        break;
+                                    case 3: //Fan speed mode 3
+                                        fanSpeedModeText = hasAutomaticFanSpeed ? [5, 1, 2, 3, 0][value] : [5, 1, 2, 3][value];
+                                        deviceData.Device.SetFanSpeed = hasAutomaticFanSpeed ? [0, 1, 2, 3, 0][value] : [1, 1, 2, 3][value];
+                                        break;
+                                    case 4: //Fan speed mode 4
+                                        fanSpeedModeText = hasAutomaticFanSpeed ? [5, 1, 2, 3, 4, 0][value] : [5, 1, 2, 3, 4][value];
+                                        deviceData.Device.SetFanSpeed = hasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 0][value] : [1, 1, 2, 3, 4][value];
+                                        break;
+                                    case 5: //Fan speed mode 5
+                                        5; fanSpeedModeText = hasAutomaticFanSpeed ? [5, 1, 2, 3, 4, 5, 0][value] : [5, 1, 2, 3, 4, 5][value];
+                                        deviceData.Device.SetFanSpeed = hasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 0][value] : [1, 1, 2, 3, 4, 5][value];
+                                        break;;
+                                };
                                 deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.SetFanSpeed;
                                 await this.melCloudErv.send(deviceData, this.displayMode);
                                 const info = this.disableLogInfo ? false : this.emit('message', `Set fan speed mode: ${CONSTANTS.Ventilation.FanSpeed[fanSpeedModeText]}`);
