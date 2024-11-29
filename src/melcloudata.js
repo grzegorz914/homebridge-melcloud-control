@@ -1,11 +1,11 @@
 "use strict";
-const fs = require('fs');
-const fsPromises = fs.promises;
-const https = require('https');
-const axios = require('axios');
-const EventEmitter = require('events');
-const ImpulseGenerator = require('./impulsegenerator.js');
-const CONSTANTS = require('./constants.json');
+import { promises } from 'fs';
+const fsPromises = promises;
+import { Agent } from 'https';
+import { create } from 'axios';
+import EventEmitter from 'events';
+import ImpulseGenerator from './impulsegenerator.js';
+import { ApiUrls } from './constants.json';
 
 class MelCloudAta extends EventEmitter {
     constructor(config) {
@@ -17,16 +17,16 @@ class MelCloudAta extends EventEmitter {
         //set default values
         this.deviceState = {};
 
-        this.axiosInstancePost = axios.create({
+        this.axiosInstancePost = create({
             method: 'POST',
-            baseURL: CONSTANTS.ApiUrls.BaseURL,
+            baseURL: ApiUrls.BaseURL,
             timeout: 25000,
             headers: {
                 'X-MitsContextKey': config.contextKey,
                 'content-type': 'application/json'
             },
             withCredentials: true,
-            httpsAgent: new https.Agent({
+            httpsAgent: new Agent({
                 keepAlive: false,
                 rejectUnauthorized: false
             })
@@ -424,7 +424,7 @@ class MelCloudAta extends EventEmitter {
                 }
             }
 
-            await this.axiosInstancePost(CONSTANTS.ApiUrls.SetAta, payload);
+            await this.axiosInstancePost(ApiUrls.SetAta, payload);
             this.updateData(deviceData);
             return true;
         } catch (error) {
@@ -439,4 +439,4 @@ class MelCloudAta extends EventEmitter {
         }, 500);
     }
 };
-module.exports = MelCloudAta;
+export default MelCloudAta;

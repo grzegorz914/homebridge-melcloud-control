@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - do not configure it manually, always using Config UI X
   - required Homebridge v2.0.0 and above
 
+## [3.3.21] - (29.11.2024)
+
+## Changes
+
+- move from commonJS to esm module, fixing [#180](https://github.com/grzegorz914/homebridge-melcloud-control/issues/180)
+
 ## [3.3.20] - (25.09.2024)
 
 ## Changes

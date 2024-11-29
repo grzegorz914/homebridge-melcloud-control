@@ -1,6 +1,6 @@
 "use strict";
-const AsyncMqtt = require("async-mqtt");
-const EventEmitter = require('events');
+import { connectAsync } from "async-mqtt";
+import EventEmitter from 'events';
 
 class Mqtt extends EventEmitter {
     constructor(config) {
@@ -16,7 +16,7 @@ class Mqtt extends EventEmitter {
         this.on('connect', async () => {
             try {
                 //connect
-                this.mqttClient = await AsyncMqtt.connectAsync(url, options);
+                this.mqttClient = await connectAsync(url, options);
                 this.emit('connected', 'MQTT Connected.');
 
                 //subscribe
@@ -52,4 +52,4 @@ class Mqtt extends EventEmitter {
         this.emit('connect');
     };
 };
-module.exports = Mqtt;
+export default Mqtt;

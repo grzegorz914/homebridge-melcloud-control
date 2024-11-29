@@ -1,11 +1,11 @@
 "use strict";
-const fs = require('fs');
-const fsPromises = fs.promises;
-const https = require('https');
-const axios = require('axios');
-const EventEmitter = require('events');
-const ImpulseGenerator = require('./impulsegenerator.js');
-const CONSTANTS = require('./constants.json');
+import { promises } from 'fs';
+const fsPromises = promises;
+import { Agent } from 'https';
+import { create } from 'axios';
+import EventEmitter from 'events';
+import ImpulseGenerator from './impulsegenerator.js';
+import { ApiUrls } from './constants.json';
 
 class MelCloud extends EventEmitter {
     constructor(user, passwd, language, accountFile, buildingsFile, devicesFile, enableDebugMode, requestConfig) {
@@ -46,19 +46,19 @@ class MelCloud extends EventEmitter {
         const debug = this.enableDebugMode ? this.emit('debug', `Connecting to MELCloud.`) : false;
 
         try {
-            const axiosInstanceLogin = axios.create({
+            const axiosInstanceLogin = create({
                 method: 'POST',
-                baseURL: CONSTANTS.ApiUrls.BaseURL,
+                baseURL: ApiUrls.BaseURL,
                 timeout: 10000,
                 withCredentials: true,
                 maxContentLength: 100000000,
                 maxBodyLength: 1000000000,
-                httpsAgent: new https.Agent({
+                httpsAgent: new Agent({
                     keepAlive: false,
                     rejectUnauthorized: false
                 })
             });
-            const accountData = await axiosInstanceLogin(CONSTANTS.ApiUrls.ClientLogin, this.options);
+            const accountData = await axiosInstanceLogin(ApiUrls.ClientLogin, this.options);
             const account = accountData.data;
             const accountInfo = account.LoginData;
             const contextKey = accountInfo.ContextKey;
@@ -83,9 +83,9 @@ class MelCloud extends EventEmitter {
             };
 
             //create axios instance post
-            this.axiosInstancePost = axios.create({
+            this.axiosInstancePost = create({
                 method: 'POST',
-                baseURL: CONSTANTS.ApiUrls.BaseURL,
+                baseURL: ApiUrls.BaseURL,
                 timeout: 10000,
                 headers: {
                     'X-MitsContextKey': contextKey,
@@ -94,7 +94,7 @@ class MelCloud extends EventEmitter {
                 maxContentLength: 100000000,
                 maxBodyLength: 1000000000,
                 withCredentials: true,
-                httpsAgent: new https.Agent({
+                httpsAgent: new Agent({
                     keepAlive: false,
                     rejectUnauthorized: false
                 })
@@ -121,9 +121,9 @@ class MelCloud extends EventEmitter {
     async chackDevicesList(contextKey) {
         try {
             //create axios instance get
-            const axiosInstanceGet = axios.create({
+            const axiosInstanceGet = create({
                 method: 'GET',
-                baseURL: CONSTANTS.ApiUrls.BaseURL,
+                baseURL: ApiUrls.BaseURL,
                 timeout: 10000,
                 headers: {
                     'X-MitsContextKey': contextKey
@@ -131,14 +131,14 @@ class MelCloud extends EventEmitter {
                 maxContentLength: 100000000,
                 maxBodyLength: 1000000000,
                 withCredentials: true,
-                httpsAgent: new https.Agent({
+                httpsAgent: new Agent({
                     keepAlive: false,
                     rejectUnauthorized: false
                 })
             });
 
             const debug = this.enableDebugMode ? this.emit('debug', `Scanning for devices.`) : false;
-            const listDevicesData = await axiosInstanceGet(CONSTANTS.ApiUrls.ListDevices);
+            const listDevicesData = await axiosInstanceGet(ApiUrls.ListDevices);
             const buildingsList = listDevicesData.data;
             const debug1 = this.enableDebugMode ? this.emit('debug', `Buildings: ${JSON.stringify(buildingsList, null, 2)}`) : false;
 
@@ -199,7 +199,7 @@ class MelCloud extends EventEmitter {
                 data: accountInfo
             };
 
-            await this.axiosInstancePost(CONSTANTS.ApiUrls.UpdateApplicationOptions, options);
+            await this.axiosInstancePost(ApiUrls.UpdateApplicationOptions, options);
             await this.saveData(this.accountFile, accountInfo);
             return true;
         } catch (error) {
@@ -207,4 +207,4 @@ class MelCloud extends EventEmitter {
         };
     };
 };
-module.exports = MelCloud;
+export default MelCloud;
