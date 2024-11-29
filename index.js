@@ -1,27 +1,27 @@
 'use strict';
-const path = require('path');
-const fs = require('fs');
-const MelCloud = require('./src/melcloud.js')
-const DeviceAta = require('./src/deviceata.js')
-const DeviceAtw = require('./src/deviceatw.js')
-const DeviceErv = require('./src/deviceerv.js')
-const CONSTANTS = require('./src/constants.json');
+import { join } from 'path';
+import { mkdirSync } from 'fs';
+import MelCloud from './src/melcloud.js';
+import DeviceAta from './src/deviceata.js';
+import DeviceAtw from './src/deviceatw.js';
+import DeviceErv from './src/deviceerv.js';
+import { PluginName, PlatformName } from './src/constants.json';
 
 class MelCloudPlatform {
 	constructor(log, config, api) {
 		// only load if configured
 		if (!config || !Array.isArray(config.accounts)) {
-			log.warn(`No configuration found for ${CONSTANTS.PluginName}`);
+			log.warn(`No configuration found for ${PluginName}`);
 			return;
 		}
 		this.accessories = [];
 		const accountsName = [];
 
 		//create directory if it doesn't exist
-		const prefDir = path.join(api.user.storagePath(), 'melcloud');
+		const prefDir = join(api.user.storagePath(), 'melcloud');
 		try {
 			//create directory if it doesn't exist
-			fs.mkdirSync(prefDir, { recursive: true });
+			mkdirSync(prefDir, { recursive: true });
 		} catch (error) {
 			log.error(`Prepare directory error: ${error}`);
 			return;
@@ -121,7 +121,7 @@ class MelCloudPlatform {
 							airConditioner.on('publishAccessory', (accessory) => {
 
 								//publish device
-								api.publishExternalAccessories(CONSTANTS.PluginName, [accessory]);
+								api.publishExternalAccessories(PluginName, [accessory]);
 								log.success(`${accountName}, ${deviceTypeText} ${deviceName}, published as external accessory.`);
 							})
 								.on('devInfo', (devInfo) => {
@@ -166,7 +166,7 @@ class MelCloudPlatform {
 							heatPump.on('publishAccessory', (accessory) => {
 
 								//publish device
-								api.publishExternalAccessories(CONSTANTS.PluginName, [accessory]);
+								api.publishExternalAccessories(PluginName, [accessory]);
 								log.success(`${accountName}, ${deviceTypeText} ${deviceName}, published as external accessory.`);
 							})
 								.on('devInfo', (devInfo) => {
@@ -211,7 +211,7 @@ class MelCloudPlatform {
 							energyRecoveryVentilation.on('publishAccessory', (accessory) => {
 
 								//publish device
-								api.publishExternalAccessories(CONSTANTS.PluginName, [accessory]);
+								api.publishExternalAccessories(PluginName, [accessory]);
 								log.success(`${accountName}, ${deviceTypeText} ${deviceName}, published as external accessory.`);
 							})
 								.on('devInfo', (devInfo) => {
@@ -250,6 +250,6 @@ class MelCloudPlatform {
 	};
 };
 
-module.exports = (api) => {
-	api.registerPlatform(CONSTANTS.PluginName, CONSTANTS.PlatformName, MelCloudPlatform, true);
+export default (api) => {
+	api.registerPlatform(PluginName, PlatformName, MelCloudPlatform, true);
 };

@@ -1,7 +1,7 @@
 "use strict";
 
-const { HomebridgePluginUiServer, RequestError } = require('@homebridge/plugin-ui-utils');
-const MelCloud = require('../src/melcloud.js')
+import { HomebridgePluginUiServer, RequestError } from '@homebridge/plugin-ui-utils';
+import MelCloud from '../src/melcloud.js';
 
 class PluginUiServer extends HomebridgePluginUiServer {
   constructor() {
