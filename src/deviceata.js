@@ -3,7 +3,7 @@ import EventEmitter from 'events';
 import MelCloudAta from './melcloudata.js';
 import RestFul from './restful.js';
 import Mqtt from './mqtt.js';
-import { TemperatureDisplayUnits, AirConditioner } from './constants.json';
+import { TemperatureDisplayUnits, AirConditioner } from './constants.js';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceAta extends EventEmitter {

@@ -3,7 +3,7 @@ import EventEmitter from 'events';
 import MelCloudErv from './melclouderv.js';
 import RestFul from './restful.js';
 import Mqtt from './mqtt.js';
-import { TemperatureDisplayUnits, Ventilation, AirConditioner } from './constants.json';
+import { TemperatureDisplayUnits, Ventilation } from './constants.js';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceErv extends EventEmitter {
@@ -802,7 +802,7 @@ class DeviceErv extends EventEmitter {
                             .onSet(async (value) => {
                                 try {
                                     deviceData.Device.DefaultCoolingSetTemperature = value;
-                                    deviceData.Device.EffectiveFlags = AirConditioner.EffectiveFlags.SetTemperature;
+                                    deviceData.Device.EffectiveFlags = Ventilation.EffectiveFlags.SetTemperature;
                                     await this.melCloudErv.send(deviceData, this.displayMode);
                                     const info = this.disableLogInfo ? false : this.emit('message', `Set cooling threshold temperature: ${value}${this.accessory.temperatureUnit}`);
                                 } catch (error) {
@@ -825,7 +825,7 @@ class DeviceErv extends EventEmitter {
                             .onSet(async (value) => {
                                 try {
                                     deviceData.Device.DefaultHeatingSetTemperature = value;
-                                    deviceData.Device.EffectiveFlags = AirConditioner.EffectiveFlags.SetTemperature;
+                                    deviceData.Device.EffectiveFlags = Ventilation.EffectiveFlags.SetTemperature;
                                     await this.melCloudErv.send(deviceData, this.displayMode);
                                     const info = this.disableLogInfo ? false : this.emit('message', `Set heating threshold temperature: ${value}${this.accessory.temperatureUnit}`);
                                 } catch (error) {

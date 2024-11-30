@@ -3,7 +3,7 @@ import EventEmitter from 'events';
 import MelCloudAtw from './melcloudatw.js';
 import RestFul from './restful.js';
 import Mqtt from './mqtt.js';
-import { TemperatureDisplayUnits, HeatPump } from './constants.json';
+import { TemperatureDisplayUnits, HeatPump } from './constants.js';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceAtw extends EventEmitter {

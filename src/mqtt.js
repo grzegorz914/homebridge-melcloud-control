@@ -1,5 +1,6 @@
 "use strict";
-import { connectAsync } from "async-mqtt";
+import asyncMqtt from 'async-mqtt';
+const { connectAsync } = asyncMqtt;
 import EventEmitter from 'events';
 
 class Mqtt extends EventEmitter {

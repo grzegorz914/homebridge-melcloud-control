@@ -1,6 +1,6 @@
 "use strict";
 
-import { HomebridgePluginUiServer, RequestError } from '@homebridge/plugin-ui-utils';
+import { HomebridgePluginUiServer } from '@homebridge/plugin-ui-utils';
 import MelCloud from '../src/melcloud.js';
 
 class PluginUiServer extends HomebridgePluginUiServer {

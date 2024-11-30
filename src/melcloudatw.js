@@ -2,10 +2,10 @@
 import { promises } from 'fs';
 const fsPromises = promises;
 import { Agent } from 'https';
-import { create } from 'axios';
+import axios from 'axios';
 import EventEmitter from 'events';
 import ImpulseGenerator from './impulsegenerator.js';
-import { ApiUrls } from './constants.json';
+import { ApiUrls } from './constants.js';
 
 class MelCloudAtw extends EventEmitter {
     constructor(config) {
@@ -17,7 +17,7 @@ class MelCloudAtw extends EventEmitter {
         //set default values
         this.deviceState = {};
 
-        this.axiosInstancePost = create({
+        this.axiosInstancePost = axios.create({
             method: 'POST',
             baseURL: ApiUrls.BaseURL,
             timeout: 25000,

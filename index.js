@@ -5,7 +5,7 @@ import MelCloud from './src/melcloud.js';
 import DeviceAta from './src/deviceata.js';
 import DeviceAtw from './src/deviceatw.js';
 import DeviceErv from './src/deviceerv.js';
-import { PluginName, PlatformName } from './src/constants.json';
+import { PluginName, PlatformName } from './src/constants.js';
 
 class MelCloudPlatform {
 	constructor(log, config, api) {

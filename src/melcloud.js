@@ -2,10 +2,10 @@
 import { promises } from 'fs';
 const fsPromises = promises;
 import { Agent } from 'https';
-import { create } from 'axios';
+import axios from 'axios';
 import EventEmitter from 'events';
 import ImpulseGenerator from './impulsegenerator.js';
-import { ApiUrls } from './constants.json';
+import { ApiUrls } from './constants.js';
 
 class MelCloud extends EventEmitter {
     constructor(user, passwd, language, accountFile, buildingsFile, devicesFile, enableDebugMode, requestConfig) {
@@ -46,7 +46,7 @@ class MelCloud extends EventEmitter {
         const debug = this.enableDebugMode ? this.emit('debug', `Connecting to MELCloud.`) : false;
 
         try {
-            const axiosInstanceLogin = create({
+            const axiosInstanceLogin = axios.create({
                 method: 'POST',
                 baseURL: ApiUrls.BaseURL,
                 timeout: 10000,
@@ -83,7 +83,7 @@ class MelCloud extends EventEmitter {
             };
 
             //create axios instance post
-            this.axiosInstancePost = create({
+            this.axiosInstancePost = axios.create({
                 method: 'POST',
                 baseURL: ApiUrls.BaseURL,
                 timeout: 10000,
@@ -121,7 +121,7 @@ class MelCloud extends EventEmitter {
     async chackDevicesList(contextKey) {
         try {
             //create axios instance get
-            const axiosInstanceGet = create({
+            const axiosInstanceGet = axios.create({
                 method: 'GET',
                 baseURL: ApiUrls.BaseURL,
                 timeout: 10000,
