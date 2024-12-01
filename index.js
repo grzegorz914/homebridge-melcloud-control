@@ -1,4 +1,3 @@
-'use strict';
 import { join } from 'path';
 import { mkdirSync } from 'fs';
 import MelCloud from './src/melcloud.js';
