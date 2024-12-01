@@ -1,4 +1,3 @@
-"use strict";
 import EventEmitter from 'events';
 import MelCloudAta from './melcloudata.js';
 import RestFul from './restful.js';
