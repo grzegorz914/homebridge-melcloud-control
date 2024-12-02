@@ -214,24 +214,28 @@
                   "id": {
                     "title": "ID",
                     "type": "integer",
+                    "default": 0,
                     "required": false,
                     "readonly": true
                   },
                   "type": {
                     "title": "Type",
                     "type": "integer",
+                    "default": 0,
                     "required": false,
                     "readonly": true
                   },
                   "typeString": {
                     "title": "Type",
                     "type": "string",
+                    "default": "Air Conditioner",
                     "required": false,
                     "readonly": true
                   },
                   "name": {
                     "title": "Name",
                     "type": "string",
+                    "default": "Air Conditioner",
                     "required": false
                   },
                   "displayMode": {
@@ -761,26 +765,30 @@
                 "type": "object",
                 "properties": {
                   "id": {
-                    "title": "Mode",
+                    "title": "ID",
                     "type": "integer",
+                    "default": 0,
                     "required": false,
                     "readonly": true
                   },
                   "type": {
                     "title": "Type",
                     "type": "integer",
+                    "default": 1,
                     "required": false,
                     "readonly": true
                   },
                   "typeString": {
                     "title": "Type",
                     "type": "string",
+                    "default": "Heat Pump",
                     "required": false,
                     "readonly": true
                   },
                   "name": {
                     "title": "Name",
                     "type": "string",
+                    "default": "Heat Pump",
                     "required": false
                   },
                   "displayMode": {
@@ -1176,26 +1184,30 @@
                 "type": "object",
                 "properties": {
                   "id": {
-                    "title": "Mode",
+                    "title": "ID",
                     "type": "integer",
+                    "default": 3,
                     "required": false,
                     "readonly": true
                   },
                   "type": {
                     "title": "Type",
                     "type": "integer",
+                    "default": 1,
                     "required": false,
                     "readonly": true
                   },
                   "typeString": {
                     "title": "Type",
                     "type": "string",
+                    "default": "Ventilation",
                     "required": false,
                     "readonly": true
                   },
                   "name": {
                     "title": "Name",
                     "type": "string",
+                    "default": "Ventilation",
                     "required": false
                   },
                   "displayMode": {
