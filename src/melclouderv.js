@@ -1,4 +1,5 @@
 import { promises as fsPromises } from 'fs';
+import { Agent } from 'https';
 import axios from 'axios';
 import EventEmitter from 'events';
 import ImpulseGenerator from './impulsegenerator.js';
