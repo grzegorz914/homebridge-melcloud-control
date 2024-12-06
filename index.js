@@ -74,19 +74,19 @@ class MelCloudPlatform {
 					//melcloud account
 					const melCloud = new MelCloud(user, passwd, language, accountFile, buildingsFile, devicesFile, enableDebugMode, false);
 					melCloud.on('success', (message) => {
-						log.success(`Account ${accountName}, ${message}`);
+						log.success(`${accountName}, ${message}`);
 					})
 						.on('message', (message) => {
-							log.info(`Account ${accountName}, ${message}`);
+							log.info(`${accountName}, ${message}`);
 						})
 						.on('debug', (debug) => {
-							log.info(`Account ${accountName}, debug: ${debug}`);
+							log.info(`${accountName}, debug: ${debug}`);
 						})
 						.on('warn', (warn) => {
-							log.warn(`Account ${accountName}, ${warn}`);
+							log.warn(`${accountName}, ${warn}`);
 						})
 						.on('error', (error) => {
-							log.error(`Account ${accountName}, ${error}.`);
+							log.error(`${accountName}, ${error}.`);
 						});
 
 					//connect
