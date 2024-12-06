@@ -49,7 +49,7 @@ class MelCloudPlatform {
 
 				//debug config
 				const enableDebugMode = account.enableDebugMode || false;
-				const debug = enableDebugMode ? log.info(`Account: ${accountName}, did finish launching.`) : false;
+				const debug = enableDebugMode ? log.info(`${accountName}, did finish launching.`) : false;
 
 				//remove sensitive data
 				const debugData = {
@@ -60,7 +60,7 @@ class MelCloudPlatform {
 						passwd: 'removed'
 					}
 				};
-				const debug1 = enableDebugMode ? log.info(`Account: ${accountName}, Config: ${JSON.stringify(debugData, null, 2)}`) : false;
+				const debug1 = enableDebugMode ? log.info(`${accountName}, Config: ${JSON.stringify(debugData, null, 2)}`) : false;
 
 				//define directory and file paths
 				const accountFile = `${prefDir}/${accountName}_Account`;
@@ -69,7 +69,6 @@ class MelCloudPlatform {
 
 				//set refresh interval
 				const refreshInterval = account.refreshInterval * 1000 || 120000;
-				const deviceRefreshInterval = account.deviceRefreshInterval * 1000 || 5000;
 
 				try {
 					//melcloud account
@@ -116,6 +115,7 @@ class MelCloudPlatform {
 
 							const deviceName = device.name;
 							const deviceTypeText = device.typeString;
+							const deviceRefreshInterval = device.refreshInterval * 1000 || 5000;
 							const airConditioner = new DeviceAta(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit)
 							airConditioner.on('publishAccessory', (accessory) => {
 
@@ -127,25 +127,25 @@ class MelCloudPlatform {
 									log.info(devInfo);
 								})
 								.on('success', (message) => {
-									log.success(`${deviceTypeText}, ${deviceName}, ${message}`);
+									log.success(`${accountName}, ${deviceTypeText}, ${deviceName}, ${message}`);
 								})
 								.on('message', (message) => {
-									log.info(`${deviceTypeText}, ${deviceName}, ${message}`);
+									log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, ${message}`);
 								})
 								.on('debug', (debug) => {
-									log.info(`${deviceTypeText}, ${deviceName}, debug: ${debug}`);
+									log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, debug: ${debug}`);
 								})
 								.on('warn', (warn) => {
-									log.warn(`${deviceTypeText}, ${deviceName}, ${warn}`);
+									log.warn(`${accountName}, ${deviceTypeText}, ${deviceName}, ${warn}`);
 								})
 								.on('error', (error) => {
-									log.error(`${deviceTypeText}, ${deviceName}, ${error}`);
+									log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}`);
 								});
 
 							await airConditioner.start();
 						};
 					} catch (error) {
-						log.error(`Account: ${accountName}, ATA did finish launching error: ${error}`);
+						log.error(`${accountName}, ATA did finish launching error: ${error}`);
 					}
 
 					//Heat Pump 1
@@ -161,6 +161,7 @@ class MelCloudPlatform {
 
 							const deviceName = device.name;
 							const deviceTypeText = device.typeString;
+							const deviceRefreshInterval = device.refreshInterval * 1000 || 5000;
 							const heatPump = new DeviceAtw(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit)
 							heatPump.on('publishAccessory', (accessory) => {
 
@@ -172,25 +173,25 @@ class MelCloudPlatform {
 									log.info(devInfo);
 								})
 								.on('success', (message) => {
-									log.success(`${deviceTypeText}, ${deviceName}, ${message}`);
+									log.success(`${accountName}, ${deviceTypeText}, ${deviceName}, ${message}`);
 								})
 								.on('message', (message) => {
-									log.info(`${deviceTypeText}, ${deviceName}, ${message}`);
+									log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, ${message}`);
 								})
 								.on('debug', (debug) => {
-									log.info(`${deviceTypeText}, ${deviceName}, debug: ${debug}`);
+									log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, debug: ${debug}`);
 								})
 								.on('warn', (warn) => {
-									log.warn(`${deviceTypeText}, ${deviceName}, ${warn}`);
+									log.warn(`${accountName}, ${deviceTypeText}, ${deviceName}, ${warn}`);
 								})
 								.on('error', (error) => {
-									log.error(`${deviceTypeText}, ${deviceName}, ${error}`);
+									log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}`);
 								});
 
 							await heatPump.start();
 						};
 					} catch (error) {
-						log.error(`Account: ${accountName}, ATW did finish launching error: ${error}`);
+						log.error(`${accountName}, ATW did finish launching error: ${error}`);
 					}
 
 					//Energy Recovery Ventilation 3
@@ -206,6 +207,7 @@ class MelCloudPlatform {
 
 							const deviceName = device.name;
 							const deviceTypeText = device.typeString;
+							const deviceRefreshInterval = device.refreshInterval * 1000 || 5000;
 							const energyRecoveryVentilation = new DeviceErv(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit)
 							energyRecoveryVentilation.on('publishAccessory', (accessory) => {
 
@@ -217,28 +219,28 @@ class MelCloudPlatform {
 									log.info(devInfo);
 								})
 								.on('success', (message) => {
-									log.success(`${deviceTypeText}, ${deviceName}, ${message}`);
+									log.success(`${accountName}, ${deviceTypeText}, ${deviceName}, ${message}`);
 								})
 								.on('message', (message) => {
-									log.info(`${deviceTypeText}, ${deviceName}, ${message}`);
+									log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, ${message}`);
 								})
 								.on('debug', (debug) => {
-									log.info(`${deviceTypeText}, ${deviceName}, debug: ${debug}`);
+									log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, debug: ${debug}`);
 								})
 								.on('warn', (warn) => {
-									log.warn(`${deviceTypeText}, ${deviceName}, ${warn}`);
+									log.warn(`${accountName}, ${deviceTypeText}, ${deviceName}, ${warn}`);
 								})
 								.on('error', (error) => {
-									log.error(`${deviceTypeText}, ${deviceName}, ${error}`);
+									log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}`);
 								});
 
 							await energyRecoveryVentilation.start();
 						};
 					} catch (error) {
-						log.error(`Account: ${accountName}, ERV did finish launching error: ${error}`);
+						log.error(`${accountName}, ERV did finish launching error: ${error}`);
 					}
 				} catch (error) {
-					log.error(`Account: ${accountName}, did finish launching error: ${error}`);
+					log.error(`${accountName}, did finish launching error: ${error}`);
 				}
 			};
 		});

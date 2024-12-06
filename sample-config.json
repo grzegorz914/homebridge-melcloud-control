@@ -27,7 +27,6 @@
           "atwDevices": [],
           "ervDevices": [],
           "refreshInterval": 120,
-          "deviceRefreshInterval": 5,
           "enableDebugMode": false,
           "disableLogInfo": true,
           "disableLogDeviceInfo": false,

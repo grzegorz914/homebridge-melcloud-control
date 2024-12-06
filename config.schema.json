@@ -386,6 +386,15 @@
                     "description": "This enable extra outdoor temperature sensor to use with automations in HomeKit app.",
                     "required": false
                   },
+                  "refreshInterval": {
+                    "title": "Refresh Interval",
+                    "type": "integer",
+                    "default": 5,
+                    "minimum": 1,
+                    "maximum": 60,
+                    "description": "Set the background device state refresh time in seconds.",
+                    "required": false
+                  },
                   "presets": {
                     "title": "Presets",
                     "type": "array",
@@ -883,6 +892,15 @@
                     "description": "This enable extra Return Zone 2 temperature sensor to use with automations in HomeKit app.",
                     "required": false
                   },
+                  "refreshInterval": {
+                    "title": "Refresh Interval",
+                    "type": "integer",
+                    "default": 5,
+                    "minimum": 1,
+                    "maximum": 60,
+                    "description": "Set the background device state refresh time in seconds.",
+                    "required": false
+                  },
                   "presets": {
                     "title": "Presets",
                     "type": "array",
@@ -1186,14 +1204,14 @@
                   "id": {
                     "title": "ID",
                     "type": "integer",
-                    "default": 3,
+                    "default": 0,
                     "required": false,
                     "readonly": true
                   },
                   "type": {
                     "title": "Type",
                     "type": "integer",
-                    "default": 1,
+                    "default": 3,
                     "required": false,
                     "readonly": true
                   },
@@ -1258,6 +1276,15 @@
                     "type": "boolean",
                     "default": false,
                     "description": "This enable extra supply temperature sensor to use with automations in HomeKit app.",
+                    "required": false
+                  },
+                  "refreshInterval": {
+                    "title": "Refresh Interval",
+                    "type": "integer",
+                    "default": 5,
+                    "minimum": 1,
+                    "maximum": 60,
+                    "description": "Set the background device state refresh time in seconds.",
                     "required": false
                   },
                   "presets": {
@@ -1508,21 +1535,12 @@
               }
             },
             "refreshInterval": {
-              "title": "Account Refresh Interval",
+              "title": "Refresh Interval",
               "type": "integer",
               "default": 120,
               "minimum": 1,
               "maximum": 600,
               "description": "Set the background account data refresh time in seconds.",
-              "required": false
-            },
-            "deviceRefreshInterval": {
-              "title": "Device Refresh Interval",
-              "type": "integer",
-              "default": 5,
-              "minimum": 1,
-              "maximum": 60,
-              "description": "Set the background devices state refresh time in seconds.",
               "required": false
             },
             "enableDebugMode": {
@@ -1724,7 +1742,8 @@
                         "accounts[].ataDevices[].displayMode",
                         "accounts[].ataDevices[].heatDryFanMode",
                         "accounts[].ataDevices[].coolDryFanMode",
-                        "accounts[].ataDevices[].autoDryFanMode"
+                        "accounts[].ataDevices[].autoDryFanMode",
+                        "accounts[].ataDevices[].refreshInterval"
                       ]
                     },
                     {
@@ -1810,7 +1829,8 @@
                       "expanded": false,
                       "items": [
                         "accounts[].atwDevices[].name",
-                        "accounts[].atwDevices[].displayMode"
+                        "accounts[].atwDevices[].displayMode",
+                        "accounts[].atwDevices[].refreshInterval"
                       ]
                     },
                     {
@@ -1903,7 +1923,8 @@
                       "expanded": false,
                       "items": [
                         "accounts[].ervDevices[].name",
-                        "accounts[].ervDevices[].displayMode"
+                        "accounts[].ervDevices[].displayMode",
+                        "accounts[].ervDevices[].refreshInterval"
                       ]
                     },
                     {
@@ -1981,10 +2002,9 @@
               "items": [
                 {
                   "key": "accounts[]",
-                  "title": "Data Refresh",
+                  "title": "Account Data Refresh",
                   "items": [
-                    "accounts[].refreshInterval",
-                    "accounts[].deviceRefreshInterval"
+                    "accounts[].refreshInterval"
                   ]
                 },
                 {

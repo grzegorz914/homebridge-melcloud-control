@@ -614,6 +614,9 @@ class DeviceAta extends EventEmitter {
                         this.emit('error', error);
                     };
                 })
+                .on('success', (message) => {
+                    this.emit('success', message);
+                })
                 .on('message', (message) => {
                     this.emit('message', message);
                 })

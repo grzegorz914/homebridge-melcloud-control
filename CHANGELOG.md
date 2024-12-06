@@ -16,6 +16,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - do not configure it manually, always using Config UI X
   - required Homebridge v2.0.0 and above
 
+## [3.5.0] - (06.12.2024)
+
+## Changes
+
+- added possibility to set device refresh state indyvidually for every device
+- bump deependemcies
+- config.schema updated
+- redme updated
+- cleanup
+
 ## [3.4.4] - (05.12.2024)
 
 ## Changes
