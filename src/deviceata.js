@@ -96,552 +96,6 @@ class DeviceAta extends EventEmitter {
         this.accessory.temperatureUnit = TemperatureDisplayUnits[this.accessory.useFahrenheit];
     };
 
-    async start() {
-        try {
-            //melcloud device
-            this.melCloudAta = new MelCloudAta({
-                contextKey: this.contextKey,
-                devicesFile: this.devicesFile,
-                deviceId: this.deviceId,
-                debugLog: this.enableDebugMode
-            });
-
-            this.melCloudAta.on('externalIntegrations', (deviceData) => {
-                try {
-                    //RESTFul server
-                    const restFulEnabled = this.restFul.enable || false;
-                    if (restFulEnabled) {
-                        if (!this.restFulConnected) {
-                            this.restFul1 = new RestFul({
-                                port: this.deviceId.slice(-4),
-                                debug: this.restFul.debug || false
-                            });
-
-                            this.restFul1.on('connected', (message) => {
-                                this.restFulConnected = true;
-                                this.emit('success', message);
-                            })
-                                .on('set', async (key, value) => {
-                                    try {
-                                        await this.setOverExternalIntegration('RESTFul', deviceData, key, value);
-                                    } catch (error) {
-                                        this.emit('warn', error);
-                                    };
-                                })
-                                .on('debug', (debug) => {
-                                    this.emit('debug', debug);
-                                })
-                                .on('error', (error) => {
-                                    this.emit('warn', error);
-                                });
-                        }
-                        const restFul0 = this.restFulConnected ? this.restFul1.update('info', deviceData) : false;
-                        const restFul1 = this.restFulConnected ? this.restFul1.update('state', deviceData.Device) : false;
-                    }
-
-                    //MQTT client
-                    const mqttEnabled = this.mqtt.enable || false;
-                    if (mqttEnabled) {
-                        if (!this.mqttConnected) {
-                            this.mqtt1 = new Mqtt({
-                                host: this.mqtt.host,
-                                port: this.mqtt.port || 1883,
-                                clientId: `${this.mqtt.clientId}_${this.deviceId}` || `${this.deviceTypeText}_${this.deviceName}_${this.deviceId}`,
-                                prefix: `${this.mqtt.prefix}/${this.deviceTypeText}/${this.deviceName}`,
-                                user: this.mqtt.user,
-                                passwd: this.mqtt.pass,
-                                debug: this.mqtt.debug || false
-                            });
-
-                            this.mqtt1.on('connected', (message) => {
-                                this.mqttConnected = true;
-                                this.emit('success', message);
-                            })
-                                .on('subscribed', (message) => {
-                                    this.emit('success', message);
-                                })
-                                .on('set', async (key, value) => {
-                                    try {
-                                        await this.setOverExternalIntegration('MQTT', deviceData, key, value);
-                                    } catch (error) {
-                                        this.emit('warn', error);
-                                    };
-                                })
-                                .on('debug', (debug) => {
-                                    this.emit('debug', debug);
-                                })
-                                .on('error', (error) => {
-                                    this.emit('warn', error);
-                                });
-                        }
-                        const mqtt0 = this.mqttConnected ? this.mqtt1.emit('publish', `Info`, deviceData) : false;
-                        const mqtt1 = this.mqttConnected ? this.mqtt1.emit('publish', `State`, deviceData.Device) : false;
-                    }
-
-                } catch (error) {
-                    this.emit('warn', `External integration start error: ${error}.`);
-                };
-            })
-                .on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) => {
-                    if (!this.displayDeviceInfo) {
-                        return;
-                    }
-
-                    if (!this.disableLogDeviceInfo) {
-                        this.emit('devInfo', `---- ${this.deviceTypeText}: ${this.deviceName} ----`);
-                        this.emit('devInfo', `Account: ${this.accountName}`);
-                        const indoor = modelIndoor ? this.emit('devInfo', `Indoor: ${modelIndoor}`) : false;
-                        const outdoor = modelOutdoor ? this.emit('devInfo', `Outdoor: ${modelOutdoor}`) : false
-                        this.emit('devInfo', `Serial: ${serialNumber}`);
-                        this.emit('devInfo', `Firmware: ${firmwareAppVersion}`);
-                        this.emit('devInfo', `Manufacturer: ${manufacturer}`);
-                        this.emit('devInfo', '----------------------------------');
-                    };
-
-                    //accessory info
-                    this.manufacturer = manufacturer;
-                    this.model = modelIndoor ? modelIndoor : modelOutdoor ? modelOutdoor : `${this.deviceTypeText} ${this.deviceId}`;
-                    this.serialNumber = serialNumber;
-                    this.firmwareRevision = firmwareAppVersion;
-                    this.displayDeviceInfo = false;
-                })
-                .on('deviceState', async (deviceData) => {
-                    //presets
-                    const presetsOnServer = deviceData.Presets ?? [];
-
-                    //device control
-                    const hideVaneControls = deviceData.HideVaneControls ?? false;
-                    const hideDryModeControl = deviceData.HideDryModeControl ?? false;
-
-                    //device info
-                    const hasAutomaticFanSpeed = deviceData.Device.HasAutomaticFanSpeed ?? false;
-                    const airDirectionFunction = deviceData.Device.AirDirectionFunction ?? false;
-                    const swingFunction = deviceData.Device.SwingFunction ?? false;
-                    const hasOutdoorTemperature = deviceData.Device.HasOutdoorTemperature ?? false;
-                    const numberOfFanSpeeds = deviceData.Device.NumberOfFanSpeeds ?? 0;
-                    const modelSupportsFanSpeed = deviceData.Device.ModelSupportsFanSpeed ?? false;
-                    const modelSupportsAuto1 = deviceData.Device.ModelSupportsAuto ?? false;
-                    const modelSupportsAuto = this.autoDryFanMode >= 1 && modelSupportsAuto1
-                    const modelSupportsHeat1 = deviceData.Device.ModelSupportsHeat ?? false;
-                    const modelSupportsHeat = this.heatDryFanMode >= 1 && modelSupportsHeat1;
-                    const modelSupportsDry = deviceData.Device.ModelSupportsDry ?? false;
-                    const modelSupportsCool = this.coolDryFanMode >= 1;
-                    const minTempHeat = 10;
-                    const maxTempHeat = 31;
-                    const minTempCoolDry = 16;
-                    const maxTempCoolDry = 31;
-
-                    //device state
-                    const power = deviceData.Device.Power ?? false;
-                    const inStandbyMode = deviceData.Device.InStandbyMode ?? false;
-                    const roomTemperature = deviceData.Device.RoomTemperature;
-                    const setTemperature = deviceData.Device.SetTemperature ?? 20;
-                    const defaultHeatingSetTemperature = deviceData.Device.DefaultHeatingSetTemperature ?? 20;
-                    const defaultCoolingSetTemperature = deviceData.Device.DefaultCoolingSetTemperature ?? 23;
-                    const actualFanSpeed = deviceData.Device.ActualFanSpeed;
-                    const automaticFanSpeed = deviceData.Device.AutomaticFanSpeed;
-                    const fanSpeed = deviceData.Device.FanSpeed ?? 0;
-                    const operationMode = deviceData.Device.OperationMode;
-                    const vaneVerticalDirection = deviceData.Device.VaneVerticalDirection;
-                    const vaneVerticalSwing = deviceData.Device.VaneVerticalSwing;
-                    const vaneHorizontalDirection = deviceData.Device.VaneHorizontalDirection;
-                    const vaneHorizontalSwing = deviceData.Device.VaneHorizontalSwing;
-                    const prohibitSetTemperature = deviceData.Device.ProhibitSetTemperature ?? false;
-                    const prohibitOperationMode = deviceData.Device.ProhibitOperationMode ?? false;
-                    const prohibitPower = deviceData.Device.ProhibitPower ?? false;
-                    const temperatureIncrement = deviceData.Device.TemperatureIncrement ?? 1;
-                    const outdoorTemperature = deviceData.Device.OutdoorTemperature;
-
-                    //accessory
-                    this.accessory.presets = presetsOnServer;
-                    this.accessory.hasAutomaticFanSpeed = hasAutomaticFanSpeed;
-                    this.accessory.airDirectionFunction = airDirectionFunction;
-                    this.accessory.swingFunction = swingFunction;
-                    this.accessory.hasOutdoorTemperature = hasOutdoorTemperature;
-                    this.accessory.numberOfFanSpeeds = numberOfFanSpeeds;
-                    this.accessory.modelSupportsFanSpeed = modelSupportsFanSpeed;
-                    this.accessory.modelSupportsAuto = modelSupportsAuto;
-                    this.accessory.modelSupportsHeat = modelSupportsHeat;
-                    this.accessory.modelSupportsDry = modelSupportsDry;
-                    this.accessory.modelSupportsCool = modelSupportsCool;
-                    this.accessory.minTempHeat = minTempHeat;
-                    this.accessory.maxTempHeat = maxTempHeat;
-                    this.accessory.minTempCoolDry = minTempCoolDry;
-                    this.accessory.maxTempCoolDry = maxTempCoolDry;
-
-                    this.accessory.power = power ? 1 : 0;
-                    this.accessory.inStandbyMode = inStandbyMode;
-                    this.accessory.operationMode = operationMode;
-                    this.accessory.roomTemperature = roomTemperature;
-                    this.accessory.outdoorTemperature = outdoorTemperature;
-                    this.accessory.setTemperature = setTemperature;
-                    this.accessory.defaultHeatingSetTemperature = defaultHeatingSetTemperature;
-                    this.accessory.defaultCoolingSetTemperature = defaultCoolingSetTemperature;
-                    this.accessory.actualFanSpeed = actualFanSpeed;
-                    this.accessory.automaticFanSpeed = automaticFanSpeed;
-                    this.accessory.vaneVerticalSwing = vaneVerticalSwing;
-                    this.accessory.vaneHorizontalSwing = vaneHorizontalSwing;
-                    this.accessory.swingMode = swingFunction && vaneHorizontalDirection === 12 && vaneVerticalDirection === 7 ? 1 : 0;
-                    this.accessory.lockPhysicalControl = prohibitSetTemperature && prohibitOperationMode && prohibitPower ? 1 : 0;
-                    this.accessory.temperatureIncrement = temperatureIncrement;
-
-                    //operating mode 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
-                    switch (this.displayMode) {
-                        case 1: //Heater Cooler
-                            switch (operationMode) {
-                                case 1: //HEAT
-                                    this.accessory.currentOperationMode = roomTemperature > setTemperature ? 1 : 2; //INACTIVE, IDLE, HEATING, COOLING
-                                    this.accessory.targetOperationMode = 1; //AUTO, HEAT, COOL
-                                    break;
-                                case 2: //DRY
-                                    this.accessory.currentOperationMode = 1;
-                                    this.accessory.targetOperationMode = this.autoDryFanMode === 2 ? 0 : this.heatDryFanMode === 2 ? 1 : this.coolDryFanMode === 2 ? 2 : this.accessory.targetOperationMode ?? 0;
-                                    break;
-                                case 3: //COOL
-                                    this.accessory.currentOperationMode = roomTemperature < setTemperature ? 1 : 3;
-                                    this.accessory.targetOperationMode = 2;
-                                    break;
-                                case 7: //FAN
-                                    this.accessory.currentOperationMode = 1;
-                                    this.accessory.targetOperationMode = this.autoDryFanMode === 3 ? 0 : this.heatDryFanMode === 3 ? 1 : this.coolDryFanMode === 3 ? 2 : this.accessory.targetOperationMode ?? 0;
-                                    break;
-                                case 8: //AUTO
-                                    this.accessory.currentOperationMode = roomTemperature > setTemperature ? 3 : roomTemperature < setTemperature ? 2 : 1;
-                                    this.accessory.targetOperationMode = 0;
-                                    break;
-                                case 9: //ISEE HEAT
-                                    this.accessory.currentOperationMode = roomTemperature > setTemperature ? 1 : 2
-                                    this.accessory.targetOperationMode = 1;
-                                    break;
-                                case 10: //ISEE DRY
-                                    this.accessory.currentOperationMode = 1;
-                                    this.accessory.targetOperationMode = this.autoDryFanMode === 2 ? 0 : this.heatDryFanMode === 2 ? 1 : this.coolDryFanMode === 2 ? 2 : this.accessory.targetOperationMode ?? 0;
-                                    break;
-                                case 11: //ISEE COOL;
-                                    this.accessory.currentOperationMode = roomTemperature < setTemperature ? 1 : 3;
-                                    this.accessory.targetOperationMode = 2;
-                                    break;
-                                default:
-                                    this.emit('warn', `Unknown operating mode: ${operationMode}`);
-                                    return
-                            };
-
-                            this.accessory.currentOperationMode = !power ? 0 : inStandbyMode ? 1 : this.accessory.currentOperationMode;
-                            this.accessory.operationModeSetPropsMinValue = modelSupportsAuto && modelSupportsHeat ? 0 : !modelSupportsAuto && modelSupportsHeat ? 1 : modelSupportsAuto && !modelSupportsHeat ? 0 : 2;
-                            this.accessory.operationModeSetPropsMaxValue = 2
-                            this.accessory.operationModeSetPropsValidValues = modelSupportsAuto && modelSupportsHeat ? [0, 1, 2] : !modelSupportsAuto && modelSupportsHeat ? [1, 2] : modelSupportsAuto && !modelSupportsHeat ? [0, 2] : [2];
-
-                            //fan speed mode
-                            if (modelSupportsFanSpeed) {
-                                switch (numberOfFanSpeeds) {
-                                    case 2: //Fan speed mode 2
-                                        this.accessory.fanSpeed = hasAutomaticFanSpeed ? [3, 1, 2][fanSpeed] : [0, 1, 2][fanSpeed];
-                                        this.accessory.fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 3 : 2;
-                                        break;
-                                    case 3: //Fan speed mode 3
-                                        this.accessory.fanSpeed = hasAutomaticFanSpeed ? [4, 1, 2, 3][fanSpeed] : [0, 1, 2, 3][fanSpeed];
-                                        this.accessory.fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 4 : 3;
-                                        break;
-                                    case 4: //Fan speed mode 4
-                                        this.accessory.fanSpeed = hasAutomaticFanSpeed ? [5, 1, 2, 3, 4][fanSpeed] : [0, 1, 2, 3, 4][fanSpeed];
-                                        this.accessory.fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 5 : 4;
-                                        break;
-                                    case 5: //Fan speed mode 5
-                                        this.accessory.fanSpeed = hasAutomaticFanSpeed ? [6, 1, 2, 3, 4, 5][fanSpeed] : [0, 1, 2, 3, 4, 5][fanSpeed];
-                                        this.accessory.fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 6 : 5;
-                                        break;
-                                    case 6: //Fan speed mode 6
-                                        this.accessory.fanSpeed = hasAutomaticFanSpeed ? [7, 1, 2, 3, 4, 5, 6][fanSpeed] : [0, 1, 2, 3, 4, 5, 6][fanSpeed];
-                                        this.accessory.fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 7 : 6;
-                                        break;
-                                };
-                            };
-
-                            //update characteristics
-                            if (this.melCloudService) {
-                                this.melCloudService
-                                    .updateCharacteristic(Characteristic.Active, power ? 1 : 0)
-                                    .updateCharacteristic(Characteristic.CurrentHeaterCoolerState, this.accessory.currentOperationMode)
-                                    .updateCharacteristic(Characteristic.TargetHeaterCoolerState, this.accessory.targetOperationMode)
-                                    .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-                                    .updateCharacteristic(Characteristic.LockPhysicalControls, this.accessory.lockPhysicalControl)
-                                    .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.accessory.useFahrenheit)
-                                    .updateCharacteristic(Characteristic.CoolingThresholdTemperature, defaultCoolingSetTemperature);
-                                const updateDefHeat = modelSupportsHeat ? this.melCloudService.updateCharacteristic(Characteristic.HeatingThresholdTemperature, defaultHeatingSetTemperature) : false;
-                                const updateRS = modelSupportsFanSpeed ? this.melCloudService.updateCharacteristic(Characteristic.RotationSpeed, this.accessory.fanSpeed) : false;
-                                const updateSM = swingFunction ? this.melCloudService.updateCharacteristic(Characteristic.SwingMode, this.accessory.swingMode) : false;
-                            };
-                            break;
-                        case 2: //Thermostat
-                            switch (operationMode) {
-                                case 1: //HEAT
-                                    this.accessory.currentOperationMode = roomTemperature > setTemperature ? 0 : 1; //OFF, HEATING, COOLING
-                                    this.accessory.targetOperationMode = 1; //OFF, HEAT, COOL, AUTO
-                                    break;
-                                case 2: //DRY
-                                    this.accessory.currentOperationMode = 0;
-                                    this.accessory.targetOperationMode = this.autoDryFanMode === 2 ? 3 : this.heatDryFanMode === 2 ? 1 : this.coolDryFanMode === 2 ? 2 : this.accessory.targetOperationMode ?? 0;
-                                    break;
-                                case 3: //COOL
-                                    this.accessory.currentOperationMode = roomTemperature < setTemperature ? 0 : 2;
-                                    this.accessory.targetOperationMode = 2;
-                                    break;
-                                case 7: //FAN
-                                    this.accessory.currentOperationMode = 0;
-                                    this.accessory.targetOperationMode = this.autoDryFanMode === 3 ? 3 : this.heatDryFanMode === 3 ? 1 : this.coolDryFanMode === 3 ? 2 : this.accessory.targetOperationMode ?? 0;
-                                    break;
-                                case 8: //AUTO
-                                    this.accessory.currentOperationMode = roomTemperature < setTemperature ? 1 : roomTemperature > setTemperature ? 2 : 0;
-                                    this.accessory.targetOperationMode = 3;
-                                    break;
-                                case 9: //ISEE HEAT
-                                    this.accessory.currentOperationMode = roomTemperature > setTemperature ? 0 : 1;
-                                    this.accessory.targetOperationMode = 1;
-                                    break;
-                                case 10: //ISEE DRY
-                                    this.accessory.currentOperationMode = 0;
-                                    this.accessory.targetOperationMode = this.autoDryFanMode === 2 ? 3 : this.heatDryFanMode === 2 ? 1 : this.coolDryFanMode === 2 ? 2 : this.accessory.targetOperationMode ?? 0;
-                                    break;
-                                case 11: //ISEE COOL;
-                                    this.accessory.currentOperationMode = roomTemperature < setTemperature ? 0 : 2;
-                                    this.accessory.targetOperationMode = 2;
-                                    break;
-                                default:
-                                    this.emit('warn', `Unknown operating mode: ${operationMode}`);
-                                    break;
-                            };
-
-                            this.accessory.currentOperationMode = !power ? 0 : this.accessory.currentOperationMode;
-                            this.accessory.targetOperationMode = !power ? 0 : this.accessory.targetOperationMode;
-                            this.accessory.operationModeSetPropsMinValue = 0
-                            this.accessory.operationModeSetPropsMaxValue = modelSupportsAuto && modelSupportsHeat ? 3 : !modelSupportsAuto && modelSupportsHeat ? 2 : modelSupportsAuto && !modelSupportsHeat ? 3 : 2;
-                            this.accessory.operationModeSetPropsValidValues = modelSupportsAuto && modelSupportsHeat ? [0, 1, 2, 3] : !modelSupportsAuto && modelSupportsHeat ? [0, 1, 2] : modelSupportsAuto && !modelSupportsHeat ? [0, 2, 3] : [0, 2];
-
-                            //update characteristics
-                            if (this.melCloudService) {
-                                this.melCloudService
-                                    .updateCharacteristic(Characteristic.CurrentHeatingCoolingState, this.accessory.currentOperationMode)
-                                    .updateCharacteristic(Characteristic.TargetHeatingCoolingState, this.accessory.targetOperationMode)
-                                    .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-                                    .updateCharacteristic(Characteristic.TargetTemperature, setTemperature)
-                                    .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.accessory.useFahrenheit);
-                            };
-                            break;
-                    };
-
-                    if (this.roomTemperatureSensorService) {
-                        this.roomTemperatureSensorService
-                            .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-                    };
-
-                    if (this.outdoorTemperatureSensorService) {
-                        this.outdoorTemperatureSensorService
-                            .updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature)
-                    };
-
-                    //update presets state
-                    if (this.presetsConfigured.length > 0) {
-                        for (let i = 0; i < this.presetsConfigured.length; i++) {
-                            const preset = this.presetsConfigured[i];
-                            const presetData = presetsOnServer.find(p => p.ID === preset.Id);
-
-                            preset.state = presetData ? (presetData.Power === power
-                                && presetData.SetTemperature === setTemperature
-                                && presetData.OperationMode === operationMode
-                                && presetData.VaneHorizontal === vaneHorizontalDirection
-                                && presetData.VaneVertical === vaneVerticalDirection
-                                && presetData.FanSpeed === fanSpeed) : false;
-
-                            if (this.presetsServices) {
-                                const characteristicType = preset.characteristicType;
-                                this.presetsServices[i]
-                                    .updateCharacteristic(characteristicType, preset.state)
-                            };
-                        };
-                    };
-
-                    //update buttons state
-                    if (this.buttonsConfiguredCount > 0) {
-                        for (let i = 0; i < this.buttonsConfiguredCount; i++) {
-                            const button = this.buttonsConfigured[i];
-                            const mode = button.mode;
-                            switch (mode) {
-                                case 0: //POWER ON,OFF
-                                    button.state = (power === true);
-                                    break;
-                                case 1: //OPERATING MODE HEAT
-                                    button.state = power ? (operationMode === 1 || operationMode === 9) : false;
-                                    break;
-                                case 2: //OPERATING MODE DRY
-                                    button.state = power ? (operationMode === 2 || operationMode === 10) : false;
-                                    break
-                                case 3: //OPERATING MODE COOL
-                                    button.state = power ? (operationMode === 3 || operationMode === 11) : false;
-                                    break;
-                                case 4: //OPERATING MODE FAN
-                                    button.state = power ? (operationMode === 7) : false;
-                                    break;
-                                case 5: //OPERATING MODE AUTO
-                                    button.state = power ? (operationMode === 8) : false;
-                                    break;
-                                case 6: //OPERATING MODE PURIFY
-                                    button.state = power ? (operationMode === 12) : false;
-                                    break;
-                                case 7: //OPERATING MODE DRY CONTROL HIDE
-                                    button.state = power ? (hideDryModeControl === true) : false;
-                                    break;
-                                case 10: //VANE H SWING MODE AUTO
-                                    button.state = power ? (vaneHorizontalDirection === 0) : false;
-                                    break;
-                                case 11: //VANE H SWING MODE 1
-                                    button.state = power ? (vaneHorizontalDirection === 1) : false;
-                                    break;
-                                case 12: //VANE H SWING MODE 2
-                                    button.state = power ? (vaneHorizontalDirection === 2) : false;
-                                    break;
-                                case 13: //VANE H SWING MODE 3
-                                    button.state = power ? (vaneHorizontalDirection === 3) : false;
-                                    break;
-                                case 14: //VANE H SWING MODE 4
-                                    button.state = power ? (vaneHorizontalDirection === 4) : false;
-                                    break;
-                                case 15: //VANE H SWING MODE 5
-                                    button.state = power ? (vaneHorizontalDirection === 5) : false;
-                                    break;
-                                case 16: //VANE H SWING MODE SPLIT
-                                    button.state = power ? (vaneHorizontalDirection === 8) : false;
-                                    break;
-                                case 17: //VANE H SWING MODE SWING
-                                    button.state = power ? (vaneHorizontalDirection === 12) : false;
-                                    break;
-                                case 20: //VANE V SWING MODE AUTO
-                                    button.state = power ? (vaneVerticalDirection === 0) : false;
-                                    break;
-                                case 21: //VANE V SWING MODE 1
-                                    button.state = power ? (vaneVerticalDirection === 1) : false;
-                                    break;
-                                case 22: //VANE V SWING MODE 2
-                                    button.state = power ? (vaneVerticalDirection === 2) : false;
-                                    break;
-                                case 23: //VANE V SWING MODE 3
-                                    button.state = power ? (vaneVerticalDirection === 3) : false;
-                                    break;
-                                case 24: //VANE V SWING MODE 4
-                                    button.state = power ? (vaneVerticalDirection === 4) : false;
-                                    break;
-                                case 25: //VANE V SWING MODE 5
-                                    button.state = power ? (vaneVerticalDirection === 5) : false;
-                                    break;
-                                case 26: //VANE V SWING MODE SWING
-                                    button.state = power ? (vaneVerticalDirection === 7) : false;
-                                    break;
-                                case 27: //VANE H/V CONTROLS HIDE
-                                    button.state = power ? (hideVaneControls === true) : false;
-                                    break;
-                                case 30: //FAN SPEED MODE AUTO
-                                    button.state = power ? (fanSpeed === 0) : false;
-                                    break;
-                                case 31: //FAN SPEED MODE 1
-                                    button.state = power ? (fanSpeed === 1) : false;
-                                    break;
-                                case 32: //FAN SPEED MODE 2
-                                    button.state = power ? (fanSpeed === 2) : false;
-                                    break;
-                                case 33: //FAN SPEED MODE 3
-                                    button.state = power ? (fanSpeed === 3) : false;
-                                    break;
-                                case 34: //FAN SPEED MODE 4
-                                    button.state = power ? (fanSpeed === 4) : false;
-                                    break;
-                                case 35: //FAN SPEED  MODE 5
-                                    button.state = power ? (fanSpeed === 5) : false;
-                                    break;
-                                case 36: //FAN SPEED  MODE 6
-                                    button.state = power ? (fanSpeed === 6) : false;
-                                    break;
-                                case 37: //PHYSICAL LOCK CONTROLS ALL
-                                    button.state = (this.accessory.lockPhysicalControl === 1);
-                                    break;
-                                case 38: //PHYSICAL LOCK CONTROLS POWER
-                                    button.state = (prohibitPower === true);
-                                    break;
-                                case 39: //PHYSICAL LOCK CONTROLS MODE
-                                    button.state = (prohibitOperationMode === true);
-                                    break;
-                                case 40: //PHYSICAL LOCK CONTROLS TEMP
-                                    button.state = (prohibitSetTemperature === true);
-                                    break;
-                                default: //Unknown button
-                                    this.emit('message', `Unknown button mode: ${mode} detected.`);
-                                    break;
-                            };
-
-                            //update services
-                            if (this.buttonsServices) {
-                                const characteristicType = button.characteristicType;
-                                this.buttonsServices[i]
-                                    .updateCharacteristic(characteristicType, button.state)
-                            };
-                        };
-                    };
-
-                    //log current state
-                    if (!this.disableLogInfo) {
-                        this.emit('message', `Power: ${power ? 'ON' : 'OFF'}`);
-                        this.emit('message', `Target operation mode: ${AirConditioner.DriveMode[operationMode]}`);
-                        this.emit('message', `Current operation mode: ${this.displayMode === 1 ? AirConditioner.CurrentOperationModeHeatherCooler[this.accessory.currentOperationMode] : AirConditioner.CurrentOperationModeThermostat[this.accessory.currentOperationMode]}`);
-                        this.emit('message', `Target temperature: ${setTemperature}${this.accessory.temperatureUnit}`);
-                        this.emit('message', `Current temperature: ${roomTemperature}${this.accessory.temperatureUnit}`);
-                        const info = hasOutdoorTemperature && outdoorTemperature !== null ? this.emit('message', `Outdoor temperature: ${outdoorTemperature}${this.accessory.temperatureUnit}`) : false;
-                        const info3 = modelSupportsFanSpeed ? this.emit('message', `Target fan speed: ${AirConditioner.FanSpeed[fanSpeed]}`) : false;
-                        const info4 = modelSupportsFanSpeed ? this.emit('message', `Current fan speed: ${AirConditioner.FanSpeed[actualFanSpeed]}`) : false;
-                        const info5 = vaneHorizontalDirection !== null ? this.emit('message', `Vane horizontal: ${AirConditioner.HorizontalVane[vaneHorizontalDirection] ?? vaneHorizontalDirection}`) : false;
-                        const info6 = vaneVerticalDirection !== null ? this.emit('message', `Vane vertical: ${AirConditioner.VerticalVane[vaneVerticalDirection] ?? vaneVerticalDirection}`) : false;
-                        const info7 = swingFunction ? this.emit('message', `Air direction: ${AirConditioner.AirDirection[this.accessory.swingMode]}`) : false;
-                        this.emit('message', `Temperature display unit: ${this.accessory.temperatureUnit}`);
-                        this.emit('message', `Lock physical controls: ${this.accessory.lockPhysicalControl ? 'LOCKED' : 'UNLOCKED'}`);
-                    };
-
-                    //start prepare accessory
-                    if (!this.startPrepareAccessory) {
-                        return;
-                    }
-                    try {
-                        const accessory = await this.prepareAccessory(this.accountInfo, deviceData, this.deviceId, this.deviceTypeText, this.deviceName, this.accountName);
-                        this.emit('publishAccessory', accessory);
-                        this.startPrepareAccessory = false;
-                    } catch (error) {
-                        this.emit('error', error);
-                    };
-                })
-                .on('success', (message) => {
-                    this.emit('success', message);
-                })
-                .on('message', (message) => {
-                    this.emit('message', message);
-                })
-                .on('debug', (debug) => {
-                    this.emit('debug', debug);
-                })
-                .on('warn', async (warn) => {
-                    this.emit('warn', warn);
-                })
-                .on('error', async (error) => {
-                    this.emit('error', error);
-                });
-
-            //check state
-            await this.melCloudAta.checkState();
-
-            //start impule generator
-            await this.melCloudAta.impulseGenerator.start([{ name: 'checkState', sampling: this.refreshInterval }]);
-
-            return true;
-        } catch (error) {
-            throw new Error(`Start error: ${error}`);
-        };
-    };
-
     async setOverExternalIntegration(integration, deviceData, key, value) {
         try {
             let set = false
@@ -1394,6 +848,553 @@ class DeviceAta extends EventEmitter {
             return accessory;
         } catch (error) {
             throw new Error(`Prepare accessory error: ${error.message || error}`);
+        };
+    };
+
+    //start
+    async start() {
+        try {
+            //melcloud device
+            this.melCloudAta = new MelCloudAta({
+                contextKey: this.contextKey,
+                devicesFile: this.devicesFile,
+                deviceId: this.deviceId,
+                debugLog: this.enableDebugMode
+            });
+
+            this.melCloudAta.on('externalIntegrations', (deviceData) => {
+                try {
+                    //RESTFul server
+                    const restFulEnabled = this.restFul.enable || false;
+                    if (restFulEnabled) {
+                        if (!this.restFulConnected) {
+                            this.restFul1 = new RestFul({
+                                port: this.deviceId.slice(-4),
+                                debug: this.restFul.debug || false
+                            });
+
+                            this.restFul1.on('connected', (message) => {
+                                this.restFulConnected = true;
+                                this.emit('success', message);
+                            })
+                                .on('set', async (key, value) => {
+                                    try {
+                                        await this.setOverExternalIntegration('RESTFul', deviceData, key, value);
+                                    } catch (error) {
+                                        this.emit('warn', error);
+                                    };
+                                })
+                                .on('debug', (debug) => {
+                                    this.emit('debug', debug);
+                                })
+                                .on('error', (error) => {
+                                    this.emit('warn', error);
+                                });
+                        }
+                        const restFul0 = this.restFulConnected ? this.restFul1.update('info', deviceData) : false;
+                        const restFul1 = this.restFulConnected ? this.restFul1.update('state', deviceData.Device) : false;
+                    }
+
+                    //MQTT client
+                    const mqttEnabled = this.mqtt.enable || false;
+                    if (mqttEnabled) {
+                        if (!this.mqttConnected) {
+                            this.mqtt1 = new Mqtt({
+                                host: this.mqtt.host,
+                                port: this.mqtt.port || 1883,
+                                clientId: `${this.mqtt.clientId}_${this.deviceId}` || `${this.deviceTypeText}_${this.deviceName}_${this.deviceId}`,
+                                prefix: `${this.mqtt.prefix}/${this.deviceTypeText}/${this.deviceName}`,
+                                user: this.mqtt.user,
+                                passwd: this.mqtt.pass,
+                                debug: this.mqtt.debug || false
+                            });
+
+                            this.mqtt1.on('connected', (message) => {
+                                this.mqttConnected = true;
+                                this.emit('success', message);
+                            })
+                                .on('subscribed', (message) => {
+                                    this.emit('success', message);
+                                })
+                                .on('set', async (key, value) => {
+                                    try {
+                                        await this.setOverExternalIntegration('MQTT', deviceData, key, value);
+                                    } catch (error) {
+                                        this.emit('warn', error);
+                                    };
+                                })
+                                .on('debug', (debug) => {
+                                    this.emit('debug', debug);
+                                })
+                                .on('error', (error) => {
+                                    this.emit('warn', error);
+                                });
+                        }
+                        const mqtt0 = this.mqttConnected ? this.mqtt1.emit('publish', `Info`, deviceData) : false;
+                        const mqtt1 = this.mqttConnected ? this.mqtt1.emit('publish', `State`, deviceData.Device) : false;
+                    }
+
+                } catch (error) {
+                    this.emit('warn', `External integration start error: ${error}.`);
+                };
+            })
+                .on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) => {
+                    if (!this.displayDeviceInfo) {
+                        return;
+                    }
+
+                    if (!this.disableLogDeviceInfo) {
+                        this.emit('devInfo', `---- ${this.deviceTypeText}: ${this.deviceName} ----`);
+                        this.emit('devInfo', `Account: ${this.accountName}`);
+                        const indoor = modelIndoor ? this.emit('devInfo', `Indoor: ${modelIndoor}`) : false;
+                        const outdoor = modelOutdoor ? this.emit('devInfo', `Outdoor: ${modelOutdoor}`) : false
+                        this.emit('devInfo', `Serial: ${serialNumber}`);
+                        this.emit('devInfo', `Firmware: ${firmwareAppVersion}`);
+                        this.emit('devInfo', `Manufacturer: ${manufacturer}`);
+                        this.emit('devInfo', '----------------------------------');
+                    };
+
+                    //accessory info
+                    this.manufacturer = manufacturer;
+                    this.model = modelIndoor ? modelIndoor : modelOutdoor ? modelOutdoor : `${this.deviceTypeText} ${this.deviceId}`;
+                    this.serialNumber = serialNumber;
+                    this.firmwareRevision = firmwareAppVersion;
+                    this.displayDeviceInfo = false;
+                })
+                .on('deviceState', async (deviceData) => {
+                    //presets
+                    const presetsOnServer = deviceData.Presets ?? [];
+
+                    //device control
+                    const hideVaneControls = deviceData.HideVaneControls ?? false;
+                    const hideDryModeControl = deviceData.HideDryModeControl ?? false;
+
+                    //device info
+                    const hasAutomaticFanSpeed = deviceData.Device.HasAutomaticFanSpeed ?? false;
+                    const airDirectionFunction = deviceData.Device.AirDirectionFunction ?? false;
+                    const swingFunction = deviceData.Device.SwingFunction ?? false;
+                    const hasOutdoorTemperature = deviceData.Device.HasOutdoorTemperature ?? false;
+                    const numberOfFanSpeeds = deviceData.Device.NumberOfFanSpeeds ?? 0;
+                    const modelSupportsFanSpeed = deviceData.Device.ModelSupportsFanSpeed ?? false;
+                    const modelSupportsAuto1 = deviceData.Device.ModelSupportsAuto ?? false;
+                    const modelSupportsAuto = this.autoDryFanMode >= 1 && modelSupportsAuto1
+                    const modelSupportsHeat1 = deviceData.Device.ModelSupportsHeat ?? false;
+                    const modelSupportsHeat = this.heatDryFanMode >= 1 && modelSupportsHeat1;
+                    const modelSupportsDry = deviceData.Device.ModelSupportsDry ?? false;
+                    const modelSupportsCool = this.coolDryFanMode >= 1;
+                    const minTempHeat = 10;
+                    const maxTempHeat = 31;
+                    const minTempCoolDry = 16;
+                    const maxTempCoolDry = 31;
+
+                    //device state
+                    const power = deviceData.Device.Power ?? false;
+                    const inStandbyMode = deviceData.Device.InStandbyMode ?? false;
+                    const roomTemperature = deviceData.Device.RoomTemperature;
+                    const setTemperature = deviceData.Device.SetTemperature ?? 20;
+                    const defaultHeatingSetTemperature = deviceData.Device.DefaultHeatingSetTemperature ?? 20;
+                    const defaultCoolingSetTemperature = deviceData.Device.DefaultCoolingSetTemperature ?? 23;
+                    const actualFanSpeed = deviceData.Device.ActualFanSpeed;
+                    const automaticFanSpeed = deviceData.Device.AutomaticFanSpeed;
+                    const fanSpeed = deviceData.Device.FanSpeed ?? 0;
+                    const operationMode = deviceData.Device.OperationMode;
+                    const vaneVerticalDirection = deviceData.Device.VaneVerticalDirection;
+                    const vaneVerticalSwing = deviceData.Device.VaneVerticalSwing;
+                    const vaneHorizontalDirection = deviceData.Device.VaneHorizontalDirection;
+                    const vaneHorizontalSwing = deviceData.Device.VaneHorizontalSwing;
+                    const prohibitSetTemperature = deviceData.Device.ProhibitSetTemperature ?? false;
+                    const prohibitOperationMode = deviceData.Device.ProhibitOperationMode ?? false;
+                    const prohibitPower = deviceData.Device.ProhibitPower ?? false;
+                    const temperatureIncrement = deviceData.Device.TemperatureIncrement ?? 1;
+                    const outdoorTemperature = deviceData.Device.OutdoorTemperature;
+
+                    //accessory
+                    this.accessory.presets = presetsOnServer;
+                    this.accessory.hasAutomaticFanSpeed = hasAutomaticFanSpeed;
+                    this.accessory.airDirectionFunction = airDirectionFunction;
+                    this.accessory.swingFunction = swingFunction;
+                    this.accessory.hasOutdoorTemperature = hasOutdoorTemperature;
+                    this.accessory.numberOfFanSpeeds = numberOfFanSpeeds;
+                    this.accessory.modelSupportsFanSpeed = modelSupportsFanSpeed;
+                    this.accessory.modelSupportsAuto = modelSupportsAuto;
+                    this.accessory.modelSupportsHeat = modelSupportsHeat;
+                    this.accessory.modelSupportsDry = modelSupportsDry;
+                    this.accessory.modelSupportsCool = modelSupportsCool;
+                    this.accessory.minTempHeat = minTempHeat;
+                    this.accessory.maxTempHeat = maxTempHeat;
+                    this.accessory.minTempCoolDry = minTempCoolDry;
+                    this.accessory.maxTempCoolDry = maxTempCoolDry;
+
+                    this.accessory.power = power ? 1 : 0;
+                    this.accessory.inStandbyMode = inStandbyMode;
+                    this.accessory.operationMode = operationMode;
+                    this.accessory.roomTemperature = roomTemperature;
+                    this.accessory.outdoorTemperature = outdoorTemperature;
+                    this.accessory.setTemperature = setTemperature;
+                    this.accessory.defaultHeatingSetTemperature = defaultHeatingSetTemperature;
+                    this.accessory.defaultCoolingSetTemperature = defaultCoolingSetTemperature;
+                    this.accessory.actualFanSpeed = actualFanSpeed;
+                    this.accessory.automaticFanSpeed = automaticFanSpeed;
+                    this.accessory.vaneVerticalSwing = vaneVerticalSwing;
+                    this.accessory.vaneHorizontalSwing = vaneHorizontalSwing;
+                    this.accessory.swingMode = swingFunction && vaneHorizontalDirection === 12 && vaneVerticalDirection === 7 ? 1 : 0;
+                    this.accessory.lockPhysicalControl = prohibitSetTemperature && prohibitOperationMode && prohibitPower ? 1 : 0;
+                    this.accessory.temperatureIncrement = temperatureIncrement;
+
+                    //operating mode 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
+                    switch (this.displayMode) {
+                        case 1: //Heater Cooler
+                            switch (operationMode) {
+                                case 1: //HEAT
+                                    this.accessory.currentOperationMode = roomTemperature > setTemperature ? 1 : 2; //INACTIVE, IDLE, HEATING, COOLING
+                                    this.accessory.targetOperationMode = 1; //AUTO, HEAT, COOL
+                                    break;
+                                case 2: //DRY
+                                    this.accessory.currentOperationMode = 1;
+                                    this.accessory.targetOperationMode = this.autoDryFanMode === 2 ? 0 : this.heatDryFanMode === 2 ? 1 : this.coolDryFanMode === 2 ? 2 : this.accessory.targetOperationMode ?? 0;
+                                    break;
+                                case 3: //COOL
+                                    this.accessory.currentOperationMode = roomTemperature < setTemperature ? 1 : 3;
+                                    this.accessory.targetOperationMode = 2;
+                                    break;
+                                case 7: //FAN
+                                    this.accessory.currentOperationMode = 1;
+                                    this.accessory.targetOperationMode = this.autoDryFanMode === 3 ? 0 : this.heatDryFanMode === 3 ? 1 : this.coolDryFanMode === 3 ? 2 : this.accessory.targetOperationMode ?? 0;
+                                    break;
+                                case 8: //AUTO
+                                    this.accessory.currentOperationMode = roomTemperature > setTemperature ? 3 : roomTemperature < setTemperature ? 2 : 1;
+                                    this.accessory.targetOperationMode = 0;
+                                    break;
+                                case 9: //ISEE HEAT
+                                    this.accessory.currentOperationMode = roomTemperature > setTemperature ? 1 : 2
+                                    this.accessory.targetOperationMode = 1;
+                                    break;
+                                case 10: //ISEE DRY
+                                    this.accessory.currentOperationMode = 1;
+                                    this.accessory.targetOperationMode = this.autoDryFanMode === 2 ? 0 : this.heatDryFanMode === 2 ? 1 : this.coolDryFanMode === 2 ? 2 : this.accessory.targetOperationMode ?? 0;
+                                    break;
+                                case 11: //ISEE COOL;
+                                    this.accessory.currentOperationMode = roomTemperature < setTemperature ? 1 : 3;
+                                    this.accessory.targetOperationMode = 2;
+                                    break;
+                                default:
+                                    this.emit('warn', `Unknown operating mode: ${operationMode}`);
+                                    return
+                            };
+
+                            this.accessory.currentOperationMode = !power ? 0 : inStandbyMode ? 1 : this.accessory.currentOperationMode;
+                            this.accessory.operationModeSetPropsMinValue = modelSupportsAuto && modelSupportsHeat ? 0 : !modelSupportsAuto && modelSupportsHeat ? 1 : modelSupportsAuto && !modelSupportsHeat ? 0 : 2;
+                            this.accessory.operationModeSetPropsMaxValue = 2
+                            this.accessory.operationModeSetPropsValidValues = modelSupportsAuto && modelSupportsHeat ? [0, 1, 2] : !modelSupportsAuto && modelSupportsHeat ? [1, 2] : modelSupportsAuto && !modelSupportsHeat ? [0, 2] : [2];
+
+                            //fan speed mode
+                            if (modelSupportsFanSpeed) {
+                                switch (numberOfFanSpeeds) {
+                                    case 2: //Fan speed mode 2
+                                        this.accessory.fanSpeed = hasAutomaticFanSpeed ? [3, 1, 2][fanSpeed] : [0, 1, 2][fanSpeed];
+                                        this.accessory.fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 3 : 2;
+                                        break;
+                                    case 3: //Fan speed mode 3
+                                        this.accessory.fanSpeed = hasAutomaticFanSpeed ? [4, 1, 2, 3][fanSpeed] : [0, 1, 2, 3][fanSpeed];
+                                        this.accessory.fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 4 : 3;
+                                        break;
+                                    case 4: //Fan speed mode 4
+                                        this.accessory.fanSpeed = hasAutomaticFanSpeed ? [5, 1, 2, 3, 4][fanSpeed] : [0, 1, 2, 3, 4][fanSpeed];
+                                        this.accessory.fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 5 : 4;
+                                        break;
+                                    case 5: //Fan speed mode 5
+                                        this.accessory.fanSpeed = hasAutomaticFanSpeed ? [6, 1, 2, 3, 4, 5][fanSpeed] : [0, 1, 2, 3, 4, 5][fanSpeed];
+                                        this.accessory.fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 6 : 5;
+                                        break;
+                                    case 6: //Fan speed mode 6
+                                        this.accessory.fanSpeed = hasAutomaticFanSpeed ? [7, 1, 2, 3, 4, 5, 6][fanSpeed] : [0, 1, 2, 3, 4, 5, 6][fanSpeed];
+                                        this.accessory.fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 7 : 6;
+                                        break;
+                                };
+                            };
+
+                            //update characteristics
+                            if (this.melCloudService) {
+                                this.melCloudService
+                                    .updateCharacteristic(Characteristic.Active, power ? 1 : 0)
+                                    .updateCharacteristic(Characteristic.CurrentHeaterCoolerState, this.accessory.currentOperationMode)
+                                    .updateCharacteristic(Characteristic.TargetHeaterCoolerState, this.accessory.targetOperationMode)
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+                                    .updateCharacteristic(Characteristic.LockPhysicalControls, this.accessory.lockPhysicalControl)
+                                    .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.accessory.useFahrenheit)
+                                    .updateCharacteristic(Characteristic.CoolingThresholdTemperature, defaultCoolingSetTemperature);
+                                const updateDefHeat = modelSupportsHeat ? this.melCloudService.updateCharacteristic(Characteristic.HeatingThresholdTemperature, defaultHeatingSetTemperature) : false;
+                                const updateRS = modelSupportsFanSpeed ? this.melCloudService.updateCharacteristic(Characteristic.RotationSpeed, this.accessory.fanSpeed) : false;
+                                const updateSM = swingFunction ? this.melCloudService.updateCharacteristic(Characteristic.SwingMode, this.accessory.swingMode) : false;
+                            };
+                            break;
+                        case 2: //Thermostat
+                            switch (operationMode) {
+                                case 1: //HEAT
+                                    this.accessory.currentOperationMode = roomTemperature > setTemperature ? 0 : 1; //OFF, HEATING, COOLING
+                                    this.accessory.targetOperationMode = 1; //OFF, HEAT, COOL, AUTO
+                                    break;
+                                case 2: //DRY
+                                    this.accessory.currentOperationMode = 0;
+                                    this.accessory.targetOperationMode = this.autoDryFanMode === 2 ? 3 : this.heatDryFanMode === 2 ? 1 : this.coolDryFanMode === 2 ? 2 : this.accessory.targetOperationMode ?? 0;
+                                    break;
+                                case 3: //COOL
+                                    this.accessory.currentOperationMode = roomTemperature < setTemperature ? 0 : 2;
+                                    this.accessory.targetOperationMode = 2;
+                                    break;
+                                case 7: //FAN
+                                    this.accessory.currentOperationMode = 0;
+                                    this.accessory.targetOperationMode = this.autoDryFanMode === 3 ? 3 : this.heatDryFanMode === 3 ? 1 : this.coolDryFanMode === 3 ? 2 : this.accessory.targetOperationMode ?? 0;
+                                    break;
+                                case 8: //AUTO
+                                    this.accessory.currentOperationMode = roomTemperature < setTemperature ? 1 : roomTemperature > setTemperature ? 2 : 0;
+                                    this.accessory.targetOperationMode = 3;
+                                    break;
+                                case 9: //ISEE HEAT
+                                    this.accessory.currentOperationMode = roomTemperature > setTemperature ? 0 : 1;
+                                    this.accessory.targetOperationMode = 1;
+                                    break;
+                                case 10: //ISEE DRY
+                                    this.accessory.currentOperationMode = 0;
+                                    this.accessory.targetOperationMode = this.autoDryFanMode === 2 ? 3 : this.heatDryFanMode === 2 ? 1 : this.coolDryFanMode === 2 ? 2 : this.accessory.targetOperationMode ?? 0;
+                                    break;
+                                case 11: //ISEE COOL;
+                                    this.accessory.currentOperationMode = roomTemperature < setTemperature ? 0 : 2;
+                                    this.accessory.targetOperationMode = 2;
+                                    break;
+                                default:
+                                    this.emit('warn', `Unknown operating mode: ${operationMode}`);
+                                    break;
+                            };
+
+                            this.accessory.currentOperationMode = !power ? 0 : this.accessory.currentOperationMode;
+                            this.accessory.targetOperationMode = !power ? 0 : this.accessory.targetOperationMode;
+                            this.accessory.operationModeSetPropsMinValue = 0
+                            this.accessory.operationModeSetPropsMaxValue = modelSupportsAuto && modelSupportsHeat ? 3 : !modelSupportsAuto && modelSupportsHeat ? 2 : modelSupportsAuto && !modelSupportsHeat ? 3 : 2;
+                            this.accessory.operationModeSetPropsValidValues = modelSupportsAuto && modelSupportsHeat ? [0, 1, 2, 3] : !modelSupportsAuto && modelSupportsHeat ? [0, 1, 2] : modelSupportsAuto && !modelSupportsHeat ? [0, 2, 3] : [0, 2];
+
+                            //update characteristics
+                            if (this.melCloudService) {
+                                this.melCloudService
+                                    .updateCharacteristic(Characteristic.CurrentHeatingCoolingState, this.accessory.currentOperationMode)
+                                    .updateCharacteristic(Characteristic.TargetHeatingCoolingState, this.accessory.targetOperationMode)
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+                                    .updateCharacteristic(Characteristic.TargetTemperature, setTemperature)
+                                    .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.accessory.useFahrenheit);
+                            };
+                            break;
+                    };
+
+                    if (this.roomTemperatureSensorService) {
+                        this.roomTemperatureSensorService
+                            .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+                    };
+
+                    if (this.outdoorTemperatureSensorService) {
+                        this.outdoorTemperatureSensorService
+                            .updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature)
+                    };
+
+                    //update presets state
+                    if (this.presetsConfigured.length > 0) {
+                        for (let i = 0; i < this.presetsConfigured.length; i++) {
+                            const preset = this.presetsConfigured[i];
+                            const presetData = presetsOnServer.find(p => p.ID === preset.Id);
+
+                            preset.state = presetData ? (presetData.Power === power
+                                && presetData.SetTemperature === setTemperature
+                                && presetData.OperationMode === operationMode
+                                && presetData.VaneHorizontal === vaneHorizontalDirection
+                                && presetData.VaneVertical === vaneVerticalDirection
+                                && presetData.FanSpeed === fanSpeed) : false;
+
+                            if (this.presetsServices) {
+                                const characteristicType = preset.characteristicType;
+                                this.presetsServices[i]
+                                    .updateCharacteristic(characteristicType, preset.state)
+                            };
+                        };
+                    };
+
+                    //update buttons state
+                    if (this.buttonsConfiguredCount > 0) {
+                        for (let i = 0; i < this.buttonsConfiguredCount; i++) {
+                            const button = this.buttonsConfigured[i];
+                            const mode = button.mode;
+                            switch (mode) {
+                                case 0: //POWER ON,OFF
+                                    button.state = (power === true);
+                                    break;
+                                case 1: //OPERATING MODE HEAT
+                                    button.state = power ? (operationMode === 1 || operationMode === 9) : false;
+                                    break;
+                                case 2: //OPERATING MODE DRY
+                                    button.state = power ? (operationMode === 2 || operationMode === 10) : false;
+                                    break
+                                case 3: //OPERATING MODE COOL
+                                    button.state = power ? (operationMode === 3 || operationMode === 11) : false;
+                                    break;
+                                case 4: //OPERATING MODE FAN
+                                    button.state = power ? (operationMode === 7) : false;
+                                    break;
+                                case 5: //OPERATING MODE AUTO
+                                    button.state = power ? (operationMode === 8) : false;
+                                    break;
+                                case 6: //OPERATING MODE PURIFY
+                                    button.state = power ? (operationMode === 12) : false;
+                                    break;
+                                case 7: //OPERATING MODE DRY CONTROL HIDE
+                                    button.state = power ? (hideDryModeControl === true) : false;
+                                    break;
+                                case 10: //VANE H SWING MODE AUTO
+                                    button.state = power ? (vaneHorizontalDirection === 0) : false;
+                                    break;
+                                case 11: //VANE H SWING MODE 1
+                                    button.state = power ? (vaneHorizontalDirection === 1) : false;
+                                    break;
+                                case 12: //VANE H SWING MODE 2
+                                    button.state = power ? (vaneHorizontalDirection === 2) : false;
+                                    break;
+                                case 13: //VANE H SWING MODE 3
+                                    button.state = power ? (vaneHorizontalDirection === 3) : false;
+                                    break;
+                                case 14: //VANE H SWING MODE 4
+                                    button.state = power ? (vaneHorizontalDirection === 4) : false;
+                                    break;
+                                case 15: //VANE H SWING MODE 5
+                                    button.state = power ? (vaneHorizontalDirection === 5) : false;
+                                    break;
+                                case 16: //VANE H SWING MODE SPLIT
+                                    button.state = power ? (vaneHorizontalDirection === 8) : false;
+                                    break;
+                                case 17: //VANE H SWING MODE SWING
+                                    button.state = power ? (vaneHorizontalDirection === 12) : false;
+                                    break;
+                                case 20: //VANE V SWING MODE AUTO
+                                    button.state = power ? (vaneVerticalDirection === 0) : false;
+                                    break;
+                                case 21: //VANE V SWING MODE 1
+                                    button.state = power ? (vaneVerticalDirection === 1) : false;
+                                    break;
+                                case 22: //VANE V SWING MODE 2
+                                    button.state = power ? (vaneVerticalDirection === 2) : false;
+                                    break;
+                                case 23: //VANE V SWING MODE 3
+                                    button.state = power ? (vaneVerticalDirection === 3) : false;
+                                    break;
+                                case 24: //VANE V SWING MODE 4
+                                    button.state = power ? (vaneVerticalDirection === 4) : false;
+                                    break;
+                                case 25: //VANE V SWING MODE 5
+                                    button.state = power ? (vaneVerticalDirection === 5) : false;
+                                    break;
+                                case 26: //VANE V SWING MODE SWING
+                                    button.state = power ? (vaneVerticalDirection === 7) : false;
+                                    break;
+                                case 27: //VANE H/V CONTROLS HIDE
+                                    button.state = power ? (hideVaneControls === true) : false;
+                                    break;
+                                case 30: //FAN SPEED MODE AUTO
+                                    button.state = power ? (fanSpeed === 0) : false;
+                                    break;
+                                case 31: //FAN SPEED MODE 1
+                                    button.state = power ? (fanSpeed === 1) : false;
+                                    break;
+                                case 32: //FAN SPEED MODE 2
+                                    button.state = power ? (fanSpeed === 2) : false;
+                                    break;
+                                case 33: //FAN SPEED MODE 3
+                                    button.state = power ? (fanSpeed === 3) : false;
+                                    break;
+                                case 34: //FAN SPEED MODE 4
+                                    button.state = power ? (fanSpeed === 4) : false;
+                                    break;
+                                case 35: //FAN SPEED  MODE 5
+                                    button.state = power ? (fanSpeed === 5) : false;
+                                    break;
+                                case 36: //FAN SPEED  MODE 6
+                                    button.state = power ? (fanSpeed === 6) : false;
+                                    break;
+                                case 37: //PHYSICAL LOCK CONTROLS ALL
+                                    button.state = (this.accessory.lockPhysicalControl === 1);
+                                    break;
+                                case 38: //PHYSICAL LOCK CONTROLS POWER
+                                    button.state = (prohibitPower === true);
+                                    break;
+                                case 39: //PHYSICAL LOCK CONTROLS MODE
+                                    button.state = (prohibitOperationMode === true);
+                                    break;
+                                case 40: //PHYSICAL LOCK CONTROLS TEMP
+                                    button.state = (prohibitSetTemperature === true);
+                                    break;
+                                default: //Unknown button
+                                    this.emit('message', `Unknown button mode: ${mode} detected.`);
+                                    break;
+                            };
+
+                            //update services
+                            if (this.buttonsServices) {
+                                const characteristicType = button.characteristicType;
+                                this.buttonsServices[i]
+                                    .updateCharacteristic(characteristicType, button.state)
+                            };
+                        };
+                    };
+
+                    //log current state
+                    if (!this.disableLogInfo) {
+                        this.emit('message', `Power: ${power ? 'ON' : 'OFF'}`);
+                        this.emit('message', `Target operation mode: ${AirConditioner.DriveMode[operationMode]}`);
+                        this.emit('message', `Current operation mode: ${this.displayMode === 1 ? AirConditioner.CurrentOperationModeHeatherCooler[this.accessory.currentOperationMode] : AirConditioner.CurrentOperationModeThermostat[this.accessory.currentOperationMode]}`);
+                        this.emit('message', `Target temperature: ${setTemperature}${this.accessory.temperatureUnit}`);
+                        this.emit('message', `Current temperature: ${roomTemperature}${this.accessory.temperatureUnit}`);
+                        const info = hasOutdoorTemperature && outdoorTemperature !== null ? this.emit('message', `Outdoor temperature: ${outdoorTemperature}${this.accessory.temperatureUnit}`) : false;
+                        const info3 = modelSupportsFanSpeed ? this.emit('message', `Target fan speed: ${AirConditioner.FanSpeed[fanSpeed]}`) : false;
+                        const info4 = modelSupportsFanSpeed ? this.emit('message', `Current fan speed: ${AirConditioner.FanSpeed[actualFanSpeed]}`) : false;
+                        const info5 = vaneHorizontalDirection !== null ? this.emit('message', `Vane horizontal: ${AirConditioner.HorizontalVane[vaneHorizontalDirection] ?? vaneHorizontalDirection}`) : false;
+                        const info6 = vaneVerticalDirection !== null ? this.emit('message', `Vane vertical: ${AirConditioner.VerticalVane[vaneVerticalDirection] ?? vaneVerticalDirection}`) : false;
+                        const info7 = swingFunction ? this.emit('message', `Air direction: ${AirConditioner.AirDirection[this.accessory.swingMode]}`) : false;
+                        this.emit('message', `Temperature display unit: ${this.accessory.temperatureUnit}`);
+                        this.emit('message', `Lock physical controls: ${this.accessory.lockPhysicalControl ? 'LOCKED' : 'UNLOCKED'}`);
+                    };
+
+                    //start prepare accessory
+                    if (!this.startPrepareAccessory) {
+                        return;
+                    }
+                    try {
+                        const accessory = await this.prepareAccessory(this.accountInfo, deviceData, this.deviceId, this.deviceTypeText, this.deviceName, this.accountName);
+                        this.emit('publishAccessory', accessory);
+                        this.startPrepareAccessory = false;
+                    } catch (error) {
+                        this.emit('error', error);
+                    };
+                })
+                .on('success', (message) => {
+                    this.emit('success', message);
+                })
+                .on('message', (message) => {
+                    this.emit('message', message);
+                })
+                .on('debug', (debug) => {
+                    this.emit('debug', debug);
+                })
+                .on('warn', async (warn) => {
+                    this.emit('warn', warn);
+                })
+                .on('error', async (error) => {
+                    this.emit('error', error);
+                });
+
+            //check state
+            await this.melCloudAta.checkState();
+
+            //start impule generator
+            await this.melCloudAta.impulseGenerator.start([{ name: 'checkState', sampling: this.refreshInterval }]);
+
+            return true;
+        } catch (error) {
+            throw new Error(`Start error: ${error}`);
         };
     };
 };
