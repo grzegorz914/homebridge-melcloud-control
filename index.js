@@ -47,9 +47,14 @@ class MelCloudPlatform {
 				}
 				accountsName.push(accountName);
 
-				//debug config
+				//log config
 				const enableDebugMode = account.enableDebugMode || false;
-				const debug = enableDebugMode ? log.info(`${accountName}, did finish launching.`) : false;
+				const disableLogDeviceInfo = account.disableLogDeviceInfo || false;
+				const disableLogInfo = account.disableLogInfo || false;
+				const disableLogSuccess = account.disableLogSuccess || false;
+				const disableLogWarn = account.disableLogWarn || false;
+				const disableLogError = account.disableLogError || false;
+				const debug = enableDebugMode ? log.info(`Device: ${host} ${deviceName}, debug: Did finish launching.`) : false;
 
 				//remove sensitive data
 				const debugData = {
@@ -60,7 +65,7 @@ class MelCloudPlatform {
 						passwd: 'removed'
 					}
 				};
-				const debug1 = enableDebugMode ? log.info(`${accountName}, Config: ${JSON.stringify(debugData, null, 2)}`) : false;
+				const debug1 = !enableDebugMode ? false : log.info(`${accountName}, Config: ${JSON.stringify(debugData, null, 2)}`);
 
 				//define directory and file paths
 				const accountFile = `${prefDir}/${accountName}_Account`;
@@ -73,34 +78,41 @@ class MelCloudPlatform {
 				try {
 					//melcloud account
 					const melCloud = new MelCloud(user, passwd, language, accountFile, buildingsFile, devicesFile, enableDebugMode, false);
-					melCloud.on('success', (message) => {
-						log.success(`${accountName}, ${message}`);
+					melCloud.on('success', (success) => {
+						const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${success}`);
 					})
-						.on('message', (message) => {
-							log.info(`${accountName}, ${message}`);
+						.on('info', (info) => {
+							const emitLog = disableLogInfo ? false : log.info(`${accountName}, ${info}`);
 						})
 						.on('debug', (debug) => {
-							log.info(`${accountName}, debug: ${debug}`);
+							const emitLog = !enableDebugMode ? false : log.info(`${accountName}, debug: ${debug}`);
 						})
 						.on('warn', (warn) => {
-							log.warn(`${accountName}, ${warn}`);
+							const emitLog = disableLogWarn ? false : log.warn(`${accountName}, ${warn}`);
 						})
 						.on('error', (error) => {
-							log.error(`${accountName}, ${error}.`);
+							const emitLog = disableLogError ? false : log.error(`${accountName}, ${error}.`);
 						});
 
 					//connect
 					const response = await melCloud.connect();
-					const accountInfo = response.accountInfo;
-					const contextKey = response.contextKey;
-					const useFahrenheit = response.useFahrenheit;
+					const accountInfo = response.accountInfo ?? false;
+					const contextKey = response.contextKey ?? false;
+					const useFahrenheit = response.useFahrenheit ?? false;
+
+					if (contextKey === false) {
+						return;
+					}
 
 					//check devices list
 					const devices = await melCloud.chackDevicesList(contextKey);
+					if (devices === false) {
+						return;
+					}
 
 					//start impulse generator
 					const timers = [{ name: 'checkDevicesList', sampling: refreshInterval }];
-					melCloud.impulseGenerator.start(timers);
+					await melCloud.impulseGenerator.start(timers);
 
 					//Air Conditioner 0
 					try {
@@ -121,31 +133,31 @@ class MelCloudPlatform {
 
 								//publish device
 								api.publishExternalAccessories(PluginName, [accessory]);
-								log.success(`${accountName}, ${deviceTypeText} ${deviceName}, published as external accessory.`);
+								const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceTypeText} ${deviceName}, published as external accessory.`);
 							})
 								.on('devInfo', (devInfo) => {
-									log.info(devInfo);
+									const emitLog = disableLogDeviceInfo ? false : log.info(devInfo);
 								})
-								.on('success', (message) => {
-									log.success(`${accountName}, ${deviceTypeText}, ${deviceName}, ${message}`);
+								.on('success', (success) => {
+									const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceTypeText}, ${deviceName}, ${success}`);
 								})
-								.on('message', (message) => {
-									log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, ${message}`);
+								.on('info', (info) => {
+									const emitLog = disableLogInfo ? false : log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, ${info}`);
 								})
 								.on('debug', (debug) => {
-									log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, debug: ${debug}`);
+									const emitLog = !enableDebugMode ? false : log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, debug: ${debug}`);
 								})
 								.on('warn', (warn) => {
-									log.warn(`${accountName}, ${deviceTypeText}, ${deviceName}, ${warn}`);
+									const emitLog = disableLogWarn ? false : log.warn(`${accountName}, ${deviceTypeText}, ${deviceName}, ${warn}`);
 								})
 								.on('error', (error) => {
-									log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}`);
+									const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}`);
 								});
 
 							await airConditioner.start();
 						};
 					} catch (error) {
-						log.error(`${accountName}, ATA did finish launching error: ${error}`);
+						throw new Error(`${accountName}, ATA did finish launching error: ${error}.`);
 					}
 
 					//Heat Pump 1
@@ -167,31 +179,31 @@ class MelCloudPlatform {
 
 								//publish device
 								api.publishExternalAccessories(PluginName, [accessory]);
-								log.success(`${accountName}, ${deviceTypeText} ${deviceName}, published as external accessory.`);
+								const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceTypeText} ${deviceName}, published as external accessory.`);
 							})
 								.on('devInfo', (devInfo) => {
-									log.info(devInfo);
+									const emitLog = disableLogDeviceInfo ? false : log.info(devInfo);
 								})
-								.on('success', (message) => {
-									log.success(`${accountName}, ${deviceTypeText}, ${deviceName}, ${message}`);
+								.on('success', (success) => {
+									const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceTypeText}, ${deviceName}, ${success}`);
 								})
-								.on('message', (message) => {
-									log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, ${message}`);
+								.on('info', (info) => {
+									const emitLog = disableLogInfo ? false : log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, ${info}`);
 								})
 								.on('debug', (debug) => {
-									log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, debug: ${debug}`);
+									const emitLog = !enableDebugMode ? false : log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, debug: ${debug}`);
 								})
 								.on('warn', (warn) => {
-									log.warn(`${accountName}, ${deviceTypeText}, ${deviceName}, ${warn}`);
+									const emitLog = disableLogWarn ? false : log.warn(`${accountName}, ${deviceTypeText}, ${deviceName}, ${warn}`);
 								})
 								.on('error', (error) => {
-									log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}`);
+									const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}`);
 								});
 
 							await heatPump.start();
 						};
 					} catch (error) {
-						log.error(`${accountName}, ATW did finish launching error: ${error}`);
+						throw new Error(`${accountName}, ATE did finish launching error: ${error}.`);
 					}
 
 					//Energy Recovery Ventilation 3
@@ -213,34 +225,34 @@ class MelCloudPlatform {
 
 								//publish device
 								api.publishExternalAccessories(PluginName, [accessory]);
-								log.success(`${accountName}, ${deviceTypeText} ${deviceName}, published as external accessory.`);
+								const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceTypeText} ${deviceName}, published as external accessory.`);
 							})
 								.on('devInfo', (devInfo) => {
-									log.info(devInfo);
+									const emitLog = disableLogDeviceInfo ? false : log.info(devInfo);
 								})
-								.on('success', (message) => {
-									log.success(`${accountName}, ${deviceTypeText}, ${deviceName}, ${message}`);
+								.on('success', (success) => {
+									const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceTypeText}, ${deviceName}, ${success}`);
 								})
-								.on('message', (message) => {
-									log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, ${message}`);
+								.on('info', (info) => {
+									const emitLog = disableLogInfo ? false : log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, ${info}`);
 								})
 								.on('debug', (debug) => {
-									log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, debug: ${debug}`);
+									const emitLog = !enableDebugMode ? false : log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, debug: ${debug}`);
 								})
 								.on('warn', (warn) => {
-									log.warn(`${accountName}, ${deviceTypeText}, ${deviceName}, ${warn}`);
+									const emitLog = disableLogWarn ? false : log.warn(`${accountName}, ${deviceTypeText}, ${deviceName}, ${warn}`);
 								})
 								.on('error', (error) => {
-									log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}`);
+									const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}`);
 								});
 
 							await energyRecoveryVentilation.start();
 						};
 					} catch (error) {
-						log.error(`${accountName}, ERV did finish launching error: ${error}`);
+						throw new Error(`${accountName}, ERV did finish launching error: ${error}.`);
 					}
 				} catch (error) {
-					log.error(`${accountName}, did finish launching error: ${error}`);
+					throw new Error(`${accountName}, Account did finish launching error: ${error}.`);
 				}
 			};
 		});

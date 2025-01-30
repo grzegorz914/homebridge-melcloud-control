@@ -79,7 +79,7 @@ class MelCloud extends EventEmitter {
 
             if (contextKey === undefined || contextKey === null) {
                 this.emit('warn', `Context key: ${contextKey}, missing.`)
-                return;
+                return false;
             };
 
             //create axios instance post
@@ -144,7 +144,7 @@ class MelCloud extends EventEmitter {
 
             if (!buildingsList) {
                 this.emit('warn', `No building found.`);
-                return;
+                return false;
             }
 
             //save buildings to the file
@@ -170,7 +170,7 @@ class MelCloud extends EventEmitter {
             const devicesCount = devices.length;
             if (devicesCount === 0) {
                 this.emit('warn', `No devices found.`);
-                return;
+                return false;
             }
 
             //save buildings to the file

@@ -1370,19 +1370,19 @@ class DeviceAta extends EventEmitter {
                         this.emit('error', error);
                     };
                 })
-                .on('success', (message) => {
-                    this.emit('success', message);
+                .on('success', (success) => {
+                    this.emit('success', success);
                 })
-                .on('message', (message) => {
-                    this.emit('message', message);
+                .on('info', (info) => {
+                    this.emit('info', info);
                 })
                 .on('debug', (debug) => {
                     this.emit('debug', debug);
                 })
-                .on('warn', async (warn) => {
+                .on('warn', (warn) => {
                     this.emit('warn', warn);
                 })
-                .on('error', async (error) => {
+                .on('error', (error) => {
                     this.emit('error', error);
                 });
 

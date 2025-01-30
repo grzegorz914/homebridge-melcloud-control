@@ -10,7 +10,7 @@ class MelCloudErv extends EventEmitter {
         super();
         this.devicesFile = config.devicesFile;
         this.deviceId = config.deviceId;
-        this.debugLog = config.debugLog;
+        this.enableDebugMode = config.enableDebugMode;
 
         //set default values
         this.deviceState = {};
@@ -52,7 +52,7 @@ class MelCloudErv extends EventEmitter {
                 return;
             }
             const deviceData = devicesData.find(device => device.DeviceID === this.deviceId);
-            const debug = this.debugLog ? this.emit('debug', `Device Data: ${JSON.stringify(deviceData, null, 2)}`) : false;
+            const debug = this.enableDebugMode ? this.emit('debug', `Device Data: ${JSON.stringify(deviceData, null, 2)}`) : false;
 
             //deviceData
             const deviceId = deviceData.DeviceID;

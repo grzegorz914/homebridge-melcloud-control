@@ -16,6 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - do not configure it manually, always using Config UI X
   - required Homebridge v2.0.0 and above
 
+## [3.6.0] - (29.01.2025)
+
+## Changes
+
+- added possibility to disable/enable log success, info, warn, error
+- refactor cnnect code
+- bump dependencies
+- config schema updated
+- redme updated
+- cleanup
+
 ## [3.5.0] - (06.12.2024)
 
 ## Changes

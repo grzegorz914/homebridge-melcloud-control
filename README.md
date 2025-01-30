@@ -273,9 +273,12 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `buttonsSensors.displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Outlet`, `2 - Switch`, `3 - Motion Sensor`, `4 - Occupancy Sensor`, `5 - Contact Sensor`. |
 | `buttonsSensors.namePrefix` | Here enable/disable the accessory name as a prefix for button/sensor name. |
 | `refreshInterval` | Here set the background account data refresh time in (sec), default `120s`. |
-| `enableDebugMode` | This enable deep log in homebridge console. |
-| `disableLogInfo` | This disable display log values and states on every it change. |
-| `disableLogDeviceInfo` | This disable display log device info on plugin start. |
+| `disableLogDeviceInfo` | If enabled, add ability to disable log device info by every connections device to the network. |
+| `disableLogInfo` | If enabled, disable log info, all values and state will not be displayed in Homebridge log console. |
+| `disableLogSuccess` | If enabled, disable logging device success. |
+| `disableLogWarn` | If enabled, disable logging device warnings. |
+| `disableLogError` | If enabled, disable logging device error. |
+| `enableDebugMode` | If enabled, deep log will be present in homebridge console. |
 | `restFul` | This is RSTful server. |
 | `restFul.enable` | If enabled, RESTful server will start automatically and respond to any path request. |
 | `restFul.port` | Here set the listening `Port` for RESTful server. |

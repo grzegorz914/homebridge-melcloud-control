@@ -1543,25 +1543,41 @@
               "description": "Set the background account data refresh time in seconds.",
               "required": false
             },
-            "enableDebugMode": {
-              "title": "Debug",
+            "disableLogDeviceInfo": {
+              "title": "Disable Log Device Info",
               "type": "boolean",
               "default": false,
-              "description": "Enable debug mode.",
+              "description": "This disable logging device info by every connections device to the network.",
               "required": false
             },
             "disableLogInfo": {
               "title": "Disable Log Info",
               "type": "boolean",
               "default": false,
-              "description": "Don't display values and states in log every time info changes.",
               "required": false
             },
-            "disableLogDeviceInfo": {
-              "title": "Disable Log Device Info",
+            "disableLogSuccess": {
+              "title": "Disable Log Success",
               "type": "boolean",
               "default": false,
-              "description": "Don't display device info in log on plugin start.",
+              "required": false
+            },
+            "disableLogWarn": {
+              "title": "Disable Log Warn",
+              "type": "boolean",
+              "default": false,
+              "required": false
+            },
+            "disableLogError": {
+              "title": "Disable Log Error",
+              "type": "boolean",
+              "default": false,
+              "required": false
+            },
+            "enableDebugMode": {
+              "title": "Enable Log Debug",
+              "type": "boolean",
+              "default": false,
               "required": false
             },
             "restFul": {
@@ -2011,9 +2027,12 @@
                   "key": "accounts[]",
                   "title": "Log",
                   "items": [
-                    "accounts[].enableDebugMode",
+                    "accounts[].disableLogDeviceInfo",
                     "accounts[].disableLogInfo",
-                    "accounts[].disableLogDeviceInfo"
+                    "accounts[].disableLogSuccess",
+                    "accounts[].disableLogWarn",
+                    "accounts[].disableLogError",
+                    "accounts[].enableDebugMode"
                   ]
                 },
                 {
