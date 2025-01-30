@@ -35,10 +35,10 @@ class MelCloudAta extends EventEmitter {
             try {
                 await this.checkState();
             } catch (error) {
-                this.emit('error', `Impulse generator error: ${error}.`);
+                this.emit('error', `Impulse generator error: ${error}`);
             };
         }).on('state', (state) => {
-            const emitState = state ? this.emit('success', `Impulse generator started.`) : this.emit('warn', `Impulse generator stopped.`);
+            const emitState = state ? this.emit('success', `Impulse generator started`) : this.emit('warn', `Impulse generator stopped`);
         });
     };
 
@@ -48,8 +48,8 @@ class MelCloudAta extends EventEmitter {
             const devicesData = await this.readData(this.devicesFile);
 
             if (!Array.isArray(devicesData)) {
-                this.emit('warn', `Device data not found.`);
-                return;
+                this.emit('warn', `Device data not found`);
+                return false;
             }
             const deviceData = devicesData.find(device => device.DeviceID === this.deviceId);
             const debug = this.enableDebugMode ? this.emit('debug', `Device Data: ${JSON.stringify(deviceData, null, 2)}`) : false;
@@ -307,7 +307,7 @@ class MelCloudAta extends EventEmitter {
 
             //display info if units are not configured in MELCloud service
             if (unitsCount === 0) {
-                this.emit('warn', `Units are not configured in MELCloud service.`);
+                this.emit('warn', `Units are not configured in MELCloud service`);
             };
 
             const deviceState = {
@@ -340,8 +340,13 @@ class MelCloudAta extends EventEmitter {
             }
             this.deviceState = deviceState;
 
-            //external integrations
-            this.emit('externalIntegrations', deviceData);
+            //restFul
+            this.emit('restFul', 'info', deviceData);
+            this.emit('restFul', 'state', deviceData.Device);
+
+            //mqtt
+            this.emit('mqtt', 'Info', deviceData);
+            this.emit('mqtt', 'State', deviceData.Device);
 
             //emit info
             this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion);
@@ -349,7 +354,7 @@ class MelCloudAta extends EventEmitter {
             //emit state
             this.emit('deviceState', deviceData);
 
-            return true;
+            return deviceData;
         } catch (error) {
             throw new Error(`Check state error: ${error.message || error}`);
         };

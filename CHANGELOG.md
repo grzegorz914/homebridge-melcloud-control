@@ -16,6 +16,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - do not configure it manually, always using Config UI X
   - required Homebridge v2.0.0 and above
 
+## [3.6.1] - (29.01.2025)
+
+## Changes
+
+- refactor cnnect and reconnect code
+- refactor external integrations MQTT and RESTFul
+- update logging
+- cleanup
+
 ## [3.6.0] - (29.01.2025)
 
 ## Changes

@@ -63,7 +63,7 @@ class DeviceAta extends EventEmitter {
                 preset.previousSettings = {};
                 this.presetsConfigured.push(preset);
             } else {
-                const log = presetDisplayType === 0 ? false : this.emit('warn', `Preset Name: ${preset ? preset : 'Missing'}.`);
+                const log = presetDisplayType === 0 ? false : this.emit('warn', `Preset Name: ${preset ? preset : 'Missing'}`);
             };
         }
         this.presetsConfiguredCount = this.presetsConfigured.length || 0;
@@ -85,10 +85,13 @@ class DeviceAta extends EventEmitter {
                 button.previousValue = null;
                 this.buttonsConfigured.push(button);
             } else {
-                const log = buttonDisplayType === 0 ? false : this.emit('warn', `Button Name: ${buttonName ? buttonName : 'Missing'}, Mode: ${buttonMode ? buttonMode : 'Missing'}.`);
+                const log = buttonDisplayType === 0 ? false : this.emit('warn', `Button Name: ${buttonName ? buttonName : 'Missing'}, Mode: ${buttonMode ? buttonMode : 'Missing'}`);
             };
         }
         this.buttonsConfiguredCount = this.buttonsConfigured.length || 0;
+
+        //device data
+        this.deviceData = {};
 
         //accessory
         this.accessory = {};
@@ -172,6 +175,78 @@ class DeviceAta extends EventEmitter {
             return set;
         } catch (error) {
             throw new Error(`${integration} set key: ${key}, value: ${value}, error: ${error.message ?? error}`);
+        };
+    }
+
+    async externalIntegrations() {
+        try {
+            //RESTFul server
+            const restFulEnabled = this.restFul.enable || false;
+            if (restFulEnabled) {
+                if (!this.restFulConnected) {
+                    this.restFul1 = new RestFul({
+                        port: this.deviceId.slice(-4),
+                        debug: this.restFul.debug || false
+                    });
+
+                    this.restFul1.on('connected', (message) => {
+                        this.restFulConnected = true;
+                        this.emit('success', message);
+                    })
+                        .on('set', async (key, value) => {
+                            try {
+                                await this.setOverExternalIntegration('RESTFul', this.deviceData, key, value);
+                            } catch (error) {
+                                this.emit('warn', error);
+                            };
+                        })
+                        .on('debug', (debug) => {
+                            this.emit('debug', debug);
+                        })
+                        .on('error', (error) => {
+                            this.emit('warn', error);
+                        });
+                }
+            }
+
+            //MQTT client
+            const mqttEnabled = this.mqtt.enable || false;
+            if (mqttEnabled) {
+                if (!this.mqttConnected) {
+                    this.mqtt1 = new Mqtt({
+                        host: this.mqtt.host,
+                        port: this.mqtt.port || 1883,
+                        clientId: `${this.mqtt.clientId}_${this.deviceId}` || `${this.deviceTypeText}_${this.deviceName}_${this.deviceId}`,
+                        prefix: `${this.mqtt.prefix}/${this.deviceTypeText}/${this.deviceName}`,
+                        user: this.mqtt.user,
+                        passwd: this.mqtt.pass,
+                        debug: this.mqtt.debug || false
+                    });
+
+                    this.mqtt1.on('connected', (message) => {
+                        this.mqttConnected = true;
+                        this.emit('success', message);
+                    })
+                        .on('subscribed', (message) => {
+                            this.emit('success', message);
+                        })
+                        .on('set', async (key, value) => {
+                            try {
+                                await this.setOverExternalIntegration('MQTT', this.deviceData, key, value);
+                            } catch (error) {
+                                this.emit('warn', error);
+                            };
+                        })
+                        .on('debug', (debug) => {
+                            this.emit('debug', debug);
+                        })
+                        .on('error', (error) => {
+                            this.emit('warn', error);
+                        });
+                }
+            }
+        } catch (error) {
+            this.emit('warn', `External integration start error: ${error}`);
         };
     }
 
@@ -859,84 +934,11 @@ class DeviceAta extends EventEmitter {
                 contextKey: this.contextKey,
                 devicesFile: this.devicesFile,
                 deviceId: this.deviceId,
-                debugLog: this.enableDebugMode
+                enableDebugMode: this.enableDebugMode
             });
 
             this.melCloudAta.on('externalIntegrations', (deviceData) => {
-                try {
-                    //RESTFul server
-                    const restFulEnabled = this.restFul.enable || false;
-                    if (restFulEnabled) {
-                        if (!this.restFulConnected) {
-                            this.restFul1 = new RestFul({
-                                port: this.deviceId.slice(-4),
-                                debug: this.restFul.debug || false
-                            });
 
-                            this.restFul1.on('connected', (message) => {
-                                this.restFulConnected = true;
-                                this.emit('success', message);
-                            })
-                                .on('set', async (key, value) => {
-                                    try {
-                                        await this.setOverExternalIntegration('RESTFul', deviceData, key, value);
-                                    } catch (error) {
-                                        this.emit('warn', error);
-                                    };
-                                })
-                                .on('debug', (debug) => {
-                                    this.emit('debug', debug);
-                                })
-                                .on('error', (error) => {
-                                    this.emit('warn', error);
-                                });
-                        }
-                        const restFul0 = this.restFulConnected ? this.restFul1.update('info', deviceData) : false;
-                        const restFul1 = this.restFulConnected ? this.restFul1.update('state', deviceData.Device) : false;
-                    }
-
-                    //MQTT client
-                    const mqttEnabled = this.mqtt.enable || false;
-                    if (mqttEnabled) {
-                        if (!this.mqttConnected) {
-                            this.mqtt1 = new Mqtt({
-                                host: this.mqtt.host,
-                                port: this.mqtt.port || 1883,
-                                clientId: `${this.mqtt.clientId}_${this.deviceId}` || `${this.deviceTypeText}_${this.deviceName}_${this.deviceId}`,
-                                prefix: `${this.mqtt.prefix}/${this.deviceTypeText}/${this.deviceName}`,
-                                user: this.mqtt.user,
-                                passwd: this.mqtt.pass,
-                                debug: this.mqtt.debug || false
-                            });
-
-                            this.mqtt1.on('connected', (message) => {
-                                this.mqttConnected = true;
-                                this.emit('success', message);
-                            })
-                                .on('subscribed', (message) => {
-                                    this.emit('success', message);
-                                })
-                                .on('set', async (key, value) => {
-                                    try {
-                                        await this.setOverExternalIntegration('MQTT', deviceData, key, value);
-                                    } catch (error) {
-                                        this.emit('warn', error);
-                                    };
-                                })
-                                .on('debug', (debug) => {
-                                    this.emit('debug', debug);
-                                })
-                                .on('error', (error) => {
-                                    this.emit('warn', error);
-                                });
-                        }
-                        const mqtt0 = this.mqttConnected ? this.mqtt1.emit('publish', `Info`, deviceData) : false;
-                        const mqtt1 = this.mqttConnected ? this.mqtt1.emit('publish', `State`, deviceData.Device) : false;
-                    }
-
-                } catch (error) {
-                    this.emit('warn', `External integration start error: ${error}.`);
-                };
             })
                 .on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) => {
                     if (!this.displayDeviceInfo) {
@@ -961,7 +963,9 @@ class DeviceAta extends EventEmitter {
                     this.firmwareRevision = firmwareAppVersion;
                     this.displayDeviceInfo = false;
                 })
-                .on('deviceState', async (deviceData) => {
+                .on('deviceState', (deviceData) => {
+                    this.deviceData = deviceData;
+
                     //presets
                     const presetsOnServer = deviceData.Presets ?? [];
 
@@ -1328,7 +1332,7 @@ class DeviceAta extends EventEmitter {
                                     button.state = (prohibitSetTemperature === true);
                                     break;
                                 default: //Unknown button
-                                    this.emit('message', `Unknown button mode: ${mode} detected.`);
+                                    this.emit('message', `Unknown button mode: ${mode} detected`);
                                     break;
                             };
 
@@ -1357,18 +1361,6 @@ class DeviceAta extends EventEmitter {
                         this.emit('message', `Temperature display unit: ${this.accessory.temperatureUnit}`);
                         this.emit('message', `Lock physical controls: ${this.accessory.lockPhysicalControl ? 'LOCKED' : 'UNLOCKED'}`);
                     };
-
-                    //start prepare accessory
-                    if (!this.startPrepareAccessory) {
-                        return;
-                    }
-                    try {
-                        const accessory = await this.prepareAccessory(this.accountInfo, deviceData, this.deviceId, this.deviceTypeText, this.deviceName, this.accountName);
-                        this.emit('publishAccessory', accessory);
-                        this.startPrepareAccessory = false;
-                    } catch (error) {
-                        this.emit('error', error);
-                    };
                 })
                 .on('success', (success) => {
                     this.emit('success', success);
@@ -1384,13 +1376,33 @@ class DeviceAta extends EventEmitter {
                 })
                 .on('error', (error) => {
                     this.emit('error', error);
+                })
+                .on('restFul', (path, data) => {
+                    const restFul = this.restFulConnected ? this.restFul1.update(path, data) : false;
+                })
+                .on('mqtt', (topic, message) => {
+                    const mqtt = this.mqttConnected ? this.mqtt1.emit('publish', topic, message) : false;
                 });
 
-            //check state
-            await this.melCloudAta.checkState();
+            //start external integrations
+            const startExternalIntegrations = this.restFul.enable || this.mqtt.enable ? await this.externalIntegrations() : false;
 
-            //start impule generator
-            await this.melCloudAta.impulseGenerator.start([{ name: 'checkState', sampling: this.refreshInterval }]);
+            //check state
+            const deviceData = await this.melCloudAta.checkState();
+
+            if (deviceData === false) {
+                return false;
+            }
+
+            //prepare accessory
+            if (this.startPrepareAccessory) {
+                const accessory = await this.prepareAccessory(this.accountInfo, deviceData, this.deviceId, this.deviceTypeText, this.deviceName, this.accountName);
+                this.emit('publishAccessory', accessory);
+                this.startPrepareAccessory = false;
+
+                //start impule generator
+                await this.melCloudAta.impulseGenerator.start([{ name: 'checkState', sampling: this.refreshInterval }]);
+            }
 
             return true;
         } catch (error) {

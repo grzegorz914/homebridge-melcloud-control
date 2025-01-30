@@ -34,16 +34,16 @@ class MelCloud extends EventEmitter {
                 try {
                     await this.chackDevicesList(this.contextKey);
                 } catch (error) {
-                    this.emit('error', `Impulse generator error: ${error}.`);
+                    this.emit('error', `Impulse generator error: ${error}`);
                 };
             }).on('state', (state) => {
-                const emitState = state ? this.emit('success', `Impulse generator started.`) : this.emit('warn', `Impulse generator stopped.`);
+                const emitState = state ? this.emit('success', `Impulse generator started`) : this.emit('warn', `Impulse generator stopped`);
             });
         };
     };
 
     async connect() {
-        const debug = this.enableDebugMode ? this.emit('debug', `Connecting to MELCloud.`) : false;
+        const debug = this.enableDebugMode ? this.emit('debug', `Connecting to MELCloud`) : false;
 
         try {
             const axiosInstanceLogin = axios.create({
@@ -78,7 +78,7 @@ class MelCloud extends EventEmitter {
             const debug1 = this.enableDebugMode ? this.emit('debug', `MELCloud Info: ${JSON.stringify(debugData, null, 2)}`) : false;
 
             if (contextKey === undefined || contextKey === null) {
-                this.emit('warn', `Context key: ${contextKey}, missing.`)
+                this.emit('warn', `Context key: ${contextKey}, missing`)
                 return false;
             };
 
@@ -104,7 +104,7 @@ class MelCloud extends EventEmitter {
             await this.saveData(this.accountFile, accountInfo);
 
             //emit connect success
-            this.emit('success', `Connect to MELCloud Success.`)
+            this.emit('success', `Connect to MELCloud Success`)
 
             const obj = {
                 accountInfo: accountInfo,
@@ -114,7 +114,7 @@ class MelCloud extends EventEmitter {
 
             return obj;
         } catch (error) {
-            throw new Error(`Connect to MELCloud error: ${error.message || error}.`);
+            throw new Error(`Connect to MELCloud error: ${error.message || error}`);
         };
     }
 
@@ -137,19 +137,19 @@ class MelCloud extends EventEmitter {
                 })
             });
 
-            const debug = this.enableDebugMode ? this.emit('debug', `Scanning for devices.`) : false;
+            const debug = this.enableDebugMode ? this.emit('debug', `Scanning for devices`) : false;
             const listDevicesData = await axiosInstanceGet(ApiUrls.ListDevices);
             const buildingsList = listDevicesData.data;
             const debug1 = this.enableDebugMode ? this.emit('debug', `Buildings: ${JSON.stringify(buildingsList, null, 2)}`) : false;
 
             if (!buildingsList) {
-                this.emit('warn', `No building found.`);
+                this.emit('warn', `No building found`);
                 return false;
             }
 
             //save buildings to the file
             await this.saveData(this.buildingsFile, buildingsList);
-            const debug2 = this.enableDebugMode ? this.emit('debug', `Buildings list saved.`) : false;
+            const debug2 = this.enableDebugMode ? this.emit('debug', `Buildings list saved`) : false;
 
             //read buildings structure and get the devices
             const devices = [];
@@ -169,24 +169,24 @@ class MelCloud extends EventEmitter {
 
             const devicesCount = devices.length;
             if (devicesCount === 0) {
-                this.emit('warn', `No devices found.`);
+                this.emit('warn', `No devices found`);
                 return false;
             }
 
             //save buildings to the file
             await this.saveData(this.devicesFile, devices);
-            const debug3 = this.enableDebugMode ? this.emit('debug', `${devicesCount} devices saved.`) : false;
+            const debug3 = this.enableDebugMode ? this.emit('debug', `${devicesCount} devices saved`) : false;
 
             return devices;
         } catch (error) {
-            throw new Error(`Check devices list error: ${error.message || error}.`);
+            throw new Error(`Check devices list error: ${error.message || error}`);
         };
     }
 
     async saveData(path, data) {
         try {
             await fsPromises.writeFile(path, JSON.stringify(data, null, 2));
-            const debug3 = this.enableDebugMode ? this.emit('debug', `Data saved to: ${path}.`) : false;
+            const debug3 = this.enableDebugMode ? this.emit('debug', `Data saved to: ${path}`) : false;
             return true;
         } catch (error) {
             throw new Error(`Save data error: ${error.message || error}`);
