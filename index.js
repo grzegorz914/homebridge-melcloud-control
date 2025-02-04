@@ -55,7 +55,7 @@ class MelCloudPlatform {
 				const disableLogSuccess = account.disableLogSuccess || false;
 				const disableLogWarn = account.disableLogWarn || false;
 				const disableLogError = account.disableLogError || false;
-				const debug = enableDebugMode ? log.info(`Device: ${host} ${deviceName}, debug: Did finish launching.`) : false;
+				const debug = enableDebugMode ? log.info(`${accountName}, debug: Did finish launching.`) : false;
 
 				//remove sensitive data
 				const debugData = {
