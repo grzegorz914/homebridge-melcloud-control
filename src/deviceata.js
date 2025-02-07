@@ -250,6 +250,16 @@ class DeviceAta extends EventEmitter {
         };
     }
 
+    async startImpulseGenerator() {
+        try {
+            //start impule generator
+            await this.melCloudAta.impulseGenerator.start([{ name: 'checkState', sampling: this.refreshInterval }]);
+            return true;
+        } catch (error) {
+            throw new Error(`Impulse generator start error: ${error}`);
+        };
+    }
+
     //prepare accessory
     async prepareAccessory(accountInfo, deviceData, deviceId, deviceTypeText, deviceName, accountName) {
         try {
@@ -1399,9 +1409,6 @@ class DeviceAta extends EventEmitter {
                 const accessory = await this.prepareAccessory(this.accountInfo, deviceData, this.deviceId, this.deviceTypeText, this.deviceName, this.accountName);
                 this.emit('publishAccessory', accessory);
                 this.startPrepareAccessory = false;
-
-                //start impule generator
-                await this.melCloudAta.impulseGenerator.start([{ name: 'checkState', sampling: this.refreshInterval }]);
             }
 
             return true;

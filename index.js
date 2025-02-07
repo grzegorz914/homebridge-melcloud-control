@@ -112,8 +112,7 @@ class MelCloudPlatform {
 					}
 
 					//start impulse generator
-					const timers = [{ name: 'checkDevicesList', sampling: refreshInterval }];
-					await melCloud.impulseGenerator.start(timers);
+					await melCloud.impulseGenerator.start([{ name: 'checkDevicesList', sampling: refreshInterval }]);
 
 					//Air Conditioner 0
 					try {
@@ -161,6 +160,9 @@ class MelCloudPlatform {
 								try {
 									const startDone = await airConditioner.start();
 									const stopImpulseGenerator = startDone ? await impulseGenerator.stop() : false;
+
+									//start impulse generator 
+									const startImpulseGenerator = startDone ? await airConditioner.startImpulseGenerator() : false
 								} catch (error) {
 									const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}, trying again.`);
 								};
@@ -221,6 +223,9 @@ class MelCloudPlatform {
 								try {
 									const startDone = await heatPump.start();
 									const stopImpulseGenerator = startDone ? await impulseGenerator.stop() : false;
+
+									//start impulse generator 
+									const startImpulseGenerator = startDone ? await heatPump.startImpulseGenerator() : false
 								} catch (error) {
 									const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}, trying again.`);
 								};
@@ -281,6 +286,9 @@ class MelCloudPlatform {
 								try {
 									const startDone = await energyRecoveryVentilation.start();
 									const stopImpulseGenerator = startDone ? await impulseGenerator.stop() : false;
+
+									//start impulse generator 
+									const startImpulseGenerator = startDone ? await energyRecoveryVentilation.startImpulseGenerator() : false
 								} catch (error) {
 									const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}, trying again.`);
 								};
