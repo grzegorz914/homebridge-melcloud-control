@@ -117,6 +117,7 @@ class MelCloudPlatform {
 					//Air Conditioner 0
 					try {
 						const ataDevices = account.ataDevices ?? [];
+						const emitLog = !enableDebugMode ? false : log.info(`Found configured ATA devices: ${ataDevices.length}.`);
 						for (const device of ataDevices) {
 							//chack device from config exist on melcloud
 							const deviceId = device.id;
@@ -181,6 +182,7 @@ class MelCloudPlatform {
 					//Heat Pump 1
 					try {
 						const atwDevices = account.atwDevices ?? [];
+						const emitLog = !enableDebugMode ? false : log.info(`Found configured ATW devices: ${atwDevices.length}.`);
 						for (const device of atwDevices) {
 							//chack device from config exist on melcloud
 							const deviceId = device.id;
@@ -245,6 +247,7 @@ class MelCloudPlatform {
 					//Energy Recovery Ventilation 3
 					try {
 						const ervDevices = account.ervDevices ?? [];
+						const emitLog = !enableDebugMode ? false : log.info(`Found configured ERV devices: ${ervDevices.length}.`);
 						for (const device of ervDevices) {
 							//chack device from config exist on melcloud
 							const deviceId = device.id;
