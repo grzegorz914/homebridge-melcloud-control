@@ -297,7 +297,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 ### RESTful Integration
 
 * Port: last 4 numbers of `device Id`, displayed in HB log during start.
-* POST data as a JSON Object `{OperationMode: 8}`, content type must be `application/json`
+* POST data as a JSON Object `{OperationMode: 8}`.
+* Header content type must be `application/json`.
 
 | Method | URL | Path | Response | Type |
 | --- | --- | --- | --- | --- |
