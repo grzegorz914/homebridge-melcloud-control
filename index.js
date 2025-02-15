@@ -321,5 +321,5 @@ class MelCloudPlatform {
 };
 
 export default (api) => {
-	api.registerPlatform(PluginName, PlatformName, MelCloudPlatform, true);
+	api.registerPlatform(PluginName, PlatformName, MelCloudPlatform);
 };
