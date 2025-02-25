@@ -97,6 +97,78 @@ class DeviceErv extends EventEmitter {
         this.accessory.temperatureUnit = TemperatureDisplayUnits[this.accessory.useFahrenheit];
     };
 
+    async externalIntegrations() {
+        try {
+            //RESTFul server
+            const restFulEnabled = this.restFul.enable || false;
+            if (restFulEnabled) {
+                if (!this.restFulConnected) {
+                    this.restFul1 = new RestFul({
+                        port: this.deviceId.slice(-4),
+                        debug: this.restFul.debug || false
+                    });
+
+                    this.restFul1.on('connected', (message) => {
+                        this.restFulConnected = true;
+                        this.emit('success', message);
+                    })
+                        .on('set', async (key, value) => {
+                            try {
+                                await this.setOverExternalIntegration('RESTFul', this.deviceData, key, value);
+                            } catch (error) {
+                                this.emit('warn', error);
+                            };
+                        })
+                        .on('debug', (debug) => {
+                            this.emit('debug', debug);
+                        })
+                        .on('error', (error) => {
+                            this.emit('warn', error);
+                        });
+                }
+            }
+
+            //MQTT client
+            const mqttEnabled = this.mqtt.enable || false;
+            if (mqttEnabled) {
+                if (!this.mqttConnected) {
+                    this.mqtt1 = new Mqtt({
+                        host: this.mqtt.host,
+                        port: this.mqtt.port || 1883,
+                        clientId: `${this.mqtt.clientId}_${this.deviceId}` || `${this.deviceTypeText}_${this.deviceName}_${this.deviceId}`,
+                        prefix: `${this.mqtt.prefix}/${this.deviceTypeText}/${this.deviceName}`,
+                        user: this.mqtt.user,
+                        passwd: this.mqtt.pass,
+                        debug: this.mqtt.debug || false
+                    });
+
+                    this.mqtt1.on('connected', (message) => {
+                        this.mqttConnected = true;
+                        this.emit('success', message);
+                    })
+                        .on('subscribed', (message) => {
+                            this.emit('success', message);
+                        })
+                        .on('set', async (key, value) => {
+                            try {
+                                await this.setOverExternalIntegration('MQTT', this.deviceData, key, value);
+                            } catch (error) {
+                                this.emit('warn', error);
+                            };
+                        })
+                        .on('debug', (debug) => {
+                            this.emit('debug', debug);
+                        })
+                        .on('error', (error) => {
+                            this.emit('warn', error);
+                        });
+                }
+            }
+        } catch (error) {
+            this.emit('warn', `External integration start error: ${error}`);
+        };
+    }
+
     async setOverExternalIntegration(integration, deviceData, key, value) {
         try {
             let set = false
