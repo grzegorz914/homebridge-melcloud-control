@@ -1600,16 +1600,6 @@
                     "functionBody": "return model.accounts[arrayIndices].restFul.enable === true;"
                   },
                   "required": false
-                },
-                "port": {
-                  "title": "Port",
-                  "type": "integer",
-                  "placeholder": 3000,
-                  "description": "Here set the listening Port for RESTful server.",
-                  "condition": {
-                    "functionBody": "return model.accounts[arrayIndices].restFul.enable === true;"
-                  },
-                  "required": false
                 }
               }
             },

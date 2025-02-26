@@ -281,7 +281,6 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `enableDebugMode` | If enabled, deep log will be present in homebridge console. |
 | `restFul` | This is RSTful server. |
 | `restFul.enable` | If enabled, RESTful server will start automatically and respond to any path request. |
-| `restFul.port` | Here set the listening `Port` for RESTful server. |
 | `restFul.debug` | If enabled, deep log will be present in homebridge console for RESTFul server. |
 | `mqtt` | This is MQTT Broker. |
 | `mqtt.enable` | If enabled, MQTT Broker will start automatically and publish all awailable PV data. |

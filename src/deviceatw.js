@@ -6,7 +6,7 @@ import { TemperatureDisplayUnits, HeatPump } from './constants.js';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceAtw extends EventEmitter {
-    constructor(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, refreshInterval, useFahrenheit) {
+    constructor(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, refreshInterval, useFahrenheit, restFul, mqtt) {
         super();
 
         Accessory = api.platformAccessory;
@@ -43,9 +43,9 @@ class DeviceAtw extends EventEmitter {
         this.displayDeviceInfo = true;
 
         //external integrations
-        this.restFul = account.restFul ?? {};
+        this.restFul = restFul;
         this.restFulConnected = false;
-        this.mqtt = account.mqtt ?? {};
+        this.mqtt = mqtt;
         this.mqttConnected = false;
 
         //function

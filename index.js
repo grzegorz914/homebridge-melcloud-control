@@ -48,6 +48,10 @@ class MelCloudPlatform {
 				}
 				accountsName.push(accountName);
 
+				//external integrations
+				const restFul = account.restFul ?? {};
+				const mqtt = account.mqtt ?? {};
+
 				//log config
 				const enableDebugMode = account.enableDebugMode || false;
 				const disableLogDeviceInfo = account.disableLogDeviceInfo || false;
@@ -130,7 +134,7 @@ class MelCloudPlatform {
 							const deviceName = device.name;
 							const deviceTypeText = device.typeString;
 							const deviceRefreshInterval = device.refreshInterval * 1000 || 5000;
-							const airConditioner = new DeviceAta(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit)
+							const airConditioner = new DeviceAta(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit, restFul, mqtt)
 							airConditioner.on('publishAccessory', (accessory) => {
 
 								//publish device
@@ -195,7 +199,7 @@ class MelCloudPlatform {
 							const deviceName = device.name;
 							const deviceTypeText = device.typeString;
 							const deviceRefreshInterval = device.refreshInterval * 1000 || 5000;
-							const heatPump = new DeviceAtw(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit)
+							const heatPump = new DeviceAtw(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit, restFul, mqtt)
 							heatPump.on('publishAccessory', (accessory) => {
 
 								//publish device
@@ -260,7 +264,7 @@ class MelCloudPlatform {
 							const deviceName = device.name;
 							const deviceTypeText = device.typeString;
 							const deviceRefreshInterval = device.refreshInterval * 1000 || 5000;
-							const energyRecoveryVentilation = new DeviceErv(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit)
+							const energyRecoveryVentilation = new DeviceErv(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit, restFul, mqtt)
 							energyRecoveryVentilation.on('publishAccessory', (accessory) => {
 
 								//publish device
