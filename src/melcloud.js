@@ -21,7 +21,7 @@ class MelCloud extends EventEmitter {
                 Email: user,
                 Password: passwd,
                 Language: language,
-                AppVersion: '1.31.0',
+                AppVersion: '1.34.12',
                 CaptchaChallenge: '',
                 CaptchaResponse: '',
                 Persist: true
@@ -79,7 +79,7 @@ class MelCloud extends EventEmitter {
 
             if (contextKey === undefined || contextKey === null) {
                 this.emit('warn', `Context key: ${contextKey}, missing`)
-                return false;
+                return null;
             };
 
             //create axios instance post
@@ -114,7 +114,7 @@ class MelCloud extends EventEmitter {
 
             return obj;
         } catch (error) {
-            throw new Error(`Connect to MELCloud error: ${error.message || error}`);
+            throw new Error(`Connect to MELCloud error: ${error}`);
         };
     }
 
@@ -144,7 +144,7 @@ class MelCloud extends EventEmitter {
 
             if (!buildingsList) {
                 this.emit('warn', `No building found`);
-                return false;
+                return null;
             }
 
             //save buildings to the file
@@ -170,7 +170,7 @@ class MelCloud extends EventEmitter {
             const devicesCount = devices.length;
             if (devicesCount === 0) {
                 this.emit('warn', `No devices found`);
-                return false;
+                return null;
             }
 
             //save buildings to the file
@@ -179,7 +179,7 @@ class MelCloud extends EventEmitter {
 
             return devices;
         } catch (error) {
-            throw new Error(`Check devices list error: ${error.message || error}`);
+            throw new Error(`Check devices list error: ${error}`);
         };
     }
 
@@ -189,7 +189,7 @@ class MelCloud extends EventEmitter {
             const debug3 = this.enableDebugMode ? this.emit('debug', `Data saved to: ${path}`) : false;
             return true;
         } catch (error) {
-            throw new Error(`Save data error: ${error.message || error}`);
+            throw new Error(`Save data error: ${error}`);
         }
     }
 
@@ -203,7 +203,7 @@ class MelCloud extends EventEmitter {
             await this.saveData(this.accountFile, accountInfo);
             return true;
         } catch (error) {
-            throw new Error(`Send data error: ${error.message || error}`);
+            throw new Error(`Send data error: ${error}`);
         };
     };
 };

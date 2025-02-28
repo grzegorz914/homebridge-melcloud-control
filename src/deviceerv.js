@@ -853,7 +853,7 @@ class DeviceErv extends EventEmitter {
 
             return accessory;
         } catch (error) {
-            throw new Error(`Prepare accessory error: ${error.message || error}`);
+            throw new Error(`Prepare accessory error: ${error}`);
         };
     };
 
@@ -1266,7 +1266,7 @@ class DeviceErv extends EventEmitter {
             const deviceData = await this.melCloudErv.checkState();
 
             if (deviceData === false) {
-                return false;
+                return null;
             }
 
             //prepare accessory

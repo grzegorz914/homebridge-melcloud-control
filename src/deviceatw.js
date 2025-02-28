@@ -1290,7 +1290,7 @@ class DeviceAtw extends EventEmitter {
 
             return accessory;
         } catch (error) {
-            throw new Error(`Prepare accessory error: ${error.message || error}`);
+            throw new Error(`Prepare accessory error: ${error}`);
         };
     };
 
@@ -1944,7 +1944,7 @@ class DeviceAtw extends EventEmitter {
             const deviceData = await this.melCloudAtw.checkState();
 
             if (deviceData === false) {
-                return false;
+                return null;
             }
 
             //prepare accessory

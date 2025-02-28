@@ -49,7 +49,7 @@ class MelCloudErv extends EventEmitter {
 
             if (!Array.isArray(devicesData)) {
                 this.emit('warn', `Device data not found`);
-                return false;
+                return null;
             }
             const deviceData = devicesData.find(device => device.DeviceID === this.deviceId);
             const debug = this.enableDebugMode ? this.emit('debug', `Device Data: ${JSON.stringify(deviceData, null, 2)}`) : false;
@@ -344,17 +344,25 @@ class MelCloudErv extends EventEmitter {
 
             return deviceData;
         } catch (error) {
-            throw new Error(`Check state error: ${error.message || error}`);
+            throw new Error(`Check state error: ${error}`);
         };
     };
 
     async readData(path) {
         try {
             const savedData = await fsPromises.readFile(path)
-            const data = savedData.length > 0 ? JSON.parse(savedData) : false;
-            return data;;
+            if (savedData.toString().trim().length === 0) {
+                return null;
+            }
+
+            try {
+                const data = JSON.parse(savedData);
+                return data;
+            } catch (error) {
+                throw new Error(`Parse JSON error: ${error}`);
+            }
         } catch (error) {
-            throw new Error(`Read data error: ${error.message || error}`);
+            throw new Error(`Read data error: ${error}`);
         }
     }
 
@@ -404,7 +412,7 @@ class MelCloudErv extends EventEmitter {
             this.updateData(deviceData);
             return true;
         } catch (error) {
-            throw new Error(`Send data error: ${error.message || error}`);
+            throw new Error(`Send data error: ${error}`);
         };
     };
 
