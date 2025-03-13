@@ -211,6 +211,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ataDevices.id` | Read only data, do not change it. |
 | `ataDevices.type` | Read only data, do not change it. |
 | `ataDevices.typeString` | Read only data, do not change it. |
+| `ataDevices.disableAccessory` | If enabled, the accessory will be disabled. |
 | `ataDevices.name` | Here You can schange the `Accessory Name` which is exposed to the `Homebridge/HomeKit`. |
 | `ataDevices.displayMode` | Here select device control mode `None/Disabled`, `Heater/Cooler`, `Thermostat`. |
 | `ataDevices.heatDryFanMode` | Here select the operatiing mode for `Heat`, if this mode is not supported, it will be disabled. |
@@ -232,6 +233,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `atwDevices.id` | Read only data, do not change it. |
 | `atwDevices.type` | Read only data, do not change it. |
 | `atwDevices.typeString` | Read only data, do not change it. |
+| `atwDevices.disableAccessory` | If enabled, the accessory will be disabled. |
 | `atwDevices.name` | Here You can schange the `Accessory Name` which is exposed to the `Homebridge/HomeKit`. |
 | `atwDevices.displayMode` | Here select main control mode `None/Disabled`, `Heater/Cooler`, `Thermostat`. |
 | `atwDevices.temperatureSensor` | This enable extra `Room` temperature sensors to use with automations in HomeKit app. |
@@ -257,6 +259,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ervDevices.id` | Read only data, do not change it. |
 | `ervDevices.type` | Read only data, do not change it. |
 | `ervDevices.typeString` | Read only data, do not change it. |
+| `ervDevices.disableAccessory` | If enabled, the accessory will be disabled. |
 | `ervDevices.name` | Here You can schange the `Accessory Name` which is exposed to the `Homebridge/HomeKit`. |
 | `ervDevices.displayMode` | Here select main control mode `None/Disabled`, `Heater/Cooler`, `Thermostat`. |
 | `ervDevices.temperatureSensor` | This enable extra `Room` temperature sensors to use with automations in HomeKit app. |

@@ -232,6 +232,13 @@
                     "required": false,
                     "readonly": true
                   },
+                  "disableAccessory": {
+                    "title": "Disable Accessory",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Here You can disable this accessory.",
+                    "required": false
+                  },
                   "name": {
                     "title": "Name",
                     "type": "string",
@@ -794,6 +801,13 @@
                     "required": false,
                     "readonly": true
                   },
+                  "disableAccessory": {
+                    "title": "Disable Accessory",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Here You can disable this accessory.",
+                    "required": false
+                  },
                   "name": {
                     "title": "Name",
                     "type": "string",
@@ -1221,6 +1235,13 @@
                     "default": "Ventilation",
                     "required": false,
                     "readonly": true
+                  },
+                  "disableAccessory": {
+                    "title": "Disable Accessory",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Here You can disable this accessory.",
+                    "required": false
                   },
                   "name": {
                     "title": "Name",
@@ -1737,6 +1758,7 @@
                       "key": "accounts[].ataDevices[].typeString",
                       "readonly": true
                     },
+                    "accounts[].ataDevices[].disableAccessory",
                     {
                       "key": "accounts[].ataDevices[]",
                       "type": "section",
@@ -1750,7 +1772,10 @@
                         "accounts[].ataDevices[].coolDryFanMode",
                         "accounts[].ataDevices[].autoDryFanMode",
                         "accounts[].ataDevices[].refreshInterval"
-                      ]
+                      ],
+                      "condition": {
+                        "functionBody": "return model.accounts[arrayIndices].ataDevices[arrayIndices].disableAccessory === false;"
+                      }
                     },
                     {
                       "key": "accounts[].ataDevices[]",
@@ -1773,7 +1798,10 @@
                             "accounts[].ataDevices[].presets[].namePrefix"
                           ]
                         }
-                      ]
+                      ],
+                      "condition": {
+                        "functionBody": "return model.accounts[arrayIndices].ataDevices[arrayIndices].disableAccessory === false;"
+                      }
                     },
                     {
                       "key": "accounts[].ataDevices[]",
@@ -1784,7 +1812,10 @@
                       "items": [
                         "accounts[].ataDevices[].temperatureSensor",
                         "accounts[].ataDevices[].temperatureSensorOutdoor"
-                      ]
+                      ],
+                      "condition": {
+                        "functionBody": "return model.accounts[arrayIndices].ataDevices[arrayIndices].disableAccessory === false;"
+                      }
                     },
                     {
                       "key": "accounts[].ataDevices[]",
@@ -1804,7 +1835,10 @@
                             "accounts[].ataDevices[].buttonsSensors[].namePrefix"
                           ]
                         }
-                      ]
+                      ],
+                      "condition": {
+                        "functionBody": "return model.accounts[arrayIndices].ataDevices[arrayIndices].disableAccessory === false;"
+                      }
                     }
                   ]
                 }
@@ -1827,6 +1861,7 @@
                       "key": "accounts[].atwDevices[].typeString",
                       "readonly": true
                     },
+                    "accounts[].ataDevices[].disableAccessory",
                     {
                       "key": "accounts[].atwDevices[]",
                       "type": "section",
@@ -1837,7 +1872,10 @@
                         "accounts[].atwDevices[].name",
                         "accounts[].atwDevices[].displayMode",
                         "accounts[].atwDevices[].refreshInterval"
-                      ]
+                      ],
+                      "condition": {
+                        "functionBody": "return model.accounts[arrayIndices].atwDevices[arrayIndices].disableAccessory === false;"
+                      }
                     },
                     {
                       "key": "accounts[].atwDevices[]",
@@ -1860,7 +1898,10 @@
                             "accounts[].atwDevices[].presets[].namePrefix"
                           ]
                         }
-                      ]
+                      ],
+                      "condition": {
+                        "functionBody": "return model.accounts[arrayIndices].atwDevices[arrayIndices].disableAccessory === false;"
+                      }
                     },
                     {
                       "key": "accounts[].atwDevices[]",
@@ -1878,7 +1919,10 @@
                         "accounts[].atwDevices[].temperatureSensorReturnWaterTank",
                         "accounts[].atwDevices[].temperatureSensorFlowZone2",
                         "accounts[].atwDevices[].temperatureSensorReturnZone2"
-                      ]
+                      ],
+                      "condition": {
+                        "functionBody": "return model.accounts[arrayIndices].atwDevices[arrayIndices].disableAccessory === false;"
+                      }
                     },
                     {
                       "key": "accounts[].atwDevices[]",
@@ -1898,7 +1942,10 @@
                             "accounts[].atwDevices[].buttonsSensors[].namePrefix"
                           ]
                         }
-                      ]
+                      ],
+                      "condition": {
+                        "functionBody": "return model.accounts[arrayIndices].atwDevices[arrayIndices].disableAccessory === false;"
+                      }
                     }
                   ]
                 }
@@ -1921,6 +1968,7 @@
                       "key": "accounts[].ervDevices[].typeString",
                       "readonly": true
                     },
+                    "accounts[].ataDevices[].disableAccessory",
                     {
                       "key": "accounts[].ervDevices[]",
                       "type": "section",
@@ -1931,7 +1979,10 @@
                         "accounts[].ervDevices[].name",
                         "accounts[].ervDevices[].displayMode",
                         "accounts[].ervDevices[].refreshInterval"
-                      ]
+                      ],
+                      "condition": {
+                        "functionBody": "return model.accounts[arrayIndices].ervDevices[arrayIndices].disableAccessory === false;"
+                      }
                     },
                     {
                       "key": "accounts[].ervDevices[]",
@@ -1954,7 +2005,10 @@
                             "accounts[].ervDevices[].presets[].namePrefix"
                           ]
                         }
-                      ]
+                      ],
+                      "condition": {
+                        "functionBody": "return model.accounts[arrayIndices].ervDevices[arrayIndices].disableAccessory === false;"
+                      }
                     },
                     {
                       "key": "accounts[].ervDevices[]",
@@ -1966,7 +2020,10 @@
                         "accounts[].ervDevices[].temperatureSensor",
                         "accounts[].ervDevices[].temperatureSensorOutdoor",
                         "accounts[].ervDevices[].temperatureSensorSupply"
-                      ]
+                      ],
+                      "condition": {
+                        "functionBody": "return model.accounts[arrayIndices].ervDevices[arrayIndices].disableAccessory === false;"
+                      }
                     },
                     {
                       "key": "accounts[].ervDevices[]",
@@ -1986,7 +2043,10 @@
                             "accounts[].ervDevices[].buttonsSensors[].namePrefix"
                           ]
                         }
-                      ]
+                      ],
+                      "condition": {
+                        "functionBody": "return model.accounts[arrayIndices].ervDevices[arrayIndices].disableAccessory === false;"
+                      }
                     }
                   ]
                 }
