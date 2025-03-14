@@ -124,15 +124,9 @@ class MelCloudPlatform {
 						const emitLog = !enableDebugMode ? false : log.info(`Found configured ATA devices: ${ataDevices.length}.`);
 						for (const device of ataDevices) {
 
-							//check accessory is enabled
-							const disableAccessory = device.disableAccessory || false;
-							if (disableAccessory) {
-								continue;
-							}
-
 							//chack device from config exist on melcloud
 							const deviceId = device.id;
-							const displayMode = device.displayMode > 0 ?? false;
+							const displayMode = device.displayMode > 0;
 							const deviceExistInMelCloud = devices.some(dev => dev.DeviceID === deviceId);
 							if (!deviceExistInMelCloud || !displayMode) {
 								continue;
@@ -196,15 +190,9 @@ class MelCloudPlatform {
 						const emitLog = !enableDebugMode ? false : log.info(`Found configured ATW devices: ${atwDevices.length}.`);
 						for (const device of atwDevices) {
 
-							//check accessory is enabled
-							const disableAccessory = device.disableAccessory || false;
-							if (disableAccessory) {
-								continue;
-							}
-
 							//chack device from config exist on melcloud
 							const deviceId = device.id;
-							const displayMode = device.displayMode > 0 ?? false;
+							const displayMode = device.displayMode > 0;
 							const deviceExistInMelCloud = devices.some(dev => dev.DeviceID === deviceId);
 							if (!deviceExistInMelCloud || !displayMode) {
 								continue;
@@ -268,15 +256,9 @@ class MelCloudPlatform {
 						const emitLog = !enableDebugMode ? false : log.info(`Found configured ERV devices: ${ervDevices.length}.`);
 						for (const device of ervDevices) {
 
-							//check accessory is enabled
-							const disableAccessory = device.disableAccessory || false;
-							if (disableAccessory) {
-								continue;
-							}
-
 							//chack device from config exist on melcloud
 							const deviceId = device.id;
-							const displayMode = device.displayMode > 0 ?? false;
+							const displayMode = device.displayMode > 0;
 							const deviceExistInMelCloud = devices.some(dev => dev.DeviceID === deviceId);
 							if (!deviceExistInMelCloud || !displayMode) {
 								continue;

@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - do not configure it manually, always using Config UI X
   - required Homebridge v2.0.0 and above
 
+## [3.7.1] - (14.03.2025)
+
+## Changes
+
+- removed possibility to disable indyvidual accessory due to duplicated function with displayMode
+
 ## [3.7.0] - (13.03.2025)
 
 ## Changes

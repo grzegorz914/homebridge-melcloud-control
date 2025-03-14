@@ -232,13 +232,6 @@
                     "required": false,
                     "readonly": true
                   },
-                  "disableAccessory": {
-                    "title": "Disable Accessory",
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Here You can disable this accessory.",
-                    "required": false
-                  },
                   "name": {
                     "title": "Name",
                     "type": "string",
@@ -801,13 +794,6 @@
                     "required": false,
                     "readonly": true
                   },
-                  "disableAccessory": {
-                    "title": "Disable Accessory",
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Here You can disable this accessory.",
-                    "required": false
-                  },
                   "name": {
                     "title": "Name",
                     "type": "string",
@@ -1235,13 +1221,6 @@
                     "default": "Ventilation",
                     "required": false,
                     "readonly": true
-                  },
-                  "disableAccessory": {
-                    "title": "Disable Accessory",
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Here You can disable this accessory.",
-                    "required": false
                   },
                   "name": {
                     "title": "Name",
@@ -1758,7 +1737,7 @@
                       "key": "accounts[].ataDevices[].typeString",
                       "readonly": true
                     },
-                    "accounts[].ataDevices[].disableAccessory",
+                    "accounts[].ataDevices[].displayMode",
                     {
                       "key": "accounts[].ataDevices[]",
                       "type": "section",
@@ -1767,7 +1746,6 @@
                       "expanded": false,
                       "items": [
                         "accounts[].ataDevices[].name",
-                        "accounts[].ataDevices[].displayMode",
                         "accounts[].ataDevices[].heatDryFanMode",
                         "accounts[].ataDevices[].coolDryFanMode",
                         "accounts[].ataDevices[].autoDryFanMode",
@@ -1861,7 +1839,7 @@
                       "key": "accounts[].atwDevices[].typeString",
                       "readonly": true
                     },
-                    "accounts[].ataDevices[].disableAccessory",
+                    "accounts[].atwDevices[].displayMode",
                     {
                       "key": "accounts[].atwDevices[]",
                       "type": "section",
@@ -1870,7 +1848,6 @@
                       "expanded": false,
                       "items": [
                         "accounts[].atwDevices[].name",
-                        "accounts[].atwDevices[].displayMode",
                         "accounts[].atwDevices[].refreshInterval"
                       ],
                       "condition": {
@@ -1968,7 +1945,7 @@
                       "key": "accounts[].ervDevices[].typeString",
                       "readonly": true
                     },
-                    "accounts[].ataDevices[].disableAccessory",
+                    "accounts[].ervDevices[].displayMode",
                     {
                       "key": "accounts[].ervDevices[]",
                       "type": "section",
@@ -1977,7 +1954,6 @@
                       "expanded": false,
                       "items": [
                         "accounts[].ervDevices[].name",
-                        "accounts[].ervDevices[].displayMode",
                         "accounts[].ervDevices[].refreshInterval"
                       ],
                       "condition": {
