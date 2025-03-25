@@ -110,7 +110,7 @@ class DeviceAtw extends EventEmitter {
             if (restFulEnabled) {
                 if (!this.restFulConnected) {
                     this.restFul1 = new RestFul({
-                        port: this.deviceId.slice(-4),
+                        port: this.deviceId.toString().slice(-4).replace(/^0/, '9'),
                         debug: this.restFul.debug || false
                     });
 
