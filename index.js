@@ -181,7 +181,7 @@ class MelCloudPlatform {
 							await impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
 						};
 					} catch (error) {
-						throw new Error(`${accountName}, ATA did finish launching error: ${error}.`);
+						const emitLog = disableLogError ? false : log.error(`${accountName}, ATA did finish launching error: ${error}.`);
 					}
 
 					//Heat Pump 1
@@ -247,7 +247,7 @@ class MelCloudPlatform {
 							await impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
 						};
 					} catch (error) {
-						throw new Error(`${accountName}, ATE did finish launching error: ${error}.`);
+						const emitLog = disableLogError ? false : log.error(`${accountName}, ATE did finish launching error: ${error}.`);
 					}
 
 					//Energy Recovery Ventilation 3
@@ -313,10 +313,10 @@ class MelCloudPlatform {
 							await impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
 						};
 					} catch (error) {
-						throw new Error(`${accountName}, ERV did finish launching error: ${error}.`);
+						const emitLog = disableLogError ? false : log.error(`${accountName}, ERV did finish launching error: ${error}.`);
 					}
 				} catch (error) {
-					throw new Error(`${accountName}, Account did finish launching error: ${error}.`);
+					const emitLog = disableLogError ? false : log.error(`${accountName}, Account did finish launching error: ${error}.`);
 				}
 			};
 		});
