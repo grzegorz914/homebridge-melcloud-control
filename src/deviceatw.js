@@ -17,7 +17,12 @@ class DeviceAtw extends EventEmitter {
 
         //account config
         this.displayMode = device.displayMode;
-        this.temperatureSensor = device.temperatureSensor || false;
+	    this.includeZones = [
+            device.includeZone1 ?? true, //unsure if these are named correctly.
+            device.includeZone2 ?? true, //unsure if these are named correctly.
+            device.includeHotWater ?? true //this is named correctly for a Mitsubishi Ecodan with FTC-6
+        ];
+	    this.temperatureSensor = device.temperatureSensor || false;
         this.temperatureSensorFlow = device.temperatureSensorFlow || false;
         this.temperatureSensorReturn = device.temperatureSensorReturn || false;
         this.temperatureSensorFlowZone1 = device.temperatureSensorFlowZone1 || false;
@@ -636,6 +641,7 @@ class DeviceAtw extends EventEmitter {
                         accessory.addService(melCloudService);
                         break;
                     case 2: //Thermostat
+			if (!this.includeZones[i]) break;  // Skip this zone if not included
                         const debug3 = this.enableDebugMode ? this.emit('debug', `Prepare thermostat ${zoneName} service`) : false;
                         const melCloudServiceT = new Service.Thermostat(serviceName, `Thermostat ${deviceId} ${i}`);
                         melCloudServiceT.getCharacteristic(Characteristic.CurrentHeatingCoolingState)

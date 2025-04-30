@@ -829,6 +829,24 @@
                     "description": "Select device control mode displayed in HomeKit app.",
                     "required": true
                   },
+                  "includeZone1": {
+                    "title": "Include Zone 1",
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show or hide Zone 1 thermostat."
+                  },
+                  "includeZone2": {
+                    "title": "Include Zone 2", 
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show or hide Zone 2 thermostat."
+                  },
+                  "includeHotWater": {
+                    "title": "Include Hot Water", 
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show or hide Hot Water thermostat."
+                  },
                   "temperatureSensor": {
                     "title": "Temperature Sensor Room",
                     "type": "boolean",
@@ -1829,17 +1847,20 @@
                     },
                     "accounts[].atwDevices[].displayMode",
                     {
-                      "key": "accounts[].atwDevices[]",
-                      "type": "section",
-                      "title": "Settings",
-                      "expandable": true,
-                      "expanded": false,
-                      "items": [
-                        "accounts[].atwDevices[].name",
-                        "accounts[].atwDevices[].refreshInterval"
-                      ]
-                    },
-                    {
+  "key": "accounts[].atwDevices[]",
+  "type": "section",
+  "title": "Settings",
+  "expandable": true,
+  "expanded": false,
+  "items": [
+    "accounts[].atwDevices[].name",
+    "accounts[].atwDevices[].refreshInterval",
+    "accounts[].atwDevices[].includeZone1",
+    "accounts[].atwDevices[].includeZone2",
+    "accounts[].atwDevices[].includeHotWater"
+  ]
+},
+{
                       "key": "accounts[].atwDevices[]",
                       "type": "section",
                       "title": "Presets",
