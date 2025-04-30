@@ -1137,10 +1137,93 @@ class DeviceAta extends EventEmitter {
                                     .updateCharacteristic(Characteristic.LockPhysicalControls, this.accessory.lockPhysicalControl)
                                     .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.accessory.useFahrenheit)
                                     .updateCharacteristic(Characteristic.CoolingThresholdTemperature, defaultCoolingSetTemperature);
-                                const updateDefHeat = modelSupportsHeat ? this.melCloudService.updateCharacteristic(Characteristic.HeatingThresholdTemperature, defaultHeatingSetTemperature) : false;
-                                const updateRS = modelSupportsFanSpeed ? this.melCloudService.updateCharacteristic(Characteristic.RotationSpeed, this.accessory.fanSpeed) : false;
-                                const updateSM = swingFunction ? this.melCloudService.updateCharacteristic(Characteristic.SwingMode, this.accessory.swingMode) : false;
-                            };
+
+                                if (modelSupportsHeat) {
+                                    this.melCloudService.updateCharacteristic(Characteristic.HeatingThresholdTemperature, defaultHeatingSetTemperature);
+                                }
+                                if (modelSupportsFanSpeed) {
+                                    this.melCloudService.updateCharacteristic(Characteristic.RotationSpeed, this.accessory.fanSpeed);
+                                }
+                                if (swingFunction) {
+                                    this.melCloudService.updateCharacteristic(Characteristic.SwingMode, this.accessory.swingMode);
+                                }
+                            } else {
+                                this.emit('warn', 'melCloudService is undefined.');
+                            }
+
+                            if (this.roomTemperatureSensorService) {
+                                this.roomTemperatureSensorService.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature);
+                            } else {
+                                this.emit('warn', 'Room temperature sensor service is undefined.');
+                            }
+
+                            if (this.outdoorTemperatureSensorService) {
+                                this.outdoorTemperatureSensorService.updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature);
+                            } else {
+                                this.emit('warn', 'Outdoor temperature sensor service is undefined.');
+                            }
+
+                            if (this.presetsConfigured.length > 0) {
+                                for (let i = 0; i < this.presetsConfigured.length; i++) {
+                                    const preset = this.presetsConfigured[i];
+                                    const presetData = presetsOnServer.find(p => p.ID === preset.Id);
+
+                                    preset.state = presetData ? (presetData.Power === power
+                                        && presetData.SetTemperature === setTemperature
+                                        && presetData.OperationMode === operationMode
+                                        && presetData.VaneHorizontal === vaneHorizontalDirection
+                                        && presetData.VaneVertical === vaneVerticalDirection
+                                        && presetData.FanSpeed === fanSpeed) : false;
+
+                                    if (this.presetsServices && this.presetsServices[i]) {
+                                        const characteristicType = preset.characteristicType;
+                                        this.presetsServices[i].updateCharacteristic(characteristicType, preset.state);
+                                    } else {
+                                        this.emit('warn', `Preset service at index ${i} is undefined.`);
+                                    }
+                                }
+                            }
+
+                            if (this.buttonsConfiguredCount > 0) {
+                                for (let i = 0; i < this.buttonsConfiguredCount; i++) {
+                                    const button = this.buttonsConfigured[i];
+                                    const mode = button.mode;
+
+                                    switch (mode) {
+                                        case 0: // POWER ON, OFF
+                                            button.state = (power === true);
+                                            break;
+                                        case 1: // OPERATING MODE HEAT
+                                            button.state = power ? (operationMode === 1 || operationMode === 9) : false;
+                                            break;
+                                        case 2: // OPERATING MODE DRY
+                                            button.state = power ? (operationMode === 2 || operationMode === 10) : false;
+                                            break;
+                                        case 3: // OPERATING MODE COOL
+                                            button.state = power ? (operationMode === 3 || operationMode === 11) : false;
+                                            break;
+                                        case 4: // OPERATING MODE FAN
+                                            button.state = power ? (operationMode === 7) : false;
+                                            break;
+                                        case 5: // OPERATING MODE AUTO
+                                            button.state = power ? (operationMode === 8) : false;
+                                            break;
+                                        case 6: // OPERATING MODE PURIFY
+                                            button.state = power ? (operationMode === 12) : false;
+                                            break;
+                                        default: // Unknown button
+                                            this.emit('warn', `Unknown button mode: ${mode} detected`);
+                                            break;
+                                    }
+
+                                    if (this.buttonsServices && this.buttonsServices[i]) {
+                                        const characteristicType = button.characteristicType;
+                                        this.buttonsServices[i].updateCharacteristic(characteristicType, button.state);
+                                    } else {
+                                        this.emit('warn', `Button service at index ${i} is undefined.`);
+                                    }
+                                }
+                            }
                             break;
                         case 2: //Thermostat
                             switch (operationMode) {

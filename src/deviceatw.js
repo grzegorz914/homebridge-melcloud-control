@@ -1549,7 +1549,7 @@ class DeviceAtw extends EventEmitter {
                                 };
 
                                 //update characteristics
-                                if (this.melCloudServices) {
+                                if (this.melCloudServices && this.melCloudServices[i]) {
                                     this.melCloudServices[i]
                                         .updateCharacteristic(Characteristic.Active, power)
                                         .updateCharacteristic(Characteristic.CurrentHeaterCoolerState, currentOperationMode)
@@ -1557,8 +1557,13 @@ class DeviceAtw extends EventEmitter {
                                         .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                                         .updateCharacteristic(Characteristic.LockPhysicalControls, lockPhysicalControl)
                                         .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.accessory.useFahrenheit);
-                                    const updateDefCool = heatCoolModes === 0 || heatCoolModes === 2 ? this.melCloudServices[i].updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature) : false;
-                                    const updateDefHeat = heatCoolModes === 0 || heatCoolModes === 1 ? this.melCloudServices[i].updateCharacteristic(Characteristic.HeatingThresholdTemperature, setTemperature) : false;
+
+                                    if (heatCoolModes === 0 || heatCoolModes === 2) {
+                                        this.melCloudServices[i].updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature);
+                                    }
+                                    if (heatCoolModes === 0 || heatCoolModes === 1) {
+                                        this.melCloudServices[i].updateCharacteristic(Characteristic.HeatingThresholdTemperature, setTemperature);
+                                    }
                                 }
                                 break;
                             case 2: //Thermostat

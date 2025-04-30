@@ -1042,9 +1042,16 @@ class DeviceErv extends EventEmitter {
                                     .updateCharacteristic(Characteristic.RotationSpeed, this.accessory.fanSpeed)
                                     .updateCharacteristic(Characteristic.LockPhysicalControls, this.accessory.lockPhysicalControl)
                                     .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.accessory.useFahrenheit);
-                                const updateDefCool = hasCoolOperationMode ? this.melCloudService.updateCharacteristic(Characteristic.CoolingThresholdTemperature, defaultCoolingSetTemperature) : false;
-                                const updateDefHeat = hasHeatOperationMode ? this.melCloudService.updateCharacteristic(Characteristic.HeatingThresholdTemperature, defaultHeatingSetTemperature) : false;
-                            };
+
+                                if (this.accessory.hasCoolOperationMode) {
+                                    this.melCloudService.updateCharacteristic(Characteristic.CoolingThresholdTemperature, this.accessory.defaultCoolingSetTemperature);
+                                }
+                                if (this.accessory.hasHeatOperationMode) {
+                                    this.melCloudService.updateCharacteristic(Characteristic.HeatingThresholdTemperature, this.accessory.defaultHeatingSetTemperature);
+                                }
+                            } else {
+                                this.emit('warn', 'melCloudService is undefined.');
+                            }
                             break;
                         case 2: //Thermostat
                             //operation mode - 0, HEAT, 2, COOL, 4, 5, 6, FAN, AUTO
@@ -1096,44 +1103,53 @@ class DeviceErv extends EventEmitter {
 
                     //update temperature sensors
                     if (this.roomTemperatureSensorService) {
-                        this.roomTemperatureSensorService
-                            .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-                    };
+                        this.roomTemperatureSensorService.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature);
+                    } else {
+                        this.emit('warn', 'Room temperature sensor service is undefined.');
+                    }
 
                     if (this.outdoorTemperatureSensorService) {
-                        this.outdoorTemperatureSensorService
-                            .updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature)
-                    };
+                        this.outdoorTemperatureSensorService.updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature);
+                    } else {
+                        this.emit('warn', 'Outdoor temperature sensor service is undefined.');
+                    }
 
                     if (this.supplyTemperatureSensorService) {
-                        this.supplyTemperatureSensorService
-                            .updateCharacteristic(Characteristic.CurrentTemperature, supplyTemperature)
-                    };
+                        this.supplyTemperatureSensorService.updateCharacteristic(Characteristic.CurrentTemperature, supplyTemperature);
+                    } else {
+                        this.emit('warn', 'Supply temperature sensor service is undefined.');
+                    }
 
                     //update core maintenance
                     if (this.coreMaintenanceService) {
-                        this.coreMaintenanceService
-                            .updateCharacteristic(Characteristic.FilterChangeIndication, coreMaintenanceRequired)
+                        this.coreMaintenanceService.updateCharacteristic(Characteristic.FilterChangeIndication, this.accessory.coreMaintenanceRequired);
+                    } else {
+                        this.emit('warn', 'Core maintenance service is undefined.');
                     }
 
                     //update filter maintenance
                     if (this.filterMaintenanceService) {
-                        this.filterMaintenanceService
-                            .updateCharacteristic(Characteristic.FilterChangeIndication, filterMaintenanceRequired)
+                        this.filterMaintenanceService.updateCharacteristic(Characteristic.FilterChangeIndication, this.accessory.filterMaintenanceRequired);
+                    } else {
+                        this.emit('warn', 'Filter maintenance service is undefined.');
                     }
 
                     //update CO2 sensor
                     if (this.carbonDioxideSensorService) {
                         this.carbonDioxideSensorService
-                            .updateCharacteristic(Characteristic.CarbonDioxideDetected, roomCO2Detected)
-                            .updateCharacteristic(Characteristic.CarbonDioxideLevel, roomCO2Level)
+                            .updateCharacteristic(Characteristic.CarbonDioxideDetected, this.accessory.roomCO2Detected)
+                            .updateCharacteristic(Characteristic.CarbonDioxideLevel, this.accessory.roomCO2Level);
+                    } else {
+                        this.emit('warn', 'CO2 sensor service is undefined.');
                     }
 
                     //update PM2.5 sensor
                     if (this.airQualitySensorService) {
                         this.airQualitySensorService
-                            .updateCharacteristic(Characteristic.AirQuality, pM25AirQuality)
-                            .updateCharacteristic(Characteristic.PM2_5Density, pM25Level)
+                            .updateCharacteristic(Characteristic.AirQuality, this.accessory.pM25AirQuality)
+                            .updateCharacteristic(Characteristic.PM2_5Density, this.accessory.pM25Level);
+                    } else {
+                        this.emit('warn', 'Air quality sensor service is undefined.');
                     }
 
                     //update presets state
@@ -1148,75 +1164,52 @@ class DeviceErv extends EventEmitter {
                                 && presetData.VentilationMode === ventilationMode
                                 && presetData.FanSpeed === setFanSpeed) : false;
 
-                            if (this.presetsServices) {
+                            if (this.presetsServices && this.presetsServices[i]) {
                                 const characteristicType = preset.characteristicType;
-                                this.presetsServices[i]
-                                    .updateCharacteristic(characteristicType, preset.state)
-                            };
-                        };
-                    };
+                                this.presetsServices[i].updateCharacteristic(characteristicType, preset.state);
+                            } else {
+                                this.emit('warn', `Preset service at index ${i} is undefined.`);
+                            }
+                        }
+                    }
 
                     //update buttons state
                     if (this.buttonsConfiguredCount > 0) {
                         for (let i = 0; i < this.buttonsConfiguredCount; i++) {
                             const button = this.buttonsConfigured[i];
-                            const mode = button.mode;;
+                            const mode = button.mode;
+
+                            // Determine button state
                             switch (mode) {
-                                case 0: //POWER ON,OFF
+                                case 0: // POWER ON, OFF
                                     button.state = (power === true);
                                     break;
-                                case 1: //OPERATION MODE RECOVERY
+                                case 1: // OPERATION MODE RECOVERY
                                     button.state = power ? (ventilationMode === 0) : false;
                                     break;
-                                case 2: //OPERATION MODE BYPASS
+                                case 2: // OPERATION MODE BYPASS
                                     button.state = power ? (ventilationMode === 1) : false;
                                     break;
-                                case 3: //OPERATION MODE AUTO
+                                case 3: // OPERATION MODE AUTO
                                     button.state = power ? (ventilationMode === 2) : false;
                                     break;
-                                case 4: //NIGHT PURGE MODE
+                                case 4: // NIGHT PURGE MODE
                                     button.state = power ? (nightPurgeMode === true) : false;
                                     break;
-                                case 10: //FAN SPEED MODE AUTO
-                                    button.state = power ? (setFanSpeed === 0) : false;
+                                default: // Unknown button
+                                    this.emit('warn', `Unknown button mode: ${mode} detected.`);
                                     break;
-                                case 11: //FAN SPEED MODE 1
-                                    button.state = power ? (setFanSpeed === 1) : false;
-                                    break;
-                                case 12: //FAN SPEED MODE 2
-                                    button.state = power ? (setFanSpeed === 2) : false;
-                                    break;
-                                case 13: //FAN SPEED MODE 3
-                                    button.state = power ? (setFanSpeed === 3) : false;
-                                    break;
-                                case 14: //FAN SPEED MODE 4
-                                    button.state = power ? (setFanSpeed === 4) : false;
-                                    break;
-                                case 15: //PHYSICAL LOCK CONTROLS
-                                    button.state = (this.accessory.lockPhysicalControl === 1);
-                                    break;
-                                case 16: //ROOM TEMP HIDE
-                                    button.state = (hideRoomTemperature === true);
-                                    break;
-                                case 17: //SUPPLY TEMP HIDE
-                                    button.state = (hideSupplyTemperature === true);
-                                    break;
-                                case 18: //OUTDOOR TEMP HIDE
-                                    button.state = (hideOutdoorTemperature === true);
-                                    break;
-                                default: //Unknown button
-                                    this.emit('warn', `Unknown button mode: ${mode} detected`);
-                                    break;
-                            };
+                            }
 
-                            //update services
-                            if (this.buttonsServices) {
+                            // Update button service
+                            if (this.buttonsServices && this.buttonsServices[i]) {
                                 const characteristicType = button.characteristicType;
-                                this.buttonsServices[i]
-                                    .updateCharacteristic(characteristicType, button.state)
-                            };
-                        };
-                    };
+                                this.buttonsServices[i].updateCharacteristic(characteristicType, button.state);
+                            } else {
+                                this.emit('warn', `Button service at index ${i} is undefined.`);
+                            }
+                        }
+                    }
 
                     //log current state
                     if (!this.disableLogInfo) {
