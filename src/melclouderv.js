@@ -342,7 +342,7 @@ class MelCloudErv extends EventEmitter {
             //emit state 
             this.emit('deviceState', deviceData);
 
-            return deviceData;
+            return true;
         } catch (error) {
             throw new Error(`Check state error: ${error}`);
         };

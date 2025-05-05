@@ -169,7 +169,7 @@ class MelCloudPlatform {
 									const stopImpulseGenerator = startDone ? await impulseGenerator.stop() : false;
 
 									//start impulse generator 
-									const startImpulseGenerator = startDone ? await airConditioner.startImpulseGenerator() : false
+									const startImpulseGenerator = stopImpulseGenerator ? await airConditioner.startImpulseGenerator() : false
 								} catch (error) {
 									const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}, trying again.`);
 								};
@@ -235,7 +235,7 @@ class MelCloudPlatform {
 									const stopImpulseGenerator = startDone ? await impulseGenerator.stop() : false;
 
 									//start impulse generator 
-									const startImpulseGenerator = startDone ? await heatPump.startImpulseGenerator() : false
+									const startImpulseGenerator = stopImpulseGenerator ? await heatPump.startImpulseGenerator() : false
 								} catch (error) {
 									const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}, trying again.`);
 								};
@@ -247,7 +247,7 @@ class MelCloudPlatform {
 							await impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
 						};
 					} catch (error) {
-						const emitLog = disableLogError ? false : log.error(`${accountName}, ATE did finish launching error: ${error}.`);
+						const emitLog = disableLogError ? false : log.error(`${accountName}, ATW did finish launching error: ${error}.`);
 					}
 
 					//Energy Recovery Ventilation 3
@@ -301,7 +301,7 @@ class MelCloudPlatform {
 									const stopImpulseGenerator = startDone ? await impulseGenerator.stop() : false;
 
 									//start impulse generator 
-									const startImpulseGenerator = startDone ? await energyRecoveryVentilation.startImpulseGenerator() : false
+									const startImpulseGenerator = stopImpulseGenerator ? await energyRecoveryVentilation.startImpulseGenerator() : false
 								} catch (error) {
 									const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}, trying again.`);
 								};

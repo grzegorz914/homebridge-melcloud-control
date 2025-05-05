@@ -50,43 +50,38 @@ class DeviceAta extends EventEmitter {
         //presets configured
         this.presetsConfigured = [];
         for (const preset of this.presets) {
-            const presetName = preset.name ?? false;
-            const presetDisplayType = preset.displayType ?? 0;
-            const presetNamePrefix = preset.namePrefix ?? false;
-            if (presetName && presetDisplayType > 0) {
-                const presetyServiceType = ['', Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][presetDisplayType];
-                const presetCharacteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][presetDisplayType];
-                preset.namePrefix = presetNamePrefix;
-                preset.serviceType = presetyServiceType;
-                preset.characteristicType = presetCharacteristicType;
-                preset.state = false;
-                preset.previousSettings = {};
-                this.presetsConfigured.push(preset);
-            } else {
-                const log = presetDisplayType === 0 ? false : this.emit('warn', `Preset Name: ${preset ? preset : 'Missing'}`);
+            const displayType = preset.displayType ?? 0;
+            if (displayType === 0) {
+                continue;
             };
+
+            const presetyServiceType = ['', Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][displayType];
+            const presetCharacteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][displayType];
+            preset.name = preset.name || 'Preset'
+            preset.serviceType = presetyServiceType;
+            preset.characteristicType = presetCharacteristicType;
+            preset.state = false;
+            preset.previousSettings = {};
+            this.presetsConfigured.push(preset);
         }
         this.presetsConfiguredCount = this.presetsConfigured.length || 0;
 
         //buttons configured
         this.buttonsConfigured = [];
         for (const button of this.buttons) {
-            const buttonName = button.name ?? false;
-            const buttonMode = button.mode ?? -1;
-            const buttonDisplayType = button.displayType ?? 0;
-            const buttonNamePrefix = button.namePrefix ?? false;
-            if (buttonName && buttonMode >= 0 && buttonDisplayType > 0) {
-                const buttonServiceType = ['', Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][buttonDisplayType];
-                const buttonCharacteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][buttonDisplayType];
-                button.namePrefix = buttonNamePrefix;
-                button.serviceType = buttonServiceType;
-                button.characteristicType = buttonCharacteristicType;
-                button.state = false;
-                button.previousValue = null;
-                this.buttonsConfigured.push(button);
-            } else {
-                const log = buttonDisplayType === 0 ? false : this.emit('warn', `Button Name: ${buttonName ? buttonName : 'Missing'}, Mode: ${buttonMode ? buttonMode : 'Missing'}`);
+            const displayType = button.displayType ?? 0;
+            if (displayType === 0) {
+                continue;
             };
+
+            const buttonServiceType = ['', Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][displayType];
+            const buttonCharacteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][displayType];
+            button.name = button.name || 'Button'
+            button.serviceType = buttonServiceType;
+            button.characteristicType = buttonCharacteristicType;
+            button.state = false;
+            button.previousValue = null;
+            this.buttonsConfigured.push(button);;
         }
         this.buttonsConfiguredCount = this.buttonsConfigured.length || 0;
 
@@ -253,6 +248,7 @@ class DeviceAta extends EventEmitter {
     async startImpulseGenerator() {
         try {
             //start impule generator
+            await new Promise(resolve => setTimeout(resolve, 1000));
             await this.melCloudAta.impulseGenerator.start([{ name: 'checkState', sampling: this.refreshInterval }]);
             return true;
         } catch (error) {
@@ -281,7 +277,7 @@ class DeviceAta extends EventEmitter {
             const debug = this.enableDebugMode ? this.emit('debug', `Prepare accessory`) : false;
             const accessoryName = deviceName;
             const accessoryUUID = AccessoryUUID.generate(accountName + deviceId.toString());
-            const accessoryCategory = Categories.AIR_CONDITIONER;
+            const accessoryCategory = [Categories.OTHER, Categories.AIR_HEATER, Categories.THERMOSTAT][this.displayType];
             const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 
             //information service
@@ -299,6 +295,7 @@ class DeviceAta extends EventEmitter {
                 case 1: //Heater Cooler
                     const debug = this.enableDebugMode ? this.emit('debug', `Prepare heater/cooler service`) : false;
                     this.melCloudService = new Service.HeaterCooler(serviceName, `HeaterCooler ${deviceId}`);
+                    this.melCloudService.setPrimaryService(true);
                     this.melCloudService.getCharacteristic(Characteristic.Active)
                         .onGet(async () => {
                             const state = this.accessory.power;
@@ -499,6 +496,7 @@ class DeviceAta extends EventEmitter {
                 case 2: //Thermostat
                     const debug1 = this.enableDebugMode ? this.emit('debug', `Prepare thermostat service`) : false;
                     this.melCloudService = new Service.Thermostat(serviceName, `Thermostat ${deviceId}`);
+                    this.melCloudService.setPrimaryService(true);
                     this.melCloudService.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
                         .onGet(async () => {
                             const value = this.accessory.currentOperationMode;
@@ -630,18 +628,16 @@ class DeviceAta extends EventEmitter {
             if (this.presetsConfiguredCount > 0) {
                 const debug = this.enableDebugMode ? this.emit('debug', `Prepare presets services`) : false;
                 this.presetsServices = [];
-
-                for (let i = 0; i < this.presetsConfiguredCount; i++) {
-                    const preset = this.presetsConfigured[i];
+                this.presetsConfigured.forEach((preset, i) => {
                     const presetData = presetsOnServer.find(p => p.ID === preset.Id);
 
                     //get preset name
-                    const presetName = preset.name;
+                    const name = preset.name;
 
                     //get preset name prefix
-                    const presetNamePrefix = preset.namePrefix;
+                    const namePrefix = preset.namePrefix;
 
-                    const serviceName = presetNamePrefix ? `${accessoryName} ${presetName}` : presetName;
+                    const serviceName = namePrefix ? `${accessoryName} ${name}` : name;
                     const serviceType = preset.serviceType;
                     const characteristicType = preset.characteristicType;
                     const presetService = new serviceType(serviceName, `Preset ${deviceId} ${i}`);
@@ -677,34 +673,31 @@ class DeviceAta extends EventEmitter {
                                 };
 
                                 await this.melCloudAta.send(deviceData, this.displayMode);
-                                const info = this.disableLogInfo ? false : this.emit('message', `${state ? 'Set:' : 'Unset:'} ${presetName}`);
+                                const info = this.disableLogInfo ? false : this.emit('message', `${state ? 'Set:' : 'Unset:'} ${name}`);
                             } catch (error) {
                                 this.emit('warn', `Set preset error: ${error}`);
                             };
                         });
                     this.presetsServices.push(presetService);
                     accessory.addService(presetService);
-                };
+                });
             };
 
             //buttons services
             if (this.buttonsConfiguredCount > 0) {
                 const debug = this.enableDebugMode ? this.emit('debug', `Prepare buttons/sensors services`) : false;
                 this.buttonsServices = [];
-
-                for (let i = 0; i < this.buttonsConfiguredCount; i++) {
-                    const button = this.buttonsConfigured[i];
-
+                this.buttonsConfigured.forEach((button, i) => {
                     //get button mode
                     const mode = button.mode;
 
                     //get button name
-                    const buttonName = button.name;
+                    const name = button.name;
 
                     //get button name prefix
-                    const buttonNamePrefix = button.namePrefix;
+                    const namePrefix = button.namePrefix;
 
-                    const serviceName = buttonNamePrefix ? `${accessoryName} ${buttonName}` : buttonName;
+                    const serviceName = namePrefix ? `${accessoryName} ${name}` : name;
                     const serviceType = button.serviceType;
                     const characteristicType = button.characteristicType;
                     const buttonService = new serviceType(serviceName, `Button ${deviceId} ${i}`);
@@ -920,14 +913,14 @@ class DeviceAta extends EventEmitter {
                                 };
 
                                 await this.melCloudAta.send(deviceData, this.displayMode);
-                                const info = this.disableLogInfo ? false : this.emit('message', `${state ? `Set: ${buttonName}` : `Unset: ${buttonName}, Set: ${button.previousValue}`}`);
+                                const info = this.disableLogInfo ? false : this.emit('message', `${state ? `Set: ${name}` : `Unset: ${name}, Set: ${button.previousValue}`}`);
                             } catch (error) {
                                 this.emit('warn', `Set button error: ${error}`);
                             };
                         });
                     this.buttonsServices.push(buttonService);
                     accessory.addService(buttonService);
-                };
+                });
             };
 
             return accessory;
@@ -973,7 +966,7 @@ class DeviceAta extends EventEmitter {
                     this.firmwareRevision = firmwareAppVersion;
                     this.displayDeviceInfo = false;
                 })
-                .on('deviceState', (deviceData) => {
+                .on('deviceState', async (deviceData) => {
                     this.deviceData = deviceData;
 
                     //presets
@@ -1211,8 +1204,7 @@ class DeviceAta extends EventEmitter {
 
                     //update presets state
                     if (this.presetsConfigured.length > 0) {
-                        for (let i = 0; i < this.presetsConfigured.length; i++) {
-                            const preset = this.presetsConfigured[i];
+                        this.presetsConfigured.forEach((preset, i) => {
                             const presetData = presetsOnServer.find(p => p.ID === preset.Id);
 
                             preset.state = presetData ? (presetData.Power === power
@@ -1227,13 +1219,12 @@ class DeviceAta extends EventEmitter {
                                 this.presetsServices[i]
                                     .updateCharacteristic(characteristicType, preset.state)
                             };
-                        };
+                        });
                     };
 
                     //update buttons state
                     if (this.buttonsConfiguredCount > 0) {
-                        for (let i = 0; i < this.buttonsConfiguredCount; i++) {
-                            const button = this.buttonsConfigured[i];
+                        this.buttonsConfigured.forEach((button, i) => {
                             const mode = button.mode;
                             switch (mode) {
                                 case 0: //POWER ON,OFF
@@ -1352,7 +1343,7 @@ class DeviceAta extends EventEmitter {
                                 this.buttonsServices[i]
                                     .updateCharacteristic(characteristicType, button.state)
                             };
-                        };
+                        });
                     };
 
                     //log current state
@@ -1371,6 +1362,13 @@ class DeviceAta extends EventEmitter {
                         this.emit('message', `Temperature display unit: ${this.accessory.temperatureUnit}`);
                         this.emit('message', `Lock physical controls: ${this.accessory.lockPhysicalControl ? 'LOCKED' : 'UNLOCKED'}`);
                     };
+
+                    //prepare accessory
+                    if (this.startPrepareAccessory) {
+                        const accessory = await this.prepareAccessory(this.accountInfo, deviceData, this.deviceId, this.deviceTypeText, this.deviceName, this.accountName);
+                        this.emit('publishAccessory', accessory);
+                        this.startPrepareAccessory = false;
+                    }
                 })
                 .on('success', (success) => {
                     this.emit('success', success);
@@ -1398,18 +1396,7 @@ class DeviceAta extends EventEmitter {
             const startExternalIntegrations = this.restFul.enable || this.mqtt.enable ? await this.externalIntegrations() : false;
 
             //check state
-            const deviceData = await this.melCloudAta.checkState();
-
-            if (deviceData === false) {
-                return null;
-            }
-
-            //prepare accessory
-            if (this.startPrepareAccessory) {
-                const accessory = await this.prepareAccessory(this.accountInfo, deviceData, this.deviceId, this.deviceTypeText, this.deviceName, this.accountName);
-                this.emit('publishAccessory', accessory);
-                this.startPrepareAccessory = false;
-            }
+            await this.melCloudAta.checkState();
 
             return true;
         } catch (error) {

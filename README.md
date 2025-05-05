@@ -234,6 +234,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `atwDevices.typeString` | Read only data, do not change it. |
 | `atwDevices.name` | Here You can schange the `Accessory Name` which is exposed to the `Homebridge/HomeKit`. |
 | `atwDevices.displayMode` | Here select main control mode `None/Disabled`, `Heater/Cooler`, `Thermostat`. |
+| `atwDevices.hideZone` | Here select which zone need to be hidden `None/Disabled`, `Heat Pump`, `Heat Pump / Zone 1`, `Heat Pump / Zone 1 / Hot Water`, `Heat Pump / Zone 1 / Zone 2`, `Heat Pump / Hot Water`,`Heat Pump / Hot Water / Zone 2`, `Heat Pump / Zone 2`, `Zone 1`, `Zone 1 / Hot Water`, `Zone 1 / Hot Water / Zone 2`, `Zone 1 / Zone 2`, `Hot Water`, `Hot Water / Zone 2`, `Zone 2`, `All`. |
 | `atwDevices.temperatureSensor` | This enable extra `Room` temperature sensors to use with automations in HomeKit app. |
 | `atwDevices.temperatureSensorFlow` | This enable extra `Flow` temperature sensors to use with automations in HomeKit app. |
 | `atwDevices.temperatureSensorReturn` | This enable extra `Return` temperature sensors to use with automations in HomeKit app. |

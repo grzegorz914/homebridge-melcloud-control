@@ -264,7 +264,7 @@
                         ]
                       }
                     ],
-                    "description": "Select device control mode displayed in HomeKit app.",
+                    "description": "Select accessory control type displayed in HomeKit app.",
                     "required": true
                   },
                   "heatDryFanMode": {
@@ -826,7 +826,114 @@
                         ]
                       }
                     ],
-                    "description": "Select device control mode displayed in HomeKit app.",
+                    "description": "Select accessory control type displayed in HomeKit app.",
+                    "required": true
+                  },
+                  "hideZone": {
+                    "title": "Hide zone",
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 15,
+                    "default": 0,
+                    "oneOf": [
+                      {
+                        "title": "None/Disabled",
+                        "enum": [
+                          0
+                        ]
+                      },
+                      {
+                        "title": "Heat Pump",
+                        "enum": [
+                          1
+                        ]
+                      },
+                      {
+                        "title": "Heat Pump / Zone 1",
+                        "enum": [
+                          2
+                        ]
+                      },
+                      {
+                        "title": "Heat Pump / Zone 1 / Hot Water",
+                        "enum": [
+                          3
+                        ]
+                      },
+                      {
+                        "title": "Heat Pump / Zone 1 / Zone 2",
+                        "enum": [
+                          4
+                        ]
+                      },
+                      {
+                        "title": "Heat Pump / Hot Water",
+                        "enum": [
+                          5
+                        ]
+                      },
+                      {
+                        "title": "Heat Pump / Hot Water / Zone 2",
+                        "enum": [
+                          6
+                        ]
+                      },
+                      {
+                        "title": "Heat Pump / Zone 2",
+                        "enum": [
+                          7
+                        ]
+                      },
+                      {
+                        "title": "Zone 1",
+                        "enum": [
+                          8
+                        ]
+                      },
+                      {
+                        "title": "Zone 1 / Hot Water",
+                        "enum": [
+                          9
+                        ]
+                      },
+                      {
+                        "title": "Zone 1 / Hot Water / Zone 2",
+                        "enum": [
+                          10
+                        ]
+                      },
+                      {
+                        "title": "Zone 1 / Zone 2",
+                        "enum": [
+                          11
+                        ]
+                      },
+                      {
+                        "title": "Hot Water",
+                        "enum": [
+                          12
+                        ]
+                      },
+                      {
+                        "title": "Hot Water / Zone 2",
+                        "enum": [
+                          13
+                        ]
+                      },
+                      {
+                        "title": "Zone 2",
+                        "enum": [
+                          14
+                        ]
+                      },
+                      {
+                        "title": "All",
+                        "enum": [
+                          15
+                        ]
+                      }
+                    ],
+                    "description": "Select zone to hidde in HomeKit app, if present.",
                     "required": true
                   },
                   "temperatureSensor": {
@@ -1254,7 +1361,7 @@
                         ]
                       }
                     ],
-                    "description": "Select device control mode displayed in HomeKit app.",
+                    "description": "Select accessory control type displayed in HomeKit app.",
                     "required": true
                   },
                   "temperatureSensor": {
@@ -1806,7 +1913,19 @@
                         }
                       ]
                     }
-                  ]
+                  ],
+                  "condition": {
+                    "functionBody": "return model.accounts[arrayIndices].ataDevices.length > 0;"
+                  }
+                },
+                {
+                  "key": "accounts[]",
+                  "type": "tabarray",
+                  "title": "{{ value.title }}",
+                  "items": [],
+                  "condition": {
+                    "functionBody": "return model.accounts[arrayIndices].ataDevices.length === 0;"
+                  }
                 }
               ]
             },
@@ -1828,6 +1947,7 @@
                       "readonly": true
                     },
                     "accounts[].atwDevices[].displayMode",
+                    "accounts[].atwDevices[].hideZone",
                     {
                       "key": "accounts[].atwDevices[]",
                       "type": "section",
@@ -1900,7 +2020,19 @@
                         }
                       ]
                     }
-                  ]
+                  ],
+                  "condition": {
+                    "functionBody": "return model.accounts[arrayIndices].atwDevices.length > 0;"
+                  }
+                },
+                {
+                  "key": "accounts[]",
+                  "type": "tabarray",
+                  "title": "{{ value.title }}",
+                  "items": [],
+                  "condition": {
+                    "functionBody": "return model.accounts[arrayIndices].atwDevices.length === 0;"
+                  }
                 }
               ]
             },
@@ -1988,7 +2120,19 @@
                         }
                       ]
                     }
-                  ]
+                  ],
+                  "condition": {
+                    "functionBody": "return model.accounts[arrayIndices].ervDevices.length > 0;"
+                  }
+                },
+                {
+                  "key": "accounts[]",
+                  "type": "tabarray",
+                  "title": "{{ value.title }}",
+                  "items": [],
+                  "condition": {
+                    "functionBody": "return model.accounts[arrayIndices].ervDevices.length === 0;"
+                  }
                 }
               ]
             }

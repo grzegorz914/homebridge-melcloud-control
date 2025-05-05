@@ -16,18 +16,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - do not configure it manually, always using Config UI X
   - required Homebridge v2.0.0 and above
 
+## [3.8.0] - (05.05.2025)
+
+## Changes
+
+- add possibility to hide individual zone accessory in Home app for ATW device, solved[#194](https://github.com/grzegorz914/homebridge-melcloud-control/issues/194)
+- publish sensors independent from hiden zones for ATW devices
+- stability and performance improvements
+- bump dependencies
+- config schema updated
+- redme updated
+- cleanup
+
 ## [3.7.5] - (25.03.2025)
 
 ## Changes
 
 - fix[#192](https://github.com/grzegorz914/homebridge-melcloud-control/issues/192), thanks @helloabunai
 
-
 ## [3.7.3] - (15.03.2025)
 
 ## Changes
 
-- updated Homebridge UI interface 
+- updated Homebridge UI interface
 
 ## [3.7.1] - (14.03.2025)
 
@@ -43,7 +54,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - bump dependencies
 - config schema updated
 - redme updated
-- cleanup 
+- cleanup
 
 ## [3.6.9] - (28.02.2025)
 
