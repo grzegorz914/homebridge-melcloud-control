@@ -22,8 +22,8 @@ class DeviceAtw extends EventEmitter {
         this.temperatureSensorFlow = device.temperatureSensorFlow || false;
         this.temperatureSensorReturn = device.temperatureSensorReturn || false;
         this.temperatureSensorFlowZone1 = device.temperatureSensorFlowZone1 || false;
-        this.temperatureSensorReturnZone1 = device.temperatureSensorFlowWaterTank || false;
-        this.temperatureSensorFlowWaterTank = device.temperatureSensorFlowZone1 || false;
+        this.temperatureSensorReturnZone1 = device.temperatureSensorReturnZone1 || false;
+        this.temperatureSensorFlowWaterTank = device.temperatureSensorFlowWaterTank || false;
         this.temperatureSensorReturnWaterTank = device.temperatureSensorReturnWaterTank || false;
         this.temperatureSensorFlowZone2 = device.temperatureSensorFlowZone2 || false;
         this.temperatureSensorReturnZone2 = device.temperatureSensorReturnZone2 || false;
@@ -1821,6 +1821,7 @@ class DeviceAtw extends EventEmitter {
                         };
 
                         //add value to sensors arrays
+                        this.accessory.zonesSensors[i].name = name;
                         this.accessory.zonesSensors[i].roomTemperature = roomTemperature;
                         this.accessory.zonesSensors[i].flowTemperature = flowTemperature;
                         this.accessory.zonesSensors[i].returnTemperature = returnTemperature;

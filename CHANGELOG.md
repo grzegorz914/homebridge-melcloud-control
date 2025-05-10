@@ -16,6 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - do not configure it manually, always using Config UI X
   - required Homebridge v2.0.0 and above
 
+## [3.8.1] - (10.05.2025)
+
+## Changes
+
+- fix temperature sensors
+- cleanup
+
 ## [3.8.0] - (05.05.2025)
 
 ## Changes
