@@ -418,7 +418,6 @@ class MelCloudErv extends EventEmitter {
 
     updateData(deviceData) {
         setTimeout(() => {
-            this.emit('externalIntegrations', deviceData);
             this.emit('deviceState', deviceData);
         }, 500);
     }

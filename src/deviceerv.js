@@ -293,7 +293,7 @@ class DeviceErv extends EventEmitter {
                                 deviceData.Device.Power = [false, true][state];
                                 deviceData.Device.EffectiveFlags = Ventilation.EffectiveFlags.Power;
                                 await this.melCloudErv.send(deviceData, this.displayMode);
-                                const info = this.disableLogInfo ? false : this.emit('message', `Set power: ${state ? 'ON' : 'OFF'}`);
+                                const info = this.disableLogInfo ? false : this.emit('info', `Set power: ${state ? 'ON' : 'OFF'}`);
                             } catch (error) {
                                 this.emit('warn', `Set power error: ${error}`);
                             };
@@ -330,7 +330,7 @@ class DeviceErv extends EventEmitter {
                                 deviceData.Device.EffectiveFlags = Ventilation.EffectiveFlags.VentilationMode;
                                 await this.melCloudErv.send(deviceData, this.displayMode);
                                 const operationModeText = Ventilation.VentilationMode[deviceData.Device.VentilationMode];
-                                const info = this.disableLogInfo ? false : this.emit('message', `Set operation mode: ${operationModeText}`);
+                                const info = this.disableLogInfo ? false : this.emit('info', `Set operation mode: ${operationModeText}`);
                             } catch (error) {
                                 this.emit('warn', `Set operation mode error: ${error}`);
                             };
@@ -373,7 +373,7 @@ class DeviceErv extends EventEmitter {
                                 };
                                 deviceData.Device.EffectiveFlags = Ventilation.EffectiveFlags.SetFanSpeed;
                                 await this.melCloudErv.send(deviceData, this.displayMode);
-                                const info = this.disableLogInfo ? false : this.emit('message', `Set fan speed mode: ${Ventilation.FanSpeed[fanSpeedModeText]}`);
+                                const info = this.disableLogInfo ? false : this.emit('info', `Set fan speed mode: ${Ventilation.FanSpeed[fanSpeedModeText]}`);
                             } catch (error) {
                                 this.emit('warn', `Set fan speed mode error: ${error}`);
                             };
@@ -395,7 +395,7 @@ class DeviceErv extends EventEmitter {
                                     deviceData.Device.DefaultCoolingSetTemperature = value;
                                     deviceData.Device.EffectiveFlags = Ventilation.EffectiveFlags.SetTemperature;
                                     await this.melCloudErv.send(deviceData, this.displayMode);
-                                    const info = this.disableLogInfo ? false : this.emit('message', `Set cooling threshold temperature: ${value}${this.accessory.temperatureUnit}`);
+                                    const info = this.disableLogInfo ? false : this.emit('info', `Set cooling threshold temperature: ${value}${this.accessory.temperatureUnit}`);
                                 } catch (error) {
                                     this.emit('warn', `Set cooling threshold temperature error: ${error}`);
                                 };
@@ -418,7 +418,7 @@ class DeviceErv extends EventEmitter {
                                     deviceData.Device.DefaultHeatingSetTemperature = value;
                                     deviceData.Device.EffectiveFlags = Ventilation.EffectiveFlags.SetTemperature;
                                     await this.melCloudErv.send(deviceData, this.displayMode);
-                                    const info = this.disableLogInfo ? false : this.emit('message', `Set heating threshold temperature: ${value}${this.accessory.temperatureUnit}`);
+                                    const info = this.disableLogInfo ? false : this.emit('info', `Set heating threshold temperature: ${value}${this.accessory.temperatureUnit}`);
                                 } catch (error) {
                                     this.emit('warn', `Set heating threshold temperature error: ${error}`);
                                 };
@@ -427,7 +427,7 @@ class DeviceErv extends EventEmitter {
                     //this.melCloudService.getCharacteristic(Characteristic.LockPhysicalControls)
                     //    .onGet(async () => {
                     //        const value = this.accessory.lockPhysicalControl;
-                    //        const info = this.disableLogInfo ? false : this.emit('message', `Lock physical controls: ${value ? 'LOCKED' : 'UNLOCKED'}`);
+                    //        const info = this.disableLogInfo ? false : this.emit('info', `Lock physical controls: ${value ? 'LOCKED' : 'UNLOCKED'}`);
                     //        return value;
                     //    })
                     //    .onSet(async (value) => {
@@ -436,7 +436,7 @@ class DeviceErv extends EventEmitter {
                     //         deviceData.Device = deviceData.Device;
                     //         deviceData.Device.EffectiveFlags = CONSTANTS.Ventilation.EffectiveFlags.Prohibit;
                     //         await this.melCloudErv.send(deviceData, this.displayMode);
-                    //         const info = this.disableLogInfo ? false : this.emit('message', `Set local physical controls: ${value ? 'LOCK' : 'UNLOCK'}`);
+                    //         const info = this.disableLogInfo ? false : this.emit('info', `Set local physical controls: ${value ? 'LOCK' : 'UNLOCK'}`);
                     //     } catch (error) {
                     //          this.emit('warn', `Set lock physical controls error: ${error}`);
                     //      };
@@ -451,7 +451,7 @@ class DeviceErv extends EventEmitter {
                                 accountInfo.UseFahrenheit = [false, true][value];
                                 await this.melCloud.send(accountInfo);
                                 this.accessory.useFahrenheit = value;
-                                const info = this.disableLogInfo ? false : this.emit('message', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
+                                const info = this.disableLogInfo ? false : this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
                             } catch (error) {
                                 this.emit('warn', `Set temperature display unit error: ${error}`);
                             };
@@ -503,7 +503,7 @@ class DeviceErv extends EventEmitter {
 
                                 await this.melCloudErv.send(deviceData, this.displayMode);
                                 const operationModeText = Ventilation.VentilationMode[deviceData.Device.VentilationMode];
-                                const info = this.disableLogInfo ? false : this.emit('message', `Set operation mode: ${operationModeText}`);
+                                const info = this.disableLogInfo ? false : this.emit('info', `Set operation mode: ${operationModeText}`);
                             } catch (error) {
                                 this.emit('warn', `Set operation mode error: ${error}`);
                             };
@@ -528,7 +528,7 @@ class DeviceErv extends EventEmitter {
                                 deviceData.Device.SetTemperature = value;
                                 deviceData.Device.EffectiveFlags = Ventilation.EffectiveFlags.SetTemperature;
                                 await this.melCloudErv.send(deviceData, this.displayMode);
-                                const info = this.disableLogInfo ? false : this.emit('message', `Set temperature: ${value}${this.accessory.temperatureUnit}`);
+                                const info = this.disableLogInfo ? false : this.emit('info', `Set temperature: ${value}${this.accessory.temperatureUnit}`);
                             } catch (error) {
                                 this.emit('warn', `Set temperature error: ${error}`);
                             };
@@ -543,7 +543,7 @@ class DeviceErv extends EventEmitter {
                                 accountInfo.UseFahrenheit = [false, true][value];
                                 await this.melCloud.send(accountInfo);
                                 this.accessory.useFahrenheit = value;
-                                const info = this.disableLogInfo ? false : this.emit('message', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
+                                const info = this.disableLogInfo ? false : this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
                             } catch (error) {
                                 this.emit('warn', `Set temperature display unit error: ${error}`);
                             };
@@ -720,7 +720,7 @@ class DeviceErv extends EventEmitter {
                                 };
 
                                 await this.melCloudErv.send(deviceData, this.displayMode);
-                                const info = this.disableLogInfo ? false : this.emit('message', `${state ? 'Set:' : 'Unset:'} ${name}`);
+                                const info = this.disableLogInfo ? false : this.emit('info', `${state ? 'Set:' : 'Unset:'} ${name}`);
                             } catch (error) {
                                 this.emit('warn', `Set preset error: ${error}`);
                             };
@@ -829,12 +829,12 @@ class DeviceErv extends EventEmitter {
                                         deviceData.hideOutdoorTemperature = state;
                                         break;
                                     default:
-                                        this.emit('message', `Unknown button mode: ${mode}`);
+                                        this.emit('warn', `Unknown button mode: ${mode}`);
                                         break;
                                 };
 
                                 await this.melCloudErv.send(deviceData, this.displayMode);
-                                const info = this.disableLogInfo ? false : this.emit('message', `${state ? `Set: ${buttonName}` : `Unset: ${buttonName}, Set: ${button.previousValue}`}`);
+                                const info = this.disableLogInfo ? false : this.emit('info', `${state ? `Set: ${buttonName}` : `Unset: ${buttonName}, Set: ${button.previousValue}`}`);
                             } catch (error) {
                                 this.emit('warn', `Set button error: ${error}`);
                             };
@@ -1211,21 +1211,21 @@ class DeviceErv extends EventEmitter {
 
                     //log current state
                     if (!this.disableLogInfo) {
-                        this.emit('message', `Power: ${power ? 'ON' : 'OFF'}`);
-                        this.emit('message', `Target ventilation mode: ${Ventilation.OperationMode[ventilationMode]}`);
-                        this.emit('message', `Current ventilation mode: ${Ventilation.OperationMode[actualVentilationMode]}`);
-                        this.emit('message', `Target temperature: ${setTemperature}${this.accessory.temperatureUnit}`);
-                        this.emit('message', `Room temperature: ${roomTemperature}${this.accessory.temperatureUnit}`);
-                        const info1 = hasSupplyTemperature && deviceData.Device.SupplyTemperature !== null ? this.emit('message', `Supply temperature: ${roomTemperature}${this.accessory.temperatureUnit}`) : false;
-                        const info2 = hasOutdoorTemperature && deviceData.Device.OutdoorTemperature !== null ? this.emit('message', `Outdoor temperature: ${roomTemperature}${this.accessory.temperatureUnit}`) : false;
-                        this.emit('message', `Fan speed mode: ${Ventilation.FanSpeed[setFanSpeed]}`);
-                        this.emit('message', `Temperature display unit: ${this.accessory.temperatureUnit}`);
-                        this.emit('message', `Core maintenance: ${Ventilation.CoreMaintenance[coreMaintenanceRequired]}`);
-                        this.emit('message', `Filter maintenance: ${Ventilation.FilterMaintenance[filterMaintenanceRequired]}`);
-                        const info5 = hasCO2Sensor ? this.emit('message', `CO2 detected: ${Ventilation.Co2Detected[roomCO2Detected]}`) : false;
-                        const info6 = hasCO2Sensor ? this.emit('message', `CO2 level: ${roomCO2Level} ppm`) : false;
-                        const info7 = hasPM25Sensor ? this.emit('message', `PM2.5 air quality: ${Ventilation.PM25AirQuality[pM25AirQuality]}`) : false;
-                        const info8 = hasPM25Sensor ? this.emit('message', `PM2.5 level: ${pM25Level} µg/m`) : false;
+                        this.emit('info', `Power: ${power ? 'ON' : 'OFF'}`);
+                        this.emit('info', `Target ventilation mode: ${Ventilation.OperationMode[ventilationMode]}`);
+                        this.emit('info', `Current ventilation mode: ${Ventilation.OperationMode[actualVentilationMode]}`);
+                        this.emit('info', `Target temperature: ${setTemperature}${this.accessory.temperatureUnit}`);
+                        this.emit('info', `Room temperature: ${roomTemperature}${this.accessory.temperatureUnit}`);
+                        const info1 = hasSupplyTemperature && deviceData.Device.SupplyTemperature !== null ? this.emit('info', `Supply temperature: ${roomTemperature}${this.accessory.temperatureUnit}`) : false;
+                        const info2 = hasOutdoorTemperature && deviceData.Device.OutdoorTemperature !== null ? this.emit('info', `Outdoor temperature: ${roomTemperature}${this.accessory.temperatureUnit}`) : false;
+                        this.emit('info', `Fan speed mode: ${Ventilation.FanSpeed[setFanSpeed]}`);
+                        this.emit('info', `Temperature display unit: ${this.accessory.temperatureUnit}`);
+                        this.emit('info', `Core maintenance: ${Ventilation.CoreMaintenance[coreMaintenanceRequired]}`);
+                        this.emit('info', `Filter maintenance: ${Ventilation.FilterMaintenance[filterMaintenanceRequired]}`);
+                        const info5 = hasCO2Sensor ? this.emit('info', `CO2 detected: ${Ventilation.Co2Detected[roomCO2Detected]}`) : false;
+                        const info6 = hasCO2Sensor ? this.emit('info', `CO2 level: ${roomCO2Level} ppm`) : false;
+                        const info7 = hasPM25Sensor ? this.emit('info', `PM2.5 air quality: ${Ventilation.PM25AirQuality[pM25AirQuality]}`) : false;
+                        const info8 = hasPM25Sensor ? this.emit('info', `PM2.5 level: ${pM25Level} µg/m`) : false;
                     };
 
                     //prepare accessory
