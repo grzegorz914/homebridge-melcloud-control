@@ -135,13 +135,21 @@ class MelCloudPlatform {
 							const deviceName = device.name;
 							const deviceTypeText = device.typeString;
 							const deviceRefreshInterval = device.refreshInterval * 1000 || 5000;
-							const airConditioner = new DeviceAta(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit, restFul, mqtt)
+							const airConditioner = new DeviceAta(api, account, device, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit, restFul, mqtt)
 							airConditioner.on('publishAccessory', (accessory) => {
 
 								//publish device
 								api.publishExternalAccessories(PluginName, [accessory]);
 								const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceTypeText} ${deviceName}, published as external accessory.`);
 							})
+								.on('melCloud', async (key, value) => {
+									try {
+										accountInfo[key] = value;
+										await melCloud.send(accountInfo);
+									} catch (error) {
+										const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}.`);
+									};
+								})
 								.on('devInfo', (devInfo) => {
 									const emitLog = disableLogDeviceInfo ? false : log.info(devInfo);
 								})
@@ -201,13 +209,21 @@ class MelCloudPlatform {
 							const deviceName = device.name;
 							const deviceTypeText = device.typeString;
 							const deviceRefreshInterval = device.refreshInterval * 1000 || 5000;
-							const heatPump = new DeviceAtw(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit, restFul, mqtt)
+							const heatPump = new DeviceAtw(api, account, device, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit, restFul, mqtt)
 							heatPump.on('publishAccessory', (accessory) => {
 
 								//publish device
 								api.publishExternalAccessories(PluginName, [accessory]);
 								const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceTypeText} ${deviceName}, published as external accessory.`);
 							})
+								.on('melCloud', async (key, value) => {
+									try {
+										accountInfo[key] = value;
+										await melCloud.send(accountInfo);
+									} catch (error) {
+										const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}.`);
+									};
+								})
 								.on('devInfo', (devInfo) => {
 									const emitLog = disableLogDeviceInfo ? false : log.info(devInfo);
 								})
@@ -267,13 +283,21 @@ class MelCloudPlatform {
 							const deviceName = device.name;
 							const deviceTypeText = device.typeString;
 							const deviceRefreshInterval = device.refreshInterval * 1000 || 5000;
-							const energyRecoveryVentilation = new DeviceErv(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit, restFul, mqtt)
+							const energyRecoveryVentilation = new DeviceErv(api, account, device, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit, restFul, mqtt)
 							energyRecoveryVentilation.on('publishAccessory', (accessory) => {
 
 								//publish device
 								api.publishExternalAccessories(PluginName, [accessory]);
 								const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceTypeText} ${deviceName}, published as external accessory.`);
 							})
+								.on('melCloud', async (key, value) => {
+									try {
+										accountInfo[key] = value;
+										await melCloud.send(accountInfo);
+									} catch (error) {
+										const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}.`);
+									};
+								})
 								.on('devInfo', (devInfo) => {
 									const emitLog = disableLogDeviceInfo ? false : log.info(devInfo);
 								})

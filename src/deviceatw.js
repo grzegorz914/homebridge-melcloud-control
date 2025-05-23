@@ -6,7 +6,7 @@ import { TemperatureDisplayUnits, HeatPump } from './constants.js';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceAtw extends EventEmitter {
-    constructor(api, account, device, melCloud, accountInfo, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, refreshInterval, useFahrenheit, restFul, mqtt) {
+    constructor(api, account, device, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, refreshInterval, useFahrenheit, restFul, mqtt) {
         super();
 
         Accessory = api.platformAccessory;
@@ -48,9 +48,6 @@ class DeviceAtw extends EventEmitter {
         this.restFulConnected = false;
         this.mqtt = mqtt;
         this.mqttConnected = false;
-
-        //function
-        this.melCloud = melCloud; //function
 
         //presets configured
         this.presetsConfigured = [];
@@ -94,12 +91,8 @@ class DeviceAtw extends EventEmitter {
         this.deviceData = {};
 
         //accessory
-        this.accessory = {
-            zones: [{}, {}, {}, {}],
-            zonesSensors: [{}, {}, {}, {}]
-        };
-        this.accessory.useFahrenheit = useFahrenheit ? 1 : 0;
-        this.accessory.temperatureUnit = TemperatureDisplayUnits[this.accessory.useFahrenheit];
+        this.accessory = {};
+        this.useFahrenheit = useFahrenheit ? 1 : 0;
     };
 
     async externalIntegrations() {
@@ -286,8 +279,12 @@ class DeviceAtw extends EventEmitter {
     }
 
     //prepare accessory
-    async prepareAccessory(accountInfo, deviceData, deviceId, deviceTypeText, deviceName, accountName) {
+    async prepareAccessory(deviceData) {
         try {
+            const deviceId = this.deviceId;
+            const deviceTypeText = this.deviceTypeText;
+            const deviceName = this.deviceName;
+            const accountName = this.accountName;
             const presetsOnServer = this.accessory.presets;
             const zonesCount = this.accessory.zonesCount;
             const caseHeatPump = this.accessory.caseHeatPump;
@@ -625,9 +622,9 @@ class DeviceAtw extends EventEmitter {
                                 })
                                 .onSet(async (value) => {
                                     try {
-                                        accountInfo.UseFahrenheit = [false, true][value];
-                                        await this.melCloud.send(accountInfo);
+                                        value = [false, true][value];
                                         this.accessory.useFahrenheit = value;
+                                        this.emit('melCloud', 'UseFahrenheit', value);
                                         const info = this.disableLogInfo ? false : this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
                                     } catch (error) {
                                         this.emit('warn', `Set temperature display unit error: ${error}`);
@@ -807,9 +804,9 @@ class DeviceAtw extends EventEmitter {
                                 })
                                 .onSet(async (value) => {
                                     try {
-                                        accountInfo.UseFahrenheit = [false, true][value];
-                                        await this.melCloud.send(accountInfo);
+                                        value = [false, true][value];
                                         this.accessory.useFahrenheit = value;
+                                        this.emit('melCloud', 'UseFahrenheit', value);
                                         const info = this.disableLogInfo ? false : this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
                                     } catch (error) {
                                         this.emit('warn', `Set temperature display unit error: ${error}`);
@@ -1417,27 +1414,33 @@ class DeviceAtw extends EventEmitter {
                     const returnTemperatureZone2 = deviceData.Device.ReturnTemperatureZone2;
 
                     //accessory
-                    this.accessory.presets = presetsOnServer;
-                    this.accessory.power = power ? 1 : 0;
-                    this.accessory.unitStatus = unitStatus;
-                    this.accessory.idleZone1 = idleZone1;
-                    this.accessory.idleZone2 = idleZone2;
-                    this.accessory.temperatureIncrement = temperatureIncrement;
-                    this.accessory.hasHeatPump = hasHeatPump;
-                    this.accessory.hasZone1 = hasZone1;
-                    this.accessory.hasHotWaterTank = hasHotWaterTank;
-                    this.accessory.hasZone2 = hasZone2;
-                    this.accessory.heatCoolModes = heatCoolModes;
-                    this.accessory.caseHeatPump = caseHeatPump;
-                    this.accessory.caseZone1 = caseZone1;
-                    this.accessory.caseHotWater = caseHotWater;
-                    this.accessory.caseZone2 = caseZone2;
-                    this.accessory.zonesCount = zonesCount;
-                    this.accessory.caseHeatPumpSensor = caseHeatPumpSensor;
-                    this.accessory.caseZone1Sensor = caseZone1Sensor;
-                    this.accessory.caseHotWaterSensor = caseHotWaterSensor;
-                    this.accessory.caseZone2Sensor = caseZone2Sensor;
-                    this.accessory.sensorsCount = zonesSensorsCount;
+                    const obj = {
+                        presets: presetsOnServer,
+                        power: power ? 1 : 0,
+                        unitStatus: unitStatus,
+                        idleZone1: idleZone1,
+                        idleZone2: idleZone2,
+                        temperatureIncrement: temperatureIncrement,
+                        hasHeatPump: hasHeatPump,
+                        hasZone1: hasZone1,
+                        hasHotWaterTank: hasHotWaterTank,
+                        hasZone2: hasZone2,
+                        heatCoolModes: heatCoolModes,
+                        caseHeatPump: caseHeatPump,
+                        caseZone1: caseZone1,
+                        caseHotWater: caseHotWater,
+                        caseZone2: caseZone2,
+                        zonesCount: zonesCount,
+                        caseHeatPumpSensor: caseHeatPumpSensor,
+                        caseZone1Sensor: caseZone1Sensor,
+                        caseHotWaterSensor: caseHotWaterSensor,
+                        caseZone2Sensor: caseZone2Sensor,
+                        sensorsCount: zonesSensorsCount,
+                        useFahrenheit: this.useFahrenheit,
+                        temperatureUnit: TemperatureDisplayUnits[this.useFahrenheit],
+                        zones: [{}, {}, {}, {}],
+                        zonesSensors: [{}, {}, {}, {}]
+                    };
 
                     //default values
                     let name = 'Heat Pump'
@@ -1563,7 +1566,7 @@ class DeviceAtw extends EventEmitter {
                                         .updateCharacteristic(Characteristic.TargetHeaterCoolerState, targetOperationMode)
                                         .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                                         .updateCharacteristic(Characteristic.LockPhysicalControls, lockPhysicalControl)
-                                        .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.accessory.useFahrenheit);
+                                        .updateCharacteristic(Characteristic.TemperatureDisplayUnits, obj.useFahrenheit);
                                     const updateDefCool = heatCoolModes === 0 || heatCoolModes === 2 ? this.melCloudServices[i].updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature) : false;
                                     const updateDefHeat = heatCoolModes === 0 || heatCoolModes === 1 ? this.melCloudServices[i].updateCharacteristic(Characteristic.HeatingThresholdTemperature, setTemperature) : false;
                                 }
@@ -1669,24 +1672,24 @@ class DeviceAtw extends EventEmitter {
                                         .updateCharacteristic(Characteristic.TargetHeatingCoolingState, targetOperationMode)
                                         .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
                                         .updateCharacteristic(Characteristic.TargetTemperature, setTemperature)
-                                        .updateCharacteristic(Characteristic.TemperatureDisplayUnits, this.accessory.useFahrenheit);
+                                        .updateCharacteristic(Characteristic.TemperatureDisplayUnits, obj.useFahrenheit);
                                 }
                                 break;
                         };
 
                         //add value to zones arrays
-                        this.accessory.zones[i].name = name;
-                        this.accessory.zones[i].operationMode = operationModeZone;
-                        this.accessory.zones[i].currentOperationMode = currentOperationMode;
-                        this.accessory.zones[i].targetOperationMode = targetOperationMode;
-                        this.accessory.zones[i].roomTemperature = roomTemperature;
-                        this.accessory.zones[i].setTemperature = setTemperature;
-                        this.accessory.zones[i].lockPhysicalControl = lockPhysicalControl;
-                        this.accessory.zones[i].temperaturesSetPropsMinValue = temperatureSetPropsMinValue;
-                        this.accessory.zones[i].temperaturesSetPropsMaxValue = temperatureSetPropsMaxValue;
-                        const setPropsMinValue = this.startPrepareAccessory ? this.accessory.zones[i].operationModesSetPropsMinValue = operationModeSetPropsMinValue : false;
-                        const setPropsMaxValue = this.startPrepareAccessory ? this.accessory.zones[i].operationModesSetPropsMaxValue = operationModeSetPropsMaxValue : false;
-                        const setPropsValidValues = this.startPrepareAccessory ? this.accessory.zones[i].operationModesSetPropsValidValues = operationModeSetPropsValidValues : false;
+                        obj.zones[i].name = name;
+                        obj.zones[i].operationMode = operationModeZone;
+                        obj.zones[i].currentOperationMode = currentOperationMode;
+                        obj.zones[i].targetOperationMode = targetOperationMode;
+                        obj.zones[i].roomTemperature = roomTemperature;
+                        obj.zones[i].setTemperature = setTemperature;
+                        obj.zones[i].lockPhysicalControl = lockPhysicalControl;
+                        obj.zones[i].temperaturesSetPropsMinValue = temperatureSetPropsMinValue;
+                        obj.zones[i].temperaturesSetPropsMaxValue = temperatureSetPropsMaxValue;
+                        const setPropsMinValue = this.startPrepareAccessory ? obj.zones[i].operationModesSetPropsMinValue = operationModeSetPropsMinValue : false;
+                        const setPropsMaxValue = this.startPrepareAccessory ? obj.zones[i].operationModesSetPropsMaxValue = operationModeSetPropsMaxValue : false;
+                        const setPropsValidValues = this.startPrepareAccessory ? obj.zones[i].operationModesSetPropsValidValues = operationModeSetPropsValidValues : false;
 
                         //log current state
                         if (!this.disableLogInfo) {
@@ -1695,32 +1698,32 @@ class DeviceAtw extends EventEmitter {
                                 case caseHeatPump: //Heat Pump - HEAT, COOL, OFF
                                     this.emit('info', `${heatPumpName}, Power: ${power ? 'ON' : 'OFF'}`)
                                     this.emit('info', `${heatPumpName}, Operation mode: ${HeatPump.System[unitStatus]}`);
-                                    this.emit('info', `${heatPumpName},'Outdoor temperature: ${roomTemperature}${this.accessory.temperatureUnit}`);
-                                    this.emit('info', `${heatPumpName}, Temperature display unit: ${this.accessory.temperatureUnit}`);
+                                    this.emit('info', `${heatPumpName},'Outdoor temperature: ${roomTemperature}${obj.temperatureUnit}`);
+                                    this.emit('info', `${heatPumpName}, Temperature display unit: ${obj.temperatureUnit}`);
                                     this.emit('info', `${heatPumpName}, Lock physical controls: ${lockPhysicalControl ? 'LOCKED' : 'UNLOCKED'}`);
                                     break;
                                 case caseZone1: //Zone 1 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
                                     operationModeText = idleZone1 ? HeatPump.ZoneOperation[6] : HeatPump.ZoneOperation[operationModeZone1];
                                     this.emit('info', `${zone1Name}, Operation mode: ${operationModeText}`);
-                                    this.emit('info', `${zone1Name}, Temperature: ${roomTemperature}${this.accessory.temperatureUnit}`);
-                                    this.emit('info', `${zone1Name}, Target temperature: ${setTemperature}${this.accessory.temperatureUnit}`)
-                                    this.emit('info', `${zone1Name}, Temperature display unit: ${this.accessory.temperatureUnit}`);
+                                    this.emit('info', `${zone1Name}, Temperature: ${roomTemperature}${obj.temperatureUnit}`);
+                                    this.emit('info', `${zone1Name}, Target temperature: ${setTemperature}${obj.temperatureUnit}`)
+                                    this.emit('info', `${zone1Name}, Temperature display unit: ${obj.temperatureUnit}`);
                                     this.emit('info', `${zone1Name}, Lock physical controls: ${lockPhysicalControl ? 'LOCKED' : 'UNLOCKED'}`);
                                     break;
                                 case caseHotWater: //Hot Water - AUTO, HEAT NOW
                                     operationModeText = operationMode === 1 ? HeatPump.ForceDhw[1] : HeatPump.ForceDhw[forcedHotWaterMode ? 1 : 0];
                                     this.emit('info', `${hotWaterName}, Operation mode: ${operationModeText}`);
-                                    this.emit('info', `${hotWaterName}, Temperature: ${roomTemperature}${this.accessory.temperatureUnit}`);
-                                    this.emit('info', `${hotWaterName}, Target temperature: ${setTemperature}${this.accessory.temperatureUnit}`)
-                                    this.emit('info', `${hotWaterName}, Temperature display unit: ${this.accessory.temperatureUnit}`);
+                                    this.emit('info', `${hotWaterName}, Temperature: ${roomTemperature}${obj.temperatureUnit}`);
+                                    this.emit('info', `${hotWaterName}, Target temperature: ${setTemperature}${obj.temperatureUnit}`)
+                                    this.emit('info', `${hotWaterName}, Temperature display unit: ${obj.temperatureUnit}`);
                                     this.emit('info', `${hotWaterName}, Lock physical controls: ${lockPhysicalControl ? 'LOCKED' : 'UNLOCKED'}`);
                                     break;
                                 case caseZone2: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
                                     operationModeText = idleZone2 ? HeatPump.ZoneOperation[6] : HeatPump.ZoneOperation[operationModeZone2];
                                     this.emit('info', `${zone2Name}, Operation mode: ${operationModeText}`);
-                                    this.emit('info', `${zone2Name}, Temperature: ${roomTemperature}${this.accessory.temperatureUnit}`);
-                                    this.emit('info', `${zone2Name}, Target temperature: ${setTemperature}${this.accessory.temperatureUnit}`)
-                                    this.emit('info', `${zone2Name}, Temperature display unit: ${this.accessory.temperatureUnit}`);
+                                    this.emit('info', `${zone2Name}, Temperature: ${roomTemperature}${obj.temperatureUnit}`);
+                                    this.emit('info', `${zone2Name}, Target temperature: ${setTemperature}${obj.temperatureUnit}`)
+                                    this.emit('info', `${zone2Name}, Temperature display unit: ${obj.temperatureUnit}`);
                                     this.emit('info', `${zone2Name}, Lock physical controls: ${lockPhysicalControl ? 'LOCKED' : 'UNLOCKED'}`);
                                     break;
                             };
@@ -1821,37 +1824,38 @@ class DeviceAtw extends EventEmitter {
                         };
 
                         //add value to sensors arrays
-                        this.accessory.zonesSensors[i].name = name;
-                        this.accessory.zonesSensors[i].roomTemperature = roomTemperature;
-                        this.accessory.zonesSensors[i].flowTemperature = flowTemperature;
-                        this.accessory.zonesSensors[i].returnTemperature = returnTemperature;
+                        obj.zonesSensors[i].name = name;
+                        obj.zonesSensors[i].roomTemperature = roomTemperature;
+                        obj.zonesSensors[i].flowTemperature = flowTemperature;
+                        obj.zonesSensors[i].returnTemperature = returnTemperature;
 
                         //log current state
                         if (!this.disableLogInfo) {
                             switch (i) {
                                 case caseHeatPumpSensor: //Heat Pump - HEAT, COOL, OFF
-                                    const info = outdoorTemperature !== null ? this.emit('info', `${heatPumpName}, Outdoor temperature: ${outdoorTemperature}${this.accessory.temperatureUnit}`) : false;
-                                    const info0 = flowTemperatureHeatPump !== null ? this.emit('info', `${heatPumpName}, Flow temperature: ${flowTemperatureHeatPump}${this.accessory.temperatureUnit}`) : false;
-                                    const info1 = returnTemperatureHeatPump !== null ? this.emit('info', `${heatPumpName}, Return temperature: ${returnTemperatureHeatPump}${this.accessory.temperatureUnit}`) : false;
+                                    const info = outdoorTemperature !== null ? this.emit('info', `${heatPumpName}, Outdoor temperature: ${outdoorTemperature}${obj.temperatureUnit}`) : false;
+                                    const info0 = flowTemperatureHeatPump !== null ? this.emit('info', `${heatPumpName}, Flow temperature: ${flowTemperatureHeatPump}${obj.temperatureUnit}`) : false;
+                                    const info1 = returnTemperatureHeatPump !== null ? this.emit('info', `${heatPumpName}, Return temperature: ${returnTemperatureHeatPump}${obj.temperatureUnit}`) : false;
                                     break;
                                 case caseZone1Sensor: //Zone 1 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
-                                    const info2 = roomTemperatureZone1 !== null ? this.emit('info', `${zone1Name}, Room temperature: ${roomTemperatureZone1}${this.accessory.temperatureUnit}`) : false;
-                                    const info3 = flowTemperatureZone1 !== null ? this.emit('info', `${zone1Name}, Flow temperature: ${flowTemperatureZone1}${this.accessory.temperatureUnit}`) : false;
-                                    const info4 = returnTemperatureZone1 !== null ? this.emit('info', `${zone1Name}, Return temperature: ${returnTemperatureZone1}${this.accessory.temperatureUnit}`) : false;
+                                    const info2 = roomTemperatureZone1 !== null ? this.emit('info', `${zone1Name}, Room temperature: ${roomTemperatureZone1}${obj.temperatureUnit}`) : false;
+                                    const info3 = flowTemperatureZone1 !== null ? this.emit('info', `${zone1Name}, Flow temperature: ${flowTemperatureZone1}${obj.temperatureUnit}`) : false;
+                                    const info4 = returnTemperatureZone1 !== null ? this.emit('info', `${zone1Name}, Return temperature: ${returnTemperatureZone1}${obj.temperatureUnit}`) : false;
                                     break;
                                 case caseHotWaterSensor: //Hot Water - AUTO, HEAT NOW
-                                    const info5 = tankWaterTemperature !== null ? this.emit('info', `${hotWaterName}, Temperature: ${tankWaterTemperature}${this.accessory.temperatureUnit}`) : false;
-                                    const info6 = flowTemperatureWaterTank !== null ? this.emit('info', `${hotWaterName}, Flow temperature: ${flowTemperatureWaterTank}${this.accessory.temperatureUnit}`) : false;
-                                    const info7 = returnTemperatureWaterTank !== null ? this.emit('info', `${hotWaterName}, Return temperature: ${returnTemperatureWaterTank}${this.accessory.temperatureUnit}`) : false;
+                                    const info5 = tankWaterTemperature !== null ? this.emit('info', `${hotWaterName}, Temperature: ${tankWaterTemperature}${obj.temperatureUnit}`) : false;
+                                    const info6 = flowTemperatureWaterTank !== null ? this.emit('info', `${hotWaterName}, Flow temperature: ${flowTemperatureWaterTank}${obj.temperatureUnit}`) : false;
+                                    const info7 = returnTemperatureWaterTank !== null ? this.emit('info', `${hotWaterName}, Return temperature: ${returnTemperatureWaterTank}${obj.temperatureUnit}`) : false;
                                     break;
                                 case caseZone2Sensor: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
-                                    const info8 = roomTemperatureZone2 !== null ? this.emit('info', `${zone2Name}, Room temperature: ${roomTemperatureZone2}${this.accessory.temperatureUnit}`) : false;
-                                    const info9 = flowTemperatureZone2 !== null ? this.emit('info', `${zone2Name}, Flow temperature: ${flowTemperatureZone2}${this.accessory.temperatureUnit}`) : false;
-                                    const info10 = returnTemperatureZone2 !== null ? this.emit('info', `${zone2Name}, Return temperature: ${returnTemperatureZone2}${this.accessory.temperatureUnit}`) : false;
+                                    const info8 = roomTemperatureZone2 !== null ? this.emit('info', `${zone2Name}, Room temperature: ${roomTemperatureZone2}${obj.temperatureUnit}`) : false;
+                                    const info9 = flowTemperatureZone2 !== null ? this.emit('info', `${zone2Name}, Flow temperature: ${flowTemperatureZone2}${obj.temperatureUnit}`) : false;
+                                    const info10 = returnTemperatureZone2 !== null ? this.emit('info', `${zone2Name}, Return temperature: ${returnTemperatureZone2}${obj.temperatureUnit}`) : false;
                                     break;
                             };
                         };
                     };
+                    this.accessory = obj;
 
                     //update presets state
                     if (this.presetsConfigured.length > 0) {
@@ -1970,7 +1974,7 @@ class DeviceAtw extends EventEmitter {
 
                     //prepare accessory
                     if (this.startPrepareAccessory) {
-                        const accessory = await this.prepareAccessory(this.accountInfo, deviceData, this.deviceId, this.deviceTypeText, this.deviceName, this.accountName);
+                        const accessory = await this.prepareAccessory(deviceData);
                         this.emit('publishAccessory', accessory);
                         this.startPrepareAccessory = false;
                     }

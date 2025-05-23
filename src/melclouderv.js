@@ -324,6 +324,7 @@ class MelCloudErv extends EventEmitter {
             //check state changes
             const deviceDataHasNotChanged = JSON.stringify(deviceState) === JSON.stringify(this.deviceState);
             if (deviceDataHasNotChanged) {
+                const debug = this.enableDebugMode ? this.emit('debug', `Device state not changed`) : false;
                 return;
             }
             this.deviceState = deviceState;
