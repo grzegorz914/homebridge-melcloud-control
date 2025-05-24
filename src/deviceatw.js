@@ -120,8 +120,11 @@ class DeviceAtw extends EventEmitter {
                         .on('debug', (debug) => {
                             this.emit('debug', debug);
                         })
+                        .on('warn', (warn) => {
+                            this.emit('warn', warn);
+                        })
                         .on('error', (error) => {
-                            this.emit('warn', error);
+                            this.emit('error', error);
                         });
                 }
             }
@@ -133,8 +136,8 @@ class DeviceAtw extends EventEmitter {
                     this.mqtt1 = new Mqtt({
                         host: this.mqtt.host,
                         port: this.mqtt.port || 1883,
-                        clientId: `${this.mqtt.clientId}_${this.deviceId}` || `${this.deviceTypeText}_${this.deviceName}_${this.deviceId}`,
-                        prefix: `${this.mqtt.prefix}/${this.deviceTypeText}/${this.deviceName}`,
+                        clientId: this.mqtt.clientId ? `${this.mqtt.clientId}_${this.deviceId}` : `${this.deviceTypeText}_${this.deviceName}_${this.deviceId}`,
+                        prefix: this.mqtt.prefix ? `${this.mqtt.prefix}/${this.deviceTypeText}/${this.deviceName}` : `melcloud/${this.deviceTypeText}/${this.deviceName}`,
                         user: this.mqtt.user,
                         passwd: this.mqtt.pass,
                         debug: this.mqtt.debug || false
@@ -157,8 +160,11 @@ class DeviceAtw extends EventEmitter {
                         .on('debug', (debug) => {
                             this.emit('debug', debug);
                         })
+                        .on('warn', (warn) => {
+                            this.emit('warn', warn);
+                        })
                         .on('error', (error) => {
-                            this.emit('warn', error);
+                            this.emit('error', error);
                         });
                 }
             }

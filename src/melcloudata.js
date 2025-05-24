@@ -333,14 +333,6 @@ class MelCloudAta extends EventEmitter {
                 HideDryModeControl: hideDryModeControl
             }
 
-            //check state changes
-            const deviceDataHasNotChanged = JSON.stringify(deviceState) === JSON.stringify(this.deviceState);
-            if (deviceDataHasNotChanged) {
-                const debug = this.enableDebugMode ? this.emit('debug', `Device state not changed`) : false;
-                return;
-            }
-            this.deviceState = deviceState;
-
             //restFul
             this.emit('restFul', 'info', deviceData);
             this.emit('restFul', 'state', deviceData.Device);
@@ -348,6 +340,14 @@ class MelCloudAta extends EventEmitter {
             //mqtt
             this.emit('mqtt', 'Info', deviceData);
             this.emit('mqtt', 'State', deviceData.Device);
+
+            //check state changes
+            const deviceDataHasNotChanged = JSON.stringify(deviceState) === JSON.stringify(this.deviceState);
+            if (deviceDataHasNotChanged) {
+                const debug = this.enableDebugMode ? this.emit('debug', `Device state not changed`) : false;
+                return;
+            }
+            this.deviceState = deviceState;
 
             //emit info
             this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion);

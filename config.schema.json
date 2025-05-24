@@ -1764,7 +1764,7 @@
                 "prefix": {
                   "title": "Prefix",
                   "type": "string",
-                  "placeholder": "home/envoy",
+                  "placeholder": "home/melcloud",
                   "description": "Here set the prefix.",
                   "condition": {
                     "functionBody": "return model.accounts[arrayIndices].mqtt.enable === true;"
