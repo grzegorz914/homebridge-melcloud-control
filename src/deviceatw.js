@@ -32,7 +32,6 @@ class DeviceAtw extends EventEmitter {
         this.disableLogInfo = account.disableLogInfo || false;
         this.disableLogDeviceInfo = account.disableLogDeviceInfo || false;
         this.enableDebugMode = account.enableDebugMode || false;
-        this.accountInfo = accountInfo;
         this.contextKey = contextKey;
         this.accountName = accountName;
         this.deviceId = deviceId;
