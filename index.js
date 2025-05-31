@@ -77,7 +77,7 @@ class MelCloudPlatform {
 				const buildingsFile = `${prefDir}/${accountName}_Buildings`;
 				const devicesFile = `${prefDir}/${accountName}_Devices`;
 
-				//set refresh interval
+				//set account refresh interval
 				const refreshInterval = account.refreshInterval * 1000 || 120000;
 
 				try {
@@ -110,37 +110,55 @@ class MelCloudPlatform {
 					}
 
 					//check devices list
-					const devices = await melCloud.chackDevicesList(contextKey);
-					if (devices === false) {
+					const devicesInMelcloud = await melCloud.chackDevicesList(contextKey);
+					if (devicesInMelcloud === false) {
 						return;
 					}
 
-					//start impulse generator
+					//start account impulse generator
 					await melCloud.impulseGenerator.start([{ name: 'checkDevicesList', sampling: refreshInterval }]);
 
-					//Air Conditioner 0
-					try {
-						const ataDevices = account.ataDevices ?? [];
-						const emitLog = !enableDebugMode ? false : log.info(`Found configured ATA devices: ${ataDevices.length}.`);
-						for (const device of ataDevices) {
+					//configured devices
+					const ataDevices = account.ataDevices ?? [];
+					const atwDevices = account.atwDevices ?? [];
+					const ervDevices = account.ervDevices ?? [];
+					const devices = [...ataDevices, ...atwDevices, ...ervDevices];
+					const emitLog = !enableDebugMode ? false : log.info(`Found configured devices ATA: ${ataDevices.length}, ATW: ${atwDevices.length}, ERV: ${ervDevices.length}.`);
+					for (const device of devices) {
+						//chack device from config exist on melcloud
+						const deviceId = device.id;
+						const displayMode = device.displayMode > 0;
+						const deviceExistInMelCloud = devicesInMelcloud.some(dev => dev.DeviceID === deviceId);
+						if (!deviceExistInMelCloud || !displayMode) {
+							continue;
+						}
 
-							//chack device from config exist on melcloud
-							const deviceId = device.id;
-							const displayMode = device.displayMode > 0;
-							const deviceExistInMelCloud = devices.some(dev => dev.DeviceID === deviceId);
-							if (!deviceExistInMelCloud || !displayMode) {
-								continue;
-							};
+						const deviceName = device.name;
+						const deviceType = device.type;
+						const deviceTypeText = device.typeString;
+						const deviceRefreshInterval = device.refreshInterval * 1000 || 5000;
+						try {
+							let configuredDevice;
+							switch (deviceType) {
+								case 0: //ATA
+									configuredDevice = new DeviceAta(api, account, device, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit, restFul, mqtt);
+									break;
+								case 1: //ATW
+									configuredDevice = new DeviceAtw(api, account, device, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit, restFul, mqtt);
+									break;
+								case 2:
+									break;
+								case 3: //ERV
+									configuredDevice = new DeviceErv(api, account, device, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit, restFul, mqtt);
+									break;
+								default:
+									const emitLog = disableLogWarn ? false : log.warn(`${accountName}, ${deviceTypeText}, ${deviceName}, unknown device: ${deviceType}.`);
+									return;
+							}
 
-							const deviceName = device.name;
-							const deviceTypeText = device.typeString;
-							const deviceRefreshInterval = device.refreshInterval * 1000 || 5000;
-							const airConditioner = new DeviceAta(api, account, device, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit, restFul, mqtt)
-							airConditioner.on('publishAccessory', (accessory) => {
-
-								//publish device
+							configuredDevice.on('publishAccessory', (accessory) => {
 								api.publishExternalAccessories(PluginName, [accessory]);
-								const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceTypeText} ${deviceName}, published as external accessory.`);
+								const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceTypeText}, ${deviceName}, published as external accessory.`);
 							})
 								.on('melCloud', async (key, value) => {
 									try {
@@ -148,7 +166,7 @@ class MelCloudPlatform {
 										await melCloud.send(accountInfo);
 									} catch (error) {
 										const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}.`);
-									};
+									}
 								})
 								.on('devInfo', (devInfo) => {
 									const emitLog = disableLogDeviceInfo ? false : log.info(devInfo);
@@ -173,184 +191,36 @@ class MelCloudPlatform {
 							const impulseGenerator = new ImpulseGenerator();
 							impulseGenerator.on('start', async () => {
 								try {
-									const startDone = await airConditioner.start();
+									const startDone = await configuredDevice.start();
 									const stopImpulseGenerator = startDone ? await impulseGenerator.stop() : false;
 
 									//start impulse generator 
-									const startImpulseGenerator = stopImpulseGenerator ? await airConditioner.startImpulseGenerator() : false
+									const startImpulseGenerator = stopImpulseGenerator ? await configuredDevice.startImpulseGenerator() : false
 								} catch (error) {
 									const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}, trying again.`);
-								};
+								}
 							}).on('state', (state) => {
 								const emitLog = !enableDebugMode ? false : state ? log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, Start impulse generator started.`) : log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, Start impulse generator stopped.`);
 							});
 
 							//start impulse generator
 							await impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
-						};
-					} catch (error) {
-						const emitLog = disableLogError ? false : log.error(`${accountName}, ATA did finish launching error: ${error}.`);
-					}
-
-					//Heat Pump 1
-					try {
-						const atwDevices = account.atwDevices ?? [];
-						const emitLog = !enableDebugMode ? false : log.info(`Found configured ATW devices: ${atwDevices.length}.`);
-						for (const device of atwDevices) {
-
-							//chack device from config exist on melcloud
-							const deviceId = device.id;
-							const displayMode = device.displayMode > 0;
-							const deviceExistInMelCloud = devices.some(dev => dev.DeviceID === deviceId);
-							if (!deviceExistInMelCloud || !displayMode) {
-								continue;
-							};
-
-							const deviceName = device.name;
-							const deviceTypeText = device.typeString;
-							const deviceRefreshInterval = device.refreshInterval * 1000 || 5000;
-							const heatPump = new DeviceAtw(api, account, device, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit, restFul, mqtt)
-							heatPump.on('publishAccessory', (accessory) => {
-
-								//publish device
-								api.publishExternalAccessories(PluginName, [accessory]);
-								const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceTypeText} ${deviceName}, published as external accessory.`);
-							})
-								.on('melCloud', async (key, value) => {
-									try {
-										accountInfo[key] = value;
-										await melCloud.send(accountInfo);
-									} catch (error) {
-										const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}.`);
-									};
-								})
-								.on('devInfo', (devInfo) => {
-									const emitLog = disableLogDeviceInfo ? false : log.info(devInfo);
-								})
-								.on('success', (success) => {
-									const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceTypeText}, ${deviceName}, ${success}.`);
-								})
-								.on('info', (info) => {
-									const emitLog = disableLogInfo ? false : log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, ${info}.`);
-								})
-								.on('debug', (debug) => {
-									const emitLog = !enableDebugMode ? false : log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, debug: ${debug}.`);
-								})
-								.on('warn', (warn) => {
-									const emitLog = disableLogWarn ? false : log.warn(`${accountName}, ${deviceTypeText}, ${deviceName}, ${warn}.`);
-								})
-								.on('error', (error) => {
-									const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}.`);
-								});
-
-							//create impulse generator
-							const impulseGenerator = new ImpulseGenerator();
-							impulseGenerator.on('start', async () => {
-								try {
-									const startDone = await heatPump.start();
-									const stopImpulseGenerator = startDone ? await impulseGenerator.stop() : false;
-
-									//start impulse generator 
-									const startImpulseGenerator = stopImpulseGenerator ? await heatPump.startImpulseGenerator() : false
-								} catch (error) {
-									const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}, trying again.`);
-								};
-							}).on('state', (state) => {
-								const emitLog = !enableDebugMode ? false : state ? log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, Start impulse generator started.`) : log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, Start impulse generator stopped.`);
-							});
-
-							//start impulse generator
-							await impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
-						};
-					} catch (error) {
-						const emitLog = disableLogError ? false : log.error(`${accountName}, ATW did finish launching error: ${error}.`);
-					}
-
-					//Energy Recovery Ventilation 3
-					try {
-						const ervDevices = account.ervDevices ?? [];
-						const emitLog = !enableDebugMode ? false : log.info(`Found configured ERV devices: ${ervDevices.length}.`);
-						for (const device of ervDevices) {
-
-							//chack device from config exist on melcloud
-							const deviceId = device.id;
-							const displayMode = device.displayMode > 0;
-							const deviceExistInMelCloud = devices.some(dev => dev.DeviceID === deviceId);
-							if (!deviceExistInMelCloud || !displayMode) {
-								continue;
-							};
-
-							const deviceName = device.name;
-							const deviceTypeText = device.typeString;
-							const deviceRefreshInterval = device.refreshInterval * 1000 || 5000;
-							const energyRecoveryVentilation = new DeviceErv(api, account, device, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit, restFul, mqtt)
-							energyRecoveryVentilation.on('publishAccessory', (accessory) => {
-
-								//publish device
-								api.publishExternalAccessories(PluginName, [accessory]);
-								const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceTypeText} ${deviceName}, published as external accessory.`);
-							})
-								.on('melCloud', async (key, value) => {
-									try {
-										accountInfo[key] = value;
-										await melCloud.send(accountInfo);
-									} catch (error) {
-										const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}.`);
-									};
-								})
-								.on('devInfo', (devInfo) => {
-									const emitLog = disableLogDeviceInfo ? false : log.info(devInfo);
-								})
-								.on('success', (success) => {
-									const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceTypeText}, ${deviceName}, ${success}.`);
-								})
-								.on('info', (info) => {
-									const emitLog = disableLogInfo ? false : log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, ${info}.`);
-								})
-								.on('debug', (debug) => {
-									const emitLog = !enableDebugMode ? false : log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, debug: ${debug}.`);
-								})
-								.on('warn', (warn) => {
-									const emitLog = disableLogWarn ? false : log.warn(`${accountName}, ${deviceTypeText}, ${deviceName}, ${warn}.`);
-								})
-								.on('error', (error) => {
-									const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}.`);
-								});
-
-							//create impulse generator
-							const impulseGenerator = new ImpulseGenerator();
-							impulseGenerator.on('start', async () => {
-								try {
-									const startDone = await energyRecoveryVentilation.start();
-									const stopImpulseGenerator = startDone ? await impulseGenerator.stop() : false;
-
-									//start impulse generator 
-									const startImpulseGenerator = stopImpulseGenerator ? await energyRecoveryVentilation.startImpulseGenerator() : false
-								} catch (error) {
-									const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}, trying again.`);
-								};
-							}).on('state', (state) => {
-								const emitLog = !enableDebugMode ? false : state ? log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, Start impulse generator started.`) : log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, Start impulse generator stopped.`);
-							});
-
-							//start impulse generator
-							await impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
-						};
-					} catch (error) {
-						const emitLog = disableLogError ? false : log.error(`${accountName}, ERV did finish launching error: ${error}.`);
+						} catch (error) {
+							const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, did finish launching error: ${error}.`);
+						}
 					}
 				} catch (error) {
-					const emitLog = disableLogError ? false : log.error(`${accountName}, Account did finish launching error: ${error}.`);
+					const emitLog = disableLogError ? false : log.error(`${accountName}, did finish launching error: ${error}.`);
 				}
-			};
+			}
 		});
-	};
+	}
 
 	configureAccessory(accessory) {
 		this.accessories.push(accessory);
-	};
-};
+	}
+}
 
 export default (api) => {
 	api.registerPlatform(PluginName, PlatformName, MelCloudPlatform);
-};
+}
