@@ -323,8 +323,9 @@ class DeviceAtw extends EventEmitter {
             //services
             if (zonesCount > 0) {
                 this.melCloudServices = [];
-                this.accessory.zones.forEach((zone, i) => {
-                    const zoneName = zone.name
+                for (let i = 0; i < zonesCount; i++) {
+                    const zone = this.accessory.zones[i];
+                    const zoneName = zone.name;
                     const serviceName = `${deviceTypeText} ${accessoryName}: ${zoneName}`;
                     switch (this.displayMode) {
                         case 1: //Heater Cooler
@@ -821,7 +822,7 @@ class DeviceAtw extends EventEmitter {
                             accessory.addService(melCloudServiceT);
                             break;
                     };
-                });
+                }
             };
 
             //sensor services
