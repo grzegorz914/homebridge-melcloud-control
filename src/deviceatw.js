@@ -1443,8 +1443,8 @@ class DeviceAtw extends EventEmitter {
                         sensorsCount: zonesSensorsCount,
                         useFahrenheit: this.useFahrenheit,
                         temperatureUnit: TemperatureDisplayUnits[this.useFahrenheit],
-                        zones: [{}, {}, {}, {}],
-                        zonesSensors: [{}, {}, {}, {}]
+                        zones: [],
+                        zonesSensors: []
                     };
 
                     //default values
@@ -1682,19 +1682,22 @@ class DeviceAtw extends EventEmitter {
                                 break;
                         };
 
-                        //add value to zones arrays
-                        obj.zones[i].name = name;
-                        obj.zones[i].operationMode = operationModeZone;
-                        obj.zones[i].currentOperationMode = currentOperationMode;
-                        obj.zones[i].targetOperationMode = targetOperationMode;
-                        obj.zones[i].roomTemperature = roomTemperature;
-                        obj.zones[i].setTemperature = setTemperature;
-                        obj.zones[i].lockPhysicalControl = lockPhysicalControl;
-                        obj.zones[i].temperaturesSetPropsMinValue = temperatureSetPropsMinValue;
-                        obj.zones[i].temperaturesSetPropsMaxValue = temperatureSetPropsMaxValue;
-                        const setPropsMinValue = this.startPrepareAccessory ? obj.zones[i].operationModesSetPropsMinValue = operationModeSetPropsMinValue : false;
-                        const setPropsMaxValue = this.startPrepareAccessory ? obj.zones[i].operationModesSetPropsMaxValue = operationModeSetPropsMaxValue : false;
-                        const setPropsValidValues = this.startPrepareAccessory ? obj.zones[i].operationModesSetPropsValidValues = operationModeSetPropsValidValues : false;
+                        //add every zone to array
+                        const zone = {
+                            name: name,
+                            operationMode: operationModeZone,
+                            currentOperationMode: currentOperationMode,
+                            targetOperationMode: targetOperationMode,
+                            roomTemperature: roomTemperature,
+                            setTemperature: setTemperature,
+                            lockPhysicalControl: lockPhysicalControl,
+                            temperaturesSetPropsMinValue: temperatureSetPropsMinValue,
+                            temperaturesSetPropsMaxValue: temperatureSetPropsMaxValue,
+                            operationModesSetPropsMinValue: operationModeSetPropsMinValue,
+                            operationModesSetPropsMaxValue: operationModeSetPropsMaxValue,
+                            operationModesSetPropsValidValues: operationModeSetPropsValidValues
+                        };
+                        obj.zones.push(zone);
 
                         //log current state
                         if (!this.disableLogInfo) {
@@ -1828,11 +1831,14 @@ class DeviceAtw extends EventEmitter {
                                 break;
                         };
 
-                        //add value to sensors arrays
-                        obj.zonesSensors[i].name = name;
-                        obj.zonesSensors[i].roomTemperature = roomTemperature;
-                        obj.zonesSensors[i].flowTemperature = flowTemperature;
-                        obj.zonesSensors[i].returnTemperature = returnTemperature;
+                        //add every sensor to array
+                        const sensor = {
+                            name: name,
+                            roomTemperature: roomTemperature,
+                            flowTemperature: flowTemperature,
+                            returnTemperature: returnTemperature
+                        };
+                        obj.zonesSensors.push(sensor);
 
                         //log current state
                         if (!this.disableLogInfo) {
