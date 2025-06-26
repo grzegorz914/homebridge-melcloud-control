@@ -16,6 +16,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - do not configure it manually, always using Config UI X
   - required Homebridge v2.0.0 and above
 
+## [3.8.14] - (26.06.2025)
+
+## Changes
+
+- fix [#199](https://github.com/grzegorz914/homebridge-melcloud-control/issues/199)
+- fix [#205](https://github.com/grzegorz914/homebridge-melcloud-control/issues/205)
+- RESTFul code refactor
+
  ## [3.8.13] - (26.06.2025)
 
 ## Changes

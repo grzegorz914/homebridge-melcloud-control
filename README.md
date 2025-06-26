@@ -299,10 +299,11 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * Port: last 4 numbers of `device Id`, displayed in HB log during start.
 * POST data as a JSON Object `{OperationMode: 8}`.
 * Header content type must be `application/json`.
+* Path `status` response all available paths.
 
 | Method | URL | Path | Response | Type |
 | --- | --- | --- | --- | --- |
-| GET | `http//ip:port` | `Info`, `State` | `{"Power": true, "SetTemperature": 21.5}` | JSON object. |
+| GET | `http//ip:port` | `info`, `state` | `{"Power": true, "SetTemperature": 21.5}` | JSON object. |
 
 | Method | URL | Key | Value | Type | Description |
 | --- | --- | --- | --- | --- | --- |
