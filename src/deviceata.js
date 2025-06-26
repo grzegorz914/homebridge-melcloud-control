@@ -130,8 +130,8 @@ class DeviceAta extends EventEmitter {
                     this.mqtt1 = new Mqtt({
                         host: this.mqtt.host,
                         port: this.mqtt.port || 1883,
-                        clientId: this.mqtt.clientId || `melcloud_${Math.random().toString(16).slice(3)}`,
-                        prefix: this.mqtt.prefix || `melcloud/${this.deviceTypeText}/${this.deviceName}`,
+                        clientId: this.mqtt.clientId ? `melcloud_${this.mqtt.clientId}_${Math.random().toString(16).slice(3)}` : `melcloud_${Math.random().toString(16).slice(3)}`,
+                        prefix: this.mqtt.prefix ? `melcloud/${this.mqtt.prefix}${this.deviceTypeText}/${this.deviceName}` : `melcloud/${this.deviceTypeText}/${this.deviceName}`,
                         user: this.mqtt.user,
                         passwd: this.mqtt.pass,
                         debug: this.mqtt.debug || false
