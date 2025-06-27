@@ -129,7 +129,7 @@ class DeviceErv extends EventEmitter {
                         host: this.mqtt.host,
                         port: this.mqtt.port || 1883,
                         clientId: this.mqtt.clientId ? `melcloud_${this.mqtt.clientId}_${Math.random().toString(16).slice(3)}` : `melcloud_${Math.random().toString(16).slice(3)}`,
-                        prefix: this.mqtt.prefix ? `melcloud/${this.mqtt.prefix}${this.deviceTypeText}/${this.deviceName}` : `melcloud/${this.deviceTypeText}/${this.deviceName}`,
+                        prefix: this.mqtt.prefix ? `melcloud/${this.mqtt.prefix}/${this.deviceTypeText}/${this.deviceName}` : `melcloud/${this.deviceTypeText}/${this.deviceName}`,
                         user: this.mqtt.user,
                         passwd: this.mqtt.passwd,
                         debug: this.mqtt.debug || false
