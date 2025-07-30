@@ -1310,35 +1310,34 @@ class DeviceAtw extends EventEmitter {
                 devicesFile: this.devicesFile,
                 deviceId: this.deviceId,
                 enableDebugMode: this.enableDebugMode
-            });
-
-            this.melCloudAtw.on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, hasHotWaterTank, hasZone2) => {
-                if (!this.displayDeviceInfo) {
-                    return;
-                }
-
-                if (!this.disableLogDeviceInfo) {
-                    this.emit('devInfo', `---- ${this.deviceTypeText}: ${this.deviceName} ----`);
-                    this.emit('devInfo', `Account: ${this.accountName}`);
-                    const indoor = modelIndoor ? this.emit('devInfo', `Indoor: ${modelIndoor}`) : false;
-                    const outdoor = modelOutdoor ? this.emit('devInfo', `Outdoor: ${modelOutdoor}`) : false
-                    this.emit('devInfo', `Serial: ${serialNumber}`)
-                    this.emit('devInfo', `Firmware: ${firmwareAppVersion}`);
-                    this.emit('devInfo', `Manufacturer: ${manufacturer}`);
-                    this.emit('devInfo', '----------------------------------');
-                    this.emit('devInfo', `Zone 1: Yes`);
-                    this.emit('devInfo', `Hot Water Tank: ${hasHotWaterTank ? 'Yes' : 'No'}`);
-                    this.emit('devInfo', `Zone 2: ${hasZone2 ? 'Yes' : 'No'}`);
-                    this.emit('devInfo', '----------------------------------');
-                };
-
-                //accessory info
-                this.manufacturer = manufacturer;
-                this.model = modelIndoor ? modelIndoor : modelOutdoor ? modelOutdoor : `${this.deviceTypeText} ${this.deviceId}`;
-                this.serialNumber = serialNumber;
-                this.firmwareRevision = firmwareAppVersion;
-                this.displayDeviceInfo = false;
             })
+                .on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, hasHotWaterTank, hasZone2) => {
+                    if (!this.displayDeviceInfo) {
+                        return;
+                    }
+
+                    if (!this.disableLogDeviceInfo) {
+                        this.emit('devInfo', `---- ${this.deviceTypeText}: ${this.deviceName} ----`);
+                        this.emit('devInfo', `Account: ${this.accountName}`);
+                        const indoor = modelIndoor ? this.emit('devInfo', `Indoor: ${modelIndoor}`) : false;
+                        const outdoor = modelOutdoor ? this.emit('devInfo', `Outdoor: ${modelOutdoor}`) : false
+                        this.emit('devInfo', `Serial: ${serialNumber}`)
+                        this.emit('devInfo', `Firmware: ${firmwareAppVersion}`);
+                        this.emit('devInfo', `Manufacturer: ${manufacturer}`);
+                        this.emit('devInfo', '----------------------------------');
+                        this.emit('devInfo', `Zone 1: Yes`);
+                        this.emit('devInfo', `Hot Water Tank: ${hasHotWaterTank ? 'Yes' : 'No'}`);
+                        this.emit('devInfo', `Zone 2: ${hasZone2 ? 'Yes' : 'No'}`);
+                        this.emit('devInfo', '----------------------------------');
+                    };
+
+                    //accessory info
+                    this.manufacturer = manufacturer;
+                    this.model = modelIndoor ? modelIndoor : modelOutdoor ? modelOutdoor : `${this.deviceTypeText} ${this.deviceId}`;
+                    this.serialNumber = serialNumber;
+                    this.firmwareRevision = firmwareAppVersion;
+                    this.displayDeviceInfo = false;
+                })
                 .on('deviceState', async (deviceData) => {
                     this.deviceData = deviceData;
 

@@ -943,31 +943,30 @@ class DeviceAta extends EventEmitter {
                 devicesFile: this.devicesFile,
                 deviceId: this.deviceId,
                 enableDebugMode: this.enableDebugMode
-            });
-
-            this.melCloudAta.on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) => {
-                if (!this.displayDeviceInfo) {
-                    return;
-                }
-
-                if (!this.disableLogDeviceInfo) {
-                    this.emit('devInfo', `---- ${this.deviceTypeText}: ${this.deviceName} ----`);
-                    this.emit('devInfo', `Account: ${this.accountName}`);
-                    const indoor = modelIndoor ? this.emit('devInfo', `Indoor: ${modelIndoor}`) : false;
-                    const outdoor = modelOutdoor ? this.emit('devInfo', `Outdoor: ${modelOutdoor}`) : false
-                    this.emit('devInfo', `Serial: ${serialNumber}`);
-                    this.emit('devInfo', `Firmware: ${firmwareAppVersion}`);
-                    this.emit('devInfo', `Manufacturer: ${manufacturer}`);
-                    this.emit('devInfo', '----------------------------------');
-                };
-
-                //accessory info
-                this.manufacturer = manufacturer;
-                this.model = modelIndoor ? modelIndoor : modelOutdoor ? modelOutdoor : `${this.deviceTypeText} ${this.deviceId}`;
-                this.serialNumber = serialNumber;
-                this.firmwareRevision = firmwareAppVersion;
-                this.displayDeviceInfo = false;
             })
+                .on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) => {
+                    if (!this.displayDeviceInfo) {
+                        return;
+                    }
+
+                    if (!this.disableLogDeviceInfo) {
+                        this.emit('devInfo', `---- ${this.deviceTypeText}: ${this.deviceName} ----`);
+                        this.emit('devInfo', `Account: ${this.accountName}`);
+                        const indoor = modelIndoor ? this.emit('devInfo', `Indoor: ${modelIndoor}`) : false;
+                        const outdoor = modelOutdoor ? this.emit('devInfo', `Outdoor: ${modelOutdoor}`) : false
+                        this.emit('devInfo', `Serial: ${serialNumber}`);
+                        this.emit('devInfo', `Firmware: ${firmwareAppVersion}`);
+                        this.emit('devInfo', `Manufacturer: ${manufacturer}`);
+                        this.emit('devInfo', '----------------------------------');
+                    };
+
+                    //accessory info
+                    this.manufacturer = manufacturer;
+                    this.model = modelIndoor ? modelIndoor : modelOutdoor ? modelOutdoor : `${this.deviceTypeText} ${this.deviceId}`;
+                    this.serialNumber = serialNumber;
+                    this.firmwareRevision = firmwareAppVersion;
+                    this.displayDeviceInfo = false;
+                })
                 .on('deviceState', async (deviceData) => {
                     this.deviceData = deviceData;
 
