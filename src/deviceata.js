@@ -279,14 +279,14 @@ class DeviceAta extends EventEmitter {
             const coolDryFanMode = [this.accessory.operationMode, 3, modelSupportsDry ? 2 : 3, 7][this.coolDryFanMode]; //NONE, COOL - 3, DRY - 2, FAN - 7
 
             //accessory
-            const debug = this.enableDebugMode ? this.emit('debug', `Prepare accessory`) : false;
+            if (this.enableDebugMode) this.emit('debug', `Prepare accessory`);
             const accessoryName = deviceName;
             const accessoryUUID = AccessoryUUID.generate(accountName + deviceId.toString());
             const accessoryCategory = [Categories.OTHER, Categories.AIR_HEATER, Categories.THERMOSTAT][this.displayType];
             const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 
             //information service
-            const debug1 = this.enableDebugMode ? this.emit('debug', `Prepare information service`) : false;
+            if (this.enableDebugMode) this.emit('debug', `Prepare information service`);
             accessory.getService(Service.AccessoryInformation)
                 .setCharacteristic(Characteristic.Manufacturer, this.manufacturer)
                 .setCharacteristic(Characteristic.Model, this.model)
@@ -298,7 +298,7 @@ class DeviceAta extends EventEmitter {
             const serviceName = `${deviceTypeText} ${accessoryName}`;
             switch (this.displayMode) {
                 case 1: //Heater Cooler
-                    const debug = this.enableDebugMode ? this.emit('debug', `Prepare heater/cooler service`) : false;
+                    if (this.enableDebugMode) this.emit('debug', `Prepare heater/cooler service`);
                     this.melCloudService = new Service.HeaterCooler(serviceName, `HeaterCooler ${deviceId}`);
                     this.melCloudService.setPrimaryService(true);
                     this.melCloudService.getCharacteristic(Characteristic.Active)
@@ -311,7 +311,7 @@ class DeviceAta extends EventEmitter {
                                 deviceData.Device.Power = [false, true][state];
                                 deviceData.Device.EffectiveFlags = AirConditioner.EffectiveFlags.Power;
                                 await this.melCloudAta.send(deviceData, this.displayMode);
-                                const info = this.disableLogInfo ? false : this.emit('info', `Set power: ${state ? 'ON' : 'OFF'}`);
+                                if (!this.disableLogInfo) this.emit('info', `Set power: ${state ? 'ON' : 'OFF'}`);
                             } catch (error) {
                                 this.emit('warn', `Set power error: ${error}`);
                             };
@@ -348,7 +348,7 @@ class DeviceAta extends EventEmitter {
                                 deviceData.Device.EffectiveFlags = AirConditioner.EffectiveFlags.OperationModeSetTemperature;
                                 await this.melCloudAta.send(deviceData, this.displayMode);
                                 const operationModeText = AirConditioner.DriveMode[deviceData.Device.OperationMode];
-                                const info = this.disableLogInfo ? false : this.emit('info', `Set operation mode: ${operationModeText}`);
+                                if (!this.disableLogInfo) this.emit('info', `Set operation mode: ${operationModeText}`);
                             } catch (error) {
                                 this.emit('warn', `Set operation mode error: ${error}`);
                             };
@@ -396,7 +396,7 @@ class DeviceAta extends EventEmitter {
                                     };
                                     deviceData.Device.EffectiveFlags = AirConditioner.EffectiveFlags.SetFanSpeed;
                                     await this.melCloudAta.send(deviceData, this.displayMode);
-                                    const info = this.disableLogInfo ? false : this.emit('info', `Set fan speed mode: ${AirConditioner.FanSpeed[fanSpeedModeText]}`);
+                                    if (!this.disableLogInfo) this.emit('info', `Set fan speed mode: ${AirConditioner.FanSpeed[fanSpeedModeText]}`);
                                 } catch (error) {
                                     this.emit('warn', `Set fan speed mode error: ${error}`);
                                 };
@@ -415,7 +415,7 @@ class DeviceAta extends EventEmitter {
                                     deviceData.Device.VaneVertical = value ? 7 : 0;
                                     deviceData.Device.EffectiveFlags = AirConditioner.EffectiveFlags.VaneVerticalVaneHorizontal;
                                     await this.melCloudAta.send(deviceData, this.displayMode);
-                                    const info = this.disableLogInfo ? false : this.emit('info', `Set air direction mode: ${AirConditioner.AirDirection[value]}`);
+                                    if (!this.disableLogInfo) this.emit('info', `Set air direction mode: ${AirConditioner.AirDirection[value]}`);
                                 } catch (error) {
                                     this.emit('warn', `Set vane swing mode error: ${error}`);
                                 };
@@ -436,7 +436,7 @@ class DeviceAta extends EventEmitter {
                                 deviceData.Device.DefaultCoolingSetTemperature = value;
                                 deviceData.Device.EffectiveFlags = AirConditioner.EffectiveFlags.SetTemperature;
                                 await this.melCloudAta.send(deviceData, this.displayMode);
-                                const info = this.disableLogInfo ? false : this.emit('info', `Set cooling threshold temperature: ${value}${this.accessory.temperatureUnit}`);
+                                if (!this.disableLogInfo) this.emit('info', `Set cooling threshold temperature: ${value}${this.accessory.temperatureUnit}`);
                             } catch (error) {
                                 this.emit('warn', `Set cooling threshold temperature error: ${error}`);
                             };
@@ -457,7 +457,7 @@ class DeviceAta extends EventEmitter {
                                     deviceData.Device.DefaultHeatingSetTemperature = value;
                                     deviceData.Device.EffectiveFlags = AirConditioner.EffectiveFlags.SetTemperature;
                                     await this.melCloudAta.send(deviceData, this.displayMode);
-                                    const info = this.disableLogInfo ? false : this.emit('info', `Set heating threshold temperature: ${value}${this.accessory.temperatureUnit}`);
+                                    if (!this.disableLogInfo) this.emit('info', `Set heating threshold temperature: ${value}${this.accessory.temperatureUnit}`);
                                 } catch (error) {
                                     this.emit('warn', `Set heating threshold temperature error: ${error}`);
                                 };
@@ -476,7 +476,7 @@ class DeviceAta extends EventEmitter {
                                 deviceData.Device.ProhibitPower = value;
                                 deviceData.Device.EffectiveFlags = AirConditioner.EffectiveFlags.Prohibit;
                                 await this.melCloudAta.send(deviceData, this.displayMode);
-                                const info = this.disableLogInfo ? false : this.emit('info', `Set local physical controls: ${value ? 'LOCK' : 'UNLOCK'}`);
+                                if (!this.disableLogInfo) this.emit('info', `Set local physical controls: ${value ? 'LOCK' : 'UNLOCK'}`);
                             } catch (error) {
                                 this.emit('warn', `Set lock physical controls error: ${error}`);
                             };
@@ -491,7 +491,7 @@ class DeviceAta extends EventEmitter {
                                 value = [false, true][value];
                                 this.accessory.useFahrenheit = value;
                                 this.emit('melCloud', 'UseFahrenheit', value);
-                                const info = this.disableLogInfo ? false : this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
+                                if (!this.disableLogInfo) this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
                             } catch (error) {
                                 this.emit('warn', `Set temperature display unit error: ${error}`);
                             };
@@ -499,7 +499,7 @@ class DeviceAta extends EventEmitter {
                     accessory.addService(this.melCloudService);
                     break;
                 case 2: //Thermostat
-                    const debug1 = this.enableDebugMode ? this.emit('debug', `Prepare thermostat service`) : false;
+                    if (this.enableDebugMode) this.emit('debug', `Prepare thermostat service`);
                     this.melCloudService = new Service.Thermostat(serviceName, `Thermostat ${deviceId}`);
                     this.melCloudService.setPrimaryService(true);
                     this.melCloudService.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
@@ -543,7 +543,7 @@ class DeviceAta extends EventEmitter {
 
                                 await this.melCloudAta.send(deviceData, this.displayMode);
                                 const operationModeText = AirConditioner.DriveMode[deviceData.Device.OperationMode];
-                                const info = this.disableLogInfo ? false : this.emit('info', `Set operation mode: ${operationModeText}`);
+                                if (!this.disableLogInfo) this.emit('info', `Set operation mode: ${operationModeText}`);
                             } catch (error) {
                                 this.emit('warn', `Set operation mode error: ${error}`);
                             };
@@ -568,7 +568,7 @@ class DeviceAta extends EventEmitter {
                                 deviceData.Device.SetTemperature = value;
                                 deviceData.Device.EffectiveFlags = AirConditioner.EffectiveFlags.SetTemperature;
                                 await this.melCloudAta.send(deviceData, this.displayMode);
-                                const info = this.disableLogInfo ? false : this.emit('info', `Set temperature: ${value}${this.accessory.temperatureUnit}`);
+                                if (!this.disableLogInfo) this.emit('info', `Set temperature: ${value}${this.accessory.temperatureUnit}`);
                             } catch (error) {
                                 this.emit('warn', `Set temperature error: ${error}`);
                             };
@@ -583,7 +583,7 @@ class DeviceAta extends EventEmitter {
                                 value = [false, true][value];
                                 this.accessory.useFahrenheit = value;
                                 this.emit('melCloud', 'UseFahrenheit', value);
-                                const info = this.disableLogInfo ? false : this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
+                                if (!this.disableLogInfo) this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
                             } catch (error) {
                                 this.emit('warn', `Set temperature display unit error: ${error}`);
                             };
@@ -594,7 +594,7 @@ class DeviceAta extends EventEmitter {
 
             //temperature sensor services
             if (this.temperatureSensor && this.accessory.roomTemperature !== null) {
-                const debug = this.enableDebugMode ? this.emit('debug', `Prepare room temperature sensor service`) : false;
+                if (this.enableDebugMode) this.emit('debug', `Prepare room temperature sensor service`);
                 this.roomTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Room`, `Room Temperature Sensor ${deviceId}`);
                 this.roomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                 this.roomTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Room`);
@@ -612,7 +612,7 @@ class DeviceAta extends EventEmitter {
             };
 
             if (this.temperatureSensorOutdoor && hasOutdoorTemperature && this.accessory.outdoorTemperature !== null) {
-                const debug = this.enableDebugMode ? this.emit('debug', `Prepare outdoor temperature sensor service`) : false;
+                if (this.enableDebugMode) this.emit('debug', `Prepare outdoor temperature sensor service`);
                 this.outdoorTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Outdoor`, `Outdoor Temperature Sensor ${deviceId}`);
                 this.outdoorTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                 this.outdoorTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Outdoor`);
@@ -631,7 +631,7 @@ class DeviceAta extends EventEmitter {
 
             //presets services
             if (this.presetsConfiguredCount > 0) {
-                const debug = this.enableDebugMode ? this.emit('debug', `Prepare presets services`) : false;
+                if (this.enableDebugMode) this.emit('debug', `Prepare presets services`);
                 this.presetsServices = [];
                 this.presetsConfigured.forEach((preset, i) => {
                     const presetData = presetsOnServer.find(p => p.ID === preset.Id);
@@ -678,7 +678,7 @@ class DeviceAta extends EventEmitter {
                                 };
 
                                 await this.melCloudAta.send(deviceData, this.displayMode);
-                                const info = this.disableLogInfo ? false : this.emit('info', `${state ? 'Set:' : 'Unset:'} ${name}`);
+                                if (!this.disableLogInfo) this.emit('info', `${state ? 'Set:' : 'Unset:'} ${name}`);
                             } catch (error) {
                                 this.emit('warn', `Set preset error: ${error}`);
                             };
@@ -690,7 +690,7 @@ class DeviceAta extends EventEmitter {
 
             //buttons services
             if (this.buttonsConfiguredCount > 0) {
-                const debug = this.enableDebugMode ? this.emit('debug', `Prepare buttons/sensors services`) : false;
+                if (this.enableDebugMode) this.emit('debug', `Prepare buttons/sensors services`);
                 this.buttonsServices = [];
                 this.buttonsConfigured.forEach((button, i) => {
                     //get button mode
@@ -918,7 +918,7 @@ class DeviceAta extends EventEmitter {
                                 };
 
                                 await this.melCloudAta.send(deviceData, this.displayMode);
-                                const info = this.disableLogInfo ? false : this.emit('info', `${state ? `Set: ${name}` : `Unset: ${name}, Set: ${button.previousValue}`}`);
+                                if (!this.disableLogInfo) this.emit('info', `${state ? `Set: ${name}` : `Unset: ${name}, Set: ${button.previousValue}`}`);
                             } catch (error) {
                                 this.emit('warn', `Set button error: ${error}`);
                             };

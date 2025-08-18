@@ -43,7 +43,7 @@ class MelCloud extends EventEmitter {
     };
 
     async connect() {
-        const debug = this.enableDebugMode ? this.emit('debug', `Connecting to MELCloud`) : false;
+       if (this.enableDebugMode) this.emit('debug', `Connecting to MELCloud`);
 
         try {
             const axiosInstanceLogin = axios.create({
@@ -75,7 +75,7 @@ class MelCloud extends EventEmitter {
                 MapLongitude: 'removed',
                 MapLatitude: 'removed'
             };
-            const debug1 = this.enableDebugMode ? this.emit('debug', `MELCloud Info: ${JSON.stringify(debugData, null, 2)}`) : false;
+           if (this.enableDebugMode) this.emit('debug', `MELCloud Info: ${JSON.stringify(debugData, null, 2)}`);
 
             if (contextKey === undefined || contextKey === null) {
                 this.emit('warn', `Context key: ${contextKey}, missing`)
@@ -137,10 +137,10 @@ class MelCloud extends EventEmitter {
                 })
             });
 
-            const debug = this.enableDebugMode ? this.emit('debug', `Scanning for devices`) : false;
+           if (this.enableDebugMode) this.emit('debug', `Scanning for devices`);
             const listDevicesData = await axiosInstanceGet(ApiUrls.ListDevices);
             const buildingsList = listDevicesData.data;
-            const debug1 = this.enableDebugMode ? this.emit('debug', `Buildings: ${JSON.stringify(buildingsList, null, 2)}`) : false;
+           if (this.enableDebugMode) this.emit('debug', `Buildings: ${JSON.stringify(buildingsList, null, 2)}`);
 
             if (!buildingsList) {
                 this.emit('warn', `No building found`);
@@ -149,7 +149,7 @@ class MelCloud extends EventEmitter {
 
             //save buildings to the file
             await this.saveData(this.buildingsFile, buildingsList);
-            const debug2 = this.enableDebugMode ? this.emit('debug', `Buildings list saved`) : false;
+           if (this.enableDebugMode) this.emit('debug', `Buildings list saved`);
 
             //read buildings structure and get the devices
             const devices = [];
@@ -175,7 +175,7 @@ class MelCloud extends EventEmitter {
 
             //save buildings to the file
             await this.saveData(this.devicesFile, devices);
-            const debug3 = this.enableDebugMode ? this.emit('debug', `${devicesCount} devices saved`) : false;
+           if (this.enableDebugMode) this.emit('debug', `${devicesCount} devices saved`);
 
             return devices;
         } catch (error) {
@@ -186,7 +186,7 @@ class MelCloud extends EventEmitter {
     async saveData(path, data) {
         try {
             await fsPromises.writeFile(path, JSON.stringify(data, null, 2));
-            const debug3 = this.enableDebugMode ? this.emit('debug', `Data saved to: ${path}`) : false;
+           if (this.enableDebugMode) this.emit('debug', `Data saved to: ${path}`);
             return true;
         } catch (error) {
             throw new Error(`Save data error: ${error}`);

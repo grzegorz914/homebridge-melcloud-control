@@ -16,6 +16,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - do not configure it manually, always using Config UI X
   - required Homebridge v2.0.0 and above
 
+## [3.9.0] - (18.08.2025)
+
+## Changes
+
+- Config UI CONECT TO MELCLOUD updated
+  - automayically remove devices not existed in melcloud
+  - show/hide password
+
+- cleanup
+
 ## [3.8.14] - (26.06.2025)
 
 ## Changes
@@ -24,7 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - fix [#205](https://github.com/grzegorz914/homebridge-melcloud-control/issues/205)
 - RESTFul code refactor
 
- ## [3.8.13] - (26.06.2025)
+## [3.8.13] - (26.06.2025)
 
 ## Changes
 

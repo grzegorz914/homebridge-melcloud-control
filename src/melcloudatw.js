@@ -52,7 +52,7 @@ class MelCloudAtw extends EventEmitter {
                 return null;
             }
             const deviceData = devicesData.find(device => device.DeviceID === this.deviceId);
-            const debug = this.enableDebugMode ? this.emit('debug', `Device Data: ${JSON.stringify(deviceData, null, 2)}`) : false;
+           if (this.enableDebugMode) this.emit('debug', `Device Data: ${JSON.stringify(deviceData, null, 2)}`);
 
             //device info
             const deviceId = deviceData.DeviceID;
@@ -408,7 +408,7 @@ class MelCloudAtw extends EventEmitter {
             //check state changes
             const deviceDataHasNotChanged = JSON.stringify(deviceState) === JSON.stringify(this.deviceState);
             if (deviceDataHasNotChanged) {
-                const debug = this.enableDebugMode ? this.emit('debug', `Device state not changed`) : false;
+               if (this.enableDebugMode) this.emit('debug', `Device state not changed`);
                 return;
             }
             this.deviceState = deviceState;
