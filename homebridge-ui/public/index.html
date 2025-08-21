@@ -119,11 +119,8 @@
           document.getElementById('user').value = acc.user || '';
           document.getElementById('passwd').value = acc.passwd || '';
           document.getElementById('language').value = acc.language || '';
-
           document.getElementById('logIn').disabled = !(acc.name && acc.user && acc.passwd && acc.language);
-
           this.deviceIndex = i;
-          await homebridge.updatePluginConfig(pluginConfig);
         });
 
         if (i === accountsCount - 1) document.getElementById(`button0`).click();
