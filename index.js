@@ -54,12 +54,16 @@ class MelCloudPlatform {
 
 				//log config
 				const enableDebugMode = account.enableDebugMode || false;
-				const disableLogDeviceInfo = account.disableLogDeviceInfo || false;
-				const disableLogInfo = account.disableLogInfo || false;
-				const disableLogSuccess = account.disableLogSuccess || false;
-				const disableLogWarn = account.disableLogWarn || false;
-				const disableLogError = account.disableLogError || false;
-				const debug = enableDebugMode ? log.info(`${accountName}, debug: Did finish launching.`) : false;
+				const logLevel = {
+					debug: enableDebugMode,
+					info: !account.disableLogInfo,
+					success: !account.disableLogSuccess,
+					warn: !account.disableLogWarn,
+					error: !account.disableLogError,
+					devInfo: !account.disableLogDeviceInfo,
+				};
+
+				if (logLevel.debug) log.info(`${accountName}, debug: Did finish launching.`);
 
 				//remove sensitive data
 				const debugData = {
@@ -70,7 +74,7 @@ class MelCloudPlatform {
 						passwd: 'removed'
 					}
 				};
-				const debug1 = !enableDebugMode ? false : log.info(`${accountName}, Config: ${JSON.stringify(debugData, null, 2)}`);
+				if (logLevel.debug) log.info(`${accountName}, Config: ${JSON.stringify(debugData, null, 2)}`);
 
 				//define directory and file paths
 				const accountFile = `${prefDir}/${accountName}_Account`;
@@ -82,22 +86,13 @@ class MelCloudPlatform {
 
 				try {
 					//melcloud account
-					const melCloud = new MelCloud(user, passwd, language, accountFile, buildingsFile, devicesFile, enableDebugMode, false);
-					melCloud.on('success', (success) => {
-						const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${success}.`);
-					})
-						.on('info', (info) => {
-							const emitLog = disableLogInfo ? false : log.info(`${accountName}, ${info}.`);
-						})
-						.on('debug', (debug) => {
-							const emitLog = !enableDebugMode ? false : log.info(`${accountName}, debug: ${debug}.`);
-						})
-						.on('warn', (warn) => {
-							const emitLog = disableLogWarn ? false : log.warn(`${accountName}, ${warn}.`);
-						})
-						.on('error', (error) => {
-							const emitLog = disableLogError ? false : log.error(`${accountName}, ${error}.`);
-						});
+					const melCloud = new MelCloud(user, passwd, language, accountFile, buildingsFile, devicesFile, enableDebugMode, false)
+						.on('success', (msg) => logLevel.success && log.success(`${accountName}, ${msg}`))
+						.on('info', (msg) => logLevel.info && log.info(`${accountName}, ${msg}`))
+						.on('debug', (msg) => logLevel.debug && log.info(`${accountName}, debug: ${msg}`))
+						.on('warn', (msg) => logLevel.warn && log.warn(`${accountName}, ${msg}`))
+						.on('error', (msg) => logLevel.error && log.error(`${accountName}, ${msg}`));
+
 
 					//connect
 					const response = await melCloud.connect();
@@ -123,7 +118,7 @@ class MelCloudPlatform {
 					const atwDevices = account.atwDevices ?? [];
 					const ervDevices = account.ervDevices ?? [];
 					const devices = [...ataDevices, ...atwDevices, ...ervDevices];
-					const emitLog = !enableDebugMode ? false : log.info(`Found configured devices ATA: ${ataDevices.length}, ATW: ${atwDevices.length}, ERV: ${ervDevices.length}.`);
+					if (logLevel.debug) log.info(`Found configured devices ATA: ${ataDevices.length}, ATW: ${atwDevices.length}, ERV: ${ervDevices.length}.`);
 					for (const device of devices) {
 						//chack device from config exist on melcloud
 						const deviceId = device.id;
@@ -152,65 +147,52 @@ class MelCloudPlatform {
 									configuredDevice = new DeviceErv(api, account, device, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit, restFul, mqtt);
 									break;
 								default:
-									const emitLog = disableLogWarn ? false : log.warn(`${accountName}, ${deviceTypeText}, ${deviceName}, unknown device: ${deviceType}.`);
+									if (logLevel.warn) log.warn(`${accountName}, ${deviceTypeText}, ${deviceName}, unknown device: ${deviceType}.`);
 									return;
 							}
 
-							configuredDevice.on('publishAccessory', (accessory) => {
-								api.publishExternalAccessories(PluginName, [accessory]);
-								const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceTypeText}, ${deviceName}, published as external accessory.`);
+							configuredDevice.on('melCloud', async (key, value) => {
+								try {
+									accountInfo[key] = value;
+									await melCloud.send(accountInfo);
+								} catch (error) {
+									if (logLevel.error) log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}.`);
+								}
 							})
-								.on('melCloud', async (key, value) => {
-									try {
-										accountInfo[key] = value;
-										await melCloud.send(accountInfo);
-									} catch (error) {
-										const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}.`);
-									}
-								})
-								.on('devInfo', (devInfo) => {
-									const emitLog = disableLogDeviceInfo ? false : log.info(devInfo);
-								})
-								.on('success', (success) => {
-									const emitLog = disableLogSuccess ? false : log.success(`${accountName}, ${deviceTypeText}, ${deviceName}, ${success}.`);
-								})
-								.on('info', (info) => {
-									const emitLog = disableLogInfo ? false : log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, ${info}.`);
-								})
-								.on('debug', (debug) => {
-									const emitLog = !enableDebugMode ? false : log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, debug: ${debug}.`);
-								})
-								.on('warn', (warn) => {
-									const emitLog = disableLogWarn ? false : log.warn(`${accountName}, ${deviceTypeText}, ${deviceName}, ${warn}.`);
-								})
-								.on('error', (error) => {
-									const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}.`);
-								});
+								.on('devInfo', (info) => logLevel.devInfo && log.info(info))
+								.on('success', (msg) => logLevel.success && log.success(`${accountName}, ${deviceTypeText}, ${deviceName}, ${msg}`))
+								.on('info', (msg) => logLevel.info && log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, ${msg}`))
+								.on('debug', (msg) => logLevel.debug && log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, debug: ${msg}`))
+								.on('warn', (msg) => logLevel.warn && log.warn(`${accountName}, ${deviceTypeText}, ${deviceName}, ${msg}`))
+								.on('error', (msg) => logLevel.error && log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${msg}`));
 
 							//create impulse generator
 							const impulseGenerator = new ImpulseGenerator();
 							impulseGenerator.on('start', async () => {
 								try {
-									const startDone = await configuredDevice.start();
-									const stopImpulseGenerator = startDone ? await impulseGenerator.stop() : false;
+									const accessory = await configuredDevice.start();
+									if (accessory) {
+										api.publishExternalAccessories(PluginName, [accessory]);
+										if (logLevel.success) log.success(`${accountName}, ${deviceTypeText}, ${deviceName}, Published as external accessory.`);
 
-									//start impulse generator 
-									const startImpulseGenerator = stopImpulseGenerator ? await configuredDevice.startImpulseGenerator() : false
+										await impulseGenerator.stop();
+										await configuredDevice.startImpulseGenerator();
+									}
 								} catch (error) {
-									const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}, trying again.`);
+									if (logLevel.error) log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}, trying again.`);
 								}
 							}).on('state', (state) => {
-								const emitLog = !enableDebugMode ? false : state ? log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, Start impulse generator started.`) : log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, Start impulse generator stopped.`);
+								if (logLevel.debug) log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, Start impulse generator ${state ? 'started' : 'stopped'}.`);
 							});
 
 							//start impulse generator
 							await impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
 						} catch (error) {
-							const emitLog = disableLogError ? false : log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, did finish launching error: ${error}.`);
+							if (logLevel.error) log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, did finish launching error: ${error}.`);
 						}
 					}
 				} catch (error) {
-					const emitLog = disableLogError ? false : log.error(`${accountName}, did finish launching error: ${error}.`);
+					if (logLevel.error) log.error(`${accountName}, did finish launching error: ${error}.`);
 				}
 			}
 		});

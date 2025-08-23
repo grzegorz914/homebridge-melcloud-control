@@ -38,7 +38,7 @@ class MelCloudErv extends EventEmitter {
                 this.emit('error', `Impulse generator error: ${error}`);
             };
         }).on('state', (state) => {
-            const emitState = state ? this.emit('success', `Impulse generator started`) : this.emit('warn', `Impulse generator stopped`);
+            this.emit('success', `Impulse generator ${state ? 'started' : 'stopped'}`);
         });
     };
 
@@ -52,7 +52,7 @@ class MelCloudErv extends EventEmitter {
                 return null;
             }
             const deviceData = devicesData.find(device => device.DeviceID === this.deviceId);
-           if (this.enableDebugMode) this.emit('debug', `Device Data: ${JSON.stringify(deviceData, null, 2)}`);
+            if (this.enableDebugMode) this.emit('debug', `Device Data: ${JSON.stringify(deviceData, null, 2)}`);
 
             //deviceData
             const deviceId = deviceData.DeviceID;
@@ -332,7 +332,7 @@ class MelCloudErv extends EventEmitter {
             //check state changes
             const deviceDataHasNotChanged = JSON.stringify(deviceState) === JSON.stringify(this.deviceState);
             if (deviceDataHasNotChanged) {
-               if (this.enableDebugMode) this.emit('debug', `Device state not changed`);
+                if (this.enableDebugMode) this.emit('debug', `Device state not changed`);
                 return;
             }
             this.deviceState = deviceState;

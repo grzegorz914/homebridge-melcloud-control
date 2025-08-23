@@ -246,8 +246,9 @@ class DeviceErv extends EventEmitter {
     }
 
     //prepare accessory
-    async prepareAccessory(deviceData) {
+    async prepareAccessory() {
         try {
+            const deviceData = this.deviceData;
             const deviceId = this.deviceId;
             const deviceTypeText = this.deviceTypeText;
             const deviceName = this.deviceName;
@@ -266,14 +267,14 @@ class DeviceErv extends EventEmitter {
             const numberOfFanSpeeds = this.accessory.numberOfFanSpeeds;
 
             //accessory
-           if (this.enableDebugMode) this.emit('debug', `Prepare accessory`);
+            if (this.enableDebugMode) this.emit('debug', `Prepare accessory`);
             const accessoryName = deviceName;
             const accessoryUUID = AccessoryUUID.generate(accountName + deviceId.toString());
             const accessoryCategory = [Categories.OTHER, Categories.AIR_PURIFIER, Categories.THERMOSTAT][this.displayType];
             const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 
             //information service
-           if (this.enableDebugMode) this.emit('debug', `Prepare information service`);
+            if (this.enableDebugMode) this.emit('debug', `Prepare information service`);
             accessory.getService(Service.AccessoryInformation)
                 .setCharacteristic(Characteristic.Manufacturer, this.manufacturer)
                 .setCharacteristic(Characteristic.Model, this.model)
@@ -285,7 +286,7 @@ class DeviceErv extends EventEmitter {
             const serviceName = `${deviceTypeText} ${accessoryName}`;
             switch (this.displayMode) {
                 case 1: //Heater Cooler
-                   if (this.enableDebugMode) this.emit('debug', `Prepare heather/cooler service`);
+                    if (this.enableDebugMode) this.emit('debug', `Prepare heather/cooler service`);
                     this.melCloudService = new Service.HeaterCooler(serviceName, `HeaterCooler ${deviceId}`);
                     this.melCloudService.setPrimaryService(true);
                     this.melCloudService.getCharacteristic(Characteristic.Active)
@@ -464,7 +465,7 @@ class DeviceErv extends EventEmitter {
                     accessory.addService(this.melCloudService);
                     break;
                 case 2: //Thermostat
-                   if (this.enableDebugMode) this.emit('debug', `Prepare thermostat service`);
+                    if (this.enableDebugMode) this.emit('debug', `Prepare thermostat service`);
                     this.melCloudService = new Service.Thermostat(serviceName, `Thermostat ${deviceId}`);
                     this.melCloudService.setPrimaryService(true);
                     this.melCloudService.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
@@ -559,7 +560,7 @@ class DeviceErv extends EventEmitter {
 
             //temperature sensor service room
             if (this.temperatureSensor && hasRoomTemperature && this.accessory.roomTemperature !== null) {
-               if (this.enableDebugMode) this.emit('debug', `Prepare room temperature sensor service`);
+                if (this.enableDebugMode) this.emit('debug', `Prepare room temperature sensor service`);
                 this.roomTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Room`, `Room Temperature Sensor ${deviceId}`);
                 this.roomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                 this.roomTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${serviceName} Room`);
@@ -578,7 +579,7 @@ class DeviceErv extends EventEmitter {
 
             //temperature sensor service supply
             if (this.temperatureSensorSupply && hasSupplyTemperature && this.accessory.supplyTemperature !== null) {
-               if (this.enableDebugMode) this.emit('debug', `Prepare supply temperature sensor service`);
+                if (this.enableDebugMode) this.emit('debug', `Prepare supply temperature sensor service`);
                 this.supplyTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Supply`, `Supply Temperature Sensor ${deviceId}`);
                 this.supplyTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                 this.supplyTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${serviceName} Supply`);
@@ -597,7 +598,7 @@ class DeviceErv extends EventEmitter {
 
             //temperature sensor service outdoor
             if (this.temperatureSensorOutdoor && hasOutdoorTemperature && this.accessory.outdoorTemperature !== null) {
-               if (this.enableDebugMode) this.emit('debug', `Prepare outdoor temperature sensor service`);
+                if (this.enableDebugMode) this.emit('debug', `Prepare outdoor temperature sensor service`);
                 this.outdoorTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Outdoor`, `Outdoor Temperature Sensor ${deviceId}`);
                 this.outdoorTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                 this.outdoorTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${serviceName} Outdoor`);
@@ -680,7 +681,7 @@ class DeviceErv extends EventEmitter {
 
             //presets services
             if (this.presetsConfiguredCount > 0) {
-               if (this.enableDebugMode) this.emit('debug', `Prepare presets services`);
+                if (this.enableDebugMode) this.emit('debug', `Prepare presets services`);
                 this.presetsServices = [];
                 this.presetsConfigured.forEach((preset, i) => {
                     const presetData = presetsOnServer.find(p => p.ID === preset.Id);
@@ -737,7 +738,7 @@ class DeviceErv extends EventEmitter {
 
             //buttons services
             if (this.buttonsConfiguredCount > 0) {
-               if (this.enableDebugMode) this.emit('debug', `Prepare buttons services`);
+                if (this.enableDebugMode) this.emit('debug', `Prepare buttons services`);
                 this.buttonsServices = [];
                 this.buttonsConfigured.forEach((button, i) => {
                     //get button mode
@@ -1239,43 +1240,28 @@ class DeviceErv extends EventEmitter {
                         const info7 = hasPM25Sensor ? this.emit('info', `PM2.5 air quality: ${Ventilation.PM25AirQuality[pM25AirQuality]}`) : false;
                         const info8 = hasPM25Sensor ? this.emit('info', `PM2.5 level: ${pM25Level} µg/m`) : false;
                     };
-
-                    //prepare accessory
-                    if (this.startPrepareAccessory) {
-                        const accessory = await this.prepareAccessory(deviceData);
-                        this.emit('publishAccessory', accessory);
-                        this.startPrepareAccessory = false;
-                    }
                 })
-                .on('success', (success) => {
-                    this.emit('success', success);
-                })
-                .on('info', (info) => {
-                    this.emit('info', info);
-                })
-                .on('debug', (debug) => {
-                    this.emit('debug', debug);
-                })
-                .on('warn', (warn) => {
-                    this.emit('warn', warn);
-                })
-                .on('error', (error) => {
-                    this.emit('error', error);
-                })
+                .on('success', (success) => this.emit('success', success))
+                .on('info', (info) => this.emit('info', info))
+                .on('debug', (debug) => this.emit('debug', debug))
+                .on('warn', (warn) => this.emit('warn', warn))
+                .on('error', (error) => this.emit('error', error))
                 .on('restFul', (path, data) => {
-                    const restFul = this.restFulConnected ? this.restFul1.update(path, data) : false;
+                    if (this.restFulConnected) this.restFul1.update(path, data);
                 })
                 .on('mqtt', (topic, message) => {
-                    const mqtt = this.mqttConnected ? this.mqtt1.emit('publish', topic, message) : false;
+                    if (this.mqttConnected) this.mqtt1.emit('publish', topic, message);
                 });
 
             //start external integrations
-            const startExternalIntegrations = this.restFul.enable || this.mqtt.enable ? await this.externalIntegrations() : false;
+            if (this.restFul.enable || this.mqtt.enable) await this.externalIntegrations();
 
             //check state
             await this.melCloudErv.checkState();
 
-            return true;
+            //prepare accessory
+            const accessory = await this.prepareAccessory(deviceData);
+            return accessory;
         } catch (error) {
             throw new Error(`Start error: ${error}`);
         };

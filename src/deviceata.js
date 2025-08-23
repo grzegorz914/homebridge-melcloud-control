@@ -258,8 +258,9 @@ class DeviceAta extends EventEmitter {
     }
 
     //prepare accessory
-    async prepareAccessory(deviceData) {
+    async prepareAccessory() {
         try {
+            const deviceData = this.deviceData;
             const deviceId = this.deviceId;
             const deviceTypeText = this.deviceTypeText;
             const deviceName = this.deviceName;
@@ -1369,43 +1370,28 @@ class DeviceAta extends EventEmitter {
                         this.emit('info', `Temperature display unit: ${obj.temperatureUnit}`);
                         this.emit('info', `Lock physical controls: ${obj.lockPhysicalControl ? 'LOCKED' : 'UNLOCKED'}`);
                     };
-
-                    //prepare accessory
-                    if (this.startPrepareAccessory) {
-                        const accessory = await this.prepareAccessory(deviceData);
-                        this.emit('publishAccessory', accessory);
-                        this.startPrepareAccessory = false;
-                    }
                 })
-                .on('success', (success) => {
-                    this.emit('success', success);
-                })
-                .on('info', (info) => {
-                    this.emit('info', info);
-                })
-                .on('debug', (debug) => {
-                    this.emit('debug', debug);
-                })
-                .on('warn', (warn) => {
-                    this.emit('warn', warn);
-                })
-                .on('error', (error) => {
-                    this.emit('error', error);
-                })
+                .on('success', (success) => this.emit('success', success))
+                .on('info', (info) => this.emit('info', info))
+                .on('debug', (debug) => this.emit('debug', debug))
+                .on('warn', (warn) => this.emit('warn', warn))
+                .on('error', (error) => this.emit('error', error))
                 .on('restFul', (path, data) => {
-                    const restFul = this.restFulConnected ? this.restFul1.update(path, data) : false;
+                    if (this.restFulConnected) this.restFul1.update(path, data);
                 })
                 .on('mqtt', (topic, message) => {
-                    const mqtt = this.mqttConnected ? this.mqtt1.emit('publish', topic, message) : false;
+                    if (this.mqttConnected) this.mqtt1.emit('publish', topic, message);
                 });
 
             //start external integrations
-            const startExternalIntegrations = this.restFul.enable || this.mqtt.enable ? await this.externalIntegrations() : false;
+            if (this.restFul.enable || this.mqtt.enable) await this.externalIntegrations();
 
             //check state
             await this.melCloudAta.checkState();
 
-            return true;
+            //prepare accessory
+            const accessory = await this.prepareAccessory();
+            return accessory;
         } catch (error) {
             throw new Error(`Start error: ${error}`);
         };

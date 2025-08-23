@@ -27,7 +27,7 @@ class Mqtt extends EventEmitter {
                 this.mqttClient.on('message', (topic, message) => {
                     try {
                         const obj = JSON.parse(message.toString());
-                        const emitDebug = config.debug ? this.emit('debug', `MQTT Received topic: ${topic}, message: ${JSON.stringify(obj, null, 2)}`) : false;
+                        if (config.debug) this.emit('debug', `MQTT Received topic: ${topic}, message: ${JSON.stringify(obj, null, 2)}`);
                         const key = Object.keys(obj)[0];
                         const value = Object.values(obj)[0];
                         this.emit('set', key, value);
@@ -43,7 +43,7 @@ class Mqtt extends EventEmitter {
                 const fullTopic = `${config.prefix}/${topic}`;
                 const publishMessage = JSON.stringify(message, null, 2);
                 await this.mqttClient.publish(fullTopic, publishMessage);
-                const emitDebug = config.debug ? this.emit('debug', `MQTT Publish topic: ${fullTopic}, message: ${publishMessage}`) : false;
+                if (config.debug) this.emit('debug', `MQTT Publish topic: ${fullTopic}, message: ${publishMessage}`);
             } catch (error) {
                 this.emit('warn', `MQTT Publish error: ${error}`);
             };
