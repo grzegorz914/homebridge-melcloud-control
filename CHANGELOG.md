@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - do not configure it manually, always using Config UI X
   - required Homebridge v2.0.0 and above
 
+## [3.9.5] - (02.09.2025)
+
+## Changes
+
+- fix ERV start error
+
 ## [3.9.4] - (02.09.2025)
 
 ## Changes
