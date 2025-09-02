@@ -1995,7 +1995,7 @@ class DeviceAtw extends EventEmitter {
             await this.melCloudAtw.checkState();
 
             //prepare accessory
-            const accessory = await this.prepareAccessory(deviceData);
+            const accessory = await this.prepareAccessory();
             return accessory;
         } catch (error) {
             throw new Error(`Start error: ${error}`);
