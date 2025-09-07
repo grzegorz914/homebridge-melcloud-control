@@ -22,10 +22,5 @@ class Functions {
             throw new Error(`Read data error: ${error}`);
         }
     }
-
-    async scaleValue(value, inMin, inMax, outMin, outMax) {
-        const scaledValue = parseFloat((((Math.max(inMin, Math.min(inMax, value)) - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin).toFixed(0));
-        return scaledValue;
-    }
 }
 export default Functions

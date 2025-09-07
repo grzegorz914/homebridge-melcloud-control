@@ -24,7 +24,7 @@ class PluginUiServer extends HomebridgePluginUiServer {
 
     try {
       const response = await melCloud.connect();
-      const devices = await melCloud.chackDevicesList(response.contextKey);
+      const devices = await melCloud.checkDevicesList(response.contextKey);
       return devices;
     } catch (error) {
       throw new Error(`MELCloud error: ${error.message ?? error}.`);

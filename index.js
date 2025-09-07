@@ -105,7 +105,7 @@ class MelCloudPlatform {
 					}
 
 					//check devices list
-					const devicesInMelcloud = await melCloud.chackDevicesList(contextKey);
+					const devicesInMelcloud = await melCloud.checkDevicesList(contextKey);
 					if (devicesInMelcloud === false) {
 						return;
 					}
