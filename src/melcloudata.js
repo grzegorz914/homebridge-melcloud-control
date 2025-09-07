@@ -60,7 +60,8 @@ class MelCloudAta extends EventEmitter {
     async checkState() {
         try {
             //read device info from file
-            const devicesData = await this.functions.readData(this.devicesFile);
+            const data = await this.functions.readData(this.devicesFile);
+            const devicesData = JSON.parse(data);
 
             if (!Array.isArray(devicesData)) {
                 this.emit('warn', `Device data not found`);
