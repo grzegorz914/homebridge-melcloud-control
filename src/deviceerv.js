@@ -44,8 +44,8 @@ class DeviceErv extends EventEmitter {
         //presets configured
         this.presetsConfigured = [];
         for (const preset of this.presets) {
-            const displayType = preset.displayType ?? 0;
-            if (displayType === 0) {
+            const displayType = preset.displayType;
+            if (!displayType) {
                 continue;
             };
 
@@ -63,8 +63,8 @@ class DeviceErv extends EventEmitter {
         //buttons configured
         this.buttonsConfigured = [];
         for (const button of this.buttons) {
-            const displayType = button.displayType ?? 0;
-            if (displayType === 0) {
+            const displayType = button.displayType;
+            if (!displayType) {
                 continue;
             };
 
@@ -1038,18 +1038,16 @@ class DeviceErv extends EventEmitter {
                             };
 
                             //update characteristics
-                            if (this.melCloudService) {
-                                this.melCloudService
-                                    .updateCharacteristic(Characteristic.Active, power)
-                                    .updateCharacteristic(Characteristic.CurrentHeaterCoolerState, obj.currentOperationMode)
-                                    .updateCharacteristic(Characteristic.TargetHeaterCoolerState, obj.targetOperationMode)
-                                    .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-                                    .updateCharacteristic(Characteristic.RotationSpeed, obj.fanSpeed)
-                                    .updateCharacteristic(Characteristic.LockPhysicalControls, obj.lockPhysicalControl)
-                                    .updateCharacteristic(Characteristic.TemperatureDisplayUnits, obj.useFahrenheit);
-                                const updateDefCool = hasCoolOperationMode ? this.melCloudService.updateCharacteristic(Characteristic.CoolingThresholdTemperature, defaultCoolingSetTemperature) : false;
-                                const updateDefHeat = hasHeatOperationMode ? this.melCloudService.updateCharacteristic(Characteristic.HeatingThresholdTemperature, defaultHeatingSetTemperature) : false;
-                            };
+                            this.melCloudService
+                                ?.updateCharacteristic(Characteristic.Active, power)
+                                .updateCharacteristic(Characteristic.CurrentHeaterCoolerState, obj.currentOperationMode)
+                                .updateCharacteristic(Characteristic.TargetHeaterCoolerState, obj.targetOperationMode)
+                                .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+                                .updateCharacteristic(Characteristic.RotationSpeed, obj.fanSpeed)
+                                .updateCharacteristic(Characteristic.LockPhysicalControls, obj.lockPhysicalControl)
+                                .updateCharacteristic(Characteristic.TemperatureDisplayUnits, obj.useFahrenheit);
+                            const updateDefCool = hasCoolOperationMode ? this.melCloudService?.updateCharacteristic(Characteristic.CoolingThresholdTemperature, defaultCoolingSetTemperature) : false;
+                            const updateDefHeat = hasHeatOperationMode ? this.melCloudService?.updateCharacteristic(Characteristic.HeatingThresholdTemperature, defaultHeatingSetTemperature) : false;
                             break;
                         case 2: //Thermostat
                             //operation mode - 0, HEAT, 2, COOL, 4, 5, 6, FAN, AUTO
@@ -1088,59 +1086,36 @@ class DeviceErv extends EventEmitter {
                             obj.operationModeSetPropsValidValues = hasAutoVentilationMode ? (hasBypassVentilationMode ? [0, 1, 2, 3] : [0, 2, 3]) : (hasBypassVentilationMode ? [0, 1, 2] : [0, 2]);
 
                             //update characteristics
-                            if (this.melCloudService) {
-                                this.melCloudService
-                                    .updateCharacteristic(Characteristic.CurrentHeatingCoolingState, obj.currentOperationMode)
-                                    .updateCharacteristic(Characteristic.TargetHeatingCoolingState, obj.targetOperationMode)
-                                    .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-                                    .updateCharacteristic(Characteristic.TargetTemperature, setTemperature)
-                                    .updateCharacteristic(Characteristic.TemperatureDisplayUnits, obj.useFahrenheit);
-                            };
+                            this.melCloudService
+                                ?.updateCharacteristic(Characteristic.CurrentHeatingCoolingState, obj.currentOperationMode)
+                                .updateCharacteristic(Characteristic.TargetHeatingCoolingState, obj.targetOperationMode)
+                                .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+                                .updateCharacteristic(Characteristic.TargetTemperature, setTemperature)
+                                .updateCharacteristic(Characteristic.TemperatureDisplayUnits, obj.useFahrenheit);
                             break;
                     };
                     this.accessory = obj;
 
                     //update temperature sensors
-                    if (this.roomTemperatureSensorService) {
-                        this.roomTemperatureSensorService
-                            .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-                    };
-
-                    if (this.outdoorTemperatureSensorService) {
-                        this.outdoorTemperatureSensorService
-                            .updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature)
-                    };
-
-                    if (this.supplyTemperatureSensorService) {
-                        this.supplyTemperatureSensorService
-                            .updateCharacteristic(Characteristic.CurrentTemperature, supplyTemperature)
-                    };
+                    this.roomTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature);
+                    this.outdoorTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature);
+                    this.supplyTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, supplyTemperature);
 
                     //update core maintenance
-                    if (this.coreMaintenanceService) {
-                        this.coreMaintenanceService
-                            .updateCharacteristic(Characteristic.FilterChangeIndication, coreMaintenanceRequired)
-                    }
+                    this.coreMaintenanceService?.updateCharacteristic(Characteristic.FilterChangeIndication, coreMaintenanceRequired);
 
                     //update filter maintenance
-                    if (this.filterMaintenanceService) {
-                        this.filterMaintenanceService
-                            .updateCharacteristic(Characteristic.FilterChangeIndication, filterMaintenanceRequired)
-                    }
+                    this.filterMaintenanceService?.updateCharacteristic(Characteristic.FilterChangeIndication, filterMaintenanceRequired);
 
                     //update CO2 sensor
-                    if (this.carbonDioxideSensorService) {
-                        this.carbonDioxideSensorService
-                            .updateCharacteristic(Characteristic.CarbonDioxideDetected, roomCO2Detected)
-                            .updateCharacteristic(Characteristic.CarbonDioxideLevel, roomCO2Level)
-                    }
+                    this.carbonDioxideSensorService
+                        ?.updateCharacteristic(Characteristic.CarbonDioxideDetected, roomCO2Detected)
+                        .updateCharacteristic(Characteristic.CarbonDioxideLevel, roomCO2Level);
 
                     //update PM2.5 sensor
-                    if (this.airQualitySensorService) {
-                        this.airQualitySensorService
-                            .updateCharacteristic(Characteristic.AirQuality, pM25AirQuality)
-                            .updateCharacteristic(Characteristic.PM2_5Density, pM25Level)
-                    }
+                    this.airQualitySensorService
+                        ?.updateCharacteristic(Characteristic.AirQuality, pM25AirQuality)
+                        .updateCharacteristic(Characteristic.PM2_5Density, pM25Level);
 
                     //update presets state
                     if (this.presetsConfigured.length > 0) {
@@ -1153,11 +1128,8 @@ class DeviceErv extends EventEmitter {
                                 && presetData.VentilationMode === ventilationMode
                                 && presetData.FanSpeed === setFanSpeed) : false;
 
-                            if (this.presetsServices) {
-                                const characteristicType = preset.characteristicType;
-                                this.presetsServices[i]
-                                    .updateCharacteristic(characteristicType, preset.state)
-                            };
+                            const characteristicType = preset.characteristicType;
+                            this.presetsServices?.[i]?.updateCharacteristic(characteristicType, preset.state);
                         });
                     };
 
@@ -1214,11 +1186,8 @@ class DeviceErv extends EventEmitter {
                             };
 
                             //update services
-                            if (this.buttonsServices) {
-                                const characteristicType = button.characteristicType;
-                                this.buttonsServices[i]
-                                    .updateCharacteristic(characteristicType, button.state)
-                            };
+                            const characteristicType = button.characteristicType;
+                            this.buttonsServices?.[i]?.updateCharacteristic(characteristicType, button.state);
                         });
                     };
 

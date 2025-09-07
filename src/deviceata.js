@@ -46,8 +46,8 @@ class DeviceAta extends EventEmitter {
         //presets configured
         this.presetsConfigured = [];
         for (const preset of this.presets) {
-            const displayType = preset.displayType ?? 0;
-            if (displayType === 0) {
+            const displayType = preset.displayType;
+            if (!displayType) {
                 continue;
             };
 
@@ -65,8 +65,8 @@ class DeviceAta extends EventEmitter {
         //buttons configured
         this.buttonsConfigured = [];
         for (const button of this.buttons) {
-            const displayType = button.displayType ?? 0;
-            if (displayType === 0) {
+            const displayType = button.displayType;
+            if (!displayType) {
                 continue;
             };
 
@@ -1128,19 +1128,17 @@ class DeviceAta extends EventEmitter {
                             };
 
                             //update characteristics
-                            if (this.melCloudService) {
-                                this.melCloudService
-                                    .updateCharacteristic(Characteristic.Active, power ? 1 : 0)
-                                    .updateCharacteristic(Characteristic.CurrentHeaterCoolerState, obj.currentOperationMode)
-                                    .updateCharacteristic(Characteristic.TargetHeaterCoolerState, obj.targetOperationMode)
-                                    .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-                                    .updateCharacteristic(Characteristic.LockPhysicalControls, obj.lockPhysicalControl)
-                                    .updateCharacteristic(Characteristic.TemperatureDisplayUnits, obj.useFahrenheit)
-                                    .updateCharacteristic(Characteristic.CoolingThresholdTemperature, defaultCoolingSetTemperature);
-                                const updateDefHeat = modelSupportsHeat ? this.melCloudService.updateCharacteristic(Characteristic.HeatingThresholdTemperature, defaultHeatingSetTemperature) : false;
-                                const updateRS = modelSupportsFanSpeed ? this.melCloudService.updateCharacteristic(Characteristic.RotationSpeed, obj.fanSpeed) : false;
-                                const updateSM = swingFunction ? this.melCloudService.updateCharacteristic(Characteristic.SwingMode, obj.swingMode) : false;
-                            };
+                            this.melCloudService
+                                ?.updateCharacteristic(Characteristic.Active, power ? 1 : 0)
+                                .updateCharacteristic(Characteristic.CurrentHeaterCoolerState, obj.currentOperationMode)
+                                .updateCharacteristic(Characteristic.TargetHeaterCoolerState, obj.targetOperationMode)
+                                .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+                                .updateCharacteristic(Characteristic.LockPhysicalControls, obj.lockPhysicalControl)
+                                .updateCharacteristic(Characteristic.TemperatureDisplayUnits, obj.useFahrenheit)
+                                .updateCharacteristic(Characteristic.CoolingThresholdTemperature, defaultCoolingSetTemperature);
+                            const updateDefHeat = modelSupportsHeat ? this.melCloudService?.updateCharacteristic(Characteristic.HeatingThresholdTemperature, defaultHeatingSetTemperature) : false;
+                            const updateRS = modelSupportsFanSpeed ? this.melCloudService?.updateCharacteristic(Characteristic.RotationSpeed, obj.fanSpeed) : false;
+                            const updateSM = swingFunction ? this.melCloudService?.updateCharacteristic(Characteristic.SwingMode, obj.swingMode) : false;
                             break;
                         case 2: //Thermostat
                             switch (operationMode) {
@@ -1188,27 +1186,18 @@ class DeviceAta extends EventEmitter {
                             obj.operationModeSetPropsValidValues = modelSupportsAuto && modelSupportsHeat ? [0, 1, 2, 3] : !modelSupportsAuto && modelSupportsHeat ? [0, 1, 2] : modelSupportsAuto && !modelSupportsHeat ? [0, 2, 3] : [0, 2];
 
                             //update characteristics
-                            if (this.melCloudService) {
-                                this.melCloudService
-                                    .updateCharacteristic(Characteristic.CurrentHeatingCoolingState, obj.currentOperationMode)
-                                    .updateCharacteristic(Characteristic.TargetHeatingCoolingState, obj.targetOperationMode)
-                                    .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-                                    .updateCharacteristic(Characteristic.TargetTemperature, setTemperature)
-                                    .updateCharacteristic(Characteristic.TemperatureDisplayUnits, obj.useFahrenheit);
-                            };
+                            this.melCloudService
+                                ?.updateCharacteristic(Characteristic.CurrentHeatingCoolingState, obj.currentOperationMode)
+                                .updateCharacteristic(Characteristic.TargetHeatingCoolingState, obj.targetOperationMode)
+                                .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+                                .updateCharacteristic(Characteristic.TargetTemperature, setTemperature)
+                                .updateCharacteristic(Characteristic.TemperatureDisplayUnits, obj.useFahrenheit);
                             break;
                     };
                     this.accessory = obj;
 
-                    if (this.roomTemperatureSensorService) {
-                        this.roomTemperatureSensorService
-                            .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-                    };
-
-                    if (this.outdoorTemperatureSensorService) {
-                        this.outdoorTemperatureSensorService
-                            .updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature)
-                    };
+                    this.roomTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature);
+                    this.outdoorTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature);
 
                     //update presets state
                     if (this.presetsConfigured.length > 0) {
@@ -1222,11 +1211,8 @@ class DeviceAta extends EventEmitter {
                                 && presetData.VaneVertical === vaneVerticalDirection
                                 && presetData.FanSpeed === fanSpeed) : false;
 
-                            if (this.presetsServices) {
-                                const characteristicType = preset.characteristicType;
-                                this.presetsServices[i]
-                                    .updateCharacteristic(characteristicType, preset.state)
-                            };
+                            const characteristicType = preset.characteristicType;
+                            this.presetsServices?.[i]?.updateCharacteristic(characteristicType, preset.state);
                         });
                     };
 
@@ -1346,11 +1332,8 @@ class DeviceAta extends EventEmitter {
                             };
 
                             //update services
-                            if (this.buttonsServices) {
-                                const characteristicType = button.characteristicType;
-                                this.buttonsServices[i]
-                                    .updateCharacteristic(characteristicType, button.state)
-                            };
+                            const characteristicType = button.characteristicType;
+                            this.buttonsServices?.[i]?.updateCharacteristic(characteristicType, button.state);
                         });
                     };
 

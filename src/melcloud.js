@@ -1,8 +1,8 @@
-import { promises as fsPromises } from 'fs';
 import { Agent } from 'https';
 import axios from 'axios';
 import EventEmitter from 'events';
 import ImpulseGenerator from './impulsegenerator.js';
+import Functions from './functions.js';
 import { ApiUrls } from './constants.js';
 
 class MelCloud extends EventEmitter {
@@ -15,6 +15,7 @@ class MelCloud extends EventEmitter {
         this.requestConfig = requestConfig;
         this.devicesId = [];
         this.contextKey = '';
+        this.functions = new Functions();
 
         this.options = {
             data: {
@@ -42,8 +43,73 @@ class MelCloud extends EventEmitter {
         };
     };
 
+    async chackDevicesList(contextKey) {
+        try {
+            //create axios instance get
+            const axiosInstanceGet = axios.create({
+                method: 'GET',
+                baseURL: ApiUrls.BaseURL,
+                timeout: 10000,
+                headers: {
+                    'X-MitsContextKey': contextKey
+                },
+                maxContentLength: 100000000,
+                maxBodyLength: 1000000000,
+                withCredentials: true,
+                httpsAgent: new Agent({
+                    keepAlive: false,
+                    rejectUnauthorized: false
+                })
+            });
+
+            if (this.enableDebugMode) this.emit('debug', `Scanning for devices`);
+            const listDevicesData = await axiosInstanceGet(ApiUrls.ListDevices);
+            const buildingsList = listDevicesData.data;
+            if (this.enableDebugMode) this.emit('debug', `Buildings: ${JSON.stringify(buildingsList, null, 2)}`);
+
+            if (!buildingsList) {
+                this.emit('warn', `No building found`);
+                return null;
+            }
+
+            //save buildings to the file
+            await this.functions.saveData(this.buildingsFile, buildingsList);
+            if (this.enableDebugMode) this.emit('debug', `Buildings list saved`);
+
+            //read buildings structure and get the devices
+            const devices = [];
+            for (const building of buildingsList) {
+                const buildingStructure = building.Structure;
+
+                //get all devices from the building structure
+                const allDevices = [
+                    ...buildingStructure.Floors.flatMap(floor => [...floor.Areas.flatMap(area => area.Devices), ...floor.Devices]),
+                    ...buildingStructure.Areas.flatMap(area => area.Devices),
+                    ...buildingStructure.Devices
+                ];
+
+                //add all devices to the devices array
+                devices.push(...allDevices);
+            }
+
+            const devicesCount = devices.length;
+            if (devicesCount === 0) {
+                this.emit('warn', `No devices found`);
+                return null;
+            }
+
+            //save buildings to the file
+            await this.functions.saveData(this.devicesFile, devices);
+            if (this.enableDebugMode) this.emit('debug', `${devicesCount} devices saved`);
+
+            return devices;
+        } catch (error) {
+            throw new Error(`Check devices list error: ${error}`);
+        };
+    }
+
     async connect() {
-       if (this.enableDebugMode) this.emit('debug', `Connecting to MELCloud`);
+        if (this.enableDebugMode) this.emit('debug', `Connecting to MELCloud`);
 
         try {
             const axiosInstanceLogin = axios.create({
@@ -75,7 +141,7 @@ class MelCloud extends EventEmitter {
                 MapLongitude: 'removed',
                 MapLatitude: 'removed'
             };
-           if (this.enableDebugMode) this.emit('debug', `MELCloud Info: ${JSON.stringify(debugData, null, 2)}`);
+            if (this.enableDebugMode) this.emit('debug', `MELCloud Info: ${JSON.stringify(debugData, null, 2)}`);
 
             if (contextKey === undefined || contextKey === null) {
                 this.emit('warn', `Context key: ${contextKey}, missing`)
@@ -101,7 +167,7 @@ class MelCloud extends EventEmitter {
             });
 
             //save melcloud info to the file
-            await this.saveData(this.accountFile, accountInfo);
+            await this.functions.saveData(this.accountFile, accountInfo);
 
             //emit connect success
             this.emit('success', `Connect to MELCloud Success`)
@@ -118,81 +184,6 @@ class MelCloud extends EventEmitter {
         };
     }
 
-    async chackDevicesList(contextKey) {
-        try {
-            //create axios instance get
-            const axiosInstanceGet = axios.create({
-                method: 'GET',
-                baseURL: ApiUrls.BaseURL,
-                timeout: 10000,
-                headers: {
-                    'X-MitsContextKey': contextKey
-                },
-                maxContentLength: 100000000,
-                maxBodyLength: 1000000000,
-                withCredentials: true,
-                httpsAgent: new Agent({
-                    keepAlive: false,
-                    rejectUnauthorized: false
-                })
-            });
-
-           if (this.enableDebugMode) this.emit('debug', `Scanning for devices`);
-            const listDevicesData = await axiosInstanceGet(ApiUrls.ListDevices);
-            const buildingsList = listDevicesData.data;
-           if (this.enableDebugMode) this.emit('debug', `Buildings: ${JSON.stringify(buildingsList, null, 2)}`);
-
-            if (!buildingsList) {
-                this.emit('warn', `No building found`);
-                return null;
-            }
-
-            //save buildings to the file
-            await this.saveData(this.buildingsFile, buildingsList);
-           if (this.enableDebugMode) this.emit('debug', `Buildings list saved`);
-
-            //read buildings structure and get the devices
-            const devices = [];
-            for (const building of buildingsList) {
-                const buildingStructure = building.Structure;
-
-                //get all devices from the building structure
-                const allDevices = [
-                    ...buildingStructure.Floors.flatMap(floor => [...floor.Areas.flatMap(area => area.Devices), ...floor.Devices]),
-                    ...buildingStructure.Areas.flatMap(area => area.Devices),
-                    ...buildingStructure.Devices
-                ];
-
-                //add all devices to the devices array
-                devices.push(...allDevices);
-            }
-
-            const devicesCount = devices.length;
-            if (devicesCount === 0) {
-                this.emit('warn', `No devices found`);
-                return null;
-            }
-
-            //save buildings to the file
-            await this.saveData(this.devicesFile, devices);
-           if (this.enableDebugMode) this.emit('debug', `${devicesCount} devices saved`);
-
-            return devices;
-        } catch (error) {
-            throw new Error(`Check devices list error: ${error}`);
-        };
-    }
-
-    async saveData(path, data) {
-        try {
-            await fsPromises.writeFile(path, JSON.stringify(data, null, 2));
-           if (this.enableDebugMode) this.emit('debug', `Data saved to: ${path}`);
-            return true;
-        } catch (error) {
-            throw new Error(`Save data error: ${error}`);
-        }
-    }
-
     async send(accountInfo) {
         try {
             const options = {
@@ -200,7 +191,7 @@ class MelCloud extends EventEmitter {
             };
 
             await this.axiosInstancePost(ApiUrls.UpdateApplicationOptions, options);
-            await this.saveData(this.accountFile, accountInfo);
+            await this.functions.saveData(this.accountFile, accountInfo);
             return true;
         } catch (error) {
             throw new Error(`Send data error: ${error}`);

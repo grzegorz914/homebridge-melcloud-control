@@ -1,8 +1,8 @@
-import { promises as fsPromises } from 'fs';
 import { Agent } from 'https';
 import axios from 'axios';
 import EventEmitter from 'events';
 import ImpulseGenerator from './impulsegenerator.js';
+import Functions from './functions.js';
 import { ApiUrls } from './constants.js';
 
 class MelCloudAtw extends EventEmitter {
@@ -11,6 +11,7 @@ class MelCloudAtw extends EventEmitter {
         this.devicesFile = config.devicesFile;
         this.deviceId = config.deviceId;
         this.enableDebugMode = config.enableDebugMode;
+        this.functions = new Functions();
 
         //set default values
         this.deviceState = {};
@@ -30,22 +31,36 @@ class MelCloudAtw extends EventEmitter {
             })
         });
 
-        this.impulseGenerator = new ImpulseGenerator();
-        this.impulseGenerator.on('checkState', async () => {
-            try {
+        //lock flags
+        this.locks = {
+            checkState: false,
+        };
+        this.impulseGenerator = new ImpulseGenerator()
+            .on('checkState', () => this.handleWithLock('checkState', async () => {
                 await this.checkState();
-            } catch (error) {
-                this.emit('error', `Impulse generator error: ${error}`);
-            };
-        }).on('state', (state) => {
-            this.emit('success', `Impulse generator ${state ? 'started' : 'stopped'}`);
-        });
-    };
+            }))
+            .on('state', (state) => {
+                this.emit('success', `Impulse generator ${state ? 'started' : 'stopped'}.`);
+            });
+    }
+
+    async handleWithLock(lockKey, fn) {
+        if (this.locks[lockKey]) return;
+
+        this.locks[lockKey] = true;
+        try {
+            await fn();
+        } catch (error) {
+            this.emit('error', `Inpulse generator error: ${error}`);
+        } finally {
+            this.locks[lockKey] = false;
+        }
+    }
 
     async checkState() {
         try {
             //read device info from file
-            const devicesData = await this.readData(this.devicesFile);
+            const devicesData = await this.functions.readData(this.devicesFile);
 
             if (!Array.isArray(devicesData)) {
                 this.emit('warn', `Device data not found`);
@@ -424,24 +439,6 @@ class MelCloudAtw extends EventEmitter {
             throw new Error(`Check state error: ${error}`);
         };
     };
-
-    async readData(path) {
-        try {
-            const savedData = await fsPromises.readFile(path)
-            if (savedData.toString().trim().length === 0) {
-                return null;
-            }
-
-            try {
-                const data = JSON.parse(savedData);
-                return data;
-            } catch (error) {
-                throw new Error(`Parse JSON error: ${error}`);
-            }
-        } catch (error) {
-            throw new Error(`Read data error: ${error}`);
-        }
-    }
 
     async send(deviceData) {
         try {

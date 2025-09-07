@@ -51,8 +51,8 @@ class DeviceAtw extends EventEmitter {
         //presets configured
         this.presetsConfigured = [];
         for (const preset of this.presets) {
-            const displayType = preset.displayType ?? 0;
-            if (displayType === 0) {
+            const displayType = preset.displayType;
+            if (!displayType) {
                 continue;
             };
 
@@ -70,8 +70,8 @@ class DeviceAtw extends EventEmitter {
         //buttons configured
         this.buttonsConfigured = [];
         for (const button of this.buttons) {
-            const displayType = button.displayType ?? 0;
-            if (displayType === 0) {
+            const displayType = button.displayType;
+            if (!displayType) {
                 continue;
             };
 
@@ -270,7 +270,6 @@ class DeviceAtw extends EventEmitter {
             throw new Error(`${integration} set key: ${key}, value: ${value}, error: ${error.message ?? error}`);
         };
     }
-
 
     async startImpulseGenerator() {
         try {
@@ -1564,17 +1563,14 @@ class DeviceAtw extends EventEmitter {
                                 };
 
                                 //update characteristics
-                                if (this.melCloudServices) {
-                                    this.melCloudServices[i]
-                                        .updateCharacteristic(Characteristic.Active, power)
-                                        .updateCharacteristic(Characteristic.CurrentHeaterCoolerState, currentOperationMode)
-                                        .updateCharacteristic(Characteristic.TargetHeaterCoolerState, targetOperationMode)
-                                        .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-                                        .updateCharacteristic(Characteristic.LockPhysicalControls, lockPhysicalControl)
-                                        .updateCharacteristic(Characteristic.TemperatureDisplayUnits, obj.useFahrenheit);
-                                    const updateDefCool = heatCoolModes === 0 || heatCoolModes === 2 ? this.melCloudServices[i].updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature) : false;
-                                    const updateDefHeat = heatCoolModes === 0 || heatCoolModes === 1 ? this.melCloudServices[i].updateCharacteristic(Characteristic.HeatingThresholdTemperature, setTemperature) : false;
-                                }
+                                this.melCloudServices?.[i]
+                                    ?.updateCharacteristic(Characteristic.Active, power)
+                                    .updateCharacteristic(Characteristic.CurrentHeaterCoolerState, currentOperationMode)
+                                    .updateCharacteristic(Characteristic.TargetHeaterCoolerState, targetOperationMode)
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+                                    .updateCharacteristic(Characteristic.LockPhysicalControls, lockPhysicalControl)
+                                    .updateCharacteristic(Characteristic.TemperatureDisplayUnits, obj.useFahrenheit);
+                                const updateDefCool = heatCoolModes === 0 || heatCoolModes === 2 ? this.melCloudServices?.[i]?.updateCharacteristic(Characteristic.CoolingThresholdTemperature, setTemperature) : false;
                                 break;
                             case 2: //Thermostat
                                 switch (i) {
@@ -1671,14 +1667,12 @@ class DeviceAtw extends EventEmitter {
                                 };
 
                                 //update characteristics
-                                if (this.melCloudServices) {
-                                    this.melCloudServices[i]
-                                        .updateCharacteristic(Characteristic.CurrentHeatingCoolingState, currentOperationMode)
-                                        .updateCharacteristic(Characteristic.TargetHeatingCoolingState, targetOperationMode)
-                                        .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-                                        .updateCharacteristic(Characteristic.TargetTemperature, setTemperature)
-                                        .updateCharacteristic(Characteristic.TemperatureDisplayUnits, obj.useFahrenheit);
-                                }
+                                this.melCloudServices?.[i]
+                                    ?.updateCharacteristic(Characteristic.CurrentHeatingCoolingState, currentOperationMode)
+                                    .updateCharacteristic(Characteristic.TargetHeatingCoolingState, targetOperationMode)
+                                    .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+                                    .updateCharacteristic(Characteristic.TargetTemperature, setTemperature)
+                                    .updateCharacteristic(Characteristic.TemperatureDisplayUnits, obj.useFahrenheit);
                                 break;
                         };
 
@@ -1748,20 +1742,9 @@ class DeviceAtw extends EventEmitter {
                                 returnTemperature = returnTemperatureHeatPump;
 
                                 //updte characteristics
-                                if (this.roomTemperatureSensorService) {
-                                    this.roomTemperatureSensorService
-                                        .updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature)
-                                };
-
-                                if (this.flowTemperatureSensorService) {
-                                    this.flowTemperatureSensorService
-                                        .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureHeatPump)
-                                };
-
-                                if (this.returnTemperatureSensorService) {
-                                    this.returnTemperatureSensorService
-                                        .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureHeatPump)
-                                };
+                                this.roomTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature);
+                                this.flowTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureHeatPump);
+                                this.returnTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureHeatPump);
                                 break;
                             case caseZone1Sensor: //Zone 1
                                 name = zone1Name;
@@ -1770,20 +1753,9 @@ class DeviceAtw extends EventEmitter {
                                 returnTemperature = returnTemperatureZone1;
 
                                 //updte characteristics
-                                if (this.roomTemperatureZone1SensorService) {
-                                    this.roomTemperatureZone1SensorService
-                                        .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperatureZone1)
-                                };
-
-                                if (this.flowTemperatureZone1SensorService) {
-                                    this.flowTemperatureZone1SensorService
-                                        .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureZone1)
-                                };
-
-                                if (this.returnTemperatureZone1SensorService) {
-                                    this.returnTemperatureZone1SensorService
-                                        .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureZone1)
-                                };
+                                this.roomTemperatureZone1SensorService?.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperatureZone1);
+                                this.flowTemperatureZone1SensorService?.updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureZone1);
+                                this.returnTemperatureZone1SensorService?.updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureZone1);
                                 break;
                             case caseHotWaterSensor: //Hot Water
                                 name = hotWaterName;
@@ -1792,20 +1764,9 @@ class DeviceAtw extends EventEmitter {
                                 returnTemperature = returnTemperatureWaterTank;
 
                                 //updte characteristics
-                                if (this.roomTemperatureWaterTankSensorService) {
-                                    this.roomTemperatureWaterTankSensorService
-                                        .updateCharacteristic(Characteristic.CurrentTemperature, tankWaterTemperature)
-                                };
-
-                                if (this.flowTemperatureWaterTankSensorService) {
-                                    this.flowTemperatureWaterTankSensorService
-                                        .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureWaterTank)
-                                };
-
-                                if (this.returnTemperatureWaterTankSensorService) {
-                                    this.returnTemperatureWaterTankSensorService
-                                        .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureWaterTank)
-                                };
+                                this.roomTemperatureWaterTankSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, tankWaterTemperature);
+                                this.flowTemperatureWaterTankSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureWaterTank);
+                                this.returnTemperatureWaterTankSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureWaterTank);
                                 break;
                             case caseZone2Sensor: //Zone 2
                                 name = zone2Name;
@@ -1814,20 +1775,9 @@ class DeviceAtw extends EventEmitter {
                                 returnTemperature = returnTemperatureZone2;
 
                                 //updte characteristics
-                                if (this.roomTemperatureZone2SensorService) {
-                                    this.roomTemperatureZone2SensorService
-                                        .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperatureZone2)
-                                };
-
-                                if (this.flowTemperatureZone2SensorService) {
-                                    this.flowTemperatureZone2SensorService
-                                        .updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureZone2)
-                                };
-
-                                if (this.returnTemperatureZone2SensorService) {
-                                    this.returnTemperatureZone2SensorService
-                                        .updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureZone2)
-                                };
+                                this.roomTemperatureZone2SensorService?.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperatureZone2);
+                                this.flowTemperatureZone2SensorService?.updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureZone2);
+                                this.returnTemperatureZone2SensorService?.updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureZone2);
                                 break;
                         };
 
@@ -1886,18 +1836,14 @@ class DeviceAtw extends EventEmitter {
                                 && presetData.SetCoolFlowTemperatureZone1 === setCoolFlowTemperatureZone1
                                 && presetData.SetCoolFlowTemperatureZone2 === setCoolFlowTemperatureZone2) : false;
 
-                            if (this.presetsServices) {
-                                const characteristicType = preset.characteristicType;
-                                this.presetsServices[i]
-                                    .updateCharacteristic(characteristicType, preset.state)
-                            };
+                            const characteristicType = preset.characteristicType;
+                            this.presetsServices?.[i]?.updateCharacteristic(characteristicType, preset.state);
                         });
                     };
 
                     //update buttons state
                     if (this.buttonsConfiguredCount > 0) {
-                        for (let i = 0; i < this.buttonsConfiguredCount; i++) {
-                            const button = this.buttonsConfigured[i];
+                        this.buttonsConfigured.forEach((button, i) => {
                             const mode = button.mode;
                             switch (mode) {
                                 case 0: //POWER ON,OFF
@@ -1973,7 +1919,11 @@ class DeviceAtw extends EventEmitter {
                                     this.emit('warn', `Unknown button mode: ${mode} detected`);
                                     break;
                             };
-                        };
+
+                            //update services
+                            const characteristicType = button.characteristicType;
+                            this.buttonsServices?.[i]?.updateCharacteristic(characteristicType, button.state);
+                        });
                     };
                 })
                 .on('success', (success) => this.emit('success', success))
