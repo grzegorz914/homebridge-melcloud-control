@@ -23,7 +23,7 @@ class MelCloudPlatform {
 			//create directory if it doesn't exist
 			mkdirSync(prefDir, { recursive: true });
 		} catch (error) {
-			log.error(`Prepare directory error: ${error}`);
+			log.error(`Prepare directory error: ${error.message ?? error}`);
 			return;
 		}
 
@@ -38,13 +38,13 @@ class MelCloudPlatform {
 				//check mandatory properties
 				if (!accountName || !user || !passwd || !language) {
 					log.warn(`Name: ${accountName ? 'OK' : accountName}, user: ${user ? 'OK' : user}, password: ${passwd ? 'OK' : passwd}, language: ${language ? 'OK' : language} in config missing.`);
-					return;
+					continue;
 				}
 
 				//check duplicate account name
 				if (accountsName.includes(accountName)) {
 					log.warn(`Account name: ${accountName}, must be unique.`);
-					return;
+					continue;
 				}
 				accountsName.push(accountName);
 
@@ -66,7 +66,7 @@ class MelCloudPlatform {
 				if (logLevel.debug) log.info(`${accountName}, debug: Did finish launching.`);
 
 				//remove sensitive data
-				const debugData = {
+				const safeConfig = {
 					...account,
 					passwd: 'removed',
 					mqtt: {
@@ -74,7 +74,7 @@ class MelCloudPlatform {
 						passwd: 'removed'
 					}
 				};
-				if (logLevel.debug) log.info(`${accountName}, Config: ${JSON.stringify(debugData, null, 2)}`);
+				if (logLevel.debug) log.info(`${accountName}, Config: ${JSON.stringify(safeConfig, null, 2)}`);
 
 				//define directory and file paths
 				const accountFile = `${prefDir}/${accountName}_Account`;
@@ -82,7 +82,7 @@ class MelCloudPlatform {
 				const devicesFile = `${prefDir}/${accountName}_Devices`;
 
 				//set account refresh interval
-				const refreshInterval = account.refreshInterval * 1000 || 120000;
+				const refreshInterval = (account.refreshInterval ?? 120) * 1000;
 
 				try {
 					//melcloud account
@@ -95,20 +95,31 @@ class MelCloudPlatform {
 
 
 					//connect
-					const response = await melCloud.connect();
+					let response;
+					try {
+						response = await melCloud.connect();
+					} catch (error) {
+						if (logLevel.error) log.error(`${accountName}, Connect error: ${error.message ?? error}`);
+						continue;
+					}
+
 					const accountInfo = response.accountInfo ?? false;
 					const contextKey = response.contextKey ?? false;
 					const useFahrenheit = response.useFahrenheit ?? false;
 
 					if (contextKey === false) {
-						return;
+						continue;
 					}
 
 					//check devices list
-					const devicesInMelcloud = await melCloud.checkDevicesList(contextKey);
-					if (devicesInMelcloud === false) {
-						return;
+					let devicesInMelcloud;
+					try {
+						devicesInMelcloud = await melCloud.checkDevicesList(contextKey);
+					} catch (error) {
+						if (logLevel.error) log.error(`${accountName}, Check devices list error: ${error.message ?? error}`);
+						continue;
 					}
+					if (!devicesInMelcloud || !Array.isArray(devicesInMelcloud)) continue;
 
 					//start account impulse generator
 					await melCloud.impulseGenerator.start([{ name: 'checkDevicesList', sampling: refreshInterval }]);
@@ -131,7 +142,7 @@ class MelCloudPlatform {
 						const deviceName = device.name;
 						const deviceType = device.type;
 						const deviceTypeText = device.typeString;
-						const deviceRefreshInterval = device.refreshInterval * 1000 || 5000;
+						const deviceRefreshInterval = (device.refreshInterval ?? 5) * 1000;
 						try {
 							let configuredDevice;
 							switch (deviceType) {
@@ -148,7 +159,7 @@ class MelCloudPlatform {
 									break;
 								default:
 									if (logLevel.warn) log.warn(`${accountName}, ${deviceTypeText}, ${deviceName}, unknown device: ${deviceType}.`);
-									return;
+									continue;
 							}
 
 							configuredDevice.on('melCloud', async (key, value) => {
@@ -179,7 +190,7 @@ class MelCloudPlatform {
 										await configuredDevice.startImpulseGenerator();
 									}
 								} catch (error) {
-									if (logLevel.error) log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}, trying again.`);
+									if (logLevel.error) log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error.message ?? error}, trying again.`);
 								}
 							}).on('state', (state) => {
 								if (logLevel.debug) log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, Start impulse generator ${state ? 'started' : 'stopped'}.`);
@@ -188,11 +199,11 @@ class MelCloudPlatform {
 							//start impulse generator
 							await impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
 						} catch (error) {
-							if (logLevel.error) log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, did finish launching error: ${error}.`);
+							if (logLevel.error) log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, did finish launching error: ${error.message ?? error}.`);
 						}
 					}
 				} catch (error) {
-					if (logLevel.error) log.error(`${accountName}, did finish launching error: ${error}.`);
+					if (logLevel.error) log.error(`${accountName}, did finish launching error: ${error.message ?? error}.`);
 				}
 			}
 		});
