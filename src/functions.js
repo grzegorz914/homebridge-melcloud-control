@@ -1,12 +1,12 @@
 import { promises as fsPromises } from 'fs';
 
 class Functions {
-    constructor(config) {
+    constructor() {
     }
 
-    async saveData(path, data) {
+    async saveData(path, data, stringify = true) {
         try {
-            data = JSON.stringify(data, null, 2);
+            data = stringify ? JSON.stringify(data, null, 2) : data;
             await fsPromises.writeFile(path, data);
             return true;
         } catch (error) {
