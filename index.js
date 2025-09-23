@@ -36,14 +36,8 @@ class MelCloudPlatform {
 				const language = account.language;
 
 				//check mandatory properties
-				if (!accountName || !user || !passwd || !language) {
-					log.warn(`Name: ${accountName ? 'OK' : accountName}, user: ${user ? 'OK' : user}, password: ${passwd ? 'OK' : passwd}, language: ${language ? 'OK' : language} in config missing.`);
-					continue;
-				}
-
-				//check duplicate account name
-				if (accountsName.includes(accountName)) {
-					log.warn(`Account name: ${accountName}, must be unique.`);
+				if (!accountName || accountsName.includes(accountName) || !user || !passwd || !language) {
+					log.warn(`Account name: ${accountName ? accountsName.includes(accountName) ? 'Duplicated' : 'OK' : accountName}, user: ${user ? 'OK' : user}, password: ${passwd ? 'OK' : passwd}, language: ${language ? 'OK' : language} in config missing.`);
 					continue;
 				}
 				accountsName.push(accountName);
@@ -82,128 +76,126 @@ class MelCloudPlatform {
 				const devicesFile = `${prefDir}/${accountName}_Devices`;
 
 				//set account refresh interval
-				const refreshInterval = (account.refreshInterval ?? 120) * 1000;
+				const refreshInterval = (account.refreshInterval ?? 120) * 1000
 
 				try {
-					//melcloud account
-					const melCloud = new MelCloud(user, passwd, language, accountFile, buildingsFile, devicesFile, enableDebugMode, false)
-						.on('success', (msg) => logLevel.success && log.success(`${accountName}, ${msg}`))
-						.on('info', (msg) => logLevel.info && log.info(`${accountName}, ${msg}`))
-						.on('debug', (msg) => logLevel.debug && log.info(`${accountName}, debug: ${msg}`))
-						.on('warn', (msg) => logLevel.warn && log.warn(`${accountName}, ${msg}`))
-						.on('error', (msg) => logLevel.error && log.error(`${accountName}, ${msg}`));
+					//create impulse generator
+					const impulseGenerator = new ImpulseGenerator()
+						.on('start', async () => {
+							try {
+								//melcloud account
+								const melCloud = new MelCloud(user, passwd, language, accountFile, buildingsFile, devicesFile, enableDebugMode, false)
+									.on('success', (msg) => logLevel.success && log.success(`${accountName}, ${msg}`))
+									.on('info', (msg) => logLevel.info && log.info(`${accountName}, ${msg}`))
+									.on('debug', (msg) => logLevel.debug && log.info(`${accountName}, debug: ${msg}`))
+									.on('warn', (msg) => logLevel.warn && log.warn(`${accountName}, ${msg}`))
+									.on('error', (msg) => logLevel.error && log.error(`${accountName}, ${msg}`));
 
 
-					//connect
-					let response;
-					try {
-						response = await melCloud.connect();
-					} catch (error) {
-						if (logLevel.error) log.error(`${accountName}, Connect error: ${error.message ?? error}`);
-						continue;
-					}
-
-					const accountInfo = response.accountInfo ?? false;
-					const contextKey = response.contextKey ?? false;
-					const useFahrenheit = response.useFahrenheit ?? false;
-
-					if (contextKey === false) {
-						continue;
-					}
-
-					//check devices list
-					let devicesInMelcloud;
-					try {
-						devicesInMelcloud = await melCloud.checkDevicesList(contextKey);
-					} catch (error) {
-						if (logLevel.error) log.error(`${accountName}, Check devices list error: ${error.message ?? error}`);
-						continue;
-					}
-					if (!devicesInMelcloud || !Array.isArray(devicesInMelcloud)) continue;
-
-					//start account impulse generator
-					await melCloud.impulseGenerator.start([{ name: 'checkDevicesList', sampling: refreshInterval }]);
-
-					//configured devices
-					const ataDevices = account.ataDevices ?? [];
-					const atwDevices = account.atwDevices ?? [];
-					const ervDevices = account.ervDevices ?? [];
-					const devices = [...ataDevices, ...atwDevices, ...ervDevices];
-					if (logLevel.debug) log.info(`Found configured devices ATA: ${ataDevices.length}, ATW: ${atwDevices.length}, ERV: ${ervDevices.length}.`);
-					for (const device of devices) {
-						//chack device from config exist on melcloud
-						const deviceId = device.id;
-						const displayMode = device.displayMode > 0;
-						const deviceExistInMelCloud = devicesInMelcloud.some(dev => dev.DeviceID === deviceId);
-						if (!deviceExistInMelCloud || !displayMode) {
-							continue;
-						}
-
-						const deviceName = device.name;
-						const deviceType = device.type;
-						const deviceTypeText = device.typeString;
-						const deviceRefreshInterval = (device.refreshInterval ?? 5) * 1000;
-						try {
-							let configuredDevice;
-							switch (deviceType) {
-								case 0: //ATA
-									configuredDevice = new DeviceAta(api, account, device, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit, restFul, mqtt);
-									break;
-								case 1: //ATW
-									configuredDevice = new DeviceAtw(api, account, device, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit, restFul, mqtt);
-									break;
-								case 2:
-									break;
-								case 3: //ERV
-									configuredDevice = new DeviceErv(api, account, device, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit, restFul, mqtt);
-									break;
-								default:
-									if (logLevel.warn) log.warn(`${accountName}, ${deviceTypeText}, ${deviceName}, unknown device: ${deviceType}.`);
-									continue;
-							}
-
-							configuredDevice.on('melCloud', async (key, value) => {
+								//connect
+								let response;
 								try {
-									accountInfo[key] = value;
-									await melCloud.send(accountInfo);
+									response = await melCloud.connect();
 								} catch (error) {
-									if (logLevel.error) log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error}.`);
+									if (logLevel.error) log.error(`${accountName}, Connect error: ${error.message ?? error}`);
+									return;
 								}
-							})
-								.on('devInfo', (info) => logLevel.devInfo && log.info(info))
-								.on('success', (msg) => logLevel.success && log.success(`${accountName}, ${deviceTypeText}, ${deviceName}, ${msg}`))
-								.on('info', (msg) => logLevel.info && log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, ${msg}`))
-								.on('debug', (msg) => logLevel.debug && log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, debug: ${msg}`))
-								.on('warn', (msg) => logLevel.warn && log.warn(`${accountName}, ${deviceTypeText}, ${deviceName}, ${msg}`))
-								.on('error', (msg) => logLevel.error && log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${msg}`));
 
-							//create impulse generator
-							const impulseGenerator = new ImpulseGenerator();
-							impulseGenerator.on('start', async () => {
+								const accountInfo = response.accountInfo ?? false;
+								const contextKey = response.contextKey ?? false;
+								const useFahrenheit = response.useFahrenheit ?? false;
+
+								if (contextKey === false) {
+									return;
+								}
+
+								//check devices list
+								let devicesInMelcloud;
 								try {
+									devicesInMelcloud = await melCloud.checkDevicesList(contextKey);
+								} catch (error) {
+									if (logLevel.error) log.error(`${accountName}, Check devices list error: ${error.message ?? error}`);
+									return;
+								}
+								if (!devicesInMelcloud || !Array.isArray(devicesInMelcloud)) return;
+
+								//configured devices
+								const ataDevices = account.ataDevices ?? [];
+								const atwDevices = account.atwDevices ?? [];
+								const ervDevices = account.ervDevices ?? [];
+								const devices = [...ataDevices, ...atwDevices, ...ervDevices];
+								if (logLevel.debug) log.info(`Found configured devices ATA: ${ataDevices.length}, ATW: ${atwDevices.length}, ERV: ${ervDevices.length}.`);
+
+								for (const device of devices) {
+									//chack device from config exist on melcloud
+									const deviceId = device.id;
+									const displayMode = device.displayMode > 0;
+									const deviceExistInMelCloud = devicesInMelcloud.some(dev => dev.DeviceID === deviceId);
+									if (!deviceExistInMelCloud || !displayMode) {
+										continue;
+									}
+
+									const deviceName = device.name;
+									const deviceType = device.type;
+									const deviceTypeText = device.typeString;
+									const deviceRefreshInterval = (device.refreshInterval ?? 5) * 1000;
+
+									let configuredDevice;
+									switch (deviceType) {
+										case 0: //ATA
+											configuredDevice = new DeviceAta(api, account, device, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit, restFul, mqtt);
+											break;
+										case 1: //ATW
+											configuredDevice = new DeviceAtw(api, account, device, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit, restFul, mqtt);
+											break;
+										case 2:
+											break;
+										case 3: //ERV
+											configuredDevice = new DeviceErv(api, account, device, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit, restFul, mqtt);
+											break;
+										default:
+											if (logLevel.warn) log.warn(`${accountName}, ${deviceTypeText}, ${deviceName}, unknown device: ${deviceType}.`);
+											return;
+									}
+
+									configuredDevice.on('melCloud', async (key, value) => {
+										try {
+											accountInfo[key] = value;
+											await melCloud.send(accountInfo);
+										} catch (error) {
+											if (logLevel.error) log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error.message ?? error}.`);
+										}
+									})
+										.on('devInfo', (info) => logLevel.devInfo && log.info(info))
+										.on('success', (msg) => logLevel.success && log.success(`${accountName}, ${deviceTypeText}, ${deviceName}, ${msg}`))
+										.on('info', (msg) => logLevel.info && log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, ${msg}`))
+										.on('debug', (msg) => logLevel.debug && log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, debug: ${msg}`))
+										.on('warn', (msg) => logLevel.warn && log.warn(`${accountName}, ${deviceTypeText}, ${deviceName}, ${msg}`))
+										.on('error', (msg) => logLevel.error && log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${msg}`));
+
 									const accessory = await configuredDevice.start();
 									if (accessory) {
 										api.publishExternalAccessories(PluginName, [accessory]);
 										if (logLevel.success) log.success(`${accountName}, ${deviceTypeText}, ${deviceName}, Published as external accessory.`);
 
+										//start account impulse generator
+										await melCloud.impulseGenerator.start([{ name: 'checkDevicesList', sampling: refreshInterval }]);
+
 										await impulseGenerator.stop();
 										await configuredDevice.startImpulseGenerator();
 									}
-								} catch (error) {
-									if (logLevel.error) log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error.message ?? error}, trying again.`);
 								}
-							}).on('state', (state) => {
-								if (logLevel.debug) log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, Start impulse generator ${state ? 'started' : 'stopped'}.`);
-							});
+							} catch (error) {
+								if (logLevel.error) log.error(`${accountName}, Start impulse generator error, ${error.message ?? error}, trying again.`);
+							}
+						}).on('state', (state) => {
+							if (logLevel.debug) log.info(`${accountName}, Start impulse generator ${state ? 'started' : 'stopped'}.`);
+						});
 
-							//start impulse generator
-							await impulseGenerator.start([{ name: 'start', sampling: 45000 }]);
-						} catch (error) {
-							if (logLevel.error) log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, did finish launching error: ${error.message ?? error}.`);
-						}
-					}
+					//start impulse generator
+					await impulseGenerator.start([{ name: 'start', sampling: 60000 }]);
 				} catch (error) {
-					if (logLevel.error) log.error(`${accountName}, did finish launching error: ${error.message ?? error}.`);
+					if (logLevel.error) log.error(`${accountName}, Did finish launching error: ${error.message ?? error}.`);
 				}
 			}
 		});
