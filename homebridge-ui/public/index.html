@@ -11,12 +11,12 @@
 
 <body>
 
-  <div class="container mt-4">
+  <div class="container mt-3">
     <div class="text-center">
       <img src="homebridge-melcloud-control.png" alt="Image" height="120" />
     </div>
 
-    <div id="melCloudAccount" class="card card-body mt-3">
+    <div id="melCloudAccount" class="card card-body mt-2">
       <form id="configForm">
         <div class="text-center">
           <label id="accountName" class="fw-bold" style="font-size: 23px;">Account</label><br>
@@ -25,17 +25,17 @@
           <label id="info2" class="d-block" style="font-size: 12px;"></label>
         </div>
 
-        <div class="mb-3">
+        <div class="mb-2">
           <label for="name" class="form-label">Name</label>
           <input id="name" type="text" class="form-control" required>
         </div>
 
-        <div class="mb-3">
+        <div class="mb-2">
           <label for="user" class="form-label">User Name</label>
           <input id="user" type="text" class="form-control" required>
         </div>
 
-        <div class="mb-3 position-relative">
+        <div class="mb-2 position-relative">
           <label for="passwd" class="form-label">Password</label>
           <div class="input-group">
             <input id="passwd" type="password" class="form-control" autocomplete="off" required>
@@ -45,7 +45,7 @@
           </div>
         </div>
 
-        <div class="mb-3">
+        <div class="mb-2">
           <label for="language" class="form-label">Language</label>
           <select id="language" name="language" class="form-control">
             <option value="0">English</option>
@@ -76,6 +76,15 @@
           </select>
         </div>
 
+        <div class="mb-2">
+          <label for="displayType" class="form-label">Account Type</label>
+          <select id="displayType" name="displayType" class="form-control">
+            <option value="0">None/Disabled</option>
+            <option value="1">MELCloud</option>
+            <option value="2">MELCloud Home</option>
+          </select>
+        </div>
+
         <div class="text-center">
           <button id="logIn" type="button" class="btn btn-secondary">Connect to MELCloud</button>
           <button id="configButton" type="button" class="btn btn-secondary"><i class="fas fa-gear"></i></button>
@@ -83,7 +92,7 @@
       </form>
     </div>
 
-    <div id="accountButton" class="mt-3"></div>
+    <div id="accountButton" class="mt-2"></div>
   </div>
 
   <script>
@@ -119,7 +128,8 @@
           document.getElementById('user').value = acc.user || '';
           document.getElementById('passwd').value = acc.passwd || '';
           document.getElementById('language').value = acc.language || '';
-          document.getElementById('logIn').disabled = !(acc.name && acc.user && acc.passwd && acc.language);
+          document.getElementById('displayType').value = acc.displayType || '';
+          document.getElementById('logIn').disabled = !(acc.name && acc.user && acc.passwd && acc.language && acc.displayType);
           this.deviceIndex = i;
         });
 
@@ -134,8 +144,9 @@
         acc.user = document.querySelector('#user').value;
         acc.passwd = document.querySelector('#passwd').value;
         acc.language = document.querySelector('#language').value;
+        acc.displayType = document.querySelector('#displayType').value;
 
-        document.getElementById('logIn').disabled = !(acc.name && acc.user && acc.passwd && acc.language);
+        document.getElementById('logIn').disabled = !(acc.name && acc.user && acc.passwd && acc.languaged && acc.displayType);
 
         await homebridge.updatePluginConfig(pluginConfig);
         await homebridge.savePluginConfig(pluginConfig);
@@ -192,7 +203,7 @@
 
         try {
           const acc = pluginConfig[0].accounts[this.deviceIndex];
-          const payload = { accountName: acc.name, user: acc.user, passwd: acc.passwd, language: acc.language };
+          const payload = { accountName: acc.name, user: acc.user, passwd: acc.passwd, language: acc.language, displayType: acc.displayType };
           const devicesInMelCloud = await homebridge.request('/connect', payload);
 
           // Initialize devices arrays
@@ -238,7 +249,7 @@
 
           handleDevices(devicesByType.ata, acc.ataDevices, "Air Conditioner", newDevices.ata, newDevices.ataPresets);
           handleDevices(devicesByType.atw, acc.atwDevices, "Heat Pump", newDevices.atw, newDevices.atwPresets);
-          handleDevices(devicesByType.erv, acc.ervDevices, "ERV", newDevices.erv, newDevices.ervPresets);
+          handleDevices(devicesByType.erv, acc.ervDevices, "Energy Recovery ventiltion", newDevices.erv, newDevices.ervPresets);
 
           // Display summary
           const newDevicesCount = newDevices.ata.length + newDevices.atw.length + newDevices.erv.length;

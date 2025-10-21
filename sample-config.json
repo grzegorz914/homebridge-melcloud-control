@@ -27,22 +27,30 @@
           "atwDevices": [],
           "ervDevices": [],
           "refreshInterval": 120,
-          "disableLogDeviceInfo": false,
-          "disableLogInfo": false,
-          "disableLogSuccess": false,
-          "disableLogWarn": false,
-          "disableLogError": false,
-          "enableDebugMode": false,
+          "log": {
+            "deviceInfo": true,
+            "success": true,
+            "info": false,
+            "warn": true,
+            "error": true,
+            "debug": false
+          },
           "restFul": {
             "enable": false,
             "debug": false
           },
           "mqtt": {
             "enable": false,
+            "host": "",
+            "port": 1883,
+            "clientId": "",
+            "prefix": "",
             "debug": false,
-            "auth": false,
-            "user": "user",
-            "passwd": "password"
+            "auth": {
+              "enable": false,
+              "user": "",
+              "passwd": ""
+            }
           }
         }
       ]

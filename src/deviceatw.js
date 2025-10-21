@@ -6,7 +6,7 @@ import { TemperatureDisplayUnits, HeatPump } from './constants.js';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceAtw extends EventEmitter {
-    constructor(api, account, device, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, refreshInterval, useFahrenheit, restFul, mqtt) {
+    constructor(api, account, device, contextKey, devicesFile, useFahrenheit, restFul, mqtt) {
         super();
 
         Accessory = api.platformAccessory;
@@ -16,6 +16,7 @@ class DeviceAtw extends EventEmitter {
         AccessoryUUID = api.hap.uuid;
 
         //account config
+        this.device = device;
         this.displayMode = device.displayMode;
         this.hideZone = device.hideZone;
         this.temperatureSensor = device.temperatureSensor || false;
@@ -27,19 +28,18 @@ class DeviceAtw extends EventEmitter {
         this.temperatureSensorReturnWaterTank = device.temperatureSensorReturnWaterTank || false;
         this.temperatureSensorFlowZone2 = device.temperatureSensorFlowZone2 || false;
         this.temperatureSensorReturnZone2 = device.temperatureSensorReturnZone2 || false;
-        this.presets = device.presets || [];
-        this.buttons = device.buttonsSensors || [];
-        this.disableLogInfo = account.disableLogInfo || false;
-        this.disableLogDeviceInfo = account.disableLogDeviceInfo || false;
-        this.enableDebugMode = account.enableDebugMode || false;
+        this.presets = (device.presets || []).filter(preset => (preset.displayType ?? 0) > 0);
+        this.buttons = (device.buttonsSensors || []).filter(button => (button.displayType ?? 0) > 0);
+        this.logDeviceInfo = account.log?.deviceInfo || false;
+        this.logInfo = account.log?.info || false;
+        this.logWarn = account.log?.warn || false;
+        this.logDebug = account.log?.debug || false;
         this.contextKey = contextKey;
-        this.accountName = accountName;
-        this.deviceId = deviceId;
-        this.deviceName = deviceName;
-        this.deviceTypeText = deviceTypeText;
+        this.accountName = account.name;
+        this.deviceId = device.id;
+        this.deviceName = device.name;
+        this.deviceTypeText = device.typeString;
         this.devicesFile = devicesFile;
-        this.refreshInterval = refreshInterval;
-        this.startPrepareAccessory = true;
         this.displayDeviceInfo = true;
 
         //external integrations
@@ -49,42 +49,22 @@ class DeviceAtw extends EventEmitter {
         this.mqttConnected = false;
 
         //presets configured
-        this.presetsConfigured = [];
         for (const preset of this.presets) {
-            const displayType = preset.displayType;
-            if (!displayType) {
-                continue;
-            };
-
-            const presetyServiceType = ['', Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][displayType];
-            const presetCharacteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][displayType];
             preset.name = preset.name || 'Preset'
-            preset.serviceType = presetyServiceType;
-            preset.characteristicType = presetCharacteristicType;
+            preset.serviceType = [null, Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][preset.displayType];
+            preset.characteristicType = [null, Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][preset.displayType];
             preset.state = false;
             preset.previousSettings = {};
-            this.presetsConfigured.push(preset);
         }
-        this.presetsConfiguredCount = this.presetsConfigured.length || 0;
 
         //buttons configured
-        this.buttonsConfigured = [];
         for (const button of this.buttons) {
-            const displayType = button.displayType;
-            if (!displayType) {
-                continue;
-            };
-
-            const buttonServiceType = ['', Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][displayType];
-            const buttonCharacteristicType = ['', Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][displayType];
             button.name = button.name || 'Button'
-            button.serviceType = buttonServiceType;
-            button.characteristicType = buttonCharacteristicType;
+            button.serviceType = [null, Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][button.displayType];
+            button.characteristicType = [null, Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][button.displayType];
             button.state = false;
             button.previousValue = null;
-            this.buttonsConfigured.push(button);;
         }
-        this.buttonsConfiguredCount = this.buttonsConfigured.length || 0;
 
         //device data
         this.deviceData = {};
@@ -102,13 +82,13 @@ class DeviceAtw extends EventEmitter {
                 if (!this.restFulConnected) {
                     this.restFul1 = new RestFul({
                         port: this.deviceId.toString().slice(-4).replace(/^0/, '9'),
-                        debug: this.restFul.debug || false
-                    });
-
-                    this.restFul1.on('connected', (message) => {
-                        this.restFulConnected = true;
-                        this.emit('success', message);
+                        logWarn: this.logWarn,
+                        logDebug: this.logDebug
                     })
+                        .on('connected', (message) => {
+                            this.restFulConnected = true;
+                            this.emit('success', message);
+                        })
                         .on('set', async (key, value) => {
                             try {
                                 await this.setOverExternalIntegration('RESTFul', this.deviceData, key, value);
@@ -137,15 +117,15 @@ class DeviceAtw extends EventEmitter {
                         port: this.mqtt.port || 1883,
                         clientId: this.mqtt.clientId ? `melcloud_${this.mqtt.clientId}_${Math.random().toString(16).slice(3)}` : `melcloud_${Math.random().toString(16).slice(3)}`,
                         prefix: this.mqtt.prefix ? `melcloud/${this.mqtt.prefix}/${this.deviceTypeText}/${this.deviceName}` : `melcloud/${this.deviceTypeText}/${this.deviceName}`,
-                        user: this.mqtt.user,
-                        passwd: this.mqtt.passwd,
-                        debug: this.mqtt.debug || false
-                    });
-
-                    this.mqtt1.on('connected', (message) => {
-                        this.mqttConnected = true;
-                        this.emit('success', message);
+                        user: this.mqtt.auth?.user,
+                        passwd: this.mqtt.auth?.passwd,
+                        logWarn: this.logWarn,
+                        logDebug: this.logDebug
                     })
+                        .on('connected', (message) => {
+                            this.mqttConnected = true;
+                            this.emit('success', message);
+                        })
                         .on('subscribed', (message) => {
                             this.emit('success', message);
                         })
@@ -271,15 +251,14 @@ class DeviceAtw extends EventEmitter {
         };
     }
 
-    async startImpulseGenerator() {
+    async startStopImpulseGenerator(state, timers = []) {
         try {
-            //start impule generator
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            await this.melCloudAtw.impulseGenerator.start([{ name: 'checkState', sampling: this.refreshInterval }]);
+            //start impulse generator 
+            await this.melCloudAtw.impulseGenerator.state(state, timers)
             return true;
         } catch (error) {
             throw new Error(`Impulse generator start error: ${error}`);
-        };
+        }
     }
 
     //prepare accessory
@@ -305,14 +284,14 @@ class DeviceAtw extends EventEmitter {
             const caseZone2Sensor = this.accessory.caseZone2Sensor;
 
             //accessory
-            if (this.enableDebugMode) this.emit('debug', `Prepare accessory`);
+            if (this.logDebug) this.emit('debug', `Prepare accessory`);
             const accessoryName = deviceName;
             const accessoryUUID = AccessoryUUID.generate(accountName + deviceId.toString());
             const accessoryCategory = [Categories.OTHER, Categories.AIR_HEATER, Categories.THERMOSTAT][this.displayType];
             const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 
             //information service
-            if (this.enableDebugMode) this.emit('debug', `Prepare information service`);
+            if (this.logDebug) this.emit('debug', `Prepare information service`);
             accessory.getService(Service.AccessoryInformation)
                 .setCharacteristic(Characteristic.Manufacturer, this.manufacturer)
                 .setCharacteristic(Characteristic.Model, this.model)
@@ -328,7 +307,7 @@ class DeviceAtw extends EventEmitter {
                     const serviceName = `${deviceTypeText} ${accessoryName}: ${zoneName}`;
                     switch (this.displayMode) {
                         case 1: //Heater Cooler
-                            if (this.enableDebugMode) this.emit('debug', `Prepare heather/cooler ${zoneName} service`);
+                            if (this.logDebug) this.emit('debug', `Prepare heather/cooler ${zoneName} service`);
                             const melCloudService = new Service.HeaterCooler(serviceName, `HeaterCooler ${deviceId} ${i}`);
                             melCloudService.setPrimaryService(true);
                             melCloudService.getCharacteristic(Characteristic.Active)
@@ -343,11 +322,11 @@ class DeviceAtw extends EventEmitter {
                                                 deviceData.Device.Power = [false, true][state];
                                                 deviceData.Device.EffectiveFlags = HeatPump.EffectiveFlags.Power;
                                                 await this.melCloudAtw.send(deviceData);
-                                                if (!this.disableLogInfo) this.emit('info', `${zoneName}, Set power: ${state ? 'ON' : 'OFF'}`);
+                                                if (this.logInfo) this.emit('info', `${zoneName}, Set power: ${state ? 'ON' : 'OFF'}`);
                                                 break;
                                         };
                                     } catch (error) {
-                                        this.emit('warn', `Set power error: ${error}`);
+                                        if (this.logWarn) this.emit('warn', `Set power error: ${error}`);
                                     };
                                 });
                             melCloudService.getCharacteristic(Characteristic.CurrentHeaterCoolerState)
@@ -442,9 +421,9 @@ class DeviceAtw extends EventEmitter {
                                         };
 
                                         await this.melCloudAtw.send(deviceData);
-                                        if (!this.disableLogInfo) this.emit('info', `${zoneName}, Set operation mode: ${operationModeText}`);
+                                        if (this.logInfo) this.emit('info', `${zoneName}, Set operation mode: ${operationModeText}`);
                                     } catch (error) {
-                                        this.emit('warn', `${zoneName}, Set operation mode error: ${error}`);
+                                        if (this.logWarn) this.emit('warn', `${zoneName}, Set operation mode error: ${error}`);
                                     };
                                 });
                             melCloudService.getCharacteristic(Characteristic.CurrentTemperature)
@@ -515,9 +494,9 @@ class DeviceAtw extends EventEmitter {
                                             };
 
                                             const set = i > 0 ? await this.melCloudAtw.send(deviceData) : false;
-                                            const info = this.disableLogInfo || i === 0 ? false : this.emit('info', `${zoneName}, Set cooling threshold temperature: ${value}${this.accessory.temperatureUnit}`);
+                                            const info = this.logInfo || i === 0 ? false : this.emit('info', `${zoneName}, Set cooling threshold temperature: ${value}${this.accessory.temperatureUnit}`);
                                         } catch (error) {
-                                            this.emit('warn', `${zoneName}, Set cooling threshold temperature error: ${error}`);
+                                            if (this.logWarn) this.emit('warn', `${zoneName}, Set cooling threshold temperature error: ${error}`);
                                         };
                                     });
                             };
@@ -579,9 +558,9 @@ class DeviceAtw extends EventEmitter {
                                             };
 
                                             const set = i > 0 ? await this.melCloudAtw.send(deviceData) : false;
-                                            const info = this.disableLogInfo || i === 0 ? false : this.emit('info', `${zoneName}, Set heating threshold temperature: ${value}${this.accessory.temperatureUnit}`);
+                                            const info = this.logInfo || i === 0 ? false : this.emit('info', `${zoneName}, Set heating threshold temperature: ${value}${this.accessory.temperatureUnit}`);
                                         } catch (error) {
-                                            this.emit('warn', `${zoneName}, Set heating threshold temperature error: ${error}`);
+                                            if (this.logWarn) this.emit('warn', `${zoneName}, Set heating threshold temperature error: ${error}`);
                                         };
                                     });
                             };
@@ -615,9 +594,9 @@ class DeviceAtw extends EventEmitter {
                                         };
 
                                         await this.melCloudAtw.send(deviceData);
-                                        if (!this.disableLogInfo) this.emit('info', `${zoneName}, Set lock physical controls: ${value ? 'LOCK' : 'UNLOCK'}`);
+                                        if (this.logInfo) this.emit('info', `${zoneName}, Set lock physical controls: ${value ? 'LOCK' : 'UNLOCK'}`);
                                     } catch (error) {
-                                        this.emit('warn', `${zoneName}, Set lock physical controls error: ${error}`);
+                                        if (this.logWarn) this.emit('warn', `${zoneName}, Set lock physical controls error: ${error}`);
                                     };
                                 });
                             melCloudService.getCharacteristic(Characteristic.TemperatureDisplayUnits)
@@ -630,16 +609,16 @@ class DeviceAtw extends EventEmitter {
                                         value = [false, true][value];
                                         this.accessory.useFahrenheit = value;
                                         this.emit('melCloud', 'UseFahrenheit', value);
-                                        if (!this.disableLogInfo) this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
+                                        if (this.logInfo) this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
                                     } catch (error) {
-                                        this.emit('warn', `Set temperature display unit error: ${error}`);
+                                        if (this.logWarn) this.emit('warn', `Set temperature display unit error: ${error}`);
                                     };
                                 });
                             this.melCloudServices.push(melCloudService);
                             accessory.addService(melCloudService);
                             break;
                         case 2: //Thermostat
-                            if (this.enableDebugMode) this.emit('debug', `Prepare thermostat ${zoneName} service`);
+                            if (this.logDebug) this.emit('debug', `Prepare thermostat ${zoneName} service`);
                             const melCloudServiceT = new Service.Thermostat(serviceName, `Thermostat ${deviceId} ${i}`);
                             melCloudServiceT.setPrimaryService(true);
                             melCloudServiceT.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
@@ -750,9 +729,9 @@ class DeviceAtw extends EventEmitter {
                                         };
 
                                         await this.melCloudAtw.send(deviceData);
-                                        if (!this.disableLogInfo) this.emit('info', `${zoneName}, Set operation mode: ${operationModeText}`);
+                                        if (this.logInfo) this.emit('info', `${zoneName}, Set operation mode: ${operationModeText}`);
                                     } catch (error) {
-                                        this.emit('warn', `${zoneName}, Set operation mode error: ${error}`);
+                                        if (this.logWarn) this.emit('warn', `${zoneName}, Set operation mode error: ${error}`);
                                     };
                                 });
                             melCloudServiceT.getCharacteristic(Characteristic.CurrentTemperature)
@@ -797,9 +776,9 @@ class DeviceAtw extends EventEmitter {
                                         };
 
                                         const set = i > 0 ? await this.melCloudAtw.send(deviceData) : false;
-                                        const info = this.disableLogInfo || i === 0 ? false : this.emit('info', `${zoneName}, Set temperature: ${value}${this.accessory.temperatureUnit}`);
+                                        const info = this.logInfo || i === 0 ? false : this.emit('info', `${zoneName}, Set temperature: ${value}${this.accessory.temperatureUnit}`);
                                     } catch (error) {
-                                        this.emit('warn', `${zoneName}, Set temperature error: ${error}`);
+                                        if (this.logWarn) this.emit('warn', `${zoneName}, Set temperature error: ${error}`);
                                     };
                                 });
                             melCloudServiceT.getCharacteristic(Characteristic.TemperatureDisplayUnits)
@@ -812,9 +791,9 @@ class DeviceAtw extends EventEmitter {
                                         value = [false, true][value];
                                         this.accessory.useFahrenheit = value;
                                         this.emit('melCloud', 'UseFahrenheit', value);
-                                        if (!this.disableLogInfo) this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
+                                        if (this.logInfo) this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
                                     } catch (error) {
-                                        this.emit('warn', `Set temperature display unit error: ${error}`);
+                                        if (this.logWarn) this.emit('warn', `Set temperature display unit error: ${error}`);
                                     };
                                 });
                             this.melCloudServices.push(melCloudServiceT);
@@ -832,7 +811,7 @@ class DeviceAtw extends EventEmitter {
                     switch (i) {
                         case caseHeatPumpSensor: //Heat Pump
                             if (zone.roomTemperature !== null) {
-                                if (this.enableDebugMode) this.emit('debug', `${zoneName}, Prepare temperature sensor service`);
+                                if (this.logDebug) this.emit('debug', `${zoneName}, Prepare temperature sensor service`);
                                 this.roomTemperatureSensorService = new Service.TemperatureSensor(`${serviceName}`, `${zoneName} Temperature Sensor ${deviceId} ${i}`);
                                 this.roomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 this.roomTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName}`);
@@ -850,7 +829,7 @@ class DeviceAtw extends EventEmitter {
                             };
 
                             if (zone.flowTemperature !== null) {
-                                if (this.enableDebugMode) this.emit('debug', `Prepare flow temperature sensor service`);
+                                if (this.logDebug) this.emit('debug', `Prepare flow temperature sensor service`);
                                 this.flowTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Flow`, `${zoneName} Temperature Sensor Flow ${deviceId} ${i}`);
                                 this.flowTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 this.flowTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName} Flow`);
@@ -869,7 +848,7 @@ class DeviceAtw extends EventEmitter {
                             };
 
                             if (zone.returnTemperature !== null) {
-                                if (this.enableDebugMode) this.emit('debug', `Prepare return temperature sensor service`);
+                                if (this.logDebug) this.emit('debug', `Prepare return temperature sensor service`);
                                 this.returnTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Return`, `${zoneName} Temperature Sensor Return ${deviceId} ${i}`);
                                 this.returnTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 this.returnTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName} Return`);
@@ -888,7 +867,7 @@ class DeviceAtw extends EventEmitter {
                             break;
                         case caseZone1Sensor: //Zone 1
                             if (zone.roomTemperature !== null) {
-                                if (this.enableDebugMode) this.emit('debug', `${zoneName}, Prepare temperature sensor service`);
+                                if (this.logDebug) this.emit('debug', `${zoneName}, Prepare temperature sensor service`);
                                 this.roomTemperatureZone1SensorService = new Service.TemperatureSensor(`${serviceName}`, `${zoneName} Temperature Sensor ${deviceId} ${i}`);
                                 this.roomTemperatureZone1SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 this.roomTemperatureZone1SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName}`);
@@ -906,7 +885,7 @@ class DeviceAtw extends EventEmitter {
                             };
 
                             if (zone.flowTemperature !== null) {
-                                if (this.enableDebugMode) this.emit('debug', `Prepare flow temperature zone 1 sensor service`);
+                                if (this.logDebug) this.emit('debug', `Prepare flow temperature zone 1 sensor service`);
                                 this.flowTemperatureZone1SensorService = new Service.TemperatureSensor(`${serviceName} Flow`, `${zoneName} Temperature Sensor Flow ${deviceId} ${i}`);
                                 this.flowTemperatureZone1SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 this.flowTemperatureZone1SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName} Flow`);
@@ -924,7 +903,7 @@ class DeviceAtw extends EventEmitter {
                             };
 
                             if (zone.returnTemperature !== null) {
-                                if (this.enableDebugMode) this.emit('debug', `Prepare return temperature zone 1 sensor service`);
+                                if (this.logDebug) this.emit('debug', `Prepare return temperature zone 1 sensor service`);
                                 this.returnTemperatureZone1SensorService = new Service.TemperatureSensor(`${serviceName} Return`, `${zoneName} Temperature Sensor Return ${deviceId} ${i}`);
                                 this.returnTemperatureZone1SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 this.returnTemperatureZone1SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName} Return`);
@@ -943,7 +922,7 @@ class DeviceAtw extends EventEmitter {
                             break;
                         case caseHotWaterSensor: //Hot Water
                             if (zone.roomTemperature !== null) {
-                                if (this.enableDebugMode) this.emit('debug', `${zoneName}, Prepare temperature sensor service`);
+                                if (this.logDebug) this.emit('debug', `${zoneName}, Prepare temperature sensor service`);
                                 this.roomTemperatureWaterTankSensorService = new Service.TemperatureSensor(`${serviceName}`, `${zoneName} Temperature Sensor ${deviceId} ${i}`);
                                 this.roomTemperatureWaterTankSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 this.roomTemperatureWaterTankSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName}`);
@@ -961,7 +940,7 @@ class DeviceAtw extends EventEmitter {
                             };
 
                             if (zone.flowTemperature !== null) {
-                                if (this.enableDebugMode) this.emit('debug', `Prepare flow temperature water tank sensor service`);
+                                if (this.logDebug) this.emit('debug', `Prepare flow temperature water tank sensor service`);
                                 this.flowTemperatureWaterTankSensorService = new Service.TemperatureSensor(`${serviceName} Flow`, `${zoneName} Temperature Sensor Flow ${deviceId} ${i}`);
                                 this.flowTemperatureWaterTankSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 this.flowTemperatureWaterTankSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName} Flow`);
@@ -979,7 +958,7 @@ class DeviceAtw extends EventEmitter {
                             };
 
                             if (zone.returnTemperature !== null) {
-                                if (this.enableDebugMode) this.emit('debug', `Prepare return temperature water tank sensor service`);
+                                if (this.logDebug) this.emit('debug', `Prepare return temperature water tank sensor service`);
                                 this.returnTemperatureWaterTankSensorService = new Service.TemperatureSensor(`${serviceName} Return`, `${zoneName} Temperature Sensor Return ${deviceId} ${i}`);
                                 this.returnTemperatureWaterTankSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 this.returnTemperatureWaterTankSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName} Return`);
@@ -998,7 +977,7 @@ class DeviceAtw extends EventEmitter {
                             break;
                         case caseZone2Sensor: //Zone 2
                             if (zone.roomTemperature !== null) {
-                                if (this.enableDebugMode) this.emit('debug', `${zoneName}, Prepare temperature sensor service`);
+                                if (this.logDebug) this.emit('debug', `${zoneName}, Prepare temperature sensor service`);
                                 this.roomTemperatureZone2SensorService = new Service.TemperatureSensor(`${serviceName}`, `${zoneName} Temperature Sensor ${deviceId} ${i}`);
                                 this.roomTemperatureZone2SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 this.roomTemperatureZone2SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName}`);
@@ -1016,7 +995,7 @@ class DeviceAtw extends EventEmitter {
                             };
 
                             if (zone.flowTemperature !== null) {
-                                if (this.enableDebugMode) this.emit('debug', `Prepare flow temperature zone 2 sensor service`);
+                                if (this.logDebug) this.emit('debug', `Prepare flow temperature zone 2 sensor service`);
                                 this.flowTemperatureZone2SensorService = new Service.TemperatureSensor(`${serviceName} Flow`, `${zoneName} Temperature Sensor Flow${deviceId} ${i}`);
                                 this.flowTemperatureZone2SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 this.flowTemperatureZone2SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName} Flow`);
@@ -1034,7 +1013,7 @@ class DeviceAtw extends EventEmitter {
                             };
 
                             if (zone.returnTemperature !== null) {
-                                if (this.enableDebugMode) this.emit('debug', `Prepare return temperature zone 2 sensor service`);
+                                if (this.logDebug) this.emit('debug', `Prepare return temperature zone 2 sensor service`);
                                 this.returnTemperatureZone2SensorService = new Service.TemperatureSensor(`${serviceName} Return`, `${zoneName} Temperature Sensor Return${deviceId} ${i}`);
                                 this.returnTemperatureZone2SensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                                 this.returnTemperatureZone2SensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} ${zoneName} Return`);
@@ -1056,10 +1035,10 @@ class DeviceAtw extends EventEmitter {
             };
 
             //presets services
-            if (this.presetsConfiguredCount > 0) {
-                if (this.enableDebugMode) this.emit('debug', `Prepare presets services`);
+            if (this.presets.length > 0) {
+                if (this.logDebug) this.emit('debug', `Prepare presets services`);
                 this.presetsServices = [];
-                this.presetsConfigured.forEach((preset, i) => {
+                this.presets.forEach((preset, i) => {
                     const presetData = presetsOnServer.find(p => p.ID === preset.Id);
 
                     //get preset name
@@ -1116,9 +1095,9 @@ class DeviceAtw extends EventEmitter {
                                 };
 
                                 await this.melCloudAtw.send(deviceData);
-                                if (!this.disableLogInfo) this.emit('info', `${state ? 'Set:' : 'Unset:'} ${name}`);
+                                if (this.logInfo) this.emit('info', `${state ? 'Set:' : 'Unset:'} ${name}`);
                             } catch (error) {
-                                this.emit('warn', `Set preset error: ${error}`);
+                                if (this.logWarn) this.emit('warn', `Set preset error: ${error}`);
                             };
                         });
                     this.presetsServices.push(presetService);
@@ -1127,10 +1106,10 @@ class DeviceAtw extends EventEmitter {
             };
 
             //buttons services
-            if (this.buttonsConfiguredCount > 0) {
-                if (this.enableDebugMode) this.emit('debug', `Prepare buttons services`);
+            if (this.buttons.length > 0) {
+                if (this.logDebug) this.emit('debug', `Prepare buttons services`);
                 this.buttonsServices = [];
-                this.buttonsConfigured.forEach((button, i) => {
+                this.buttons.lengthforEach((button, i) => {
                     //get button mode
                     const mode = button.mode;
 
@@ -1279,14 +1258,14 @@ class DeviceAtw extends EventEmitter {
                                             HeatPump.EffectiveFlags.ProhibitHeatingZone2;
                                             break;
                                         default:
-                                            this.emit('warn', `Unknown button mode: ${mode}`);
+                                            if (this.logWarn) this.emit('warn', `Unknown button mode: ${mode}`);
                                             break;
                                     };
 
                                     await this.melCloudAtw.send(deviceData);
-                                    if (!this.disableLogInfo) this.emit('info', `${state ? `Set: ${name}` : `Unset: ${name}, Set: ${button.previousValue}`}`);
+                                    if (this.logInfo) this.emit('info', `${state ? `Set: ${name}` : `Unset: ${name}, Set: ${button.previousValue}`}`);
                                 } catch (error) {
-                                    this.emit('warn', `Set button error: ${error}`);
+                                    if (this.logWarn) this.emit('warn', `Set button error: ${error}`);
                                 };
                             };
                         });
@@ -1305,22 +1284,13 @@ class DeviceAtw extends EventEmitter {
     async start() {
         try {
             //melcloud device
-            this.melCloudAtw = new MelCloudAtw({
-                contextKey: this.contextKey,
-                devicesFile: this.devicesFile,
-                deviceId: this.deviceId,
-                enableDebugMode: this.enableDebugMode
-            })
+            this.melCloudAtw = new MelCloudAtw(this.device, this.contextKey, this.devicesFile)
                 .on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, hasHotWaterTank, hasZone2) => {
-                    if (!this.displayDeviceInfo) {
-                        return;
-                    }
-
-                    if (!this.disableLogDeviceInfo) {
+                    if (this.logDeviceInfo && this.displayDeviceInfo) {
                         this.emit('devInfo', `---- ${this.deviceTypeText}: ${this.deviceName} ----`);
                         this.emit('devInfo', `Account: ${this.accountName}`);
-                        const indoor = modelIndoor ? this.emit('devInfo', `Indoor: ${modelIndoor}`) : false;
-                        const outdoor = modelOutdoor ? this.emit('devInfo', `Outdoor: ${modelOutdoor}`) : false
+                        if (modelIndoor) this.emit('devInfo', `Indoor: ${modelIndoor}`);
+                        if (modelOutdoor) this.emit('devInfo', `Outdoor: ${modelOutdoor}`);
                         this.emit('devInfo', `Serial: ${serialNumber}`)
                         this.emit('devInfo', `Firmware: ${firmwareAppVersion}`);
                         this.emit('devInfo', `Manufacturer: ${manufacturer}`);
@@ -1329,14 +1299,16 @@ class DeviceAtw extends EventEmitter {
                         this.emit('devInfo', `Hot Water Tank: ${hasHotWaterTank ? 'Yes' : 'No'}`);
                         this.emit('devInfo', `Zone 2: ${hasZone2 ? 'Yes' : 'No'}`);
                         this.emit('devInfo', '----------------------------------');
-                    };
+                        this.displayDeviceInfo = false;
+                    }
 
                     //accessory info
                     this.manufacturer = manufacturer;
                     this.model = modelIndoor ? modelIndoor : modelOutdoor ? modelOutdoor : `${this.deviceTypeText} ${this.deviceId}`;
                     this.serialNumber = serialNumber;
                     this.firmwareRevision = firmwareAppVersion;
-                    this.displayDeviceInfo = false;
+
+                    this.informationService?.setCharacteristic(Characteristic.FirmwareRevision, firmwareAppVersion);
                 })
                 .on('deviceState', async (deviceData) => {
                     this.deviceData = deviceData;
@@ -1694,7 +1666,7 @@ class DeviceAtw extends EventEmitter {
                         obj.zones.push(zone);
 
                         //log current state
-                        if (!this.disableLogInfo) {
+                        if (this.logInfo) {
                             let operationModeText = '';
                             switch (i) {
                                 case caseHeatPump: //Heat Pump - HEAT, COOL, OFF
@@ -1791,7 +1763,7 @@ class DeviceAtw extends EventEmitter {
                         obj.zonesSensors.push(sensor);
 
                         //log current state
-                        if (!this.disableLogInfo) {
+                        if (this.logInfo) {
                             switch (i) {
                                 case caseHeatPumpSensor: //Heat Pump - HEAT, COOL, OFF
                                     const info = outdoorTemperature !== null ? this.emit('info', `${heatPumpName}, Outdoor temperature: ${outdoorTemperature}${obj.temperatureUnit}`) : false;
@@ -1819,8 +1791,8 @@ class DeviceAtw extends EventEmitter {
                     this.accessory = obj;
 
                     //update presets state
-                    if (this.presetsConfigured.length > 0) {
-                        this.presetsConfigured.forEach((preset, i) => {
+                    if (this.presets.length > 0) {
+                        this.presets.forEach((preset, i) => {
                             const presetData = presetsOnServer.find(p => p.ID === preset.Id);
 
                             preset.state = presetData ? (presetData.Power === power
@@ -1842,8 +1814,8 @@ class DeviceAtw extends EventEmitter {
                     };
 
                     //update buttons state
-                    if (this.buttonsConfiguredCount > 0) {
-                        this.buttonsConfigured.forEach((button, i) => {
+                    if (this.buttons.length > 0) {
+                        this.buttons.forEach((button, i) => {
                             const mode = button.mode;
                             switch (mode) {
                                 case 0: //POWER ON,OFF
@@ -1916,7 +1888,7 @@ class DeviceAtw extends EventEmitter {
                                     button.state = (prohibitZone2 === true);
                                     break;
                                 default: //Unknown button
-                                    this.emit('warn', `Unknown button mode: ${mode} detected`);
+                                    if (this.logWarn) this.emit('warn', `Unknown button mode: ${mode} detected`);
                                     break;
                             };
 

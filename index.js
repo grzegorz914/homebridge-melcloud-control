@@ -30,6 +30,9 @@ class MelCloudPlatform {
 		api.on('didFinishLaunching', async () => {
 			//loop through accounts
 			for (const account of config.accounts) {
+				const displayType = account.displayType || 1;
+				if (displayType === 0) continue;
+
 				const accountName = account.name;
 				const user = account.user;
 				const passwd = account.passwd;
@@ -47,33 +50,36 @@ class MelCloudPlatform {
 				const mqtt = account.mqtt ?? {};
 
 				//log config
-				const enableDebugMode = account.enableDebugMode || false;
 				const logLevel = {
-					debug: enableDebugMode,
-					info: !account.disableLogInfo,
-					success: !account.disableLogSuccess,
-					warn: !account.disableLogWarn,
-					error: !account.disableLogError,
-					devInfo: !account.disableLogDeviceInfo,
+					devInfo: account.log?.deviceInfo,
+					success: account.log?.success,
+					info: account.log?.info,
+					warn: account.log?.warn,
+					error: account.log?.error,
+					debug: account.log?.debug
 				};
 
-				if (logLevel.debug) log.info(`${accountName}, debug: Did finish launching.`);
 
-				//remove sensitive data
-				const safeConfig = {
-					...account,
-					passwd: 'removed',
-					mqtt: {
-						...account.mqtt,
-						passwd: 'removed'
-					}
-				};
-				if (logLevel.debug) log.info(`${accountName}, Config: ${JSON.stringify(safeConfig, null, 2)}`);
+				if (logLevel.debug) {
+					log.info(`${accountName}, debug: did finish launching.`);
+					const safeConfig = {
+						...account,
+						passwd: 'removed',
+						mqtt: {
+							auth: {
+								...account.mqtt?.auth,
+								passwd: 'removed',
+							}
+						},
+					};
+					log.info(`${accountName}, Config: ${JSON.stringify(safeConfig, null, 2)}`);
+				}
 
 				//define directory and file paths
 				const accountFile = `${prefDir}/${accountName}_Account`;
 				const buildingsFile = `${prefDir}/${accountName}_Buildings`;
 				const devicesFile = `${prefDir}/${accountName}_Devices`;
+
 
 				//set account refresh interval
 				const refreshInterval = (account.refreshInterval ?? 120) * 1000
@@ -84,13 +90,12 @@ class MelCloudPlatform {
 						.on('start', async () => {
 							try {
 								//melcloud account
-								const melCloud = new MelCloud(user, passwd, language, accountFile, buildingsFile, devicesFile, enableDebugMode, false)
+								const melCloud = new MelCloud(displayType, user, passwd, language, accountFile, buildingsFile, devicesFile, logLevel.warn, logLevel.debug, false)
 									.on('success', (msg) => logLevel.success && log.success(`${accountName}, ${msg}`))
 									.on('info', (msg) => logLevel.info && log.info(`${accountName}, ${msg}`))
 									.on('debug', (msg) => logLevel.debug && log.info(`${accountName}, debug: ${msg}`))
 									.on('warn', (msg) => logLevel.warn && log.warn(`${accountName}, ${msg}`))
 									.on('error', (msg) => logLevel.error && log.error(`${accountName}, ${msg}`));
-
 
 								//connect
 								let response;
@@ -102,10 +107,10 @@ class MelCloudPlatform {
 								}
 
 								const accountInfo = response.accountInfo ?? false;
-								const contextKey = response.contextKey ?? false;
+								const contextKey = response.contextKey;
 								const useFahrenheit = response.useFahrenheit ?? false;
 
-								if (contextKey === false) {
+								if (!contextKey) {
 									return;
 								}
 
@@ -143,15 +148,15 @@ class MelCloudPlatform {
 									let configuredDevice;
 									switch (deviceType) {
 										case 0: //ATA
-											configuredDevice = new DeviceAta(api, account, device, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit, restFul, mqtt);
+											configuredDevice = new DeviceAta(api, account, device, contextKey, devicesFile, useFahrenheit, restFul, mqtt);
 											break;
 										case 1: //ATW
-											configuredDevice = new DeviceAtw(api, account, device, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit, restFul, mqtt);
+											configuredDevice = new DeviceAtw(api, account, device, contextKey, devicesFile, useFahrenheit, restFul, mqtt);
 											break;
 										case 2:
 											break;
 										case 3: //ERV
-											configuredDevice = new DeviceErv(api, account, device, contextKey, accountName, deviceId, deviceName, deviceTypeText, devicesFile, deviceRefreshInterval, useFahrenheit, restFul, mqtt);
+											configuredDevice = new DeviceErv(api, account, device, contextKey, devicesFile, useFahrenheit, restFul, mqtt);
 											break;
 										default:
 											if (logLevel.warn) log.warn(`${accountName}, ${deviceTypeText}, ${deviceName}, unknown device: ${deviceType}.`);
@@ -178,11 +183,12 @@ class MelCloudPlatform {
 										api.publishExternalAccessories(PluginName, [accessory]);
 										if (logLevel.success) log.success(`${accountName}, ${deviceTypeText}, ${deviceName}, Published as external accessory.`);
 
-										//start account impulse generator
-										await melCloud.impulseGenerator.start([{ name: 'checkDevicesList', sampling: refreshInterval }]);
+										//start impulse generators
+										await melCloud.impulseGenerator.state(true, [{ name: 'checkDevicesList', sampling: refreshInterval }]);
+										await configuredDevice.startStopImpulseGenerator(true, [{ name: 'checkState', sampling: deviceRefreshInterval }]);
 
-										await impulseGenerator.stop();
-										await configuredDevice.startImpulseGenerator();
+										//stop impulse generator
+										await impulseGenerator.state(false);
 									}
 								}
 							} catch (error) {
@@ -193,7 +199,7 @@ class MelCloudPlatform {
 						});
 
 					//start impulse generator
-					await impulseGenerator.start([{ name: 'start', sampling: 60000 }]);
+					await impulseGenerator.state(true, [{ name: 'start', sampling: 120000 }]);
 				} catch (error) {
 					if (logLevel.error) log.error(`${accountName}, Did finish launching error: ${error.message ?? error}.`);
 				}

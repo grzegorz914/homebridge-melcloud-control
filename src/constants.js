@@ -14,7 +14,16 @@ export const ApiUrls = {
     SetErv: "/Device/SetErv",
     UpdateApplicationOptions: "/User/UpdateApplicationOptions",
     HolidayModeUpdate: "/HolidayMode/Update",
-    EnergyCostReport: "/EnergyCost/Report"
+    EnergyCostReport: "/EnergyCost/Report",
+};
+
+export const ApiUrlsHome = {
+    LoginUrl:"https://live-melcloudhome.auth.eu-west-1.amazoncognito.com/login?client_id=3g4d5l5kivuqi7oia68gib7uso&redirect_uri=https%3A%2F%2Fauth.melcloudhome.com%2Fsignin-oidc-meu&response_type=code&scope=openid%20profile&response_mode=form_post",
+    BaseURL: 'https://melcloudhome.com',
+    GetUserContext: "/api/user/context",
+    SetAta: "/api/ataunit/deviceid",
+    SetAtw: "/api/atwunit/deviceid",
+    SetErv: "/api/ervunit/deviceid",
 };
 
 export const DeviceType = [

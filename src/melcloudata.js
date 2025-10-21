@@ -6,11 +6,12 @@ import Functions from './functions.js';
 import { ApiUrls } from './constants.js';
 
 class MelCloudAta extends EventEmitter {
-    constructor(config) {
+    constructor(device, contextKey, devicesFile) {
         super();
-        this.devicesFile = config.devicesFile;
-        this.deviceId = config.deviceId;
-        this.enableDebugMode = config.enableDebugMode;
+        this.deviceId = device.id;
+        this.logWarn = device.log?.warn;
+        this.logDebug = device.log?.debug;
+        this.devicesFile = devicesFile;
         this.functions = new Functions();
 
         //set default values
@@ -21,7 +22,7 @@ class MelCloudAta extends EventEmitter {
             baseURL: ApiUrls.BaseURL,
             timeout: 25000,
             headers: {
-                'X-MitsContextKey': config.contextKey,
+                'X-MitsContextKey': contextKey,
                 'content-type': 'application/json'
             },
             withCredentials: true,
@@ -64,11 +65,11 @@ class MelCloudAta extends EventEmitter {
             const devicesData = JSON.parse(data);
 
             if (!Array.isArray(devicesData)) {
-                this.emit('warn', `Device data not found`);
+                if (this.logWarn) this.emit('warn', `Device data not found`);
                 return null;
             }
             const deviceData = devicesData.find(device => device.DeviceID === this.deviceId);
-            if (this.enableDebugMode) this.emit('debug', `Device Data: ${JSON.stringify(deviceData, null, 2)}`);
+            if (this.logDebug) this.emit('debug', `Device Data: ${JSON.stringify(deviceData, null, 2)}`);
 
             //device info
             const deviceId = deviceData.DeviceID;
@@ -323,7 +324,7 @@ class MelCloudAta extends EventEmitter {
 
             //display info if units are not configured in MELCloud service
             if (unitsCount === 0) {
-                this.emit('warn', `Units are not configured in MELCloud service`);
+                if (this.logWarn) this.emit('warn', `Units are not configured in MELCloud service`);
             };
 
             const deviceState = {
@@ -360,7 +361,7 @@ class MelCloudAta extends EventEmitter {
             //check state changes
             const deviceDataHasNotChanged = JSON.stringify(deviceState) === JSON.stringify(this.deviceState);
             if (deviceDataHasNotChanged) {
-                if (this.enableDebugMode) this.emit('debug', `Device state not changed`);
+                if (this.logDebug) this.emit('debug', `Device state not changed`);
                 return;
             }
             this.deviceState = deviceState;

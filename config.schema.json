@@ -19,23 +19,20 @@
               "title": "Name",
               "type": "string",
               "placeholder": "Account name",
-              "description": "Your own account name.",
-              "required": true
+              "description": "Your own account name."
             },
             "user": {
               "title": "User",
               "type": "string",
               "placeholder": "User",
-              "description": "MELCloud account username.",
-              "required": true
+              "description": "MELCloud account username."
             },
             "passwd": {
               "title": "Password",
               "type": "string",
               "placeholder": "Password",
               "description": "MELCloud account password.",
-              "format": "password",
-              "required": true
+              "format": "password"
             },
             "language": {
               "title": "Language",
@@ -44,6 +41,7 @@
               "maxLength": 2,
               "pattern": "^[0-9]+$",
               "default": "0",
+              "description": "Here select the language used in MELCloud account.",
               "oneOf": [
                 {
                   "title": "English",
@@ -201,9 +199,35 @@
                     "25"
                   ]
                 }
-              ],
+              ]
+            },
+            "displayType": {
+              "title": "Account Type",
+              "type": "string",
+              "minimum": 0,
+              "maximum": 2,
+              "default": 1,
               "description": "Here select the language used in MELCloud account.",
-              "required": true
+              "oneOf": [
+                {
+                  "title": "None/Disabled",
+                  "enum": [
+                    "0"
+                  ]
+                },
+                {
+                  "title": "MELCLoud",
+                  "enum": [
+                    "1"
+                  ]
+                },
+                {
+                  "title": "MELCLoud Home",
+                  "enum": [
+                    "2"
+                  ]
+                }
+              ]
             },
             "ataDevices": {
               "title": "Devices ATA",
@@ -215,35 +239,27 @@
                     "title": "ID",
                     "type": "integer",
                     "default": 0,
-                    "required": false,
                     "readonly": true
                   },
                   "type": {
                     "title": "Type",
                     "type": "integer",
                     "default": 0,
-                    "required": false,
                     "readonly": true
                   },
                   "typeString": {
                     "title": "Type",
                     "type": "string",
                     "default": "Air Conditioner",
-                    "required": false,
                     "readonly": true
                   },
-                  "name": {
-                    "title": "Name",
-                    "type": "string",
-                    "default": "Air Conditioner",
-                    "required": false
-                  },
                   "displayMode": {
-                    "title": "Control",
+                    "title": "Display Type",
                     "type": "integer",
                     "minimum": 0,
                     "maximum": 2,
                     "default": 1,
+                    "description": "Select accessory control type displayed in HomeKit app.",
                     "oneOf": [
                       {
                         "title": "None/Disabled",
@@ -263,9 +279,12 @@
                           2
                         ]
                       }
-                    ],
-                    "description": "Select accessory control type displayed in HomeKit app.",
-                    "required": true
+                    ]
+                  },
+                  "name": {
+                    "title": "Name",
+                    "type": "string",
+                    "default": "Air Conditioner"
                   },
                   "heatDryFanMode": {
                     "title": "Heat",
@@ -273,6 +292,7 @@
                     "minimum": 0,
                     "maximum": 3,
                     "default": 1,
+                    "description": "Select the operating mode for Heat, if this mode is not supported, it will be disabled.",
                     "oneOf": [
                       {
                         "title": "None/Disabled",
@@ -298,9 +318,7 @@
                           3
                         ]
                       }
-                    ],
-                    "description": "Select the operating mode for Heat, if this mode is not supported, it will be disabled.",
-                    "required": true
+                    ]
                   },
                   "coolDryFanMode": {
                     "title": "Cool",
@@ -308,6 +326,7 @@
                     "minimum": 0,
                     "maximum": 3,
                     "default": 1,
+                    "description": "Select the operating mode for Cool, if this mode is not supported, it will be disabled.",
                     "oneOf": [
                       {
                         "title": "None/Disabled",
@@ -333,9 +352,7 @@
                           3
                         ]
                       }
-                    ],
-                    "description": "Select the operating mode for Cool, if this mode is not supported, it will be disabled.",
-                    "required": true
+                    ]
                   },
                   "autoDryFanMode": {
                     "title": "Auto",
@@ -343,6 +360,7 @@
                     "minimum": 0,
                     "maximum": 3,
                     "default": 1,
+                    "description": "Select the operating mode for Auto, if this mode is not supported, it will be disabled.",
                     "oneOf": [
                       {
                         "title": "None/Disabled",
@@ -368,23 +386,19 @@
                           3
                         ]
                       }
-                    ],
-                    "description": "Select the operating mode for Auto, if this mode is not supported, it will be disabled.",
-                    "required": true
+                    ]
                   },
                   "temperatureSensor": {
                     "title": "Room",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra room temperature sensor to use with automations in HomeKit app.",
-                    "required": false
+                    "description": "This enable extra room temperature sensor to use with automations in HomeKit app."
                   },
                   "temperatureSensorOutdoor": {
                     "title": "Outdoor",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra outdoor temperature sensor to use with automations in HomeKit app.",
-                    "required": false
+                    "description": "This enable extra outdoor temperature sensor to use with automations in HomeKit app."
                   },
                   "refreshInterval": {
                     "title": "Refresh Interval",
@@ -392,8 +406,7 @@
                     "default": 5,
                     "minimum": 1,
                     "maximum": 60,
-                    "description": "Set the background device state refresh time in seconds.",
-                    "required": false
+                    "description": "Set the background device state refresh time in seconds."
                   },
                   "presets": {
                     "title": "Presets",
@@ -403,22 +416,15 @@
                       "properties": {
                         "id": {
                           "title": "ID",
-                          "type": "integer",
-                          "required": false
-                        },
-                        "name": {
-                          "title": "Name",
-                          "type": "string",
-                          "placeholder": "Preset name",
-                          "description": "Your own name displayed in Homebridge/HomeKit app.",
-                          "required": false
+                          "type": "integer"
                         },
                         "displayType": {
-                          "title": "Type",
+                          "title": "Display Type",
                           "type": "integer",
                           "minimum": 0,
                           "maximum": 5,
                           "default": 0,
+                          "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "oneOf": [
                             {
                               "title": "None/Disabled",
@@ -456,18 +462,30 @@
                                 5
                               ]
                             }
-                          ],
-                          "description": "Select the characteristic type to be displayed in HomeKit app.",
-                          "required": true
+                          ]
+                        },
+                        "name": {
+                          "title": "Name",
+                          "type": "string",
+                          "placeholder": "Preset name",
+                          "description": "Your own name displayed in Homebridge/HomeKit app.",
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].presets[arrayIndices[2]].displayType > 0;"
+                          }
                         },
                         "namePrefix": {
                           "title": "Prefix",
                           "type": "boolean",
                           "default": false,
                           "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
-                          "required": false
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].presets[arrayIndices[2]].displayType > 0;"
+                          }
                         }
-                      }
+                      },
+                      "required": [
+                        "displayType"
+                      ]
                     }
                   },
                   "buttonsSensors": {
@@ -476,19 +494,57 @@
                     "items": {
                       "type": "object",
                       "properties": {
-                        "name": {
-                          "title": "Name",
-                          "type": "string",
-                          "placeholder": "Button name",
-                          "description": "Your own name displayed in Homebridge/HomeKit app.",
-                          "required": false
+                        "displayType": {
+                          "title": "Display Type",
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 5,
+                          "default": 0,
+                          "description": "Select the characteristic type to be displayed in HomeKit app.",
+                          "oneOf": [
+                            {
+                              "title": "None/Disabled",
+                              "enum": [
+                                0
+                              ]
+                            },
+                            {
+                              "title": "Outlet",
+                              "enum": [
+                                1
+                              ]
+                            },
+                            {
+                              "title": "Switch",
+                              "enum": [
+                                2
+                              ]
+                            },
+                            {
+                              "title": "Motion Sensor",
+                              "enum": [
+                                3
+                              ]
+                            },
+                            {
+                              "title": "Occupancy Sensor",
+                              "enum": [
+                                4
+                              ]
+                            },
+                            {
+                              "title": "Contact Sensor",
+                              "enum": [
+                                5
+                              ]
+                            }
+                          ]
                         },
                         "mode": {
                           "title": "Mode",
                           "type": "integer",
                           "minimum": 0,
                           "maximum": 40,
-                          "default": 0,
                           "description": "Function, VH - Vane Horizontal, VV - Vane Vertical.",
                           "oneOf": [
                             {
@@ -702,69 +758,44 @@
                               ]
                             }
                           ],
-                          "required": true
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].buttonsSensors[arrayIndices[2]].displayType > 0;"
+                          }
                         },
-                        "displayType": {
-                          "title": "Type",
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 5,
-                          "default": 0,
-                          "oneOf": [
-                            {
-                              "title": "None/Disabled",
-                              "enum": [
-                                0
-                              ]
-                            },
-                            {
-                              "title": "Outlet",
-                              "enum": [
-                                1
-                              ]
-                            },
-                            {
-                              "title": "Switch",
-                              "enum": [
-                                2
-                              ]
-                            },
-                            {
-                              "title": "Motion Sensor",
-                              "enum": [
-                                3
-                              ]
-                            },
-                            {
-                              "title": "Occupancy Sensor",
-                              "enum": [
-                                4
-                              ]
-                            },
-                            {
-                              "title": "Contact Sensor",
-                              "enum": [
-                                5
-                              ]
-                            }
-                          ],
-                          "description": "Select the characteristic type to be displayed in HomeKit app.",
-                          "required": true
+                        "name": {
+                          "title": "Name",
+                          "type": "string",
+                          "placeholder": "Button name",
+                          "description": "Your own name displayed in Homebridge/HomeKit app.",
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].buttonsSensors[arrayIndices[2]].displayType > 0;"
+                          }
                         },
                         "namePrefix": {
                           "title": "Prefix",
                           "type": "boolean",
                           "default": false,
                           "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
-                          "required": false
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].buttonsSensors[arrayIndices[2]].displayType > 0;"
+                          }
                         }
-                      }
+                      },
+                      "required": [
+                        "displayType"
+                      ]
                     }
                   }
-                }
+                },
+                "required": [
+                  "displayMode",
+                  "heatDryFanMode",
+                  "coolDryFanMode",
+                  "autoDryFanMode"
+                ]
               },
               "condition": {
-                "functionBody": "const devices = model.accounts[arrayIndices]?.ataDevices || []; return devices.length > 0 && devices.every(device => device.id != null);"
+                "functionBody": "const accounts = model.accounts[arrayIndices]?.ataDevices || []; return accounts.length > 0 && accounts.every(device => device.id != null);"
               }
             },
             "atwDevices": {
@@ -777,35 +808,32 @@
                     "title": "ID",
                     "type": "integer",
                     "default": 0,
-                    "required": false,
                     "readonly": true
                   },
                   "type": {
                     "title": "Type",
                     "type": "integer",
                     "default": 1,
-                    "required": false,
                     "readonly": true
                   },
                   "typeString": {
                     "title": "Type",
                     "type": "string",
                     "default": "Heat Pump",
-                    "required": false,
                     "readonly": true
                   },
                   "name": {
                     "title": "Name",
                     "type": "string",
-                    "default": "Heat Pump",
-                    "required": false
+                    "default": "Heat Pump"
                   },
                   "displayMode": {
-                    "title": "Control",
+                    "title": "Display Type",
                     "type": "integer",
                     "minimum": 0,
                     "maximum": 2,
                     "default": 1,
+                    "description": "Select accessory control type displayed in HomeKit app.",
                     "oneOf": [
                       {
                         "title": "None/Disabled",
@@ -825,9 +853,7 @@
                           2
                         ]
                       }
-                    ],
-                    "description": "Select accessory control type displayed in HomeKit app.",
-                    "required": true
+                    ]
                   },
                   "hideZone": {
                     "title": "Hide zone",
@@ -835,6 +861,7 @@
                     "minimum": 0,
                     "maximum": 15,
                     "default": 0,
+                    "description": "Select zone to hidde in HomeKit app, if present.",
                     "oneOf": [
                       {
                         "title": "None/Disabled",
@@ -932,72 +959,61 @@
                           15
                         ]
                       }
-                    ],
-                    "description": "Select zone to hidde in HomeKit app, if present.",
-                    "required": true
+                    ]
                   },
                   "temperatureSensor": {
                     "title": "Temperature Sensor Room",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra temperature sensor to use with automations in HomeKit app.",
-                    "required": false
+                    "description": "This enable extra temperature sensor to use with automations in HomeKit app."
                   },
                   "temperatureSensorFlow": {
                     "title": "Temperature Sensor Flow",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra Flow temperature sensor to use with automations in HomeKit app.",
-                    "required": false
+                    "description": "This enable extra Flow temperature sensor to use with automations in HomeKit app."
                   },
                   "temperatureSensorReturn": {
                     "title": "Temperature Sensor Return",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra Return temperature sensor to use with automations in HomeKit app.",
-                    "required": false
+                    "description": "This enable extra Return temperature sensor to use with automations in HomeKit app."
                   },
                   "temperatureSensorFlowZone1": {
                     "title": "Temperature Sensor Flow Zone 1",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra Flow Zone 1 temperature sensor to use with automations in HomeKit app.",
-                    "required": false
+                    "description": "This enable extra Flow Zone 1 temperature sensor to use with automations in HomeKit app."
                   },
                   "temperatureSensorReturnZone1": {
                     "title": "Temperature Sensor Return Zone 1",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra Return Zone 1 temperature sensor to use with automations in HomeKit app.",
-                    "required": false
+                    "description": "This enable extra Return Zone 1 temperature sensor to use with automations in HomeKit app."
                   },
                   "temperatureSensorFlowWaterTank": {
                     "title": "Temperature Sensor Flow Water Tank",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra Flow Water Tank temperature sensor to use with automations in HomeKit app.",
-                    "required": false
+                    "description": "This enable extra Flow Water Tank temperature sensor to use with automations in HomeKit app."
                   },
                   "temperatureSensorReturnWaterTank": {
                     "title": "Temperature Sensor Return Water Tank",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra Return Water Tank temperature sensor to use with automations in HomeKit app.",
-                    "required": false
+                    "description": "This enable extra Return Water Tank temperature sensor to use with automations in HomeKit app."
                   },
                   "temperatureSensorFlowZone2": {
                     "title": "Temperature Sensor Flow Zone 2",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra Flow Zone 2 temperature sensor to use with automations in HomeKit app.",
-                    "required": false
+                    "description": "This enable extra Flow Zone 2 temperature sensor to use with automations in HomeKit app."
                   },
                   "temperatureSensorReturnZone2": {
                     "title": "Temperature Sensor Return Zone 2",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra Return Zone 2 temperature sensor to use with automations in HomeKit app.",
-                    "required": false
+                    "description": "This enable extra Return Zone 2 temperature sensor to use with automations in HomeKit app."
                   },
                   "refreshInterval": {
                     "title": "Refresh Interval",
@@ -1005,8 +1021,7 @@
                     "default": 5,
                     "minimum": 1,
                     "maximum": 60,
-                    "description": "Set the background device state refresh time in seconds.",
-                    "required": false
+                    "description": "Set the background device state refresh time in seconds."
                   },
                   "presets": {
                     "title": "Presets",
@@ -1016,22 +1031,15 @@
                       "properties": {
                         "id": {
                           "title": "ID",
-                          "type": "integer",
-                          "required": false
-                        },
-                        "name": {
-                          "title": "Name",
-                          "type": "string",
-                          "placeholder": "Preset name",
-                          "description": "Your own name displayed in Homebridge/HomeKit app.",
-                          "required": false
+                          "type": "integer"
                         },
                         "displayType": {
-                          "title": "Type",
+                          "title": "Display Type",
                           "type": "integer",
                           "minimum": 0,
                           "maximum": 5,
                           "default": 0,
+                          "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "oneOf": [
                             {
                               "title": "None/Disabled",
@@ -1069,18 +1077,30 @@
                                 5
                               ]
                             }
-                          ],
-                          "description": "Select the characteristic type to be displayed in HomeKit app.",
-                          "required": true
+                          ]
+                        },
+                        "name": {
+                          "title": "Name",
+                          "type": "string",
+                          "placeholder": "Preset name",
+                          "description": "Your own name displayed in Homebridge/HomeKit app.",
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].presets[arrayIndices[2]].displayType > 0;"
+                          }
                         },
                         "namePrefix": {
                           "title": "Prefix",
                           "type": "boolean",
                           "default": false,
                           "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
-                          "required": false
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].presets[arrayIndices[2]].displayType > 0;"
+                          }
                         }
-                      }
+                      },
+                      "required": [
+                        "displayType"
+                      ]
                     }
                   },
                   "buttonsSensors": {
@@ -1089,19 +1109,57 @@
                     "items": {
                       "type": "object",
                       "properties": {
-                        "name": {
-                          "title": "Name",
-                          "type": "string",
-                          "placeholder": "Button name",
-                          "description": "Your own name displayed in Homebridge/HomeKit app.",
-                          "required": false
+                        "displayType": {
+                          "title": "Display Type",
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 5,
+                          "default": 0,
+                          "description": "Select the characteristic type to be displayed in HomeKit app.",
+                          "oneOf": [
+                            {
+                              "title": "None/Disabled",
+                              "enum": [
+                                0
+                              ]
+                            },
+                            {
+                              "title": "Outlet",
+                              "enum": [
+                                1
+                              ]
+                            },
+                            {
+                              "title": "Switch",
+                              "enum": [
+                                2
+                              ]
+                            },
+                            {
+                              "title": "Motion Sensor",
+                              "enum": [
+                                3
+                              ]
+                            },
+                            {
+                              "title": "Occupancy Sensor",
+                              "enum": [
+                                4
+                              ]
+                            },
+                            {
+                              "title": "Contact Sensor",
+                              "enum": [
+                                5
+                              ]
+                            }
+                          ]
                         },
                         "mode": {
                           "title": "Mode",
                           "type": "integer",
                           "minimum": 0,
                           "maximum": 70,
-                          "default": 0,
                           "description": "Select the function.",
                           "oneOf": [
                             {
@@ -1237,69 +1295,42 @@
                               ]
                             }
                           ],
-                          "required": true
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].buttonsSensors[arrayIndices[2]].displayType > 0;"
+                          }
                         },
-                        "displayType": {
-                          "title": "Type",
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 5,
-                          "default": 0,
-                          "oneOf": [
-                            {
-                              "title": "None/Disabled",
-                              "enum": [
-                                0
-                              ]
-                            },
-                            {
-                              "title": "Outlet",
-                              "enum": [
-                                1
-                              ]
-                            },
-                            {
-                              "title": "Switch",
-                              "enum": [
-                                2
-                              ]
-                            },
-                            {
-                              "title": "Motion Sensor",
-                              "enum": [
-                                3
-                              ]
-                            },
-                            {
-                              "title": "Occupancy Sensor",
-                              "enum": [
-                                4
-                              ]
-                            },
-                            {
-                              "title": "Contact Sensor",
-                              "enum": [
-                                5
-                              ]
-                            }
-                          ],
-                          "description": "Select the characteristic type to be displayed in HomeKit app.",
-                          "required": true
+                        "name": {
+                          "title": "Name",
+                          "type": "string",
+                          "placeholder": "Button name",
+                          "description": "Your own name displayed in Homebridge/HomeKit app.",
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].buttonsSensors[arrayIndices[2]].displayType > 0;"
+                          }
                         },
                         "namePrefix": {
                           "title": "Prefix",
                           "type": "boolean",
                           "default": false,
                           "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
-                          "required": false
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].buttonsSensors[arrayIndices[2]].displayType > 0;"
+                          }
                         }
-                      }
+                      },
+                      "required": [
+                        "displayType"
+                      ]
                     }
                   }
-                }
+                },
+                "required": [
+                  "displayMode",
+                  "hideZone"
+                ]
               },
               "condition": {
-                "functionBody": "const devices = model.accounts[arrayIndices]?.atwDevices || []; return devices.length > 0 && devices.every(device => device.id != null);"
+                "functionBody": "const accounts = model.accounts[arrayIndices]?.atwDevices || []; return accounts.length > 0 && accounts.every(device => device.id != null);"
               }
             },
             "ervDevices": {
@@ -1312,35 +1343,32 @@
                     "title": "ID",
                     "type": "integer",
                     "default": 0,
-                    "required": false,
                     "readonly": true
                   },
                   "type": {
                     "title": "Type",
                     "type": "integer",
                     "default": 3,
-                    "required": false,
                     "readonly": true
                   },
                   "typeString": {
                     "title": "Type",
                     "type": "string",
                     "default": "Ventilation",
-                    "required": false,
                     "readonly": true
                   },
                   "name": {
                     "title": "Name",
                     "type": "string",
-                    "default": "Ventilation",
-                    "required": false
+                    "default": "Ventilation"
                   },
                   "displayMode": {
-                    "title": "Control",
+                    "title": "Display Type",
                     "type": "integer",
                     "minimum": 0,
                     "maximum": 2,
                     "default": 1,
+                    "description": "Select accessory control type displayed in HomeKit app.",
                     "oneOf": [
                       {
                         "title": "None/Disabled",
@@ -1360,30 +1388,25 @@
                           2
                         ]
                       }
-                    ],
-                    "description": "Select accessory control type displayed in HomeKit app.",
-                    "required": true
+                    ]
                   },
                   "temperatureSensor": {
                     "title": "Temperature Sensor Room",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra temperature sensor to use with automations in HomeKit app.",
-                    "required": false
+                    "description": "This enable extra temperature sensor to use with automations in HomeKit app."
                   },
                   "temperatureSensorOutdoor": {
                     "title": "Temperature Sensor Outdoor",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra outdoor temperature sensor to use with automations in HomeKit app.",
-                    "required": false
+                    "description": "This enable extra outdoor temperature sensor to use with automations in HomeKit app."
                   },
                   "temperatureSensorSupply": {
                     "title": "Temperature Sensor Supply",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra supply temperature sensor to use with automations in HomeKit app.",
-                    "required": false
+                    "description": "This enable extra supply temperature sensor to use with automations in HomeKit app."
                   },
                   "refreshInterval": {
                     "title": "Refresh Interval",
@@ -1391,8 +1414,7 @@
                     "default": 5,
                     "minimum": 1,
                     "maximum": 60,
-                    "description": "Set the background device state refresh time in seconds.",
-                    "required": false
+                    "description": "Set the background device state refresh time in seconds."
                   },
                   "presets": {
                     "title": "Presets",
@@ -1403,22 +1425,15 @@
                         "id": {
                           "title": "ID",
                           "type": "integer",
-                          "required": false,
                           "readonly": true
                         },
-                        "name": {
-                          "title": "Name",
-                          "type": "string",
-                          "placeholder": "Preset name",
-                          "description": "Your own name displayed in Homebridge/HomeKit app.",
-                          "required": false
-                        },
                         "displayType": {
-                          "title": "Type",
+                          "title": "Display Type",
                           "type": "integer",
                           "minimum": 0,
                           "maximum": 5,
                           "default": 0,
+                          "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "oneOf": [
                             {
                               "title": "None/Disabled",
@@ -1457,17 +1472,32 @@
                               ]
                             }
                           ],
-                          "description": "Select the characteristic type to be displayed in HomeKit app.",
-                          "required": true
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].presets[arrayIndices[2]].displayType > 0;"
+                          }
+                        },
+                        "name": {
+                          "title": "Name",
+                          "type": "string",
+                          "placeholder": "Preset name",
+                          "description": "Your own name displayed in Homebridge/HomeKit app.",
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].presets[arrayIndices[2]].displayType > 0;"
+                          }
                         },
                         "namePrefix": {
                           "title": "Prefix",
                           "type": "boolean",
                           "default": false,
                           "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
-                          "required": false
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].presets[arrayIndices[2]].displayType > 0;"
+                          }
                         }
-                      }
+                      },
+                      "required": [
+                        "displayType"
+                      ]
                     }
                   },
                   "buttonsSensors": {
@@ -1476,19 +1506,57 @@
                     "items": {
                       "type": "object",
                       "properties": {
-                        "name": {
-                          "title": "Name",
-                          "type": "string",
-                          "placeholder": "Button name",
-                          "description": "Your own name displayed in Homebridge/HomeKit app.",
-                          "required": false
+                        "displayType": {
+                          "title": "Display Type",
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 5,
+                          "default": 0,
+                          "description": "Select the characteristic type to be displayed in HomeKit app.",
+                          "oneOf": [
+                            {
+                              "title": "None/Disabled",
+                              "enum": [
+                                0
+                              ]
+                            },
+                            {
+                              "title": "Outlet",
+                              "enum": [
+                                1
+                              ]
+                            },
+                            {
+                              "title": "Switch",
+                              "enum": [
+                                2
+                              ]
+                            },
+                            {
+                              "title": "Motion Sensor",
+                              "enum": [
+                                3
+                              ]
+                            },
+                            {
+                              "title": "Occupancy Sensor",
+                              "enum": [
+                                4
+                              ]
+                            },
+                            {
+                              "title": "Contact Sensor",
+                              "enum": [
+                                5
+                              ]
+                            }
+                          ]
                         },
                         "mode": {
                           "title": "Mode",
                           "type": "integer",
                           "minimum": 0,
                           "maximum": 18,
-                          "default": 0,
                           "description": "Select the function.",
                           "oneOf": [
                             {
@@ -1576,69 +1644,41 @@
                               ]
                             }
                           ],
-                          "required": true
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].buttonsSensors[arrayIndices[2]].displayType > 0;"
+                          }
                         },
-                        "displayType": {
-                          "title": "Type",
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 5,
-                          "default": 0,
-                          "oneOf": [
-                            {
-                              "title": "None/Disabled",
-                              "enum": [
-                                0
-                              ]
-                            },
-                            {
-                              "title": "Outlet",
-                              "enum": [
-                                1
-                              ]
-                            },
-                            {
-                              "title": "Switch",
-                              "enum": [
-                                2
-                              ]
-                            },
-                            {
-                              "title": "Motion Sensor",
-                              "enum": [
-                                3
-                              ]
-                            },
-                            {
-                              "title": "Occupancy Sensor",
-                              "enum": [
-                                4
-                              ]
-                            },
-                            {
-                              "title": "Contact Sensor",
-                              "enum": [
-                                5
-                              ]
-                            }
-                          ],
-                          "description": "Select the characteristic type to be displayed in HomeKit app.",
-                          "required": true
+                        "name": {
+                          "title": "Name",
+                          "type": "string",
+                          "placeholder": "Button name",
+                          "description": "Your own name displayed in Homebridge/HomeKit app.",
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].buttonsSensors[arrayIndices[2]].displayType > 0;"
+                          }
                         },
                         "namePrefix": {
                           "title": "Prefix",
                           "type": "boolean",
                           "default": false,
                           "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
-                          "required": false
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].buttonsSensors[arrayIndices[2]].displayType > 0;"
+                          }
                         }
-                      }
+                      },
+                      "required": [
+                        "displayType"
+                      ]
                     }
                   }
-                }
+                },
+                "required": [
+                  "displayMode"
+                ]
               },
               "condition": {
-                "functionBody": "const devices = model.accounts[arrayIndices]?.ervDevices || []; return devices.length > 0 && devices.every(device => device.id != null);"
+                "functionBody": "const accounts = model.accounts[arrayIndices]?.ervDevices || []; return accounts.length > 0 && accounts.every(device => device.id != null);"
               }
             },
             "refreshInterval": {
@@ -1647,45 +1687,44 @@
               "default": 120,
               "minimum": 1,
               "maximum": 600,
-              "description": "Set the background account data refresh time in seconds.",
-              "required": false
+              "description": "Set the background account data refresh time in seconds."
             },
-            "disableLogDeviceInfo": {
-              "title": "Disable Log Device Info",
-              "type": "boolean",
-              "default": false,
-              "description": "This disable logging device info by every connections device to the network.",
-              "required": false
-            },
-            "disableLogInfo": {
-              "title": "Disable Log Info",
-              "type": "boolean",
-              "default": false,
-              "required": false
-            },
-            "disableLogSuccess": {
-              "title": "Disable Log Success",
-              "type": "boolean",
-              "default": false,
-              "required": false
-            },
-            "disableLogWarn": {
-              "title": "Disable Log Warn",
-              "type": "boolean",
-              "default": false,
-              "required": false
-            },
-            "disableLogError": {
-              "title": "Disable Log Error",
-              "type": "boolean",
-              "default": false,
-              "required": false
-            },
-            "enableDebugMode": {
-              "title": "Enable Log Debug",
-              "type": "boolean",
-              "default": false,
-              "required": false
+            "log": {
+              "title": "Log",
+              "type": "object",
+              "properties": {
+                "deviceInfo": {
+                  "title": "Device Info",
+                  "type": "boolean",
+                  "default": true,
+                  "description": "This enable logging device info by every connections device to the network."
+                },
+                "success": {
+                  "title": "Log Success",
+                  "type": "boolean",
+                  "default": true
+                },
+                "info": {
+                  "title": "Log Info",
+                  "type": "boolean",
+                  "default": false
+                },
+                "warn": {
+                  "title": "Log Warn",
+                  "type": "boolean",
+                  "default": true
+                },
+                "error": {
+                  "title": "Log Error",
+                  "type": "boolean",
+                  "default": true
+                },
+                "debug": {
+                  "title": "Log Debug",
+                  "type": "boolean",
+                  "default": false
+                }
+              }
             },
             "restFul": {
               "title": "RESTFul",
@@ -1695,18 +1734,7 @@
                   "title": "Enable",
                   "type": "boolean",
                   "default": false,
-                  "description": "This enable RESTful server.",
-                  "required": false
-                },
-                "debug": {
-                  "title": "Debug",
-                  "type": "boolean",
-                  "default": false,
-                  "description": "This enable debug mode for RESTFul.",
-                  "condition": {
-                    "functionBody": "return model.accounts[arrayIndices].restFul.enable === true;"
-                  },
-                  "required": false
+                  "description": "This enable RESTful server."
                 }
               }
             },
@@ -1720,16 +1748,6 @@
                   "default": false,
                   "description": "This enable MQTT client."
                 },
-                "debug": {
-                  "title": "Debug",
-                  "type": "boolean",
-                  "default": false,
-                  "description": "This enable debug mode for MQTT.",
-                  "condition": {
-                    "functionBody": "return model.accounts[arrayIndices].mqtt.enable === true;"
-                  },
-                  "required": false
-                },
                 "host": {
                   "title": "IP/Hostname",
                   "type": "string",
@@ -1738,8 +1756,7 @@
                   "description": "Here set the IP/Hostname of MQTT Broker.",
                   "condition": {
                     "functionBody": "return model.accounts[arrayIndices].mqtt.enable === true;"
-                  },
-                  "required": false
+                  }
                 },
                 "port": {
                   "title": "Port",
@@ -1748,8 +1765,7 @@
                   "description": "Here set the port of MQTT Broker.",
                   "condition": {
                     "functionBody": "return model.accounts[arrayIndices].mqtt.enable === true;"
-                  },
-                  "required": false
+                  }
                 },
                 "clientId": {
                   "title": "Client ID",
@@ -1758,53 +1774,61 @@
                   "description": "Here optional set the Client ID of MQTT Broker.",
                   "condition": {
                     "functionBody": "return model.accounts[arrayIndices].mqtt.enable === true"
-                  },
-                  "required": false
+                  }
                 },
                 "prefix": {
                   "title": "Prefix",
                   "type": "string",
-                  "placeholder": "home/melcloud",
+                  "placeholder": "home",
                   "description": "Here set the prefix.",
                   "condition": {
                     "functionBody": "return model.accounts[arrayIndices].mqtt.enable === true;"
-                  },
-                  "required": false
+                  }
                 },
                 "auth": {
                   "title": "Authorization",
-                  "type": "boolean",
-                  "default": false,
-                  "description": "This enable authorization for MQTT Broker.",
+                  "type": "object",
+                  "properties": {
+                    "enable": {
+                      "title": "Enable",
+                      "type": "boolean",
+                      "default": false,
+                      "description": "This enable authorization for MQTT Broker."
+                    },
+                    "user": {
+                      "title": "User",
+                      "type": "string",
+                      "placeholder": "user",
+                      "description": "Here set the user of MQTT Broker.",
+                      "condition": {
+                        "functionBody": "return model.accounts[arrayIndices].mqtt.auth.enable === true;"
+                      }
+                    },
+                    "passwd": {
+                      "title": "Password",
+                      "type": "string",
+                      "placeholder": "password",
+                      "description": "Here set the password of MQTT Broker.",
+                      "format": "password",
+                      "condition": {
+                        "functionBody": "return model.accounts[arrayIndices].mqtt.auth.enable === true;"
+                      }
+                    }
+                  },
                   "condition": {
                     "functionBody": "return model.accounts[arrayIndices].mqtt.enable === true;"
-                  },
-                  "required": false
-                },
-                "user": {
-                  "title": "User",
-                  "type": "string",
-                  "placeholder": "user",
-                  "description": "Here set the user of MQTT Broker.",
-                  "condition": {
-                    "functionBody": "return model.accounts[arrayIndices].mqtt.enable === true && model.accounts[arrayIndices].mqtt.auth === true;"
-                  },
-                  "required": false
-                },
-                "passwd": {
-                  "title": "Password",
-                  "type": "string",
-                  "placeholder": "password",
-                  "description": "Here set the password of MQTT Broker.",
-                  "format": "password",
-                  "condition": {
-                    "functionBody": "return model.accounts[arrayIndices].mqtt.enable === true && model.accounts[arrayIndices].mqtt.auth === true;"
-                  },
-                  "required": false
+                  }
                 }
               }
             }
-          }
+          },
+          "required": [
+            "name",
+            "user",
+            "passwd",
+            "language",
+            "displayType"
+          ]
         }
       }
     }
@@ -1822,6 +1846,7 @@
           "type": "password"
         },
         "accounts[].language",
+        "accounts[].displayType",
         {
           "key": "accounts[]",
           "type": "tabarray",
@@ -1847,8 +1872,8 @@
                     "accounts[].ataDevices[].displayMode",
                     {
                       "key": "accounts[].ataDevices[]",
-                      "type": "section",
                       "title": "Settings",
+                      "type": "section",
                       "expandable": true,
                       "expanded": false,
                       "items": [
@@ -1857,12 +1882,29 @@
                         "accounts[].ataDevices[].coolDryFanMode",
                         "accounts[].ataDevices[].autoDryFanMode",
                         "accounts[].ataDevices[].refreshInterval"
-                      ]
+                      ],
+                      "condition": {
+                        "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayMode > 0;"
+                      }
                     },
                     {
                       "key": "accounts[].ataDevices[]",
+                      "title": "Temperature Sensors",
                       "type": "section",
+                      "expandable": true,
+                      "expanded": false,
+                      "items": [
+                        "accounts[].ataDevices[].temperatureSensor",
+                        "accounts[].ataDevices[].temperatureSensorOutdoor"
+                      ],
+                      "condition": {
+                        "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayMode > 0;"
+                      }
+                    },
+                    {
+                      "key": "accounts[].ataDevices[].presets",
                       "title": "Presets",
+                      "type": "section",
                       "expandable": true,
                       "expanded": false,
                       "items": [
@@ -1875,28 +1917,20 @@
                               "key": "accounts[].ataDevices[].presets[].id",
                               "readonly": true
                             },
-                            "accounts[].ataDevices[].presets[].name",
                             "accounts[].ataDevices[].presets[].displayType",
+                            "accounts[].ataDevices[].presets[].name",
                             "accounts[].ataDevices[].presets[].namePrefix"
                           ]
                         }
-                      ]
+                      ],
+                      "condition": {
+                        "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayMode > 0;"
+                      }
                     },
                     {
-                      "key": "accounts[].ataDevices[]",
-                      "type": "section",
-                      "title": "Temperature Sensors",
-                      "expandable": true,
-                      "expanded": false,
-                      "items": [
-                        "accounts[].ataDevices[].temperatureSensor",
-                        "accounts[].ataDevices[].temperatureSensorOutdoor"
-                      ]
-                    },
-                    {
-                      "key": "accounts[].ataDevices[]",
-                      "type": "section",
+                      "key": "accounts[].ataDevices[].buttonsSensors",
                       "title": "Buttons / Sensors",
+                      "type": "section",
                       "expandable": true,
                       "expanded": false,
                       "items": [
@@ -1905,13 +1939,16 @@
                           "type": "tabarray",
                           "title": "{{ value.name || 'button/sensor' }}",
                           "items": [
-                            "accounts[].ataDevices[].buttonsSensors[].name",
-                            "accounts[].ataDevices[].buttonsSensors[].mode",
                             "accounts[].ataDevices[].buttonsSensors[].displayType",
+                            "accounts[].ataDevices[].buttonsSensors[].mode",
+                            "accounts[].ataDevices[].buttonsSensors[].name",
                             "accounts[].ataDevices[].buttonsSensors[].namePrefix"
                           ]
                         }
-                      ]
+                      ],
+                      "condition": {
+                        "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayMode > 0;"
+                      }
                     }
                   ],
                   "condition": {
@@ -1947,7 +1984,6 @@
                       "readonly": true
                     },
                     "accounts[].atwDevices[].displayMode",
-                    "accounts[].atwDevices[].hideZone",
                     {
                       "key": "accounts[].atwDevices[]",
                       "type": "section",
@@ -1955,37 +1991,18 @@
                       "expandable": true,
                       "expanded": false,
                       "items": [
+                        "accounts[].atwDevices[].hideZone",
                         "accounts[].atwDevices[].name",
                         "accounts[].atwDevices[].refreshInterval"
-                      ]
+                      ],
+                      "condition": {
+                        "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].displayMode > 0;"
+                      }
                     },
                     {
                       "key": "accounts[].atwDevices[]",
-                      "type": "section",
-                      "title": "Presets",
-                      "expandable": true,
-                      "expanded": false,
-                      "items": [
-                        {
-                          "key": "accounts[].atwDevices[].presets",
-                          "type": "tabarray",
-                          "title": "{{ value.name }}",
-                          "items": [
-                            {
-                              "key": "accounts[].atwDevices[].presets[].id",
-                              "readonly": true
-                            },
-                            "accounts[].atwDevices[].presets[].name",
-                            "accounts[].atwDevices[].presets[].displayType",
-                            "accounts[].atwDevices[].presets[].namePrefix"
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "key": "accounts[].atwDevices[]",
-                      "type": "section",
                       "title": "Temperature Sensors",
+                      "type": "section",
                       "expandable": true,
                       "expanded": false,
                       "items": [
@@ -1998,12 +2015,41 @@
                         "accounts[].atwDevices[].temperatureSensorReturnWaterTank",
                         "accounts[].atwDevices[].temperatureSensorFlowZone2",
                         "accounts[].atwDevices[].temperatureSensorReturnZone2"
-                      ]
+                      ],
+                      "condition": {
+                        "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].displayMode > 0;"
+                      }
                     },
                     {
-                      "key": "accounts[].atwDevices[]",
+                      "key": "accounts[].atwDevices[].presets",
+                      "title": "Presets",
                       "type": "section",
+                      "expandable": true,
+                      "expanded": false,
+                      "items": [
+                        {
+                          "key": "accounts[].atwDevices[].presets",
+                          "type": "tabarray",
+                          "title": "{{ value.name }}",
+                          "items": [
+                            {
+                              "key": "accounts[].atwDevices[].presets[].id",
+                              "readonly": true
+                            },
+                            "accounts[].atwDevices[].presets[].displayType",
+                            "accounts[].atwDevices[].presets[].name",
+                            "accounts[].atwDevices[].presets[].namePrefix"
+                          ]
+                        }
+                      ],
+                      "condition": {
+                        "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].displayMode > 0;"
+                      }
+                    },
+                    {
+                      "key": "accounts[].atwDevices[].buttonsSensors",
                       "title": "Buttons / Sensors",
+                      "type": "section",
                       "expandable": true,
                       "expanded": false,
                       "items": [
@@ -2012,13 +2058,16 @@
                           "type": "tabarray",
                           "title": "{{ value.name || 'button/sensor' }}",
                           "items": [
-                            "accounts[].atwDevices[].buttonsSensors[].name",
-                            "accounts[].atwDevices[].buttonsSensors[].mode",
                             "accounts[].atwDevices[].buttonsSensors[].displayType",
+                            "accounts[].atwDevices[].buttonsSensors[].mode",
+                            "accounts[].atwDevices[].buttonsSensors[].name",
                             "accounts[].atwDevices[].buttonsSensors[].namePrefix"
                           ]
                         }
-                      ]
+                      ],
+                      "condition": {
+                        "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].displayMode > 0;"
+                      }
                     }
                   ],
                   "condition": {
@@ -2056,19 +2105,37 @@
                     "accounts[].ervDevices[].displayMode",
                     {
                       "key": "accounts[].ervDevices[]",
-                      "type": "section",
                       "title": "Settings",
+                      "type": "section",
                       "expandable": true,
                       "expanded": false,
                       "items": [
                         "accounts[].ervDevices[].name",
                         "accounts[].ervDevices[].refreshInterval"
-                      ]
+                      ],
+                      "condition": {
+                        "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].displayMode > 0;"
+                      }
                     },
                     {
                       "key": "accounts[].ervDevices[]",
+                      "title": "Temperature Sensors",
                       "type": "section",
+                      "expandable": true,
+                      "expanded": false,
+                      "items": [
+                        "accounts[].ervDevices[].temperatureSensor",
+                        "accounts[].ervDevices[].temperatureSensorOutdoor",
+                        "accounts[].ervDevices[].temperatureSensorSupply"
+                      ],
+                      "condition": {
+                        "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].displayMode > 0;"
+                      }
+                    },
+                    {
+                      "key": "accounts[].ervDevices[].presets",
                       "title": "Presets",
+                      "type": "section",
                       "expandable": true,
                       "expanded": false,
                       "items": [
@@ -2081,29 +2148,20 @@
                               "key": "accounts[].ervDevices[].presets[].id",
                               "readonly": true
                             },
-                            "accounts[].ervDevices[].presets[].name",
                             "accounts[].ervDevices[].presets[].displayType",
+                            "accounts[].ervDevices[].presets[].name",
                             "accounts[].ervDevices[].presets[].namePrefix"
                           ]
                         }
-                      ]
+                      ],
+                      "condition": {
+                        "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].displayMode > 0;"
+                      }
                     },
                     {
-                      "key": "accounts[].ervDevices[]",
-                      "type": "section",
-                      "title": "Temperature Sensors",
-                      "expandable": true,
-                      "expanded": false,
-                      "items": [
-                        "accounts[].ervDevices[].temperatureSensor",
-                        "accounts[].ervDevices[].temperatureSensorOutdoor",
-                        "accounts[].ervDevices[].temperatureSensorSupply"
-                      ]
-                    },
-                    {
-                      "key": "accounts[].ervDevices[]",
-                      "type": "section",
+                      "key": "accounts[].ervDevices[].buttonsSensors",
                       "title": "Buttons / Sensors",
+                      "type": "section",
                       "expandable": true,
                       "expanded": false,
                       "items": [
@@ -2112,13 +2170,16 @@
                           "type": "tabarray",
                           "title": "{{ value.name || 'button/sensor' }}",
                           "items": [
-                            "accounts[].ervDevices[].buttonsSensors[].name",
-                            "accounts[].ervDevices[].buttonsSensors[].mode",
                             "accounts[].ervDevices[].buttonsSensors[].displayType",
+                            "accounts[].ervDevices[].buttonsSensors[].mode",
+                            "accounts[].ervDevices[].buttonsSensors[].name",
                             "accounts[].ervDevices[].buttonsSensors[].namePrefix"
                           ]
                         }
-                      ]
+                      ],
+                      "condition": {
+                        "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].displayMode > 0;"
+                      }
                     }
                   ],
                   "condition": {
@@ -2158,15 +2219,15 @@
                   ]
                 },
                 {
-                  "key": "accounts[]",
+                  "key": "accounts[].log",
                   "title": "Log",
                   "items": [
-                    "accounts[].disableLogDeviceInfo",
-                    "accounts[].disableLogInfo",
-                    "accounts[].disableLogSuccess",
-                    "accounts[].disableLogWarn",
-                    "accounts[].disableLogError",
-                    "accounts[].enableDebugMode"
+                    "accounts[].log.deviceInfo",
+                    "accounts[].log.success",
+                    "accounts[].log.info",
+                    "accounts[].log.warn",
+                    "accounts[].log.error",
+                    "accounts[].log.debug"
                   ]
                 },
                 {
@@ -2182,8 +2243,7 @@
                           "key": "accounts[].restFul",
                           "title": "RESTFul",
                           "items": [
-                            "accounts[].restFul.enable",
-                            "accounts[].restFul.debug"
+                            "accounts[].restFul.enable"
                           ]
                         },
                         {
@@ -2191,16 +2251,21 @@
                           "title": "MQTT",
                           "items": [
                             "accounts[].mqtt.enable",
-                            "accounts[].mqtt.debug",
                             "accounts[].mqtt.host",
                             "accounts[].mqtt.port",
                             "accounts[].mqtt.clientId",
                             "accounts[].mqtt.prefix",
-                            "accounts[].mqtt.auth",
-                            "accounts[].mqtt.user",
                             {
-                              "key": "accounts[].mqtt.passwd",
-                              "type": "password"
+                              "key": "accounts[].mqtt.auth",
+                              "title": "Authorization",
+                              "items": [
+                                "accounts[].mqtt.auth.enable",
+                                "accounts[].mqtt.auth.user",
+                                {
+                                  "key": "accounts[].mqtt.auth.passwd",
+                                  "type": "password"
+                                }
+                              ]
                             }
                           ]
                         }
@@ -2210,7 +2275,10 @@
                 }
               ]
             }
-          ]
+          ],
+          "condition": {
+            "functionBody": "return model.accounts[arrayIndices].ataDevices.length > 0 || model.accounts[arrayIndices].atwDevices.length > 0 || model.accounts[arrayIndices].ervDevices.length > 0;"
+          }
         }
       ]
     }
