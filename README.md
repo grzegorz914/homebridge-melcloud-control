@@ -207,7 +207,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `user` | Here set the account username. |
 | `passwd` | Here set the account password. |
 | `language` | Here select the account language. |
-| `displayMode` | Here select the account type `None/Disabled`, `MELCloud`, `MELCloud Home`. |
+| `displayType` | Here select the account type `None/Disabled`, `MELCloud`, `MELCloud Home`. |
 | `ataDevices[]` | Array of ATA devices created automatically after login to MELCloud from plugin config UI. |
 | `ataDevices[].id` | Read only data, do not change it. |
 | `ataDevices[].type` | Read only data, do not change it. |
