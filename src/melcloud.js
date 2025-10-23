@@ -1,4 +1,3 @@
-import { Agent } from 'https';
 import axios from 'axios';
 import puppeteer from 'puppeteer';
 import EventEmitter from 'events';
@@ -7,9 +6,9 @@ import Functions from './functions.js';
 import { ApiUrls, ApiUrlsHome } from './constants.js';
 
 class MelCloud extends EventEmitter {
-    constructor(displayType, user, passwd, language, accountFile, buildingsFile, devicesFile, logWarn, logDebug, requestConfig) {
+    constructor(accountType, user, passwd, language, accountFile, buildingsFile, devicesFile, logWarn, logDebug, requestConfig) {
         super();
-        this.displayType = displayType;
+        this.accountType = accountType;
         this.user = user;
         this.passwd = passwd;
         this.language = language;
@@ -33,18 +32,15 @@ class MelCloud extends EventEmitter {
             Persist: true
         };
 
-        this.axiosDefaults = {
-            timeout: 15000,
-            maxContentLength: 100000000,
-            maxBodyLength: 1000000000,
-            httpsAgent: new Agent({
-                keepAlive: false,
-                rejectUnauthorized: false
-            })
-        };
-
         if (!requestConfig) {
             this.impulseGenerator = new ImpulseGenerator()
+                .on('connect', async () => {
+                    try {
+                        await this.connect(true);
+                    } catch (error) {
+                        this.emit('error', `Impulse generator error: ${error}`);
+                    }
+                })
                 .on('checkDevicesList', async () => {
                     try {
                         await this.checkDevicesList(this.contextKey);
@@ -63,8 +59,8 @@ class MelCloud extends EventEmitter {
             const axiosInstanceGet = axios.create({
                 method: 'GET',
                 baseURL: ApiUrls.BaseURL,
-                headers: { 'X-MitsContextKey': contextKey },
-                ...this.axiosDefaults
+                timeout: 15000,
+                headers: { 'X-MitsContextKey': contextKey }
             });
 
             if (this.logDebug) this.emit('debug', `Scanning for devices`);
@@ -91,6 +87,14 @@ class MelCloud extends EventEmitter {
                     ...buildingStructure.Areas.flatMap(area => area.Devices),
                     ...buildingStructure.Devices
                 ];
+
+                // Zamiana DeviceID na string
+                allDevices.forEach(device => {
+                    if (device.DeviceID !== undefined && device.DeviceID !== null) {
+                        device.DeviceID = device.DeviceID.toString();
+                    }
+                });
+
                 devices.push(...allDevices);
             }
 
@@ -116,14 +120,13 @@ class MelCloud extends EventEmitter {
             const axiosInstanceLogin = axios.create({
                 method: 'POST',
                 baseURL: ApiUrls.BaseURL,
-                ...this.axiosDefaults
+                timeout: 15000,
             });
 
             const accountData = await axiosInstanceLogin(ApiUrls.ClientLogin, { data: this.loginData });
             const account = accountData.data;
             const accountInfo = account.LoginData;
             const contextKey = accountInfo?.ContextKey;
-            const useFahrenheit = accountInfo?.UseFahrenheit ?? false;
             this.contextKey = contextKey;
 
             const debugData = {
@@ -145,45 +148,32 @@ class MelCloud extends EventEmitter {
             this.axiosInstancePost = axios.create({
                 method: 'POST',
                 baseURL: ApiUrls.BaseURL,
+                timeout: 15000,
                 headers: {
                     'X-MitsContextKey': contextKey,
                     'content-type': 'application/json'
-                },
-                ...this.axiosDefaults
+                }
             });
 
             await this.functions.saveData(this.accountFile, accountInfo);
-
             this.emit('success', `Connect to MELCloud Success`);
 
-            return { accountInfo, contextKey, useFahrenheit };
+            return accountInfo
         } catch (error) {
             throw new Error(`Connect to MELCloud error: ${error.message}`);
         }
     }
 
-    async checkMelcloudHomeDevicesList(cookies) {
+    async checkMelcloudHomeDevicesList(contextKey) {
         try {
-            const c1 = cookies.c1.trim();
-            const c2 = cookies.c2.trim();
-
-            const cookie = [
-                '__Secure-monitorandcontrol=chunks-2',
-                `__Secure-monitorandcontrolC1=${c1}`,
-                `__Secure-monitorandcontrolC2=${c2}`,
-            ].join('; ');
-
             const axiosInstance = axios.create({
+                method: 'GET',
                 baseURL: ApiUrlsHome.BaseURL,
-                timeout: 20000,
-                httpsAgent: new Agent({
-                    keepAlive: false,
-                    rejectUnauthorized: false
-                }),
+                timeout: 25000,
                 headers: {
                     'Accept': '*/*',
                     'Accept-Language': 'en-US,en;q=0.9',
-                    'Cookie': cookie,
+                    'Cookie': contextKey,
                     'User-Agent': 'homebridge-melcloud-control/4.0.0',
                     'DNT': '1',
                     'Origin': 'https://melcloudhome.com',
@@ -196,7 +186,7 @@ class MelCloud extends EventEmitter {
             });
 
             if (this.logDebug) this.emit('debug', `Scanning for devices`);
-            const listDevicesData = await axiosInstance.get(ApiUrlsHome.GetUserContext);
+            const listDevicesData = await axiosInstance(ApiUrlsHome.GetUserContext);
             const buildingsList = listDevicesData.data.buildings;
             if (this.logDebug) this.emit('debug', `Buildings: ${JSON.stringify(buildingsList, null, 2)}`);
 
@@ -208,10 +198,59 @@ class MelCloud extends EventEmitter {
             await this.functions.saveData(this.buildingsFile, buildingsList);
             if (this.logDebug) this.emit('debug', `Buildings list saved`);
 
-            const devices = buildingsList.flatMap(building => [
-                ...(building.airToAirUnits || []),
-                ...(building.airToWaterUnits || [])
-            ]);
+            const devices = buildingsList.flatMap(building => {
+                // Funkcja kapitalizująca klucze obiektu
+                const capitalizeKeys = obj =>
+                    Object.fromEntries(
+                        Object.entries(obj).map(([key, value]) => [
+                            key.charAt(0).toUpperCase() + key.slice(1),
+                            value
+                        ])
+                    );
+
+                // Funkcja tworząca finalny obiekt Device
+                const createDevice = (device, type, contextKey) => {
+                    // Settings już kapitalizowane w nazwach
+                    const settingsArray = device.Settings || [];
+
+                    const settingsObject = Object.fromEntries(
+                        settingsArray.map(({ name, value }) => {
+                            let parsedValue = value;
+                            if (value === "True") parsedValue = true;
+                            else if (value === "False") parsedValue = false;
+                            else if (!isNaN(value) && value !== "") parsedValue = Number(value);
+
+                            const key = name.charAt(0).toUpperCase() + name.slice(1);
+                            return [key, parsedValue];
+                        })
+                    );
+
+                    // Scal Capabilities + Settings + DeviceType w Device
+                    const deviceObject = {
+                        ...capitalizeKeys(device.Capabilities || {}),
+                        ...settingsObject,
+                        DeviceType: type
+                    };
+
+                    // Usuń stare pola Settings i Capabilities
+                    const { Settings, Capabilities, Id, GivenDisplayName, ...rest } = device;
+
+                    return {
+                        ...rest,
+                        ContextKey: contextKey,
+                        Type: type,
+                        DeviceID: Id,
+                        DeviceName: GivenDisplayName,
+                        Device: deviceObject
+                    };
+                };
+
+                return [
+                    ...(building.airToAirUnits || []).map(d => createDevice(capitalizeKeys(d), 0, this.contextKey)),
+                    ...(building.airToWaterUnits || []).map(d => createDevice(capitalizeKeys(d), 1, this.contextKey)),
+                    ...(building.airToVentilationUnits || []).map(d => createDevice(capitalizeKeys(d), 3, this.contextKey))
+                ];
+            });
 
             const devicesCount = devices.length;
             if (devicesCount === 0) {
@@ -228,7 +267,7 @@ class MelCloud extends EventEmitter {
         }
     }
 
-    async connectToMelCloudHome() {
+    async connectToMelCloudHome(refresh = false) {
         if (this.logDebug) this.emit('debug', `Connecting to MELCloud Home`);
 
         const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
@@ -250,13 +289,13 @@ class MelCloud extends EventEmitter {
             if (!loginBtn && this.logWarn) this.emit('warn', `Login button not found`);
 
             // Set credentials and login
-            await Promise.all([loginBtn.click(), page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 20000 })]);
-            await page.waitForSelector('input[name="username"]', { timeout: 15000 });
+            await Promise.all([loginBtn.click(), page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 5000 })]);
+            await page.waitForSelector('input[name="username"]', { timeout: 5000 });
             await page.type('input[name="username"]', this.user, { delay: 50 });
             await page.type('input[name="password"]', this.passwd, { delay: 50 });
 
             const button1 = await page.$('input[type="submit"]');
-            await Promise.all([button1.click(), page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 20000 })]);
+            await Promise.all([button1.click(), page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 5000 })]);
 
             // Get cookies C1 and C2
             let c1 = null, c2 = null;
@@ -275,14 +314,14 @@ class MelCloud extends EventEmitter {
                 return null;
             }
 
-            const accountInfo = {};
-            const contextKey = { c1, c2 };
-            const useFahrenheit = false;
+            const contextKey = ['__Secure-monitorandcontrol=chunks-2', `__Secure-monitorandcontrolC1=${c1}`, `__Secure-monitorandcontrolC2=${c2}`,].join('; ');
+            const accountInfo = { ContextKey: contextKey, UseFahrenheit: false };
             this.contextKey = contextKey;
 
-            this.emit('success', `Connect to MELCloud Home Success`);
+            await this.functions.saveData(this.accountFile, accountInfo);
+            if (!refresh) this.emit('success', `Connect to MELCloud Home Success`);
 
-            return { accountInfo, contextKey, useFahrenheit };
+            return accountInfo;
         } catch (error) {
             throw new Error(`Connect to MELCloud Home error: ${error.message}`);
         } finally {
@@ -290,31 +329,31 @@ class MelCloud extends EventEmitter {
         }
     }
 
-    async connect() {
-        let response = null;
-        switch (this.displayType) {
-            case "1":
-                response = await this.connectToMelCloud();
-                return response
-            case "2":
-                response = await this.connectToMelCloudHome();
-                return response
+    async checkDevicesList(contextKey) {
+        let devices = [];
+        switch (this.accountType) {
+            case "melcloud":
+                devices = await this.checkMelcloudDevicesList(contextKey);
+                return devices
+            case "melcloudhome":
+                devices = await this.checkMelcloudHomeDevicesList(contextKey);
+                return devices;
             default:
-                return null
+                return devices;
         }
     }
 
-    async checkDevicesList(key) {
-        let devices = null;
-        switch (this.displayType) {
-            case "1":
-                devices = await this.checkMelcloudDevicesList(key);
-                return devices
-            case "2":
-                devices = await this.checkMelcloudHomeDevicesList(key);
-                return devices
+    async connect(refresh) {
+        let response = {};
+        switch (this.accountType) {
+            case "melcloud":
+                response = await this.connectToMelCloud();
+                return response
+            case "melcloudhome":
+                response = await this.connectToMelCloudHome(refresh);
+                return response
             default:
-                return null;
+                return response
         }
     }
 

@@ -16,6 +16,7 @@ class DeviceAtw extends EventEmitter {
         AccessoryUUID = api.hap.uuid;
 
         //account config
+        this.accountMelcloud = account.displayType === 'melcloud' ? true : false;
         this.device = device;
         this.displayMode = device.displayMode;
         this.hideZone = device.hideZone;
@@ -287,7 +288,7 @@ class DeviceAtw extends EventEmitter {
             if (this.logDebug) this.emit('debug', `Prepare accessory`);
             const accessoryName = deviceName;
             const accessoryUUID = AccessoryUUID.generate(accountName + deviceId.toString());
-            const accessoryCategory = [Categories.OTHER, Categories.AIR_HEATER, Categories.THERMOSTAT][this.displayType];
+            const accessoryCategory = [Categories.OTHER, Categories.AIR_HEATER, Categories.THERMOSTAT][this.displayMode];
             const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 
             //information service

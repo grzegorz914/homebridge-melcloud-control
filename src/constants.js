@@ -18,8 +18,7 @@ export const ApiUrls = {
 };
 
 export const ApiUrlsHome = {
-    LoginUrl:"https://live-melcloudhome.auth.eu-west-1.amazoncognito.com/login?client_id=3g4d5l5kivuqi7oia68gib7uso&redirect_uri=https%3A%2F%2Fauth.melcloudhome.com%2Fsignin-oidc-meu&response_type=code&scope=openid%20profile&response_mode=form_post",
-    BaseURL: 'https://melcloudhome.com',
+    BaseURL: "https://melcloudhome.com",
     GetUserContext: "/api/user/context",
     SetAta: "/api/ataunit/deviceid",
     SetAtw: "/api/atwunit/deviceid",
@@ -37,23 +36,12 @@ export const TemperatureDisplayUnits = ["°C", "°F"];
 
 export const AirConditioner = {
     System: ["AIR CONDITIONER OFF", "AIR CONDITIONER ON", "AIR CONDITIONER OFFLINE"],
-    DriveMode: [
-        "0", "HEAT", "DRY", "COOL", "4", "5", "6", "FAN", "AUTO",
-        "ISEE HEAT", "ISEE DRY", "ISEE COOL"
-    ],
-    VerticalVane: ["AUTO", "1", "2", "3", "4", "5", "6", "SWING"],
-    HorizontalVane: [
-        "AUTO", "LL", "L", "C", "R", "RR", "6", "7",
-        "SPLIT", "9", "10", "11", "SWING"
-    ],
+    OperationMode: ["0", "HEAT", "DRY", "COOL", "4", "5", "6", "FAN", "AUTO", "ISEE HEAT", "ISEE DRY", "ISEE COOL"],
+    VaneVertical: ["AUTO", "UP", "UP CENTER", "CENTER", "DOWN CENTER", "DOWN", "6", "SWING"],
+    VaneHorizontal: ["AUTO", "LEFT", "LEFT CENTER", "CENTER", "RIGHT CENTER", "RIGHT", "6", "7", "SPLIT", "9", "10", "11", "SWING"],
     AirDirection: ["AUTO", "SWING"],
-    FanSpeed: [
-        "AUTO", "1", "QUIET", "WEAK", "4",
-        "STRONG", "VERY STRONG", "OFF"
-    ],
-    CurrentOperationModeHeatherCooler: [
-        "INACTIVE", "IDLE", "HEATING", "COOLING"
-    ],
+    FanSpeedMapHomekit: ["AUTO", "1", "QUIET", "WEAK", "4", "STRONG", "VERY STRONG", "OFF"],
+    CurrentOperationModeHeatherCooler: ["INACTIVE", "IDLE", "HEATING", "COOLING"],
     CurrentOperationModeThermostat: ["INACTIVE", "HEATING", "COOLING"],
     EffectiveFlags: {
         Power: 1,
@@ -74,7 +62,15 @@ export const AirConditioner = {
         Presets: 287,
         HolidayMode: 131072,
         All: 281483566710825
-    }
+    },
+    OperationModeMapStringToEnum: { "0": 0, "Heat": 1, "Dry": 2, "Cool": 3, "4": 4, "5": 5, "6": 6, "Fan": 7, "Auto": 8, "Isee Heat": 9, "Isee Dry": 10, "Isee Cool": 11 },
+    OperationModeMapEnumToString: { 0: "0", 1: "Heat", 2: "Dry", 3: "Cool", 4: "4", 5: "5", 6: "6", 7: "Fan", 8: "Auto", 9: "Isee Heat", 10: "Isee Dry", 11: "Isee Cool" },
+    FanSpeedMapStringToEnum: { "Auto": 0, "One": 1, "Two": 2, "Three": 3, "Four": 4, "Five": 5, "0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, },
+    FanSpeedMapEnumToString: { 0: "Auto", 1: "One", 2: "Two", 3: "Three", 4: "Four", 5: "Five" },
+    VaneVerticalDirectionMapStringToEnum: { "Auto": 0, "One": 1, "Two": 2, "Three": 3, "Four": 4, "Five": 5, "Six": 6, "Swing": 7 },
+    VaneVerticalDirectionMapEnumToString: { 0: "Auto", 1: "One", 2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six", 7: "Swing" },
+    VaneHorizontalDirectionMapStringToEnum: { "Auto": 0, "Left": 1, "LeftCenter": 2, "Center": 3, "RightCenter": 4, "Right": 5, "Six": 6, "Seven": 7, "Split": 8, "Nine": 9, "Ten": 10, "Eleven": 11, "Swing": 12 },
+    VaneHorizontalDirectionMapStringToEnum: { 0: "Auto", 1: "Left", 2: "LeftCenter", 3: "Center", 4: "RightCenter", 5: "Right", 6: "Six", 7: "Seven", 8: "Split", 9: "Nine", 10: "Ten", 11: "Eleven", 12: "Swing" },
 };
 
 export const HeatPump = {

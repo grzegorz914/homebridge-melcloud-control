@@ -23,6 +23,7 @@
           "user": "user",
           "passwd": "password",
           "language": "14",
+          "displayType": "melcloud",
           "ataDevices": [],
           "atwDevices": [],
           "ervDevices": [],
@@ -36,8 +37,7 @@
             "debug": false
           },
           "restFul": {
-            "enable": false,
-            "debug": false
+            "enable": false
           },
           "mqtt": {
             "enable": false,
@@ -45,7 +45,6 @@
             "port": 1883,
             "clientId": "",
             "prefix": "",
-            "debug": false,
             "auth": {
               "enable": false,
               "user": "",

@@ -13,7 +13,7 @@
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/grzegorz914/homebridge-melcloud-control.svg)](https://github.com/grzegorz914/homebridge-melcloud-control/pulls)
 [![GitHub issues](https://img.shields.io/github/issues/grzegorz914/homebridge-melcloud-control.svg)](https://github.com/grzegorz914/homebridge-melcloud-control/issues)
 
-Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation Lossnay, manufactured by Mistsubishi and connected to MELCloud.
+Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation Lossnay, manufactured by Mistsubishi and connected to MELCloud or MELCloud Home.
 
 </span>
 
@@ -21,14 +21,14 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 
 | Package | Installation | Role | Required |
 | --- | --- | --- | --- |
-| [Homebridge v2.0](https://github.com/homebridge/homebridge) | [Homebridge Wiki](https://github.com/homebridge/homebridge/wiki) | HomeKit Bridge | Required ab v3.0.0 |
-| [Config UI X](https://github.com/homebridge/homebridge-config-ui-x) | [Config UI X Wiki](https://github.com/homebridge/homebridge-config-ui-x/wiki) | Homebridge Web User Interface | Required ab v3.0.0|
+| [Homebridge](https://github.com/homebridge/homebridge) | [Homebridge Wiki](https://github.com/homebridge/homebridge/wiki) | HomeKit Bridge | Required |
+| [Homebridge UI](https://github.com/homebridge/homebridge-config-ui-x) | [Config UI X Wiki](https://github.com/homebridge/homebridge-config-ui-x/wiki) | Homebridge Web User Interface | Required |
 | [MELCloud](https://github.com/grzegorz914/homebridge-melcloud-control) | [Plug-In Wiki](https://github.com/grzegorz914/homebridge-melcloud-control/wiki) | Homebridge Plug-In | Required |
 
 ### About The Plugin
 
 * All devices are detected automatically.
-* Control devices over MELCloud server.
+* Control devices over MELCloud and MELCloud Home.
 * Support multiple accounts, buildings, floors, areas.
 * Support temperature display units `Celsius/Fahrenheit`.
 * Support assing inividual operating mode for `Heat/Cool/Auto`.
@@ -187,7 +187,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 ### Configuration
 
 * Run this plugin as a [Child Bridge](https://github.com/homebridge/homebridge/wiki/Child-Bridges) (Highly Recommended), this prevent crash Homebridge if plugin crashes.
-* Install and use [Homebridge Config UI X](https://github.com/homebridge/homebridge-config-ui-x/wiki) to configure this plugin, required for version v3 and above.
+* Install and use [Homebridge UI](https://github.com/homebridge/homebridge-config-ui-x/wiki) to configure this plugin, required for version v3 and above.
 * The `sample-config.json` can be edited and used as an alternative.
 
 <p align="center">
@@ -204,9 +204,10 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | Key | Description |
 | --- | --- |
 | `name` | Here set the own account name. |
-| `user` | Here set the MELCloud username. |
-| `passwd` | Here set the MELCloud password. |
-| `language` | Here select the MELCloud language. |
+| `user` | Here set the account username. |
+| `passwd` | Here set the account password. |
+| `language` | Here select the account language. |
+| `displayMode` | Here select the account type `None/Disabled`, `MELCloud`, `MELCloud Home`. |
 | `ataDevices[]` | Array of ATA devices created automatically after login to MELCloud from plugin config UI. |
 | `ataDevices[].id` | Read only data, do not change it. |
 | `ataDevices[].type` | Read only data, do not change it. |

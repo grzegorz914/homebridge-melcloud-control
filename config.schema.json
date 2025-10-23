@@ -204,27 +204,25 @@
             "displayType": {
               "title": "Account Type",
               "type": "string",
-              "minimum": 0,
-              "maximum": 2,
-              "default": 1,
+              "default": "disabled",
               "description": "Here select the language used in MELCloud account.",
               "oneOf": [
                 {
                   "title": "None/Disabled",
                   "enum": [
-                    "0"
+                    "disabled"
                   ]
                 },
                 {
                   "title": "MELCLoud",
                   "enum": [
-                    "1"
+                    "melcloud"
                   ]
                 },
                 {
                   "title": "MELCLoud Home",
                   "enum": [
-                    "2"
+                    "melcloudhome"
                   ]
                 }
               ]
@@ -237,8 +235,8 @@
                 "properties": {
                   "id": {
                     "title": "ID",
-                    "type": "integer",
-                    "default": 0,
+                    "type": "string",
+                    "default": "0",
                     "readonly": true
                   },
                   "type": {
@@ -806,8 +804,8 @@
                 "properties": {
                   "id": {
                     "title": "ID",
-                    "type": "integer",
-                    "default": 0,
+                    "type": "string",
+                    "default": "0",
                     "readonly": true
                   },
                   "type": {
@@ -1341,8 +1339,8 @@
                 "properties": {
                   "id": {
                     "title": "ID",
-                    "type": "integer",
-                    "default": 0,
+                    "type": "string",
+                    "default": "0",
                     "readonly": true
                   },
                   "type": {
@@ -1985,7 +1983,7 @@
                     },
                     "accounts[].atwDevices[].displayMode",
                     {
-                      "key": "accounts[].atwDevices[]",
+                      "key": "accounts[].atwDevices",
                       "type": "section",
                       "title": "Settings",
                       "expandable": true,
@@ -2000,7 +1998,7 @@
                       }
                     },
                     {
-                      "key": "accounts[].atwDevices[]",
+                      "key": "accounts[].atwDevices",
                       "title": "Temperature Sensors",
                       "type": "section",
                       "expandable": true,
@@ -2104,7 +2102,7 @@
                     },
                     "accounts[].ervDevices[].displayMode",
                     {
-                      "key": "accounts[].ervDevices[]",
+                      "key": "accounts[].ervDevices",
                       "title": "Settings",
                       "type": "section",
                       "expandable": true,
@@ -2118,7 +2116,7 @@
                       }
                     },
                     {
-                      "key": "accounts[].ervDevices[]",
+                      "key": "accounts[].ervDevices",
                       "title": "Temperature Sensors",
                       "type": "section",
                       "expandable": true,

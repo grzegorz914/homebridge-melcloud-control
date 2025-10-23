@@ -79,9 +79,9 @@
         <div class="mb-2">
           <label for="displayType" class="form-label">Account Type</label>
           <select id="displayType" name="displayType" class="form-control">
-            <option value="0">None/Disabled</option>
-            <option value="1">MELCloud</option>
-            <option value="2">MELCloud Home</option>
+            <option value="disabled">None/Disabled</option>
+            <option value="melcloud">MELCloud</option>
+            <option value="melcloudhome">MELCloud Home</option>
           </select>
         </div>
 
@@ -90,36 +90,42 @@
           <button id="configButton" type="button" class="btn btn-secondary"><i class="fas fa-gear"></i></button>
         </div>
       </form>
+      <div id="accountButton" class="text-center mt-2"></div>
     </div>
-
-    <div id="accountButton" class="mt-2"></div>
   </div>
 
   <script>
     (async () => {
-      const pluginConfig = await homebridge.getPluginConfig();
-      if (!pluginConfig.length) {
-        pluginConfig.push({});
-        await homebridge.updatePluginConfig(pluginConfig);
+      const config = await homebridge.getPluginConfig();
+
+      if (!config.length) {
+        config.push({ accounts: [] });
+        await homebridge.updatePluginConfig(config);
         homebridge.showSchemaForm();
         return;
       }
 
-      this.deviceIndex = 0;
+      config[0].accounts ??= [];
 
+      // 🧩 Deep clone — UI-safe copy (JSON method resets references)
+      const pluginConfig = JSON.parse(JSON.stringify(config));
+
+      this.accountIndex = 0;
       const accountsCount = pluginConfig[0].accounts.length;
+
       for (let i = 0; i < accountsCount; i++) {
+        const acc = pluginConfig[0].accounts[i];
         const button = document.createElement("button");
         button.type = "button";
         button.id = `button${i}`;
         button.className = "btn btn-primary";
         button.style.textTransform = 'none';
-        button.innerText = pluginConfig[0].accounts[i].name;
+        button.innerText = acc.name;
         document.getElementById("accountButton").appendChild(button);
 
         button.addEventListener('click', async () => {
           for (let j = 0; j < accountsCount; j++) {
-            document.getElementById(`button${j}`).className = (j === i ? 'btn btn-secondary' : 'btn btn-primary');
+            document.getElementById(`button${j}`).className = (j === i ? 'btn btn-primary' : 'btn btn-secondary');
           }
 
           const acc = pluginConfig[0].accounts[i];
@@ -127,26 +133,30 @@
           document.getElementById('name').value = acc.name || '';
           document.getElementById('user').value = acc.user || '';
           document.getElementById('passwd').value = acc.passwd || '';
-          document.getElementById('language').value = acc.language || '';
-          document.getElementById('displayType').value = acc.displayType || '';
+          document.getElementById('language').value = acc.language || '0';
+          document.getElementById('displayType').value = acc.displayType || 'disabled';
           document.getElementById('logIn').disabled = !(acc.name && acc.user && acc.passwd && acc.language && acc.displayType);
-          this.deviceIndex = i;
         });
 
-        if (i === accountsCount - 1) document.getElementById(`button0`).click();
+        if (i === accountsCount - 1 && accountsCount > 0)
+          document.getElementById(`button0`).click();
+
+        this.accountIndex = i;
       }
 
       document.getElementById('melCloudAccount').style.display = 'block';
 
+      // Safe update
       document.getElementById('configForm').addEventListener('input', async () => {
-        const acc = pluginConfig[0].accounts[this.deviceIndex];
+        const acc = pluginConfig[0].accounts[this.accountIndex];
+        if (!acc) return;
         acc.name = document.querySelector('#name').value;
         acc.user = document.querySelector('#user').value;
         acc.passwd = document.querySelector('#passwd').value;
         acc.language = document.querySelector('#language').value;
         acc.displayType = document.querySelector('#displayType').value;
 
-        document.getElementById('logIn').disabled = !(acc.name && acc.user && acc.passwd && acc.languaged && acc.displayType);
+        document.getElementById('logIn').disabled = !(acc.name && acc.user && acc.passwd && acc.language && acc.displayType);
 
         await homebridge.updatePluginConfig(pluginConfig);
         await homebridge.savePluginConfig(pluginConfig);
@@ -178,9 +188,10 @@
       function removeStaleDevices(configDevices, melcloudDevices) {
         const melcloudIds = melcloudDevices.map(d => d.DeviceID);
         const removedDevices = [];
+
         for (let i = configDevices.length - 1; i >= 0; i--) {
           const device = configDevices[i];
-          if (device.id !== 0 && !melcloudIds.includes(device.id)) {
+          if (device.id !== "0" && !melcloudIds.includes(device.id)) {
             removedDevices.push(device);
             configDevices.splice(i, 1);
           }
@@ -197,12 +208,13 @@
       }
 
       document.getElementById('logIn').addEventListener('click', async () => {
-        homebridge.showSpinner();
         document.getElementById(`logIn`).className = "btn btn-primary";
+
         updateInfo('info', 'Connecting...', 'yellow');
+        homebridge.showSpinner();
 
         try {
-          const acc = pluginConfig[0].accounts[this.deviceIndex];
+          const acc = pluginConfig[0].accounts[this.accountIndex];
           const payload = { accountName: acc.name, user: acc.user, passwd: acc.passwd, language: acc.language, displayType: acc.displayType };
           const devicesInMelCloud = await homebridge.request('/connect', payload);
 
@@ -224,24 +236,36 @@
           const removedAtw = removeStaleDevices(acc.atwDevices, devicesByType.atw);
           const removedErv = removeStaleDevices(acc.ervDevices, devicesByType.erv);
 
-          // Function to handle device & presets
           const handleDevices = (devicesInCloud, devicesInConfig, typeString, newArr, newPresets) => {
             devicesInCloud.forEach(device => {
               const { DeviceID: id, Type: type, DeviceName: name, Presets: presets = [] } = device;
-              const devObj = { id, type, typeString, name, displayMode: 1, presets: [], buttonsSensors: [] };
+              const devObj = structuredClone({
+                id,
+                type,
+                typeString,
+                name,
+                displayMode: 1,
+                presets: [],
+                buttonsSensors: []
+              });
+
               if (!devicesInConfig.some(d => d.id === id)) {
                 devicesInConfig.push(devObj);
-                newArr.push(devObj);
+                newArr.push(structuredClone(devObj));
               }
-              presets.forEach(p => {
-                p.id = p.ID;
-                p.name = p.NumberDescription;
-                p.displayType = 0;
-                p.namePrefix = false;
+
+              presets.forEach(preset => {
+                const p = structuredClone({
+                  id: preset.ID,
+                  name: preset.NumberDescription,
+                  displayType: 0,
+                  namePrefix: false
+                });
+
                 const devConfig = devicesInConfig.find(d => d.id === id);
-                if (devConfig && !devConfig.presets.some(x => x.id === p.ID)) {
+                if (devConfig && !devConfig.presets.some(x => x.id === p.id)) {
                   devConfig.presets.push(p);
-                  newPresets.push(p);
+                  newPresets.push(structuredClone(p));
                 }
               });
             });
@@ -249,9 +273,8 @@
 
           handleDevices(devicesByType.ata, acc.ataDevices, "Air Conditioner", newDevices.ata, newDevices.ataPresets);
           handleDevices(devicesByType.atw, acc.atwDevices, "Heat Pump", newDevices.atw, newDevices.atwPresets);
-          handleDevices(devicesByType.erv, acc.ervDevices, "Energy Recovery ventiltion", newDevices.erv, newDevices.ervPresets);
+          handleDevices(devicesByType.erv, acc.ervDevices, "Energy Recovery Ventilation", newDevices.erv, newDevices.ervPresets);
 
-          // Display summary
           const newDevicesCount = newDevices.ata.length + newDevices.atw.length + newDevices.erv.length;
           const newPresetsCount = newDevices.ataPresets.length + newDevices.atwPresets.length + newDevices.ervPresets.length;
           const removedDevicesCount = removedAta.length + removedAtw.length + removedErv.length;
@@ -259,9 +282,12 @@
           if (!newDevicesCount && !newPresetsCount && !removedDevicesCount) {
             updateInfo('info', 'No changes detected.', 'white');
           } else {
-            if (newDevicesCount) updateInfo('info', `Found new devices: ATA: ${newDevices.ata.length}, ATW: ${newDevices.atw.length}, ERV: ${newDevices.erv.length}.`, 'green');
-            if (newPresetsCount) updateInfo('info1', `Found new presets: ATA: ${newDevices.ataPresets.length}, ATW: ${newDevices.atwPresets.length}, ERV: ${newDevices.ervPresets.length}.`, 'green');
-            if (removedDevicesCount) updateInfo('info2', `Removed devices: ATA: ${removedAta.length}, ATW: ${removedAtw.length}, ERV: ${removedErv.length}.`, 'orange');
+            if (newDevicesCount)
+              updateInfo('info', `Found new devices: ATA: ${newDevices.ata.length}, ATW: ${newDevices.atw.length}, ERV: ${newDevices.erv.length}.`, 'green');
+            if (newPresetsCount)
+              updateInfo('info1', `Found new presets: ATA: ${newDevices.ataPresets.length}, ATW: ${newDevices.atwPresets.length}, ERV: ${newDevices.ervPresets.length}.`, 'green');
+            if (removedDevicesCount)
+              updateInfo('info2', `Removed devices: ATA: ${removedAta.length}, ATW: ${removedAtw.length}, ERV: ${removedErv.length}.`, 'orange');
           }
 
           await homebridge.updatePluginConfig(pluginConfig);
@@ -270,7 +296,7 @@
 
         } catch (error) {
           updateInfo('info', 'Check Your credentials data and try again.', 'yellow');
-          updateInfo('info1', `Error: ${error}`, 'red');
+          updateInfo('info1', `Error: ${JSON.stringify(error)}`, 'red');
           document.getElementById('logIn').className = "btn btn-secondary";
         } finally {
           homebridge.hideSpinner();
