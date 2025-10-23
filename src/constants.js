@@ -70,7 +70,7 @@ export const AirConditioner = {
     VaneVerticalDirectionMapStringToEnum: { "Auto": 0, "One": 1, "Two": 2, "Three": 3, "Four": 4, "Five": 5, "Six": 6, "Swing": 7 },
     VaneVerticalDirectionMapEnumToString: { 0: "Auto", 1: "One", 2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six", 7: "Swing" },
     VaneHorizontalDirectionMapStringToEnum: { "Auto": 0, "Left": 1, "LeftCenter": 2, "Center": 3, "RightCenter": 4, "Right": 5, "Six": 6, "Seven": 7, "Split": 8, "Nine": 9, "Ten": 10, "Eleven": 11, "Swing": 12 },
-    VaneHorizontalDirectionMapStringToEnum: { 0: "Auto", 1: "Left", 2: "LeftCenter", 3: "Center", 4: "RightCenter", 5: "Right", 6: "Six", 7: "Seven", 8: "Split", 9: "Nine", 10: "Ten", 11: "Eleven", 12: "Swing" },
+    VaneHorizontalDirectionMapEnumToString: { 0: "Auto", 1: "Left", 2: "LeftCenter", 3: "Center", 4: "RightCenter", 5: "Right", 6: "Six", 7: "Seven", 8: "Split", 9: "Nine", 10: "Ten", 11: "Eleven", 12: "Swing" },
 };
 
 export const HeatPump = {
