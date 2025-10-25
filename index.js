@@ -1,5 +1,5 @@
 import { join } from 'path';
-import { mkdirSync } from 'fs';
+import { mkdirSync, existsSync, writeFileSync } from 'fs';
 import MelCloud from './src/melcloud.js';
 import DeviceAta from './src/deviceata.js';
 import DeviceAtw from './src/deviceatw.js';
@@ -30,7 +30,7 @@ class MelCloudPlatform {
 		api.on('didFinishLaunching', async () => {
 			//loop through accounts
 			for (const account of config.accounts) {
-				const accountType = account.displayType || 'disabled';
+				const accountType = account.type || 'disabled';
 				if (accountType === 'disabled') continue;
 
 				const accountName = account.name;
@@ -79,7 +79,6 @@ class MelCloudPlatform {
 				const accountFile = `${prefDir}/${accountName}_Account`;
 				const buildingsFile = `${prefDir}/${accountName}_Buildings`;
 				const devicesFile = `${prefDir}/${accountName}_Devices`;
-
 
 				//set account refresh interval
 				const refreshInterval = (account.refreshInterval ?? 120) * 1000
@@ -132,9 +131,9 @@ class MelCloudPlatform {
 
 								for (const device of devices) {
 									//chack device from config exist on melcloud
-									const displayMode = device.displayMode > 0;
+									const displayType = device.displayType > 0;
 									const deviceExistInMelCloud = devicesInMelcloud.some(dev => dev.DeviceID === device.id);
-									if (!deviceExistInMelCloud || !displayMode) {
+									if (!deviceExistInMelCloud || !displayType) {
 										continue;
 									}
 
@@ -142,19 +141,39 @@ class MelCloudPlatform {
 									const deviceType = device.type;
 									const deviceTypeText = device.typeString;
 									const deviceRefreshInterval = (device.refreshInterval ?? 5) * 1000;
+									const defaultTempsFile = `${prefDir}/${accountName}_${device.id}_Temps`;
+
+									if (accountType === 'melcloudhome') {
+										try {
+											const temps = {
+												defaultCoolingSetTemperature: 24,
+												defaultHeatingSetTemperature: 20
+											};
+
+											if (!existsSync(defaultTempsFile)) {
+												writeFileSync(defaultTempsFile, JSON.stringify(temps, null, 2));
+												if (logLevel.debug) log.debug(`Default temperature file created: ${defaultTempsFile}`);
+											}
+										} catch (error) {
+											if (logLevel.error) {
+												log.error(`Device: ${host} ${deviceName}, File init error: ${error.message}`);
+											}
+											continue;
+										}
+									}
 
 									let configuredDevice;
 									switch (deviceType) {
 										case 0: //ATA
-											configuredDevice = new DeviceAta(api, account, device, devicesFile, useFahrenheit, restFul, mqtt);
+											configuredDevice = new DeviceAta(api, account, device, devicesFile, defaultTempsFile, useFahrenheit, restFul, mqtt);
 											break;
 										case 1: //ATW
-											configuredDevice = new DeviceAtw(api, account, device, contextKey, devicesFile, useFahrenheit, restFul, mqtt);
+											configuredDevice = new DeviceAtw(api, account, device, contextKey, devicesFile, defaultTempsFile, useFahrenheit, restFul, mqtt);
 											break;
 										case 2:
 											break;
 										case 3: //ERV
-											configuredDevice = new DeviceErv(api, account, device, contextKey, devicesFile, useFahrenheit, restFul, mqtt);
+											configuredDevice = new DeviceErv(api, account, device, contextKey, devicesFile, defaultTempsFile, useFahrenheit, restFul, mqtt);
 											break;
 										default:
 											if (logLevel.warn) log.warn(`${accountName}, ${deviceTypeText}, ${deviceName}, unknown device: ${deviceType}.`);

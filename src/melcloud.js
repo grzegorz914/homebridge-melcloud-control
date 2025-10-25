@@ -1,5 +1,7 @@
-import axios from 'axios';
+
+import { execSync } from 'child_process';
 import puppeteer from 'puppeteer';
+import axios from 'axios';
 import EventEmitter from 'events';
 import ImpulseGenerator from './impulsegenerator.js';
 import Functions from './functions.js';
@@ -54,6 +56,7 @@ class MelCloud extends EventEmitter {
         }
     }
 
+    // MELCloud
     async checkMelcloudDevicesList(contextKey) {
         try {
             const axiosInstanceGet = axios.create({
@@ -267,17 +270,23 @@ class MelCloud extends EventEmitter {
         }
     }
 
+    // MELCloud Home
     async connectToMelCloudHome(refresh = false) {
         if (this.logDebug) this.emit('debug', `Connecting to MELCloud Home`);
 
-        const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
-        const page = await browser.newPage();
-
+        let browser;
         try {
-            // Open MELCloud Home
+            browser = await puppeteer.launch({
+                headless: true,
+                args: ['--no-sandbox', '--disable-setuid-sandbox']
+            });
+
+            const page = await browser.newPage();
             await page.goto(ApiUrlsHome.BaseURL, { waitUntil: 'networkidle2' });
+
             const buttons = await page.$$('button.btn--blue');
             let loginBtn = null;
+
             for (const btn of buttons) {
                 const text = await page.evaluate(el => el.textContent, btn);
                 if (text.trim() === 'Zaloguj' || text.trim() === 'Log In') {
@@ -288,33 +297,43 @@ class MelCloud extends EventEmitter {
 
             if (!loginBtn && this.logWarn) this.emit('warn', `Login button not found`);
 
-            // Set credentials and login
-            await Promise.all([loginBtn.click(), page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 5000 })]);
+            await Promise.all([
+                loginBtn.click(),
+                page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 10000 })
+            ]);
+
             await page.waitForSelector('input[name="username"]', { timeout: 5000 });
             await page.type('input[name="username"]', this.user, { delay: 50 });
             await page.type('input[name="password"]', this.passwd, { delay: 50 });
 
             const button1 = await page.$('input[type="submit"]');
-            await Promise.all([button1.click(), page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 5000 })]);
+            await Promise.all([
+                button1.click(),
+                page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 10000 })
+            ]);
 
-            // Get cookies C1 and C2
             let c1 = null, c2 = null;
             const start = Date.now();
 
-            // Loop max 20s
             while ((!c1 || !c2) && Date.now() - start < 20000) {
-                const cookies = await page.cookies();
+                const cookies = await page.browserContext().cookies();
                 c1 = cookies.find(c => c.name === '__Secure-monitorandcontrolC1')?.value || c1;
                 c2 = cookies.find(c => c.name === '__Secure-monitorandcontrolC2')?.value || c2;
                 if (!c1 || !c2) await new Promise(r => setTimeout(r, 500));
             }
+
 
             if (!c1 || !c2) {
                 if (this.logWarn) this.emit('warn', `Cookies C1/C2 missing`);
                 return null;
             }
 
-            const contextKey = ['__Secure-monitorandcontrol=chunks-2', `__Secure-monitorandcontrolC1=${c1}`, `__Secure-monitorandcontrolC2=${c2}`,].join('; ');
+            const contextKey = [
+                '__Secure-monitorandcontrol=chunks-2',
+                `__Secure-monitorandcontrolC1=${c1}`,
+                `__Secure-monitorandcontrolC2=${c2}`
+            ].join('; ');
+
             const accountInfo = { ContextKey: contextKey, UseFahrenheit: false };
             this.contextKey = contextKey;
 
@@ -323,9 +342,43 @@ class MelCloud extends EventEmitter {
 
             return accountInfo;
         } catch (error) {
-            throw new Error(`Connect to MELCloud Home error: ${error.message}`);
+            if (error.message.includes('libnspr4.so') || error.message.includes('Failed to launch the browser process')) {
+                const inDocker = await this.functions.isRunningInDocker();
+                if (this.logWarn) this.emit('warn', `Missing system libraries detected.`);
+
+                if (inDocker) {
+                    this.emit('warn', `Running in Docker — attempting automatic fix...`);
+
+                    const installCmd =
+                        'apt-get update && apt-get install -y ' +
+                        'libnss3 libnspr4 libatk1.0-0 libatk-bridge2.0-0 libcups2 ' +
+                        'libxcomposite1 libxrandr2 libxdamage1 libxkbcommon0 libpango-1.0-0 ' +
+                        'libgbm1 libasound2 libxshmfence1 fonts-liberation libappindicator3-1 libu2f-udev';
+
+                    try {
+                        execSync(installCmd, { stdio: 'inherit' });
+                        if (this.logDebug) this.emit('debug', `Libraries installed. Retrying Puppeteer...`);
+
+                        const testBrowser = await puppeteer.launch({
+                            headless: true,
+                            args: ['--no-sandbox', '--disable-setuid-sandbox']
+                        });
+                        await testBrowser.close();
+
+                        this.emit('success', `Puppeteer repaired and running, try again.`);
+                        return true;
+                    } catch (fixError) {
+                        throw new Error(`Automatic fix failed. Run manually inside container:\n${installCmd}`);
+                    }
+
+                } else {
+                    throw new Error(`System libraries missing. Non-Docker environment detected — install dependencies manually.`);
+                }
+            } else {
+                throw new Error(`Puppeteer failed: ${error.message}`);
+            }
         } finally {
-            await browser.close();
+            if (browser) await browser.close().catch(() => { });
         }
     }
 

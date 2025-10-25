@@ -23,7 +23,7 @@
           "user": "user",
           "passwd": "password",
           "language": "14",
-          "displayType": "melcloud",
+          "accountType": "melcloud",
           "ataDevices": [],
           "atwDevices": [],
           "ervDevices": [],

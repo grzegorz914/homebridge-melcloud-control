@@ -77,8 +77,8 @@
         </div>
 
         <div class="mb-2">
-          <label for="displayType" class="form-label">Account Type</label>
-          <select id="displayType" name="displayType" class="form-control">
+          <label for="accountType" class="form-label">Account Type</label>
+          <select id="accountType" name="accountType" class="form-control">
             <option value="disabled">None/Disabled</option>
             <option value="melcloud">MELCloud</option>
             <option value="melcloudhome">MELCloud Home</option>
@@ -90,79 +90,94 @@
           <button id="configButton" type="button" class="btn btn-secondary"><i class="fas fa-gear"></i></button>
         </div>
       </form>
-      <div id="accountButton" class="text-center mt-2"></div>
+      <div id="accountButton" class="d-flex flex-wrap justify-content-center gap-1 mt-3"></div>
     </div>
   </div>
 
   <script>
     (async () => {
-      const config = await homebridge.getPluginConfig();
+      const pluginConfig = await homebridge.getPluginConfig();
 
-      if (!config.length) {
-        config.push({ accounts: [] });
-        await homebridge.updatePluginConfig(config);
+      if (!pluginConfig.length) {
+        pluginConfig.push({});
+        await homebridge.updatePluginConfig(pluginConfig);
         homebridge.showSchemaForm();
         return;
       }
 
-      config[0].accounts ??= [];
-
-      // 🧩 Deep clone — UI-safe copy (JSON method resets references)
-      const pluginConfig = JSON.parse(JSON.stringify(config));
-
       this.accountIndex = 0;
-      const accountsCount = pluginConfig[0].accounts.length;
+      const accounts = pluginConfig[0].accounts || [];
+      const accountsCount = accounts.length;
 
-      for (let i = 0; i < accountsCount; i++) {
-        const acc = pluginConfig[0].accounts[i];
+      const container = document.getElementById("accountButton");
+      container.style.display = 'flex';
+      container.style.flexWrap = 'wrap';
+      container.style.justifyContent = 'center';
+      container.style.gap = '0.25rem';
+      container.style.alignItems = 'center';
+
+      const formElements = {
+        name: document.getElementById('name'),
+        user: document.getElementById('user'),
+        passwd: document.getElementById('passwd'),
+        language: document.getElementById('language'),
+        accountType: document.getElementById('accountType'),
+        logIn: document.getElementById('logIn'),
+        accountName: document.getElementById('accountName')
+      };
+
+      // Tworzenie przycisków
+      accounts.forEach((account, i) => {
         const button = document.createElement("button");
         button.type = "button";
         button.id = `button${i}`;
         button.className = "btn btn-primary";
         button.style.textTransform = 'none';
-        button.innerText = acc.name;
-        document.getElementById("accountButton").appendChild(button);
+        button.innerText = account.name || `Account ${i + 1}`;
+        container.appendChild(button);
 
         button.addEventListener('click', async () => {
-          for (let j = 0; j < accountsCount; j++) {
+          this.accountIndex = i;
+
+          // Zmieniamy klasę wszystkich przycisków
+          accounts.forEach((_, j) => {
             document.getElementById(`button${j}`).className = (j === i ? 'btn btn-primary' : 'btn btn-secondary');
-          }
+          });
 
-          const acc = pluginConfig[0].accounts[i];
-          document.getElementById('accountName').innerText = acc.name || '';
-          document.getElementById('name').value = acc.name || '';
-          document.getElementById('user').value = acc.user || '';
-          document.getElementById('passwd').value = acc.passwd || '';
-          document.getElementById('language').value = acc.language || '0';
-          document.getElementById('displayType').value = acc.displayType || 'disabled';
-          document.getElementById('logIn').disabled = !(acc.name && acc.user && acc.passwd && acc.language && acc.displayType);
+          // Ustawiamy formularz
+          formElements.accountName.innerText = account.name || '';
+          formElements.name.value = account.name || '';
+          formElements.user.value = account.user || '';
+          formElements.passwd.value = account.passwd || '';
+          formElements.language.value = account.language || '0';
+          formElements.accountType.value = account.type || 'disabled';
+          formElements.logIn.disabled = !(account.name && account.user && account.passwd && account.language && account.type);
         });
+      });
 
-        if (i === accountsCount - 1 && accountsCount > 0)
-          document.getElementById(`button0`).click();
+      // Klikamy pierwszy przycisk po zakończeniu pętli
+      if (accountsCount > 0) document.getElementById('button0').click();
 
-        this.accountIndex = i;
-      }
-
-      document.getElementById('melCloudAccount').style.display = 'block';
-
-      // Safe update
+      // Jeden listener input dla całego formularza
       document.getElementById('configForm').addEventListener('input', async () => {
-        const acc = pluginConfig[0].accounts[this.accountIndex];
-        if (!acc) return;
-        acc.name = document.querySelector('#name').value;
-        acc.user = document.querySelector('#user').value;
-        acc.passwd = document.querySelector('#passwd').value;
-        acc.language = document.querySelector('#language').value;
-        acc.displayType = document.querySelector('#displayType').value;
+        const account = accounts[this.accountIndex];
+        if (!account) return;
 
-        document.getElementById('logIn').disabled = !(acc.name && acc.user && acc.passwd && acc.language && acc.displayType);
+        account.name = formElements.name.value;
+        account.user = formElements.user.value;
+        account.passwd = formElements.passwd.value;
+        account.language = formElements.language.value;
+        account.type = formElements.accountType.value;
+
+        formElements.logIn.disabled = !(account.name && account.user && account.passwd && account.language && account.type);
 
         await homebridge.updatePluginConfig(pluginConfig);
         await homebridge.savePluginConfig(pluginConfig);
       });
 
-      // --- Config Button Toggle ---
+      document.getElementById('melCloudAccount').style.display = 'block';
+
+      // Config Button Toggle
       const configButton = document.getElementById('configButton');
       let configButtonState = false;
       configButton.addEventListener('click', () => {
@@ -184,7 +199,7 @@
         }
       });
 
-      // --- Device Handling & Login Logic ---
+      // Device Handling & Login Logic
       function removeStaleDevices(configDevices, melcloudDevices) {
         const melcloudIds = melcloudDevices.map(d => d.DeviceID);
         const removedDevices = [];
@@ -215,7 +230,7 @@
 
         try {
           const acc = pluginConfig[0].accounts[this.accountIndex];
-          const payload = { accountName: acc.name, user: acc.user, passwd: acc.passwd, language: acc.language, displayType: acc.displayType };
+          const payload = { accountName: acc.name, user: acc.user, passwd: acc.passwd, language: acc.language, accountType: acc.type };
           const devicesInMelCloud = await homebridge.request('/connect', payload);
 
           // Initialize devices arrays
@@ -244,7 +259,7 @@
                 type,
                 typeString,
                 name,
-                displayMode: 1,
+                displayType: 0,
                 presets: [],
                 buttonsSensors: []
               });

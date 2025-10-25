@@ -6,12 +6,13 @@ import Functions from './functions.js';
 import { ApiUrls } from './constants.js';
 
 class MelCloudErv extends EventEmitter {
-    constructor(device, contextKey, devicesFile) {
+    constructor(device, contextKey, devicesFile, defaultTempsFile) {
         super();
         this.deviceId = device.id;
         this.logWarn = device.log?.warn;
         this.logDebug = device.log?.debug;
         this.devicesFile = devicesFile;
+        this.defaultTempsFile = defaultTempsFile;
         this.functions = new Functions();
 
         //set default values
@@ -61,8 +62,7 @@ class MelCloudErv extends EventEmitter {
     async checkState() {
         try {
             //read device info from file
-            const data = await this.functions.readData(this.devicesFile);
-            const devicesData = JSON.parse(data);
+            const devicesData = await this.functions.readData(this.devicesFile, true);
 
             if (!Array.isArray(devicesData)) {
                 if (this.logWarn) this.emit('warn', `Device data not found`);
@@ -209,10 +209,10 @@ class MelCloudErv extends EventEmitter {
         };
     };
 
-    async send(deviceData, displayMode) {
+    async send(deviceData, displayType) {
         try {
             //set target temp based on display mode and ventilation mode
-            switch (displayMode) {
+            switch (displayType) {
                 case 1: //Heather/Cooler
                     switch (deviceData.Device.VentilationMode) {
                         case 0: //LOSNAY

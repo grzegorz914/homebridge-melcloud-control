@@ -5,13 +5,14 @@ import Functions from './functions.js';
 import { ApiUrls, ApiUrlsHome, AirConditioner } from './constants.js';
 
 class MelCloudAta extends EventEmitter {
-    constructor(device, devicesFile) {
+    constructor(account, device, devicesFile, defaultTempsFile) {
         super();
-        this.accountType = device.displayType
+        this.accountType = account.type
         this.deviceId = device.id;
         this.logWarn = device.log?.warn;
         this.logDebug = device.log?.debug;
         this.devicesFile = devicesFile;
+        this.defaultTempsFile = defaultTempsFile;
         this.functions = new Functions();
 
         //set default values
@@ -45,23 +46,38 @@ class MelCloudAta extends EventEmitter {
 
     async checkState() {
         try {
+
             //read device info from file
-            const data = await this.functions.readData(this.devicesFile);
-            const devicesData = JSON.parse(data);
+            const devicesData = await this.functions.readData(this.devicesFile, true);
 
             if (!Array.isArray(devicesData)) {
                 if (this.logWarn) this.emit('warn', `Device data not found`);
                 return null;
             }
             const deviceData = devicesData.find(device => device.DeviceID === this.deviceId);
+            if (this.accountType === 'melcloudhome') {
+                deviceData.SerialNumber = deviceData.Device.DeviceID || '4.0.0';
+                deviceData.Device.FirmwareAppVersion = '4.0.0';
+                deviceData.Device.OperationMode = AirConditioner.OperationModeMapStringToEnum[deviceData.Device.OperationMode] ?? deviceData.Device.OperationMode;
+                deviceData.Device.ActualFanSpeed = AirConditioner.FanSpeedMapStringToEnum[deviceData.Device.ActualFanSpeed] ?? deviceData.Device.ActualFanSpeed;
+                deviceData.Device.SetFanSpeed = AirConditioner.FanSpeedMapStringToEnum[deviceData.Device.SetFanSpeed] ?? deviceData.Device.SetFanSpeed;
+                deviceData.Device.VaneVerticalDirection = AirConditioner.VaneVerticalDirectionMapStringToEnum[deviceData.Device.VaneVerticalDirection] ?? deviceData.Device.VaneVerticalDirection;
+                deviceData.Device.VaneHorizontalDirection = AirConditioner.VaneHorizontalDirectionMapStringToEnum[deviceData.Device.VaneHorizontalDirection] ?? deviceData.Device.VaneHorizontalDirection;
+
+                //read default temps
+                const temps = await this.functions.readData(this.defaultTempsFile, true);
+                deviceData.Device.DefaultHeatingSetTemperature = temps?.defaultHeatingSetTemperature ?? 20;
+                deviceData.Device.DefaultCoolingSetTemperature = temps?.defaultCoolingSetTemperature ?? 24;
+            }
             if (this.logDebug) this.emit('debug', `Device Data: ${JSON.stringify(deviceData, null, 2)}`);
 
             //device info
             const hideVaneControls = deviceData.HideVaneControls ?? false;
             const hideDryModeControl = deviceData.HideDryModeControl ?? false;
-            const serialNumber = deviceData.SerialNumber || deviceData.DeviceID || '4.0.0';
+            const serialNumber = deviceData.SerialNumber;
 
             //device
+            const fanKey = this.accountType === 'melcloud' ? 'FanSpeed' : 'SetFanSpeed';
             const device = deviceData.Device ?? {};
             const prohibitSetTemperature = device.ProhibitSetTemperature;
             const prohibitOperationMode = device.ProhibitOperationMode;
@@ -71,8 +87,7 @@ class MelCloudAta extends EventEmitter {
             const outdoorTemperature = device.OutdoorTemperature;
             const setTemperature = device.SetTemperature;
             const actualFanSpeed = device.ActualFanSpeed;
-            const fanSpeed = device.FanSpeed;
-            const setFanSpeed = device.SetFanSpeed; // melcloud home only
+            const setFanSpeed = device[fanKey];
             const automaticFanSpeed = device.AutomaticFanSpeed;
             const vaneVerticalDirection = device.VaneVerticalDirection;
             const vaneVerticalSwing = device.VaneVerticalSwing;
@@ -82,58 +97,26 @@ class MelCloudAta extends EventEmitter {
             const inStandbyMode = device.InStandbyMode;
             const defaultCoolingSetTemperature = device.DefaultCoolingSetTemperature;
             const defaultHeatingSetTemperature = device.DefaultHeatingSetTemperature;
-            const firmwareAppVersion = device.FirmwareAppVersion || '4.0.0';
+            const firmwareAppVersion = device.FirmwareAppVersion;
 
             //units
             const units = Array.isArray(device.Units) ? device.Units : [];
             const unitsCount = units.length;
             const manufacturer = 'Mitsubishi';
 
-            //indoor
-            let idIndoor = 0;
-            let deviceIndoor = 0;
-            let serialNumberIndoor = 'Undefined';
-            let modelNumberIndoor = 0;
-            let modelIndoor = false;
-            let typeIndoor = 0;
+            const { indoor, outdoor } = units.reduce((acc, unit) => {
+                const target = unit.IsIndoor ? 'indoor' : 'outdoor';
+                acc[target] = {
+                    id: unit.ID,
+                    device: unit.Device,
+                    serialNumber: unit.SerialNumber ?? 'Undefined',
+                    modelNumber: unit.ModelNumber ?? 0,
+                    model: unit.Model ?? false,
+                    type: unit.UnitType ?? 0
+                };
+                return acc;
+            }, { indoor: {}, outdoor: {} });
 
-            //outdoor
-            let idOutdoor = 0;
-            let deviceOutdoor = 0;
-            let serialNumberOutdoor = 'Undefined';
-            let modelNumberOutdoor = 0;
-            let modelOutdoor = false;
-            let typeOutdoor = 0;
-
-            //units array
-            for (const unit of units) {
-                const unitId = unit.ID;
-                const unitDevice = unit.Device;
-                const unitSerialNumber = unit.SerialNumber ?? 'Undefined';
-                const unitModelNumber = unit.ModelNumber;
-                const unitModel = unit.Model ?? false;
-                const unitType = unit.UnitType;
-                const unitIsIndoor = unit.IsIndoor ?? false;
-
-                switch (unitIsIndoor) {
-                    case true:
-                        idIndoor = unitId;
-                        deviceIndoor = unitDevice;
-                        serialNumberIndoor = unitSerialNumber;
-                        modelNumberIndoor = unitModelNumber;
-                        modelIndoor = unitModel;
-                        typeIndoor = unitType;
-                        break;
-                    case false:
-                        idOutdoor = unitId;
-                        deviceOutdoor = unitDevice;
-                        serialNumberOutdoor = unitSerialNumber;
-                        modelNumberOutdoor = unitModelNumber;
-                        modelOutdoor = unitModel;
-                        typeOutdoor = unitType;
-                        break;
-                }
-            }
 
             //display info if units are not configured in MELCloud service
             if (unitsCount === 0) {
@@ -147,7 +130,6 @@ class MelCloudAta extends EventEmitter {
                 OutdoorTemperature: outdoorTemperature,
                 SetTemperature: setTemperature,
                 ActualFanSpeed: actualFanSpeed,
-                FanSpeed: fanSpeed,
                 SetFanSpeed: setFanSpeed,
                 AutomaticFanSpeed: automaticFanSpeed,
                 OperationMode: operationMode,
@@ -181,7 +163,7 @@ class MelCloudAta extends EventEmitter {
             this.deviceState = deviceState;
 
             //emit info
-            this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion);
+            this.emit('deviceInfo', manufacturer, indoor.model, outdoor.model, serialNumber, firmwareAppVersion);
 
             //emit state
             this.emit('deviceState', deviceData);
@@ -192,51 +174,24 @@ class MelCloudAta extends EventEmitter {
         };
     };
 
-    async send(accountType, deviceData, displayMode) {
-        switch (accountType) {
-            case "melcloud":
-                try {
+    async send(accountType, displayType, deviceData) {
+        try {
+            switch (accountType) {
+                case "melcloud":
                     const axiosInstancePost = axios.create({
                         method: 'POST',
                         baseURL: ApiUrls.BaseURL,
                         timeout: 25000,
                         headers: {
                             'X-MitsContextKey': deviceData.ContextKey,
-                            'content-type': 'application/json'
+                            'Content-Type': 'application/json'
                         },
                         withCredentials: true
                     });
 
-                    //set target temp based on display mode and operation mode
-                    switch (displayMode) {
-                        case 1: //Heather/Cooler
-                            switch (deviceData.Device.OperationMode) {
-                                case 1: //HEAT
-                                case 9: //ISEE HEAT
-                                    deviceData.Device.SetTemperature = deviceData.Device.DefaultHeatingSetTemperature;
-                                    break;
-                                case 2: //DRY
-                                case 3: //COOL
-                                case 10: //ISEE DRY
-                                case 11: //ISEE COOL
-                                    deviceData.Device.SetTemperature = deviceData.Device.DefaultCoolingSetTemperature;
-                                    break;
-                                case 7: //FAN
-                                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature;
-                                    break;
-                                case 8: //AUTO
-                                    deviceData.Device.SetTemperature = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
-                                    break;
-                                default:
-                                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature;
-                                    break;
-                            };
-                        case 2: //Thermostat
-                            deviceData.Device.SetTemperature = deviceData.Device.SetTemperature;
-                            break;
-                        default:
-                            return;
-                    };
+                    if (displayType === 1 && deviceData.Device.OperationMode === 8) {
+                        deviceData.Device.SetTemperature = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
+                    }
 
                     const payload = {
                         data: {
@@ -257,20 +212,17 @@ class MelCloudAta extends EventEmitter {
                             HideDryModeControl: deviceData.HideDryModeControl,
                             HasPendingCommand: true
                         }
-                    }
+                    };
+                    if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(payload.data, null, 2)}`);
 
                     await axiosInstancePost(ApiUrls.SetAta, payload);
                     this.emit('deviceState', deviceData);
                     return true;
-                } catch (error) {
-                    throw new Error(`Send data error: ${error}`);
-                };
-            case "melcloudhome":
-                try {
+                case "melcloudhome":
                     const axiosInstancePut = axios.create({
                         method: 'PUT',
-                        timeout: 25000,
                         baseURL: ApiUrlsHome.BaseURL,
+                        timeout: 25000,
                         headers: {
                             'Accept': '*/*',
                             'Accept-Language': 'en-US,en;q=0.9',
@@ -286,49 +238,47 @@ class MelCloudAta extends EventEmitter {
                         }
                     });
 
-                    //set target temp based on display mode and operation mode
-                    switch (displayMode) {
-                        case 1: //Heather/Cooler
-                            switch (deviceData.Device.OperationMode) {
-                                case 8: //AUTO
-                                    deviceData.Device.SetTemperature = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
-                                    break;
-                                default:
-                                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature;
-                                    break;
+                    if (displayType === 1 && deviceData.Device.OperationMode === 8) {
+                        deviceData.Device.SetTemperature = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
+
+                        if (this.deviceState.DefaultCoolingSetTemperature !== deviceData.Device.DefaultCoolingSetTemperature || this.deviceState.DefaultHeatingSetTemperature !== deviceData.Device.DefaultHeatingSetTemperature) {
+                            const temps = {
+                                defaultCoolingSetTemperature: deviceData.Device.DefaultCoolingSetTemperature,
+                                defaultHeatingSetTemperature: deviceData.Device.DefaultHeatingSetTemperature
                             };
-                        case 2: //Thermostat
-                            deviceData.Device.SetTemperature = deviceData.Device.SetTemperature;
-                            break;
-                        default:
-                            return;
-                    };
-
-                    deviceData.Device.OperationMode = AirConditioner.OperationModeMapEnumToString[deviceData.Device.OperationMode];
-                    this.emit('warn', JSON.stringify(deviceData.Device, null, 2));
-
-                    const payload = {
-                        data: {
-                            Power: deviceData.Device.Power,
-                            SetTemperature: deviceData.Device.SetTemperature,
-                            SetFanSpeed: deviceData.Device.SetFanSpeed,
-                            OperationMode: deviceData.Device.OperationMode,
-                            VaneHorizontalDirection: deviceData.Device.VaneHorizontalDirection,
-                            VaneVerticalDirection: deviceData.Device.VaneVerticalDirection
+                            await this.functions.saveData(this.defaultTempsFile, temps);
                         }
                     }
 
-                    this.emit('warn', JSON.stringify(payload, null, 2));
+                    const settings = {
+                        data: {
+                            Power: deviceData.Device.Power,
+                            SetTemperature: deviceData.Device.SetTemperature,
+                            SetFanSpeed: String(deviceData.Device.SetFanSpeed),
+                            OperationMode: AirConditioner.OperationModeMapEnumToString[deviceData.Device.OperationMode],
+                            VaneHorizontalDirection: AirConditioner.VaneHorizontalDirectionMapEnumToString[deviceData.Device.VaneHorizontalDirection],
+                            VaneVerticalDirection: AirConditioner.VaneVerticalDirectionMapEnumToString[deviceData.Device.VaneVerticalDirection]
+                        }
+                    };
+                    if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(settings.data, null, 2)}`);
 
                     const path = ApiUrlsHome.SetAta.replace('deviceid', deviceData.DeviceID);
-                    await axiosInstancePut(path, payload);
+                    await axiosInstancePut(path, settings);
+                    this.emit('deviceState', deviceData);
                     return true;
-                } catch (error) {
-                    throw new Error(`Send data error: ${error}`);
-                };
-            default:
-                return;
+                default:
+                    return;
+            }
+        } catch (error) {
+            if (error.response) {
+                throw new Error(`Send data error: HTTP ${error.response.status} - ${JSON.stringify(error.response.data)}`);
+            } else if (error.request) {
+                throw new Error(`Send data error: No response received - ${error.message}`);
+            } else {
+                throw new Error(`Send data error: ${error.message}`);
+            }
         }
     }
+
 };
 export default MelCloudAta;

@@ -6,7 +6,7 @@ import { TemperatureDisplayUnits, HeatPump } from './constants.js';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceAtw extends EventEmitter {
-    constructor(api, account, device, contextKey, devicesFile, useFahrenheit, restFul, mqtt) {
+    constructor(api, account, device, contextKey, devicesFile, defaultTempsFile, useFahrenheit, restFul, mqtt) {
         super();
 
         Accessory = api.platformAccessory;
@@ -18,7 +18,7 @@ class DeviceAtw extends EventEmitter {
         //account config
         this.accountMelcloud = account.displayType === 'melcloud' ? true : false;
         this.device = device;
-        this.displayMode = device.displayMode;
+        this.displayType = device.displayType;
         this.hideZone = device.hideZone;
         this.temperatureSensor = device.temperatureSensor || false;
         this.temperatureSensorFlow = device.temperatureSensorFlow || false;
@@ -41,6 +41,7 @@ class DeviceAtw extends EventEmitter {
         this.deviceName = device.name;
         this.deviceTypeText = device.typeString;
         this.devicesFile = devicesFile;
+        this.defaultTempsFile = defaultTempsFile;
         this.displayDeviceInfo = true;
 
         //external integrations
@@ -288,7 +289,7 @@ class DeviceAtw extends EventEmitter {
             if (this.logDebug) this.emit('debug', `Prepare accessory`);
             const accessoryName = deviceName;
             const accessoryUUID = AccessoryUUID.generate(accountName + deviceId.toString());
-            const accessoryCategory = [Categories.OTHER, Categories.AIR_HEATER, Categories.THERMOSTAT][this.displayMode];
+            const accessoryCategory = [Categories.OTHER, Categories.AIR_HEATER, Categories.THERMOSTAT][this.displayType];
             const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 
             //information service
@@ -306,7 +307,7 @@ class DeviceAtw extends EventEmitter {
                 this.accessory.zones.forEach((zone, i) => {
                     const zoneName = zone.name
                     const serviceName = `${deviceTypeText} ${accessoryName}: ${zoneName}`;
-                    switch (this.displayMode) {
+                    switch (this.displayType) {
                         case 1: //Heater Cooler
                             if (this.logDebug) this.emit('debug', `Prepare heather/cooler ${zoneName} service`);
                             const melCloudService = new Service.HeaterCooler(serviceName, `HeaterCooler ${deviceId} ${i}`);
@@ -1285,7 +1286,7 @@ class DeviceAtw extends EventEmitter {
     async start() {
         try {
             //melcloud device
-            this.melCloudAtw = new MelCloudAtw(this.device, this.contextKey, this.devicesFile)
+            this.melCloudAtw = new MelCloudAtw(this.device, this.contextKey, this.devicesFile,  this.defaultTempsFile)
                 .on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, hasHotWaterTank, hasZone2) => {
                     if (this.logDeviceInfo && this.displayDeviceInfo) {
                         this.emit('devInfo', `---- ${this.deviceTypeText}: ${this.deviceName} ----`);
@@ -1436,7 +1437,7 @@ class DeviceAtw extends EventEmitter {
                     let temperatureSetPropsMaxValue = 100;
 
                     for (let i = 0; i < zonesCount; i++) {
-                        switch (this.displayMode) {
+                        switch (this.displayType) {
                             case 1: //Heater Cooler
                                 switch (i) {
                                     case caseHeatPump: //Heat Pump Operation Mode - IDLE, HOT WATER, HEATING ZONES, COOLING, HOT WATER STORAGE, FREEZE STAT, LEGIONELLA, HEATING ECO, MODE 1, MODE 2, MODE 3, HEATING UP /// Unit Status - HEAT, COOL

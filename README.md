@@ -207,13 +207,13 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `user` | Here set the account username. |
 | `passwd` | Here set the account password. |
 | `language` | Here select the account language. |
-| `displayType` | Here select the account type `None/Disabled`, `MELCloud`, `MELCloud Home`. |
+| `type` | Here select the account type `None/Disabled`, `MELCloud`, `MELCloud Home`. |
 | `ataDevices[]` | Array of ATA devices created automatically after login to MELCloud from plugin config UI. |
 | `ataDevices[].id` | Read only data, do not change it. |
 | `ataDevices[].type` | Read only data, do not change it. |
 | `ataDevices[].typeString` | Read only data, do not change it. |
 | `ataDevices[].name` | Here You can schange the `Accessory Name` which is exposed to the `Homebridge/HomeKit`. |
-| `ataDevices[].displayMode` | Here select device control mode `None/Disabled`, `Heater/Cooler`, `Thermostat`. |
+| `ataDevices[].displayType` | Here select device control mode `None/Disabled`, `Heater/Cooler`, `Thermostat`. |
 | `ataDevices[].heatDryFanMode` | Here select the operatiing mode for `Heat`, if this mode is not supported, it will be disabled. |
 | `ataDevices[].coolDryFanMode` | Here select the operatiing mode for `Cool`, if this mode is not supported, it will be disabled. |
 | `ataDevices[].autoDryFanMode` | Here select the operatiing mode for `Auto`, if this mode is not supported, it will be disabled.. |
@@ -234,7 +234,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `atwDevices[].type` | Read only data, do not change it. |
 | `atwDevices[].typeString` | Read only data, do not change it. |
 | `atwDevices[].name` | Here You can schange the `Accessory Name` which is exposed to the `Homebridge/HomeKit`. |
-| `atwDevices[].displayMode` | Here select main control mode `None/Disabled`, `Heater/Cooler`, `Thermostat`. |
+| `atwDevices[].displayType` | Here select main control mode `None/Disabled`, `Heater/Cooler`, `Thermostat`. |
 | `atwDevices[].hideZone` | Here select which zone need to be hidden `None/Disabled`, `Heat Pump`, `Heat Pump / Zone 1`, `Heat Pump / Zone 1 / Hot Water`, `Heat Pump / Zone 1 / Zone 2`, `Heat Pump / Hot Water`,`Heat Pump / Hot Water / Zone 2`, `Heat Pump / Zone 2`, `Zone 1`, `Zone 1 / Hot Water`, `Zone 1 / Hot Water / Zone 2`, `Zone 1 / Zone 2`, `Hot Water`, `Hot Water / Zone 2`, `Zone 2`, `All`. |
 | `atwDevices[].temperatureSensor` | This enable extra `Room` temperature sensors to use with automations in HomeKit app. |
 | `atwDevices[].temperatureSensorFlow` | This enable extra `Flow` temperature sensors to use with automations in HomeKit app. |
@@ -260,7 +260,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ervDevices[].type` | Read only data, do not change it. |
 | `ervDevices[].typeString` | Read only data, do not change it. |
 | `ervDevices[].name` | Here You can schange the `Accessory Name` which is exposed to the `Homebridge/HomeKit`. |
-| `ervDevices[].displayMode` | Here select main control mode `None/Disabled`, `Heater/Cooler`, `Thermostat`. |
+| `ervDevices[].displayType` | Here select main control mode `None/Disabled`, `Heater/Cooler`, `Thermostat`. |
 | `ervDevices[].temperatureSensor` | This enable extra `Room` temperature sensors to use with automations in HomeKit app. |
 | `ervDevices[].temperatureSensorOutdoor` | This enable extra `Outdoor` temperature sensors to use with automations in HomeKit app. |
 | `ervDevices[].temperatureSensorSupply` | This enable extra `Supply` temperature sensors to use with automations in HomeKit app. |

@@ -201,11 +201,11 @@
                 }
               ]
             },
-            "displayType": {
+            "type": {
               "title": "Account Type",
               "type": "string",
               "default": "disabled",
-              "description": "Here select the language used in MELCloud account.",
+              "description": "Here select the MELCloud account type.",
               "oneOf": [
                 {
                   "title": "None/Disabled",
@@ -236,27 +236,24 @@
                   "id": {
                     "title": "ID",
                     "type": "string",
-                    "default": "0",
-                    "readonly": true
+                    "default": "0"
                   },
                   "type": {
                     "title": "Type",
                     "type": "integer",
-                    "default": 0,
-                    "readonly": true
+                    "default": 0
                   },
                   "typeString": {
                     "title": "Type",
                     "type": "string",
-                    "default": "Air Conditioner",
-                    "readonly": true
+                    "default": "Air Conditioner"
                   },
-                  "displayMode": {
+                  "displayType": {
                     "title": "Display Type",
                     "type": "integer",
                     "minimum": 0,
                     "maximum": 2,
-                    "default": 1,
+                    "default": 0,
                     "description": "Select accessory control type displayed in HomeKit app.",
                     "oneOf": [
                       {
@@ -786,14 +783,11 @@
                   }
                 },
                 "required": [
-                  "displayMode",
+                  "displayType",
                   "heatDryFanMode",
                   "coolDryFanMode",
                   "autoDryFanMode"
                 ]
-              },
-              "condition": {
-                "functionBody": "const accounts = model.accounts[arrayIndices]?.ataDevices || []; return accounts.length > 0 && accounts.every(device => device.id != null);"
               }
             },
             "atwDevices": {
@@ -805,32 +799,29 @@
                   "id": {
                     "title": "ID",
                     "type": "string",
-                    "default": "0",
-                    "readonly": true
+                    "default": "0"
                   },
                   "type": {
                     "title": "Type",
                     "type": "integer",
-                    "default": 1,
-                    "readonly": true
+                    "default": 1
                   },
                   "typeString": {
                     "title": "Type",
                     "type": "string",
-                    "default": "Heat Pump",
-                    "readonly": true
+                    "default": "Heat Pump"
                   },
                   "name": {
                     "title": "Name",
                     "type": "string",
                     "default": "Heat Pump"
                   },
-                  "displayMode": {
+                  "displayType": {
                     "title": "Display Type",
                     "type": "integer",
                     "minimum": 0,
                     "maximum": 2,
-                    "default": 1,
+                    "default": 0,
                     "description": "Select accessory control type displayed in HomeKit app.",
                     "oneOf": [
                       {
@@ -1323,12 +1314,9 @@
                   }
                 },
                 "required": [
-                  "displayMode",
+                  "displayType",
                   "hideZone"
                 ]
-              },
-              "condition": {
-                "functionBody": "const accounts = model.accounts[arrayIndices]?.atwDevices || []; return accounts.length > 0 && accounts.every(device => device.id != null);"
               }
             },
             "ervDevices": {
@@ -1340,32 +1328,29 @@
                   "id": {
                     "title": "ID",
                     "type": "string",
-                    "default": "0",
-                    "readonly": true
+                    "default": "0"
                   },
                   "type": {
                     "title": "Type",
                     "type": "integer",
-                    "default": 3,
-                    "readonly": true
+                    "default": 3
                   },
                   "typeString": {
                     "title": "Type",
                     "type": "string",
-                    "default": "Ventilation",
-                    "readonly": true
+                    "default": "Ventilation"
                   },
                   "name": {
                     "title": "Name",
                     "type": "string",
                     "default": "Ventilation"
                   },
-                  "displayMode": {
+                  "displayType": {
                     "title": "Display Type",
                     "type": "integer",
                     "minimum": 0,
                     "maximum": 2,
-                    "default": 1,
+                    "default": 0,
                     "description": "Select accessory control type displayed in HomeKit app.",
                     "oneOf": [
                       {
@@ -1672,11 +1657,8 @@
                   }
                 },
                 "required": [
-                  "displayMode"
+                  "displayType"
                 ]
-              },
-              "condition": {
-                "functionBody": "const accounts = model.accounts[arrayIndices]?.ervDevices || []; return accounts.length > 0 && accounts.every(device => device.id != null);"
               }
             },
             "refreshInterval": {
@@ -1825,7 +1807,7 @@
             "user",
             "passwd",
             "language",
-            "displayType"
+            "type"
           ]
         }
       }
@@ -1844,7 +1826,7 @@
           "type": "password"
         },
         "accounts[].language",
-        "accounts[].displayType",
+        "accounts[].type",
         {
           "key": "accounts[]",
           "type": "tabarray",
@@ -1860,107 +1842,99 @@
                   "title": "{{ value.name }}",
                   "items": [
                     {
-                      "key": "accounts[].ataDevices[].id",
-                      "readonly": true
-                    },
-                    {
-                      "key": "accounts[].ataDevices[].typeString",
-                      "readonly": true
-                    },
-                    "accounts[].ataDevices[].displayMode",
-                    {
                       "key": "accounts[].ataDevices[]",
-                      "title": "Settings",
-                      "type": "section",
-                      "expandable": true,
-                      "expanded": false,
-                      "items": [
-                        "accounts[].ataDevices[].name",
-                        "accounts[].ataDevices[].heatDryFanMode",
-                        "accounts[].ataDevices[].coolDryFanMode",
-                        "accounts[].ataDevices[].autoDryFanMode",
-                        "accounts[].ataDevices[].refreshInterval"
-                      ],
-                      "condition": {
-                        "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayMode > 0;"
-                      }
-                    },
-                    {
-                      "key": "accounts[].ataDevices[]",
-                      "title": "Temperature Sensors",
-                      "type": "section",
-                      "expandable": true,
-                      "expanded": false,
-                      "items": [
-                        "accounts[].ataDevices[].temperatureSensor",
-                        "accounts[].ataDevices[].temperatureSensorOutdoor"
-                      ],
-                      "condition": {
-                        "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayMode > 0;"
-                      }
-                    },
-                    {
-                      "key": "accounts[].ataDevices[].presets",
-                      "title": "Presets",
-                      "type": "section",
-                      "expandable": true,
-                      "expanded": false,
                       "items": [
                         {
-                          "key": "accounts[].ataDevices[].presets",
-                          "type": "tabarray",
-                          "title": "{{ value.name }}",
+                          "key": "accounts[].ataDevices[].id",
+                          "readonly": true
+                        },
+                        {
+                          "key": "accounts[].ataDevices[].typeString",
+                          "readonly": true
+                        },
+                        "accounts[].ataDevices[].displayType",
+                        {
+                          "title": "Settings",
+                          "type": "section",
+                          "expandable": true,
+                          "expanded": false,
+                          "items": [
+                            "accounts[].ataDevices[].name",
+                            "accounts[].ataDevices[].heatDryFanMode",
+                            "accounts[].ataDevices[].coolDryFanMode",
+                            "accounts[].ataDevices[].autoDryFanMode",
+                            "accounts[].ataDevices[].refreshInterval"
+                          ],
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayType > 0;"
+                          }
+                        },
+                        {
+                          "title": "Temperature Sensors",
+                          "type": "section",
+                          "expandable": true,
+                          "expanded": false,
+                          "items": [
+                            "accounts[].ataDevices[].temperatureSensor",
+                            "accounts[].ataDevices[].temperatureSensorOutdoor"
+                          ],
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayType > 0;"
+                          }
+                        },
+                        {
+                          "title": "Presets",
+                          "type": "section",
+                          "expandable": true,
+                          "expanded": false,
                           "items": [
                             {
-                              "key": "accounts[].ataDevices[].presets[].id",
-                              "readonly": true
-                            },
-                            "accounts[].ataDevices[].presets[].displayType",
-                            "accounts[].ataDevices[].presets[].name",
-                            "accounts[].ataDevices[].presets[].namePrefix"
-                          ]
-                        }
-                      ],
-                      "condition": {
-                        "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayMode > 0;"
-                      }
-                    },
-                    {
-                      "key": "accounts[].ataDevices[].buttonsSensors",
-                      "title": "Buttons / Sensors",
-                      "type": "section",
-                      "expandable": true,
-                      "expanded": false,
-                      "items": [
+                              "key": "accounts[].ataDevices[].presets",
+                              "type": "tabarray",
+                              "title": "{{ value.name }}",
+                              "items": [
+                                {
+                                  "key": "accounts[].ataDevices[].presets[].id",
+                                  "readonly": true
+                                },
+                                "accounts[].ataDevices[].presets[].displayType",
+                                "accounts[].ataDevices[].presets[].name",
+                                "accounts[].ataDevices[].presets[].namePrefix"
+                              ]
+                            }
+                          ],
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayType > 0;"
+                          }
+                        },
                         {
-                          "key": "accounts[].ataDevices[].buttonsSensors",
-                          "type": "tabarray",
-                          "title": "{{ value.name || 'button/sensor' }}",
+                          "title": "Buttons / Sensors",
+                          "type": "section",
+                          "expandable": true,
+                          "expanded": false,
                           "items": [
-                            "accounts[].ataDevices[].buttonsSensors[].displayType",
-                            "accounts[].ataDevices[].buttonsSensors[].mode",
-                            "accounts[].ataDevices[].buttonsSensors[].name",
-                            "accounts[].ataDevices[].buttonsSensors[].namePrefix"
-                          ]
+                            {
+                              "key": "accounts[].ataDevices[].buttonsSensors",
+                              "type": "tabarray",
+                              "title": "{{ value.name || 'button/sensor' }}",
+                              "items": [
+                                "accounts[].ataDevices[].buttonsSensors[].displayType",
+                                "accounts[].ataDevices[].buttonsSensors[].mode",
+                                "accounts[].ataDevices[].buttonsSensors[].name",
+                                "accounts[].ataDevices[].buttonsSensors[].namePrefix"
+                              ]
+                            }
+                          ],
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayType > 0;"
+                          }
                         }
                       ],
                       "condition": {
-                        "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayMode > 0;"
+                        "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].id !== '0';"
                       }
                     }
-                  ],
-                  "condition": {
-                    "functionBody": "return model.accounts[arrayIndices].ataDevices.length > 0;"
-                  }
-                },
-                {
-                  "key": "accounts[]",
-                  "type": "tabarray",
-                  "title": "{{ value.title }}",
-                  "items": [],
-                  "condition": {
-                    "functionBody": "return model.accounts[arrayIndices].ataDevices.length === 0;"
-                  }
+                  ]
                 }
               ]
             },
@@ -1974,112 +1948,104 @@
                   "title": "{{ value.name }}",
                   "items": [
                     {
-                      "key": "accounts[].atwDevices[].id",
-                      "readonly": true
-                    },
-                    {
-                      "key": "accounts[].atwDevices[].typeString",
-                      "readonly": true
-                    },
-                    "accounts[].atwDevices[].displayMode",
-                    {
-                      "key": "accounts[].atwDevices",
-                      "type": "section",
-                      "title": "Settings",
-                      "expandable": true,
-                      "expanded": false,
-                      "items": [
-                        "accounts[].atwDevices[].hideZone",
-                        "accounts[].atwDevices[].name",
-                        "accounts[].atwDevices[].refreshInterval"
-                      ],
-                      "condition": {
-                        "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].displayMode > 0;"
-                      }
-                    },
-                    {
-                      "key": "accounts[].atwDevices",
-                      "title": "Temperature Sensors",
-                      "type": "section",
-                      "expandable": true,
-                      "expanded": false,
-                      "items": [
-                        "accounts[].atwDevices[].temperatureSensor",
-                        "accounts[].atwDevices[].temperatureSensorFlow",
-                        "accounts[].atwDevices[].temperatureSensorReturn",
-                        "accounts[].atwDevices[].temperatureSensorFlowZone1",
-                        "accounts[].atwDevices[].temperatureSensorReturnZone1",
-                        "accounts[].atwDevices[].temperatureSensorFlowWaterTank",
-                        "accounts[].atwDevices[].temperatureSensorReturnWaterTank",
-                        "accounts[].atwDevices[].temperatureSensorFlowZone2",
-                        "accounts[].atwDevices[].temperatureSensorReturnZone2"
-                      ],
-                      "condition": {
-                        "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].displayMode > 0;"
-                      }
-                    },
-                    {
-                      "key": "accounts[].atwDevices[].presets",
-                      "title": "Presets",
-                      "type": "section",
-                      "expandable": true,
-                      "expanded": false,
+                      "key": "accounts[].atwDevices[]",
                       "items": [
                         {
-                          "key": "accounts[].atwDevices[].presets",
-                          "type": "tabarray",
-                          "title": "{{ value.name }}",
+                          "key": "accounts[].atwDevices[].id",
+                          "readonly": true
+                        },
+                        {
+                          "key": "accounts[].atwDevices[].typeString",
+                          "readonly": true
+                        },
+                        "accounts[].atwDevices[].displayType",
+                        {
+                          "type": "section",
+                          "title": "Settings",
+                          "expandable": true,
+                          "expanded": false,
+                          "items": [
+                            "accounts[].atwDevices[].hideZone",
+                            "accounts[].atwDevices[].name",
+                            "accounts[].atwDevices[].refreshInterval"
+                          ],
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].displayType > 0;"
+                          }
+                        },
+                        {
+                          "title": "Temperature Sensors",
+                          "type": "section",
+                          "expandable": true,
+                          "expanded": false,
+                          "items": [
+                            "accounts[].atwDevices[].temperatureSensor",
+                            "accounts[].atwDevices[].temperatureSensorFlow",
+                            "accounts[].atwDevices[].temperatureSensorReturn",
+                            "accounts[].atwDevices[].temperatureSensorFlowZone1",
+                            "accounts[].atwDevices[].temperatureSensorReturnZone1",
+                            "accounts[].atwDevices[].temperatureSensorFlowWaterTank",
+                            "accounts[].atwDevices[].temperatureSensorReturnWaterTank",
+                            "accounts[].atwDevices[].temperatureSensorFlowZone2",
+                            "accounts[].atwDevices[].temperatureSensorReturnZone2"
+                          ],
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].displayType > 0;"
+                          }
+                        },
+                        {
+                          "title": "Presets",
+                          "type": "section",
+                          "expandable": true,
+                          "expanded": false,
                           "items": [
                             {
-                              "key": "accounts[].atwDevices[].presets[].id",
-                              "readonly": true
-                            },
-                            "accounts[].atwDevices[].presets[].displayType",
-                            "accounts[].atwDevices[].presets[].name",
-                            "accounts[].atwDevices[].presets[].namePrefix"
-                          ]
-                        }
-                      ],
-                      "condition": {
-                        "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].displayMode > 0;"
-                      }
-                    },
-                    {
-                      "key": "accounts[].atwDevices[].buttonsSensors",
-                      "title": "Buttons / Sensors",
-                      "type": "section",
-                      "expandable": true,
-                      "expanded": false,
-                      "items": [
+                              "key": "accounts[].atwDevices[].presets",
+                              "type": "tabarray",
+                              "title": "{{ value.name }}",
+                              "items": [
+                                {
+                                  "key": "accounts[].atwDevices[].presets[].id",
+                                  "readonly": true
+                                },
+                                "accounts[].atwDevices[].presets[].displayType",
+                                "accounts[].atwDevices[].presets[].name",
+                                "accounts[].atwDevices[].presets[].namePrefix"
+                              ]
+                            }
+                          ],
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].displayType > 0;"
+                          }
+                        },
                         {
-                          "key": "accounts[].atwDevices[].buttonsSensors",
-                          "type": "tabarray",
-                          "title": "{{ value.name || 'button/sensor' }}",
+                          "title": "Buttons / Sensors",
+                          "type": "section",
+                          "expandable": true,
+                          "expanded": false,
                           "items": [
-                            "accounts[].atwDevices[].buttonsSensors[].displayType",
-                            "accounts[].atwDevices[].buttonsSensors[].mode",
-                            "accounts[].atwDevices[].buttonsSensors[].name",
-                            "accounts[].atwDevices[].buttonsSensors[].namePrefix"
-                          ]
+                            {
+                              "key": "accounts[].atwDevices[].buttonsSensors",
+                              "type": "tabarray",
+                              "title": "{{ value.name || 'button/sensor' }}",
+                              "items": [
+                                "accounts[].atwDevices[].buttonsSensors[].displayType",
+                                "accounts[].atwDevices[].buttonsSensors[].mode",
+                                "accounts[].atwDevices[].buttonsSensors[].name",
+                                "accounts[].atwDevices[].buttonsSensors[].namePrefix"
+                              ]
+                            }
+                          ],
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].displayType > 0;"
+                          }
                         }
                       ],
                       "condition": {
-                        "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].displayMode > 0;"
+                        "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].id !== '0';"
                       }
                     }
-                  ],
-                  "condition": {
-                    "functionBody": "return model.accounts[arrayIndices].atwDevices.length > 0;"
-                  }
-                },
-                {
-                  "key": "accounts[]",
-                  "type": "tabarray",
-                  "title": "{{ value.title }}",
-                  "items": [],
-                  "condition": {
-                    "functionBody": "return model.accounts[arrayIndices].atwDevices.length === 0;"
-                  }
+                  ]
                 }
               ]
             },
@@ -2093,105 +2059,97 @@
                   "title": "{{ value.name }}",
                   "items": [
                     {
-                      "key": "accounts[].ervDevices[].id",
-                      "readonly": true
-                    },
-                    {
-                      "key": "accounts[].ervDevices[].typeString",
-                      "readonly": true
-                    },
-                    "accounts[].ervDevices[].displayMode",
-                    {
-                      "key": "accounts[].ervDevices",
-                      "title": "Settings",
-                      "type": "section",
-                      "expandable": true,
-                      "expanded": false,
-                      "items": [
-                        "accounts[].ervDevices[].name",
-                        "accounts[].ervDevices[].refreshInterval"
-                      ],
-                      "condition": {
-                        "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].displayMode > 0;"
-                      }
-                    },
-                    {
-                      "key": "accounts[].ervDevices",
-                      "title": "Temperature Sensors",
-                      "type": "section",
-                      "expandable": true,
-                      "expanded": false,
-                      "items": [
-                        "accounts[].ervDevices[].temperatureSensor",
-                        "accounts[].ervDevices[].temperatureSensorOutdoor",
-                        "accounts[].ervDevices[].temperatureSensorSupply"
-                      ],
-                      "condition": {
-                        "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].displayMode > 0;"
-                      }
-                    },
-                    {
-                      "key": "accounts[].ervDevices[].presets",
-                      "title": "Presets",
-                      "type": "section",
-                      "expandable": true,
-                      "expanded": false,
+                      "key": "accounts[].ervDevices[]",
                       "items": [
                         {
-                          "key": "accounts[].ervDevices[].presets",
-                          "type": "tabarray",
-                          "title": "{{ value.name }}",
+                          "key": "accounts[].ervDevices[].id",
+                          "readonly": true
+                        },
+                        {
+                          "key": "accounts[].ervDevices[].typeString",
+                          "readonly": true
+                        },
+                        "accounts[].ervDevices[].displayType",
+                        {
+                          "title": "Settings",
+                          "type": "section",
+                          "expandable": true,
+                          "expanded": false,
+                          "items": [
+                            "accounts[].ervDevices[].name",
+                            "accounts[].ervDevices[].refreshInterval"
+                          ],
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].displayType > 0;"
+                          }
+                        },
+                        {
+                          "title": "Temperature Sensors",
+                          "type": "section",
+                          "expandable": true,
+                          "expanded": false,
+                          "items": [
+                            "accounts[].ervDevices[].temperatureSensor",
+                            "accounts[].ervDevices[].temperatureSensorOutdoor",
+                            "accounts[].ervDevices[].temperatureSensorSupply"
+                          ],
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].displayType > 0;"
+                          }
+                        },
+                        {
+                          "title": "Presets",
+                          "type": "section",
+                          "expandable": true,
+                          "expanded": false,
                           "items": [
                             {
-                              "key": "accounts[].ervDevices[].presets[].id",
-                              "readonly": true
-                            },
-                            "accounts[].ervDevices[].presets[].displayType",
-                            "accounts[].ervDevices[].presets[].name",
-                            "accounts[].ervDevices[].presets[].namePrefix"
-                          ]
-                        }
-                      ],
-                      "condition": {
-                        "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].displayMode > 0;"
-                      }
-                    },
-                    {
-                      "key": "accounts[].ervDevices[].buttonsSensors",
-                      "title": "Buttons / Sensors",
-                      "type": "section",
-                      "expandable": true,
-                      "expanded": false,
-                      "items": [
+                              "key": "accounts[].ervDevices[].presets",
+                              "type": "tabarray",
+                              "title": "{{ value.name }}",
+                              "items": [
+                                {
+                                  "key": "accounts[].ervDevices[].presets[].id",
+                                  "readonly": true
+                                },
+                                "accounts[].ervDevices[].presets[].displayType",
+                                "accounts[].ervDevices[].presets[].name",
+                                "accounts[].ervDevices[].presets[].namePrefix"
+                              ]
+                            }
+                          ],
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].displayType > 0;"
+                          }
+                        },
                         {
-                          "key": "accounts[].ervDevices[].buttonsSensors",
-                          "type": "tabarray",
-                          "title": "{{ value.name || 'button/sensor' }}",
+                          "title": "Buttons / Sensors",
+                          "type": "section",
+                          "expandable": true,
+                          "expanded": false,
                           "items": [
-                            "accounts[].ervDevices[].buttonsSensors[].displayType",
-                            "accounts[].ervDevices[].buttonsSensors[].mode",
-                            "accounts[].ervDevices[].buttonsSensors[].name",
-                            "accounts[].ervDevices[].buttonsSensors[].namePrefix"
-                          ]
+                            {
+                              "key": "accounts[].ervDevices[].buttonsSensors",
+                              "type": "tabarray",
+                              "title": "{{ value.name || 'button/sensor' }}",
+                              "items": [
+                                "accounts[].ervDevices[].buttonsSensors[].displayType",
+                                "accounts[].ervDevices[].buttonsSensors[].mode",
+                                "accounts[].ervDevices[].buttonsSensors[].name",
+                                "accounts[].ervDevices[].buttonsSensors[].namePrefix"
+                              ]
+                            }
+                          ],
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].displayType > 0;"
+                          }
                         }
                       ],
                       "condition": {
-                        "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].displayMode > 0;"
+                        "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].id !== '0';"
                       }
                     }
-                  ],
-                  "condition": {
-                    "functionBody": "return model.accounts[arrayIndices].ervDevices.length > 0;"
-                  }
-                },
-                {
-                  "key": "accounts[]",
-                  "type": "tabarray",
-                  "title": "{{ value.title }}",
-                  "items": [],
-                  "condition": {
-                    "functionBody": "return model.accounts[arrayIndices].ervDevices.length === 0;"
-                  }
+                  ]
                 }
               ]
             }

@@ -17,11 +17,11 @@ class PluginUiServer extends HomebridgePluginUiServer {
     const user = payload.user;
     const passwd = payload.passwd;
     const language = payload.language;
-    const displayType = payload.displayType;
+    const accountType = payload.accountType;
     const accountFile = `${this.homebridgeStoragePath}/melcloud/${accountName}_Account`;
     const buildingsFile = `${this.homebridgeStoragePath}/melcloud/${accountName}_Buildings`;
     const devicesFile = `${this.homebridgeStoragePath}/melcloud/${accountName}_Devices`;
-    const melCloud = new MelCloud(displayType, user, passwd, language, accountFile, buildingsFile, devicesFile, false, true);
+    const melCloud = new MelCloud(accountType, user, passwd, language, accountFile, buildingsFile, devicesFile, false, true);
 
     try {
       const accountInfo = await melCloud.connect();
