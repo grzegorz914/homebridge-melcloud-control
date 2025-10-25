@@ -167,6 +167,7 @@ class MelCloud extends EventEmitter {
         }
     }
 
+    // MELCloud Home
     async checkMelcloudHomeDevicesList(contextKey) {
         try {
             const axiosInstance = axios.create({
@@ -270,7 +271,6 @@ class MelCloud extends EventEmitter {
         }
     }
 
-    // MELCloud Home
     async connectToMelCloudHome(refresh = false) {
         if (this.logDebug) this.emit('debug', `Connecting to MELCloud Home`);
 
