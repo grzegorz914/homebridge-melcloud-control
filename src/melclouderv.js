@@ -10,10 +10,14 @@ class MelCloudErv extends EventEmitter {
         super();
         this.deviceId = device.id;
         this.logWarn = device.log?.warn;
+        this.logError = device.log?.error;
         this.logDebug = device.log?.debug;
         this.devicesFile = devicesFile;
         this.defaultTempsFile = defaultTempsFile;
-        this.functions = new Functions();
+        this.functions = new Functions(this.logWarn, this.logError, this.logDebug)
+            .on('warn', warn => this.emit('warn', warn))
+            .on('error', error => this.emit('error', error))
+            .on('debug', debug => this.emit('debug', debug));
 
         //set default values
         this.deviceState = {};

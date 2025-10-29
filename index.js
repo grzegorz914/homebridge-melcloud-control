@@ -89,7 +89,7 @@ class MelCloudPlatform {
 						.on('start', async () => {
 							try {
 								//melcloud account
-								const melCloud = new MelCloud(accountType, user, passwd, language, accountFile, buildingsFile, devicesFile, logLevel.warn, logLevel.debug, false)
+								const melCloud = new MelCloud(account, accountFile, buildingsFile, devicesFile, true)
 									.on('success', (msg) => logLevel.success && log.success(`${accountName}, ${msg}`))
 									.on('info', (msg) => logLevel.info && log.info(`${accountName}, ${msg}`))
 									.on('debug', (msg) => logLevel.debug && log.info(`${accountName}, debug: ${msg}`))
@@ -115,7 +115,7 @@ class MelCloudPlatform {
 								//check devices list
 								let devicesInMelcloud;
 								try {
-									devicesInMelcloud = await melCloud.checkDevicesList(contextKey);
+									devicesInMelcloud = await melCloud.checkDevicesList();
 								} catch (error) {
 									if (logLevel.error) log.error(`${accountName}, Check devices list error: ${error.message ?? error}`);
 									return;
@@ -201,7 +201,7 @@ class MelCloudPlatform {
 										if (logLevel.success) log.success(`${accountName}, ${deviceTypeText}, ${deviceName}, Published as external accessory.`);
 
 										//start impulse generators\
-										const timmers = accountType === 'melcloudhome' ? [{ name: 'connect', sampling: 150000 }, { name: 'checkDevicesList', sampling: deviceRefreshInterval }] : [{ name: 'checkDevicesList', sampling: refreshInterval }];
+										const timmers = accountType === 'melcloudhome' ? [{ name: 'connect', sampling: 300000 }, { name: 'checkDevicesList', sampling: deviceRefreshInterval }] : [{ name: 'checkDevicesList', sampling: refreshInterval }];
 										await melCloud.impulseGenerator.state(true, timmers);
 										await configuredDevice.startStopImpulseGenerator(true, [{ name: 'checkState', sampling: deviceRefreshInterval }]);
 

@@ -229,9 +229,8 @@
         homebridge.showSpinner();
 
         try {
-          const acc = pluginConfig[0].accounts[this.accountIndex];
-          const payload = { accountName: acc.name, user: acc.user, passwd: acc.passwd, language: acc.language, accountType: acc.type };
-          const devicesInMelCloud = await homebridge.request('/connect', payload);
+          const account = pluginConfig[0].accounts[this.accountIndex];
+          const devicesInMelCloud = await homebridge.request('/connect', account);
 
           // Initialize devices arrays
           const newDevices = { ata: [], ataPresets: [], atw: [], atwPresets: [], erv: [], ervPresets: [] };
@@ -243,13 +242,13 @@
             if (d.Type === 3) devicesByType.erv.push(d);
           });
 
-          acc.ataDevices ??= [];
-          acc.atwDevices ??= [];
-          acc.ervDevices ??= [];
+          account.ataDevices ??= [];
+          account.atwDevices ??= [];
+          account.ervDevices ??= [];
 
-          const removedAta = removeStaleDevices(acc.ataDevices, devicesByType.ata);
-          const removedAtw = removeStaleDevices(acc.atwDevices, devicesByType.atw);
-          const removedErv = removeStaleDevices(acc.ervDevices, devicesByType.erv);
+          const removedAta = removeStaleDevices(account.ataDevices, devicesByType.ata);
+          const removedAtw = removeStaleDevices(account.atwDevices, devicesByType.atw);
+          const removedErv = removeStaleDevices(account.ervDevices, devicesByType.erv);
 
           const handleDevices = (devicesInCloud, devicesInConfig, typeString, newArr, newPresets) => {
             devicesInCloud.forEach(device => {
@@ -286,9 +285,9 @@
             });
           };
 
-          handleDevices(devicesByType.ata, acc.ataDevices, "Air Conditioner", newDevices.ata, newDevices.ataPresets);
-          handleDevices(devicesByType.atw, acc.atwDevices, "Heat Pump", newDevices.atw, newDevices.atwPresets);
-          handleDevices(devicesByType.erv, acc.ervDevices, "Energy Recovery Ventilation", newDevices.erv, newDevices.ervPresets);
+          handleDevices(devicesByType.ata, account.ataDevices, "Air Conditioner", newDevices.ata, newDevices.ataPresets);
+          handleDevices(devicesByType.atw, account.atwDevices, "Heat Pump", newDevices.atw, newDevices.atwPresets);
+          handleDevices(devicesByType.erv, account.ervDevices, "Energy Recovery Ventilation", newDevices.erv, newDevices.ervPresets);
 
           const newDevicesCount = newDevices.ata.length + newDevices.atw.length + newDevices.erv.length;
           const newPresetsCount = newDevices.ataPresets.length + newDevices.atwPresets.length + newDevices.ervPresets.length;

@@ -35,7 +35,7 @@ export const DeviceType = [
 export const TemperatureDisplayUnits = ["°C", "°F"];
 
 export const AirConditioner = {
-    SystemMapEnumToString: { 0: "Air Conditioner Off", 1: "ir Conditioner On", 2: "ir Conditioner Offline" },
+    SystemMapEnumToString: { 0: "Air Conditioner Off", 1: "Air Conditioner On", 2: "Air Conditioner Offline" },
     AirDirectionMapEnumToString: { 0: "Auto", 1: "Swing" },
     CurrentOperationModeHeatherCoolerMapEnumToString: { 0: "Inactive", 1: "Idle", 2: "Heating", 3: "Cooling" },
     CurrentOperationModeThermostatMapEnumToString: { 0: "Inactive", 1: "Heating", 2: "Cooling" },
