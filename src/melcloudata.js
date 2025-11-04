@@ -75,13 +75,17 @@ class MelCloudAta extends EventEmitter {
             }
             if (this.logDebug) this.emit('debug', `Device Data: ${JSON.stringify(deviceData, null, 2)}`);
 
+            //keys
+            const fanKey = this.accountType === 'melcloud' ? 'FanSpeed' : 'SetFanSpeed';
+            const tempStepKey = this.accountType === 'melcloud' ? 'TemperatureIncrement' : 'HasHalfDegreeIncrements';
+            const errorKey = this.accountType === 'melcloud' ? 'HasError' : 'IsInError';
+
             //device info
             const hideVaneControls = deviceData.HideVaneControls;
             const hideDryModeControl = deviceData.HideDryModeControl;
             const serialNumber = deviceData.SerialNumber;
 
             //device
-            const fanKey = this.accountType === 'melcloud' ? 'FanSpeed' : 'SetFanSpeed';
             const device = deviceData.Device ?? {};
             const prohibitSetTemperature = device.ProhibitSetTemperature;
             const prohibitOperationMode = device.ProhibitOperationMode;
@@ -99,10 +103,11 @@ class MelCloudAta extends EventEmitter {
             const vaneHorizontalSwing = device.VaneHorizontalSwing;
             const operationMode = device.OperationMode;
             const inStandbyMode = device.InStandbyMode;
+            const temperatureIncrement = device[tempStepKey];
             const defaultCoolingSetTemperature = device.DefaultCoolingSetTemperature;
             const defaultHeatingSetTemperature = device.DefaultHeatingSetTemperature;
             const firmwareAppVersion = device.FirmwareAppVersion;
-            const isInError = device.IsInError;
+            const isInError = device[errorKey];
 
             //units
             const units = Array.isArray(device.Units) ? device.Units : [];
@@ -141,6 +146,7 @@ class MelCloudAta extends EventEmitter {
                 VaneVerticalSwing: vaneVerticalSwing,
                 VaneHorizontalDirection: vaneHorizontalDirection,
                 VaneHorizontalSwing: vaneHorizontalSwing,
+                TemperatureIncrement: temperatureIncrement,
                 DefaultCoolingSetTemperature: defaultCoolingSetTemperature,
                 DefaultHeatingSetTemperature: defaultHeatingSetTemperature,
                 ProhibitPower: prohibitPower,
@@ -252,7 +258,7 @@ class MelCloudAta extends EventEmitter {
                             VaneVerticalDirection: AirConditioner.VaneVerticalDirectionMapEnumToString[deviceData.Device.VaneVerticalDirection]
                         }
                     };
-                    if (!this.logDebug) this.emit('warn', `Send Data: ${JSON.stringify(settings.data, null, 2)}`);
+                    if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(settings.data, null, 2)}`);
 
                     const path = ApiUrlsHome.SetAta.replace('deviceid', deviceData.DeviceID);
                     await axiosInstancePut(path, settings);

@@ -283,7 +283,7 @@ class DeviceAtw extends EventEmitter {
 
             //information service
             if (this.logDebug) this.emit('debug', `Prepare information service`);
-            accessory.getService(Service.AccessoryInformation)
+            this.informationService = accessory.getService(Service.AccessoryInformation)
                 .setCharacteristic(Characteristic.Manufacturer, this.manufacturer)
                 .setCharacteristic(Characteristic.Model, this.model)
                 .setCharacteristic(Characteristic.SerialNumber, this.serialNumber)
@@ -869,7 +869,7 @@ class DeviceAtw extends EventEmitter {
                             };
 
                             //error sensor
-                            if (this.errorSensor) {
+                            if (this.errorSensor && this.accessory.isInError !== null) {
                                 if (this.logDebug) this.emit('debug', `Prepare error service`);
                                 this.errorService = new Service.ContactSensor(`${serviceName} Error`, `Error Sensor ${deviceId}`);
                                 this.errorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
@@ -1324,10 +1324,14 @@ class DeviceAtw extends EventEmitter {
                     this.serialNumber = serialNumber.toString();
                     this.firmwareRevision = firmwareAppVersion.toString();
 
-                    this.informationService?.setCharacteristic(Characteristic.FirmwareRevision, this.firmwareAppVersion);
+                    this.informationService?.setCharacteristic(Characteristic.FirmwareRevision, this.firmwareRevision);
                 })
                 .on('deviceState', async (deviceData) => {
                     this.deviceData = deviceData;
+
+                    //keys
+                    const tempStepKey = this.accountType === 'melcloud' ? 'TemperatureIncrement' : 'HasHalfDegreeIncrements';
+                    const errorKey = this.accountType === 'melcloud' ? 'HasError' : 'IsInError';
 
                     //presets
                     const presetsOnServer = deviceData.Presets ?? [];
@@ -1340,7 +1344,7 @@ class DeviceAtw extends EventEmitter {
                     const canHeat = deviceData.Device.CanHeat ?? false;
                     const canCool = deviceData.Device.CanCool ?? false;
                     const heatCoolModes = canHeat && canCool ? 0 : canHeat ? 1 : canCool ? 2 : 3;
-                    const temperatureIncrement = deviceData.Device.TemperatureIncrement ?? 1;
+                    const temperatureIncrement = deviceData.Device[tempStepKey] ?? 1;
                     const minSetTemperature = deviceData.Device.MinSetTemperature ?? 10;
                     const maxSetTemperature = deviceData.Device.MaxSetTemperature ?? 30;
                     const maxTankTemperature = deviceData.Device.MaxTankTemperature ?? 70;
@@ -1370,7 +1374,7 @@ class DeviceAtw extends EventEmitter {
                     const holidayMode = deviceData.Device.HolidayMode ?? false;
                     const flowTemperatureHeatPump = deviceData.Device.FlowTemperature;
                     const returnTemperatureHeatPump = deviceData.Device.ReturnTemperature;
-                    const isInError = deviceData.Device.IsInError ?? false;
+                    const isInError = deviceData.Device[errorKey];
 
                     //zone 1
                     const zone1Name = deviceData.Zone1Name ?? 'Zone 1';

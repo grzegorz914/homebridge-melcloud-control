@@ -251,7 +251,7 @@ class DeviceErv extends EventEmitter {
 
             //information service
             if (this.logDebug) this.emit('debug', `Prepare information service`);
-            accessory.getService(Service.AccessoryInformation)
+            this.informationService = accessory.getService(Service.AccessoryInformation)
                 .setCharacteristic(Characteristic.Manufacturer, this.manufacturer)
                 .setCharacteristic(Characteristic.Model, this.model)
                 .setCharacteristic(Characteristic.SerialNumber, this.serialNumber)
@@ -592,32 +592,36 @@ class DeviceErv extends EventEmitter {
             };
 
             //core maintenance
-            this.coreMaintenanceService = new Service.FilterMaintenance(`${serviceName} Core Maintenance`, `CoreMaintenance ${deviceId}`);
-            this.coreMaintenanceService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-            this.coreMaintenanceService.setCharacteristic(Characteristic.ConfiguredName, `${serviceName} Core Maintenance`);
-            this.coreMaintenanceService.getCharacteristic(Characteristic.FilterChangeIndication)
-                .onGet(async () => {
-                    const value = this.accessory.coreMaintenanceRequired;
-                    return value;
-                });
-            this.coreMaintenanceService.getCharacteristic(Characteristic.ResetFilterIndication)
-                .onSet(async (state) => {
-                });
-            accessory.addService(this.coreMaintenanceService);
+            if (this.accessory.coreMaintenanceRequired !== null) {
+                this.coreMaintenanceService = new Service.FilterMaintenance(`${serviceName} Core Maintenance`, `CoreMaintenance ${deviceId}`);
+                this.coreMaintenanceService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                this.coreMaintenanceService.setCharacteristic(Characteristic.ConfiguredName, `${serviceName} Core Maintenance`);
+                this.coreMaintenanceService.getCharacteristic(Characteristic.FilterChangeIndication)
+                    .onGet(async () => {
+                        const value = this.accessory.coreMaintenanceRequired;
+                        return value;
+                    });
+                this.coreMaintenanceService.getCharacteristic(Characteristic.ResetFilterIndication)
+                    .onSet(async (state) => {
+                    });
+                accessory.addService(this.coreMaintenanceService);
+            }
 
             //filter maintenance
-            this.filterMaintenanceService = new Service.FilterMaintenance(`${serviceName} Filter Maintenance`, `FilterMaintenance ${deviceId}`);
-            this.filterMaintenanceService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-            this.filterMaintenanceService.setCharacteristic(Characteristic.ConfiguredName, `${serviceName} Filter Maintenance`);
-            this.filterMaintenanceService.getCharacteristic(Characteristic.FilterChangeIndication)
-                .onGet(async () => {
-                    const value = this.accessory.filterMaintenanceRequired;
-                    return value;
-                });
-            this.filterMaintenanceService.getCharacteristic(Characteristic.ResetFilterIndication)
-                .onSet(async (state) => {
-                });
-            accessory.addService(this.filterMaintenanceService);
+            if (this.accessory.filterMaintenanceRequired !== null) {
+                this.filterMaintenanceService = new Service.FilterMaintenance(`${serviceName} Filter Maintenance`, `FilterMaintenance ${deviceId}`);
+                this.filterMaintenanceService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                this.filterMaintenanceService.setCharacteristic(Characteristic.ConfiguredName, `${serviceName} Filter Maintenance`);
+                this.filterMaintenanceService.getCharacteristic(Characteristic.FilterChangeIndication)
+                    .onGet(async () => {
+                        const value = this.accessory.filterMaintenanceRequired;
+                        return value;
+                    });
+                this.filterMaintenanceService.getCharacteristic(Characteristic.ResetFilterIndication)
+                    .onSet(async (state) => {
+                    });
+                accessory.addService(this.filterMaintenanceService);
+            }
 
             //room CO2 sensor
             if (hasCO2Sensor) {
@@ -656,7 +660,7 @@ class DeviceErv extends EventEmitter {
             }
 
             //error sensor
-            if (this.errorSensor) {
+            if (this.errorSensor && this.accessory.isInError !== null) {
                 if (this.logDebug) this.emit('debug', `Prepare error service`);
                 this.errorService = new Service.ContactSensor(`${serviceName} Error`, `Error Sensor ${deviceId}`);
                 this.errorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
@@ -869,10 +873,15 @@ class DeviceErv extends EventEmitter {
                     this.serialNumber = serialNumber.toString();
                     this.firmwareRevision = firmwareAppVersion.toString();
 
-                    this.informationService?.setCharacteristic(Characteristic.FirmwareRevision, this.firmwareAppVersion);
+                    this.informationService?.setCharacteristic(Characteristic.FirmwareRevision, this.firmwareRevision);
                 })
                 .on('deviceState', async (deviceData) => {
                     this.deviceData = deviceData;
+
+                    //keys
+                    const fanKey = this.accountType === 'melcloud' ? 'FanSpeed' : 'SetFanSpeed';
+                    const tempStepKey = this.accountType === 'melcloud' ? 'TemperatureIncrement' : 'HasHalfDegreeIncrements';
+                    const errorKey = this.accountType === 'melcloud' ? 'HasError' : 'IsInError';
 
                     //presets
                     const presetsOnServer = deviceData.Presets ?? [];
@@ -899,18 +908,18 @@ class DeviceErv extends EventEmitter {
                     const hasAutoVentilationMode = deviceData.Device.HasAutoVentilationMode ?? false;
                     const hasBypassVentilationMode = deviceData.Device.HasBypassVentilationMode ?? false;
                     const hasAutomaticFanSpeed = deviceData.Device.HasAutomaticFanSpeed ?? false;
-                    const coreMaintenanceRequired = deviceData.Device.CoreMaintenanceRequired ? 1 : 0;
-                    const filterMaintenanceRequired = deviceData.Device.FilterMaintenanceRequired ? 1 : 0;
+                    const coreMaintenanceRequired = deviceData.Device.CoreMaintenanceRequired;
+                    const filterMaintenanceRequired = deviceData.Device.FilterMaintenanceRequired;
                     const actualVentilationMode = deviceData.Device.ActualVentilationMode;
-                    const numberOfFanSpeeds = deviceData.Device.NumberOfFanSpeeds ?? 0;
-                    const temperatureIncrement = deviceData.Device.TemperatureIncrement ?? 1;
+                    const numberOfFanSpeeds = deviceData.Device.NumberOfFanSpeeds;
+                    const temperatureIncrement = deviceData.Device[tempStepKey] ?? 1;
                     const minTempHeat = 10;
                     const maxTempHeat = 31;
                     const minTempCoolDry = 16;
                     const maxTempCoolDry = 31;
 
                     //device state
-                    const power = deviceData.Device.Power ?? false;
+                    const power = deviceData.Device.Power;
                     const roomTemperature = deviceData.Device.RoomTemperature;
                     const supplyTemperature = deviceData.Device.SupplyTemperature;
                     const outdoorTemperature = deviceData.Device.OutdoorTemperature;
@@ -921,7 +930,7 @@ class DeviceErv extends EventEmitter {
                     const setFanSpeed = deviceData.Device.SetFanSpeed;
                     const operationMode = deviceData.Device.OperationMode;
                     const ventilationMode = deviceData.Device.VentilationMode;
-                    const isInError = deviceData.Device.IsInError ?? false;
+                    const isInError = deviceData.Device[errorKey];
 
                     //accessory
                     const obj = {

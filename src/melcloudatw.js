@@ -67,13 +67,18 @@ class MelCloudAtw extends EventEmitter {
             }
             if (this.logDebug) this.emit('debug', `Device Data: ${JSON.stringify(deviceData, null, 2)}`);
 
+            //keys
+            const fanKey = this.accountType === 'melcloud' ? 'FanSpeed' : 'SetFanSpeed';
+            const tempStepKey = this.accountType === 'melcloud' ? 'TemperatureIncrement' : 'HasHalfDegreeIncrements';
+            const errorKey = this.accountType === 'melcloud' ? 'HasError' : 'IsInError';
+
             //device info
             const serialNumber = deviceData.SerialNumber;
 
             //device
             const device = deviceData.Device ?? {};
             const hasHotWaterTank = device.HasHotWaterTank ?? false;
-            const temperatureIncrement = device.TemperatureIncrement;
+            const temperatureIncrement = device[tempStepKey];
             const roomTemperatureZone1 = device.RoomTemperatureZone1;
             const roomTemperatureZone2 = device.RoomTemperatureZone2;
             const outdoorTemperature = device.OutdoorTemperature;
@@ -100,7 +105,7 @@ class MelCloudAtw extends EventEmitter {
             const idleZone2 = device.IdleZone2 ?? false;
             const firmwareAppVersion = device.FirmwareAppVersion;
             const hasZone2 = device.HasZone2 ?? false;
-            const isInError = device.IsInError;
+            const isInError = device[errorKey];
 
             //units
             const units = Array.isArray(device.Units) ? device.Units : [];

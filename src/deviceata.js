@@ -262,7 +262,7 @@ class DeviceAta extends EventEmitter {
 
             //information service
             if (this.logDebug) this.emit('debug', `Prepare information service`);
-            accessory.getService(Service.AccessoryInformation)
+            this.informationService = accessory.getService(Service.AccessoryInformation)
                 .setCharacteristic(Characteristic.Manufacturer, this.manufacturer)
                 .setCharacteristic(Characteristic.Model, this.model)
                 .setCharacteristic(Characteristic.SerialNumber, this.serialNumber)
@@ -606,7 +606,7 @@ class DeviceAta extends EventEmitter {
             };
 
             //error sensor
-            if (this.errorSensor) {
+            if (this.errorSensor && this.accessory.isInError !== null) {
                 if (this.logDebug) this.emit('debug', `Prepare error service`);
                 this.errorService = new Service.ContactSensor(`${serviceName} Error`, `Error Sensor ${deviceId}`);
                 this.errorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
@@ -949,10 +949,22 @@ class DeviceAta extends EventEmitter {
                     this.serialNumber = serialNumber.toString();
                     this.firmwareRevision = firmwareAppVersion.toString();
 
-                    this.informationService?.setCharacteristic(Characteristic.FirmwareRevision, this.firmwareAppVersion);
+                    this.informationService?.setCharacteristic(Characteristic.FirmwareRevision, this.firmwareRevision);
                 })
                 .on('deviceState', async (deviceData) => {
                     this.deviceData = deviceData;
+
+                    //keys
+                    const fanKey = this.accountType === 'melcloud' ? 'FanSpeed' : 'SetFanSpeed';
+                    const tempStepKey = this.accountType === 'melcloud' ? 'TemperatureIncrement' : 'HasHalfDegreeIncrements';
+                    const errorKey = this.accountType === 'melcloud' ? 'HasError' : 'IsInError';
+                    const supportAirDirectionKey = this.accountType === 'melcloud' ? 'AirDirectionFunction' : 'HasAirDirectionFunction';
+                    const supportSwingKey = this.accountType === 'melcloud' ? 'SwingFunction' : 'HasSwing';
+                    const supportVideWaneKey = this.accountType === 'melcloud' ? 'ModelSupportsWideVane' : 'SupportsWideVane';
+                    const supportAutoKey = this.accountType === 'melcloud' ? 'ModelSupportsAuto' : 'HasAutoOperationMode';
+                    const supportHeatKey = this.accountType === 'melcloud' ? 'ModelSupportsHeat' : 'HasHeatOperationMode';
+                    const supportDryKey = this.accountType === 'melcloud' ? 'ModelSupportsDry' : 'HasDryOperationMode';
+                    const supportCoolKey = this.accountType === 'melcloud' ? 'ModelSupportsCool' : 'HasCoolOperationMode';
 
                     //presets
                     const presetsOnServer = deviceData.Presets ?? [];
@@ -964,17 +976,17 @@ class DeviceAta extends EventEmitter {
                     //device info
                     const accountTypeMelcloud = this.accountType === 'melcloud';
                     const supportsAutomaticFanSpeed = deviceData.Device.HasAutomaticFanSpeed ?? false;
-                    const supportsAirDirectionFunction = accountTypeMelcloud ? deviceData.Device.AirDirectionFunction : deviceData.Device.HasAirDirectionFunction;;
-                    const supportsSwingFunction = accountTypeMelcloud ? deviceData.Device.SwingFunction : deviceData.Device.HasSwing;
-                    const supportsWideVane = accountTypeMelcloud ? deviceData.Device.ModelSupportsWideVane : deviceData.Device.SupportsWideVane;
+                    const supportsAirDirectionFunction = deviceData.Device[supportAirDirectionKey];
+                    const supportsSwingFunction = deviceData.Device[supportSwingKey];
+                    const supportsWideVane = deviceData.Device[supportVideWaneKey];
                     const supportsOutdoorTemperature = deviceData.Device.HasOutdoorTemperature ?? false;
                     const supportsFanSpeed = accountTypeMelcloud ? deviceData.Device.ModelSupportsFanSpeed : deviceData.Device.NumberOfFanSpeeds > 0;
-                    const supportsAuto1 = accountTypeMelcloud ? deviceData.Device.ModelSupportsAuto : deviceData.Device.HasAutoOperationMode;
+                    const supportsAuto1 = deviceData.Device[supportAutoKey];
                     const supportsAuto = this.autoDryFanMode >= 1 && supportsAuto1
-                    const supportsHeat1 = accountTypeMelcloud ? deviceData.Device.ModelSupportsHeat : deviceData.Device.HasHeatOperationMode
+                    const supportsHeat1 = deviceData.Device[supportHeatKey];
                     const supportsHeat = this.heatDryFanMode >= 1 && supportsHeat1;
-                    const supportsDry = accountTypeMelcloud ? deviceData.Device.ModelSupportsDry : deviceData.Device.HasDryOperationMode;
-                    const supportsCool1 = accountTypeMelcloud ? deviceData.Device.ModelSupportsCool : deviceData.Device.HasCoolOperationMode;
+                    const supportsDry = deviceData.Device[supportDryKey];
+                    const supportsCool1 = deviceData.Device[supportCoolKey];
                     const supportsCool = this.coolDryFanMode >= 1 && supportsCool1;
                     const numberOfFanSpeeds = supportsFanSpeed ? deviceData.Device.NumberOfFanSpeeds : 0;
                     const minTempHeat = 10;
@@ -983,8 +995,6 @@ class DeviceAta extends EventEmitter {
                     const maxTempCoolDryAuto = 31;
 
                     //device state
-                    const fanKey = this.accountType === 'melcloud' ? 'FanSpeed' : 'SetFanSpeed';
-                    const tempStepKey = this.accountType === 'melcloud' ? 'TemperatureIncrement' : 'HasHalfDegreeIncrements';
                     const power = deviceData.Device.Power ?? false;
                     const inStandbyMode = deviceData.Device.InStandbyMode ?? false;
                     const roomTemperature = deviceData.Device.RoomTemperature;
@@ -1004,7 +1014,7 @@ class DeviceAta extends EventEmitter {
                     const prohibitPower = deviceData.Device.ProhibitPower ?? false;
                     const temperatureStep = deviceData.Device[tempStepKey] ? 0.5 : 1;
                     const outdoorTemperature = deviceData.Device.OutdoorTemperature;
-                    const isInError = deviceData.Device.IsInError ?? false;
+                    const isInError = deviceData.Device[errorKey];
 
                     //accessory
                     const obj = {

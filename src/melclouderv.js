@@ -67,25 +67,30 @@ class MelCloudErv extends EventEmitter {
             }
             if (this.logDebug) this.emit('debug', `Device Data: ${JSON.stringify(deviceData, null, 2)}`);
 
+            //keys
+            const fanKey = this.accountType === 'melcloud' ? 'FanSpeed' : 'SetFanSpeed';
+            const tempStepKey = this.accountType === 'melcloud' ? 'TemperatureIncrement' : 'HasHalfDegreeIncrements';
+            const errorKey = this.accountType === 'melcloud' ? 'HasError' : 'IsInError';
+
             //presets
-            const hideRoomTemperature = deviceData.HideRoomTemperature ?? false;
-            const hideSupplyTemperature = deviceData.HideSupplyTemperature ?? false;
-            const hideOutdoorTemperature = deviceData.HideOutdoorTemperature ?? false;
+            const hideRoomTemperature = deviceData.HideRoomTemperature;
+            const hideSupplyTemperature = deviceData.HideSupplyTemperature;
+            const hideOutdoorTemperature = deviceData.HideOutdoorTemperature;
             const serialNumber = deviceData.SerialNumber;
 
             //device
             const device = deviceData.Device ?? {};
             const pM25SensorStatus = device.PM25SensorStatus;
             const pM25Level = device.PM25Level;
-            const temperatureIncrement = device.TemperatureIncrement;
-            const coreMaintenanceRequired = device.CoreMaintenanceRequired ?? false;
-            const filterMaintenanceRequired = device.FilterMaintenanceRequired ?? false;
-            const power = device.Power ?? false;
+            const temperatureIncrement = device[tempStepKey];
+            const coreMaintenanceRequired = device.CoreMaintenanceRequired;
+            const filterMaintenanceRequired = device.FilterMaintenanceRequired;
+            const power = device.Power;
             const roomTemperature = device.RoomTemperature;
             const supplyTemperature = device.SupplyTemperature;
             const outdoorTemperature = device.OutdoorTemperature;
             const roomCO2Level = device.RoomCO2Level;
-            const nightPurgeMode = device.NightPurgeMode ?? false;
+            const nightPurgeMode = device.NightPurgeMode;
             const setTemperature = device.SetTemperature;
             const actualSupplyFanSpeed = device.ActualSupplyFanSpeed;
             const actualExhaustFanSpeed = device.ActualExhaustFanSpeed;
@@ -95,7 +100,7 @@ class MelCloudErv extends EventEmitter {
             const defaultCoolingSetTemperature = device.DefaultCoolingSetTemperature ?? 23;
             const defaultHeatingSetTemperature = device.DefaultHeatingSetTemperature ?? 21;
             const firmwareAppVersion = device.FirmwareAppVersion;
-            const isInError = device.IsInError;
+            const isInError = device[errorKey];
 
             //units
             const units = Array.isArray(device.Units) ? device.Units : [];
