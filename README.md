@@ -277,21 +277,19 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `refreshInterval` | Here set the background account data refresh time in (sec), default `120s`. |
 | `log{}` | Log object. |
 | `log.deviceInfo` | If enabled, log device info will be displayed by every connections device to the network. |
-| `log.sSuccess` | If enabled, success log will be displayed in console. |
+| `log.success` | If enabled, success log will be displayed in console. |
 | `log.info` | If enabled, info log will be displayed in console. |
 | `log.warn` | If enabled, warn log will be displayed in console. |
 | `log.error` | If enabled, error log will be displayed in console. |
 | `log.debug` | If enabled, debug log will be displayed in console. |
 | `restFul{}` | RSTful object. |
 | `restFul.enable` | If enabled, RESTful server will start automatically and respond to any path request. |
-| `restFul.debug` | If enabled, deep log will be present in homebridge console for RESTFul server. |
 | `mqtt{}` | MQTT object. |
 | `mqtt.enable` | If enabled, MQTT Broker will start automatically and publish all awailable PV data. |
 | `mqtt.host` | Here set the `IP Address` or `Hostname` for MQTT Broker. |
 | `mqtt.port` | Here set the `Port` for MQTT Broker, default 1883. |
 | `mqtt.clientId` | Here optional set the `Client Id` of MQTT Broker. |
 | `mqtt.prefix` | Here set the `Prefix` for `Topic` or leave empty. |
-| `mqtt.debug` | If enabled, deep log will be present in homebridge console for MQTT. |
 | `mqtt.auth{}` | MQTT authorization object. |
 | `mqtt.auth.enable` | Here enable authorization for MQTT Broker. |
 | `mqtt.auth.user` | Here set the MQTT Broker user. |

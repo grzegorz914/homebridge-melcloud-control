@@ -1,17 +1,17 @@
-import { Agent } from 'https';
 import axios from 'axios';
 import EventEmitter from 'events';
 import ImpulseGenerator from './impulsegenerator.js';
 import Functions from './functions.js';
-import { ApiUrls } from './constants.js';
+import { ApiUrls, ApiUrlsHome, HeatPump } from './constants.js';
 
 class MelCloudAtw extends EventEmitter {
-    constructor(device, contextKey, devicesFile, defaultTempsFile) {
+    constructor(account, device, devicesFile, defaultTempsFile) {
         super();
+        this.accountType = account.type;
+        this.logWarn = account.log?.warn;
+        this.logError = account.log?.error;
+        this.logDebug = account.log?.debug;
         this.deviceId = device.id;
-        this.logWarn = device.log?.warn;
-        this.logError = device.log?.error;
-        this.logDebug = device.log?.debug;
         this.devicesFile = devicesFile;
         this.defaultTempsFile = defaultTempsFile;
         this.functions = new Functions(this.logWarn, this.logError, this.logDebug)
@@ -21,21 +21,7 @@ class MelCloudAtw extends EventEmitter {
 
         //set default values
         this.deviceState = {};
-
-        this.axiosInstancePost = axios.create({
-            method: 'POST',
-            baseURL: ApiUrls.BaseURL,
-            timeout: 25000,
-            headers: {
-                'X-MitsContextKey': contextKey,
-                'content-type': 'application/json'
-            },
-            withCredentials: true,
-            httpsAgent: new Agent({
-                keepAlive: false,
-                rejectUnauthorized: false
-            })
-        });
+        this.headers = {};
 
         //lock flags
         this.locks = {
@@ -46,7 +32,7 @@ class MelCloudAtw extends EventEmitter {
                 await this.checkState();
             }))
             .on('state', (state) => {
-                this.emit('success', `Impulse generator ${state ? 'started' : 'stopped'}.`);
+                this.emit(state ? 'success' : 'warn', `Impulse generator ${state ? 'started' : 'stopped'}`);
             });
     }
 
@@ -73,10 +59,16 @@ class MelCloudAtw extends EventEmitter {
                 return null;
             }
             const deviceData = devicesData.find(device => device.DeviceID === this.deviceId);
+            this.headers = deviceData.Headers;
+
+            if (this.accountType === 'melcloudhome') {
+                deviceData.SerialNumber = deviceData.DeviceID || '4.0.0';
+                deviceData.Device.FirmwareAppVersion = deviceData.ConnectedInterfaceIdentifier || '4.0.0';
+            }
             if (this.logDebug) this.emit('debug', `Device Data: ${JSON.stringify(deviceData, null, 2)}`);
 
             //device info
-            const serialNumber = deviceData.SerialNumber ?? 'Undefined';
+            const serialNumber = deviceData.SerialNumber;
 
             //device
             const device = deviceData.Device ?? {};
@@ -106,63 +98,31 @@ class MelCloudAtw extends EventEmitter {
             const setCoolFlowTemperatureZone2 = device.SetCoolFlowTemperatureZone2;
             const idleZone1 = device.IdleZone1 ?? false;
             const idleZone2 = device.IdleZone2 ?? false;
-            const firmwareAppVersion = device.FirmwareAppVersion?.toString() ?? 'Undefined';
+            const firmwareAppVersion = device.FirmwareAppVersion;
             const hasZone2 = device.HasZone2 ?? false;
+            const isInError = device.IsInError;
 
             //units
             const units = Array.isArray(device.Units) ? device.Units : [];
             const unitsCount = units.length;
             const manufacturer = 'Mitsubishi';
 
-            //indoor
-            let idIndoor = 0;
-            let deviceIndoor = 0;
-            let serialNumberIndoor = 'Undefined';
-            let modelNumberIndoor = 0;
-            let modelIndoor = false;
-            let typeIndoor = 0;
-
-            //outdoor
-            let idOutdoor = 0;
-            let deviceOutdoor = 0;
-            let serialNumberOutdoor = 'Undefined';
-            let modelNumberOutdoor = 0;
-            let modelOutdoor = false;
-            let typeOutdoor = 0;
-
-            //units array
-            for (const unit of units) {
-                const unitId = unit.ID;
-                const unitDevice = unit.Device;
-                const unitSerialNumber = unit.SerialNumber ?? 'Undefined';
-                const unitModelNumber = unit.ModelNumber;
-                const unitModel = unit.Model ?? false;
-                const unitType = unit.UnitType;
-                const unitIsIndoor = unit.IsIndoor ?? false;
-
-                switch (unitIsIndoor) {
-                    case true:
-                        idIndoor = unitId;
-                        deviceIndoor = unitDevice;
-                        serialNumberIndoor = unitSerialNumber;
-                        modelNumberIndoor = unitModelNumber;
-                        modelIndoor = unitModel;
-                        typeIndoor = unitType;
-                        break;
-                    case false:
-                        idOutdoor = unitId;
-                        deviceOutdoor = unitDevice;
-                        serialNumberOutdoor = unitSerialNumber;
-                        modelNumberOutdoor = unitModelNumber;
-                        modelOutdoor = unitModel;
-                        typeOutdoor = unitType;
-                        break;
-                }
-            }
+            const { indoor, outdoor } = units.reduce((acc, unit) => {
+                const target = unit.IsIndoor ? 'indoor' : 'outdoor';
+                acc[target] = {
+                    id: unit.ID,
+                    device: unit.Device,
+                    serialNumber: unit.SerialNumber ?? 'Undefined',
+                    modelNumber: unit.ModelNumber ?? 0,
+                    model: unit.Model ?? false,
+                    type: unit.UnitType ?? 0
+                };
+                return acc;
+            }, { indoor: {}, outdoor: {} });
 
             //display info if units are not configured in MELCloud service
             if (unitsCount === 0) {
-                this.emit('message', `Units are not configured in MELCloud service`);
+                if (this.logDebug) this.emit('debug', `Units are not configured in MELCloud service`);
             };
 
             const deviceState = {
@@ -190,7 +150,8 @@ class MelCloudAtw extends EventEmitter {
                 HolidayMode: holidayMode,
                 ProhibitZone1: prohibitHeatingZone1,
                 ProhibitZone2: prohibitHeatingZone2,
-                ProhibitHotWater: prohibitHotWater
+                ProhibitHotWater: prohibitHotWater,
+                IsInError: isInError
             }
 
             //restFul
@@ -210,7 +171,7 @@ class MelCloudAtw extends EventEmitter {
             this.deviceState = deviceState;
 
             //emit info
-            this.emit('deviceInfo', manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, hasHotWaterTank, hasZone2);
+            this.emit('deviceInfo', manufacturer, indoor.model, outdoor.model, serialNumber, firmwareAppVersion, hasHotWaterTank, hasZone2);
 
             //emit state
             this.emit('deviceState', deviceData);
@@ -221,53 +182,110 @@ class MelCloudAtw extends EventEmitter {
         };
     };
 
-    async send(deviceData) {
+    async send(accountType, displayType, deviceData, effectiveFlags) {
         try {
-            //prevent to set out of range temp
-            const minTempZones = 0;
-            const maxTempZones = 60;
-            const minTempWaterTank = 16;
-            const maxTempWaterTank = deviceData.Device.MaxTankTemperature ?? 70;
+            switch (accountType) {
+                case "melcloud":
+                    const axiosInstancePost = axios.create({
+                        method: 'POST',
+                        baseURL: ApiUrls.BaseURL,
+                        timeout: 10000,
+                        headers: this.headers,
+                        withCredentials: true
+                    });
 
-            deviceData.Device.SetTemperatureZone1 = deviceData.Device.SetTemperatureZone1 < minTempZones ? minTempZones : deviceData.Device.SetTemperatureZone1;
-            deviceData.Device.SetTemperatureZone1 = deviceData.Device.SetTemperatureZone1 > maxTempZones ? maxTempZones : deviceData.Device.SetTemperatureZone1;
-            deviceData.Device.SetTemperatureZone1 = deviceData.Device.SetTemperatureZone2 < minTempZones ? minTempZones : deviceData.Device.SetTemperatureZone2;
-            deviceData.Device.SetTemperatureZone1 = deviceData.Device.SetTemperatureZone2 > maxTempZones ? maxTempZones : deviceData.Device.SetTemperatureZone2;
-            deviceData.Device.SetTankWaterTemperature = deviceData.Device.SetTankWaterTemperature < minTempWaterTank ? minTempWaterTank : deviceData.Device.SetTankWaterTemperature;
-            deviceData.Device.SetTankWaterTemperature = deviceData.Device.SetTankWaterTemperature > maxTempWaterTank ? maxTempWaterTank : deviceData.Device.SetTankWaterTemperature;
+                    //prevent to set out of range temp
+                    const minTempZones = 0;
+                    const maxTempZones = 60;
+                    const minTempWaterTank = 16;
+                    const maxTempWaterTank = deviceData.Device.MaxTankTemperature ?? 70;
 
-            const payload = {
-                data: {
-                    DeviceID: deviceData.Device.DeviceID,
-                    EffectiveFlags: deviceData.Device.EffectiveFlags,
-                    Power: deviceData.Device.Power,
-                    SetTemperatureZone1: deviceData.Device.SetTemperatureZone1,
-                    SetTemperatureZone2: deviceData.Device.SetTemperatureZone2,
-                    OperationMode: deviceData.Device.OperationMode,
-                    OperationModeZone1: deviceData.Device.OperationModeZone1,
-                    OperationModeZone2: deviceData.Device.OperationModeZone2,
-                    SetHeatFlowTemperatureZone1: deviceData.Device.SetHeatFlowTemperatureZone1,
-                    SetHeatFlowTemperatureZone2: deviceData.Device.SetHeatFlowTemperatureZone2,
-                    SetCoolFlowTemperatureZone1: deviceData.Device.SetCoolFlowTemperatureZone1,
-                    SetCoolFlowTemperatureZone2: deviceData.Device.SetCoolFlowTemperatureZone2,
-                    SetTankWaterTemperature: deviceData.Device.SetTankWaterTemperature,
-                    ForcedHotWaterMode: deviceData.Device.ForcedHotWaterMode,
-                    EcoHotWater: deviceData.Device.EcoHotWater,
-                    HolidayMode: deviceData.Device.HolidayMode,
-                    ProhibitZone1: deviceData.Device.ProhibitHeatingZone1,
-                    ProhibitZone2: deviceData.Device.ProhibitHeatingZone2,
-                    ProhibitHotWater: deviceData.Device.ProhibitHotWater,
-                    HasPendingCommand: true
-                }
+                    deviceData.Device.SetTemperatureZone1 = deviceData.Device.SetTemperatureZone1 < minTempZones ? minTempZones : deviceData.Device.SetTemperatureZone1;
+                    deviceData.Device.SetTemperatureZone1 = deviceData.Device.SetTemperatureZone1 > maxTempZones ? maxTempZones : deviceData.Device.SetTemperatureZone1;
+                    deviceData.Device.SetTemperatureZone1 = deviceData.Device.SetTemperatureZone2 < minTempZones ? minTempZones : deviceData.Device.SetTemperatureZone2;
+                    deviceData.Device.SetTemperatureZone1 = deviceData.Device.SetTemperatureZone2 > maxTempZones ? maxTempZones : deviceData.Device.SetTemperatureZone2;
+                    deviceData.Device.SetTankWaterTemperature = deviceData.Device.SetTankWaterTemperature < minTempWaterTank ? minTempWaterTank : deviceData.Device.SetTankWaterTemperature;
+                    deviceData.Device.SetTankWaterTemperature = deviceData.Device.SetTankWaterTemperature > maxTempWaterTank ? maxTempWaterTank : deviceData.Device.SetTankWaterTemperature;
+
+                    deviceData.Device.EffectiveFlags = effectiveFlags;
+                    const payload = {
+                        data: {
+                            DeviceID: deviceData.Device.DeviceID,
+                            EffectiveFlags: deviceData.Device.EffectiveFlags,
+                            Power: deviceData.Device.Power,
+                            SetTemperatureZone1: deviceData.Device.SetTemperatureZone1,
+                            SetTemperatureZone2: deviceData.Device.SetTemperatureZone2,
+                            OperationMode: deviceData.Device.OperationMode,
+                            OperationModeZone1: deviceData.Device.OperationModeZone1,
+                            OperationModeZone2: deviceData.Device.OperationModeZone2,
+                            SetHeatFlowTemperatureZone1: deviceData.Device.SetHeatFlowTemperatureZone1,
+                            SetHeatFlowTemperatureZone2: deviceData.Device.SetHeatFlowTemperatureZone2,
+                            SetCoolFlowTemperatureZone1: deviceData.Device.SetCoolFlowTemperatureZone1,
+                            SetCoolFlowTemperatureZone2: deviceData.Device.SetCoolFlowTemperatureZone2,
+                            SetTankWaterTemperature: deviceData.Device.SetTankWaterTemperature,
+                            ForcedHotWaterMode: deviceData.Device.ForcedHotWaterMode,
+                            EcoHotWater: deviceData.Device.EcoHotWater,
+                            HolidayMode: deviceData.Device.HolidayMode,
+                            ProhibitZone1: deviceData.Device.ProhibitHeatingZone1,
+                            ProhibitZone2: deviceData.Device.ProhibitHeatingZone2,
+                            ProhibitHotWater: deviceData.Device.ProhibitHotWater,
+                            HasPendingCommand: true
+                        }
+                    }
+
+                    await axiosInstancePost(ApiUrls.SetAtw, payload);
+                    this.updateData(deviceData);
+                    return true;
+                case "melcloudhome":
+                    const axiosInstancePut = axios.create({
+                        method: 'PUT',
+                        baseURL: ApiUrlsHome.BaseURL,
+                        timeout: 10000,
+                        headers: this.headers,
+                        withCredentials: true
+                    });
+
+                    if (displayType === 1 && deviceData.Device.OperationMode === 8) {
+                        deviceData.Device.SetTemperature = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
+
+                        if (this.deviceState.DefaultCoolingSetTemperature !== deviceData.Device.DefaultCoolingSetTemperature || this.deviceState.DefaultHeatingSetTemperature !== deviceData.Device.DefaultHeatingSetTemperature) {
+                            const temps = {
+                                defaultCoolingSetTemperature: deviceData.Device.DefaultCoolingSetTemperature,
+                                defaultHeatingSetTemperature: deviceData.Device.DefaultHeatingSetTemperature
+                            };
+                            await this.functions.saveData(this.defaultTempsFile, temps);
+                        }
+                    }
+
+                    const settings = {
+                        data: {
+                            Power: deviceData.Device.Power,
+                            SetTemperature: deviceData.Device.SetTemperature,
+                            SetFanSpeed: String(deviceData.Device.SetFanSpeed),
+                            OperationMode: AirConditioner.OperationModeMapEnumToString[deviceData.Device.OperationMode],
+                            VaneHorizontalDirection: AirConditioner.VaneHorizontalDirectionMapEnumToString[deviceData.Device.VaneHorizontalDirection],
+                            VaneVerticalDirection: AirConditioner.VaneVerticalDirectionMapEnumToString[deviceData.Device.VaneVerticalDirection]
+                        }
+                    };
+                    if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(settings.data, null, 2)}`);
+
+                    const path = ApiUrlsHome.SetAtw.replace('deviceid', deviceData.DeviceID);
+                    await axiosInstancePut(path, settings);
+                    this.updateData(deviceData);
+                    return true;
+                default:
+                    return;
             }
-
-            await this.axiosInstancePost(ApiUrls.SetAtw, payload);
-            this.updateData(deviceData);
-            return true;
         } catch (error) {
-            throw new Error(`Send data error: ${error}`);
-        };
-    };
+            if (error.response) {
+                throw new Error(`Send data error: HTTP ${error.response.status} - ${JSON.stringify(error.response.data)}`);
+            } else if (error.request) {
+                throw new Error(`Send data error: No response received - ${error.message}`);
+            } else {
+                throw new Error(`Send data error: ${error.message}`);
+            }
+        }
+    }
 
     updateData(deviceData) {
         setTimeout(() => {

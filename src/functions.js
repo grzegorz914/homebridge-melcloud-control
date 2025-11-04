@@ -91,7 +91,6 @@ class Functions extends EventEmitter {
                     if (this.logDebug) this.emit('debug', `Using system Chrome at ${chromiumPath}`);
                     return chromiumPath;
                 } catch {
-                    if (this.logDebug) this.emit('debug', 'System Chrome not found on macOS, will use Puppeteer bundled Chromium.');
                     return null;
                 }
             }
@@ -109,7 +108,6 @@ class Functions extends EventEmitter {
                         if (this.logDebug) this.emit('debug', 'Chromium installed successfully on ARM.');
                         return '/usr/bin/chromium-browser';
                     } catch {
-                        if (this.logError) this.emit('error', 'Failed to install Chromium on ARM. Bundled Chromium will likely not work.');
                         return null;
                     }
                 }
@@ -147,8 +145,8 @@ class Functions extends EventEmitter {
                             if (this.logDebug) this.emit('debug', `Chromium installed successfully at ${chromiumPath}`);
                             return chromiumPath;
                         }
-                    } catch (err) {
-                        if (this.logDebug) this.emit('debug', `Install attempt failed: ${cmd} → ${err.message}`);
+                    } catch (error) {
+                        if (this.logDebug) this.emit('debug', `Install attempt failed: ${cmd} → ${error.message}`);
                     }
                 }
 
@@ -160,25 +158,19 @@ class Functions extends EventEmitter {
                         if (this.logDebug) this.emit('debug', 'Chromium installed successfully inside Docker at /usr/bin/chromium');
                         return '/usr/bin/chromium';
                     } catch {
-                        if (this.logError) this.emit('error', 'Failed to install Chromium inside Docker.');
+                        return null;
                     }
                 }
-
-                if (this.logDebug) this.emit('debug', 'Chromium not found on Linux. Using Puppeteer bundled Chromium.');
                 return null;
             }
 
             // Unknown OS
-            if (this.logDebug) this.emit('debug', `Unsupported OS: ${osName}. Using Puppeteer bundled Chromium.`);
+            if (this.logDebug) this.emit('debug', `Unsupported OS: ${osName}.`);
             return null;
-
         } catch (error) {
             if (this.logError) this.emit('error', `Chromium detection/install error: ${error.message}`);
-            if (this.logDebug) this.emit('debug', 'Using Puppeteer bundled Chromium due to detection error.');
             return null;
         }
     }
-
-
 }
 export default Functions

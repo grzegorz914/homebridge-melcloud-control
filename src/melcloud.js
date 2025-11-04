@@ -1,9 +1,12 @@
 import axios from 'axios';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 import EventEmitter from 'events';
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core';
 import ImpulseGenerator from './impulsegenerator.js';
 import Functions from './functions.js';
 import { ApiUrls, ApiUrlsHome } from './constants.js';
+const execPromise = promisify(exec);
 
 class MelCloud extends EventEmitter {
     constructor(account, accountFile, buildingsFile, devicesFile, pluginStart = false) {
@@ -19,7 +22,7 @@ class MelCloud extends EventEmitter {
         this.buildingsFile = buildingsFile;
         this.devicesFile = devicesFile;
         this.devicesId = [];
-        this.contextKey = '';
+        this.contextKey = null;
         this.functions = new Functions(this.logWarn, this.logError, this.logDebug)
             .on('warn', warn => this.emit('warn', warn))
             .on('error', error => this.emit('error', error))
@@ -39,7 +42,7 @@ class MelCloud extends EventEmitter {
                     await this.checkDevicesList();
                 }))
                 .on('state', (state) => {
-                    this.emit('success', `Impulse generator ${state ? 'started' : 'stopped'}.`);
+                    this.emit(state ? 'success' : 'warn', `Impulse generator ${state ? 'started' : 'stopped'}`);
                 });
         }
     }
@@ -60,11 +63,16 @@ class MelCloud extends EventEmitter {
     // MELCloud
     async checkMelcloudDevicesList() {
         try {
+            const devicesList = { State: false, Info: null, Devices: [] }
+            const headers = {
+                'X-MitsContextKey': this.contextKey,
+                'Content-Type': 'application/json'
+            }
             const axiosInstance = axios.create({
                 method: 'GET',
                 baseURL: ApiUrls.BaseURL,
                 timeout: 15000,
-                headers: { 'X-MitsContextKey': this.contextKey }
+                headers: headers
             });
 
             if (this.logDebug) this.emit('debug', `Scanning for devices...`);
@@ -89,14 +97,9 @@ class MelCloud extends EventEmitter {
             await this.functions.saveData(this.buildingsFile, buildingsList);
             if (this.logDebug) this.emit('debug', `Buildings list saved`);
 
-            const devices = [];
-
             for (const building of buildingsList) {
                 if (!building.Structure) {
-                    this.emit(
-                        'warn',
-                        `Building missing structure: ${building.BuildingName || 'Unnamed'}`
-                    );
+                    this.emit('warn', `Building missing structure: ${building.BuildingName || 'Unnamed'}`);
                     continue;
                 }
 
@@ -113,29 +116,26 @@ class MelCloud extends EventEmitter {
 
                 // Zamiana ID na string
                 allDevices.forEach(device => {
-                    if (device.DeviceID != null) device.DeviceID = String(device.DeviceID);
+                    device.DeviceID = String(device.DeviceID);
+                    device.Headers = headers;
                 });
 
-                if (this.logDebug) {
-                    const count = allDevices.length;
-                    this.emit(
-                        'debug',
-                        `Found ${count} devices in building: ${building.BuildingName || 'Unnamed'}`
-                    );
-                }
-
-                devices.push(...allDevices);
+                if (this.logDebug) this.emit('debug', `Found ${allDevices.length} devices in building: ${building.Name || 'Unnamed'}`);
+                devicesList.Devices.push(...allDevices);
             }
 
-            if (devices.length === 0) {
-                if (this.logWarn) this.emit('warn', `No devices found in any building`);
-                return null;
+            const devicesCount = devicesList.Devices.length;
+            if (devicesCount === 0) {
+                devicesList.Info = 'No devices found'
+                return devicesList;
             }
 
-            await this.functions.saveData(this.devicesFile, devices);
-            if (this.logDebug) this.emit('debug', `${devices.length} devices saved`);
+            await this.functions.saveData(this.devicesFile, devicesList.Devices);
+            if (this.logDebug) this.emit('debug', `${devicesCount} devices saved`);
 
-            return devices;
+            devicesList.State = true;
+            devicesList.Info = `Found ${devicesCount} devices`;
+            return devicesList;
         } catch (error) {
             const msg = error.response ? `HTTP ${error.response.status}: ${error.response.statusText}` : error.message;
             throw new Error(`Check devices list error: ${msg}`);
@@ -146,13 +146,14 @@ class MelCloud extends EventEmitter {
         if (this.logDebug) this.emit('debug', `Connecting to MELCloud`);
 
         try {
+            const accountInfo = { State: false, Info: '', LoginData: null, ContextKey: null, UseFahrenheit: false }
             const axiosInstance = axios.create({
                 method: 'POST',
                 baseURL: ApiUrls.BaseURL,
                 timeout: 15000,
             });
 
-            const loginData = {
+            const data = {
                 Email: this.user,
                 Password: this.passwd,
                 Language: this.language,
@@ -162,14 +163,13 @@ class MelCloud extends EventEmitter {
                 Persist: true
             };
 
-            const accountData = await axiosInstance(ApiUrls.ClientLogin, { data: loginData });
+            const accountData = await axiosInstance(ApiUrls.ClientLogin, { data: data });
             const account = accountData.data;
-            const accountInfo = account.LoginData ?? [];
-            const contextKey = accountInfo.ContextKey;
-            this.contextKey = contextKey;
+            const loginData = account.LoginData ?? [];
+            const contextKey = loginData.ContextKey;
 
             const debugData = {
-                ...accountInfo,
+                ...loginData,
                 ContextKey: 'removed',
                 ClientId: 'removed',
                 Client: 'removed',
@@ -180,12 +180,16 @@ class MelCloud extends EventEmitter {
             if (this.logDebug) this.emit('debug', `MELCloud Info: ${JSON.stringify(debugData, null, 2)}`);
 
             if (!contextKey) {
-                if (this.logWarn) this.emit('warn', `Context key missing`);
-                return null;
+                accountInfo.Info = 'Context key missing'
+                return accountInfo;
             }
+            this.contextKey = contextKey;
 
+            accountInfo.State = true;
+            accountInfo.Info = 'Connect to MELCloud Success';
+            accountInfo.LoginData = loginData;
+            accountInfo.ContextKey = contextKey;
             await this.functions.saveData(this.accountFile, accountInfo);
-            this.emit('success', `Connect to MELCloud Success`);
 
             return accountInfo
         } catch (error) {
@@ -196,23 +200,25 @@ class MelCloud extends EventEmitter {
     // MELCloud Home
     async checkMelcloudHomeDevicesList() {
         try {
+            const devicesList = { State: false, Info: null, Devices: [] }
+            const headers = {
+                'Accept': '*/*',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Cookie': this.contextKey,
+                'User-Agent': 'homebridge-melcloud-control/4.0.0',
+                'DNT': '1',
+                'Origin': 'https://melcloudhome.com',
+                'Referer': 'https://melcloudhome.com/dashboard',
+                'Sec-Fetch-Dest': 'empty',
+                'Sec-Fetch-Mode': 'cors',
+                'Sec-Fetch-Site': 'same-origin',
+                'X-CSRF': '1'
+            };
             const axiosInstance = axios.create({
                 method: 'GET',
                 baseURL: ApiUrlsHome.BaseURL,
                 timeout: 25000,
-                headers: {
-                    'Accept': '*/*',
-                    'Accept-Language': 'en-US,en;q=0.9',
-                    'Cookie': this.contextKey,
-                    'User-Agent': 'homebridge-melcloud-control/4.0.0',
-                    'DNT': '1',
-                    'Origin': 'https://melcloudhome.com',
-                    'Referer': 'https://melcloudhome.com/dashboard',
-                    'Sec-Fetch-Dest': 'empty',
-                    'Sec-Fetch-Mode': 'cors',
-                    'Sec-Fetch-Site': 'same-origin',
-                    'X-CSRF': '1'
-                }
+                headers: headers
             });
 
             if (this.logDebug) this.emit('debug', `Scanning for devices`);
@@ -221,8 +227,9 @@ class MelCloud extends EventEmitter {
             if (this.logDebug) this.emit('debug', `Buildings: ${JSON.stringify(buildingsList, null, 2)}`);
 
             if (!buildingsList) {
-                if (this.logWarn) this.emit('warn', `No building found`);
-                return null;
+                devicesList.State = false;
+                devicesList.Info = 'No building found'
+                return devicesList;
             }
 
             await this.functions.saveData(this.buildingsFile, buildingsList);
@@ -267,11 +274,11 @@ class MelCloud extends EventEmitter {
 
                     return {
                         ...rest,
-                        ContextKey: this.contextKey,
                         Type: type,
                         DeviceID: Id,
                         DeviceName: GivenDisplayName,
-                        Device: deviceObject
+                        Device: deviceObject,
+                        Headers: headers
                     };
                 };
 
@@ -284,88 +291,101 @@ class MelCloud extends EventEmitter {
 
             const devicesCount = devices.length;
             if (devicesCount === 0) {
-                if (this.logWarn) this.emit('warn', `No devices found`);
-                return null;
+                devicesList.Info = 'No devices found'
+                return devicesList;
             }
 
             await this.functions.saveData(this.devicesFile, devices);
             if (this.logDebug) this.emit('debug', `${devicesCount} devices saved`);
 
-            return devices;
+            devicesList.State = true;
+            devicesList.Info = `Found ${devicesCount} devices`;
+            devicesList.Devices = devices;
+            return devicesList;
         } catch (error) {
             throw new Error(`Check devices list error: ${error.message}`);
         }
     }
 
-    async connectToMelCloudHome(refresh = false) {
+    async connectToMelCloudHome() {
         if (this.logDebug) this.emit('debug', 'Connecting to MELCloud Home');
+        const GLOBAL_TIMEOUT = 90000;
 
         let browser;
-
         try {
+            const accountInfo = { State: false, Info: '', ContextKey: null, UseFahrenheit: false };
             const chromiumPath = await this.functions.ensureChromiumInstalled();
+            if (!chromiumPath) {
+                accountInfo.Info = 'Chromium not found on Your device, please install it manually and try again';
+                return accountInfo;
+            }
 
+            // Verify executable works
+            try {
+                const { stdout } = await execPromise(`"${chromiumPath}" --version`);
+                if (this.logDebug) this.emit('debug', `Chromium detected: ${stdout.trim()}`);
+                if (this.logDebug) this.emit('debug', `Chromium detected: ${stdout.trim()}`);
+            } catch (error) {
+                accountInfo.Info = `Chromium found at ${chromiumPath}, but cannot be executed: ${error.message}`;
+                return accountInfo;
+            }
+
+            if (this.logDebug) this.emit('debug', `Launching Chromium...`);
             browser = await puppeteer.launch({
                 headless: true,
-                executablePath: chromiumPath || puppeteer.executablePath(),
+                executablePath: chromiumPath,
+                timeout: GLOBAL_TIMEOUT,
                 args: [
                     '--no-sandbox',
                     '--disable-setuid-sandbox',
                     '--disable-dev-shm-usage',
                     '--single-process',
+                    '--disable-gpu',
                     '--no-zygote'
                 ]
             });
 
-            // Wait for Puppeteer target to be ready (browser internal page)
-            await new Promise(r => setTimeout(r, 1000));
+            const page = await browser.newPage();
+            page.setDefaultTimeout(GLOBAL_TIMEOUT);
+            page.setDefaultNavigationTimeout(GLOBAL_TIMEOUT);
 
-            // Defensive check for main frame availability
-            const pages = await browser.pages();
-            let page = pages[0];
-            if (!page) {
-                if (this.logDebug) this.emit('debug', 'No initial page found, creating a new one.');
-                page = await browser.newPage();
-            }
-
-            // Ensure page is ready
-            await new Promise(r => setTimeout(r, 200));
-
-            page.on('error', err => { if (this.logError) this.emit('error', `Page crashed: ${err.message}`); });
-            page.on('pageerror', err => { if (this.logError) this.emit('error', `Browser error: ${err.message}`); });
-            page.on('close', () => { if (this.logDebug) this.emit('debug', 'Page was closed unexpectedly'); });
-            browser.on('disconnected', () => { if (this.logDebug) this.emit('debug', 'Browser disconnected unexpectedly'); });
-
-            page.setDefaultTimeout(30000);
-            page.setDefaultNavigationTimeout(30000);
-
-            // Now safe to navigate
-            await page.goto(ApiUrlsHome.BaseURL, { waitUntil: ['domcontentloaded', 'networkidle2'] });
-
-            let loginBtn;
+            // Clear cookies before navigation
             try {
-                loginBtn = await page.waitForFunction(() => {
-                    const btns = Array.from(document.querySelectorAll('button.btn--blue'));
-                    return btns.find(b => ['Zaloguj', 'Sign In', 'Login'].includes(b.textContent.trim()));
-                }, { timeout: 15000 }); // max 15s czekania
-            } catch {
-                this.emit('warn', 'Login button not found after 15s');
-                return null;
+                const client = await page.createCDPSession();
+                await client.send('Network.clearBrowserCookies');
+            } catch (error) {
+                if (this.logError) this.emit('error', `Clear cookies error: ${error.message}`);
             }
 
-            await Promise.race([
-                Promise.all([
-                    loginBtn.click(),
-                    page.waitForNavigation({ waitUntil: ['domcontentloaded', 'networkidle2'], timeout: 15000 })
-                ]),
-                new Promise(r => setTimeout(r, 12000))
-            ]);
+            page.on('error', error => this.emit('error', `Page crashed: ${error.message}`));
+            page.on('pageerror', error => this.emit('error', `Browser error: ${error.message}`));
+            browser.on('disconnected', () => this.emit('debug', 'Browser disconnected'));
+
+            try {
+                await page.goto(ApiUrlsHome.BaseURL, { waitUntil: ['domcontentloaded', 'networkidle2'], timeout: GLOBAL_TIMEOUT });
+            } catch (error) {
+                accountInfo.Info = `Navigation to ${ApiUrlsHome.BaseURL} failed: ${error.message}`;
+                return accountInfo;
+            }
+
+            // Wait extra to ensure UI is rendered
+            await new Promise(r => setTimeout(r, 3000));
+            const loginBtn = await page.waitForSelector('button.btn--blue', { timeout: GLOBAL_TIMEOUT / 4 });
+            const loginText = await page.evaluate(el => el.textContent.trim(), loginBtn);
+
+            if (!['Zaloguj', 'Sign In', 'Login'].includes(loginText)) {
+                accountInfo.Info = `Login button ${loginText} not found`;
+                return accountInfo;
+            }
+            ;
+            await loginBtn.click();
+            await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: GLOBAL_TIMEOUT / 3 });
 
             const usernameInput = await page.$('input[name="username"]');
             const passwordInput = await page.$('input[name="password"]');
             if (!usernameInput || !passwordInput) {
-                this.emit('warn', 'Username or password input not found');
-                return null;
+                accountInfo.Info = 'Username or password input not found';
+                return accountInfo;
             }
 
             await page.type('input[name="username"]', this.user, { delay: 50 });
@@ -373,21 +393,15 @@ class MelCloud extends EventEmitter {
 
             const submitButton = await page.$('input[type="submit"], button[type="submit"]');
             if (!submitButton) {
-                this.emit('warn', 'Submit button not found on login form');
-                return null;
+                accountInfo.Info = 'Submit button not found';
+                return accountInfo;
             }
+            await Promise.race([Promise.all([submitButton.click(), page.waitForNavigation({ waitUntil: ['domcontentloaded', 'networkidle2'], timeout: GLOBAL_TIMEOUT / 4 })]), new Promise(r => setTimeout(r, GLOBAL_TIMEOUT / 3))]);
 
-            await Promise.race([
-                Promise.all([
-                    submitButton.click(),
-                    page.waitForNavigation({ waitUntil: ['domcontentloaded', 'networkidle2'], timeout: 20000 })
-                ]),
-                new Promise(r => setTimeout(r, 15000))
-            ]);
-
+            // Extract cookies
             let c1 = null, c2 = null;
             const start = Date.now();
-            while ((!c1 || !c2) && Date.now() - start < 20000) {
+            while ((!c1 || !c2) && Date.now() - start < GLOBAL_TIMEOUT / 2) {
                 const cookies = await page.browserContext().cookies();
                 c1 = cookies.find(c => c.name === '__Secure-monitorandcontrolC1')?.value || c1;
                 c2 = cookies.find(c => c.name === '__Secure-monitorandcontrolC2')?.value || c2;
@@ -395,8 +409,8 @@ class MelCloud extends EventEmitter {
             }
 
             if (!c1 || !c2) {
-                this.emit('warn', 'Cookies C1/C2 missing after login');
-                return null;
+                accountInfo.Info = 'Cookies C1/C2 missing';
+                return accountInfo;
             }
 
             const contextKey = [
@@ -404,20 +418,22 @@ class MelCloud extends EventEmitter {
                 `__Secure-monitorandcontrolC1=${c1}`,
                 `__Secure-monitorandcontrolC2=${c2}`
             ].join('; ');
-
-            const accountInfo = { ContextKey: contextKey, UseFahrenheit: false };
             this.contextKey = contextKey;
 
+            accountInfo.State = true;
+            accountInfo.Info = 'Connect to MELCloud Home Success';
+            accountInfo.ContextKey = contextKey;
             await this.functions.saveData(this.accountFile, accountInfo);
 
-            if (!refresh) this.emit('success', 'Connect to MELCloud Home Success');
             return accountInfo;
         } catch (error) {
             throw new Error(`Connect error: ${error.message}`);
         } finally {
             if (browser) {
                 try { await browser.close(); }
-                catch (closeErr) { if (this.logError) this.emit('error', `Failed to close Puppeteer browser: ${closeErr.message}`); }
+                catch (closeErr) {
+                    if (this.logError) this.emit('error', `Failed to close Puppeteer: ${closeErr.message}`);
+                }
             }
         }
     }
@@ -425,7 +441,7 @@ class MelCloud extends EventEmitter {
     async checkDevicesList() {
         const TIMEOUT_MS = 30000; // 30 seconds timeout
         try {
-            const devices = await Promise.race([
+            const devicesList = await Promise.race([
                 (async () => {
                     switch (this.accountType) {
                         case "melcloud":
@@ -439,51 +455,50 @@ class MelCloud extends EventEmitter {
                 new Promise((_, reject) => setTimeout(() => reject(new Error('Device list timeout (30s)')), TIMEOUT_MS))
             ]);
 
-            return devices;
-        } catch (err) {
-            if (this.logError) this.emit('error', `Device list error: ${err.message}`);
-            throw new Error(`Device list error: ${err.message}`);
+            return devicesList;
+        } catch (error) {
+            throw new Error(`Device list error: ${error.message}`);
         }
     }
 
-    async connect(refresh) {
-        const TIMEOUT_MS = 45000;
+    async connect() {
+        const TIMEOUT_MS = 120000;
 
         try {
-            const result = await Promise.race([
+            const response = await Promise.race([
                 (async () => {
                     switch (this.accountType) {
                         case "melcloud":
                             return await this.connectToMelCloud();
                         case "melcloudhome":
-                            return await this.connectToMelCloudHome(refresh);
+                            return await this.connectToMelCloudHome();
                         default:
                             return {};
                     }
                 })(),
-                new Promise((_, reject) => setTimeout(() => reject(new Error('Connection timeout (30s)')), TIMEOUT_MS))
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Connection timeout (90s)')), TIMEOUT_MS))
             ]);
 
-            return result;
-        } catch (err) {
-            if (this.logError) this.emit('error', `Connect error: ${err.message}`);
-            throw new Error(`Connect error: ${err.message}`);
+            return response;
+        } catch (error) {
+            throw new Error(`Connect error: ${error.message}`);
         }
     }
 
     async send(accountInfo) {
         try {
             const axiosInstance = axios.create({
+                method: 'POST',
                 baseURL: ApiUrls.BaseURL,
                 timeout: 15000,
                 headers: {
-                    'X-MitsContextKey': this.contextKey,
+                    'X-MitsContextKey': accountInfo.ContextKey,
                     'content-type': 'application/json'
                 }
             });
 
-            const options = { data: accountInfo };
-            await axiosInstance.post(ApiUrls.UpdateApplicationOptions, options);
+            const payload = { data: accountInfo.LoginData };
+            await axiosInstance(ApiUrls.UpdateApplicationOptions, payload);
             await this.functions.saveData(this.accountFile, accountInfo);
             return true;
         } catch (error) {

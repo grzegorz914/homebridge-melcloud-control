@@ -230,13 +230,18 @@
 
         try {
           const account = pluginConfig[0].accounts[this.accountIndex];
-          const devicesInMelCloud = await homebridge.request('/connect', account);
+          const response = await homebridge.request('/connect', account);
+          if (!response.State) {
+            homebridge.hideSpinner();
+            updateInfo('info', response.Info);
+            return;
+          }
 
           // Initialize devices arrays
           const newDevices = { ata: [], ataPresets: [], atw: [], atwPresets: [], erv: [], ervPresets: [] };
           const devicesByType = { ata: [], atw: [], erv: [] };
 
-          devicesInMelCloud.forEach(d => {
+          response.Devices.forEach(d => {
             if (d.Type === 0) devicesByType.ata.push(d);
             if (d.Type === 1) devicesByType.atw.push(d);
             if (d.Type === 3) devicesByType.erv.push(d);

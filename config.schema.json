@@ -42,7 +42,7 @@
               "pattern": "^[0-9]+$",
               "default": "0",
               "description": "Here select the language used in MELCloud account.",
-              "oneOf": [
+              "anyOf": [
                 {
                   "title": "English",
                   "enum": [
@@ -206,7 +206,7 @@
               "type": "string",
               "default": "disabled",
               "description": "Here select the MELCloud account type.",
-              "oneOf": [
+              "anyOf": [
                 {
                   "title": "None/Disabled",
                   "enum": [
@@ -255,7 +255,7 @@
                     "maximum": 2,
                     "default": 0,
                     "description": "Select accessory control type displayed in HomeKit app.",
-                    "oneOf": [
+                    "anyOf": [
                       {
                         "title": "None/Disabled",
                         "enum": [
@@ -288,7 +288,7 @@
                     "maximum": 3,
                     "default": 1,
                     "description": "Select the operating mode for Heat, if this mode is not supported, it will be disabled.",
-                    "oneOf": [
+                    "anyOf": [
                       {
                         "title": "None/Disabled",
                         "enum": [
@@ -322,7 +322,7 @@
                     "maximum": 3,
                     "default": 1,
                     "description": "Select the operating mode for Cool, if this mode is not supported, it will be disabled.",
-                    "oneOf": [
+                    "anyOf": [
                       {
                         "title": "None/Disabled",
                         "enum": [
@@ -356,7 +356,7 @@
                     "maximum": 3,
                     "default": 1,
                     "description": "Select the operating mode for Auto, if this mode is not supported, it will be disabled.",
-                    "oneOf": [
+                    "anyOf": [
                       {
                         "title": "None/Disabled",
                         "enum": [
@@ -395,6 +395,12 @@
                     "default": false,
                     "description": "This enable extra outdoor temperature sensor to use with automations in HomeKit app."
                   },
+                  "errorSensor": {
+                    "title": "Error",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable error sensor to use with automations in HomeKit app."
+                  },
                   "refreshInterval": {
                     "title": "Refresh Interval",
                     "type": "integer",
@@ -420,7 +426,7 @@
                           "maximum": 5,
                           "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
-                          "oneOf": [
+                          "anyOf": [
                             {
                               "title": "None/Disabled",
                               "enum": [
@@ -496,7 +502,7 @@
                           "maximum": 5,
                           "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
-                          "oneOf": [
+                          "anyOf": [
                             {
                               "title": "None/Disabled",
                               "enum": [
@@ -541,7 +547,7 @@
                           "minimum": 0,
                           "maximum": 40,
                           "description": "Function, VH - Vane Horizontal, VV - Vane Vertical.",
-                          "oneOf": [
+                          "anyOf": [
                             {
                               "title": "POWER ON/OFF",
                               "enum": [
@@ -823,7 +829,7 @@
                     "maximum": 2,
                     "default": 0,
                     "description": "Select accessory control type displayed in HomeKit app.",
-                    "oneOf": [
+                    "anyOf": [
                       {
                         "title": "None/Disabled",
                         "enum": [
@@ -851,7 +857,7 @@
                     "maximum": 15,
                     "default": 0,
                     "description": "Select zone to hidde in HomeKit app, if present.",
-                    "oneOf": [
+                    "anyOf": [
                       {
                         "title": "None/Disabled",
                         "enum": [
@@ -1004,6 +1010,12 @@
                     "default": false,
                     "description": "This enable extra Return Zone 2 temperature sensor to use with automations in HomeKit app."
                   },
+                  "errorSensor": {
+                    "title": "Error",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable error sensor to use with automations in HomeKit app."
+                  },
                   "refreshInterval": {
                     "title": "Refresh Interval",
                     "type": "integer",
@@ -1029,7 +1041,7 @@
                           "maximum": 5,
                           "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
-                          "oneOf": [
+                          "anyOf": [
                             {
                               "title": "None/Disabled",
                               "enum": [
@@ -1105,7 +1117,7 @@
                           "maximum": 5,
                           "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
-                          "oneOf": [
+                          "anyOf": [
                             {
                               "title": "None/Disabled",
                               "enum": [
@@ -1150,7 +1162,7 @@
                           "minimum": 0,
                           "maximum": 70,
                           "description": "Select the function.",
-                          "oneOf": [
+                          "anyOf": [
                             {
                               "title": "POWER ON/OFF",
                               "enum": [
@@ -1352,7 +1364,7 @@
                     "maximum": 2,
                     "default": 0,
                     "description": "Select accessory control type displayed in HomeKit app.",
-                    "oneOf": [
+                    "anyOf": [
                       {
                         "title": "None/Disabled",
                         "enum": [
@@ -1391,6 +1403,12 @@
                     "default": false,
                     "description": "This enable extra supply temperature sensor to use with automations in HomeKit app."
                   },
+                  "errorSensor": {
+                    "title": "Error",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable error sensor to use with automations in HomeKit app."
+                  },
                   "refreshInterval": {
                     "title": "Refresh Interval",
                     "type": "integer",
@@ -1417,7 +1435,7 @@
                           "maximum": 5,
                           "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
-                          "oneOf": [
+                          "anyOf": [
                             {
                               "title": "None/Disabled",
                               "enum": [
@@ -1496,7 +1514,7 @@
                           "maximum": 5,
                           "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
-                          "oneOf": [
+                          "anyOf": [
                             {
                               "title": "None/Disabled",
                               "enum": [
@@ -1541,7 +1559,7 @@
                           "minimum": 0,
                           "maximum": 18,
                           "description": "Select the function.",
-                          "oneOf": [
+                          "anyOf": [
                             {
                               "title": "POWER ON/OFF",
                               "enum": [
@@ -1833,7 +1851,6 @@
           "title": "{{ value.title }}",
           "items": [
             {
-              "key": "accounts[]",
               "title": "Air Conditioner",
               "items": [
                 {
@@ -1870,19 +1887,6 @@
                           }
                         },
                         {
-                          "title": "Temperature Sensors",
-                          "type": "section",
-                          "expandable": true,
-                          "expanded": false,
-                          "items": [
-                            "accounts[].ataDevices[].temperatureSensor",
-                            "accounts[].ataDevices[].temperatureSensorOutdoor"
-                          ],
-                          "condition": {
-                            "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayType > 0;"
-                          }
-                        },
-                        {
                           "title": "Presets",
                           "type": "section",
                           "expandable": true,
@@ -1913,15 +1917,34 @@
                           "expandable": true,
                           "expanded": false,
                           "items": [
+                            "accounts[].ataDevices[].errorSensor",
                             {
-                              "key": "accounts[].ataDevices[].buttonsSensors",
-                              "type": "tabarray",
-                              "title": "{{ value.name || 'button/sensor' }}",
+                              "title": "Temperature Sensors",
+                              "type": "section",
+                              "expandable": true,
+                              "expanded": false,
                               "items": [
-                                "accounts[].ataDevices[].buttonsSensors[].displayType",
-                                "accounts[].ataDevices[].buttonsSensors[].mode",
-                                "accounts[].ataDevices[].buttonsSensors[].name",
-                                "accounts[].ataDevices[].buttonsSensors[].namePrefix"
+                                "accounts[].ataDevices[].temperatureSensor",
+                                "accounts[].ataDevices[].temperatureSensorOutdoor"
+                              ]
+                            },
+                            {
+                              "title": "Custom",
+                              "type": "section",
+                              "expandable": true,
+                              "expanded": false,
+                              "items": [
+                                {
+                                  "key": "accounts[].ataDevices[].buttonsSensors",
+                                  "type": "tabarray",
+                                  "title": "{{ value.name || 'button/sensor' }}",
+                                  "items": [
+                                    "accounts[].ataDevices[].buttonsSensors[].displayType",
+                                    "accounts[].ataDevices[].buttonsSensors[].mode",
+                                    "accounts[].ataDevices[].buttonsSensors[].name",
+                                    "accounts[].ataDevices[].buttonsSensors[].namePrefix"
+                                  ]
+                                }
                               ]
                             }
                           ],
@@ -1939,7 +1962,6 @@
               ]
             },
             {
-              "key": "accounts[]",
               "title": "Heat Pump",
               "items": [
                 {
@@ -1968,26 +1990,6 @@
                             "accounts[].atwDevices[].hideZone",
                             "accounts[].atwDevices[].name",
                             "accounts[].atwDevices[].refreshInterval"
-                          ],
-                          "condition": {
-                            "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].displayType > 0;"
-                          }
-                        },
-                        {
-                          "title": "Temperature Sensors",
-                          "type": "section",
-                          "expandable": true,
-                          "expanded": false,
-                          "items": [
-                            "accounts[].atwDevices[].temperatureSensor",
-                            "accounts[].atwDevices[].temperatureSensorFlow",
-                            "accounts[].atwDevices[].temperatureSensorReturn",
-                            "accounts[].atwDevices[].temperatureSensorFlowZone1",
-                            "accounts[].atwDevices[].temperatureSensorReturnZone1",
-                            "accounts[].atwDevices[].temperatureSensorFlowWaterTank",
-                            "accounts[].atwDevices[].temperatureSensorReturnWaterTank",
-                            "accounts[].atwDevices[].temperatureSensorFlowZone2",
-                            "accounts[].atwDevices[].temperatureSensorReturnZone2"
                           ],
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].displayType > 0;"
@@ -2024,15 +2026,41 @@
                           "expandable": true,
                           "expanded": false,
                           "items": [
+                            "accounts[].atwDevices[].errorSensor",
                             {
-                              "key": "accounts[].atwDevices[].buttonsSensors",
-                              "type": "tabarray",
-                              "title": "{{ value.name || 'button/sensor' }}",
+                              "title": "Temperature Sensors",
+                              "type": "section",
+                              "expandable": true,
+                              "expanded": false,
                               "items": [
-                                "accounts[].atwDevices[].buttonsSensors[].displayType",
-                                "accounts[].atwDevices[].buttonsSensors[].mode",
-                                "accounts[].atwDevices[].buttonsSensors[].name",
-                                "accounts[].atwDevices[].buttonsSensors[].namePrefix"
+                                "accounts[].atwDevices[].temperatureSensor",
+                                "accounts[].atwDevices[].temperatureSensorFlow",
+                                "accounts[].atwDevices[].temperatureSensorReturn",
+                                "accounts[].atwDevices[].temperatureSensorFlowZone1",
+                                "accounts[].atwDevices[].temperatureSensorReturnZone1",
+                                "accounts[].atwDevices[].temperatureSensorFlowWaterTank",
+                                "accounts[].atwDevices[].temperatureSensorReturnWaterTank",
+                                "accounts[].atwDevices[].temperatureSensorFlowZone2",
+                                "accounts[].atwDevices[].temperatureSensorReturnZone2"
+                              ]
+                            },
+                            {
+                              "title": "Custom",
+                              "type": "section",
+                              "expandable": true,
+                              "expanded": false,
+                              "items": [
+                                {
+                                  "key": "accounts[].atwDevices[].buttonsSensors",
+                                  "type": "tabarray",
+                                  "title": "{{ value.name || 'button/sensor' }}",
+                                  "items": [
+                                    "accounts[].atwDevices[].buttonsSensors[].displayType",
+                                    "accounts[].atwDevices[].buttonsSensors[].mode",
+                                    "accounts[].atwDevices[].buttonsSensors[].name",
+                                    "accounts[].atwDevices[].buttonsSensors[].namePrefix"
+                                  ]
+                                }
                               ]
                             }
                           ],
@@ -2050,7 +2078,6 @@
               ]
             },
             {
-              "key": "accounts[]",
               "title": "Energy Recovery Ventilation",
               "items": [
                 {
@@ -2078,20 +2105,6 @@
                           "items": [
                             "accounts[].ervDevices[].name",
                             "accounts[].ervDevices[].refreshInterval"
-                          ],
-                          "condition": {
-                            "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].displayType > 0;"
-                          }
-                        },
-                        {
-                          "title": "Temperature Sensors",
-                          "type": "section",
-                          "expandable": true,
-                          "expanded": false,
-                          "items": [
-                            "accounts[].ervDevices[].temperatureSensor",
-                            "accounts[].ervDevices[].temperatureSensorOutdoor",
-                            "accounts[].ervDevices[].temperatureSensorSupply"
                           ],
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].displayType > 0;"
@@ -2128,15 +2141,35 @@
                           "expandable": true,
                           "expanded": false,
                           "items": [
+                            "accounts[].ervDevices[].errorSensor",
                             {
-                              "key": "accounts[].ervDevices[].buttonsSensors",
-                              "type": "tabarray",
-                              "title": "{{ value.name || 'button/sensor' }}",
+                              "title": "Temperature Sensors",
+                              "type": "section",
+                              "expandable": true,
+                              "expanded": false,
                               "items": [
-                                "accounts[].ervDevices[].buttonsSensors[].displayType",
-                                "accounts[].ervDevices[].buttonsSensors[].mode",
-                                "accounts[].ervDevices[].buttonsSensors[].name",
-                                "accounts[].ervDevices[].buttonsSensors[].namePrefix"
+                                "accounts[].ervDevices[].temperatureSensor",
+                                "accounts[].ervDevices[].temperatureSensorOutdoor",
+                                "accounts[].ervDevices[].temperatureSensorSupply"
+                              ]
+                            },
+                            {
+                              "title": "Custom",
+                              "type": "section",
+                              "expandable": true,
+                              "expanded": false,
+                              "items": [
+                                {
+                                  "key": "accounts[].ervDevices[].buttonsSensors",
+                                  "type": "tabarray",
+                                  "title": "{{ value.name || 'button/sensor' }}",
+                                  "items": [
+                                    "accounts[].ervDevices[].buttonsSensors[].displayType",
+                                    "accounts[].ervDevices[].buttonsSensors[].mode",
+                                    "accounts[].ervDevices[].buttonsSensors[].name",
+                                    "accounts[].ervDevices[].buttonsSensors[].namePrefix"
+                                  ]
+                                }
                               ]
                             }
                           ],
@@ -2153,7 +2186,10 @@
                 }
               ]
             }
-          ]
+          ],
+          "condition": {
+            "functionBody": "return model.accounts[arrayIndices].type !== 'disabled';"
+          }
         },
         {
           "key": "accounts[]",
@@ -2233,7 +2269,7 @@
             }
           ],
           "condition": {
-            "functionBody": "return model.accounts[arrayIndices].ataDevices.length > 0 || model.accounts[arrayIndices].atwDevices.length > 0 || model.accounts[arrayIndices].ervDevices.length > 0;"
+            "functionBody": "return model.accounts[arrayIndices].type !== 'disabled' && (model.accounts[arrayIndices].ataDevices.length > 0 || model.accounts[arrayIndices].atwDevices.length > 0 || model.accounts[arrayIndices].ervDevices.length > 0);"
           }
         }
       ]
