@@ -21,7 +21,6 @@ class MelCloud extends EventEmitter {
         this.accountFile = accountFile;
         this.buildingsFile = buildingsFile;
         this.devicesFile = devicesFile;
-        this.devicesId = [];
         this.contextKey = null;
         this.functions = new Functions(this.logWarn, this.logError, this.logDebug)
             .on('warn', warn => this.emit('warn', warn))
@@ -344,8 +343,11 @@ class MelCloud extends EventEmitter {
                     '--no-zygote'
                 ]
             });
+            browser.on('disconnected', () => this.emit('debug', 'Browser disconnected'));
 
             const page = await browser.newPage();
+            page.on('error', error => this.emit('error', `Page crashed: ${error.message}`));
+            page.on('pageerror', error => this.emit('error', `Browser error: ${error.message}`));
             page.setDefaultTimeout(GLOBAL_TIMEOUT);
             page.setDefaultNavigationTimeout(GLOBAL_TIMEOUT);
 
@@ -356,10 +358,6 @@ class MelCloud extends EventEmitter {
             } catch (error) {
                 if (this.logError) this.emit('error', `Clear cookies error: ${error.message}`);
             }
-
-            page.on('error', error => this.emit('error', `Page crashed: ${error.message}`));
-            page.on('pageerror', error => this.emit('error', `Browser error: ${error.message}`));
-            browser.on('disconnected', () => this.emit('debug', 'Browser disconnected'));
 
             try {
                 await page.goto(ApiUrlsHome.BaseURL, { waitUntil: ['domcontentloaded', 'networkidle2'], timeout: GLOBAL_TIMEOUT });

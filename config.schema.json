@@ -1919,7 +1919,7 @@
                           "items": [
                             "accounts[].ataDevices[].errorSensor",
                             {
-                              "title": "Temperature Sensors",
+                              "title": "Temperature",
                               "type": "section",
                               "expandable": true,
                               "expanded": false,
@@ -2028,7 +2028,7 @@
                           "items": [
                             "accounts[].atwDevices[].errorSensor",
                             {
-                              "title": "Temperature Sensors",
+                              "title": "Temperature",
                               "type": "section",
                               "expandable": true,
                               "expanded": false,
@@ -2143,7 +2143,7 @@
                           "items": [
                             "accounts[].ervDevices[].errorSensor",
                             {
-                              "title": "Temperature Sensors",
+                              "title": "Temperature",
                               "type": "section",
                               "expandable": true,
                               "expanded": false,
