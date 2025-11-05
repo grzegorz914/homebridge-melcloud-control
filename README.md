@@ -76,6 +76,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Presets `ACTIV/UNACTIV`.
       * Room temperature.
       * Outdoor temperature.
+      * Error
 * Heat Pump:
   * Heater Cooler:
     * Heat Pump:
@@ -124,6 +125,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Water tank temperature.
       * Flow Temperature Zone 1, 2, Hot Water.
       * Return Temperature Zone 1, 2, Hot Water.
+      * Error
 * Energy Recovery Ventilation Lossnay:
   * Heater Cooler:
     * Power `ON/OFF`.
@@ -153,6 +155,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Filter maintenance.
       * CO2 detected and level.
       * PM2.5 air quality and level.
+      * Error
 
 ### HOME app current device mode display
 
