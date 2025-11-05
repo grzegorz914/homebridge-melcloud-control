@@ -23,26 +23,33 @@
           "user": "user",
           "passwd": "password",
           "language": "14",
+          "accountType": "melcloud",
           "ataDevices": [],
           "atwDevices": [],
           "ervDevices": [],
           "refreshInterval": 120,
-          "disableLogDeviceInfo": false,
-          "disableLogInfo": false,
-          "disableLogSuccess": false,
-          "disableLogWarn": false,
-          "disableLogError": false,
-          "enableDebugMode": false,
-          "restFul": {
-            "enable": false,
+          "log": {
+            "deviceInfo": true,
+            "success": true,
+            "info": false,
+            "warn": true,
+            "error": true,
             "debug": false
+          },
+          "restFul": {
+            "enable": false
           },
           "mqtt": {
             "enable": false,
-            "debug": false,
-            "auth": false,
-            "user": "user",
-            "passwd": "password"
+            "host": "",
+            "port": 1883,
+            "clientId": "",
+            "prefix": "",
+            "auth": {
+              "enable": false,
+              "user": "",
+              "passwd": ""
+            }
           }
         }
       ]

@@ -12,9 +12,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - v1 After update to v1 and above from v0 the devices need to be added to the Home app again and the old unresponsive remove!!! This devices will be removed from all automations and scenes!!!
 - v2 After update to v2 from v1 only RESTFull and MQTT config settings need to be updated in config.
   - v2.4 and above require upcomming homebridge v2
-- v3 After update to v3 the plugin need to be configured using Config UI X.
-  - do not configure it manually, always using Config UI X
+- v3 After update to v3 the plugin need to be configured using Homebridge UI.
+  - do not configure it manually, always using Homebridge UI
   - required Homebridge v2.0.0 and above
+- v4 Added support for MELCloud Home.
+
+## Warning
+
+- Do not use Homebridge UI > v5.5.0 because of break config.json
+
+## [4.0.0] - (05.11.2025)
+
+## Changes
+
+- added support for MELCloud Home ATA devices [#215](https://github.com/grzegorz914/homebridge-melcloud-control/issues/215)
+- config schema updated
+- redme updated
+- cleanup
 
 ## [3.9.5] - (02.09.2025)
 
