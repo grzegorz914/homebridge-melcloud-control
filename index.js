@@ -127,7 +127,7 @@ class MelCloudPlatform {
 								const devices = [...ataDevices, ...atwDevices, ...ervDevices];
 								if (logLevel.debug) log.info(`Found configured devices ATA: ${ataDevices.length}, ATW: ${atwDevices.length}, ERV: ${ervDevices.length}.`);
 
-								for (const device of devices) {
+								for (const [index, device] of devices.entries()) {
 									//chack device from config exist on melcloud
 									const displayType = device.displayType > 0;
 									const deviceExistInMelCloud = devicesList.Devices.some(dev => dev.DeviceID === device.id);
@@ -140,7 +140,12 @@ class MelCloudPlatform {
 									const deviceRefreshInterval = (device.refreshInterval ?? 5) * 1000;
 									const defaultTempsFile = `${prefDir}/${accountName}_${device.id}_Temps`;
 
+									// set rest ful port
+									account.restFul.port = (device.id).slice(-4).replace(/^0/, '9');
+
 									if (accountType === 'melcloudhome') {
+										account.restFul.port = `${3000}${index}`;
+
 										try {
 											const temps = {
 												defaultCoolingSetTemperature: 24,

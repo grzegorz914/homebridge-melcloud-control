@@ -79,7 +79,7 @@ class DeviceErv extends EventEmitter {
             if (restFulEnabled) {
                 if (!this.restFulConnected) {
                     this.restFul1 = new RestFul({
-                        port: this.deviceId.toString().slice(-4).replace(/^0/, '9'),
+                        port: this.restFul.port,
                         logWarn: this.logWarn,
                         logDebug: this.logDebug
                     })

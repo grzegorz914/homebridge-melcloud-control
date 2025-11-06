@@ -222,6 +222,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ataDevices[].autoDryFanMode` | Here select the operatiing mode for `Auto`, if this mode is not supported, it will be disabled.. |
 | `ataDevices[].temperatureSensor` | This enable extra `Room` temperature sensors to use with automations in HomeKit app. |
 | `ataDevices[].temperatureSensorOutdoor` | This enable extra `Outdoor` temperature sensors to use with automations in HomeKit app. |
+| `ataDevices[].errorSensor` | This enable `Error` sensors to use with automations in HomeKit app. |
 | `ataDevices[].refreshInterval` | Here set the background devices state refresh time in (sec), default `5s`. |
 | `ataDevices[].presets[]` | Array of ATA device Presets created automatically after login to MELCloud from plugin config UI. |
 | `ataDevices[].presets[].id` | Read only data, do not change it. |
@@ -248,6 +249,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `atwDevices[].temperatureSensorReturnWaterTank` | This enable extra `Return Water Tank` temperature sensors to use with automations in HomeKit app. |
 | `atwDevices[].temperatureSensorFlowZone2` | This enable extra `Flow Zone 2` temperature sensors to use with automations in HomeKit app. |
 | `atwDevices[].temperatureSensorReturnZone2` | This enable extra `Return Zone 2` temperature sensors to use with automations in HomeKit app. |
+| `atwDevices[].errorSensor` | This enable `Error` sensors to use with automations in HomeKit app. |
 | `atwDevices[].refreshInterval` | Here set the background devices state refresh time in (sec), default `5s`. |
 | `atwDevices[].presets[]` | Array of ATA device Presets created automatically after login to MELCloud from plugin config UI. |
 | `atwDevices[].presets[].id` | Read only data, do not change it. |
@@ -267,6 +269,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ervDevices[].temperatureSensor` | This enable extra `Room` temperature sensors to use with automations in HomeKit app. |
 | `ervDevices[].temperatureSensorOutdoor` | This enable extra `Outdoor` temperature sensors to use with automations in HomeKit app. |
 | `ervDevices[].temperatureSensorSupply` | This enable extra `Supply` temperature sensors to use with automations in HomeKit app. |
+| `ervDevices[].errorSensor` | This enable `Error` sensors to use with automations in HomeKit app. |
 | `ervDevices[].refreshInterval` | Here set the background devices state refresh time in (sec), default `5s`. |
 | `ervDevices[].presets[]` | Array of ATA device Presets created automatically after login to MELCloud from plugin config UI. |
 | `ervDevices[].presets[].id` | Read only data, do not change it. |
@@ -300,7 +303,9 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 
 ### RESTful Integration
 
-* Port: last 4 numbers of `device Id`, displayed in HB log during start.
+* Port:
+  * MELCLoud, last 4 numbers of `device Id`, also displayed in HB log during start.
+  * MELCLoud Home, start at `30000` displayed in HB log during start.
 * POST data as a JSON Object `{OperationMode: 8}`.
 * Header content type must be `application/json`.
 * Path `status` response all available paths.

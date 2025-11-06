@@ -21,6 +21,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Do not use Homebridge UI > v5.5.0 because of break config.json
 
+## [4.0.2] - (06.11.2025)
+
+## Changes
+
+- fix RESTFul extrnal integration for MELCloud Home devices
+- readme updated
+- cleanup
+
 ## [4.0.1] - (06.11.2025)
 
 ## Changes
