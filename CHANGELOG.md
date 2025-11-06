@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - added support for MELCloud Home ATA devices [#215](https://github.com/grzegorz914/homebridge-melcloud-control/issues/215)
 - after update the old MELCloud config must be reconfigured, just remove all devices from config and connect to MELCloud again
+- added error sensor
 - config schema updated
 - redme updated
 - cleanup
