@@ -255,36 +255,36 @@
           const removedAtw = removeStaleDevices(account.atwDevices, devicesByType.atw);
           const removedErv = removeStaleDevices(account.ervDevices, devicesByType.erv);
 
-          const handleDevices = (devicesInCloud, devicesInConfig, typeString, newArr, newPresets) => {
-            devicesInCloud.forEach(device => {
-              const { DeviceID: id, Type: type, DeviceName: name, Presets: presets = [] } = device;
-              const devObj = structuredClone({
-                id,
-                type,
+          const handleDevices = (devicesInMelCloud, devicesInConfig, typeString, newArr, newPresets) => {
+            devicesInMelCloud.forEach(device => {
+              const deviceObj = {
+                id: device.DeviceID,
+                type: device.Type,
                 typeString,
-                name,
                 displayType: 0,
-                presets: [],
+                name: device.DeviceName,
+                presets: device.Presets ?? [],
                 buttonsSensors: []
-              });
+              };
 
-              if (!devicesInConfig.some(d => d.id === id)) {
-                devicesInConfig.push(devObj);
-                newArr.push(structuredClone(devObj));
+              if (!devicesInConfig.some(device => String(device.id) === deviceObj.id)) {
+                devicesInConfig.push(deviceObj);
+                newArr.push(deviceObj);
               }
 
+              const presets = device.Presets || [];
               presets.forEach(preset => {
-                const p = structuredClone({
+                const presetObj = {
                   id: preset.ID,
-                  name: preset.NumberDescription,
                   displayType: 0,
+                  name: preset.NumberDescription,
                   namePrefix: false
-                });
+                };
 
-                const devConfig = devicesInConfig.find(d => d.id === id);
-                if (devConfig && !devConfig.presets.some(x => x.id === p.id)) {
-                  devConfig.presets.push(p);
-                  newPresets.push(structuredClone(p));
+                const deviceInConfig = devicesInConfig.find(device => String(device.id) === deviceObj.id);
+                if (deviceInConfig && !deviceInConfig.presets.some(preset => preset.id === presetObj.id)) {
+                  deviceInConfig.presets.push(presetObj);
+                  newPresets.push(presetObj);
                 }
               });
             });
@@ -314,8 +314,8 @@
           document.getElementById('logIn').className = "btn btn-secondary";
 
         } catch (error) {
-          updateInfo('info', 'Check Your credentials data and try again.', 'yellow');
-          updateInfo('info1', `Error: ${JSON.stringify(error)}`, 'red');
+          updateInfo('info', 'Connect error.', 'yellow');
+          updateInfo('info1', `${JSON.stringify(error)}`, 'red');
           document.getElementById('logIn').className = "btn btn-secondary";
         } finally {
           homebridge.hideSpinner();

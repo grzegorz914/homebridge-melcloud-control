@@ -6,7 +6,7 @@ import { TemperatureDisplayUnits, Ventilation } from './constants.js';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceErv extends EventEmitter {
-    constructor(api, account, device, contextKey, devicesFile, defaultTempsFile, useFahrenheit, restFul, mqtt) {
+    constructor(api, account, device, contextKey, devicesFile, defaultTempsFile, useFahrenheit) {
         super();
 
         Accessory = api.platformAccessory;
@@ -41,9 +41,9 @@ class DeviceErv extends EventEmitter {
         this.displayDeviceInfo = true;
 
         //external integrations
-        this.restFul = restFul;
+        this.restFul = account.restFul ?? {};
         this.restFulConnected = false;
-        this.mqtt = mqtt;
+        this.mqtt = account.mqtt ?? {};
         this.mqttConnected = false;
 
         //presets configured

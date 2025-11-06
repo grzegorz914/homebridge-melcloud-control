@@ -16,19 +16,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - do not configure it manually, always using Homebridge UI
   - required Homebridge v2.0.0 and above
 - v4 Added support for MELCloud Home.
-  - after update the old MELCloud config must be reconfigured, just remove all devices from config and connect to MELCloud again
 
 ## Warning
 
 - Do not use Homebridge UI > v5.5.0 because of break config.json
-- After update to v4.x.x the old MELCloud config must be reconfigured, just remove all devices from config and connect to MELCloud again
+
+## [4.0.1] - (06.11.2025)
+
+## Changes
+
+- fix start error for old MELCLoud after update
+- bump dependencies
+- redme updated
+- cleanup
 
 ## [4.0.0] - (05.11.2025)
 
 ## Changes
 
 - added support for MELCloud Home ATA devices [#215](https://github.com/grzegorz914/homebridge-melcloud-control/issues/215)
-- after update the old MELCloud config must be reconfigured, just remove all devices from config and connect to MELCloud again
 - added error sensor
 - config schema updated
 - redme updated

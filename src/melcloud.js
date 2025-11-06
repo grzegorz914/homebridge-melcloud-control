@@ -455,7 +455,7 @@ class MelCloud extends EventEmitter {
 
             return devicesList;
         } catch (error) {
-            throw new Error(`Device list error: ${error.message}`);
+            throw new Error(error);
         }
     }
 
@@ -479,7 +479,7 @@ class MelCloud extends EventEmitter {
 
             return response;
         } catch (error) {
-            throw new Error(`Connect error: ${error.message}`);
+            throw new Error(error);
         }
     }
 

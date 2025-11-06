@@ -45,10 +45,6 @@ class MelCloudPlatform {
 				}
 				accountsName.push(accountName);
 
-				//external integrations
-				const restFul = account.restFul ?? {};
-				const mqtt = account.mqtt ?? {};
-
 				//log config
 				const logLevel = {
 					devInfo: account.log?.deviceInfo,
@@ -125,9 +121,9 @@ class MelCloudPlatform {
 								}
 
 								//configured devices
-								const ataDevices = (account.ataDevices || []).filter(device => (device.id ?? '0') !== '0');
-								const atwDevices = (account.atwDevices || []).filter(device => (device.id ?? '0') !== '0');
-								const ervDevices = (account.ervDevices || []).filter(device => (device.id ?? '0') !== '0');
+								const ataDevices = (account.ataDevices || []).filter(device => device.id != null && String(device.id) !== '0');
+								const atwDevices = (account.atwDevices || []).filter(device => device.id != null && String(device.id) !== '0');
+								const ervDevices = (account.ervDevices || []).filter(device => device.id != null && String(device.id) !== '0');
 								const devices = [...ataDevices, ...atwDevices, ...ervDevices];
 								if (logLevel.debug) log.info(`Found configured devices ATA: ${ataDevices.length}, ATW: ${atwDevices.length}, ERV: ${ervDevices.length}.`);
 
@@ -137,6 +133,7 @@ class MelCloudPlatform {
 									const deviceExistInMelCloud = devicesList.Devices.some(dev => dev.DeviceID === device.id);
 									if (!deviceExistInMelCloud || !displayType) continue;
 
+									device.id = String(device.id);
 									const deviceName = device.name;
 									const deviceType = device.type;
 									const deviceTypeText = device.typeString;
@@ -163,15 +160,15 @@ class MelCloudPlatform {
 									let configuredDevice;
 									switch (deviceType) {
 										case 0: //ATA
-											configuredDevice = new DeviceAta(api, account, device, devicesFile, defaultTempsFile, useFahrenheit, restFul, mqtt);
+											configuredDevice = new DeviceAta(api, account, device, devicesFile, defaultTempsFile, useFahrenheit);
 											break;
 										case 1: //ATW
-											configuredDevice = new DeviceAtw(api, account, device, devicesFile, defaultTempsFile, useFahrenheit, restFul, mqtt);
+											configuredDevice = new DeviceAtw(api, account, device, devicesFile, defaultTempsFile, useFahrenheit);
 											break;
 										case 2:
 											break;
 										case 3: //ERV
-											configuredDevice = new DeviceErv(api, account, device, devicesFile, defaultTempsFile, useFahrenheit, restFul, mqtt);
+											configuredDevice = new DeviceErv(api, account, device, devicesFile, defaultTempsFile, useFahrenheit);
 											break;
 										default:
 											if (logLevel.warn) log.warn(`${accountName}, ${deviceTypeText}, ${deviceName}, unknown device: ${deviceType}.`);

@@ -183,7 +183,7 @@ class MelCloudAtw extends EventEmitter {
 
             return true;
         } catch (error) {
-            throw new Error(`Check state error: ${error}`);
+            throw new Error(`Check state error: ${error.message}`);
         };
     };
 
@@ -282,13 +282,7 @@ class MelCloudAtw extends EventEmitter {
                     return;
             }
         } catch (error) {
-            if (error.response) {
-                throw new Error(`Send data error: HTTP ${error.response.status} - ${JSON.stringify(error.response.data)}`);
-            } else if (error.request) {
-                throw new Error(`Send data error: No response received - ${error.message}`);
-            } else {
-                throw new Error(`Send data error: ${error.message}`);
-            }
+            throw new Error(`Send data error: ${error.message}`);
         }
     }
 
