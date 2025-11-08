@@ -189,6 +189,20 @@ class MelCloudAtw extends EventEmitter {
 
     async send(accountType, displayType, deviceData, effectiveFlags) {
         try {
+
+            //prevent to set out of range temp
+            const minTempZones = 0;
+            const maxTempZones = 60;
+            const minTempWaterTank = 16;
+            const maxTempWaterTank = deviceData.Device.MaxTankTemperature ?? 70;
+
+            deviceData.Device.SetTemperatureZone1 = deviceData.Device.SetTemperatureZone1 < minTempZones ? minTempZones : deviceData.Device.SetTemperatureZone1;
+            deviceData.Device.SetTemperatureZone1 = deviceData.Device.SetTemperatureZone1 > maxTempZones ? maxTempZones : deviceData.Device.SetTemperatureZone1;
+            deviceData.Device.SetTemperatureZone1 = deviceData.Device.SetTemperatureZone2 < minTempZones ? minTempZones : deviceData.Device.SetTemperatureZone2;
+            deviceData.Device.SetTemperatureZone1 = deviceData.Device.SetTemperatureZone2 > maxTempZones ? maxTempZones : deviceData.Device.SetTemperatureZone2;
+            deviceData.Device.SetTankWaterTemperature = deviceData.Device.SetTankWaterTemperature < minTempWaterTank ? minTempWaterTank : deviceData.Device.SetTankWaterTemperature;
+            deviceData.Device.SetTankWaterTemperature = deviceData.Device.SetTankWaterTemperature > maxTempWaterTank ? maxTempWaterTank : deviceData.Device.SetTankWaterTemperature;
+
             switch (accountType) {
                 case "melcloud":
                     const axiosInstancePost = axios.create({
@@ -198,19 +212,6 @@ class MelCloudAtw extends EventEmitter {
                         headers: this.headers,
                         withCredentials: true
                     });
-
-                    //prevent to set out of range temp
-                    const minTempZones = 0;
-                    const maxTempZones = 60;
-                    const minTempWaterTank = 16;
-                    const maxTempWaterTank = deviceData.Device.MaxTankTemperature ?? 70;
-
-                    deviceData.Device.SetTemperatureZone1 = deviceData.Device.SetTemperatureZone1 < minTempZones ? minTempZones : deviceData.Device.SetTemperatureZone1;
-                    deviceData.Device.SetTemperatureZone1 = deviceData.Device.SetTemperatureZone1 > maxTempZones ? maxTempZones : deviceData.Device.SetTemperatureZone1;
-                    deviceData.Device.SetTemperatureZone1 = deviceData.Device.SetTemperatureZone2 < minTempZones ? minTempZones : deviceData.Device.SetTemperatureZone2;
-                    deviceData.Device.SetTemperatureZone1 = deviceData.Device.SetTemperatureZone2 > maxTempZones ? maxTempZones : deviceData.Device.SetTemperatureZone2;
-                    deviceData.Device.SetTankWaterTemperature = deviceData.Device.SetTankWaterTemperature < minTempWaterTank ? minTempWaterTank : deviceData.Device.SetTankWaterTemperature;
-                    deviceData.Device.SetTankWaterTemperature = deviceData.Device.SetTankWaterTemperature > maxTempWaterTank ? maxTempWaterTank : deviceData.Device.SetTankWaterTemperature;
 
                     deviceData.Device.EffectiveFlags = effectiveFlags;
                     const payload = {
@@ -250,26 +251,21 @@ class MelCloudAtw extends EventEmitter {
                         withCredentials: true
                     });
 
-                    if (displayType === 1 && deviceData.Device.OperationMode === 8) {
-                        deviceData.Device.SetTemperature = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
-
-                        if (this.deviceState.DefaultCoolingSetTemperature !== deviceData.Device.DefaultCoolingSetTemperature || this.deviceState.DefaultHeatingSetTemperature !== deviceData.Device.DefaultHeatingSetTemperature) {
-                            const temps = {
-                                defaultCoolingSetTemperature: deviceData.Device.DefaultCoolingSetTemperature,
-                                defaultHeatingSetTemperature: deviceData.Device.DefaultHeatingSetTemperature
-                            };
-                            await this.functions.saveData(this.defaultTempsFile, temps);
-                        }
-                    }
-
                     const settings = {
                         data: {
                             Power: deviceData.Device.Power,
-                            SetTemperature: deviceData.Device.SetTemperature,
-                            SetFanSpeed: String(deviceData.Device.SetFanSpeed),
-                            OperationMode: AirConditioner.OperationModeMapEnumToString[deviceData.Device.OperationMode],
-                            VaneHorizontalDirection: AirConditioner.VaneHorizontalDirectionMapEnumToString[deviceData.Device.VaneHorizontalDirection],
-                            VaneVerticalDirection: AirConditioner.VaneVerticalDirectionMapEnumToString[deviceData.Device.VaneVerticalDirection]
+                            SetTemperatureZone1: deviceData.Device.SetTemperatureZone1,
+                            SetTemperatureZone2: deviceData.Device.SetTemperatureZone2,
+                            OperationMode: HeatPump.OperationModeMapEnumToString[deviceData.Device.OperationMode],
+                            OperationModeZone1: HeatPump.OperationModeMapEnumToString[deviceData.Device.OperationModeZone1],
+                            OperationModeZone2: HeatPump.OperationModeMapEnumToString[deviceData.Device.OperationModeZone2],
+                            SetHeatFlowTemperatureZone1: deviceData.Device.SetHeatFlowTemperatureZone1,
+                            SetHeatFlowTemperatureZone2: deviceData.Device.SetHeatFlowTemperatureZone2,
+                            SetCoolFlowTemperatureZone1: deviceData.Device.SetCoolFlowTemperatureZone1,
+                            SetCoolFlowTemperatureZone2: deviceData.Device.SetCoolFlowTemperatureZone2,
+                            SetTankWaterTemperature: deviceData.Device.SetTankWaterTemperature,
+                            ForcedHotWaterMode: deviceData.Device.ForcedHotWaterMode,
+                            EcoHotWater: deviceData.Device.EcoHotWater,
                         }
                     };
                     if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(settings.data, null, 2)}`);

@@ -64,6 +64,11 @@ class MelCloudErv extends EventEmitter {
             if (this.accountType === 'melcloudhome') {
                 deviceData.SerialNumber = deviceData.DeviceID || '4.0.0';
                 deviceData.Device.FirmwareAppVersion = deviceData.ConnectedInterfaceIdentifier || '4.0.0';
+
+                //read default temps
+                const temps = await this.functions.readData(this.defaultTempsFile, true);
+                deviceData.Device.DefaultHeatingSetTemperature = temps?.defaultHeatingSetTemperature ?? 20;
+                deviceData.Device.DefaultCoolingSetTemperature = temps?.defaultCoolingSetTemperature ?? 24;
             }
             if (this.logDebug) this.emit('debug', `Device Data: ${JSON.stringify(deviceData, null, 2)}`);
 
@@ -97,8 +102,8 @@ class MelCloudErv extends EventEmitter {
             const setFanSpeed = device.SetFanSpeed;
             const operationMode = device.OperationMode; //0, Heat, 2, Cool, 4, 5, 6, Fan, Auto
             const ventilationMode = device.VentilationMode; //Lossnay, Bypass, Auto
-            const defaultCoolingSetTemperature = device.DefaultCoolingSetTemperature ?? 23;
-            const defaultHeatingSetTemperature = device.DefaultHeatingSetTemperature ?? 21;
+            const defaultCoolingSetTemperature = device.DefaultCoolingSetTemperature;
+            const defaultHeatingSetTemperature = device.DefaultHeatingSetTemperature;
             const firmwareAppVersion = device.FirmwareAppVersion;
             const isInError = device[errorKey];
 
@@ -244,7 +249,7 @@ class MelCloudErv extends EventEmitter {
                         withCredentials: true
                     });
 
-                    if (displayType === 1 && deviceData.Device.OperationMode === 8) {
+                    if (displayType === 1 && deviceData.Device.VentilationMode === 2) {
                         deviceData.Device.SetTemperature = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
 
                         if (this.deviceState.DefaultCoolingSetTemperature !== deviceData.Device.DefaultCoolingSetTemperature || this.deviceState.DefaultHeatingSetTemperature !== deviceData.Device.DefaultHeatingSetTemperature) {
@@ -261,9 +266,8 @@ class MelCloudErv extends EventEmitter {
                             Power: deviceData.Device.Power,
                             SetTemperature: deviceData.Device.SetTemperature,
                             SetFanSpeed: String(deviceData.Device.SetFanSpeed),
-                            OperationMode: AirConditioner.OperationModeMapEnumToString[deviceData.Device.OperationMode],
-                            VaneHorizontalDirection: AirConditioner.VaneHorizontalDirectionMapEnumToString[deviceData.Device.VaneHorizontalDirection],
-                            VaneVerticalDirection: AirConditioner.VaneVerticalDirectionMapEnumToString[deviceData.Device.VaneVerticalDirection]
+                            OperationMode: Ventilation.OperationModeMapEnumToString[deviceData.Device.OperationMode],
+                            VentilationMode: Ventilation.VentilationModeMapEnumToString[deviceData.Device.VentilationMode],
                         }
                     };
                     if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(settings.data, null, 2)}`);

@@ -6,7 +6,7 @@ import { TemperatureDisplayUnits, Ventilation } from './constants.js';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceErv extends EventEmitter {
-    constructor(api, account, device, contextKey, devicesFile, defaultTempsFile, useFahrenheit) {
+    constructor(api, account, device, devicesFile, defaultTempsFile, useFahrenheit) {
         super();
 
         Accessory = api.platformAccessory;
@@ -311,7 +311,7 @@ class DeviceErv extends EventEmitter {
                                 };
 
                                 await this.melCloudErv.send(this.accountType, this.displayType, deviceData, Ventilation.EffectiveFlags.VentilationMode);
-                                const operationModeText = Ventilation.VentilationMode[deviceData.Device.VentilationMode];
+                                const operationModeText = Ventilation.VentilationModeMapEnumToString[deviceData.Device.VentilationMode];
                                 if (this.logInfo) this.emit('info', `Set operation mode: ${operationModeText}`);
                             } catch (error) {
                                 if (this.logWarn) this.emit('warn', `Set operation mode error: ${error}`);
@@ -334,27 +334,24 @@ class DeviceErv extends EventEmitter {
                         })
                         .onSet(async (value) => {
                             try {
-                                let fanSpeedModeText = '';
                                 switch (numberOfFanSpeeds) {
                                     case 2: //Fan speed mode 2
-                                        fanSpeedModeText = hasAutomaticFanSpeed ? [5, 1, 2, 0][value] : [5, 1, 2][value];
-                                        deviceData.Device.SetFanSpeed = hasAutomaticFanSpeed ? [0, 1, 2, 0][value] : [1, 1, 2][value];
+                                        value = hasAutomaticFanSpeed ? [0, 1, 2, 0][value] : [1, 1, 2][value];
                                         break;
                                     case 3: //Fan speed mode 3
-                                        fanSpeedModeText = hasAutomaticFanSpeed ? [5, 1, 2, 3, 0][value] : [5, 1, 2, 3][value];
-                                        deviceData.Device.SetFanSpeed = hasAutomaticFanSpeed ? [0, 1, 2, 3, 0][value] : [1, 1, 2, 3][value];
+                                        value = hasAutomaticFanSpeed ? [0, 1, 2, 3, 0][value] : [1, 1, 2, 3][value];
                                         break;
                                     case 4: //Fan speed mode 4
-                                        fanSpeedModeText = hasAutomaticFanSpeed ? [5, 1, 2, 3, 4, 0][value] : [5, 1, 2, 3, 4][value];
-                                        deviceData.Device.SetFanSpeed = hasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 0][value] : [1, 1, 2, 3, 4][value];
+                                        value = hasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 0][value] : [1, 1, 2, 3, 4][value];
                                         break;
                                     case 5: //Fan speed mode 5
-                                        5; fanSpeedModeText = hasAutomaticFanSpeed ? [5, 1, 2, 3, 4, 5, 0][value] : [5, 1, 2, 3, 4, 5][value];
-                                        deviceData.Device.SetFanSpeed = hasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 0][value] : [1, 1, 2, 3, 4, 5][value];
+                                        value = hasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 0][value] : [1, 1, 2, 3, 4, 5][value];
                                         break;;
                                 };
+
+                                deviceData.Device.SetFanSpeed = value
                                 await this.melCloudErv.send(this.accountType, this.displayType, deviceData, Ventilation.EffectiveFlags.SetFanSpeed);
-                                if (this.logInfo) this.emit('info', `Set fan speed mode: ${Ventilation.FanSpeed[fanSpeedModeText]}`);
+                                if (this.logInfo) this.emit('info', `Set fan speed mode: ${Ventilation.FanSpeedMapEnumToString[value]}`);
                             } catch (error) {
                                 if (this.logWarn) this.emit('warn', `Set fan speed mode error: ${error}`);
                             };
@@ -483,7 +480,7 @@ class DeviceErv extends EventEmitter {
                                 };
 
                                 await this.melCloudErv.send(this.accountType, this.displayType, deviceData, effectiveFlags);
-                                const operationModeText = Ventilation.VentilationMode[deviceData.Device.VentilationMode];
+                                const operationModeText = Ventilation.VentilationModeMapEnumToString[deviceData.Device.VentilationMode];
                                 if (this.logInfo) this.emit('info', `Set operation mode: ${operationModeText}`);
                             } catch (error) {
                                 if (this.logWarn) this.emit('warn', `Set operation mode error: ${error}`);
@@ -1190,19 +1187,19 @@ class DeviceErv extends EventEmitter {
                     //log current state
                     if (this.logInfo) {
                         this.emit('info', `Power: ${power ? 'ON' : 'OFF'}`);
-                        this.emit('info', `Target ventilation mode: ${Ventilation.OperationMode[ventilationMode]}`);
-                        this.emit('info', `Current ventilation mode: ${Ventilation.OperationMode[actualVentilationMode]}`);
+                        this.emit('info', `Target ventilation mode: ${Ventilation.OperationModeMapEnumToString[ventilationMode]}`);
+                        this.emit('info', `Current ventilation mode: ${Ventilation.OperationModeMapEnumToString[actualVentilationMode]}`);
                         this.emit('info', `Target temperature: ${setTemperature}${obj.temperatureUnit}`);
                         this.emit('info', `Room temperature: ${roomTemperature}${obj.temperatureUnit}`);
                         if (hasSupplyTemperature && deviceData.Device.SupplyTemperature !== null) this.emit('info', `Supply temperature: ${roomTemperature}${obj.temperatureUnit}`);
                         if (hasOutdoorTemperature && deviceData.Device.OutdoorTemperature !== null) this.emit('info', `Outdoor temperature: ${roomTemperature}${obj.temperatureUnit}`);
-                        this.emit('info', `Fan speed mode: ${Ventilation.FanSpeed[setFanSpeed]}`);
+                        this.emit('info', `Fan speed mode: ${Ventilation.FanSpeedMapEnumToString[setFanSpeed]}`);
                         this.emit('info', `Temperature display unit: ${obj.temperatureUnit}`);
-                        this.emit('info', `Core maintenance: ${Ventilation.CoreMaintenance[coreMaintenanceRequired]}`);
-                        this.emit('info', `Filter maintenance: ${Ventilation.FilterMaintenance[filterMaintenanceRequired]}`);
-                        if (hasCO2Sensor) this.emit('info', `CO2 detected: ${Ventilation.Co2Detected[roomCO2Detected]}`);
+                        this.emit('info', `Core maintenance: ${Ventilation.CoreMaintenanceMapEnumToString[coreMaintenanceRequired]}`);
+                        this.emit('info', `Filter maintenance: ${Ventilation.FilterMaintenanceMapEnumToString[filterMaintenanceRequired]}`);
+                        if (hasCO2Sensor) this.emit('info', `CO2 detected: ${Ventilation.Co2DetectedMapEnumToString[roomCO2Detected]}`);
                         if (hasCO2Sensor) this.emit('info', `CO2 level: ${roomCO2Level} ppm`);
-                        if (hasPM25Sensor) this.emit('info', `PM2.5 air quality: ${Ventilation.PM25AirQuality[pM25AirQuality]}`);
+                        if (hasPM25Sensor) this.emit('info', `PM2.5 air quality: ${Ventilation.PM25AirQualityMapEnumToString[pM25AirQuality]}`);
                         if (hasPM25Sensor) this.emit('info', `PM2.5 level: ${pM25Level} µg/m`);
                     };
                 })
