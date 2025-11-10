@@ -11,6 +11,8 @@ class MelCloudAtw extends EventEmitter {
         this.logWarn = account.log?.warn;
         this.logError = account.log?.error;
         this.logDebug = account.log?.debug;
+        this.restFulEnabled = account.restFul?.enable;
+        this.mqttEnabled = account.mqtt?.enable;
         this.deviceId = device.id;
         this.devicesFile = devicesFile;
         this.defaultTempsFile = defaultTempsFile;
@@ -20,7 +22,7 @@ class MelCloudAtw extends EventEmitter {
             .on('debug', debug => this.emit('debug', debug));
 
         //set default values
-        this.deviceState = {};
+        this.devicesData = {};
         this.headers = {};
 
         //lock flags
@@ -67,48 +69,14 @@ class MelCloudAtw extends EventEmitter {
             }
             if (this.logDebug) this.emit('debug', `Device Data: ${JSON.stringify(deviceData, null, 2)}`);
 
-            //keys
-            const fanKey = this.accountType === 'melcloud' ? 'FanSpeed' : 'SetFanSpeed';
-            const tempStepKey = this.accountType === 'melcloud' ? 'TemperatureIncrement' : 'HasHalfDegreeIncrements';
-            const errorKey = this.accountType === 'melcloud' ? 'HasError' : 'IsInError';
-
-            //device info
-            const serialNumber = deviceData.SerialNumber;
-
             //device
-            const device = deviceData.Device ?? {};
-            const hasHotWaterTank = device.HasHotWaterTank ?? false;
-            const temperatureIncrement = device[tempStepKey];
-            const roomTemperatureZone1 = device.RoomTemperatureZone1;
-            const roomTemperatureZone2 = device.RoomTemperatureZone2;
-            const outdoorTemperature = device.OutdoorTemperature;
-            const tankWaterTemperature = device.TankWaterTemperature;
-            const unitStatus = device.UnitStatus;
-            const power = device.Power;
-            const ecoHotWater = device.EcoHotWater;
-            const operationMode = device.OperationMode;
-            const operationModeZone1 = device.OperationModeZone1;
-            const operationModeZone2 = device.OperationModeZone2;
-            const setTemperatureZone1 = device.SetTemperatureZone1;
-            const setTemperatureZone2 = device.SetTemperatureZone2;
-            const setTankWaterTemperature = device.SetTankWaterTemperature;
-            const forcedHotWaterMode = device.ForcedHotWaterMode;
-            const holidayMode = device.HolidayMode;
-            const prohibitHotWater = device.ProhibitHotWater;
-            const prohibitHeatingZone1 = device.ProhibitHeatingZone1;
-            const prohibitHeatingZone2 = device.ProhibitHeatingZone2;
-            const setHeatFlowTemperatureZone1 = device.SetHeatFlowTemperatureZone1;
-            const setHeatFlowTemperatureZone2 = device.SetHeatFlowTemperatureZone2;
-            const setCoolFlowTemperatureZone1 = device.SetCoolFlowTemperatureZone1;
-            const setCoolFlowTemperatureZone2 = device.SetCoolFlowTemperatureZone2;
-            const idleZone1 = device.IdleZone1 ?? false;
-            const idleZone2 = device.IdleZone2 ?? false;
-            const firmwareAppVersion = device.FirmwareAppVersion;
-            const hasZone2 = device.HasZone2 ?? false;
-            const isInError = device[errorKey];
+            const serialNumber = deviceData.SerialNumber;
+            const hasHotWaterTank = deviceData.Device?.HasHotWaterTank;
+            const firmwareAppVersion = deviceData.Device?.FirmwareAppVersion;
+            const hasZone2 = deviceData.Device?.HasZone2;
 
             //units
-            const units = Array.isArray(device.Units) ? device.Units : [];
+            const units = Array.isArray(deviceData.Device?.Units) ? deviceData.Device?.Units : [];
             const unitsCount = units.length;
             const manufacturer = 'Mitsubishi';
 
@@ -130,50 +98,25 @@ class MelCloudAtw extends EventEmitter {
                 if (this.logDebug) this.emit('debug', `Units are not configured in MELCloud service`);
             };
 
-            const deviceState = {
-                Power: power,
-                IdleZone1: idleZone1,
-                IdleZone2: idleZone2,
-                UnitStatus: unitStatus,
-                SetTemperatureZone1: setTemperatureZone1,
-                SetTemperatureZone2: setTemperatureZone2,
-                RoomTemperatureZone1: roomTemperatureZone1,
-                RoomTemperatureZone2: roomTemperatureZone2,
-                OperationMode: operationMode,
-                OperationModeZone1: operationModeZone1,
-                OperationModeZone2: operationModeZone2,
-                SetHeatFlowTemperatureZone1: setHeatFlowTemperatureZone1,
-                SetHeatFlowTemperatureZone2: setHeatFlowTemperatureZone2,
-                SetCoolFlowTemperatureZone1: setCoolFlowTemperatureZone1,
-                SetCoolFlowTemperatureZone2: setCoolFlowTemperatureZone2,
-                TankWaterTemperature: tankWaterTemperature,
-                SetTankWaterTemperature: setTankWaterTemperature,
-                ForcedHotWaterMode: forcedHotWaterMode,
-                OutdoorTemperature: outdoorTemperature,
-                TemperatureIncrement: temperatureIncrement,
-                EcoHotWater: ecoHotWater,
-                HolidayMode: holidayMode,
-                ProhibitZone1: prohibitHeatingZone1,
-                ProhibitZone2: prohibitHeatingZone2,
-                ProhibitHotWater: prohibitHotWater,
-                IsInError: isInError
+            //restFul
+            if (this.restFulEnabled) {
+                this.emit('restFul', 'info', deviceData);
+                this.emit('restFul', 'state', deviceData.Device);
             }
 
-            //restFul
-            this.emit('restFul', 'info', deviceData);
-            this.emit('restFul', 'state', deviceData.Device);
-
             //mqtt
-            this.emit('mqtt', 'Info', deviceData);
-            this.emit('mqtt', 'State', deviceData.Device);
+            if (this.mqttEnabled) {
+                this.emit('mqtt', 'Info', deviceData);
+                this.emit('mqtt', 'State', deviceData.Device);
+            }
 
             //check state changes
-            const deviceDataHasNotChanged = JSON.stringify(deviceState) === JSON.stringify(this.deviceState);
+            const deviceDataHasNotChanged = JSON.stringify(devicesData) === JSON.stringify(this.devicesData);
             if (deviceDataHasNotChanged) {
                 if (this.logDebug) this.emit('debug', `Device state not changed`);
                 return;
             }
-            this.deviceState = deviceState;
+            this.devicesData = devicesData;
 
             //emit info
             this.emit('deviceInfo', manufacturer, indoor.model, outdoor.model, serialNumber, firmwareAppVersion, hasHotWaterTank, hasZone2);

@@ -11,6 +11,8 @@ class MelCloudErv extends EventEmitter {
         this.logWarn = account.log?.warn;
         this.logError = account.log?.error;
         this.logDebug = account.log?.debug;
+        this.restFulEnabled = account.restFul?.enable;
+        this.mqttEnabled = account.mqtt?.enable;
         this.deviceId = device.id;
         this.devicesFile = devicesFile;
         this.defaultTempsFile = defaultTempsFile;
@@ -20,7 +22,7 @@ class MelCloudErv extends EventEmitter {
             .on('debug', debug => this.emit('debug', debug));
 
         //set default values
-        this.deviceState = {};
+        this.devicesData = {};
         this.headers = {};
 
         //lock flags
@@ -72,43 +74,12 @@ class MelCloudErv extends EventEmitter {
             }
             if (this.logDebug) this.emit('debug', `Device Data: ${JSON.stringify(deviceData, null, 2)}`);
 
-            //keys
-            const fanKey = this.accountType === 'melcloud' ? 'FanSpeed' : 'SetFanSpeed';
-            const tempStepKey = this.accountType === 'melcloud' ? 'TemperatureIncrement' : 'HasHalfDegreeIncrements';
-            const errorKey = this.accountType === 'melcloud' ? 'HasError' : 'IsInError';
-
             //presets
-            const hideRoomTemperature = deviceData.HideRoomTemperature;
-            const hideSupplyTemperature = deviceData.HideSupplyTemperature;
-            const hideOutdoorTemperature = deviceData.HideOutdoorTemperature;
             const serialNumber = deviceData.SerialNumber;
-
-            //device
-            const device = deviceData.Device ?? {};
-            const pM25SensorStatus = device.PM25SensorStatus;
-            const pM25Level = device.PM25Level;
-            const temperatureIncrement = device[tempStepKey];
-            const coreMaintenanceRequired = device.CoreMaintenanceRequired;
-            const filterMaintenanceRequired = device.FilterMaintenanceRequired;
-            const power = device.Power;
-            const roomTemperature = device.RoomTemperature;
-            const supplyTemperature = device.SupplyTemperature;
-            const outdoorTemperature = device.OutdoorTemperature;
-            const roomCO2Level = device.RoomCO2Level;
-            const nightPurgeMode = device.NightPurgeMode;
-            const setTemperature = device.SetTemperature;
-            const actualSupplyFanSpeed = device.ActualSupplyFanSpeed;
-            const actualExhaustFanSpeed = device.ActualExhaustFanSpeed;
-            const setFanSpeed = device.SetFanSpeed;
-            const operationMode = device.OperationMode; //0, Heat, 2, Cool, 4, 5, 6, Fan, Auto
-            const ventilationMode = device.VentilationMode; //Lossnay, Bypass, Auto
-            const defaultCoolingSetTemperature = device.DefaultCoolingSetTemperature;
-            const defaultHeatingSetTemperature = device.DefaultHeatingSetTemperature;
-            const firmwareAppVersion = device.FirmwareAppVersion;
-            const isInError = device[errorKey];
+            const firmwareAppVersion = deviceData.Device?.FirmwareAppVersion;
 
             //units
-            const units = Array.isArray(device.Units) ? device.Units : [];
+            const units = Array.isArray(deviceData.Device?.Units) ? deviceData.Device?.Units : [];
             const unitsCount = units.length;
             const manufacturer = 'Mitsubishi';
 
@@ -130,47 +101,25 @@ class MelCloudErv extends EventEmitter {
                 if (this.logDebug) this.emit('debug', `Units are not configured in MELCloud service`);
             };
 
-            const deviceState = {
-                Power: power,
-                RoomTemperature: roomTemperature,
-                SupplyTemperature: supplyTemperature,
-                OutdoorTemperature: outdoorTemperature,
-                NightPurgeMode: nightPurgeMode,
-                SetTemperature: setTemperature,
-                SetFanSpeed: setFanSpeed,
-                OperationMode: operationMode,
-                VentilationMode: ventilationMode,
-                RoomCO2Level: roomCO2Level,
-                ActualSupplyFanSpeed: actualSupplyFanSpeed,
-                ActualExhaustFanSpeed: actualExhaustFanSpeed,
-                CoreMaintenanceRequired: coreMaintenanceRequired,
-                FilterMaintenanceRequired: filterMaintenanceRequired,
-                TemperatureIncrement: temperatureIncrement,
-                DefaultCoolingSetTemperature: defaultCoolingSetTemperature,
-                DefaultHeatingSetTemperature: defaultHeatingSetTemperature,
-                PM25SensorStatus: pM25SensorStatus,
-                PM25Level: pM25Level,
-                HideRoomTemperature: hideRoomTemperature,
-                HideSupplyTemperature: hideSupplyTemperature,
-                HideOutdoorTemperature: hideOutdoorTemperature,
-                IsInError: isInError
+            //restFul
+            if (this.restFulEnabled) {
+                this.emit('restFul', 'info', deviceData);
+                this.emit('restFul', 'state', deviceData.Device);
             }
 
-            //restFul
-            this.emit('restFul', 'info', deviceData);
-            this.emit('restFul', 'state', deviceData.Device);
-
             //mqtt
-            this.emit('mqtt', 'Info', deviceData);
-            this.emit('mqtt', 'State', deviceData.Device);
+            if (this.mqttEnabled) {
+                this.emit('mqtt', 'Info', deviceData);
+                this.emit('mqtt', 'State', deviceData.Device);
+            }
 
             //check state changes
-            const deviceDataHasNotChanged = JSON.stringify(deviceState) === JSON.stringify(this.deviceState);
+            const deviceDataHasNotChanged = JSON.stringify(devicesData) === JSON.stringify(this.devicesData);
             if (deviceDataHasNotChanged) {
                 if (this.logDebug) this.emit('debug', `Device state not changed`);
                 return;
             }
-            this.deviceState = deviceState;
+            this.devicesData = devicesData;
 
             //emit info
             this.emit('deviceInfo', manufacturer, indoor.model, outdoor.model, serialNumber, firmwareAppVersion);

@@ -32,6 +32,7 @@ class DeviceAta extends EventEmitter {
         this.frostProtectionSensor = device.frostProtectionSensor || false;
         this.overheatProtectionSensor = device.overheatProtectionSensor || false;
         this.holidayModeSensor = device.holidayModeSensor || false;
+        this.sheduleSensor = device.sheduleSensor || false;
         this.errorSensor = device.errorSensor || false;
         this.heatDryFanMode = device.heatDryFanMode || 1; //NONE, HEAT, DRY, FAN
         this.coolDryFanMode = device.coolDryFanMode || 1; //NONE, COOL, DRY, FAN
@@ -650,6 +651,20 @@ class DeviceAta extends EventEmitter {
                 accessory.addService(this.holidayModeSensorService);
             }
 
+            //shedule sensor
+            if (this.sheduleSensor && this.accessory.sheduleEnabled !== null) {
+                if (this.logDebug) this.emit('debug', `Prepare shedule service`);
+                this.sheduleSensorService = new Service.ContactSensor(`${serviceName} Shedule`, `Shedule Sensor ${deviceId}`);
+                this.sheduleSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                this.sheduleSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Shedule`);
+                this.sheduleSensorService.getCharacteristic(Characteristic.ContactSensorState)
+                    .onGet(async () => {
+                        const state = this.accessory.sheduleEnabled;
+                        return state;
+                    })
+                accessory.addService(this.sheduleSensorService);
+            }
+
             //error sensor
             if (this.errorSensor && this.accessory.isInError !== null) {
                 if (this.logDebug) this.emit('debug', `Prepare error service`);
@@ -1021,6 +1036,7 @@ class DeviceAta extends EventEmitter {
                     const overheatProtectionActive = deviceData.OverheatProtection?.active;
                     const holidayModeEnabled = deviceData.HolidayMode?.enabled;
                     const holidayModeActive = deviceData.HolidayMode?.active;
+                    const sheduleEnabled = deviceData.ScheduleEnabled;
 
                     //device control
                     const hideVaneControls = deviceData.HideVaneControls ?? false;
@@ -1112,7 +1128,8 @@ class DeviceAta extends EventEmitter {
                         overheatProtectionEnabled: overheatProtectionEnabled,
                         overheatProtectionActive: overheatProtectionActive,
                         holidayModeEnabled: holidayModeEnabled,
-                        holidayModeActive: holidayModeActive
+                        holidayModeActive: holidayModeActive,
+                        sheduleEnabled: sheduleEnabled
                     };
 
                     //operating mode 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
@@ -1257,6 +1274,7 @@ class DeviceAta extends EventEmitter {
                     this.frostProtectionSensorService?.updateCharacteristic(Characteristic.ContactSensorState, frostProtectionActive);
                     this.overheatProtectionSensorService?.updateCharacteristic(Characteristic.ContactSensorState, overheatProtectionActive);
                     this.holidayModeSensorService?.updateCharacteristic(Characteristic.ContactSensorState, holidayModeActive);
+                    this.sheduleSensorService?.updateCharacteristic(Characteristic.ContactSensorState, sheduleEnabled);
                     this.errorService?.updateCharacteristic(Characteristic.ContactSensorState, isInError);
 
                     //update presets state

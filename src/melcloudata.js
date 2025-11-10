@@ -11,6 +11,8 @@ class MelCloudAta extends EventEmitter {
         this.logWarn = account.log?.warn;
         this.logError = account.log?.error;
         this.logDebug = account.log?.debug;
+        this.restFulEnabled = account.restFul?.enable;
+        this.mqttEnabled = account.mqtt?.enable;
         this.deviceId = device.id;
         this.devicesFile = devicesFile;
         this.defaultTempsFile = defaultTempsFile;
@@ -20,7 +22,7 @@ class MelCloudAta extends EventEmitter {
             .on('debug', debug => this.emit('debug', debug));
 
         //set default values
-        this.deviceState = {};
+        this.deviceData = {};
         this.headers = {};
 
         //lock flags
@@ -75,45 +77,12 @@ class MelCloudAta extends EventEmitter {
             }
             if (this.logDebug) this.emit('debug', `Device Data: ${JSON.stringify(deviceData, null, 2)}`);
 
-            //keys
-            const fanKey = this.accountType === 'melcloud' ? 'FanSpeed' : 'SetFanSpeed';
-            const tempStepKey = this.accountType === 'melcloud' ? 'TemperatureIncrement' : 'HasHalfDegreeIncrements';
-            const errorKey = this.accountType === 'melcloud' ? 'HasError' : 'IsInError';
-
-            //device info
-            const serialNumber = deviceData.SerialNumber;
-            const hideVaneControls = deviceData.HideVaneControls;
-            const hideDryModeControl = deviceData.HideDryModeControl;
-            const frostProtection = deviceData.FrostProtection;
-            const overheatProtection = deviceData.OverheatProtection;
-            const holidayMode = deviceData.HolidayMode;
-
             //device
-            const device = deviceData.Device ?? {};
-            const prohibitSetTemperature = device.ProhibitSetTemperature;
-            const prohibitOperationMode = device.ProhibitOperationMode;
-            const prohibitPower = device.ProhibitPower;
-            const power = device.Power;
-            const roomTemperature = device.RoomTemperature;
-            const outdoorTemperature = device.OutdoorTemperature;
-            const setTemperature = device.SetTemperature;
-            const actualFanSpeed = device.ActualFanSpeed;
-            const setFanSpeed = device[fanKey];
-            const automaticFanSpeed = device.AutomaticFanSpeed;
-            const vaneVerticalDirection = device.VaneVerticalDirection;
-            const vaneVerticalSwing = device.VaneVerticalSwing;
-            const vaneHorizontalDirection = device.VaneHorizontalDirection;
-            const vaneHorizontalSwing = device.VaneHorizontalSwing;
-            const operationMode = device.OperationMode;
-            const inStandbyMode = device.InStandbyMode;
-            const temperatureIncrement = device[tempStepKey];
-            const defaultCoolingSetTemperature = device.DefaultCoolingSetTemperature;
-            const defaultHeatingSetTemperature = device.DefaultHeatingSetTemperature;
-            const firmwareAppVersion = device.FirmwareAppVersion;
-            const isInError = device[errorKey];
+            const serialNumber = deviceData.SerialNumber;
+            const firmwareAppVersion = deviceData.Device?.FirmwareAppVersion;
 
             //units
-            const units = Array.isArray(device.Units) ? device.Units : [];
+            const units = Array.isArray(deviceData.Device?.Units) ? deviceData.Device?.Units : [];
             const unitsCount = units.length;
             const manufacturer = 'Mitsubishi';
 
@@ -135,49 +104,25 @@ class MelCloudAta extends EventEmitter {
                 if (this.logDebug) this.emit('debug', `Units are not configured in MELCloud service`);
             };
 
-            const deviceState = {
-                HideVaneControls: hideVaneControls,
-                HideDryModeControl: hideDryModeControl,
-                FrostProtection: frostProtection,
-                OverheatProtection: overheatProtection,
-                HolidayMode: holidayMode,
-                Power: power,
-                InStandbyMode: inStandbyMode,
-                OperationMode: operationMode,
-                RoomTemperature: roomTemperature,
-                OutdoorTemperature: outdoorTemperature,
-                SetTemperature: setTemperature,
-                ActualFanSpeed: actualFanSpeed,
-                SetFanSpeed: setFanSpeed,
-                AutomaticFanSpeed: automaticFanSpeed,
-                VaneVerticalDirection: vaneVerticalDirection,
-                VaneVerticalSwing: vaneVerticalSwing,
-                VaneHorizontalDirection: vaneHorizontalDirection,
-                VaneHorizontalSwing: vaneHorizontalSwing,
-                TemperatureIncrement: temperatureIncrement,
-                DefaultCoolingSetTemperature: defaultCoolingSetTemperature,
-                DefaultHeatingSetTemperature: defaultHeatingSetTemperature,
-                ProhibitPower: prohibitPower,
-                ProhibitSetTemperature: prohibitSetTemperature,
-                ProhibitOperationMode: prohibitOperationMode,
-                IsInError: isInError
+            //restFul
+            if (this.restFulEnabled) {
+                this.emit('restFul', 'info', deviceData);
+                this.emit('restFul', 'state', deviceData.Device);
             }
 
-            //restFul
-            this.emit('restFul', 'info', deviceData);
-            this.emit('restFul', 'state', deviceData.Device);
-
             //mqtt
-            this.emit('mqtt', 'Info', deviceData);
-            this.emit('mqtt', 'State', deviceData.Device);
+            if (this.mqttEnabled) {
+                this.emit('mqtt', 'Info', deviceData);
+                this.emit('mqtt', 'State', deviceData.Device);
+            }
 
             //check state changes
-            const deviceDataHasNotChanged = JSON.stringify(deviceState) === JSON.stringify(this.deviceState);
+            const deviceDataHasNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);
             if (deviceDataHasNotChanged) {
                 if (this.logDebug) this.emit('debug', `Device state not changed`);
                 return;
             }
-            this.deviceState = deviceState;
+            this.deviceData = deviceData;
 
             //emit info
             this.emit('deviceInfo', manufacturer, indoor.model, outdoor.model, serialNumber, firmwareAppVersion);

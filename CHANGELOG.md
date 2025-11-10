@@ -22,6 +22,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Do not use Homebridge UI > v5.5.0 because of break config.json
 
+## [4.1.1] - (10.11.2025)
+
+## Changes
+
+- added shedule sensor for MELCLoud Home ATA devices
+- config schema updated
+- readme updated
+- cleanup
+
 ## [4.1.0] - (10.11.2025)
 
 ## Changes

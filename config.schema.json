@@ -5,7 +5,7 @@
   "fixArrays": true,
   "strictValidation": true,
   "customUi": true,
-  "headerDisplay": "This plugin works with Mitsubishi Air Conditioner, Heat Pump and Energy Recovery Ventilation connected to MELCloud service. Devices are exposed to HomeKit as separate accessories and each needs to be manually paired.",
+  "headerDisplay": "This plugin works with Mitsubishi Air Conditioner, Heat Pump and Energy Recovery Ventilation connected to MELCloud service. Devices are exposed to HomeKit as separate accessories and each needs to be manually [paired](https://github.com/grzegorz914/homebridge-melcloud-control/wiki#adding-to-homekit).",
   "footerDisplay": "For documentation please see [GitHub repository](https://github.com/grzegorz914/homebridge-melcloud-control).",
   "schema": {
     "type": "object",
@@ -412,6 +412,12 @@
                     "type": "boolean",
                     "default": false,
                     "description": "This enable extra holiday mode sensor to use with automations in HomeKit app."
+                  },
+                  "sheduleSensor": {
+                    "title": "Shedule",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable extra shedule sensor to use with automations in HomeKit app."
                   },
                   "errorSensor": {
                     "title": "Error",
@@ -1958,6 +1964,7 @@
                                 "accounts[].ataDevices[].frostProtectionSensor",
                                 "accounts[].ataDevices[].overheatProtectionSensor",
                                 "accounts[].ataDevices[].holidayModeSensor",
+                                "accounts[].ataDevices[].sheduleSensor",
                                 "accounts[].ataDevices[].errorSensor"
                               ]
                             },
