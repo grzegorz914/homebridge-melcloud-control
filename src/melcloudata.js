@@ -81,9 +81,12 @@ class MelCloudAta extends EventEmitter {
             const errorKey = this.accountType === 'melcloud' ? 'HasError' : 'IsInError';
 
             //device info
+            const serialNumber = deviceData.SerialNumber;
             const hideVaneControls = deviceData.HideVaneControls;
             const hideDryModeControl = deviceData.HideDryModeControl;
-            const serialNumber = deviceData.SerialNumber;
+            const frostProtection = deviceData.FrostProtection;
+            const overheatProtection = deviceData.OverheatProtection;
+            const holidayMode = deviceData.HolidayMode;
 
             //device
             const device = deviceData.Device ?? {};
@@ -133,15 +136,20 @@ class MelCloudAta extends EventEmitter {
             };
 
             const deviceState = {
+                HideVaneControls: hideVaneControls,
+                HideDryModeControl: hideDryModeControl,
+                FrostProtection: frostProtection,
+                OverheatProtection: overheatProtection,
+                HolidayMode: holidayMode,
                 Power: power,
                 InStandbyMode: inStandbyMode,
+                OperationMode: operationMode,
                 RoomTemperature: roomTemperature,
                 OutdoorTemperature: outdoorTemperature,
                 SetTemperature: setTemperature,
                 ActualFanSpeed: actualFanSpeed,
                 SetFanSpeed: setFanSpeed,
                 AutomaticFanSpeed: automaticFanSpeed,
-                OperationMode: operationMode,
                 VaneVerticalDirection: vaneVerticalDirection,
                 VaneVerticalSwing: vaneVerticalSwing,
                 VaneHorizontalDirection: vaneHorizontalDirection,
@@ -152,8 +160,6 @@ class MelCloudAta extends EventEmitter {
                 ProhibitPower: prohibitPower,
                 ProhibitSetTemperature: prohibitSetTemperature,
                 ProhibitOperationMode: prohibitOperationMode,
-                HideVaneControls: hideVaneControls,
-                HideDryModeControl: hideDryModeControl,
                 IsInError: isInError
             }
 

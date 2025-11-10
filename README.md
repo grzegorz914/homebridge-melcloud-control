@@ -76,6 +76,9 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Presets `ACTIV/UNACTIV`.
       * Room temperature.
       * Outdoor temperature.
+      * Frost protection.
+      * Overheat protection.
+      * Holiday mode.
       * Error
 * Heat Pump:
   * Heater Cooler:
@@ -221,7 +224,10 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ataDevices[].coolDryFanMode` | Here select the operatiing mode for `Cool`, if this mode is not supported, it will be disabled. |
 | `ataDevices[].autoDryFanMode` | Here select the operatiing mode for `Auto`, if this mode is not supported, it will be disabled.. |
 | `ataDevices[].temperatureSensor` | This enable extra `Room` temperature sensors to use with automations in HomeKit app. |
-| `ataDevices[].temperatureSensorOutdoor` | This enable extra `Outdoor` temperature sensors to use with automations in HomeKit app. |
+| `ataDevices[].temperatureOutdoorSensor` | This enable extra `Outdoor` temperature sensors to use with automations in HomeKit app. |
+| `ataDevices[].frostProtectionSensor` | This enable extra `Frost Protectio` sensors to use with automations in HomeKit app. |
+| `ataDevices[].overHeatProtectionSensor` | This enable extra `Overheat Protection` sensors to use with automations in HomeKit app. |
+| `ataDevices[].holidayModeSensor` | This enable extra `Holiday Mode` sensors to use with automations in HomeKit app. |
 | `ataDevices[].errorSensor` | This enable `Error` sensors to use with automations in HomeKit app. |
 | `ataDevices[].refreshInterval` | Here set the background devices state refresh time in (sec), default `5s`. |
 | `ataDevices[].presets[]` | Array of ATA device Presets created automatically after login to MELCloud from plugin config UI. |
@@ -241,14 +247,14 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `atwDevices[].displayType` | Here select main control mode `None/Disabled`, `Heater/Cooler`, `Thermostat`. |
 | `atwDevices[].hideZone` | Here select which zone need to be hidden `None/Disabled`, `Heat Pump`, `Heat Pump / Zone 1`, `Heat Pump / Zone 1 / Hot Water`, `Heat Pump / Zone 1 / Zone 2`, `Heat Pump / Hot Water`,`Heat Pump / Hot Water / Zone 2`, `Heat Pump / Zone 2`, `Zone 1`, `Zone 1 / Hot Water`, `Zone 1 / Hot Water / Zone 2`, `Zone 1 / Zone 2`, `Hot Water`, `Hot Water / Zone 2`, `Zone 2`, `All`. |
 | `atwDevices[].temperatureSensor` | This enable extra `Room` temperature sensors to use with automations in HomeKit app. |
-| `atwDevices[].temperatureSensorFlow` | This enable extra `Flow` temperature sensors to use with automations in HomeKit app. |
-| `atwDevices[].temperatureSensorReturn` | This enable extra `Return` temperature sensors to use with automations in HomeKit app. |
-| `atwDevices[].temperatureSensorFlowZone1` | This enable extra `Flow Zone 1` temperature sensors to use with automations in HomeKit app. |
-| `atwDevices[].temperatureSensorReturnZone1` | This enable extra `Return Zone 1` temperature sensors to use with automations in HomeKit app. |
-| `atwDevices[].temperatureSensorFlowWaterTank` | This enable extra `Flow Water Tank` temperature sensors to use with automations in HomeKit app. |
-| `atwDevices[].temperatureSensorReturnWaterTank` | This enable extra `Return Water Tank` temperature sensors to use with automations in HomeKit app. |
-| `atwDevices[].temperatureSensorFlowZone2` | This enable extra `Flow Zone 2` temperature sensors to use with automations in HomeKit app. |
-| `atwDevices[].temperatureSensorReturnZone2` | This enable extra `Return Zone 2` temperature sensors to use with automations in HomeKit app. |
+| `atwDevices[].temperatureFlowSensor` | This enable extra `Flow` temperature sensors to use with automations in HomeKit app. |
+| `atwDevices[].temperatureReturnSensor` | This enable extra `Return` temperature sensors to use with automations in HomeKit app. |
+| `atwDevices[].temperatureFlowZone1Sensor` | This enable extra `Flow Zone 1` temperature sensors to use with automations in HomeKit app. |
+| `atwDevices[].temperatureReturnZone1Sensor` | This enable extra `Return Zone 1` temperature sensors to use with automations in HomeKit app. |
+| `atwDevices[].temperatureFlowWaterTankSensor` | This enable extra `Flow Water Tank` temperature sensors to use with automations in HomeKit app. |
+| `atwDevices[].temperatureReturnWaterTankSensor` | This enable extra `Return Water Tank` temperature sensors to use with automations in HomeKit app. |
+| `atwDevices[].temperatureFlowZone2Sensor` | This enable extra `Flow Zone 2` temperature sensors to use with automations in HomeKit app. |
+| `atwDevices[].temperatureReturnZone2Sensor` | This enable extra `Return Zone 2` temperature sensors to use with automations in HomeKit app. |
 | `atwDevices[].errorSensor` | This enable `Error` sensors to use with automations in HomeKit app. |
 | `atwDevices[].refreshInterval` | Here set the background devices state refresh time in (sec), default `5s`. |
 | `atwDevices[].presets[]` | Array of ATA device Presets created automatically after login to MELCloud from plugin config UI. |
@@ -267,8 +273,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ervDevices[].name` | Here You can schange the `Accessory Name` which is exposed to the `Homebridge/HomeKit`. |
 | `ervDevices[].displayType` | Here select main control mode `None/Disabled`, `Heater/Cooler`, `Thermostat`. |
 | `ervDevices[].temperatureSensor` | This enable extra `Room` temperature sensors to use with automations in HomeKit app. |
-| `ervDevices[].temperatureSensorOutdoor` | This enable extra `Outdoor` temperature sensors to use with automations in HomeKit app. |
-| `ervDevices[].temperatureSensorSupply` | This enable extra `Supply` temperature sensors to use with automations in HomeKit app. |
+| `ervDevices[].temperatureOutdoorSensor` | This enable extra `Outdoor` temperature sensors to use with automations in HomeKit app. |
+| `ervDevices[].temperatureSupplySensor` | This enable extra `Supply` temperature sensors to use with automations in HomeKit app. |
 | `ervDevices[].errorSensor` | This enable `Error` sensors to use with automations in HomeKit app. |
 | `ervDevices[].refreshInterval` | Here set the background devices state refresh time in (sec), default `5s`. |
 | `ervDevices[].presets[]` | Array of ATA device Presets created automatically after login to MELCloud from plugin config UI. |

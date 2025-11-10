@@ -28,7 +28,10 @@ class DeviceAta extends EventEmitter {
         this.device = device;
         this.displayType = device.displayType;
         this.temperatureSensor = device.temperatureSensor || false;
-        this.temperatureSensorOutdoor = device.temperatureSensorOutdoor || false;
+        this.temperatureOutdoorSensor = device.temperatureOutdoorSensor || false;
+        this.frostProtectionSensor = device.frostProtectionSensor || false;
+        this.overheatProtectionSensor = device.overheatProtectionSensor || false;
+        this.holidayModeSensor = device.holidayModeSensor || false;
         this.errorSensor = device.errorSensor || false;
         this.heatDryFanMode = device.heatDryFanMode || 1; //NONE, HEAT, DRY, FAN
         this.coolDryFanMode = device.coolDryFanMode || 1; //NONE, COOL, DRY, FAN
@@ -257,7 +260,7 @@ class DeviceAta extends EventEmitter {
             if (this.logDebug) this.emit('debug', `Prepare accessory`);
             const accessoryName = deviceName;
             const accessoryUUID = AccessoryUUID.generate(accountName + deviceId.toString());
-            const accessoryCategory = [Categories.OTHER, Categories.AIR_HEATER, Categories.THERMOSTAT][this.displayType];
+            const accessoryCategory = Categories.AIR_CONDITIONER;
             const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 
             //information service
@@ -587,7 +590,7 @@ class DeviceAta extends EventEmitter {
                 accessory.addService(this.roomTemperatureSensorService);
             };
 
-            if (this.temperatureSensorOutdoor && supportsOutdoorTemperature && this.accessory.outdoorTemperature !== null) {
+            if (this.temperatureOutdoorSensor && supportsOutdoorTemperature && this.accessory.outdoorTemperature !== null) {
                 if (this.logDebug) this.emit('debug', `Prepare outdoor temperature sensor service`);
                 this.outdoorTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Outdoor`, `Outdoor Temperature Sensor ${deviceId}`);
                 this.outdoorTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
@@ -604,6 +607,48 @@ class DeviceAta extends EventEmitter {
                     })
                 accessory.addService(this.outdoorTemperatureSensorService);
             };
+
+            //frost protection sensor
+            if (this.frostProtectionSensor && this.accessory.frostProtectionEnabled) {
+                if (this.logDebug) this.emit('debug', `Prepare frost protection service`);
+                this.frostProtectionSensorService = new Service.ContactSensor(`${serviceName} Frost Protection`, `Frost Protection Sensor ${deviceId}`);
+                this.frostProtectionSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                this.frostProtectionSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Frost Protection`);
+                this.frostProtectionSensorService.getCharacteristic(Characteristic.ContactSensorState)
+                    .onGet(async () => {
+                        const state = this.accessory.frostProtectionActive;
+                        return state;
+                    })
+                accessory.addService(this.frostProtectionSensorService);
+            }
+
+            //overheat sensor
+            if (this.overheatProtectionSensor && this.accessory.overheatProtectionEnabled) {
+                if (this.logDebug) this.emit('debug', `Prepare overheat protection service`);
+                this.overheatProtectionSensorService = new Service.ContactSensor(`${serviceName} Overheat Protection`, `Overheat Protection Sensor ${deviceId}`);
+                this.overheatProtectionSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                this.overheatProtectionSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Overheat Protection`);
+                this.overheatProtectionSensorService.getCharacteristic(Characteristic.ContactSensorState)
+                    .onGet(async () => {
+                        const state = this.accessory.overheatProtectionActive;
+                        return state;
+                    })
+                accessory.addService(this.overheatProtectionSensorService);
+            }
+
+            //holiday mode sensor
+            if (this.holidayModeSensor && this.accessory.holidayModeEnabled) {
+                if (this.logDebug) this.emit('debug', `Prepare holiday mode service`);
+                this.holidayModeSensorService = new Service.ContactSensor(`${serviceName} Holiday Mode`, `Holiday Mode Sensor ${deviceId}`);
+                this.holidayModeSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                this.holidayModeSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Holiday Mode`);
+                this.holidayModeSensorService.getCharacteristic(Characteristic.ContactSensorState)
+                    .onGet(async () => {
+                        const state = this.accessory.holidayModeActive;
+                        return state;
+                    })
+                accessory.addService(this.holidayModeSensorService);
+            }
 
             //error sensor
             if (this.errorSensor && this.accessory.isInError !== null) {
@@ -969,6 +1014,14 @@ class DeviceAta extends EventEmitter {
                     //presets
                     const presetsOnServer = deviceData.Presets ?? [];
 
+                    //protection
+                    const frostProtectionEnabled = deviceData.FrostProtection?.enabled;
+                    const frostProtectionActive = deviceData.FrostProtection?.active;
+                    const overheatProtectionEnabled = deviceData.OverheatProtection?.enabled;
+                    const overheatProtectionActive = deviceData.OverheatProtection?.active;
+                    const holidayModeEnabled = deviceData.HolidayMode?.enabled;
+                    const holidayModeActive = deviceData.HolidayMode?.active;
+
                     //device control
                     const hideVaneControls = deviceData.HideVaneControls ?? false;
                     const hideDryModeControl = deviceData.HideDryModeControl ?? false;
@@ -1053,7 +1106,13 @@ class DeviceAta extends EventEmitter {
                         temperatureStep: temperatureStep,
                         useFahrenheit: this.useFahrenheit,
                         temperatureUnit: TemperatureDisplayUnits[this.useFahrenheit],
-                        isInError: isInError
+                        isInError: isInError,
+                        frostProtectionEnabled: frostProtectionEnabled,
+                        frostProtectionActive: frostProtectionActive,
+                        overheatProtectionEnabled: overheatProtectionEnabled,
+                        overheatProtectionActive: overheatProtectionActive,
+                        holidayModeEnabled: holidayModeEnabled,
+                        holidayModeActive: holidayModeActive
                     };
 
                     //operating mode 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
@@ -1195,6 +1254,9 @@ class DeviceAta extends EventEmitter {
 
                     this.roomTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature);
                     this.outdoorTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature);
+                    this.frostProtectionSensorService?.updateCharacteristic(Characteristic.ContactSensorState, frostProtectionActive);
+                    this.overheatProtectionSensorService?.updateCharacteristic(Characteristic.ContactSensorState, overheatProtectionActive);
+                    this.holidayModeSensorService?.updateCharacteristic(Characteristic.ContactSensorState, holidayModeActive);
                     this.errorService?.updateCharacteristic(Characteristic.ContactSensorState, isInError);
 
                     //update presets state

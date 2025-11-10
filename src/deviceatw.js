@@ -29,14 +29,14 @@ class DeviceAtw extends EventEmitter {
         this.displayType = device.displayType;
         this.hideZone = device.hideZone;
         this.temperatureSensor = device.temperatureSensor || false;
-        this.temperatureSensorFlow = device.temperatureSensorFlow || false;
-        this.temperatureSensorReturn = device.temperatureSensorReturn || false;
-        this.temperatureSensorFlowZone1 = device.temperatureSensorFlowZone1 || false;
-        this.temperatureSensorReturnZone1 = device.temperatureSensorReturnZone1 || false;
-        this.temperatureSensorFlowWaterTank = device.temperatureSensorFlowWaterTank || false;
-        this.temperatureSensorReturnWaterTank = device.temperatureSensorReturnWaterTank || false;
-        this.temperatureSensorFlowZone2 = device.temperatureSensorFlowZone2 || false;
-        this.temperatureSensorReturnZone2 = device.temperatureSensorReturnZone2 || false;
+        this.temperatureFlowSensor = device.temperatureFlowSensor || false;
+        this.temperatureReturnSensor = device.temperatureReturnSensor || false;
+        this.temperatureFlowZone1Sensor = device.temperatureFlowZone1Sensor || false;
+        this.temperatureReturnZone1Sensor = device.temperatureReturnZone1Sensor || false;
+        this.temperatureFlowWaterTankSensor = device.temperatureFlowWaterTankSensor || false;
+        this.temperatureReturnWaterTankSensor = device.temperatureReturnWaterTankSensor || false;
+        this.temperatureFlowZone2Sensor = device.temperatureFlowZone2Sensor || false;
+        this.temperatureReturnZone2Sensor = device.temperatureReturnZone2Sensor || false;
         this.errorSensor = device.errorSensor || false;
         this.presets = (device.presets || []).filter(preset => (preset.displayType ?? 0) > 0);
         this.buttons = (device.buttonsSensors || []).filter(button => (button.displayType ?? 0) > 0);
@@ -278,7 +278,7 @@ class DeviceAtw extends EventEmitter {
             if (this.logDebug) this.emit('debug', `Prepare accessory`);
             const accessoryName = deviceName;
             const accessoryUUID = AccessoryUUID.generate(accountName + deviceId.toString());
-            const accessoryCategory = [Categories.OTHER, Categories.AIR_HEATER, Categories.THERMOSTAT][this.displayType];
+            const accessoryCategory = Categories.AIR_HEATER;
             const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 
             //information service
@@ -1359,10 +1359,10 @@ class DeviceAtw extends EventEmitter {
 
                     //zones sensors
                     let currentZoneSensorCase = 0;
-                    const caseHeatPumpSensor = this.temperatureSensor || this.temperatureSensorFlow || this.temperatureSensorReturn ? currentZoneSensorCase++ : -1;
-                    const caseZone1Sensor = this.temperatureSensorFlowZone1 || this.temperatureSensorReturnZone1 ? currentZoneSensorCase++ : -1;
-                    const caseHotWaterSensor = (this.temperatureSensorFlowWaterTank || this.temperatureSensorReturnWaterTank) && deviceData.Device.HasHotWaterTank ? currentZoneSensorCase++ : -1;
-                    const caseZone2Sensor = (this.temperatureSensorFlowZone2 || this.temperatureSensorReturnZone2) && deviceData.Device.HasZone2 ? currentZoneSensorCase++ : -1;
+                    const caseHeatPumpSensor = this.temperatureSensor || this.temperatureFlowSensor || this.temperatureReturnSensor ? currentZoneSensorCase++ : -1;
+                    const caseZone1Sensor = this.temperatureFlowZone1Sensor || this.temperatureReturnZone1Sensor ? currentZoneSensorCase++ : -1;
+                    const caseHotWaterSensor = (this.temperatureFlowWaterTankSensor || this.temperatureReturnWaterTankSensor) && deviceData.Device.HasHotWaterTank ? currentZoneSensorCase++ : -1;
+                    const caseZone2Sensor = (this.temperatureFlowZone2Sensor || this.temperatureReturnZone2Sensor) && deviceData.Device.HasZone2 ? currentZoneSensorCase++ : -1;
                     const zonesSensorsCount = currentZoneSensorCase;
 
                     //heat pump

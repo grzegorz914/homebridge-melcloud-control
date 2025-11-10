@@ -389,11 +389,29 @@
                     "default": false,
                     "description": "This enable extra room temperature sensor to use with automations in HomeKit app."
                   },
-                  "temperatureSensorOutdoor": {
+                  "temperatureOutdoorSensor": {
                     "title": "Outdoor",
                     "type": "boolean",
                     "default": false,
                     "description": "This enable extra outdoor temperature sensor to use with automations in HomeKit app."
+                  },
+                  "frostProtectionSensor": {
+                    "title": "Frost Protection",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable extra frost protection sensor to use with automations in HomeKit app."
+                  },
+                  "overheatProtectionSensor": {
+                    "title": "Overheat Protection",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable extra overheat protection sensor to use with automations in HomeKit app."
+                  },
+                  "holidayModeSensor": {
+                    "title": "Holiday Mode",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable extra holiday mode sensor to use with automations in HomeKit app."
                   },
                   "errorSensor": {
                     "title": "Error",
@@ -962,49 +980,49 @@
                     "default": false,
                     "description": "This enable extra temperature sensor to use with automations in HomeKit app."
                   },
-                  "temperatureSensorFlow": {
+                  "temperatureFlowSensor": {
                     "title": "Temperature Sensor Flow",
                     "type": "boolean",
                     "default": false,
                     "description": "This enable extra Flow temperature sensor to use with automations in HomeKit app."
                   },
-                  "temperatureSensorReturn": {
+                  "temperatureReturnSensor": {
                     "title": "Temperature Sensor Return",
                     "type": "boolean",
                     "default": false,
                     "description": "This enable extra Return temperature sensor to use with automations in HomeKit app."
                   },
-                  "temperatureSensorFlowZone1": {
+                  "temperatureFlowZone1Sensor": {
                     "title": "Temperature Sensor Flow Zone 1",
                     "type": "boolean",
                     "default": false,
                     "description": "This enable extra Flow Zone 1 temperature sensor to use with automations in HomeKit app."
                   },
-                  "temperatureSensorReturnZone1": {
+                  "temperatureReturnZone1Sensor": {
                     "title": "Temperature Sensor Return Zone 1",
                     "type": "boolean",
                     "default": false,
                     "description": "This enable extra Return Zone 1 temperature sensor to use with automations in HomeKit app."
                   },
-                  "temperatureSensorFlowWaterTank": {
+                  "temperatureFlowWaterTankSensor": {
                     "title": "Temperature Sensor Flow Water Tank",
                     "type": "boolean",
                     "default": false,
                     "description": "This enable extra Flow Water Tank temperature sensor to use with automations in HomeKit app."
                   },
-                  "temperatureSensorReturnWaterTank": {
+                  "temperatureReturnWaterTankSensor": {
                     "title": "Temperature Sensor Return Water Tank",
                     "type": "boolean",
                     "default": false,
                     "description": "This enable extra Return Water Tank temperature sensor to use with automations in HomeKit app."
                   },
-                  "temperatureSensorFlowZone2": {
+                  "temperatureFlowZone2Sensor": {
                     "title": "Temperature Sensor Flow Zone 2",
                     "type": "boolean",
                     "default": false,
                     "description": "This enable extra Flow Zone 2 temperature sensor to use with automations in HomeKit app."
                   },
-                  "temperatureSensorReturnZone2": {
+                  "temperatureReturnZone2Sensor": {
                     "title": "Temperature Sensor Return Zone 2",
                     "type": "boolean",
                     "default": false,
@@ -1391,7 +1409,7 @@
                     "default": false,
                     "description": "This enable extra temperature sensor to use with automations in HomeKit app."
                   },
-                  "temperatureSensorOutdoor": {
+                  "temperatureOutdoorSensor": {
                     "title": "Temperature Sensor Outdoor",
                     "type": "boolean",
                     "default": false,
@@ -1873,6 +1891,7 @@
                         {
                           "title": "Settings",
                           "type": "section",
+                          "description": "Section for setup device settings",
                           "expandable": true,
                           "expanded": false,
                           "items": [
@@ -1889,6 +1908,7 @@
                         {
                           "title": "Presets",
                           "type": "section",
+                          "description": "Section for setup device presets",
                           "expandable": true,
                           "expanded": false,
                           "items": [
@@ -1917,20 +1937,34 @@
                           "expandable": true,
                           "expanded": false,
                           "items": [
-                            "accounts[].ataDevices[].errorSensor",
                             {
                               "title": "Temperature",
                               "type": "section",
+                              "description": "Section for setup temperature sensors",
                               "expandable": true,
                               "expanded": false,
                               "items": [
                                 "accounts[].ataDevices[].temperatureSensor",
-                                "accounts[].ataDevices[].temperatureSensorOutdoor"
+                                "accounts[].ataDevices[].temperatureOutdoorSensor"
+                              ]
+                            },
+                            {
+                              "title": "System",
+                              "type": "section",
+                              "description": "Section for setup system sensors",
+                              "expandable": true,
+                              "expanded": false,
+                              "items": [
+                                "accounts[].ataDevices[].frostProtectionSensor",
+                                "accounts[].ataDevices[].overheatProtectionSensor",
+                                "accounts[].ataDevices[].holidayModeSensor",
+                                "accounts[].ataDevices[].errorSensor"
                               ]
                             },
                             {
                               "title": "Custom",
                               "type": "section",
+                              "description": "Section for creating custom buttons/sensors",
                               "expandable": true,
                               "expanded": false,
                               "items": [
@@ -1984,6 +2018,7 @@
                         {
                           "type": "section",
                           "title": "Settings",
+                          "description": "Section for setup device settings",
                           "expandable": true,
                           "expanded": false,
                           "items": [
@@ -1998,6 +2033,7 @@
                         {
                           "title": "Presets",
                           "type": "section",
+                          "description": "Section for setup device presets",
                           "expandable": true,
                           "expanded": false,
                           "items": [
@@ -2030,23 +2066,25 @@
                             {
                               "title": "Temperature",
                               "type": "section",
+                              "description": "Section for setup temperature sensors",
                               "expandable": true,
                               "expanded": false,
                               "items": [
                                 "accounts[].atwDevices[].temperatureSensor",
-                                "accounts[].atwDevices[].temperatureSensorFlow",
-                                "accounts[].atwDevices[].temperatureSensorReturn",
-                                "accounts[].atwDevices[].temperatureSensorFlowZone1",
-                                "accounts[].atwDevices[].temperatureSensorReturnZone1",
-                                "accounts[].atwDevices[].temperatureSensorFlowWaterTank",
-                                "accounts[].atwDevices[].temperatureSensorReturnWaterTank",
-                                "accounts[].atwDevices[].temperatureSensorFlowZone2",
-                                "accounts[].atwDevices[].temperatureSensorReturnZone2"
+                                "accounts[].atwDevices[].temperatureFlowSensor",
+                                "accounts[].atwDevices[].temperatureReturnSensor",
+                                "accounts[].atwDevices[].temperatureFlowZone1Sensor",
+                                "accounts[].atwDevices[].temperatureReturnZone1Sensor",
+                                "accounts[].atwDevices[].temperatureFlowWaterTankSensor",
+                                "accounts[].atwDevices[].temperatureReturnWaterTankSensor",
+                                "accounts[].atwDevices[].temperatureFlowZone2Sensor",
+                                "accounts[].atwDevices[].temperatureReturnZone2Sensor"
                               ]
                             },
                             {
                               "title": "Custom",
                               "type": "section",
+                              "description": "Section for creating custom buttons/sensors",
                               "expandable": true,
                               "expanded": false,
                               "items": [
@@ -2099,6 +2137,7 @@
                         "accounts[].ervDevices[].displayType",
                         {
                           "title": "Settings",
+                          "description": "Section for setup device settings",
                           "type": "section",
                           "expandable": true,
                           "expanded": false,
@@ -2113,6 +2152,7 @@
                         {
                           "title": "Presets",
                           "type": "section",
+                          "description": "Section for setup device presets",
                           "expandable": true,
                           "expanded": false,
                           "items": [
@@ -2145,17 +2185,19 @@
                             {
                               "title": "Temperature",
                               "type": "section",
+                              "description": "Section for setup temperature sensors",
                               "expandable": true,
                               "expanded": false,
                               "items": [
                                 "accounts[].ervDevices[].temperatureSensor",
-                                "accounts[].ervDevices[].temperatureSensorOutdoor",
+                                "accounts[].ervDevices[].temperatureOutdoorSensor",
                                 "accounts[].ervDevices[].temperatureSensorSupply"
                               ]
                             },
                             {
                               "title": "Custom",
                               "type": "section",
+                              "description": "Section for creating custom buttons/sensors",
                               "expandable": true,
                               "expanded": false,
                               "items": [

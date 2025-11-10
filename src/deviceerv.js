@@ -28,8 +28,8 @@ class DeviceErv extends EventEmitter {
         this.device = device;
         this.displayType = device.displayType;
         this.temperatureSensor = device.temperatureSensor || false;
-        this.temperatureSensorOutdoor = device.temperatureSensorOutdoor || false;
-        this.temperatureSensorSupply = device.temperatureSensorSupply || false;
+        this.temperatureOutdoorSensor = device.temperatureOutdoorSensor || false;
+        this.temperatureSupplySensor = device.temperatureSupplySensor || false;
         this.errorSensor = device.errorSensor || false;
         this.presets = (device.presets || []).filter(preset => (preset.displayType ?? 0) > 0);
         this.buttons = (device.buttonsSensors || []).filter(button => (button.displayType ?? 0) > 0);
@@ -246,7 +246,7 @@ class DeviceErv extends EventEmitter {
             if (this.logDebug) this.emit('debug', `Prepare accessory`);
             const accessoryName = deviceName;
             const accessoryUUID = AccessoryUUID.generate(accountName + deviceId.toString());
-            const accessoryCategory = [Categories.OTHER, Categories.AIR_PURIFIER, Categories.THERMOSTAT][this.displayType];
+            const accessoryCategory = Categories.AIR_PURIFIER;
             const accessory = new Accessory(accessoryName, accessoryUUID, accessoryCategory);
 
             //information service
@@ -551,7 +551,7 @@ class DeviceErv extends EventEmitter {
             };
 
             //temperature sensor service supply
-            if (this.temperatureSensorSupply && hasSupplyTemperature && this.accessory.supplyTemperature !== null) {
+            if (this.temperatureSupplySensor && hasSupplyTemperature && this.accessory.supplyTemperature !== null) {
                 if (this.logDebug) this.emit('debug', `Prepare supply temperature sensor service`);
                 this.supplyTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Supply`, `Supply Temperature Sensor ${deviceId}`);
                 this.supplyTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
@@ -570,7 +570,7 @@ class DeviceErv extends EventEmitter {
             };
 
             //temperature sensor service outdoor
-            if (this.temperatureSensorOutdoor && hasOutdoorTemperature && this.accessory.outdoorTemperature !== null) {
+            if (this.temperatureOutdoorSensor && hasOutdoorTemperature && this.accessory.outdoorTemperature !== null) {
                 if (this.logDebug) this.emit('debug', `Prepare outdoor temperature sensor service`);
                 this.outdoorTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Outdoor`, `Outdoor Temperature Sensor ${deviceId}`);
                 this.outdoorTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);

@@ -16,10 +16,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - do not configure it manually, always using Homebridge UI
   - required Homebridge v2.0.0 and above
 - v4 Added support for MELCloud Home.
+  - v4.1 Changed accessory category for ATA devices, required add accessory to KomeKit again
 
 ## Warning
 
 - Do not use Homebridge UI > v5.5.0 because of break config.json
+
+## [4.1.0] - (10.11.2025)
+
+## Changes
+
+- changed accessory category for ATA devices, required add accessory to KomeKit again
+- added frost protection sensor for MELCLoud Home ATA devices
+- added overheat protection sensor for MELCLoud Home ATA devices
+- added holiday mode sensor for MELCLoud Home ATA devices
+- config schema updated
+- readme updated
+- cleanup
 
 ## [4.0.3] - (08.11.2025)
 

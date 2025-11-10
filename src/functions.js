@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { promises as fsPromises } from 'fs';
-import { promisify } from 'util';
-import { exec } from 'child_process';
+import { exec } from 'node:child_process';
+import { promisify } from 'node:util';
 import EventEmitter from 'events';
 const execPromise = promisify(exec);
 const access = fs.promises.access;
