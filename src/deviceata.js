@@ -32,12 +32,13 @@ class DeviceAta extends EventEmitter {
         this.frostProtectionSensor = device.frostProtectionSensor || false;
         this.overheatProtectionSensor = device.overheatProtectionSensor || false;
         this.holidayModeSensor = device.holidayModeSensor || false;
-        this.sheduleSensor = device.sheduleSensor || false;
+        this.scheduleSensor = device.scheduleSensor || false;
         this.errorSensor = device.errorSensor || false;
         this.heatDryFanMode = device.heatDryFanMode || 1; //NONE, HEAT, DRY, FAN
         this.coolDryFanMode = device.coolDryFanMode || 1; //NONE, COOL, DRY, FAN
         this.autoDryFanMode = device.autoDryFanMode || 1; //NONE, AUTO, DRY, FAN
-        this.presets = (device.presets || []).filter(preset => (preset.displayType ?? 0) > 0);
+        this.presets = this.accountType === 'melcloud' ? (device.presets || []).filter(preset => (preset.displayType ?? 0) > 0 && preset.id !== '0') : [];
+        this.schedules = this.accountType === 'melcloudhome' ? (device.schedules || []).filter(schedule => (schedule.displayType ?? 0) > 0 && schedule.id !== '0') : [];
         this.buttons = (device.buttonsSensors || []).filter(sensor => (sensor.displayType ?? 0) > 0);
         this.deviceId = device.id;
         this.deviceName = device.name;
@@ -59,6 +60,14 @@ class DeviceAta extends EventEmitter {
             preset.characteristicType = [null, Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][preset.displayType];
             preset.state = false;
             preset.previousSettings = {};
+        }
+
+        //schedules configured
+        for (const schedule of this.schedules) {
+            schedule.name = schedule.name || 'Schedule'
+            schedule.serviceType = [null, Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][schedule.displayType];
+            schedule.characteristicType = [null, Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][schedule.displayType];
+            schedule.state = false;
         }
 
         //buttons configured
@@ -244,6 +253,7 @@ class DeviceAta extends EventEmitter {
             const deviceName = this.deviceName;
             const accountName = this.accountName;
             const presetsOnServer = this.accessory.presets;
+            const schedulesOnServer = this.accessory.schedules;
             const supportsHeat = this.accessory.supportsHeat;
             const supportsDry = this.accessory.supportsDry;
             const supportsCool = this.accessory.supportsCool;
@@ -651,18 +661,18 @@ class DeviceAta extends EventEmitter {
                 accessory.addService(this.holidayModeSensorService);
             }
 
-            //shedule sensor
-            if (this.sheduleSensor && this.accessory.sheduleEnabled !== null) {
-                if (this.logDebug) this.emit('debug', `Prepare shedule service`);
-                this.sheduleSensorService = new Service.ContactSensor(`${serviceName} Shedule`, `Shedule Sensor ${deviceId}`);
-                this.sheduleSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                this.sheduleSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Shedule`);
-                this.sheduleSensorService.getCharacteristic(Characteristic.ContactSensorState)
+            //schedule sensor
+            if (this.scheduleSensor && this.accessory.scheduleEnabled !== null) {
+                if (this.logDebug) this.emit('debug', `Prepare schedule service`);
+                this.scheduleSensorService = new Service.ContactSensor(`${serviceName} Schedule`, `Schedule Sensor ${deviceId}`);
+                this.scheduleSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                this.scheduleSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Schedule`);
+                this.scheduleSensorService.getCharacteristic(Characteristic.ContactSensorState)
                     .onGet(async () => {
-                        const state = this.accessory.sheduleEnabled;
+                        const state = this.accessory.scheduleEnabled;
                         return state;
                     })
-                accessory.addService(this.sheduleSensorService);
+                accessory.addService(this.scheduleSensorService);
             }
 
             //error sensor
@@ -684,7 +694,7 @@ class DeviceAta extends EventEmitter {
                 if (this.logDebug) this.emit('debug', `Prepare presets services`);
                 this.presetsServices = [];
                 this.presets.forEach((preset, i) => {
-                    const presetData = presetsOnServer.find(p => p.ID === preset.Id);
+                    const presetData = presetsOnServer.find(p => p.ID === preset.id);
 
                     //get preset name
                     const name = preset.name;
@@ -705,7 +715,6 @@ class DeviceAta extends EventEmitter {
                         })
                         .onSet(async (state) => {
                             try {
-                                const fanKey = this.accountType === 'melcloud' ? 'FanSpeed' : 'SetFanSpeed';
                                 switch (state) {
                                     case true:
                                         preset.previousSettings = deviceData.Device;
@@ -714,7 +723,7 @@ class DeviceAta extends EventEmitter {
                                         deviceData.Device.SetTemperature = presetData.SetTemperature;
                                         deviceData.Device.VaneHorizontalDirection = presetData.VaneHorizontalDirection;
                                         deviceData.Device.VaneVerticalDirection = presetData.VaneVerticalDirection;
-                                        deviceData.Device[fanKey] = presetData[fanKey];
+                                        deviceData.Device.SetFanSpeed = presetData.SetFanSpeed;
                                         break;
                                     case false:
                                         deviceData.Device.Power = preset.previousSettings.Power;
@@ -722,7 +731,7 @@ class DeviceAta extends EventEmitter {
                                         deviceData.Device.SetTemperature = preset.previousSettings.SetTemperature;
                                         deviceData.Device.VaneHorizontalDirection = preset.previousSettings.VaneHorizontalDirection;
                                         deviceData.Device.VaneVerticalDirection = preset.previousSettings.VaneVerticalDirection;
-                                        deviceData.Device[fanKey] = preset.previousSettings[fanKey];
+                                        deviceData.Device.SetFanSpeed = preset.previousSettings.SetFanSpeed;
                                         break;
                                 };
 
@@ -734,6 +743,42 @@ class DeviceAta extends EventEmitter {
                         });
                     this.presetsServices.push(presetService);
                     accessory.addService(presetService);
+                });
+            };
+
+            //schedules services
+            if (this.schedules.length > 0) {
+                if (this.logDebug) this.emit('debug', `Prepare schedules services`);
+                this.schedulesServices = [];
+                this.schedules.forEach((schedule, i) => {
+                    //get preset name
+                    const name = schedule.name;
+
+                    //get preset name prefix
+                    const namePrefix = schedule.namePrefix;
+
+                    const serviceName = namePrefix ? `${accessoryName} ${name}` : name;
+                    const serviceType = schedule.serviceType;
+                    const characteristicType = schedule.characteristicType;
+                    const scheduleService = new serviceType(serviceName, `Schedule ${deviceId} ${i}`);
+                    scheduleService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                    scheduleService.setCharacteristic(Characteristic.ConfiguredName, serviceName);
+                    scheduleService.getCharacteristic(characteristicType)
+                        .onGet(async () => {
+                            const state = schedule.state;
+                            return state;
+                        })
+                        .onSet(async (state) => {
+                            try {
+                                deviceData.ScheduleEnabled = state;
+                                await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'scheduleset');
+                                if (this.logInfo) this.emit('info', `${state ? 'Set:' : 'Unset:'} ${name}`);
+                            } catch (error) {
+                                if (this.logWarn) this.emit('warn', `Set schedule error: ${error}`);
+                            };
+                        });
+                    this.schedulesServices.push(scheduleService);
+                    accessory.addService(scheduleService);
                 });
             };
 
@@ -764,7 +809,7 @@ class DeviceAta extends EventEmitter {
                         })
                         .onSet(async (state) => {
                             try {
-                                const key = this.accountType === 'melcloud' ? 'FanSpeed' : 'SetFanSpeed';
+                                const fanKey = this.accountType === 'melcloud' ? 'FanSpeed' : 'SetFanSpeed';
                                 let effectiveFlags = null;
                                 switch (mode) {
                                     case 0: //POWER ON,OFF
@@ -1015,6 +1060,8 @@ class DeviceAta extends EventEmitter {
                     this.deviceData = deviceData;
 
                     //keys
+                    const presetsIdKey = this.accountType === 'melcloud' ? 'ID' : 'Id';
+                    const setTempKey = this.accountType === 'melcloud' ? 'SetTemperature' : 'SetPoint';
                     const fanKey = this.accountType === 'melcloud' ? 'FanSpeed' : 'SetFanSpeed';
                     const tempStepKey = this.accountType === 'melcloud' ? 'TemperatureIncrement' : 'HasHalfDegreeIncrements';
                     const errorKey = this.accountType === 'melcloud' ? 'HasError' : 'IsInError';
@@ -1026,17 +1073,19 @@ class DeviceAta extends EventEmitter {
                     const supportDryKey = this.accountType === 'melcloud' ? 'ModelSupportsDry' : 'HasDryOperationMode';
                     const supportCoolKey = this.accountType === 'melcloud' ? 'ModelSupportsCool' : 'HasCoolOperationMode';
 
-                    //presets
+                    //presets schedule
+                    const scheduleEnabled = deviceData.ScheduleEnabled;
+                    const schedulesOnServer = deviceData.Schedule ?? [];
                     const presetsOnServer = deviceData.Presets ?? [];
 
+
                     //protection
-                    const frostProtectionEnabled = deviceData.FrostProtection?.enabled;
-                    const frostProtectionActive = deviceData.FrostProtection?.active;
-                    const overheatProtectionEnabled = deviceData.OverheatProtection?.enabled;
-                    const overheatProtectionActive = deviceData.OverheatProtection?.active;
-                    const holidayModeEnabled = deviceData.HolidayMode?.enabled;
-                    const holidayModeActive = deviceData.HolidayMode?.active;
-                    const sheduleEnabled = deviceData.ScheduleEnabled;
+                    const frostProtectionEnabled = deviceData.FrostProtection?.Enabled;
+                    const frostProtectionActive = deviceData.FrostProtection?.Active;
+                    const overheatProtectionEnabled = deviceData.OverheatProtection?.Enabled;
+                    const overheatProtectionActive = deviceData.OverheatProtection?.Active;
+                    const holidayModeEnabled = deviceData.HolidayMode?.Enabled;
+                    const holidayModeActive = deviceData.HolidayMode?.Active;
 
                     //device control
                     const hideVaneControls = deviceData.HideVaneControls ?? false;
@@ -1088,6 +1137,7 @@ class DeviceAta extends EventEmitter {
                     //accessory
                     const obj = {
                         presets: presetsOnServer,
+                        schedules: schedulesOnServer,
                         supportsAutomaticFanSpeed: supportsAutomaticFanSpeed,
                         supportsAirDirectionFunction: supportsAirDirectionFunction,
                         supportsSwingFunction: supportsSwingFunction,
@@ -1129,7 +1179,7 @@ class DeviceAta extends EventEmitter {
                         overheatProtectionActive: overheatProtectionActive,
                         holidayModeEnabled: holidayModeEnabled,
                         holidayModeActive: holidayModeActive,
-                        sheduleEnabled: sheduleEnabled
+                        scheduleEnabled: scheduleEnabled
                     };
 
                     //operating mode 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
@@ -1274,23 +1324,34 @@ class DeviceAta extends EventEmitter {
                     this.frostProtectionSensorService?.updateCharacteristic(Characteristic.ContactSensorState, frostProtectionActive);
                     this.overheatProtectionSensorService?.updateCharacteristic(Characteristic.ContactSensorState, overheatProtectionActive);
                     this.holidayModeSensorService?.updateCharacteristic(Characteristic.ContactSensorState, holidayModeActive);
-                    this.sheduleSensorService?.updateCharacteristic(Characteristic.ContactSensorState, sheduleEnabled);
+                    this.scheduleSensorService?.updateCharacteristic(Characteristic.ContactSensorState, scheduleEnabled);
                     this.errorService?.updateCharacteristic(Characteristic.ContactSensorState, isInError);
 
                     //update presets state
                     if (this.presets.length > 0) {
                         this.presets.forEach((preset, i) => {
-                            const presetData = presetsOnServer.find(p => p.ID === preset.Id);
+                            const presetData = presetsOnServer.find(p => p[presetsIdKey] === preset.id);
 
                             preset.state = presetData ? (presetData.Power === power
                                 && presetData.SetTemperature === setTemperature
                                 && presetData.OperationMode === operationMode
                                 && presetData.VaneHorizontalDirection === vaneHorizontalDirection
                                 && presetData.VaneVerticalDirection === vaneVerticalDirection
-                                && presetData[fanKey] === setFanSpeed) : false;
+                                && presetData.FanSpeed === setFanSpeed) : false;
 
                             const characteristicType = preset.characteristicType;
                             this.presetsServices?.[i]?.updateCharacteristic(characteristicType, preset.state);
+                        });
+                    };
+
+                    //update schedules state
+                    if (this.schedules.length > 0) {
+                        this.schedules.forEach((schedule, i) => {
+                            const scheduleData = schedulesOnServer.find(s => s[presetsIdKey] === schedule.id);
+                            schedule.state = scheduleEnabled; //scheduleData.Enabled : false;
+
+                            const characteristicType = schedule.characteristicType;
+                            this.schedulesServices?.[i]?.updateCharacteristic(characteristicType, schedule.state);
                         });
                     };
 

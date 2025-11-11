@@ -23,7 +23,6 @@ class MelCloudAta extends EventEmitter {
 
         //set default values
         this.deviceData = {};
-        this.headers = {};
 
         //lock flags
         this.locks = {
@@ -60,7 +59,7 @@ class MelCloudAta extends EventEmitter {
                 return null;
             }
             const deviceData = devicesData.find(device => device.DeviceID === this.deviceId);
-            this.headers = deviceData.Headers;
+
             if (this.accountType === 'melcloudhome') {
                 deviceData.SerialNumber = deviceData.DeviceID || '4.0.0';
                 deviceData.Device.FirmwareAppVersion = deviceData.ConnectedInterfaceIdentifier || '4.0.0';
@@ -75,7 +74,12 @@ class MelCloudAta extends EventEmitter {
                 deviceData.Device.DefaultHeatingSetTemperature = temps?.defaultHeatingSetTemperature ?? 20;
                 deviceData.Device.DefaultCoolingSetTemperature = temps?.defaultCoolingSetTemperature ?? 24;
             }
-            if (this.logDebug) this.emit('debug', `Device Data: ${JSON.stringify(deviceData, null, 2)}`);
+
+            const safeConfig = {
+                ...deviceData,
+                headers: 'removed',
+            };
+            if (this.logDebug) this.emit('debug', `Device Data: ${JSON.stringify(safeConfig, null, 2)}`);
 
             //device
             const serialNumber = deviceData.SerialNumber;
@@ -144,7 +148,7 @@ class MelCloudAta extends EventEmitter {
                         method: 'POST',
                         baseURL: ApiUrls.BaseURL,
                         timeout: 10000,
-                        headers: this.headers,
+                        headers: deviceData.Headers,
                         withCredentials: true
                     });
 
@@ -183,7 +187,7 @@ class MelCloudAta extends EventEmitter {
                         method: 'PUT',
                         baseURL: ApiUrlsHome.BaseURL,
                         timeout: 10000,
-                        headers: this.headers,
+                        headers: deviceData.Headers,
                         withCredentials: true
                     });
 
@@ -199,19 +203,19 @@ class MelCloudAta extends EventEmitter {
                         }
                     }
 
-                    const settings = {
+                    const settings = effectiveFlags === 'scheduleset' ? { data: { enabled: deviceData.ScheduleEnabled } } : {
                         data: {
                             Power: deviceData.Device.Power,
                             SetTemperature: deviceData.Device.SetTemperature,
                             SetFanSpeed: String(deviceData.Device.SetFanSpeed),
                             OperationMode: AirConditioner.OperationModeMapEnumToString[deviceData.Device.OperationMode],
                             VaneHorizontalDirection: AirConditioner.VaneHorizontalDirectionMapEnumToString[deviceData.Device.VaneHorizontalDirection],
-                            VaneVerticalDirection: AirConditioner.VaneVerticalDirectionMapEnumToString[deviceData.Device.VaneVerticalDirection]
+                            VaneVerticalDirection: AirConditioner.VaneVerticalDirectionMapEnumToString[deviceData.Device.VaneVerticalDirection],
                         }
                     };
                     if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(settings.data, null, 2)}`);
 
-                    const path = ApiUrlsHome.SetAta.replace('deviceid', deviceData.DeviceID);
+                    const path = effectiveFlags === 'scheduleset' ? ApiUrlsHome.SetSchedule.replace('deviceid', deviceData.DeviceID) : ApiUrlsHome.SetAta.replace('deviceid', deviceData.DeviceID);
                     await axiosInstancePut(path, settings);
                     this.updateData(deviceData);
                     return true;
@@ -219,6 +223,11 @@ class MelCloudAta extends EventEmitter {
                     return;
             }
         } catch (error) {
+            // Return 500 for schedule hovewer working correct
+            if (error?.response?.status === 500) {
+                return true;
+            }
+
             throw new Error(`Send data error: ${error.message}`);
         }
     }

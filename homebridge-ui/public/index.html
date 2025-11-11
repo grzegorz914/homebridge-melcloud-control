@@ -105,7 +105,6 @@
         return;
       }
 
-      this.accountIndex = 0;
       const accounts = pluginConfig[0].accounts || [];
       const accountsCount = accounts.length;
 
@@ -117,17 +116,22 @@
       container.style.alignItems = 'center';
 
       const formElements = {
+        accountName: document.getElementById('accountName'),
+        info: document.getElementById('info'),
+        info1: document.getElementById('info1'),
+        info2: document.getElementById('info2'),
         name: document.getElementById('name'),
         user: document.getElementById('user'),
         passwd: document.getElementById('passwd'),
         language: document.getElementById('language'),
         accountType: document.getElementById('accountType'),
-        logIn: document.getElementById('logIn'),
-        accountName: document.getElementById('accountName')
+        logIn: document.getElementById('logIn')
       };
 
       // Tworzenie przycisków
       accounts.forEach((account, i) => {
+        this.account = account;
+
         const button = document.createElement("button");
         button.type = "button";
         button.id = `button${i}`;
@@ -137,7 +141,7 @@
         container.appendChild(button);
 
         button.addEventListener('click', async () => {
-          this.accountIndex = i;
+          this.account = account;
 
           // Zmieniamy klasę wszystkich przycisków
           accounts.forEach((_, j) => {
@@ -146,6 +150,9 @@
 
           // Ustawiamy formularz
           formElements.accountName.innerText = account.name || '';
+          formElements.info.innerText = ``;
+          formElements.info1.innerText = '';
+          formElements.info2.innerText = '';
           formElements.name.value = account.name || '';
           formElements.user.value = account.user || '';
           formElements.passwd.value = account.passwd || '';
@@ -160,7 +167,7 @@
 
       // Jeden listener input dla całego formularza
       document.getElementById('configForm').addEventListener('input', async () => {
-        const account = accounts[this.accountIndex];
+        const account = this.account;
         if (!account) return;
 
         account.name = formElements.name.value;
@@ -224,12 +231,13 @@
 
       document.getElementById('logIn').addEventListener('click', async () => {
         document.getElementById(`logIn`).className = "btn btn-primary";
-
-        updateInfo('info', 'Connecting...', 'yellow');
+        updateInfo('info', '', 'white');
+        updateInfo('info1', '', 'white');
+        updateInfo('info2', '', 'white');
         homebridge.showSpinner();
 
         try {
-          const account = pluginConfig[0].accounts[this.accountIndex];
+          const account = this.account;
           const response = await homebridge.request('/connect', account);
           if (!response.State) {
             homebridge.hideSpinner();
@@ -256,43 +264,81 @@
           const removedErv = removeStaleDevices(account.ervDevices, devicesByType.erv);
 
           const handleDevices = (devicesInMelCloud, devicesInConfig, typeString, newArr, newPresets) => {
-            devicesInMelCloud.forEach(device => {
-              const deviceObj = {
-                id: device.DeviceID,
-                type: device.Type,
-                typeString,
-                displayType: 0,
-                name: device.DeviceName,
-                presets: device.Presets ?? [],
-                buttonsSensors: []
-              };
+            try {
+              const configDevicesMap = new Map(devicesInConfig.map(dev => [String(dev.id), dev]));
+              const isMelcloud = account.type === 'melcloud';
 
-              if (!devicesInConfig.some(device => String(device.id) === deviceObj.id)) {
-                devicesInConfig.push(deviceObj);
-                newArr.push(deviceObj);
-              }
+              const idKey = isMelcloud ? 'ID' : 'Id';
+              const typeKey = isMelcloud ? 'Presets' : 'Schedule';
+              const typeKey1 = isMelcloud ? 'presets' : 'schedules';
 
-              const presets = device.Presets || [];
-              presets.forEach(preset => {
-                const presetObj = {
-                  id: preset.ID,
-                  displayType: 0,
-                  name: preset.NumberDescription,
-                  namePrefix: false
-                };
+              devicesInMelCloud.forEach(device => {
+                const deviceId = String(device.DeviceID);
+                let deviceInConfig = configDevicesMap.get(deviceId);
 
-                const deviceInConfig = devicesInConfig.find(device => String(device.id) === deviceObj.id);
-                if (deviceInConfig && !deviceInConfig.presets.some(preset => preset.id === presetObj.id)) {
-                  deviceInConfig.presets.push(presetObj);
-                  newPresets.push(presetObj);
+                // === Create device if missing ===
+                if (!deviceInConfig) {
+                  deviceInConfig = {
+                    id: device.DeviceID,
+                    type: device.Type,
+                    typeString,
+                    displayType: 0,
+                    name: device.DeviceName,
+                    presets: [],
+                    schedules: [],
+                    buttonsSensors: []
+                  };
+                  devicesInConfig.push(deviceInConfig);
+                  newArr.push(deviceInConfig);
+                  configDevicesMap.set(deviceId, deviceInConfig);
+                }
+
+                // === Process presets/schedules ===
+                const presets = device[typeKey] || [];
+                const presetsInConfig = deviceInConfig[typeKey1] || [];
+                const presetIds = new Set(presetsInConfig.map(p => String(p.id)));
+
+                let addedNewPreset = false;
+
+                presets.forEach((preset, index) => {
+                  const presetId = String(preset[idKey]);
+                  if (!presetIds.has(presetId)) {
+                    const presetObj = {
+                      id: presetId,
+                      displayType: 0,
+                      name: preset.NumberDescription || `Schedule ${index}`,
+                      namePrefix: false
+                    };
+                    presetsInConfig.push(presetObj);
+                    newPresets.push(presetObj);
+                    presetIds.add(presetId);
+                    addedNewPreset = true;
+                  }
+                });
+
+                // === Remove placeholder presets/schedules (id === '0') if new ones were added ===
+                if (addedNewPreset) {
+                  const beforeCount = presetsInConfig.length;
+                  deviceInConfig[typeKey1] = presetsInConfig.filter(p => String(p.id) !== '0');
+                  const removedCount = beforeCount - deviceInConfig[typeKey1].length;
+
+                  if (removedCount > 0 && removedCount < beforeCount) {
+                    updateInfo('info2', `Removed ${removedCount} placeholder ${typeKey1} from device ${device.DeviceID}`, 'yellow');
+                  }
                 }
               });
-            });
+
+              // Return filtered devicesInConfig to make sure upstream code uses it
+              const filteredDevices = devicesInConfig.filter(d => String(d.id) !== '0');
+              return filteredDevices;
+            } catch (error) {
+              updateInfo('info', `Error while processing device: ${JSON.stringify(error)}`, 'red');
+            }
           };
 
-          handleDevices(devicesByType.ata, account.ataDevices, "Air Conditioner", newDevices.ata, newDevices.ataPresets);
-          handleDevices(devicesByType.atw, account.atwDevices, "Heat Pump", newDevices.atw, newDevices.atwPresets);
-          handleDevices(devicesByType.erv, account.ervDevices, "Energy Recovery Ventilation", newDevices.erv, newDevices.ervPresets);
+          account.ataDevices = handleDevices(devicesByType.ata, account.ataDevices, "Air Conditioner", newDevices.ata, newDevices.ataPresets);
+          account.atwDevices = handleDevices(devicesByType.atw, account.atwDevices, "Heat Pump", newDevices.atw, newDevices.atwPresets);
+          account.ervDevices = handleDevices(devicesByType.erv, account.ervDevices, "Energy Recovery Ventilation", newDevices.erv, newDevices.ervPresets);
 
           const newDevicesCount = newDevices.ata.length + newDevices.atw.length + newDevices.erv.length;
           const newPresetsCount = newDevices.ataPresets.length + newDevices.atwPresets.length + newDevices.ervPresets.length;
@@ -304,20 +350,18 @@
             if (newDevicesCount)
               updateInfo('info', `Found new devices: ATA: ${newDevices.ata.length}, ATW: ${newDevices.atw.length}, ERV: ${newDevices.erv.length}.`, 'green');
             if (newPresetsCount)
-              updateInfo('info1', `Found new presets: ATA: ${newDevices.ataPresets.length}, ATW: ${newDevices.atwPresets.length}, ERV: ${newDevices.ervPresets.length}.`, 'green');
+              updateInfo('info1', `Found new ${account.type === 'melcloud' ? 'presets' : 'schedules'}: ATA: ${newDevices.ataPresets.length}, ATW: ${newDevices.atwPresets.length}, ERV: ${newDevices.ervPresets.length}.`, 'green');
             if (removedDevicesCount)
               updateInfo('info2', `Removed devices: ATA: ${removedAta.length}, ATW: ${removedAtw.length}, ERV: ${removedErv.length}.`, 'orange');
           }
 
           await homebridge.updatePluginConfig(pluginConfig);
           await homebridge.savePluginConfig(pluginConfig);
-          document.getElementById('logIn').className = "btn btn-secondary";
-
         } catch (error) {
-          updateInfo('info', 'Connect error.', 'yellow');
-          updateInfo('info1', `${JSON.stringify(error)}`, 'red');
+          updateInfo('info', `Connect error ${JSON.stringify(error)}`, 'red');
           document.getElementById('logIn').className = "btn btn-secondary";
         } finally {
+          document.getElementById('logIn').className = "btn btn-secondary";
           homebridge.hideSpinner();
         }
       });

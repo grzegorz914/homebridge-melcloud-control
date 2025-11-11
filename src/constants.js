@@ -21,8 +21,12 @@ export const ApiUrlsHome = {
     BaseURL: "https://melcloudhome.com",
     GetUserContext: "/api/user/context",
     SetAta: "/api/ataunit/deviceid",
+    GetAtaSchedule: "/ata/deviceid/schedule",
     SetAtw: "/api/atwunit/deviceid",
+    GetAtwSchedule: "/atw/deviceid/schedule",
     SetErv: "/api/ervunit/deviceid",
+    GetErvSchedule: "/erv/deviceid/schedule",
+    SetSchedule: "/api/cloudschedule/deviceid/enabled",
 };
 
 export const DeviceType = [

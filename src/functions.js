@@ -68,18 +68,16 @@ class Functions extends EventEmitter {
             const arch = archOut.trim();
             if (this.logDebug) this.emit('debug', `Detected architecture: ${arch}`);
 
-            // --- Detect Docker environment ---
+            // --- Detect Docker ---
             let isDocker = false;
             try {
-                await access('/.dockerenv', fs.constants.F_OK);
-                isDocker = true;
-            } catch {
-                try {
-                    const { stdout } = await execPromise('cat /proc/1/cgroup || true');
-                    if (stdout.includes('docker') || stdout.includes('containerd'))
-                        isDocker = true;
-                } catch { }
-            }
+                await access('/.dockerenv', fs.constants.F_OK); isDocker = true;
+            } catch { }
+
+            try {
+                const { stdout } = await execPromise('cat /proc/1/cgroup || true');
+                if (stdout.includes('docker') || stdout.includes('containerd')) isDocker = true;
+            } catch { }
 
             if (isDocker && this.logDebug) this.emit('debug', 'Running inside Docker container.');
 
@@ -88,83 +86,68 @@ class Functions extends EventEmitter {
                 chromiumPath = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
                 try {
                     await access(chromiumPath, fs.constants.X_OK);
-                    if (this.logDebug) this.emit('debug', `Using system Chrome at ${chromiumPath}`);
                     return chromiumPath;
                 } catch {
                     return null;
                 }
             }
 
-            // === ARM (e.g. Raspberry Pi) ===
+            // === ARM ===
             if (arch.startsWith('arm')) {
                 try {
-                    await access('/usr/bin/chromium-browser', fs.constants.X_OK);
-                    if (this.logDebug) this.emit('debug', 'Using system Chromium on ARM platform.');
-                    return '/usr/bin/chromium-browser';
+                    chromiumPath = '/usr/bin/chromium-browser';
+                    await access(chromiumPath, fs.constants.X_OK);
+                    return chromiumPath;
                 } catch {
-                    if (this.logWarn) this.emit('warn', 'System Chromium not found on ARM. Attempting installation...');
                     try {
                         await execPromise('sudo apt-get update -y && sudo apt-get install -y chromium-browser chromium-codecs-ffmpeg');
-                        if (this.logDebug) this.emit('debug', 'Chromium installed successfully on ARM.');
-                        return '/usr/bin/chromium-browser';
+                        return chromiumPath;
                     } catch {
                         return null;
                     }
                 }
             }
 
-            // === Linux (x64, Docker, etc.) ===
+            // === Linux x64 ===
             if (osName === 'Linux') {
+                let systemChromium = null;
                 try {
-                    // --- Try detect common Chromium binaries ---
                     const { stdout: checkOut } = await execPromise('which chromium || which chromium-browser || true');
-                    chromiumPath = checkOut.trim();
-                    if (chromiumPath) {
-                        if (this.logDebug) this.emit('debug', `Found system Chromium: ${chromiumPath}`);
-                        return chromiumPath;
-                    }
+                    systemChromium = checkOut.trim() || null;
                 } catch { }
 
-                if (this.logWarn) this.emit('warn', 'Chromium not found. Attempting installation...');
+                // --- Detect Entware (QNAP) ---
+                let entwareExists = false;
+                try {
+                    await access('/opt/bin/opkg', fs.constants.X_OK);
+                    entwareExists = true;
+                } catch { }
 
-                // --- Try install (Docker-optimized first) ---
-                const installCommands = [
-                    'apt-get update -y && apt-get install -y chromium chromium-browser chromium-codecs-ffmpeg',
-                    'apk add --no-cache chromium ffmpeg',
-                    'yum install -y chromium chromium-codecs-ffmpeg'
+                if (entwareExists) {
+                    try {
+                        await execPromise('/opt/bin/opkg update');
+                        await execPromise('/opt/bin/opkg install nspr nss libx11 libxcomposite libxdamage libxrandr libatk libatk-bridge libcups libdrm libgbm libasound');
+                        process.env.LD_LIBRARY_PATH = `/opt/lib:${process.env.LD_LIBRARY_PATH || ''}`;
+                    } catch { }
+                }
+
+                // --- Generic Linux installs missing libs for Puppeteer ---
+                const depInstall = [
+                    'apt-get update -y && apt-get install -y libnspr4 libnss3 libx11-6 libxcomposite1 libxdamage1 libxrandr2 libatk1.0-0 libcups2 libdrm2 libgbm1 libasound2',
+                    'apk add --no-cache nspr nss libx11 libxcomposite libxdamage libxrandr atk cups libdrm libgbm alsa-lib',
+                    'yum install -y nspr nss libX11 libXcomposite libXdamage libXrandr atk cups libdrm libgbm alsa-lib'
                 ];
-
-                for (const cmd of installCommands) {
+                for (const cmd of depInstall) {
                     try {
-                        if (this.logDebug) this.emit('debug', `Trying installation: ${cmd}`);
                         await execPromise(`sudo ${cmd}`);
-                        // Check for binary after install
-                        const { stdout: checkOut } = await execPromise('which chromium || which chromium-browser || true');
-                        chromiumPath = checkOut.trim() || '/usr/bin/chromium';
-                        if (chromiumPath) {
-                            if (this.logDebug) this.emit('debug', `Chromium installed successfully at ${chromiumPath}`);
-                            return chromiumPath;
-                        }
-                    } catch (error) {
-                        if (this.logDebug) this.emit('debug', `Install attempt failed: ${cmd} → ${error.message}`);
-                    }
+                    } catch { }
                 }
 
-                if (isDocker) {
-                    // Docker fallback specific
-                    try {
-                        await execPromise('sudo apt-get update -y && sudo apt-get install -y chromium');
-                        await access('/usr/bin/chromium', fs.constants.X_OK);
-                        if (this.logDebug) this.emit('debug', 'Chromium installed successfully inside Docker at /usr/bin/chromium');
-                        return '/usr/bin/chromium';
-                    } catch {
-                        return null;
-                    }
-                }
-                return null;
+                // Set LD_LIBRARY_PATH so Puppeteer's Chromium can find libs
+                process.env.LD_LIBRARY_PATH = `/usr/lib:/usr/lib64:${process.env.LD_LIBRARY_PATH || ''}`;
+                return systemChromium;
             }
 
-            // Unknown OS
             if (this.logDebug) this.emit('debug', `Unsupported OS: ${osName}.`);
             return null;
         } catch (error) {
@@ -172,5 +155,6 @@ class Functions extends EventEmitter {
             return null;
         }
     }
+
 }
 export default Functions

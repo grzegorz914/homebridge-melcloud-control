@@ -38,7 +38,8 @@ class DeviceAtw extends EventEmitter {
         this.temperatureFlowZone2Sensor = device.temperatureFlowZone2Sensor || false;
         this.temperatureReturnZone2Sensor = device.temperatureReturnZone2Sensor || false;
         this.errorSensor = device.errorSensor || false;
-        this.presets = (device.presets || []).filter(preset => (preset.displayType ?? 0) > 0);
+        this.presets = this.accountType === 'melcloud' ? (device.presets || []).filter(preset => (preset.displayType ?? 0) > 0 && preset.id !== '0') : [];
+        this.schedules = this.accountType === 'melcloudhome' ? (device.schedules || []).filter(schedule => (schedule.displayType ?? 0) > 0 && schedule.id !== '0') : [];
         this.buttons = (device.buttonsSensors || []).filter(button => (button.displayType ?? 0) > 0);
         this.deviceId = device.id;
         this.deviceName = device.name;
@@ -60,6 +61,14 @@ class DeviceAtw extends EventEmitter {
             preset.characteristicType = [null, Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][preset.displayType];
             preset.state = false;
             preset.previousSettings = {};
+        }
+
+        //schedules configured
+        for (const schedule of this.schedules) {
+            schedule.name = schedule.name || 'Schedule'
+            schedule.serviceType = [null, Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][schedule.displayType];
+            schedule.characteristicType = [null, Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][schedule.displayType];
+            schedule.state = false;
         }
 
         //buttons configured
@@ -261,6 +270,7 @@ class DeviceAtw extends EventEmitter {
             const deviceName = this.deviceName;
             const accountName = this.accountName;
             const presetsOnServer = this.accessory.presets;
+            const schedulesOnServer = this.accessory.schedules;
             const zonesCount = this.accessory.zonesCount;
             const caseHeatPump = this.accessory.caseHeatPump;
             const caseZone1 = this.accessory.caseZone1;
@@ -1055,8 +1065,9 @@ class DeviceAtw extends EventEmitter {
             if (this.presets.length > 0) {
                 if (this.logDebug) this.emit('debug', `Prepare presets services`);
                 this.presetsServices = [];
+                const presetsIdKey = this.accountType === 'melcloud' ? 'ID' : 'Id';
                 this.presets.forEach((preset, i) => {
-                    const presetData = presetsOnServer.find(p => p.ID === preset.Id);
+                    const presetData = presetsOnServer.find(p => p[presetsIdKey] === preset.id);
 
                     //get preset name
                     const name = preset.name;
@@ -1117,6 +1128,42 @@ class DeviceAtw extends EventEmitter {
                         });
                     this.presetsServices.push(presetService);
                     accessory.addService(presetService);
+                });
+            };
+
+            //schedules services
+            if (this.schedules.length > 0) {
+                if (this.logDebug) this.emit('debug', `Prepare schedules services`);
+                this.schedulesServices = [];
+                this.schedules.forEach((schedule, i) => {
+                    //get preset name
+                    const name = schedule.name;
+
+                    //get preset name prefix
+                    const namePrefix = schedule.namePrefix;
+
+                    const serviceName = namePrefix ? `${accessoryName} ${name}` : name;
+                    const serviceType = schedule.serviceType;
+                    const characteristicType = schedule.characteristicType;
+                    const scheduleService = new serviceType(serviceName, `Schedule ${deviceId} ${i}`);
+                    scheduleService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                    scheduleService.setCharacteristic(Characteristic.ConfiguredName, serviceName);
+                    scheduleService.getCharacteristic(characteristicType)
+                        .onGet(async () => {
+                            const state = schedule.state;
+                            return state;
+                        })
+                        .onSet(async (state) => {
+                            try {
+                                deviceData.ScheduleEnabled = state;
+                                await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'scheduleset');
+                                if (this.logInfo) this.emit('info', `${state ? 'Set:' : 'Unset:'} ${name}`);
+                            } catch (error) {
+                                if (this.logWarn) this.emit('warn', `Set schedule error: ${error}`);
+                            };
+                        });
+                    this.schedulesServices.push(scheduleService);
+                    accessory.addService(scheduleService);
                 });
             };
 
@@ -1330,10 +1377,14 @@ class DeviceAtw extends EventEmitter {
                     this.deviceData = deviceData;
 
                     //keys
+                    const presetsKey = this.accountType === 'melcloud' ? 'Presets' : 'Schedule';
+                    const presetsIdKey = accountType === 'melcloud' ? 'ID' : 'Id';
                     const tempStepKey = this.accountType === 'melcloud' ? 'TemperatureIncrement' : 'HasHalfDegreeIncrements';
                     const errorKey = this.accountType === 'melcloud' ? 'HasError' : 'IsInError';
 
-                    //presets
+                    //presets schedule
+                    const scheduleEnabled = deviceData.ScheduleEnabled;
+                    const schedulesOnServer = deviceData.Schedule ?? [];
                     const presetsOnServer = deviceData.Presets ?? [];
 
                     //device info
@@ -1413,6 +1464,7 @@ class DeviceAtw extends EventEmitter {
                     //accessory
                     const obj = {
                         presets: presetsOnServer,
+                        schedules: schedulesOnServer,
                         power: power ? 1 : 0,
                         unitStatus: unitStatus,
                         idleZone1: idleZone1,
@@ -1436,6 +1488,7 @@ class DeviceAtw extends EventEmitter {
                         useFahrenheit: this.useFahrenheit,
                         temperatureUnit: TemperatureDisplayUnits[this.useFahrenheit],
                         isInError: isInError,
+                        scheduleEnabled: scheduleEnabled,
                         zones: [],
                         zonesSensors: []
                     };
@@ -1816,7 +1869,7 @@ class DeviceAtw extends EventEmitter {
                     //update presets state
                     if (this.presets.length > 0) {
                         this.presets.forEach((preset, i) => {
-                            const presetData = presetsOnServer.find(p => p.ID === preset.Id);
+                            const presetData = presetsOnServer.find(p => p[presetsIdKey] === preset.id);
 
                             preset.state = presetData ? (presetData.Power === power
                                 && presetData.EcoHotWater === ecoHotWater
@@ -1833,6 +1886,17 @@ class DeviceAtw extends EventEmitter {
 
                             const characteristicType = preset.characteristicType;
                             this.presetsServices?.[i]?.updateCharacteristic(characteristicType, preset.state);
+                        });
+                    };
+
+                    //update schedules state
+                    if (this.schedules.length > 0) {
+                        this.schedules.forEach((schedule, i) => {
+                            const scheduleData = schedulesOnServer.find(s => s[presetsIdKey] === schedule.id);
+                            schedule.state = scheduleEnabled; //scheduleData.Enabled : false;
+
+                            const characteristicType = schedule.characteristicType;
+                            this.schedulesServices?.[i]?.updateCharacteristic(characteristicType, schedule.state);
                         });
                     };
 

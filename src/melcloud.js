@@ -1,8 +1,9 @@
+import fs from 'fs';
 import axios from 'axios';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import EventEmitter from 'events';
-import puppeteer from 'puppeteer-core';
+import puppeteer from 'puppeteer';
 import ImpulseGenerator from './impulsegenerator.js';
 import Functions from './functions.js';
 import { ApiUrls, ApiUrlsHome } from './constants.js';
@@ -244,6 +245,20 @@ class MelCloud extends EventEmitter {
                         ])
                     );
 
+                // Rekurencyjna kapitalizacja kluczy w obiekcie lub tablicy
+                const capitalizeKeysDeep = obj => {
+                    if (Array.isArray(obj)) return obj.map(capitalizeKeysDeep);
+                    if (obj && typeof obj === 'object') {
+                        return Object.fromEntries(
+                            Object.entries(obj).map(([key, value]) => [
+                                key.charAt(0).toUpperCase() + key.slice(1),
+                                capitalizeKeysDeep(value)
+                            ])
+                        );
+                    }
+                    return obj;
+                };
+
                 // Funkcja tworząca finalny obiekt Device
                 const createDevice = (device, type) => {
                     // Settings już kapitalizowane w nazwach
@@ -267,6 +282,15 @@ class MelCloud extends EventEmitter {
                         ...settingsObject,
                         DeviceType: type
                     };
+
+                    // Kapitalizacja brakujących obiektów/tablic
+                    if (device.FrostProtection) device.FrostProtection = { ...capitalizeKeys(device.FrostProtection || {}) };
+                    if (device.OverheatProtection) device.OverheatProtection = { ...capitalizeKeys(device.OverheatProtection || {}) };
+                    if (device.HolidayMode) device.HolidayMode = { ...capitalizeKeys(device.HolidayMode || {}) };
+
+                    if (Array.isArray(device.Schedule)) {
+                        device.Schedule = device.Schedule.map(capitalizeKeysDeep);
+                    }
 
                     // Usuń stare pola Settings i Capabilities
                     const { Settings, Capabilities, Id, GivenDisplayName, ...rest } = device;
@@ -313,7 +337,21 @@ class MelCloud extends EventEmitter {
         let browser;
         try {
             const accountInfo = { State: false, Info: '', ContextKey: null, UseFahrenheit: false };
-            const chromiumPath = await this.functions.ensureChromiumInstalled();
+            let chromiumPath = await this.functions.ensureChromiumInstalled();
+
+            // === Fallback to Puppeteer's built-in Chromium ===
+            if (!chromiumPath) {
+                try {
+                    const puppeteerPath = puppeteer.executablePath();
+                    if (puppeteerPath && fs.existsSync(puppeteerPath)) {
+                        chromiumPath = puppeteerPath;
+                        if (this.logDebug) this.emit('debug', `Using puppeteer Chromium at ${chromiumPath}`);
+                    }
+                } catch { }
+            } else {
+                if (this.logDebug) this.emit('debug', `Using system Chromium at ${chromiumPath}`);
+            }
+
             if (!chromiumPath) {
                 accountInfo.Info = 'Chromium not found on Your device, please install it manually and try again';
                 return accountInfo;
@@ -322,7 +360,6 @@ class MelCloud extends EventEmitter {
             // Verify executable works
             try {
                 const { stdout } = await execPromise(`"${chromiumPath}" --version`);
-                if (this.logDebug) this.emit('debug', `Chromium detected: ${stdout.trim()}`);
                 if (this.logDebug) this.emit('debug', `Chromium detected: ${stdout.trim()}`);
             } catch (error) {
                 accountInfo.Info = `Chromium found at ${chromiumPath}, but cannot be executed: ${error.message}`;

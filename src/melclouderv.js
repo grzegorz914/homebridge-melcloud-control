@@ -23,7 +23,6 @@ class MelCloudErv extends EventEmitter {
 
         //set default values
         this.devicesData = {};
-        this.headers = {};
 
         //lock flags
         this.locks = {
@@ -55,13 +54,11 @@ class MelCloudErv extends EventEmitter {
         try {
             //read device info from file
             const devicesData = await this.functions.readData(this.devicesFile, true);
-
             if (!Array.isArray(devicesData)) {
                 if (this.logWarn) this.emit('warn', `Device data not found`);
                 return null;
             }
             const deviceData = devicesData.find(device => device.DeviceID === this.deviceId);
-            this.headers = deviceData.Headers;
 
             if (this.accountType === 'melcloudhome') {
                 deviceData.SerialNumber = deviceData.DeviceID || '4.0.0';
@@ -72,7 +69,11 @@ class MelCloudErv extends EventEmitter {
                 deviceData.Device.DefaultHeatingSetTemperature = temps?.defaultHeatingSetTemperature ?? 20;
                 deviceData.Device.DefaultCoolingSetTemperature = temps?.defaultCoolingSetTemperature ?? 24;
             }
-            if (this.logDebug) this.emit('debug', `Device Data: ${JSON.stringify(deviceData, null, 2)}`);
+            const safeConfig = {
+                ...deviceData,
+                headers: 'removed',
+            };
+            if (this.logDebug) this.emit('debug', `Device Data: ${JSON.stringify(safeConfig, null, 2)}`);
 
             //presets
             const serialNumber = deviceData.SerialNumber;
@@ -141,7 +142,7 @@ class MelCloudErv extends EventEmitter {
                         method: 'POST',
                         baseURL: ApiUrls.BaseURL,
                         timeout: 10000,
-                        headers: this.headers,
+                        headers: deviceData.Headers,
                         withCredentials: true
                     });
 
@@ -194,7 +195,7 @@ class MelCloudErv extends EventEmitter {
                         method: 'PUT',
                         baseURL: ApiUrlsHome.BaseURL,
                         timeout: 10000,
-                        headers: this.headers,
+                        headers: deviceData.Headers,
                         withCredentials: true
                     });
 
@@ -210,7 +211,7 @@ class MelCloudErv extends EventEmitter {
                         }
                     }
 
-                    const settings = {
+                    const settings = effectiveFlags === 'scheduleset' ? { data: { enabled: deviceData.ScheduleEnabled } } : {
                         data: {
                             Power: deviceData.Device.Power,
                             SetTemperature: deviceData.Device.SetTemperature,
@@ -221,7 +222,7 @@ class MelCloudErv extends EventEmitter {
                     };
                     if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(settings.data, null, 2)}`);
 
-                    const path = ApiUrlsHome.SetErv.replace('deviceid', deviceData.DeviceID);
+                    const path = effectiveFlags === 'scheduleset' ? ApiUrlsHome.SetSchedule.replace('deviceid', deviceData.DeviceID) : ApiUrlsHome.SetErv.replace('deviceid', deviceData.DeviceID);
                     await axiosInstancePut(path, settings);
                     this.updateData(deviceData);
                     return true;
@@ -229,6 +230,11 @@ class MelCloudErv extends EventEmitter {
                     return;
             }
         } catch (error) {
+            // Return 500 for schedule hovewer working correct
+            if (error?.response?.status === 500) {
+                return true;
+            }
+
             throw new Error(`Send data error: ${error.message}`);
         }
     }

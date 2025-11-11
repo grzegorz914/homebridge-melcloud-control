@@ -234,7 +234,7 @@
                 "type": "object",
                 "properties": {
                   "id": {
-                    "title": "ID",
+                    "title": "Id",
                     "type": "string",
                     "default": "0"
                   },
@@ -399,25 +399,37 @@
                     "title": "Frost Protection",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra frost protection sensor to use with automations in HomeKit app."
+                    "description": "This enable extra frost protection sensor to use with automations in HomeKit app.",
+                    "condition": {
+                      "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
+                    }
                   },
                   "overheatProtectionSensor": {
                     "title": "Overheat Protection",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra overheat protection sensor to use with automations in HomeKit app."
+                    "description": "This enable extra overheat protection sensor to use with automations in HomeKit app.",
+                    "condition": {
+                      "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
+                    }
                   },
                   "holidayModeSensor": {
                     "title": "Holiday Mode",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra holiday mode sensor to use with automations in HomeKit app."
+                    "description": "This enable extra holiday mode sensor to use with automations in HomeKit app.",
+                    "condition": {
+                      "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
+                    }
                   },
-                  "sheduleSensor": {
-                    "title": "Shedule",
+                  "scheduleSensor": {
+                    "title": "Schedule",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra shedule sensor to use with automations in HomeKit app."
+                    "description": "This enable extra schedule sensor to use with automations in HomeKit app.",
+                    "condition": {
+                      "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
+                    }
                   },
                   "errorSensor": {
                     "title": "Error",
@@ -440,8 +452,9 @@
                       "type": "object",
                       "properties": {
                         "id": {
-                          "title": "ID",
-                          "type": "integer"
+                          "title": "Id",
+                          "type": "string",
+                          "default": "0"
                         },
                         "displayType": {
                           "title": "Display Type",
@@ -492,7 +505,7 @@
                         "name": {
                           "title": "Name",
                           "type": "string",
-                          "placeholder": "Preset name",
+                          "default": "Preset",
                           "description": "Your own name displayed in Homebridge/HomeKit app.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].presets[arrayIndices[2]].displayType > 0;"
@@ -505,6 +518,87 @@
                           "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].presets[arrayIndices[2]].displayType > 0;"
+                          }
+                        }
+                      },
+                      "required": [
+                        "displayType"
+                      ]
+                    }
+                  },
+                  "schedules": {
+                    "title": "Schedules",
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "title": "Id",
+                          "type": "string",
+                          "default": "0"
+                        },
+                        "displayType": {
+                          "title": "Display Type",
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 5,
+                          "default": 0,
+                          "description": "Select the characteristic type to be displayed in HomeKit app.",
+                          "anyOf": [
+                            {
+                              "title": "None/Disabled",
+                              "enum": [
+                                0
+                              ]
+                            },
+                            {
+                              "title": "Outlet",
+                              "enum": [
+                                1
+                              ]
+                            },
+                            {
+                              "title": "Switch",
+                              "enum": [
+                                2
+                              ]
+                            },
+                            {
+                              "title": "Motion Sensor",
+                              "enum": [
+                                3
+                              ]
+                            },
+                            {
+                              "title": "Occupancy Sensor",
+                              "enum": [
+                                4
+                              ]
+                            },
+                            {
+                              "title": "Contact Sensor",
+                              "enum": [
+                                5
+                              ]
+                            }
+                          ]
+                        },
+                        "name": {
+                          "title": "Name",
+                          "type": "string",
+                          "default": "Schedule",
+                          "description": "Your own name displayed in Homebridge/HomeKit app.",
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].schedules[arrayIndices[2]].displayType > 0;"
+                          }
+                        },
+                        "namePrefix": {
+                          "title": "Prefix",
+                          "type": "boolean",
+                          "default": false,
+                          "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].schedules[arrayIndices[2]].displayType > 0;"
                           }
                         }
                       },
@@ -827,7 +921,7 @@
                 "type": "object",
                 "properties": {
                   "id": {
-                    "title": "ID",
+                    "title": "Id",
                     "type": "string",
                     "default": "0"
                   },
@@ -1055,8 +1149,9 @@
                       "type": "object",
                       "properties": {
                         "id": {
-                          "title": "ID",
-                          "type": "integer"
+                          "title": "Id",
+                          "type": "string",
+                          "default": "0"
                         },
                         "displayType": {
                           "title": "Display Type",
@@ -1107,7 +1202,7 @@
                         "name": {
                           "title": "Name",
                           "type": "string",
-                          "placeholder": "Preset name",
+                          "default": "Preset",
                           "description": "Your own name displayed in Homebridge/HomeKit app.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].presets[arrayIndices[2]].displayType > 0;"
@@ -1120,6 +1215,87 @@
                           "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].presets[arrayIndices[2]].displayType > 0;"
+                          }
+                        }
+                      },
+                      "required": [
+                        "displayType"
+                      ]
+                    }
+                  },
+                  "schedules": {
+                    "title": "Schedules",
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "title": "Id",
+                          "type": "string",
+                          "default": "0"
+                        },
+                        "displayType": {
+                          "title": "Display Type",
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 5,
+                          "default": 0,
+                          "description": "Select the characteristic type to be displayed in HomeKit app.",
+                          "anyOf": [
+                            {
+                              "title": "None/Disabled",
+                              "enum": [
+                                0
+                              ]
+                            },
+                            {
+                              "title": "Outlet",
+                              "enum": [
+                                1
+                              ]
+                            },
+                            {
+                              "title": "Switch",
+                              "enum": [
+                                2
+                              ]
+                            },
+                            {
+                              "title": "Motion Sensor",
+                              "enum": [
+                                3
+                              ]
+                            },
+                            {
+                              "title": "Occupancy Sensor",
+                              "enum": [
+                                4
+                              ]
+                            },
+                            {
+                              "title": "Contact Sensor",
+                              "enum": [
+                                5
+                              ]
+                            }
+                          ]
+                        },
+                        "name": {
+                          "title": "Name",
+                          "type": "string",
+                          "default": "Schedule",
+                          "description": "Your own name displayed in Homebridge/HomeKit app.",
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].schedules[arrayIndices[2]].displayType > 0;"
+                          }
+                        },
+                        "namePrefix": {
+                          "title": "Prefix",
+                          "type": "boolean",
+                          "default": false,
+                          "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].schedules[arrayIndices[2]].displayType > 0;"
                           }
                         }
                       },
@@ -1362,7 +1538,7 @@
                 "type": "object",
                 "properties": {
                   "id": {
-                    "title": "ID",
+                    "title": "Id",
                     "type": "string",
                     "default": "0"
                   },
@@ -1448,8 +1624,9 @@
                       "type": "object",
                       "properties": {
                         "id": {
-                          "title": "ID",
-                          "type": "integer",
+                          "title": "Id",
+                          "type": "string",
+                          "default": "0",
                           "readonly": true
                         },
                         "displayType": {
@@ -1504,7 +1681,7 @@
                         "name": {
                           "title": "Name",
                           "type": "string",
-                          "placeholder": "Preset name",
+                          "default": "Preset",
                           "description": "Your own name displayed in Homebridge/HomeKit app.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].presets[arrayIndices[2]].displayType > 0;"
@@ -1517,6 +1694,87 @@
                           "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].presets[arrayIndices[2]].displayType > 0;"
+                          }
+                        }
+                      },
+                      "required": [
+                        "displayType"
+                      ]
+                    }
+                  },
+                  "schedules": {
+                    "title": "Schedules",
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "title": "Id",
+                          "type": "string",
+                          "default": "0"
+                        },
+                        "displayType": {
+                          "title": "Display Type",
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 5,
+                          "default": 0,
+                          "description": "Select the characteristic type to be displayed in HomeKit app.",
+                          "anyOf": [
+                            {
+                              "title": "None/Disabled",
+                              "enum": [
+                                0
+                              ]
+                            },
+                            {
+                              "title": "Outlet",
+                              "enum": [
+                                1
+                              ]
+                            },
+                            {
+                              "title": "Switch",
+                              "enum": [
+                                2
+                              ]
+                            },
+                            {
+                              "title": "Motion Sensor",
+                              "enum": [
+                                3
+                              ]
+                            },
+                            {
+                              "title": "Occupancy Sensor",
+                              "enum": [
+                                4
+                              ]
+                            },
+                            {
+                              "title": "Contact Sensor",
+                              "enum": [
+                                5
+                              ]
+                            }
+                          ]
+                        },
+                        "name": {
+                          "title": "Name",
+                          "type": "string",
+                          "default": "Preset",
+                          "description": "Your own name displayed in Homebridge/HomeKit app.",
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].schedules[arrayIndices[2]].displayType > 0;"
+                          }
+                        },
+                        "namePrefix": {
+                          "title": "Prefix",
+                          "type": "boolean",
+                          "default": false,
+                          "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].schedules[arrayIndices[2]].displayType > 0;"
                           }
                         }
                       },
@@ -1790,10 +2048,10 @@
                   }
                 },
                 "clientId": {
-                  "title": "Client ID",
+                  "title": "Client Id",
                   "type": "string",
                   "placeholder": "client id",
-                  "description": "Here optional set the Client ID of MQTT Broker.",
+                  "description": "Here optional set the Client Id of MQTT Broker.",
                   "condition": {
                     "functionBody": "return model.accounts[arrayIndices].mqtt.enable === true"
                   }
@@ -1934,7 +2192,33 @@
                             }
                           ],
                           "condition": {
-                            "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayType > 0;"
+                            "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloud' && model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayType > 0;"
+                          }
+                        },
+                        {
+                          "title": "Schedules",
+                          "type": "section",
+                          "description": "Section for setup device schedules",
+                          "expandable": true,
+                          "expanded": false,
+                          "items": [
+                            {
+                              "key": "accounts[].ataDevices[].schedules",
+                              "type": "tabarray",
+                              "title": "{{ value.name }}",
+                              "items": [
+                                {
+                                  "key": "accounts[].ataDevices[].schedules[].id",
+                                  "readonly": true
+                                },
+                                "accounts[].ataDevices[].schedules[].displayType",
+                                "accounts[].ataDevices[].schedules[].name",
+                                "accounts[].ataDevices[].schedules[].namePrefix"
+                              ]
+                            }
+                          ],
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome' && model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayType > 0;"
                           }
                         },
                         {
@@ -1944,46 +2228,41 @@
                           "expanded": false,
                           "items": [
                             {
-                              "title": "Temperature",
-                              "type": "section",
-                              "description": "Section for setup temperature sensors",
-                              "expandable": true,
-                              "expanded": false,
-                              "items": [
-                                "accounts[].ataDevices[].temperatureSensor",
-                                "accounts[].ataDevices[].temperatureOutdoorSensor"
-                              ]
-                            },
-                            {
-                              "title": "System",
-                              "type": "section",
-                              "description": "Section for setup system sensors",
-                              "expandable": true,
-                              "expanded": false,
-                              "items": [
-                                "accounts[].ataDevices[].frostProtectionSensor",
-                                "accounts[].ataDevices[].overheatProtectionSensor",
-                                "accounts[].ataDevices[].holidayModeSensor",
-                                "accounts[].ataDevices[].sheduleSensor",
-                                "accounts[].ataDevices[].errorSensor"
-                              ]
-                            },
-                            {
-                              "title": "Custom",
-                              "type": "section",
-                              "description": "Section for creating custom buttons/sensors",
-                              "expandable": true,
-                              "expanded": false,
+                              "key": "accounts[].ataDevices[]",
+                              "type": "tabarray",
+                              "title": "{{ value.name }}",
                               "items": [
                                 {
-                                  "key": "accounts[].ataDevices[].buttonsSensors",
-                                  "type": "tabarray",
-                                  "title": "{{ value.name || 'button/sensor' }}",
+                                  "title": "Temperature",
                                   "items": [
-                                    "accounts[].ataDevices[].buttonsSensors[].displayType",
-                                    "accounts[].ataDevices[].buttonsSensors[].mode",
-                                    "accounts[].ataDevices[].buttonsSensors[].name",
-                                    "accounts[].ataDevices[].buttonsSensors[].namePrefix"
+                                    "accounts[].ataDevices[].temperatureSensor",
+                                    "accounts[].ataDevices[].temperatureOutdoorSensor"
+                                  ]
+                                },
+                                {
+                                  "title": "System",
+                                  "items": [
+                                    "accounts[].ataDevices[].frostProtectionSensor",
+                                    "accounts[].ataDevices[].overheatProtectionSensor",
+                                    "accounts[].ataDevices[].holidayModeSensor",
+                                    "accounts[].ataDevices[].scheduleSensor",
+                                    "accounts[].ataDevices[].errorSensor"
+                                  ]
+                                },
+                                {
+                                  "title": "Custom",
+                                  "items": [
+                                    {
+                                      "key": "accounts[].ataDevices[].buttonsSensors",
+                                      "type": "tabarray",
+                                      "title": "{{ value.name }}",
+                                      "items": [
+                                        "accounts[].ataDevices[].buttonsSensors[].displayType",
+                                        "accounts[].ataDevices[].buttonsSensors[].mode",
+                                        "accounts[].ataDevices[].buttonsSensors[].name",
+                                        "accounts[].ataDevices[].buttonsSensors[].namePrefix"
+                                      ]
+                                    }
                                   ]
                                 }
                               ]
@@ -2060,7 +2339,33 @@
                             }
                           ],
                           "condition": {
-                            "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].displayType > 0;"
+                            "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloud' && model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].displayType > 0;"
+                          }
+                        },
+                        {
+                          "title": "Schedules",
+                          "type": "section",
+                          "description": "Section for setup device schedules",
+                          "expandable": true,
+                          "expanded": false,
+                          "items": [
+                            {
+                              "key": "accounts[].atwDevices[].schedules",
+                              "type": "tabarray",
+                              "title": "{{ value.name }}",
+                              "items": [
+                                {
+                                  "key": "accounts[].atwDevices[].schedules[].id",
+                                  "readonly": true
+                                },
+                                "accounts[].atwDevices[].schedules[].displayType",
+                                "accounts[].atwDevices[].schedules[].name",
+                                "accounts[].atwDevices[].schedules[].namePrefix"
+                              ]
+                            }
+                          ],
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome' && model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].displayType > 0;"
                           }
                         },
                         {
@@ -2069,41 +2374,45 @@
                           "expandable": true,
                           "expanded": false,
                           "items": [
-                            "accounts[].atwDevices[].errorSensor",
                             {
-                              "title": "Temperature",
-                              "type": "section",
-                              "description": "Section for setup temperature sensors",
-                              "expandable": true,
-                              "expanded": false,
-                              "items": [
-                                "accounts[].atwDevices[].temperatureSensor",
-                                "accounts[].atwDevices[].temperatureFlowSensor",
-                                "accounts[].atwDevices[].temperatureReturnSensor",
-                                "accounts[].atwDevices[].temperatureFlowZone1Sensor",
-                                "accounts[].atwDevices[].temperatureReturnZone1Sensor",
-                                "accounts[].atwDevices[].temperatureFlowWaterTankSensor",
-                                "accounts[].atwDevices[].temperatureReturnWaterTankSensor",
-                                "accounts[].atwDevices[].temperatureFlowZone2Sensor",
-                                "accounts[].atwDevices[].temperatureReturnZone2Sensor"
-                              ]
-                            },
-                            {
-                              "title": "Custom",
-                              "type": "section",
-                              "description": "Section for creating custom buttons/sensors",
-                              "expandable": true,
-                              "expanded": false,
+                              "key": "accounts[].atwDevices[]",
+                              "type": "tabarray",
+                              "title": "{{ value.name }}",
                               "items": [
                                 {
-                                  "key": "accounts[].atwDevices[].buttonsSensors",
-                                  "type": "tabarray",
-                                  "title": "{{ value.name || 'button/sensor' }}",
+                                  "title": "Temperature",
                                   "items": [
-                                    "accounts[].atwDevices[].buttonsSensors[].displayType",
-                                    "accounts[].atwDevices[].buttonsSensors[].mode",
-                                    "accounts[].atwDevices[].buttonsSensors[].name",
-                                    "accounts[].atwDevices[].buttonsSensors[].namePrefix"
+                                    "accounts[].atwDevices[].temperatureSensor",
+                                    "accounts[].atwDevices[].temperatureFlowSensor",
+                                    "accounts[].atwDevices[].temperatureReturnSensor",
+                                    "accounts[].atwDevices[].temperatureFlowZone1Sensor",
+                                    "accounts[].atwDevices[].temperatureReturnZone1Sensor",
+                                    "accounts[].atwDevices[].temperatureFlowWaterTankSensor",
+                                    "accounts[].atwDevices[].temperatureReturnWaterTankSensor",
+                                    "accounts[].atwDevices[].temperatureFlowZone2Sensor",
+                                    "accounts[].atwDevices[].temperatureReturnZone2Sensor"
+                                  ]
+                                },
+                                {
+                                  "title": "System",
+                                  "items": [
+                                    "accounts[].atwDevices[].errorSensor"
+                                  ]
+                                },
+                                {
+                                  "title": "Custom",
+                                  "items": [
+                                    {
+                                      "key": "accounts[].atwDevices[].buttonsSensors",
+                                      "type": "tabarray",
+                                      "title": "{{ value.name }}",
+                                      "items": [
+                                        "accounts[].atwDevices[].buttonsSensors[].displayType",
+                                        "accounts[].atwDevices[].buttonsSensors[].mode",
+                                        "accounts[].atwDevices[].buttonsSensors[].name",
+                                        "accounts[].atwDevices[].buttonsSensors[].namePrefix"
+                                      ]
+                                    }
                                   ]
                                 }
                               ]
@@ -2179,7 +2488,33 @@
                             }
                           ],
                           "condition": {
-                            "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].displayType > 0;"
+                            "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloud' && model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].displayType > 0;"
+                          }
+                        },
+                        {
+                          "title": "Schedules",
+                          "type": "section",
+                          "description": "Section for setup device schedules",
+                          "expandable": true,
+                          "expanded": false,
+                          "items": [
+                            {
+                              "key": "accounts[].ervDevices[].schedules",
+                              "type": "tabarray",
+                              "title": "{{ value.name }}",
+                              "items": [
+                                {
+                                  "key": "accounts[].ervDevices[].schedules[].id",
+                                  "readonly": true
+                                },
+                                "accounts[].ervDevices[].schedules[].displayType",
+                                "accounts[].ervDevices[].schedules[].name",
+                                "accounts[].ervDevices[].schedules[].namePrefix"
+                              ]
+                            }
+                          ],
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome' && model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].displayType > 0;"
                           }
                         },
                         {
@@ -2188,35 +2523,39 @@
                           "expandable": true,
                           "expanded": false,
                           "items": [
-                            "accounts[].ervDevices[].errorSensor",
                             {
-                              "title": "Temperature",
-                              "type": "section",
-                              "description": "Section for setup temperature sensors",
-                              "expandable": true,
-                              "expanded": false,
-                              "items": [
-                                "accounts[].ervDevices[].temperatureSensor",
-                                "accounts[].ervDevices[].temperatureOutdoorSensor",
-                                "accounts[].ervDevices[].temperatureSensorSupply"
-                              ]
-                            },
-                            {
-                              "title": "Custom",
-                              "type": "section",
-                              "description": "Section for creating custom buttons/sensors",
-                              "expandable": true,
-                              "expanded": false,
+                              "key": "accounts[].ervDevices[]",
+                              "type": "tabarray",
+                              "title": "{{ value.name }}",
                               "items": [
                                 {
-                                  "key": "accounts[].ervDevices[].buttonsSensors",
-                                  "type": "tabarray",
-                                  "title": "{{ value.name || 'button/sensor' }}",
+                                  "title": "Temperature",
                                   "items": [
-                                    "accounts[].ervDevices[].buttonsSensors[].displayType",
-                                    "accounts[].ervDevices[].buttonsSensors[].mode",
-                                    "accounts[].ervDevices[].buttonsSensors[].name",
-                                    "accounts[].ervDevices[].buttonsSensors[].namePrefix"
+                                    "accounts[].ervDevices[].temperatureSensor",
+                                    "accounts[].ervDevices[].temperatureOutdoorSensor",
+                                    "accounts[].ervDevices[].temperatureSensorSupply"
+                                  ]
+                                },
+                                {
+                                  "title": "System",
+                                  "items": [
+                                    "accounts[].ervDevices[].errorSensor"
+                                  ]
+                                },
+                                {
+                                  "title": "Custom",
+                                  "items": [
+                                    {
+                                      "key": "accounts[].ervDevices[].buttonsSensors",
+                                      "type": "tabarray",
+                                      "title": "{{ value.name || 'button/sensor' }}",
+                                      "items": [
+                                        "accounts[].ervDevices[].buttonsSensors[].displayType",
+                                        "accounts[].ervDevices[].buttonsSensors[].mode",
+                                        "accounts[].ervDevices[].buttonsSensors[].name",
+                                        "accounts[].ervDevices[].buttonsSensors[].namePrefix"
+                                      ]
+                                    }
                                   ]
                                 }
                               ]

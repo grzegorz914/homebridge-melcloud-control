@@ -31,7 +31,8 @@ class DeviceErv extends EventEmitter {
         this.temperatureOutdoorSensor = device.temperatureOutdoorSensor || false;
         this.temperatureSupplySensor = device.temperatureSupplySensor || false;
         this.errorSensor = device.errorSensor || false;
-        this.presets = (device.presets || []).filter(preset => (preset.displayType ?? 0) > 0);
+        this.presets = this.accountType === 'melcloud' ? (device.presets || []).filter(preset => (preset.displayType ?? 0) > 0 && preset.id !== '0') : [];
+        this.schedules = this.accountType === 'melcloudhome' ? (device.schedules || []).filter(schedule => (schedule.displayType ?? 0) > 0 && schedule.id !== '0') : [];
         this.buttons = (device.buttonsSensors || []).filter(button => (button.displayType ?? 0) > 0);
         this.deviceId = device.id;
         this.deviceName = device.name;
@@ -53,6 +54,14 @@ class DeviceErv extends EventEmitter {
             preset.characteristicType = [null, Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][preset.displayType];
             preset.state = false;
             preset.previousSettings = {};
+        }
+
+        //schedules configured
+        for (const schedule of this.schedules) {
+            schedule.name = schedule.name || 'Schedule'
+            schedule.serviceType = [null, Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][schedule.displayType];
+            schedule.characteristicType = [null, Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][schedule.displayType];
+            schedule.state = false;
         }
 
         //buttons configured
@@ -230,6 +239,7 @@ class DeviceErv extends EventEmitter {
             const deviceName = this.deviceName;
             const accountName = this.accountName;
             const presetsOnServer = this.accessory.presets;
+            const schedulesOnServer = this.accessory.schedules;
             const hasRoomTemperature = this.accessory.hasRoomTemperature;
             const hasSupplyTemperature = this.accessory.hasSupplyTemperature;
             const hasOutdoorTemperature = this.accessory.hasOutdoorTemperature;
@@ -675,7 +685,7 @@ class DeviceErv extends EventEmitter {
                 if (this.logDebug) this.emit('debug', `Prepare presets services`);
                 this.presetsServices = [];
                 this.presets.forEach((preset, i) => {
-                    const presetData = presetsOnServer.find(p => p.ID === preset.Id);
+                    const presetData = presetsOnServer.find(p => p.ID === preset.id);
 
                     //get preset name
                     const name = preset.name;
@@ -703,14 +713,14 @@ class DeviceErv extends EventEmitter {
                                         deviceData.Device.Power = presetData.Power;
                                         deviceData.Device.OperationMode = presetData.OperationMode;
                                         deviceData.Device.VentilationMode = presetData.VentilationMode;
-                                        deviceData.Device.SetFanSpeed = presetData.FanSpeed;
+                                        deviceData.Device.SetFanSpeed = presetData.SetFanSpeed;
                                         break;
                                     case false:
                                         deviceData.Device.SetTemperature = preset.previousSettings.SetTemperature;
                                         deviceData.Device.Power = preset.previousSettings.Power;
                                         deviceData.Device.OperationMode = preset.previousSettings.OperationMode;
                                         deviceData.Device.VentilationMode = preset.previousSettings.VentilationMode;
-                                        deviceData.Device.SetFanSpeed = preset.previousSettings.FanSpeed;
+                                        deviceData.Device.SetFanSpeed = preset.previousSettings.SetFanSpeed;
                                         break;
                                 };
 
@@ -723,6 +733,42 @@ class DeviceErv extends EventEmitter {
                 });
                 this.presetsServices.push(presetService);
                 accessory.addService(presetService);
+            };
+
+            //schedules services
+            if (this.schedules.length > 0) {
+                if (this.logDebug) this.emit('debug', `Prepare schedules services`);
+                this.schedulesServices = [];
+                this.schedules.forEach((schedule, i) => {
+                    //get preset name
+                    const name = schedule.name;
+
+                    //get preset name prefix
+                    const namePrefix = schedule.namePrefix;
+
+                    const serviceName = namePrefix ? `${accessoryName} ${name}` : name;
+                    const serviceType = schedule.serviceType;
+                    const characteristicType = schedule.characteristicType;
+                    const scheduleService = new serviceType(serviceName, `Schedule ${deviceId} ${i}`);
+                    scheduleService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                    scheduleService.setCharacteristic(Characteristic.ConfiguredName, serviceName);
+                    scheduleService.getCharacteristic(characteristicType)
+                        .onGet(async () => {
+                            const state = schedule.state;
+                            return state;
+                        })
+                        .onSet(async (state) => {
+                            try {
+                                deviceData.ScheduleEnabled = state;
+                                await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'scheduleset');
+                                if (this.logInfo) this.emit('info', `${state ? 'Set:' : 'Unset:'} ${name}`);
+                            } catch (error) {
+                                if (this.logWarn) this.emit('warn', `Set schedule error: ${error}`);
+                            };
+                        });
+                    this.schedulesServices.push(scheduleService);
+                    accessory.addService(scheduleService);
+                });
             };
 
             //buttons services
@@ -876,11 +922,15 @@ class DeviceErv extends EventEmitter {
                     this.deviceData = deviceData;
 
                     //keys
+                    const presetsKey = this.accountType === 'melcloud' ? 'Presets' : 'Schedule';
+                    const presetsIdKey = accountType === 'melcloud' ? 'ID' : 'Id';
                     const fanKey = this.accountType === 'melcloud' ? 'FanSpeed' : 'SetFanSpeed';
                     const tempStepKey = this.accountType === 'melcloud' ? 'TemperatureIncrement' : 'HasHalfDegreeIncrements';
                     const errorKey = this.accountType === 'melcloud' ? 'HasError' : 'IsInError';
 
-                    //presets
+                    //presets schedule
+                    const scheduleEnabled = deviceData.ScheduleEnabled;
+                    const schedulesOnServer = deviceData.Schedule ?? [];
                     const presetsOnServer = deviceData.Presets ?? [];
 
                     //device control
@@ -932,6 +982,7 @@ class DeviceErv extends EventEmitter {
                     //accessory
                     const obj = {
                         presets: presetsOnServer,
+                        schedules: schedulesOnServer,
                         hasRoomTemperature: hasRoomTemperature,
                         hasSupplyTemperature: hasSupplyTemperature,
                         hasOutdoorTemperature: hasOutdoorTemperature,
@@ -970,7 +1021,8 @@ class DeviceErv extends EventEmitter {
                         maxTempCoolDry: maxTempCoolDry,
                         useFahrenheit: this.useFahrenheit,
                         temperatureUnit: TemperatureDisplayUnits[this.useFahrenheit],
-                        isInError: isInError
+                        isInError: isInError,
+                        scheduleEnabled: scheduleEnabled
                     };
 
                     //ventilation mode - 0, HEAT, 2, COOL, 4, 5, 6, FAN, AUTO
@@ -1113,16 +1165,27 @@ class DeviceErv extends EventEmitter {
                     //update presets state
                     if (this.presets.length > 0) {
                         this.presets.forEach((preset, i) => {
-                            const presetData = presetsOnServer.find(p => p.ID === preset.Id);
+                            const presetData = presetsOnServer.find(p => p[presetsIdKey] === preset.id);
 
                             preset.state = presetData ? (presetData.Power === power
                                 && presetData.SetTemperature === setTemperature
                                 && presetData.OperationMode === operationMode
                                 && presetData.VentilationMode === ventilationMode
-                                && presetData.FanSpeed === setFanSpeed) : false;
+                                && presetData.SetFanSpeed === setFanSpeed) : false;
 
                             const characteristicType = preset.characteristicType;
                             this.presetsServices?.[i]?.updateCharacteristic(characteristicType, preset.state);
+                        });
+                    };
+
+                    //update schedules state
+                    if (this.schedules.length > 0) {
+                        this.schedules.forEach((schedule, i) => {
+                            const scheduleData = schedulesOnServer.find(s => s[presetsIdKey] === schedule.id);
+                            schedule.state = scheduleEnabled; //scheduleData.Enabled : false;
+
+                            const characteristicType = schedule.characteristicType;
+                            this.schedulesServices?.[i]?.updateCharacteristic(characteristicType, schedule.state);
                         });
                     };
 
