@@ -136,6 +136,9 @@ class MelCloudErv extends EventEmitter {
 
     async send(accountType, displayType, deviceData, effectiveFlags) {
         try {
+            let method = null
+            let payload = {};
+            let path = '';
             switch (accountType) {
                 case "melcloud":
                     const axiosInstancePost = axios.create({
@@ -168,7 +171,7 @@ class MelCloudErv extends EventEmitter {
 
                     //device state
                     deviceData.Device.EffectiveFlags = effectiveFlags;
-                    const payload = {
+                    payload = {
                         data: {
                             DeviceID: deviceData.Device.DeviceID,
                             EffectiveFlags: deviceData.Device.EffectiveFlags,
@@ -203,19 +206,16 @@ class MelCloudErv extends EventEmitter {
                         }
                     }
 
-                    let method = null;
-                    let settings = {};
-                    let path = '';
                     switch (effectiveFlags) {
                         case 'holidaymode':
-                            settings = {
+                            payload = {
                                 data: { enabled: deviceData.HolidayMode.Enabled, startDate: deviceData.HolidayMode.StartDate, endDate: deviceData.HolidayMode.EndDate, units: { "ERV": [deviceData.DeviceID] } }
                             };
                             method = 'POST';
                             path = ApiUrlsHome.PostHolidayMode;
                             break;
                         case 'schedule':
-                            settings = {
+                            payload = {
                                 data: {
                                     enabled: deviceData.ScheduleEnabled
                                 }
@@ -224,7 +224,7 @@ class MelCloudErv extends EventEmitter {
                             path = ApiUrlsHome.PutScheduleEnable.replace('deviceid', deviceData.DeviceID);
                             break;
                         default:
-                            settings = {
+                            payload = {
                                 data: {
                                     Power: deviceData.Device.Power,
                                     SetTemperature: deviceData.Device.SetTemperature,

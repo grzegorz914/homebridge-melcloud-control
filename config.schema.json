@@ -5,7 +5,7 @@
   "fixArrays": true,
   "strictValidation": true,
   "customUi": true,
-  "headerDisplay": "This plugin works with Mitsubishi Air Conditioner, Heat Pump and Energy Recovery Ventilation connected to MELCloud service. Devices are exposed to HomeKit as separate accessories and each needs to be manually [paired](https://github.com/grzegorz914/homebridge-melcloud-control/wiki#adding-to-homekit).",
+  "headerDisplay": "This plugin works with Mitsubishi Air Conditioner, Heat Pump and Energy Recovery Ventilation connected to MELCloud and MELCloud Home. Devices are exposed to HomeKit as separate accessories and each needs to be manually [paired](https://github.com/grzegorz914/homebridge-melcloud-control/wiki#adding-to-homekit).",
   "footerDisplay": "For documentation please see [GitHub repository](https://github.com/grzegorz914/homebridge-melcloud-control).",
   "schema": {
     "type": "object",
@@ -506,7 +506,7 @@
                           "title": "Prefix",
                           "type": "boolean",
                           "default": false,
-                          "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
+                          "description": "Enable/disable the accessory name as a prefix for preset name.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].presets[arrayIndices[2]].displayType > 0;"
                           }
@@ -575,7 +575,7 @@
                           "title": "Prefix",
                           "type": "boolean",
                           "default": false,
-                          "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
+                          "description": "Enable/disable the accessory name as a prefix for schedule name.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].schedules[arrayIndices[2]].displayType > 0;"
                           }
@@ -1200,7 +1200,7 @@
                           "title": "Prefix",
                           "type": "boolean",
                           "default": false,
-                          "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
+                          "description": "Enable/disable the accessory name as a prefix for preset name.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].presets[arrayIndices[2]].displayType > 0;"
                           }
@@ -1269,7 +1269,7 @@
                           "title": "Prefix",
                           "type": "boolean",
                           "default": false,
-                          "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
+                          "description": "Enable/disable the accessory name as a prefix for schedule name.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].schedules[arrayIndices[2]].displayType > 0;"
                           }
@@ -1676,7 +1676,7 @@
                           "title": "Prefix",
                           "type": "boolean",
                           "default": false,
-                          "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
+                          "description": "Enable/disable the accessory name as a prefix for preset name.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].presets[arrayIndices[2]].displayType > 0;"
                           }
@@ -1745,7 +1745,7 @@
                           "title": "Prefix",
                           "type": "boolean",
                           "default": false,
-                          "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
+                          "description": "Enable/disable the accessory name as a prefix for schedule name.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].schedules[arrayIndices[2]].displayType > 0;"
                           }
@@ -1953,7 +1953,7 @@
                   "title": "Device Info",
                   "type": "boolean",
                   "default": true,
-                  "description": "This enable logging device info by every connections device to the network."
+                  "description": "This enable logging device info on plugin start."
                 },
                 "success": {
                   "title": "Log Success",

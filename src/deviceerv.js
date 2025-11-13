@@ -190,6 +190,8 @@ class DeviceErv extends EventEmitter {
                     effectiveFlags = Ventilation.EffectiveFlags.SetTemperature;
                     break;
                 case 'NightPurgeMode':
+                    if (this.accountType === 'melcloudhome') return;
+
                     deviceData.Device[key] = value;
                     effectiveFlags = Ventilation.EffectiveFlags.NightPurgeMode;
                     break;
@@ -198,16 +200,34 @@ class DeviceErv extends EventEmitter {
                     effectiveFlags = Ventilation.EffectiveFlags.SetFanSpeed;
                     break;
                 case 'HideRoomTemperature':
+                    if (this.accountType === 'melcloudhome') return;
+
                     deviceData[key] = value;
                     effectiveFlags = Ventilation.EffectiveFlags.Prohibit;
                     break;
                 case 'HideSupplyTemperature':
+                    if (this.accountType === 'melcloudhome') return;
+
                     deviceData[key] = value;
                     effectiveFlags = Ventilation.EffectiveFlags.Prohibit;
                     break;
                 case 'HideOutdoorTemperature':
+                    if (this.accountType === 'melcloudhome') return;
+
                     deviceData[key] = value;
                     effectiveFlags = Ventilation.EffectiveFlags.Prohibit;
+                    break;
+                case 'ScheduleEnabled':
+                    if (this.accountType === 'melcloud') return;
+
+                    deviceData.Device[key].Enabled = value;
+                    effectiveFlags = 'schedule';
+                    break;
+                case 'HolidayMode':
+                    if (this.accountType === 'melcloud') return;
+
+                    deviceData.Device[key].Enabled = value;
+                    effectiveFlags = 'holidaymode';
                     break;
                 default:
                     this.emit('warn', `${integration}, received key: ${key}, value: ${value}`);

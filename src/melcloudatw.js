@@ -147,6 +147,9 @@ class MelCloudAtw extends EventEmitter {
             deviceData.Device.SetTankWaterTemperature = deviceData.Device.SetTankWaterTemperature < minTempWaterTank ? minTempWaterTank : deviceData.Device.SetTankWaterTemperature;
             deviceData.Device.SetTankWaterTemperature = deviceData.Device.SetTankWaterTemperature > maxTempWaterTank ? maxTempWaterTank : deviceData.Device.SetTankWaterTemperature;
 
+            let method = null
+            let payload = {};
+            let path = '';
             switch (accountType) {
                 case "melcloud":
                     const axiosInstancePost = axios.create({
@@ -158,7 +161,7 @@ class MelCloudAtw extends EventEmitter {
                     });
 
                     deviceData.Device.EffectiveFlags = effectiveFlags;
-                    const payload = {
+                    payload = {
                         data: {
                             DeviceID: deviceData.Device.DeviceID,
                             EffectiveFlags: deviceData.Device.EffectiveFlags,
@@ -187,19 +190,16 @@ class MelCloudAtw extends EventEmitter {
                     this.updateData(deviceData);
                     return true;
                 case "melcloudhome":
-                    let method = null
-                    let settings = {};
-                    let path = '';
                     switch (effectiveFlags) {
                         case 'holidaymode':
-                            settings = {
+                            payload = {
                                 data: { enabled: deviceData.HolidayMode.Enabled, startDate: deviceData.HolidayMode.StartDate, endDate: deviceData.HolidayMode.EndDate, units: { "ATW": [deviceData.DeviceID] } }
                             };
                             method = 'POST';
                             path = ApiUrlsHome.PostHolidayMode;
                             break;
                         case 'schedule':
-                            settings = {
+                            payload = {
                                 data: {
                                     enabled: deviceData.ScheduleEnabled
                                 }
@@ -208,7 +208,7 @@ class MelCloudAtw extends EventEmitter {
                             path = ApiUrlsHome.PutScheduleEnable.replace('deviceid', deviceData.DeviceID);
                             break;
                         default:
-                            settings = {
+                            payload = {
                                 data: {
                                     Power: deviceData.Device.Power,
                                     SetTemperatureZone1: deviceData.Device.SetTemperatureZone1,

@@ -142,6 +142,9 @@ class MelCloudAta extends EventEmitter {
 
     async send(accountType, displayType, deviceData, effectiveFlags) {
         try {
+            let method = null
+            let payload = {};
+            let path = '';
             switch (accountType) {
                 case "melcloud":
                     const axiosInstancePost = axios.create({
@@ -157,7 +160,7 @@ class MelCloudAta extends EventEmitter {
                     }
 
                     deviceData.Device.EffectiveFlags = effectiveFlags;
-                    const payload = {
+                    payload = {
                         data: {
                             DeviceID: deviceData.Device.DeviceID,
                             EffectiveFlags: deviceData.Device.EffectiveFlags,
@@ -195,12 +198,9 @@ class MelCloudAta extends EventEmitter {
                         }
                     }
 
-                    let method = null
-                    let settings = {};
-                    let path = '';
                     switch (effectiveFlags) {
                         case 'frostprotection':
-                            settings = {
+                            payload = {
                                 data: {
                                     enabled: deviceData.FrostProtection.Enabled,
                                     min: deviceData.FrostProtection.Min,
@@ -212,7 +212,7 @@ class MelCloudAta extends EventEmitter {
                             path = ApiUrlsHome.PostProtectionFrost;
                             break;
                         case 'overheatprotection':
-                            settings = {
+                            payload = {
                                 data: {
                                     enabled: deviceData.OverheatProtection.Enabled,
                                     min: deviceData.OverheatProtection.Min,
@@ -224,7 +224,7 @@ class MelCloudAta extends EventEmitter {
                             path = ApiUrlsHome.PostProtectionOverheat;
                             break;
                         case 'holidaymode':
-                            settings = {
+                            payload = {
                                 data: {
                                     enabled: deviceData.HolidayMode.Enabled,
                                     startDate: deviceData.HolidayMode.StartDate,
@@ -236,7 +236,7 @@ class MelCloudAta extends EventEmitter {
                             path = ApiUrlsHome.PostHolidayMode;
                             break;
                         case 'schedule':
-                            settings = {
+                            payload = {
                                 data: {
                                     enabled: deviceData.ScheduleEnabled
                                 }
@@ -245,7 +245,7 @@ class MelCloudAta extends EventEmitter {
                             path = ApiUrlsHome.PutScheduleEnable.replace('deviceid', deviceData.DeviceID);
                             break;
                         default:
-                            settings = {
+                            payload = {
                                 data: {
                                     Power: deviceData.Device.Power,
                                     SetTemperature: deviceData.Device.SetTemperature,
@@ -269,7 +269,7 @@ class MelCloudAta extends EventEmitter {
                     });
 
                     if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(settings.data, null, 2)}`);
-                    await axiosInstancePut(path, settings);
+                    await axiosInstancePut(path, payload);
                     this.updateData(deviceData);
                     return true;
                 default:

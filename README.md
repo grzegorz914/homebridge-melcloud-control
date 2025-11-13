@@ -27,14 +27,16 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 
 ### About The Plugin
 
-* All devices are detected automatically.
-* Control devices over MELCloud and MELCloud Home.
+* Support devices connected to MELCloud or MELCloud Home.
 * Support multiple accounts, buildings, floors, areas.
 * Support temperature display units `Celsius/Fahrenheit`.
 * Support assing inividual operating mode for `Heat/Cool/Auto`.
-* Support direct `Presets` control using extra `Buttons`, switch it to `OFF` restore previous device state.
+* Support direct `Presets` control, only MELCloud.
+* Support direct `Schedules` control, only MELCloud Home.
+* Support direct `Frost protection` control, only MELCloud Home.
+* Support direct `Overheat Protection` control, only MELCloud Home.
+* Support direct `Holiday Mode` control.
 * Support direct `Functions` control using extra `Buttons`, switch it to `OFF` restore previous device state.
-* Support detect all device states using extra `Sensors`.
 * Support automations, shortcuts and Siri.
 * Support external integrations, [RESTFul](https://github.com/grzegorz914/homebridge-melcloud-control?tab=readme-ov-file#restful-integration), [MQTT](https://github.com/grzegorz914/homebridge-melcloud-control?tab=readme-ov-file#mqtt-integration).
 * Control devices over local network You need use ESP module and [Tasmota Control](https://github.com/grzegorz914/homebridge-tasmota-control) plugin.
@@ -342,8 +344,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 ### RESTful Integration
 
 * Port:
-  * MELCLoud, last 4 numbers of `device Id`, also displayed in HB log during start.
-  * MELCLoud Home, start at `30000` displayed in HB log during start.
+  * MELCLoud, last 4 numbers of `device Id`, correct port is displayed in HB log during start.
+  * MELCLoud Home, start at `30000`, correct port is displayed in HB log during start.
 * POST data as a JSON Object `{OperationMode: 8}`.
 * Header content type must be `application/json`.
 * Path `status` response all available paths.
@@ -368,11 +370,14 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 |     | `http//ip:port` | `SetTemperature` | `0.0` | float | Room temperature. |
 |     | `http//ip:port` | `DefaultCoolingSetTemperature` | `0.0` | float | Default cooling temperature. |
 |     | `http//ip:port` | `DefaultHeatingSetTemperature` | `0.0` | float | Default heating temperature. |
+|     | `http//ip:port` | `FrostProtection` | `true`, `false` | boolean | Frost protectin. |
+|     | `http//ip:port` | `OverheatProtection` | `true`, `false` | boolean | Overheat protection. |
+|     | `http//ip:port` | `HolidayMode` | `true`, `false` | boolean | Holiday mode. |
+|     | `http//ip:port` | `ScheduleEnabled` | `true`, `false` | boolean | Schedules. |
 | Heat Pump |     |     |     |      |     |
 | POST | `http//ip:port` | `Power` | `true`, `false` | boolean | Power state. |
 |     | `http//ip:port` | `ForcedHotWaterMode` | `true`, `false` | boolean | Force hot water. |
 |     | `http//ip:port` | `EcoHotWater` | `true`, `false` | boolean | Eco hot water. |
-|     | `http//ip:port` | `HolidayMode` | `true`, `false` | boolean | Holiday mode. |
 |     | `http//ip:port` | `ProhibitZone1` | `true`, `false` | boolean | Lock control zone 1. |
 |     | `http//ip:port` | `ProhibitZone2` | `true`, `false` | boolean | Lock control zone 2. |
 |     | `http//ip:port` | `ProhibitHotWater` | `true`, `false` | boolean | Lock control hot water. |
@@ -386,6 +391,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 |     | `http//ip:port` | `SetCoolFlowTemperatureZone1` | `0.0` | float | Cool flow temperature zone 1. |
 |     | `http//ip:port` | `SetCoolFlowTemperatureZone2` | `0.0` | float | Cool flow temperature zone 2. |
 |     | `http//ip:port` | `SetTankWaterTemperature` | `0.0` | float | Hot water temperature. |
+|     | `http//ip:port` | `HolidayMode` | `true`, `false` | boolean | Holiday mode. |
+|     | `http//ip:port` | `ScheduleEnabled` | `true`, `false` | boolean | Schedules. |
 | Energy Recovery Ventilation |     |     |     |      |     |
 | POST | `http//ip:port` | `Power` | `true`, `false` | boolean | Power state. |
 |     | `http//ip:port` | `NightPurgeMode` | `true`, `false` | boolean | Night purge mode. |
@@ -398,6 +405,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 |     | `http//ip:port` | `SetTemperature` | `0.0` | float | Room temperature. |
 |     | `http//ip:port` | `DefaultCoolingSetTemperature` | `0.0` | float | Default cooling temperature. |
 |     | `http//ip:port` | `DefaultHeatingSetTemperature` | `0.0` | float | Default heating temperature. |
+|     | `http//ip:port` | `HolidayMode` | `true`, `false` | boolean | Holiday mode. |
+|     | `http//ip:port` | `ScheduleEnabled` | `true`, `false` | boolean | Schedules. |
 
 ### MQTT Integration
 
@@ -423,11 +432,14 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 |     | `Set` | `SetTemperature` | `0.0` | float | Room temperature. |
 |     | `Set` | `DefaultCoolingSetTemperature` | `23.0` | float | Default cooling temperature. |
 |     | `Set` | `DefaultHeatingSetTemperature` | `21.0` | float | Default heating temperature. |
+|     | `Set` | `FrostProtection` | `true`, `false` | boolean | Frost protectin. |
+|     | `Set` | `OverheatProtection` | `true`, `false` | boolean | Overheat protection. |
+|     | `Set` | `HolidayMode` | `true`, `false` | boolean | Holiday mode. |
+|     | `Set` | `ScheduleEnabled` | `true`, `false` | boolean | Schedules. |
 | Heat Pump |     |     |     |      |     |
 | Subscribe | `Set` | `Power` | `true`, `false` | boolean | Power state. |
 |     | `Set` | `ForcedHotWaterMode` | `true`, `false` | boolean | Force hot water. |
 |     | `Set` | `EcoHotWater` | `true`, `false` | boolean | Eco hot water. |
-|     | `Set` | `HolidayMode` | `true`, `false` | boolean | Holiday mode. |
 |     | `Set` | `ProhibitZone1` | `true`, `false` | boolean | Lock control zone 1. |
 |     | `Set` | `ProhibitZone2` | `true`, `false` | boolean | Lock control zone 2. |
 |     | `Set` | `ProhibitHotWater` | `true`, `false` | boolean | Lock control hot water. |
@@ -441,6 +453,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 |     | `Set` | `SetCoolFlowTemperatureZone1` | `0.0` | float | Cool flow temperature zone 1. |
 |     | `Set` | `SetCoolFlowTemperatureZone2` | `0.0` | float | Cool flow temperature zone 2. |
 |     | `Set` | `SetTankWaterTemperature` | `0.0` | float | Hot water temperature. |
+|     | `Set` | `HolidayMode` | `true`, `false` | boolean | Holiday mode. |
+|     | `Set` | `ScheduleEnabled` | `true`, `false` | boolean | Schedules. |
 | Energy Recovery Ventilation |     |     |     |      |     |
 | Subscribe | `Set` | `Power` | `true`, `false` | boolean | Power state. |
 |     | `Set` | `NightPurgeMode` | `true`, `false` | boolean | Night purge mode. |
@@ -453,3 +467,5 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 |     | `Set` | `SetTemperature` | `0.0` | float | Room temperature. |
 |     | `Set` | `DefaultCoolingSetTemperature` | `23.0` | float | Default cooling temperature. |
 |     | `Set` | `DefaultHeatingSetTemperature` | `21.0` | float | Default heating temperature. |
+|     | `Set` | `HolidayMode` | `true`, `false` | boolean | Holiday mode. |
+|     | `Set` | `ScheduleEnabled` | `true`, `false` | boolean | Schedules. |

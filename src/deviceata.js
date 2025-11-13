@@ -192,6 +192,7 @@ class DeviceAta extends EventEmitter {
                     effectiveFlags = AirConditioner.EffectiveFlags.SetTemperature;
                     break;
                 case 'FanSpeed':
+                    key = this.accountType === 'melcloud' ? key : 'SetFanSpeed';
                     deviceData.Device[key] = value;
                     effectiveFlags = AirConditioner.EffectiveFlags.SetFanSpeed;
                     break;
@@ -204,24 +205,58 @@ class DeviceAta extends EventEmitter {
                     effectiveFlags = AirConditioner.EffectiveFlags.VaneVerticalDirection;
                     break;
                 case 'HideVaneControls':
+                    if (this.accountType === 'melcloudhome') return;
+
                     deviceData[key] = value;
                     effectiveFlags = AirConditioner.EffectiveFlags.Prohibit;
                     break;
                 case 'HideDryModeControl':
+                    if (this.accountType === 'melcloudhome') return;
+
                     deviceData[key] = value;
                     effectiveFlags = AirConditioner.EffectiveFlags.Prohibit;
                     break;
                 case 'ProhibitSetTemperature':
+                    if (this.accountType === 'melcloudhome') return;
+
                     deviceData.Device[key] = value;
                     effectiveFlags = AirConditioner.EffectiveFlags.Prohibit;
                     break;
                 case 'ProhibitOperationMode':
+                    if (this.accountType === 'melcloudhome') return;
+
                     deviceData.Device[key] = value;
                     effectiveFlags = AirConditioner.EffectiveFlags.Prohibit;
                     break;
                 case 'ProhibitPower':
+                    if (this.accountType === 'melcloudhome') return;
+
                     deviceData.Device[key] = value;
                     effectiveFlags = AirConditioner.EffectiveFlags.Prohibit;
+                    break;
+                case 'FrostProtection':
+                    if (this.accountType === 'melcloud') return;
+
+                    deviceData.Device[key].Enabled = value;
+                    effectiveFlags = 'frostprotection';
+                    break;
+                case 'OverheatProtection':
+                    if (this.accountType === 'melcloud') return;
+
+                    deviceData.Device[key].Enabled = value;
+                    effectiveFlags = 'overheatprotection';
+                    break;
+                case 'ScheduleEnabled':
+                    if (this.accountType === 'melcloud') return;
+
+                    deviceData.Device[key].Enabled = value;
+                    effectiveFlags = 'schedule';
+                    break;
+                case 'HolidayMode':
+                    if (this.accountType === 'melcloud') return;
+
+                    deviceData.Device[key].Enabled = value;
+                    effectiveFlags = 'holidaymode';
                     break;
                 default:
                     this.emit('warn', `${integration}, received key: ${key}, value: ${value}`);

@@ -224,21 +224,40 @@ class DeviceAtw extends EventEmitter {
                     deviceData.Device[key] = value;
                     effectiveFlags = HeatPump.EffectiveFlags.EcoHotWater;
                     break;
-                case 'HolidayMode':
-                    deviceData.Device[key] = value;
-                    effectiveFlags = HeatPump.EffectiveFlags.HolidayMode;
-                    break;
                 case 'ProhibitZone1':
+                    if (this.accountType === 'melcloudhome') return;
+
                     deviceData.Device[key] = value;
                     effectiveFlags = HeatPump.EffectiveFlags.ProhibitZone1;
                     break;
                 case 'ProhibitZone2':
+                    if (this.accountType === 'melcloudhome') return;
+
                     deviceData.Device[key] = value;
                     effectiveFlags = HeatPump.EffectiveFlags.ProhibitZone2;
                     break;
                 case 'ProhibitHotWater':
+                    if (this.accountType === 'melcloudhome') return;
+
                     deviceData.Device[key] = value;
                     effectiveFlags = HeatPump.EffectiveFlags.ProhibitHotWater;
+                    break;
+                case 'ScheduleEnabled':
+                    if (this.accountType === 'melcloud') return;
+
+                    deviceData.Device[key].Enabled = value;
+                    effectiveFlags = 'schedule';
+                    break;
+                case 'HolidayMode':
+                    if (this.accountType === 'melcloud') {
+                        deviceData.Device[key] = value;
+                        effectiveFlags = HeatPump.EffectiveFlags.HolidayMode;
+                    }
+
+                    if (this.accountType === 'melcloudhome') {
+                        deviceData.Device[key].Enabled = value;
+                        effectiveFlags = 'holidaymode';
+                    }
                     break;
                 default:
                     this.emit('warn', `${integration}, received key: ${key}, value: ${value}`);
