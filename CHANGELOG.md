@@ -22,6 +22,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Do not use Homebridge UI > v5.5.0 because of break config.json
 
+## [4.2.0] - (13.11.2025)
+
+## Changes
+
+- initial support for MELCloud Home ATW device
+- added frost protection control for MELCloud Home ATA device
+- added overheat protection control for MELCloud Home ATA device
+- added holiday mode control MELCloud Home ATA, ERV, ATW devices
+- config schema updated
+- readme updated
+- cleanup
+
 ## [4.1.2] - (11.11.2025)
 
 ## Changes

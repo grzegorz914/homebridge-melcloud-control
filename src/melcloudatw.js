@@ -187,34 +187,58 @@ class MelCloudAtw extends EventEmitter {
                     this.updateData(deviceData);
                     return true;
                 case "melcloudhome":
+                    let method = null
+                    let settings = {};
+                    let path = '';
+                    switch (effectiveFlags) {
+                        case 'holidaymode':
+                            settings = {
+                                data: { enabled: deviceData.HolidayMode.Enabled, startDate: deviceData.HolidayMode.StartDate, endDate: deviceData.HolidayMode.EndDate, units: { "ATW": [deviceData.DeviceID] } }
+                            };
+                            method = 'POST';
+                            path = ApiUrlsHome.PostHolidayMode;
+                            break;
+                        case 'schedule':
+                            settings = {
+                                data: {
+                                    enabled: deviceData.ScheduleEnabled
+                                }
+                            };
+                            method = 'PUT';
+                            path = ApiUrlsHome.PutScheduleEnable.replace('deviceid', deviceData.DeviceID);
+                            break;
+                        default:
+                            settings = {
+                                data: {
+                                    Power: deviceData.Device.Power,
+                                    SetTemperatureZone1: deviceData.Device.SetTemperatureZone1,
+                                    SetTemperatureZone2: deviceData.Device.SetTemperatureZone2,
+                                    OperationMode: HeatPump.OperationModeMapEnumToString[deviceData.Device.OperationMode],
+                                    OperationModeZone1: HeatPump.OperationModeMapEnumToString[deviceData.Device.OperationModeZone1],
+                                    OperationModeZone2: HeatPump.OperationModeMapEnumToString[deviceData.Device.OperationModeZone2],
+                                    SetHeatFlowTemperatureZone1: deviceData.Device.SetHeatFlowTemperatureZone1,
+                                    SetHeatFlowTemperatureZone2: deviceData.Device.SetHeatFlowTemperatureZone2,
+                                    SetCoolFlowTemperatureZone1: deviceData.Device.SetCoolFlowTemperatureZone1,
+                                    SetCoolFlowTemperatureZone2: deviceData.Device.SetCoolFlowTemperatureZone2,
+                                    SetTankWaterTemperature: deviceData.Device.SetTankWaterTemperature,
+                                    ForcedHotWaterMode: deviceData.Device.ForcedHotWaterMode,
+                                    EcoHotWater: deviceData.Device.EcoHotWater,
+                                }
+                            };
+                            method = 'PUT';
+                            path = ApiUrlsHome.SetAtw.replace('deviceid', deviceData.DeviceID);
+                            break
+                    }
+
                     const axiosInstancePut = axios.create({
-                        method: 'PUT',
+                        method: method,
                         baseURL: ApiUrlsHome.BaseURL,
                         timeout: 10000,
                         headers: deviceData.Headers,
                         withCredentials: true
                     });
 
-                    const settings = effectiveFlags === 'scheduleset' ? { data: { enabled: deviceData.ScheduleEnabled } } : {
-                        data: {
-                            Power: deviceData.Device.Power,
-                            SetTemperatureZone1: deviceData.Device.SetTemperatureZone1,
-                            SetTemperatureZone2: deviceData.Device.SetTemperatureZone2,
-                            OperationMode: HeatPump.OperationModeMapEnumToString[deviceData.Device.OperationMode],
-                            OperationModeZone1: HeatPump.OperationModeMapEnumToString[deviceData.Device.OperationModeZone1],
-                            OperationModeZone2: HeatPump.OperationModeMapEnumToString[deviceData.Device.OperationModeZone2],
-                            SetHeatFlowTemperatureZone1: deviceData.Device.SetHeatFlowTemperatureZone1,
-                            SetHeatFlowTemperatureZone2: deviceData.Device.SetHeatFlowTemperatureZone2,
-                            SetCoolFlowTemperatureZone1: deviceData.Device.SetCoolFlowTemperatureZone1,
-                            SetCoolFlowTemperatureZone2: deviceData.Device.SetCoolFlowTemperatureZone2,
-                            SetTankWaterTemperature: deviceData.Device.SetTankWaterTemperature,
-                            ForcedHotWaterMode: deviceData.Device.ForcedHotWaterMode,
-                            EcoHotWater: deviceData.Device.EcoHotWater,
-                        }
-                    };
                     if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(settings.data, null, 2)}`);
-
-                    const path = effectiveFlags === 'scheduleset' ? ApiUrlsHome.SetSchedule.replace('deviceid', deviceData.DeviceID) : ApiUrlsHome.SetAtw.replace('deviceid', deviceData.DeviceID);
                     await axiosInstancePut(path, settings);
                     this.updateData(deviceData);
                     return true;
@@ -222,11 +246,7 @@ class MelCloudAtw extends EventEmitter {
                     return;
             }
         } catch (error) {
-            // Return 500 for schedule hovewer working correct
-            if (error?.response?.status === 500) {
-                return true;
-            }
-            
+            if (error.response?.status === 500) return true; // Return 500 for schedule hovewer working correct
             throw new Error(`Send data error: ${error.message}`);
         }
     }
@@ -234,7 +254,7 @@ class MelCloudAtw extends EventEmitter {
     updateData(deviceData) {
         setTimeout(() => {
             this.emit('deviceState', deviceData);
-        }, 500);
+        }, 300);
     }
 };
 export default MelCloudAtw;

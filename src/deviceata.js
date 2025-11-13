@@ -26,23 +26,24 @@ class DeviceAta extends EventEmitter {
 
         //device config
         this.device = device;
-        this.displayType = device.displayType;
-        this.temperatureSensor = device.temperatureSensor || false;
-        this.temperatureOutdoorSensor = device.temperatureOutdoorSensor || false;
-        this.frostProtectionSensor = device.frostProtectionSensor || false;
-        this.overheatProtectionSensor = device.overheatProtectionSensor || false;
-        this.holidayModeSensor = device.holidayModeSensor || false;
-        this.scheduleSensor = device.scheduleSensor || false;
-        this.errorSensor = device.errorSensor || false;
-        this.heatDryFanMode = device.heatDryFanMode || 1; //NONE, HEAT, DRY, FAN
-        this.coolDryFanMode = device.coolDryFanMode || 1; //NONE, COOL, DRY, FAN
-        this.autoDryFanMode = device.autoDryFanMode || 1; //NONE, AUTO, DRY, FAN
-        this.presets = this.accountType === 'melcloud' ? (device.presets || []).filter(preset => (preset.displayType ?? 0) > 0 && preset.id !== '0') : [];
-        this.schedules = this.accountType === 'melcloudhome' ? (device.schedules || []).filter(schedule => (schedule.displayType ?? 0) > 0 && schedule.id !== '0') : [];
-        this.buttons = (device.buttonsSensors || []).filter(sensor => (sensor.displayType ?? 0) > 0);
         this.deviceId = device.id;
         this.deviceName = device.name;
         this.deviceTypeText = device.typeString;
+        this.displayType = device.displayType;
+        this.heatDryFanMode = device.heatDryFanMode || 1; //NONE, HEAT, DRY, FAN
+        this.coolDryFanMode = device.coolDryFanMode || 1; //NONE, COOL, DRY, FAN
+        this.autoDryFanMode = device.autoDryFanMode || 1; //NONE, AUTO, DRY, FAN
+        this.temperatureSensor = device.temperatureSensor || false;
+        this.temperatureOutdoorSensor = device.temperatureOutdoorSensor || false;
+        this.errorSensor = device.errorSensor || false;
+        this.frostProtectionSupport = device.frostProtectionSupport || false;
+        this.overheatProtectionSupport = device.overheatProtectionSupport || false;
+        this.holidayModeSupport = device.holidayModeSupport || false;
+        this.presets = this.accountType === 'melcloud' ? (device.presets || []).filter(preset => (preset.displayType ?? 0) > 0 && preset.id !== '0') : [];
+        this.schedules = this.accountType === 'melcloudhome' ? (device.schedules || []).filter(schedule => (schedule.displayType ?? 0) > 0 && schedule.id !== '0') : [];
+        this.buttons = (device.buttonsSensors || []).filter(sensor => (sensor.displayType ?? 0) > 0);
+
+        //files
         this.devicesFile = devicesFile;
         this.defaultTempsFile = defaultTempsFile;
         this.displayDeviceInfo = true;
@@ -65,8 +66,8 @@ class DeviceAta extends EventEmitter {
         //schedules configured
         for (const schedule of this.schedules) {
             schedule.name = schedule.name || 'Schedule'
-            schedule.serviceType = [null, Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][schedule.displayType];
-            schedule.characteristicType = [null, Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][schedule.displayType];
+            schedule.serviceType = [null, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][schedule.displayType];
+            schedule.characteristicType = [null, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][schedule.displayType];
             schedule.state = false;
         }
 
@@ -619,62 +620,6 @@ class DeviceAta extends EventEmitter {
                 accessory.addService(this.outdoorTemperatureSensorService);
             };
 
-            //frost protection sensor
-            if (this.frostProtectionSensor && this.accessory.frostProtectionEnabled) {
-                if (this.logDebug) this.emit('debug', `Prepare frost protection service`);
-                this.frostProtectionSensorService = new Service.ContactSensor(`${serviceName} Frost Protection`, `Frost Protection Sensor ${deviceId}`);
-                this.frostProtectionSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                this.frostProtectionSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Frost Protection`);
-                this.frostProtectionSensorService.getCharacteristic(Characteristic.ContactSensorState)
-                    .onGet(async () => {
-                        const state = this.accessory.frostProtectionActive;
-                        return state;
-                    })
-                accessory.addService(this.frostProtectionSensorService);
-            }
-
-            //overheat sensor
-            if (this.overheatProtectionSensor && this.accessory.overheatProtectionEnabled) {
-                if (this.logDebug) this.emit('debug', `Prepare overheat protection service`);
-                this.overheatProtectionSensorService = new Service.ContactSensor(`${serviceName} Overheat Protection`, `Overheat Protection Sensor ${deviceId}`);
-                this.overheatProtectionSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                this.overheatProtectionSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Overheat Protection`);
-                this.overheatProtectionSensorService.getCharacteristic(Characteristic.ContactSensorState)
-                    .onGet(async () => {
-                        const state = this.accessory.overheatProtectionActive;
-                        return state;
-                    })
-                accessory.addService(this.overheatProtectionSensorService);
-            }
-
-            //holiday mode sensor
-            if (this.holidayModeSensor && this.accessory.holidayModeEnabled) {
-                if (this.logDebug) this.emit('debug', `Prepare holiday mode service`);
-                this.holidayModeSensorService = new Service.ContactSensor(`${serviceName} Holiday Mode`, `Holiday Mode Sensor ${deviceId}`);
-                this.holidayModeSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                this.holidayModeSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Holiday Mode`);
-                this.holidayModeSensorService.getCharacteristic(Characteristic.ContactSensorState)
-                    .onGet(async () => {
-                        const state = this.accessory.holidayModeActive;
-                        return state;
-                    })
-                accessory.addService(this.holidayModeSensorService);
-            }
-
-            //schedule sensor
-            if (this.scheduleSensor && this.accessory.scheduleEnabled !== null) {
-                if (this.logDebug) this.emit('debug', `Prepare schedule service`);
-                this.scheduleSensorService = new Service.ContactSensor(`${serviceName} Schedule`, `Schedule Sensor ${deviceId}`);
-                this.scheduleSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                this.scheduleSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Schedule`);
-                this.scheduleSensorService.getCharacteristic(Characteristic.ContactSensorState)
-                    .onGet(async () => {
-                        const state = this.accessory.scheduleEnabled;
-                        return state;
-                    })
-                accessory.addService(this.scheduleSensorService);
-            }
-
             //error sensor
             if (this.errorSensor && this.accessory.isInError !== null) {
                 if (this.logDebug) this.emit('debug', `Prepare error service`);
@@ -687,6 +632,146 @@ class DeviceAta extends EventEmitter {
                         return state;
                     })
                 accessory.addService(this.errorService);
+            }
+
+            //frost protection
+            if (this.frostProtectionSupport && this.accessory.frostProtectionEnabled !== null) {
+                //control
+                if (this.logDebug) this.emit('debug', `Prepare frost protection control service`);
+                this.frostProtectionControlService = new Service.Switch(`${serviceName} Frost Protection`, `frostProtectionControlService${deviceId}`);
+                this.frostProtectionControlService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                this.frostProtectionControlService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Frost Protection`);
+                this.frostProtectionControlService.getCharacteristic(Characteristic.On)
+                    .onGet(async () => {
+                        const state = this.accessory.frostProtectionEnabled;
+                        return state;
+                    })
+                    .onSet(async (state) => {
+                        try {
+                            deviceData.FrostProtection.Enabled = state;
+                            await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'frostprotection');
+                            if (this.logInfo) this.emit('info', `Frost protection: ${state ? 'Enabled' : 'Disabled'}`);
+                        } catch (error) {
+                            if (this.logWarn) this.emit('warn', `Set frost protection error: ${error}`);
+                        };
+                    });
+                accessory.addService(this.frostProtectionControlService);
+
+                if (this.logDebug) this.emit('debug', `Prepare frost protection control sensor service`);
+                this.frostProtectionControlSensorService = new Service.ContactSensor(`${serviceName} Frost Protection Control`, `frostProtectionControlSensorService${deviceId}`);
+                this.frostProtectionControlSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                this.frostProtectionControlSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Frost Protection Control`);
+                this.frostProtectionControlSensorService.getCharacteristic(Characteristic.ContactSensorState)
+                    .onGet(async () => {
+                        const state = this.accessory.frostProtectionEnabled;
+                        return state;
+                    })
+                accessory.addService(this.frostProtectionControlSensorService);
+
+                //sensor
+                if (this.logDebug) this.emit('debug', `Prepare frost protection service`);
+                this.frostProtectionSensorService = new Service.ContactSensor(`${serviceName} Frost Protection`, `frostProtectionSensorService${deviceId}`);
+                this.frostProtectionSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                this.frostProtectionSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Frost Protection`);
+                this.frostProtectionSensorService.getCharacteristic(Characteristic.ContactSensorState)
+                    .onGet(async () => {
+                        const state = this.accessory.frostProtectionActive;
+                        return state;
+                    })
+                accessory.addService(this.frostProtectionSensorService);
+            }
+
+            //overheat protection
+            if (this.overheatProtectionSupport && this.accessory.overheatProtectionEnabled !== null) {
+                //control
+                if (this.logDebug) this.emit('debug', `Prepare overheat protection control service`);
+                this.overheatProtectionControlService = new Service.Switch(`${serviceName} Overheat Protection`, `overheatProtectionControlService${deviceId}`);
+                this.overheatProtectionControlService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                this.overheatProtectionControlService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Overheat Protection`);
+                this.overheatProtectionControlService.getCharacteristic(Characteristic.On)
+                    .onGet(async () => {
+                        const state = this.accessory.overheatProtectionEnabled;
+                        return state;
+                    })
+                    .onSet(async (state) => {
+                        try {
+                            deviceData.OverheatProtection.Enabled = state;
+                            await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'overheatprotection');
+                            if (this.logInfo) this.emit('info', `Overheat protection: ${state ? 'Enabled' : 'Disabled'}`);
+                        } catch (error) {
+                            if (this.logWarn) this.emit('warn', `Set overheat protection error: ${error}`);
+                        };
+                    });
+                accessory.addService(this.overheatProtectionControlService);
+
+                if (this.logDebug) this.emit('debug', `Prepare overheat protection control sensor service`);
+                this.overheatProtectionControlSensorService = new Service.ContactSensor(`${serviceName} Overheat Protection Control`, `overheatProtectionControlSensorService${deviceId}`);
+                this.overheatProtectionControlSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                this.overheatProtectionControlSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Overheat Protection Control`);
+                this.overheatProtectionControlSensorService.getCharacteristic(Characteristic.ContactSensorState)
+                    .onGet(async () => {
+                        const state = this.accessory.overheatProtectionEnabled;
+                        return state;
+                    })
+                accessory.addService(this.overheatProtectionControlSensorService);
+
+                if (this.logDebug) this.emit('debug', `Prepare overheat protection sensor service`);
+                this.overheatProtectionSensorService = new Service.ContactSensor(`${serviceName} Overheat Protection`, `overheatProtectionSensorService${deviceId}`);
+                this.overheatProtectionSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                this.overheatProtectionSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Overheat Protection`);
+                this.overheatProtectionSensorService.getCharacteristic(Characteristic.ContactSensorState)
+                    .onGet(async () => {
+                        const state = this.accessory.overheatProtectionActive;
+                        return state;
+                    })
+                accessory.addService(this.overheatProtectionSensorService);
+            }
+
+            //holiday mode
+            if (this.holidayModeSupport && this.accessory.holidayModeEnabled !== null) {
+                //control
+                if (this.logDebug) this.emit('debug', `Prepare holiday mode control service`);
+                this.holidayModeControlService = new Service.Switch(`${serviceName} Holiday Mode`, `holidayModeControlService${deviceId}`);
+                this.holidayModeControlService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                this.holidayModeControlService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Holiday Mode`);
+                this.holidayModeControlService.getCharacteristic(Characteristic.On)
+                    .onGet(async () => {
+                        const state = this.accessory.holidayModeEnabled;
+                        return state;
+                    })
+                    .onSet(async (state) => {
+                        try {
+                            deviceData.HolidayMode.Enabled = state;
+                            await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'holidaymode');
+                            if (this.logInfo) this.emit('info', `Holiday mode: ${state ? 'Enabled' : 'Disabled'}`);
+                        } catch (error) {
+                            if (this.logWarn) this.emit('warn', `Set holiday mode error: ${error}`);
+                        };
+                    });
+                accessory.addService(this.holidayModeControlService);
+
+                if (this.logDebug) this.emit('debug', `Prepare holiday mode control sensor service`);
+                this.holidayModeControlSensorService = new Service.ContactSensor(`${serviceName} Holiday Mode Control`, `holidayModeControlSensorService${deviceId}`);
+                this.holidayModeControlSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                this.holidayModeControlSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Holiday Mode Control`);
+                this.holidayModeControlSensorService.getCharacteristic(Characteristic.ContactSensorState)
+                    .onGet(async () => {
+                        const state = this.accessory.holidayModeEnabled;
+                        return state;
+                    })
+                accessory.addService(this.holidayModeControlSensorService);
+
+                //sensors
+                if (this.logDebug) this.emit('debug', `Prepare holiday mode sensor service`);
+                this.holidayModeSensorService = new Service.ContactSensor(`${serviceName} Holiday Mode`, `holidayModeSensorService${deviceId}`);
+                this.holidayModeSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                this.holidayModeSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Holiday Mode`);
+                this.holidayModeSensorService.getCharacteristic(Characteristic.ContactSensorState)
+                    .onGet(async () => {
+                        const state = this.accessory.holidayModeActive;
+                        return state;
+                    })
+                accessory.addService(this.holidayModeSensorService);
             }
 
             //presets services
@@ -702,12 +787,12 @@ class DeviceAta extends EventEmitter {
                     //get preset name prefix
                     const namePrefix = preset.namePrefix;
 
-                    const serviceName = namePrefix ? `${accessoryName} ${name}` : name;
+                    const serviceName1 = namePrefix ? `${accessoryName} ${name}` : name;
                     const serviceType = preset.serviceType;
                     const characteristicType = preset.characteristicType;
-                    const presetService = new serviceType(serviceName, `Preset ${deviceId} ${i}`);
+                    const presetService = new serviceType(serviceName1, `Preset ${deviceId} ${i}`);
                     presetService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                    presetService.setCharacteristic(Characteristic.ConfiguredName, serviceName);
+                    presetService.setCharacteristic(Characteristic.ConfiguredName, serviceName1);
                     presetService.getCharacteristic(characteristicType)
                         .onGet(async () => {
                             const state = preset.state;
@@ -747,7 +832,7 @@ class DeviceAta extends EventEmitter {
             };
 
             //schedules services
-            if (this.schedules.length > 0) {
+            if (this.schedules.length > 0 && this.accessory.scheduleEnabled !== null) {
                 if (this.logDebug) this.emit('debug', `Prepare schedules services`);
                 this.schedulesServices = [];
                 this.schedules.forEach((schedule, i) => {
@@ -757,25 +842,51 @@ class DeviceAta extends EventEmitter {
                     //get preset name prefix
                     const namePrefix = schedule.namePrefix;
 
-                    const serviceName = namePrefix ? `${accessoryName} ${name}` : name;
+                    //control
+                    if (i === 0) {
+                        if (this.logDebug) this.emit('debug', `Prepare schedule control service`);
+                        this.schedulesControlService = new Service.Switch(`${serviceName} Schedule`, `schedulesControlService${deviceId} ${i}`);
+                        this.schedulesControlService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                        this.schedulesControlService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Schedule`);
+                        this.schedulesControlService.getCharacteristic(Characteristic.On)
+                            .onGet(async () => {
+                                const state = this.accessory.scheduleEnabled;
+                                return state;
+                            })
+                            .onSet(async (state) => {
+                                try {
+                                    deviceData.ScheduleEnabled = state;
+                                    await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'schedule');
+                                    if (this.logInfo) this.emit('info', `Schedule: ${state ? 'Enabled' : 'Disabled'}`);
+                                } catch (error) {
+                                    if (this.logWarn) this.emit('warn', `Set schedule error: ${error}`);
+                                };
+                            });
+                        accessory.addService(this.schedulesControlService);
+
+                        if (this.logDebug) this.emit('debug', `Prepare schedule control sensor service`);
+                        this.schedulesControlSensorService = new Service.ContactSensor(`${serviceName} Schedule Control`, `schedulesControlSensorService${deviceId}`);
+                        this.schedulesControlSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                        this.schedulesControlSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Schedule Control`);
+                        this.schedulesControlSensorService.getCharacteristic(Characteristic.ContactSensorState)
+                            .onGet(async () => {
+                                const state = this.accessory.scheduleEnabled;
+                                return state;
+                            })
+                        accessory.addService(this.schedulesControlSensorService);
+                    }
+
+                    //sensors
+                    const serviceName1 = namePrefix ? `${accessoryName} ${name}` : name;
                     const serviceType = schedule.serviceType;
                     const characteristicType = schedule.characteristicType;
-                    const scheduleService = new serviceType(serviceName, `Schedule ${deviceId} ${i}`);
+                    const scheduleService = new serviceType(serviceName1, `scheduleService${deviceId} ${i}`);
                     scheduleService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                    scheduleService.setCharacteristic(Characteristic.ConfiguredName, serviceName);
+                    scheduleService.setCharacteristic(Characteristic.ConfiguredName, serviceName1);
                     scheduleService.getCharacteristic(characteristicType)
                         .onGet(async () => {
                             const state = schedule.state;
                             return state;
-                        })
-                        .onSet(async (state) => {
-                            try {
-                                deviceData.ScheduleEnabled = state;
-                                await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'scheduleset');
-                                if (this.logInfo) this.emit('info', `${state ? 'Set:' : 'Unset:'} ${name}`);
-                            } catch (error) {
-                                if (this.logWarn) this.emit('warn', `Set schedule error: ${error}`);
-                            };
                         });
                     this.schedulesServices.push(scheduleService);
                     accessory.addService(scheduleService);
@@ -1060,8 +1171,6 @@ class DeviceAta extends EventEmitter {
                     this.deviceData = deviceData;
 
                     //keys
-                    const presetsIdKey = this.accountType === 'melcloud' ? 'ID' : 'Id';
-                    const setTempKey = this.accountType === 'melcloud' ? 'SetTemperature' : 'SetPoint';
                     const fanKey = this.accountType === 'melcloud' ? 'FanSpeed' : 'SetFanSpeed';
                     const tempStepKey = this.accountType === 'melcloud' ? 'TemperatureIncrement' : 'HasHalfDegreeIncrements';
                     const errorKey = this.accountType === 'melcloud' ? 'HasError' : 'IsInError';
@@ -1073,19 +1182,18 @@ class DeviceAta extends EventEmitter {
                     const supportDryKey = this.accountType === 'melcloud' ? 'ModelSupportsDry' : 'HasDryOperationMode';
                     const supportCoolKey = this.accountType === 'melcloud' ? 'ModelSupportsCool' : 'HasCoolOperationMode';
 
-                    //presets schedule
+                    //presets schedules
                     const scheduleEnabled = deviceData.ScheduleEnabled;
                     const schedulesOnServer = deviceData.Schedule ?? [];
                     const presetsOnServer = deviceData.Presets ?? [];
-
+                    const holidayModeEnabled = deviceData.HolidayMode?.Enabled;
+                    const holidayModeActive = deviceData.HolidayMode?.Active ?? false;
 
                     //protection
                     const frostProtectionEnabled = deviceData.FrostProtection?.Enabled;
-                    const frostProtectionActive = deviceData.FrostProtection?.Active;
+                    const frostProtectionActive = deviceData.FrostProtection?.Active ?? false;
                     const overheatProtectionEnabled = deviceData.OverheatProtection?.Enabled;
-                    const overheatProtectionActive = deviceData.OverheatProtection?.Active;
-                    const holidayModeEnabled = deviceData.HolidayMode?.Enabled;
-                    const holidayModeActive = deviceData.HolidayMode?.Active;
+                    const overheatProtectionActive = deviceData.OverheatProtection?.Active ?? false;
 
                     //device control
                     const hideVaneControls = deviceData.HideVaneControls ?? false;
@@ -1319,18 +1427,36 @@ class DeviceAta extends EventEmitter {
                     };
                     this.accessory = obj;
 
+                    //senors
                     this.roomTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature);
                     this.outdoorTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature);
-                    this.frostProtectionSensorService?.updateCharacteristic(Characteristic.ContactSensorState, frostProtectionActive);
-                    this.overheatProtectionSensorService?.updateCharacteristic(Characteristic.ContactSensorState, overheatProtectionActive);
-                    this.holidayModeSensorService?.updateCharacteristic(Characteristic.ContactSensorState, holidayModeActive);
-                    this.scheduleSensorService?.updateCharacteristic(Characteristic.ContactSensorState, scheduleEnabled);
                     this.errorService?.updateCharacteristic(Characteristic.ContactSensorState, isInError);
 
-                    //update presets state
+                    //frost protection
+                    if (this.frostProtectionSupport && frostProtectionEnabled !== null) {
+                        this.frostProtectionControlService?.updateCharacteristic(Characteristic.On, frostProtectionEnabled);
+                        this.frostProtectionControlSensorService?.updateCharacteristic(Characteristic.ContactSensorState, frostProtectionEnabled);
+                        this.frostProtectionSensorService?.updateCharacteristic(Characteristic.ContactSensorState, frostProtectionActive);
+                    }
+
+                    //overheat protection
+                    if (this.overheatProtectionSupport && overheatProtectionEnabled !== null) {
+                        this.overheatProtectionControlService?.updateCharacteristic(Characteristic.On, overheatProtectionEnabled);
+                        this.overheatProtectionControlSensorService?.updateCharacteristic(Characteristic.ContactSensorState, overheatProtectionEnabled);
+                        this.overheatProtectionSensorService?.updateCharacteristic(Characteristic.ContactSensorState, overheatProtectionActive);
+                    }
+
+                    //holiday mode
+                    if (this.holidayModeSupport && holidayModeEnabled !== null) {
+                        this.holidayModeControlService?.updateCharacteristic(Characteristic.On, holidayModeEnabled);
+                        this.holidayModeControlSensorService?.updateCharacteristic(Characteristic.ContactSensorState, holidayModeEnabled);
+                        this.holidayModeSensorService?.updateCharacteristic(Characteristic.ContactSensorState, holidayModeActive);
+                    }
+
+                    //presets
                     if (this.presets.length > 0) {
                         this.presets.forEach((preset, i) => {
-                            const presetData = presetsOnServer.find(p => p[presetsIdKey] === preset.id);
+                            const presetData = presetsOnServer.find(p => p.ID === preset.id);
 
                             preset.state = presetData ? (presetData.Power === power
                                 && presetData.SetTemperature === setTemperature
@@ -1344,18 +1470,25 @@ class DeviceAta extends EventEmitter {
                         });
                     };
 
-                    //update schedules state
-                    if (this.schedules.length > 0) {
+                    //schedules
+                    if (this.schedules.length > 0 && scheduleEnabled !== null) {
                         this.schedules.forEach((schedule, i) => {
-                            const scheduleData = schedulesOnServer.find(s => s[presetsIdKey] === schedule.id);
-                            schedule.state = scheduleEnabled; //scheduleData.Enabled : false;
+                            //control
+                            if (i === 0) {
+                                this.schedulesControlService?.updateCharacteristic(Characteristic.On, scheduleEnabled);
+                                this.schedulesControlSensorService?.updateCharacteristic(Characteristic.ContactSensorState, scheduleEnabled);
+                            }
+
+                            //sensors
+                            const scheduleData = schedulesOnServer.find(s => s.Id === schedule.id);
+                            schedule.state = scheduleEnabled ? scheduleData.Enabled ?? false : false;
 
                             const characteristicType = schedule.characteristicType;
                             this.schedulesServices?.[i]?.updateCharacteristic(characteristicType, schedule.state);
                         });
                     };
 
-                    //update buttons state
+                    //buttons
                     if (this.buttons.length > 0) {
                         this.buttons.forEach((button, i) => {
                             const mode = button.mode;

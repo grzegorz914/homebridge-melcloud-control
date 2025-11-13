@@ -395,47 +395,38 @@
                     "default": false,
                     "description": "This enable extra outdoor temperature sensor to use with automations in HomeKit app."
                   },
-                  "frostProtectionSensor": {
-                    "title": "Frost Protection",
-                    "type": "boolean",
-                    "default": false,
-                    "description": "This enable extra frost protection sensor to use with automations in HomeKit app.",
-                    "condition": {
-                      "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
-                    }
-                  },
-                  "overheatProtectionSensor": {
-                    "title": "Overheat Protection",
-                    "type": "boolean",
-                    "default": false,
-                    "description": "This enable extra overheat protection sensor to use with automations in HomeKit app.",
-                    "condition": {
-                      "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
-                    }
-                  },
-                  "holidayModeSensor": {
-                    "title": "Holiday Mode",
-                    "type": "boolean",
-                    "default": false,
-                    "description": "This enable extra holiday mode sensor to use with automations in HomeKit app.",
-                    "condition": {
-                      "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
-                    }
-                  },
-                  "scheduleSensor": {
-                    "title": "Schedule",
-                    "type": "boolean",
-                    "default": false,
-                    "description": "This enable extra schedule sensor to use with automations in HomeKit app.",
-                    "condition": {
-                      "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
-                    }
-                  },
                   "errorSensor": {
                     "title": "Error",
                     "type": "boolean",
                     "default": false,
                     "description": "This enable error sensor to use with automations in HomeKit app."
+                  },
+                  "frostProtectionSupport": {
+                    "title": "Frost Protection Support",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable extra frost protection control and sensors to use with automations in HomeKit app.",
+                    "condition": {
+                      "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
+                    }
+                  },
+                  "overheatProtectionSupport": {
+                    "title": "Overheat Protection Support",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable extra overheat protection control and sensors to use with automations in HomeKit app.",
+                    "condition": {
+                      "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
+                    }
+                  },
+                  "holidayModeSupport": {
+                    "title": "Holiday Mode Support",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable extra holiday mode control and sensors to use with automations in HomeKit app.",
+                    "condition": {
+                      "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
+                    }
                   },
                   "refreshInterval": {
                     "title": "Refresh Interval",
@@ -541,7 +532,7 @@
                           "title": "Display Type",
                           "type": "integer",
                           "minimum": 0,
-                          "maximum": 5,
+                          "maximum": 3,
                           "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
@@ -552,33 +543,21 @@
                               ]
                             },
                             {
-                              "title": "Outlet",
+                              "title": "Motion Sensor",
                               "enum": [
                                 1
                               ]
                             },
                             {
-                              "title": "Switch",
+                              "title": "Occupancy Sensor",
                               "enum": [
                                 2
                               ]
                             },
                             {
-                              "title": "Motion Sensor",
-                              "enum": [
-                                3
-                              ]
-                            },
-                            {
-                              "title": "Occupancy Sensor",
-                              "enum": [
-                                4
-                              ]
-                            },
-                            {
                               "title": "Contact Sensor",
                               "enum": [
-                                5
+                                3
                               ]
                             }
                           ]
@@ -1134,6 +1113,15 @@
                     "default": false,
                     "description": "This enable error sensor to use with automations in HomeKit app."
                   },
+                  "holidayModeSupport": {
+                    "title": "Holiday Mode Support",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable extra holiday mode control and sensors to use with automations in HomeKit app.",
+                    "condition": {
+                      "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
+                    }
+                  },
                   "refreshInterval": {
                     "title": "Refresh Interval",
                     "type": "integer",
@@ -1238,7 +1226,7 @@
                           "title": "Display Type",
                           "type": "integer",
                           "minimum": 0,
-                          "maximum": 5,
+                          "maximum": 3,
                           "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
@@ -1249,33 +1237,21 @@
                               ]
                             },
                             {
-                              "title": "Outlet",
+                              "title": "Motion Sensor",
                               "enum": [
                                 1
                               ]
                             },
                             {
-                              "title": "Switch",
+                              "title": "Occupancy Sensor",
                               "enum": [
                                 2
                               ]
                             },
                             {
-                              "title": "Motion Sensor",
-                              "enum": [
-                                3
-                              ]
-                            },
-                            {
-                              "title": "Occupancy Sensor",
-                              "enum": [
-                                4
-                              ]
-                            },
-                            {
                               "title": "Contact Sensor",
                               "enum": [
-                                5
+                                3
                               ]
                             }
                           ]
@@ -1609,6 +1585,15 @@
                     "default": false,
                     "description": "This enable error sensor to use with automations in HomeKit app."
                   },
+                  "holidayModeSupport": {
+                    "title": "Holiday Mode Support",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable extra holiday mode control and sensors to use with automations in HomeKit app.",
+                    "condition": {
+                      "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
+                    }
+                  },
                   "refreshInterval": {
                     "title": "Refresh Interval",
                     "type": "integer",
@@ -1717,7 +1702,7 @@
                           "title": "Display Type",
                           "type": "integer",
                           "minimum": 0,
-                          "maximum": 5,
+                          "maximum": 3,
                           "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
@@ -1728,33 +1713,21 @@
                               ]
                             },
                             {
-                              "title": "Outlet",
+                              "title": "Motion Sensor",
                               "enum": [
                                 1
                               ]
                             },
                             {
-                              "title": "Switch",
+                              "title": "Occupancy Sensor",
                               "enum": [
                                 2
                               ]
                             },
                             {
-                              "title": "Motion Sensor",
-                              "enum": [
-                                3
-                              ]
-                            },
-                            {
-                              "title": "Occupancy Sensor",
-                              "enum": [
-                                4
-                              ]
-                            },
-                            {
                               "title": "Contact Sensor",
                               "enum": [
-                                5
+                                3
                               ]
                             }
                           ]
@@ -1967,7 +1940,10 @@
               "default": 120,
               "minimum": 1,
               "maximum": 600,
-              "description": "Set the background account data refresh time in seconds."
+              "description": "Set the background account data refresh time in seconds.",
+              "condition": {
+                "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloud';"
+              }
             },
             "log": {
               "title": "Log",
@@ -2163,6 +2139,9 @@
                             "accounts[].ataDevices[].heatDryFanMode",
                             "accounts[].ataDevices[].coolDryFanMode",
                             "accounts[].ataDevices[].autoDryFanMode",
+                            "accounts[].ataDevices[].frostProtectionSupport",
+                            "accounts[].ataDevices[].overheatProtectionSupport",
+                            "accounts[].ataDevices[].holidayModeSupport",
                             "accounts[].ataDevices[].refreshInterval"
                           ],
                           "condition": {
@@ -2242,10 +2221,6 @@
                                 {
                                   "title": "System",
                                   "items": [
-                                    "accounts[].ataDevices[].frostProtectionSensor",
-                                    "accounts[].ataDevices[].overheatProtectionSensor",
-                                    "accounts[].ataDevices[].holidayModeSensor",
-                                    "accounts[].ataDevices[].scheduleSensor",
                                     "accounts[].ataDevices[].errorSensor"
                                   ]
                                 },
@@ -2310,6 +2285,7 @@
                           "items": [
                             "accounts[].atwDevices[].hideZone",
                             "accounts[].atwDevices[].name",
+                            "accounts[].atwDevices[].holidayModeSupport",
                             "accounts[].atwDevices[].refreshInterval"
                           ],
                           "condition": {
@@ -2459,6 +2435,7 @@
                           "expanded": false,
                           "items": [
                             "accounts[].ervDevices[].name",
+                            "accounts[].ervDevices[].holidayModeSupport",
                             "accounts[].ervDevices[].refreshInterval"
                           ],
                           "condition": {
@@ -2592,7 +2569,6 @@
               "title": "{{ value.name }}",
               "items": [
                 {
-                  "key": "accounts[]",
                   "title": "Account Data Refresh",
                   "items": [
                     "accounts[].refreshInterval"
@@ -2611,7 +2587,6 @@
                   ]
                 },
                 {
-                  "key": "accounts[]",
                   "title": "External Integrations",
                   "items": [
                     {

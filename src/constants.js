@@ -21,12 +21,13 @@ export const ApiUrlsHome = {
     BaseURL: "https://melcloudhome.com",
     GetUserContext: "/api/user/context",
     SetAta: "/api/ataunit/deviceid",
-    GetAtaSchedule: "/ata/deviceid/schedule",
     SetAtw: "/api/atwunit/deviceid",
-    GetAtwSchedule: "/atw/deviceid/schedule",
     SetErv: "/api/ervunit/deviceid",
-    GetErvSchedule: "/erv/deviceid/schedule",
-    SetSchedule: "/api/cloudschedule/deviceid/enabled",
+    PutScheduleEnable: "/api/cloudschedule/deviceid/enabled", // PUT {"enabled":true}
+    PostSchedule: " /api/cloudschedule/deviceid", // POST {"days":[2],"time":"17:59:00","enabled":true,"id":"53c5e804-0663-47d0-85c2-2d8ccd2573de","power":false,"operationMode":null,"setPoint":null,"vaneVerticalDirection":null,"vaneHorizontalDirection":null,"setFanSpeed":null}
+    PostProtectionFrost: "/api/protection/frost", // POST {"enabled":true,"min":13,"max":16,"units":{"ATA":["ef333525-2699-4290-af5a-2922566676da"]}}
+    PostProtectionOverheat: "api/protection/overheat", // POST {"enabled":true,"min":32,"max":35,"units":{"ATA":["ef333525-2699-4290-af5a-2922566676da"]}}
+    PostHolidayMode: " /api/holidaymode" // POST {"enabled":true,"startDate":"2025-11-11T17:42:24.913","endDate":"2026-06-01T09:18:00","units":{"ATA":["ef333525-2699-4290-af5a-2922566676da"]}}
 };
 
 export const DeviceType = [

@@ -191,14 +191,6 @@ class MelCloudErv extends EventEmitter {
                     this.updateData(deviceData);
                     return true;
                 case "melcloudhome":
-                    const axiosInstancePut = axios.create({
-                        method: 'PUT',
-                        baseURL: ApiUrlsHome.BaseURL,
-                        timeout: 10000,
-                        headers: deviceData.Headers,
-                        withCredentials: true
-                    });
-
                     if (displayType === 1 && deviceData.Device.VentilationMode === 2) {
                         deviceData.Device.SetTemperature = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
 
@@ -211,18 +203,50 @@ class MelCloudErv extends EventEmitter {
                         }
                     }
 
-                    const settings = effectiveFlags === 'scheduleset' ? { data: { enabled: deviceData.ScheduleEnabled } } : {
-                        data: {
-                            Power: deviceData.Device.Power,
-                            SetTemperature: deviceData.Device.SetTemperature,
-                            SetFanSpeed: String(deviceData.Device.SetFanSpeed),
-                            OperationMode: Ventilation.OperationModeMapEnumToString[deviceData.Device.OperationMode],
-                            VentilationMode: Ventilation.VentilationModeMapEnumToString[deviceData.Device.VentilationMode],
-                        }
-                    };
-                    if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(settings.data, null, 2)}`);
+                    let method = null;
+                    let settings = {};
+                    let path = '';
+                    switch (effectiveFlags) {
+                        case 'holidaymode':
+                            settings = {
+                                data: { enabled: deviceData.HolidayMode.Enabled, startDate: deviceData.HolidayMode.StartDate, endDate: deviceData.HolidayMode.EndDate, units: { "ERV": [deviceData.DeviceID] } }
+                            };
+                            method = 'POST';
+                            path = ApiUrlsHome.PostHolidayMode;
+                            break;
+                        case 'schedule':
+                            settings = {
+                                data: {
+                                    enabled: deviceData.ScheduleEnabled
+                                }
+                            };
+                            method = 'PUT';
+                            path = ApiUrlsHome.PutScheduleEnable.replace('deviceid', deviceData.DeviceID);
+                            break;
+                        default:
+                            settings = {
+                                data: {
+                                    Power: deviceData.Device.Power,
+                                    SetTemperature: deviceData.Device.SetTemperature,
+                                    SetFanSpeed: String(deviceData.Device.SetFanSpeed),
+                                    OperationMode: Ventilation.OperationModeMapEnumToString[deviceData.Device.OperationMode],
+                                    VentilationMode: Ventilation.VentilationModeMapEnumToString[deviceData.Device.VentilationMode],
+                                }
+                            };
+                            method = 'PUT';
+                            path = ApiUrlsHome.SetErv.replace('deviceid', deviceData.DeviceID);
+                            break
+                    }
 
-                    const path = effectiveFlags === 'scheduleset' ? ApiUrlsHome.SetSchedule.replace('deviceid', deviceData.DeviceID) : ApiUrlsHome.SetErv.replace('deviceid', deviceData.DeviceID);
+                    const axiosInstancePut = axios.create({
+                        method: method,
+                        baseURL: ApiUrlsHome.BaseURL,
+                        timeout: 10000,
+                        headers: deviceData.Headers,
+                        withCredentials: true
+                    });
+
+                    if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(settings.data, null, 2)}`);
                     await axiosInstancePut(path, settings);
                     this.updateData(deviceData);
                     return true;
@@ -230,11 +254,7 @@ class MelCloudErv extends EventEmitter {
                     return;
             }
         } catch (error) {
-            // Return 500 for schedule hovewer working correct
-            if (error?.response?.status === 500) {
-                return true;
-            }
-
+            if (error.response?.status === 500) return true; // Return 500 for schedule hovewer working correct
             throw new Error(`Send data error: ${error.message}`);
         }
     }
@@ -242,7 +262,7 @@ class MelCloudErv extends EventEmitter {
     updateData(deviceData) {
         setTimeout(() => {
             this.emit('deviceState', deviceData);
-        }, 500);
+        }, 300);
     }
 };
 export default MelCloudErv;

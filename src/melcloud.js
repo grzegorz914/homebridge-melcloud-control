@@ -168,7 +168,7 @@ class MelCloud extends EventEmitter {
             const loginData = account.LoginData ?? [];
             const contextKey = loginData.ContextKey;
 
-            const debugData = {
+            const safeConfig = {
                 ...loginData,
                 ContextKey: 'removed',
                 ClientId: 'removed',
@@ -177,7 +177,7 @@ class MelCloud extends EventEmitter {
                 MapLongitude: 'removed',
                 MapLatitude: 'removed'
             };
-            if (this.logDebug) this.emit('debug', `MELCloud Info: ${JSON.stringify(debugData, null, 2)}`);
+            if (this.logDebug) this.emit('debug', `MELCloud Info: ${JSON.stringify(safeConfig, null, 2)}`);
 
             if (!contextKey) {
                 accountInfo.Info = 'Context key missing'

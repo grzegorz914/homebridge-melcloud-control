@@ -38,6 +38,7 @@ class DeviceAtw extends EventEmitter {
         this.temperatureFlowZone2Sensor = device.temperatureFlowZone2Sensor || false;
         this.temperatureReturnZone2Sensor = device.temperatureReturnZone2Sensor || false;
         this.errorSensor = device.errorSensor || false;
+        this.holidayModeSupport = device.holidayModeSupport || false;
         this.presets = this.accountType === 'melcloud' ? (device.presets || []).filter(preset => (preset.displayType ?? 0) > 0 && preset.id !== '0') : [];
         this.schedules = this.accountType === 'melcloudhome' ? (device.schedules || []).filter(schedule => (schedule.displayType ?? 0) > 0 && schedule.id !== '0') : [];
         this.buttons = (device.buttonsSensors || []).filter(button => (button.displayType ?? 0) > 0);
@@ -66,8 +67,8 @@ class DeviceAtw extends EventEmitter {
         //schedules configured
         for (const schedule of this.schedules) {
             schedule.name = schedule.name || 'Schedule'
-            schedule.serviceType = [null, Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][schedule.displayType];
-            schedule.characteristicType = [null, Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][schedule.displayType];
+            schedule.serviceType = [null, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][schedule.displayType];
+            schedule.characteristicType = [null, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][schedule.displayType];
             schedule.state = false;
         }
 
@@ -301,6 +302,7 @@ class DeviceAtw extends EventEmitter {
                 .setCharacteristic(Characteristic.ConfiguredName, accessoryName);
 
             //services
+            const serviceName = `${deviceTypeText} ${accessoryName}`;
             if (zonesCount > 0) {
                 this.melCloudServices = [];
                 this.accessory.zones.forEach((zone, i) => {
@@ -877,20 +879,6 @@ class DeviceAtw extends EventEmitter {
                                     })
                                 accessory.addService(this.returnTemperatureSensorService);
                             };
-
-                            //error sensor
-                            if (this.errorSensor && this.accessory.isInError !== null) {
-                                if (this.logDebug) this.emit('debug', `Prepare error service`);
-                                this.errorService = new Service.ContactSensor(`${serviceName} Error`, `Error Sensor ${deviceId}`);
-                                this.errorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                                this.errorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Error`);
-                                this.errorService.getCharacteristic(Characteristic.ContactSensorState)
-                                    .onGet(async () => {
-                                        const state = this.accessory.isInError;
-                                        return state;
-                                    })
-                                accessory.addService(this.errorService);
-                            }
                             break;
                         case caseZone1Sensor: //Zone 1
                             if (zone.roomTemperature !== null) {
@@ -1061,13 +1049,73 @@ class DeviceAtw extends EventEmitter {
                 });
             };
 
+            //error sensor
+            if (this.errorSensor && this.accessory.isInError !== null) {
+                if (this.logDebug) this.emit('debug', `Prepare error service`);
+                this.errorService = new Service.ContactSensor(`${serviceName} Error`, `Error Sensor ${deviceId}`);
+                this.errorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                this.errorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Error`);
+                this.errorService.getCharacteristic(Characteristic.ContactSensorState)
+                    .onGet(async () => {
+                        const state = this.accessory.isInError;
+                        return state;
+                    })
+                accessory.addService(this.errorService);
+            }
+
+            //holiday mode
+            if (this.holidayModeSupport && this.accessory.holidayModeEnabled !== null) {
+                //control
+                if (this.logDebug) this.emit('debug', `Prepare holiday mode control service`);
+                this.holidayModeControlService = new Service.Switch(`${serviceName} Holiday Mode`, `holidayModeControlService${deviceId}`);
+                this.holidayModeControlService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                this.holidayModeControlService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Holiday Mode`);
+                this.holidayModeControlService.getCharacteristic(Characteristic.On)
+                    .onGet(async () => {
+                        const state = this.accessory.holidayModeEnabled;
+                        return state;
+                    })
+                    .onSet(async (state) => {
+                        try {
+                            deviceData.HolidayMode.Enabled = state;
+                            await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'holidaymode');
+                            if (this.logInfo) this.emit('info', `Holiday mode: ${state ? 'Enabled' : 'Disabled'}`);
+                        } catch (error) {
+                            if (this.logWarn) this.emit('warn', `Set holiday mode error: ${error}`);
+                        };
+                    });
+                accessory.addService(this.holidayModeControlService);
+
+                if (this.logDebug) this.emit('debug', `Prepare holiday mode control sensor service`);
+                this.holidayModeControlSensorService = new Service.ContactSensor(`${serviceName} Holiday Mode Control`, `holidayModeControlSensorService${deviceId}`);
+                this.holidayModeControlSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                this.holidayModeControlSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Holiday Mode Control`);
+                this.holidayModeControlSensorService.getCharacteristic(Characteristic.ContactSensorState)
+                    .onGet(async () => {
+                        const state = this.accessory.holidayModeEnabled;
+                        return state;
+                    })
+                accessory.addService(this.holidayModeControlSensorService);
+
+                //sensors
+                if (this.logDebug) this.emit('debug', `Prepare holiday mode sensor service`);
+                this.holidayModeSensorService = new Service.ContactSensor(`${serviceName} Holiday Mode`, `holidayModeSensorService${deviceId}`);
+                this.holidayModeSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                this.holidayModeSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Holiday Mode State`);
+                this.holidayModeSensorService.getCharacteristic(Characteristic.ContactSensorState)
+                    .onGet(async () => {
+                        const state = this.accessory.holidayModeActive;
+                        return state;
+                    })
+                accessory.addService(this.holidayModeSensorService);
+            }
+
             //presets services
             if (this.presets.length > 0) {
                 if (this.logDebug) this.emit('debug', `Prepare presets services`);
                 this.presetsServices = [];
-                const presetsIdKey = this.accountType === 'melcloud' ? 'ID' : 'Id';
                 this.presets.forEach((preset, i) => {
-                    const presetData = presetsOnServer.find(p => p[presetsIdKey] === preset.id);
+                    const presetData = presetsOnServer.find(p => p.ID === preset.id);
 
                     //get preset name
                     const name = preset.name;
@@ -1132,7 +1180,7 @@ class DeviceAtw extends EventEmitter {
             };
 
             //schedules services
-            if (this.schedules.length > 0) {
+            if (this.schedules.length > 0 && this.accessory.scheduleEnabled !== null) {
                 if (this.logDebug) this.emit('debug', `Prepare schedules services`);
                 this.schedulesServices = [];
                 this.schedules.forEach((schedule, i) => {
@@ -1142,25 +1190,51 @@ class DeviceAtw extends EventEmitter {
                     //get preset name prefix
                     const namePrefix = schedule.namePrefix;
 
-                    const serviceName = namePrefix ? `${accessoryName} ${name}` : name;
+                    //control
+                    if (i === 0) {
+                        if (this.logDebug) this.emit('debug', `Prepare schedule control service`);
+                        this.schedulesControlService = new Service.Switch(`${serviceName} Schedule`, `schedulesControlService${deviceId} ${i}`);
+                        this.schedulesControlService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                        this.schedulesControlService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Schedules`);
+                        this.schedulesControlService.getCharacteristic(Characteristic.On)
+                            .onGet(async () => {
+                                const state = this.accessory.scheduleEnabled;
+                                return state;
+                            })
+                            .onSet(async (state) => {
+                                try {
+                                    deviceData.ScheduleEnabled = state;
+                                    await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'schedule');
+                                    if (this.logInfo) this.emit('info', `Schedule: ${state ? 'Enabled' : 'Disabled'}`);
+                                } catch (error) {
+                                    if (this.logWarn) this.emit('warn', `Set schedule error: ${error}`);
+                                };
+                            });
+                        accessory.addService(this.schedulesControlService);
+
+                        if (this.logDebug) this.emit('debug', `Prepare schedule control sensor service`);
+                        this.schedulesControlSensorService = new Service.ContactSensor(`${serviceName} Schedule Control`, `schedulesControlSensorService${deviceId}`);
+                        this.schedulesControlSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                        this.schedulesControlSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Schedule Control`);
+                        this.schedulesControlSensorService.getCharacteristic(Characteristic.ContactSensorState)
+                            .onGet(async () => {
+                                const state = this.accessory.scheduleEnabled;
+                                return state;
+                            })
+                        accessory.addService(this.schedulesControlSensorService);
+                    }
+
+                    //sensors
+                    const serviceName1 = namePrefix ? `${accessoryName} ${name}` : name;
                     const serviceType = schedule.serviceType;
                     const characteristicType = schedule.characteristicType;
-                    const scheduleService = new serviceType(serviceName, `Schedule ${deviceId} ${i}`);
+                    const scheduleService = new serviceType(serviceName, `scheduleService${deviceId} ${i}`);
                     scheduleService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                    scheduleService.setCharacteristic(Characteristic.ConfiguredName, serviceName);
+                    scheduleService.setCharacteristic(Characteristic.ConfiguredName, serviceName1);
                     scheduleService.getCharacteristic(characteristicType)
                         .onGet(async () => {
                             const state = schedule.state;
                             return state;
-                        })
-                        .onSet(async (state) => {
-                            try {
-                                deviceData.ScheduleEnabled = state;
-                                await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'scheduleset');
-                                if (this.logInfo) this.emit('info', `${state ? 'Set:' : 'Unset:'} ${name}`);
-                            } catch (error) {
-                                if (this.logWarn) this.emit('warn', `Set schedule error: ${error}`);
-                            };
                         });
                     this.schedulesServices.push(scheduleService);
                     accessory.addService(scheduleService);
@@ -1184,12 +1258,12 @@ class DeviceAtw extends EventEmitter {
                     //get button name prefix
                     const namePrefix = button.namePrefix;
 
-                    const serviceName = namePrefix ? `${accessoryName} ${name}` : name;
+                    const serviceName1 = namePrefix ? `${accessoryName} ${name}` : name;
                     const serviceType = button.serviceType;
                     const characteristicType = button.characteristicType;
                     const buttonService = new serviceType(serviceName, `Button ${deviceId} ${i}`);
                     buttonService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                    buttonService.setCharacteristic(Characteristic.ConfiguredName, serviceName);
+                    buttonService.setCharacteristic(Characteristic.ConfiguredName, serviceName1);
                     buttonService.getCharacteristic(characteristicType)
                         .onGet(async () => {
                             const state = button.state;
@@ -1377,8 +1451,6 @@ class DeviceAtw extends EventEmitter {
                     this.deviceData = deviceData;
 
                     //keys
-                    const presetsKey = this.accountType === 'melcloud' ? 'Presets' : 'Schedule';
-                    const presetsIdKey = accountType === 'melcloud' ? 'ID' : 'Id';
                     const tempStepKey = this.accountType === 'melcloud' ? 'TemperatureIncrement' : 'HasHalfDegreeIncrements';
                     const errorKey = this.accountType === 'melcloud' ? 'HasError' : 'IsInError';
 
@@ -1386,6 +1458,8 @@ class DeviceAtw extends EventEmitter {
                     const scheduleEnabled = deviceData.ScheduleEnabled;
                     const schedulesOnServer = deviceData.Schedule ?? [];
                     const presetsOnServer = deviceData.Presets ?? [];
+                    const holidayModeEnabled = deviceData.HolidayMode?.Enabled;
+                    const holidayModeActive = deviceData.HolidayMode?.Active ?? false;
 
                     //device info
                     const hasHeatPump = ![1, 2, 3, 4, 5, 6, 7, 15].includes(this.hideZone);
@@ -1488,6 +1562,9 @@ class DeviceAtw extends EventEmitter {
                         useFahrenheit: this.useFahrenheit,
                         temperatureUnit: TemperatureDisplayUnits[this.useFahrenheit],
                         isInError: isInError,
+                        scheduleEnabled: scheduleEnabled,
+                        holidayModeEnabled: holidayModeEnabled,
+                        holidayModeActive: holidayModeActive,
                         scheduleEnabled: scheduleEnabled,
                         zones: [],
                         zonesSensors: []
@@ -1792,7 +1869,6 @@ class DeviceAtw extends EventEmitter {
                                 this.roomTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature);
                                 this.flowTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureHeatPump);
                                 this.returnTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureHeatPump);
-                                this.errorService?.updateCharacteristic(Characteristic.ContactSensorState, isInError);
                                 break;
                             case caseZone1Sensor: //Zone 1
                                 name = zone1Name;
@@ -1866,10 +1942,20 @@ class DeviceAtw extends EventEmitter {
                     };
                     this.accessory = obj;
 
-                    //update presets state
+                    //error sensor
+                    this.errorService?.updateCharacteristic(Characteristic.ContactSensorState, isInError);
+
+                    //holiday mode
+                    if (this.holidayModeSupport && holidayModeEnabled !== null) {
+                        this.holidayModeControlService?.updateCharacteristic(Characteristic.On, holidayModeEnabled);
+                        this.holidayModeControlSensorService?.updateCharacteristic(Characteristic.ContactSensorState, holidayModeEnabled);
+                        this.holidayModeSensorService?.updateCharacteristic(Characteristic.ContactSensorState, holidayModeActive);
+                    }
+
+                    //presets
                     if (this.presets.length > 0) {
                         this.presets.forEach((preset, i) => {
-                            const presetData = presetsOnServer.find(p => p[presetsIdKey] === preset.id);
+                            const presetData = presetsOnServer.find(p => p.ID === preset.id);
 
                             preset.state = presetData ? (presetData.Power === power
                                 && presetData.EcoHotWater === ecoHotWater
@@ -1889,18 +1975,22 @@ class DeviceAtw extends EventEmitter {
                         });
                     };
 
-                    //update schedules state
-                    if (this.schedules.length > 0) {
+                    //schedules
+                    if (this.schedules.length > 0 && scheduleEnabled !== null) {
                         this.schedules.forEach((schedule, i) => {
-                            const scheduleData = schedulesOnServer.find(s => s[presetsIdKey] === schedule.id);
-                            schedule.state = scheduleEnabled; //scheduleData.Enabled : false;
+                            //control
+                            if (i === 0) this.schedulesControlService?.updateCharacteristic(Characteristic.On, scheduleEnabled);
+
+                            //sensors
+                            const scheduleData = schedulesOnServer.find(s => s.Id === schedule.id);
+                            schedule.state = scheduleEnabled ? scheduleData.Enabled ?? false : false;
 
                             const characteristicType = schedule.characteristicType;
                             this.schedulesServices?.[i]?.updateCharacteristic(characteristicType, schedule.state);
                         });
                     };
 
-                    //update buttons state
+                    //buttons
                     if (this.buttons.length > 0) {
                         this.buttons.forEach((button, i) => {
                             const mode = button.mode;

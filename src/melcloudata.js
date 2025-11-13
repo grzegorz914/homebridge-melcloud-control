@@ -183,14 +183,6 @@ class MelCloudAta extends EventEmitter {
                     this.updateData(deviceData);
                     return true;
                 case "melcloudhome":
-                    const axiosInstancePut = axios.create({
-                        method: 'PUT',
-                        baseURL: ApiUrlsHome.BaseURL,
-                        timeout: 10000,
-                        headers: deviceData.Headers,
-                        withCredentials: true
-                    });
-
                     if (displayType === 1 && deviceData.Device.OperationMode === 8) {
                         deviceData.Device.SetTemperature = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
 
@@ -203,19 +195,80 @@ class MelCloudAta extends EventEmitter {
                         }
                     }
 
-                    const settings = effectiveFlags === 'scheduleset' ? { data: { enabled: deviceData.ScheduleEnabled } } : {
-                        data: {
-                            Power: deviceData.Device.Power,
-                            SetTemperature: deviceData.Device.SetTemperature,
-                            SetFanSpeed: String(deviceData.Device.SetFanSpeed),
-                            OperationMode: AirConditioner.OperationModeMapEnumToString[deviceData.Device.OperationMode],
-                            VaneHorizontalDirection: AirConditioner.VaneHorizontalDirectionMapEnumToString[deviceData.Device.VaneHorizontalDirection],
-                            VaneVerticalDirection: AirConditioner.VaneVerticalDirectionMapEnumToString[deviceData.Device.VaneVerticalDirection],
-                        }
-                    };
-                    if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(settings.data, null, 2)}`);
+                    let method = null
+                    let settings = {};
+                    let path = '';
+                    switch (effectiveFlags) {
+                        case 'frostprotection':
+                            settings = {
+                                data: {
+                                    enabled: deviceData.FrostProtection.Enabled,
+                                    min: deviceData.FrostProtection.Min,
+                                    max: deviceData.FrostProtection.Max,
+                                    units: { "ATA": [deviceData.DeviceID] }
+                                }
+                            };
+                            method = 'POST';
+                            path = ApiUrlsHome.PostProtectionFrost;
+                            break;
+                        case 'overheatprotection':
+                            settings = {
+                                data: {
+                                    enabled: deviceData.OverheatProtection.Enabled,
+                                    min: deviceData.OverheatProtection.Min,
+                                    max: deviceData.OverheatProtection.Max,
+                                    units: { "ATA": [deviceData.DeviceID] }
+                                }
+                            };
+                            method = 'POST';
+                            path = ApiUrlsHome.PostProtectionOverheat;
+                            break;
+                        case 'holidaymode':
+                            settings = {
+                                data: {
+                                    enabled: deviceData.HolidayMode.Enabled,
+                                    startDate: deviceData.HolidayMode.StartDate,
+                                    endDate: deviceData.HolidayMode.EndDate,
+                                    units: { "ATA": [deviceData.DeviceID] }
+                                }
+                            };
+                            method = 'POST';
+                            path = ApiUrlsHome.PostHolidayMode;
+                            break;
+                        case 'schedule':
+                            settings = {
+                                data: {
+                                    enabled: deviceData.ScheduleEnabled
+                                }
+                            };
+                            method = 'PUT';
+                            path = ApiUrlsHome.PutScheduleEnable.replace('deviceid', deviceData.DeviceID);
+                            break;
+                        default:
+                            settings = {
+                                data: {
+                                    Power: deviceData.Device.Power,
+                                    SetTemperature: deviceData.Device.SetTemperature,
+                                    SetFanSpeed: String(deviceData.Device.SetFanSpeed),
+                                    OperationMode: AirConditioner.OperationModeMapEnumToString[deviceData.Device.OperationMode],
+                                    VaneHorizontalDirection: AirConditioner.VaneHorizontalDirectionMapEnumToString[deviceData.Device.VaneHorizontalDirection],
+                                    VaneVerticalDirection: AirConditioner.VaneVerticalDirectionMapEnumToString[deviceData.Device.VaneVerticalDirection],
+                                }
+                            };
+                            method = 'PUT';
+                            path = ApiUrlsHome.SetAta.replace('deviceid', deviceData.DeviceID);
+                            break
+                    }
 
-                    const path = effectiveFlags === 'scheduleset' ? ApiUrlsHome.SetSchedule.replace('deviceid', deviceData.DeviceID) : ApiUrlsHome.SetAta.replace('deviceid', deviceData.DeviceID);
+                    const axiosInstancePut = axios.create({
+                        method: method,
+                        baseURL: ApiUrlsHome.BaseURL,
+                        timeout: 10000,
+                        headers: deviceData.Headers,
+                        withCredentials: true
+                    });
+
+                    if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(settings.data, null, 2)}`);
                     await axiosInstancePut(path, settings);
                     this.updateData(deviceData);
                     return true;
@@ -223,11 +276,7 @@ class MelCloudAta extends EventEmitter {
                     return;
             }
         } catch (error) {
-            // Return 500 for schedule hovewer working correct
-            if (error?.response?.status === 500) {
-                return true;
-            }
-
+            if (error.response?.status === 500) return true; // Return 500 for schedule hovewer working correct
             throw new Error(`Send data error: ${error.message}`);
         }
     }
@@ -235,7 +284,7 @@ class MelCloudAta extends EventEmitter {
     updateData(deviceData) {
         setTimeout(() => {
             this.emit('deviceState', deviceData);
-        }, 500);
+        }, 300);
     }
 
 };

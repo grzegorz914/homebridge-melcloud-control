@@ -65,7 +65,10 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Vane V mode `AUTO/1/2/3/4/5/SWING`.
       * Fan speed mode `AUTO/1/2/3/4/5`.
       * Presets `SET/UNSET`.
-      * Schedules `ON/OFF`.
+      * Frost protection `ON/OFF`.
+      * Overheat protection `ON/OFF`.
+      * Holiday mode `ON/OFF`.
+      * Schedule `ON/OFF`.
   * Sensors:
     * For automation and notifications.
       * Power `ON/OFF`.
@@ -79,8 +82,11 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Outdoor temperature.
       * Frost protection.
       * Overheat protection.
+      * Frost protection.
+      * Overheat protection.
       * Holiday mode.
-      * Shedule.
+      * Shedule control.
+      * Shedule active
       * Error
 * Heat Pump:
   * Heater Cooler:
@@ -118,6 +124,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Operating mode `HEAT/COOL/CURVE/HOLIDAY/AUTO HOT WATER/ECO HOT WATER/FORCE HOT WATER`.
       * Physical lock controls `LOCK/UNLOCK`.
       * Presets `SET/UNSET`.
+      * Holiday mode `ON/OFF`.
+      * Schedule `ON/OFF`.
   * Sensors:
     * For automation and notifications.
       * Power `ON/OFF`.
@@ -130,6 +138,9 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Water tank temperature.
       * Flow Temperature Zone 1, 2, Hot Water.
       * Return Temperature Zone 1, 2, Hot Water.
+      * Holiday mode.
+      * Shedule control.
+      * Shedule active
       * Error
 * Energy Recovery Ventilation Lossnay:
   * Heater Cooler:
@@ -147,6 +158,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Operating mode `LOSSNAY/BYPASS/AUTO/NIGHT PURGE`.
       * Fan speed mode `AUTO/1/2/3/4`.
       * Presets `SET/UNSET`.
+      * Holiday mode `ON/OFF`.
+      * Schedule `ON/OFF`.
   * Sensors:
     * For automation and notifications.
       * Power `ON/OFF`.
@@ -160,6 +173,9 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Filter maintenance.
       * CO2 detected and level.
       * PM2.5 air quality and level.
+      * Holiday mode.
+      * Shedule control.
+      * Shedule active
       * Error
 
 ### HOME app current device mode display
@@ -227,11 +243,10 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ataDevices[].autoDryFanMode` | Here select the operatiing mode for `Auto`, if this mode is not supported, it will be disabled.. |
 | `ataDevices[].temperatureSensor` | This enable extra `Room` temperature sensor to use with automations in HomeKit app. |
 | `ataDevices[].temperatureOutdoorSensor` | This enable extra `Outdoor` temperature sensor to use with automations in HomeKit app. |
-| `ataDevices[].frostProtectionSensor` | This enable extra `Frost Protectio` sensor to use with automations in HomeKit app. |
-| `ataDevices[].overHeatProtectionSensor` | This enable extra `Overheat Protection` sensor to use with automations in HomeKit app. |
-| `ataDevices[].holidayModeSensor` | This enable extra `Holiday Mode` sensor to use with automations in HomeKit app. |
-| `ataDevices[].scheduleSensor` | This enable extra `Shedule` sensor to use with automations in HomeKit app. |
 | `ataDevices[].errorSensor` | This enable `Error` sensor to use with automations in HomeKit app. |
+| `ataDevices[].frostProtectionSupport` | This enable extra `Frost Protectio` control and sensors to use with automations in HomeKit app. |
+| `ataDevices[].overheatProtectionSupport` | This enable extra `Overheat Protection` control and sensors to use with automations in HomeKit app. |
+| `ataDevices[].holidayModeSupport` | This enable extra `Holiday Mode` control and sensors to use with automations in HomeKit app. |
 | `ataDevices[].refreshInterval` | Here set the background devices state refresh time in (sec), default `5s`. |
 | `ataDevices[].presets[]` | Array of ATA device `Presets` created automatically after login to MELCloud from plugin config UI. |
 | `ataDevices[].presets[].id` | Read only data, do not change it. |
@@ -240,7 +255,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ataDevices[].schedules[]` | Array of ATA device `Schedules` created automatically after login to MELCloud Home from plugin config UI. |
 | `ataDevices[].schedules[].id` | Read only data, do not change it. |
 | `ataDevices[].schedules[].name` | Here You can schange the `Schedule Name` which is exposed to the `Homebridge/HomeKit`. |
-| `ataDevices[].schedules[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Outlet`, `2 - Switch`, `3 - Motion Sensor`, `4 - Occupancy Sensor`, `5 - Contact Sensor`. |
+| `ataDevices[].schedules[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Motion Sensor`, `2 - Occupancy Sensor`, `3 - Contact Sensor`. |
 | `ataDevices[].buttonsSensors[]` | Array of buttons sensors. |
 | `ataDevices[].buttonsSensors[].name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
 | `ataDevices[].buttonsSensors[].mode` | Here select button mode, VH - Vane Horizontal, VV - Vane Horizontal. |
@@ -263,6 +278,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `atwDevices[].temperatureFlowZone2Sensor` | This enable extra `Flow Zone 2` temperature sensor to use with automations in HomeKit app. |
 | `atwDevices[].temperatureReturnZone2Sensor` | This enable extra `Return Zone 2` temperature sensor to use with automations in HomeKit app. |
 | `atwDevices[].errorSensor` | This enable `Error` sensors to use with automations in HomeKit app. |
+| `atwDevices[].holidayModeSupport` | This enable extra `Holiday Mode` control and sensors to use with automations in HomeKit app. |
 | `atwDevices[].refreshInterval` | Here set the background devices state refresh time in (sec), default `5s`. |
 | `atwDevices[].presets[]` | Array of ATW device `Presets` created automatically after login to MELCloud from plugin config UI. |
 | `atwDevices[].presets[].id` | Read only data, do not change it. |
@@ -271,7 +287,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `atwDevices[].schedules[]` | Array of ATW device `Schedules` created automatically after login to MELCloud Home from plugin config UI. |
 | `atwDevices[].schedules[].id` | Read only data, do not change it. |
 | `atwDevices[].schedules[].name` | Here You can schange the `Schedule Name` which is exposed to the `Homebridge/HomeKit`. |
-| `atwDevices[].schedules[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Outlet`, `2 - Switch`, `3 - Motion Sensor`, `4 - Occupancy Sensor`, `5 - Contact Sensor`. |
+| `atwDevices[].schedules[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Motion Sensor`, `2 - Occupancy Sensor`, `3 - Contact Sensor`. |
 | `atwDevices[].buttonsSensors[]` | Array of buttons sensors. |
 | `atwDevices[].buttonsSensors[].name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
 | `atwDevices[].buttonsSensors[].mode` | Here select button mode. |
@@ -287,6 +303,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ervDevices[].temperatureOutdoorSensor` | This enable extra `Outdoor` temperature sensor to use with automations in HomeKit app. |
 | `ervDevices[].temperatureSupplySensor` | This enable extra `Supply` temperature sensor to use with automations in HomeKit app. |
 | `ervDevices[].errorSensor` | This enable `Error` sensors to use with automations in HomeKit app. |
+| `ervDevices[].holidayModeSupport` | This enable extra `Holiday Mode` control and sensors to use with automations in HomeKit app. |
 | `ervDevices[].refreshInterval` | Here set the background devices state refresh time in (sec), default `5s`. |
 | `ervDevices[].presets[]` | Array of ERV device `Presets` created automatically after login to MELCloud from plugin config UI. |
 | `ervDevices[].presets[].id` | Read only data, do not change it. |
@@ -295,13 +312,13 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ervDevices[].schedules[]` | Array of ERV device `Schedules` created automatically after login to MELCloud Home from plugin config UI. |
 | `ervDevices[].schedules[].id` | Read only data, do not change it. |
 | `ervDevices[].schedules[].name` | Here You can schange the `Schedule Name` which is exposed to the `Homebridge/HomeKit`. |
-| `ervDevices[].schedules[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Outlet`, `2 - Switch`, `3 - Motion Sensor`, `4 - Occupancy Sensor`, `5 - Contact Sensor`. |
+| `ervDevices[].schedules[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Motion Sensor`, `2 - Occupancy Sensor`, `3 - Contact Sensor`. |
 | `ervDevices[].buttonsSensors[]` | Array of buttons sensors. |
 | `ervDevices[].buttonsSensors[].name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
 | `ervDevices[].buttonsSensors[].mode` | Here select button mode. |
 | `ervDevices[].buttonsSensors[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Outlet`, `2 - Switch`, `3 - Motion Sensor`, `4 - Occupancy Sensor`, `5 - Contact Sensor`. |
 | `ervDevices[].buttonsSensors[].namePrefix` | Here enable/disable the accessory name as a prefix for button/sensor name. |
-| `refreshInterval` | Here set the background account data refresh time in (sec), default `120s`. |
+| `refreshInterval` | Here set the background account data refresh time in (sec) , only for old MELCLoud, default `120s`. |
 | `log{}` | Log object. |
 | `log.deviceInfo` | If enabled, log device info will be displayed by every connections device to the network. |
 | `log.success` | If enabled, success log will be displayed in console. |
