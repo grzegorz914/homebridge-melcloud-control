@@ -35,6 +35,8 @@ class DeviceAta extends EventEmitter {
         this.autoDryFanMode = device.autoDryFanMode || 1; //NONE, AUTO, DRY, FAN
         this.temperatureSensor = device.temperatureSensor || false;
         this.temperatureOutdoorSensor = device.temperatureOutdoorSensor || false;
+        this.inStandbySensor = device.inStandbySensor || false;
+        this.connectSensor = device.connectSensor || false;
         this.errorSensor = device.errorSensor || false;
         this.frostProtectionSupport = device.frostProtectionSupport || false;
         this.overheatProtectionSupport = device.overheatProtectionSupport || false;
@@ -655,10 +657,38 @@ class DeviceAta extends EventEmitter {
                 accessory.addService(this.outdoorTemperatureSensorService);
             };
 
+            //connect sensor
+            if (this.inStandbySensor && this.accessory.inStandbyMode !== null) {
+                if (this.logDebug) this.emit('debug', `Prepare in standby mode service`);
+                this.inStandbyService = new Service.ContactSensor(`${serviceName} In Standby`, `inStandbyService${deviceId}`);
+                this.inStandbyService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                this.inStandbyService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} In Standby`);
+                this.inStandbyService.getCharacteristic(Characteristic.ContactSensorState)
+                    .onGet(async () => {
+                        const state = this.accessory.inStandbyMode;
+                        return state;
+                    })
+                accessory.addService(this.inStandbyService);
+            }
+
+            //connect sensor
+            if (this.connectSensor && this.accessory.isConnected !== null) {
+                if (this.logDebug) this.emit('debug', `Prepare connect service`);
+                this.connectService = new Service.ContactSensor(`${serviceName} Connected`, `connectService${deviceId}`);
+                this.connectService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                this.connectService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Connected`);
+                this.connectService.getCharacteristic(Characteristic.ContactSensorState)
+                    .onGet(async () => {
+                        const state = this.accessory.isConnected;
+                        return state;
+                    })
+                accessory.addService(this.connectService);
+            }
+
             //error sensor
             if (this.errorSensor && this.accessory.isInError !== null) {
                 if (this.logDebug) this.emit('debug', `Prepare error service`);
-                this.errorService = new Service.ContactSensor(`${serviceName} Error`, `Error Sensor ${deviceId}`);
+                this.errorService = new Service.ContactSensor(`${serviceName} Error`, `errorService${deviceId}`);
                 this.errorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                 this.errorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Error`);
                 this.errorService.getCharacteristic(Characteristic.ContactSensorState)
@@ -1206,16 +1236,19 @@ class DeviceAta extends EventEmitter {
                     this.deviceData = deviceData;
 
                     //keys
-                    const fanKey = this.accountType === 'melcloud' ? 'FanSpeed' : 'SetFanSpeed';
-                    const tempStepKey = this.accountType === 'melcloud' ? 'TemperatureIncrement' : 'HasHalfDegreeIncrements';
-                    const errorKey = this.accountType === 'melcloud' ? 'HasError' : 'IsInError';
-                    const supportAirDirectionKey = this.accountType === 'melcloud' ? 'AirDirectionFunction' : 'HasAirDirectionFunction';
-                    const supportSwingKey = this.accountType === 'melcloud' ? 'SwingFunction' : 'HasSwing';
-                    const supportVideWaneKey = this.accountType === 'melcloud' ? 'ModelSupportsWideVane' : 'SupportsWideVane';
-                    const supportAutoKey = this.accountType === 'melcloud' ? 'ModelSupportsAuto' : 'HasAutoOperationMode';
-                    const supportHeatKey = this.accountType === 'melcloud' ? 'ModelSupportsHeat' : 'HasHeatOperationMode';
-                    const supportDryKey = this.accountType === 'melcloud' ? 'ModelSupportsDry' : 'HasDryOperationMode';
-                    const supportCoolKey = this.accountType === 'melcloud' ? 'ModelSupportsCool' : 'HasCoolOperationMode';
+                    const accountTypeMelcloud = this.accountType === 'melcloud';
+                    const fanKey = accountTypeMelcloud ? 'FanSpeed' : 'SetFanSpeed';
+                    const tempStepKey = accountTypeMelcloud ? 'TemperatureIncrement' : 'HasHalfDegreeIncrements';
+                    const connectKey = accountTypeMelcloud ? 'Offline' : 'IsConnected';
+                    const errorKey = accountTypeMelcloud ? 'HasError' : 'IsInError';
+                    const supportAirDirectionKey = accountTypeMelcloud ? 'AirDirectionFunction' : 'HasAirDirectionFunction';
+                    const supportSwingKey = accountTypeMelcloud ? 'SwingFunction' : 'HasSwing';
+                    const supportVideWaneKey = accountTypeMelcloud ? 'ModelSupportsWideVane' : 'SupportsWideVane';
+                    const supportAutoKey = accountTypeMelcloud ? 'ModelSupportsAuto' : 'HasAutoOperationMode';
+                    const supportHeatKey = accountTypeMelcloud ? 'ModelSupportsHeat' : 'HasHeatOperationMode';
+                    const supportDryKey = accountTypeMelcloud ? 'ModelSupportsDry' : 'HasDryOperationMode';
+                    const supportCoolKey = accountTypeMelcloud ? 'ModelSupportsCool' : 'HasCoolOperationMode';
+                    const supportStandbyKey = accountTypeMelcloud ? 'ModelSupportsStandbyMode' : 'HasStandby';
 
                     //presets schedules
                     const scheduleEnabled = deviceData.ScheduleEnabled;
@@ -1235,12 +1268,12 @@ class DeviceAta extends EventEmitter {
                     const hideDryModeControl = deviceData.HideDryModeControl ?? false;
 
                     //device info
-                    const accountTypeMelcloud = this.accountType === 'melcloud';
+                    const supportsStanbyMode = deviceData.Device[supportStandbyKey];
                     const supportsAutomaticFanSpeed = deviceData.Device.HasAutomaticFanSpeed ?? false;
                     const supportsAirDirectionFunction = deviceData.Device[supportAirDirectionKey];
                     const supportsSwingFunction = deviceData.Device[supportSwingKey];
                     const supportsWideVane = deviceData.Device[supportVideWaneKey];
-                    const supportsOutdoorTemperature = deviceData.Device.HasOutdoorTemperature ?? false;
+                    const supportsOutdoorTemperature = deviceData.Device.HasOutdoorTemperature;
                     const supportsFanSpeed = accountTypeMelcloud ? deviceData.Device.ModelSupportsFanSpeed : deviceData.Device.NumberOfFanSpeeds > 0;
                     const supportsAuto1 = deviceData.Device[supportAutoKey];
                     const supportsAuto = this.autoDryFanMode >= 1 && supportsAuto1
@@ -1257,7 +1290,7 @@ class DeviceAta extends EventEmitter {
 
                     //device state
                     const power = deviceData.Device.Power ?? false;
-                    const inStandbyMode = deviceData.Device.InStandbyMode ?? false;
+                    const inStandbyMode = deviceData.Device.InStandbyMode;
                     const roomTemperature = deviceData.Device.RoomTemperature;
                     const setTemperature = deviceData.Device.SetTemperature;
                     const defaultHeatingSetTemperature = deviceData.Device.DefaultHeatingSetTemperature;
@@ -1275,6 +1308,7 @@ class DeviceAta extends EventEmitter {
                     const prohibitPower = deviceData.Device.ProhibitPower ?? false;
                     const temperatureStep = deviceData.Device[tempStepKey] ? 0.5 : 1;
                     const outdoorTemperature = deviceData.Device.OutdoorTemperature;
+                    const isConnected = accountTypeMelcloud ? !deviceData.Device[connectKey] : deviceData.Device[connectKey];
                     const isInError = deviceData.Device[errorKey];
 
                     //accessory
@@ -1292,6 +1326,7 @@ class DeviceAta extends EventEmitter {
                         supportsHeat: supportsHeat,
                         supportsDry: supportsDry,
                         supportsCool: supportsCool,
+                        supportsStanbyMode: supportsStanbyMode,
                         minTempHeat: minTempHeat,
                         maxTempHeat: maxTempHeat,
                         minTempCoolDryAuto: minTempCoolDryAuto,
@@ -1315,6 +1350,7 @@ class DeviceAta extends EventEmitter {
                         temperatureStep: temperatureStep,
                         useFahrenheit: this.useFahrenheit,
                         temperatureUnit: TemperatureDisplayUnits[this.useFahrenheit],
+                        isConnected: isConnected,
                         isInError: isInError,
                         frostProtectionEnabled: frostProtectionEnabled,
                         frostProtectionActive: frostProtectionActive,
@@ -1328,70 +1364,66 @@ class DeviceAta extends EventEmitter {
                     //operating mode 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
                     switch (this.displayType) {
                         case 1: //Heater Cooler
+                            // Helper to map fan mode (2 or 3) into operation target
+                            const resolveTargetOperation = (modeValue, obj) => {
+                                return this.autoDryFanMode === modeValue ? 0 : this.heatDryFanMode === modeValue ? 1 : this.coolDryFanMode === modeValue ? 2 : (obj.targetOperationMode ?? 0);
+                            };
+
                             switch (operationMode) {
-                                case 1: //HEAT
-                                    obj.currentOperationMode = roomTemperature > setTemperature ? 1 : 2; //INACTIVE, IDLE, HEATING, COOLING
-                                    obj.targetOperationMode = 1; //AUTO, HEAT, COOL
+                                case 1: // HEAT
+                                    obj.currentOperationMode = roomTemperature > setTemperature ? 1 : 2;
+                                    obj.targetOperationMode = 1;
                                     break;
-                                case 2: //DRY
+                                case 2: // DRY
                                     obj.currentOperationMode = 1;
-                                    obj.targetOperationMode = this.autoDryFanMode === 2 ? 0 : this.heatDryFanMode === 2 ? 1 : this.coolDryFanMode === 2 ? 2 : obj.targetOperationMode ?? 0;
+                                    obj.targetOperationMode = resolveTargetOperation(2, obj);
                                     break;
-                                case 3: //COOL
+                                case 3: // COOL
                                     obj.currentOperationMode = roomTemperature < setTemperature ? 1 : 3;
                                     obj.targetOperationMode = 2;
                                     break;
-                                case 7: //FAN
+                                case 7: // FAN
                                     obj.currentOperationMode = 1;
-                                    obj.targetOperationMode = this.autoDryFanMode === 3 ? 0 : this.heatDryFanMode === 3 ? 1 : this.coolDryFanMode === 3 ? 2 : obj.targetOperationMode ?? 0;
+                                    obj.targetOperationMode = resolveTargetOperation(3, obj);
                                     break;
-                                case 8: //AUTO
+                                case 8: // AUTO
                                     obj.currentOperationMode = roomTemperature > setTemperature ? 3 : roomTemperature < setTemperature ? 2 : 1;
                                     obj.targetOperationMode = 0;
                                     break;
-                                case 9: //ISEE HEAT
-                                    obj.currentOperationMode = roomTemperature > setTemperature ? 1 : 2
+                                case 9: // ISEE HEAT
+                                    obj.currentOperationMode = roomTemperature > setTemperature ? 1 : 2;
                                     obj.targetOperationMode = 1;
                                     break;
-                                case 10: //ISEE DRY
+                                case 10: // ISEE DRY
                                     obj.currentOperationMode = 1;
-                                    obj.targetOperationMode = this.autoDryFanMode === 2 ? 0 : this.heatDryFanMode === 2 ? 1 : this.coolDryFanMode === 2 ? 2 : obj.targetOperationMode ?? 0;
+                                    obj.targetOperationMode = resolveTargetOperation(2, obj);
                                     break;
-                                case 11: //ISEE COOL;
+                                case 11: // ISEE COOL
                                     obj.currentOperationMode = roomTemperature < setTemperature ? 1 : 3;
                                     obj.targetOperationMode = 2;
                                     break;
                                 default:
                                     if (this.logWarn) this.emit('warn', `Unknown operating mode: ${operationMode}`);
-                                    return
-                            };
+                            }
 
-                            obj.currentOperationMode = !power ? 0 : inStandbyMode ? 1 : obj.currentOperationMode;
+                            obj.currentOperationMode = !power ? 0 : (inStandbyMode ? 1 : obj.currentOperationMode);
                             obj.operationModeSetPropsMinValue = supportsAuto && supportsHeat ? 0 : !supportsAuto && supportsHeat ? 1 : supportsAuto && !supportsHeat ? 0 : 2;
                             obj.operationModeSetPropsMaxValue = 2
                             obj.operationModeSetPropsValidValues = supportsAuto && supportsHeat ? [0, 1, 2] : !supportsAuto && supportsHeat ? [1, 2] : supportsAuto && !supportsHeat ? [0, 2] : [2];
 
                             //fan speed mode
                             if (supportsFanSpeed) {
-                                switch (numberOfFanSpeeds) {
-                                    case 2: //Fan speed mode 2
-                                        obj.currentFanSpeed = supportsAutomaticFanSpeed ? [3, 1, 2][setFanSpeed] : [0, 1, 2][setFanSpeed];
-                                        obj.fanSpeedSetPropsMaxValue = supportsAutomaticFanSpeed ? 3 : 2;
-                                        break;
-                                    case 3: //Fan speed mode 3
-                                        obj.currentFanSpeed = supportsAutomaticFanSpeed ? [4, 1, 2, 3][setFanSpeed] : [0, 1, 2, 3][setFanSpeed];
-                                        obj.fanSpeedSetPropsMaxValue = supportsAutomaticFanSpeed ? 4 : 3;
-                                        break;
-                                    case 4: //Fan speed mode 4
-                                        obj.currentFanSpeed = supportsAutomaticFanSpeed ? [5, 1, 2, 3, 4][setFanSpeed] : [0, 1, 2, 3, 4][setFanSpeed];
-                                        obj.fanSpeedSetPropsMaxValue = supportsAutomaticFanSpeed ? 5 : 4;
-                                        break;
-                                    case 5: //Fan speed mode 5
-                                        obj.currentFanSpeed = supportsAutomaticFanSpeed ? [6, 1, 2, 3, 4, 5][setFanSpeed] : [0, 1, 2, 3, 4, 5][setFanSpeed];
-                                        obj.fanSpeedSetPropsMaxValue = supportsAutomaticFanSpeed ? 6 : 5;
-                                        break;
-                                };
-                            };
+                                const max = numberOfFanSpeeds;
+                                const autoIndex = supportsAutomaticFanSpeed ? max + 1 : 0;
+                                const speeds = [autoIndex];
+
+                                for (let i = 1; i <= max; i++) {
+                                    speeds.push(i);
+                                }
+
+                                obj.currentFanSpeed = speeds[setFanSpeed];
+                                obj.fanSpeedSetPropsMaxValue = supportsAutomaticFanSpeed ? max + 1 : max;
+                            }
 
                             //update characteristics
                             this.melCloudService
@@ -1407,43 +1439,56 @@ class DeviceAta extends EventEmitter {
                             if (supportsSwingFunction) this.melCloudService?.updateCharacteristic(Characteristic.SwingMode, obj.currentSwingMode);
                             break;
                         case 2: //Thermostat
+                            // Helper for mapping target operation in DRY / FAN modes
+                            const resolveTargetOperation1 = (modeValue, obj) => {
+                                return this.autoDryFanMode === modeValue ? 3 : this.heatDryFanMode === modeValue ? 1 : this.coolDryFanMode === modeValue ? 2 : (obj.targetOperationMode ?? 0);
+                            };
+
                             switch (operationMode) {
-                                case 1: //HEAT
-                                    obj.currentOperationMode = roomTemperature > setTemperature ? 0 : 1; //OFF, HEATING, COOLING
-                                    obj.targetOperationMode = 1; //OFF, HEAT, COOL, AUTO
-                                    break;
-                                case 2: //DRY
-                                    obj.currentOperationMode = 0;
-                                    obj.targetOperationMode = this.autoDryFanMode === 2 ? 3 : this.heatDryFanMode === 2 ? 1 : this.coolDryFanMode === 2 ? 2 : obj.targetOperationMode ?? 0;
-                                    break;
-                                case 3: //COOL
-                                    obj.currentOperationMode = roomTemperature < setTemperature ? 0 : 2;
-                                    obj.targetOperationMode = 2;
-                                    break;
-                                case 7: //FAN
-                                    obj.currentOperationMode = 0;
-                                    obj.targetOperationMode = this.autoDryFanMode === 3 ? 3 : this.heatDryFanMode === 3 ? 1 : this.coolDryFanMode === 3 ? 2 : obj.targetOperationMode ?? 0;
-                                    break;
-                                case 8: //AUTO
-                                    obj.currentOperationMode = roomTemperature < setTemperature ? 1 : roomTemperature > setTemperature ? 2 : 0;
-                                    obj.targetOperationMode = 3;
-                                    break;
-                                case 9: //ISEE HEAT
+                                case 1: // HEAT
                                     obj.currentOperationMode = roomTemperature > setTemperature ? 0 : 1;
                                     obj.targetOperationMode = 1;
                                     break;
-                                case 10: //ISEE DRY
+
+                                case 2: // DRY
                                     obj.currentOperationMode = 0;
-                                    obj.targetOperationMode = this.autoDryFanMode === 2 ? 3 : this.heatDryFanMode === 2 ? 1 : this.coolDryFanMode === 2 ? 2 : obj.targetOperationMode ?? 0;
+                                    obj.targetOperationMode = resolveTargetOperation1(2, obj);
                                     break;
-                                case 11: //ISEE COOL;
+
+                                case 3: // COOL
                                     obj.currentOperationMode = roomTemperature < setTemperature ? 0 : 2;
                                     obj.targetOperationMode = 2;
                                     break;
+
+                                case 7: // FAN
+                                    obj.currentOperationMode = 0;
+                                    obj.targetOperationMode = resolveTargetOperation1(3, obj);
+                                    break;
+
+                                case 8: // AUTO
+                                    obj.currentOperationMode = roomTemperature < setTemperature ? 1 : roomTemperature > setTemperature ? 2 : 0;
+                                    obj.targetOperationMode = 3;
+                                    break;
+
+                                case 9: // ISEE HEAT
+                                    obj.currentOperationMode = roomTemperature > setTemperature ? 0 : 1;
+                                    obj.targetOperationMode = 1;
+                                    break;
+
+                                case 10: // ISEE DRY
+                                    obj.currentOperationMode = 0;
+                                    obj.targetOperationMode = resolveTargetOperation1(2, obj);
+                                    break;
+
+                                case 11: // ISEE COOL
+                                    obj.currentOperationMode = roomTemperature < setTemperature ? 0 : 2;
+                                    obj.targetOperationMode = 2;
+                                    break;
+
                                 default:
                                     if (this.logWarn) this.emit('warn', `Unknown operating mode: ${operationMode}`);
                                     break;
-                            };
+                            }
 
                             obj.currentOperationMode = !power ? 0 : obj.currentOperationMode;
                             obj.targetOperationMode = !power ? 0 : obj.targetOperationMode;
@@ -1462,9 +1507,11 @@ class DeviceAta extends EventEmitter {
                     };
                     this.accessory = obj;
 
-                    //senors
+                    //other sensors
                     this.roomTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature);
                     this.outdoorTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature);
+                    this.inStandbyService?.updateCharacteristic(Characteristic.ContactSensorState, inStandbyMode);
+                    this.connectService?.updateCharacteristic(Characteristic.ContactSensorState, isConnected);
                     this.errorService?.updateCharacteristic(Characteristic.ContactSensorState, isInError);
 
                     //frost protection

@@ -37,6 +37,8 @@ class DeviceAtw extends EventEmitter {
         this.temperatureReturnWaterTankSensor = device.temperatureReturnWaterTankSensor || false;
         this.temperatureFlowZone2Sensor = device.temperatureFlowZone2Sensor || false;
         this.temperatureReturnZone2Sensor = device.temperatureReturnZone2Sensor || false;
+        this.inStandbySensor = device.inStandbySensor || false;
+        this.connectSensor = device.connectSensor || false;
         this.errorSensor = device.errorSensor || false;
         this.holidayModeSupport = device.holidayModeSupport || false;
         this.presets = this.accountType === 'melcloud' ? (device.presets || []).filter(preset => (preset.displayType ?? 0) > 0 && preset.id !== '0') : [];
@@ -1068,10 +1070,37 @@ class DeviceAtw extends EventEmitter {
                 });
             };
 
+            if (this.inStandbySensor && this.accessory.inStandbyMode !== null) {
+                if (this.logDebug) this.emit('debug', `Prepare in standby mode service`);
+                this.inStandbyService = new Service.ContactSensor(`${serviceName} In Standby`, `inStandbyService${deviceId}`);
+                this.inStandbyService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                this.inStandbyService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} In Standby`);
+                this.inStandbyService.getCharacteristic(Characteristic.ContactSensorState)
+                    .onGet(async () => {
+                        const state = this.accessory.inStandbyMode;
+                        return state;
+                    })
+                accessory.addService(this.inStandbyService);
+            }
+
+            //connect sensor
+            if (this.connectSensor && this.accessory.isConnected !== null) {
+                if (this.logDebug) this.emit('debug', `Prepare connect service`);
+                this.connectService = new Service.ContactSensor(`${serviceName} Connected`, `connectService${deviceId}`);
+                this.connectService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                this.connectService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Connected`);
+                this.connectService.getCharacteristic(Characteristic.ContactSensorState)
+                    .onGet(async () => {
+                        const state = this.accessory.isConnected;
+                        return state;
+                    })
+                accessory.addService(this.connectService);
+            }
+
             //error sensor
             if (this.errorSensor && this.accessory.isInError !== null) {
                 if (this.logDebug) this.emit('debug', `Prepare error service`);
-                this.errorService = new Service.ContactSensor(`${serviceName} Error`, `Error Sensor ${deviceId}`);
+                this.errorService = new Service.ContactSensor(`${serviceName} Error`, `errorService${deviceId}`);
                 this.errorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                 this.errorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Error`);
                 this.errorService.getCharacteristic(Characteristic.ContactSensorState)
@@ -1081,6 +1110,7 @@ class DeviceAtw extends EventEmitter {
                     })
                 accessory.addService(this.errorService);
             }
+
 
             //holiday mode
             if (this.holidayModeSupport && this.accessory.holidayModeEnabled !== null) {
@@ -1441,7 +1471,7 @@ class DeviceAtw extends EventEmitter {
         try {
             //melcloud device
             this.melCloudAtw = new MelCloudAtw(this.account, this.device, this.devicesFile, this.defaultTempsFile)
-                .on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, hasHotWaterTank, hasZone2) => {
+                .on('deviceInfo', (manufacturer, modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, supportsHotWaterTank, supportsZone2) => {
                     if (this.logDeviceInfo && this.displayDeviceInfo) {
                         this.emit('devInfo', `---- ${this.deviceTypeText}: ${this.deviceName} ----`);
                         this.emit('devInfo', `Account: ${this.accountName}`);
@@ -1452,8 +1482,8 @@ class DeviceAtw extends EventEmitter {
                         this.emit('devInfo', `Manufacturer: ${manufacturer}`);
                         this.emit('devInfo', '----------------------------------');
                         this.emit('devInfo', `Zone 1: Yes`);
-                        this.emit('devInfo', `Hot Water Tank: ${hasHotWaterTank ? 'Yes' : 'No'}`);
-                        this.emit('devInfo', `Zone 2: ${hasZone2 ? 'Yes' : 'No'}`);
+                        this.emit('devInfo', `Hot Water Tank: ${supportsHotWaterTank ? 'Yes' : 'No'}`);
+                        this.emit('devInfo', `Zone 2: ${supportsZone2 ? 'Yes' : 'No'}`);
                         this.emit('devInfo', '----------------------------------');
                         this.displayDeviceInfo = false;
                     }
@@ -1470,8 +1500,11 @@ class DeviceAtw extends EventEmitter {
                     this.deviceData = deviceData;
 
                     //keys
+                    const accountTypeMelcloud = this.accountType === 'melcloud';
                     const tempStepKey = this.accountType === 'melcloud' ? 'TemperatureIncrement' : 'HasHalfDegreeIncrements';
+                    const connectKey = this.accountType === 'melcloud' ? 'Offline' : 'IsConnected';
                     const errorKey = this.accountType === 'melcloud' ? 'HasError' : 'IsInError';
+                    const supportStandbyKey = accountTypeMelcloud ? 'ModelSupportsStandbyMode' : 'HasStandby';
 
                     //presets schedule
                     const scheduleEnabled = deviceData.ScheduleEnabled;
@@ -1481,10 +1514,11 @@ class DeviceAtw extends EventEmitter {
                     const holidayModeActive = deviceData.HolidayMode?.Active ?? false;
 
                     //device info
-                    const hasHeatPump = ![1, 2, 3, 4, 5, 6, 7, 15].includes(this.hideZone);
-                    const hasZone1 = ![2, 3, 4, 8, 9, 10, 11, 15].includes(this.hideZone);
-                    const hasHotWaterTank = ![3, 5, 6, 9, 10, 12, 13, 15].includes(this.hideZone) && deviceData.Device.HasHotWaterTank;
-                    const hasZone2 = ![4, 6, 7, 10, 11, 13, 14, 15].includes(this.hideZone) && deviceData.Device.HasZone2;
+                    const supportsStanbyMode = deviceData.Device[supportStandbyKey];
+                    const supportsHeatPump = ![1, 2, 3, 4, 5, 6, 7, 15].includes(this.hideZone);
+                    const supportsZone1 = ![2, 3, 4, 8, 9, 10, 11, 15].includes(this.hideZone);
+                    const supportsHotWaterTank = ![3, 5, 6, 9, 10, 12, 13, 15].includes(this.hideZone) && deviceData.Device.HasHotWaterTank;
+                    const supportsZone2 = ![4, 6, 7, 10, 11, 13, 14, 15].includes(this.hideZone) && deviceData.Device.HasZone2;
                     const canHeat = deviceData.Device.CanHeat ?? false;
                     const canCool = deviceData.Device.CanCool ?? false;
                     const heatCoolModes = canHeat && canCool ? 0 : canHeat ? 1 : canCool ? 2 : 3;
@@ -1495,10 +1529,10 @@ class DeviceAtw extends EventEmitter {
 
                     //zones
                     let currentZoneCase = 0;
-                    const caseHeatPump = hasHeatPump ? currentZoneCase++ : -1;
-                    const caseZone1 = hasZone1 ? currentZoneCase++ : -1;
-                    const caseHotWater = hasHotWaterTank ? currentZoneCase++ : -1;
-                    const caseZone2 = hasZone2 ? currentZoneCase++ : -1;
+                    const caseHeatPump = supportsHeatPump ? currentZoneCase++ : -1;
+                    const caseZone1 = supportsZone1 ? currentZoneCase++ : -1;
+                    const caseHotWater = supportsHotWaterTank ? currentZoneCase++ : -1;
+                    const caseZone2 = supportsZone2 ? currentZoneCase++ : -1;
                     const zonesCount = currentZoneCase;
 
                     //zones sensors
@@ -1512,12 +1546,14 @@ class DeviceAtw extends EventEmitter {
                     //heat pump
                     const heatPumpName = 'Heat Pump';
                     const power = deviceData.Device.Power ?? false;
+                    const inStandbyMode = deviceData.Device.InStandbyMode;
                     const unitStatus = deviceData.Device.UnitStatus ?? 0;
                     const operationMode = deviceData.Device.OperationMode;
                     const outdoorTemperature = deviceData.Device.OutdoorTemperature;
                     const holidayMode = deviceData.Device.HolidayMode ?? false;
                     const flowTemperatureHeatPump = deviceData.Device.FlowTemperature;
                     const returnTemperatureHeatPump = deviceData.Device.ReturnTemperature;
+                    const isConnected = accountTypeMelcloud ? !deviceData.Device[connectKey] : deviceData.Device[connectKey];
                     const isInError = deviceData.Device[errorKey];
 
                     //zone 1
@@ -1559,15 +1595,17 @@ class DeviceAtw extends EventEmitter {
                         presets: presetsOnServer,
                         schedules: schedulesOnServer,
                         power: power ? 1 : 0,
+                        inStandbyMode: inStandbyMode,
                         unitStatus: unitStatus,
                         idleZone1: idleZone1,
                         idleZone2: idleZone2,
                         temperatureIncrement: temperatureIncrement,
-                        hasHeatPump: hasHeatPump,
-                        hasZone1: hasZone1,
-                        hasHotWaterTank: hasHotWaterTank,
-                        hasZone2: hasZone2,
+                        supportsHeatPump: supportsHeatPump,
+                        supportsZone1: supportsZone1,
+                        supportsHotWaterTank: supportsHotWaterTank,
+                        supportsZone2: supportsZone2,
                         heatCoolModes: heatCoolModes,
+                        supportsStanbyMode: supportsStanbyMode,
                         caseHeatPump: caseHeatPump,
                         caseZone1: caseZone1,
                         caseHotWater: caseHotWater,
@@ -1580,6 +1618,7 @@ class DeviceAtw extends EventEmitter {
                         sensorsCount: zonesSensorsCount,
                         useFahrenheit: this.useFahrenheit,
                         temperatureUnit: TemperatureDisplayUnits[this.useFahrenheit],
+                        isConnected: isConnected,
                         isInError: isInError,
                         scheduleEnabled: scheduleEnabled,
                         holidayModeEnabled: holidayModeEnabled,
@@ -1612,12 +1651,12 @@ class DeviceAtw extends EventEmitter {
                                     case caseHeatPump: //Heat Pump Operation Mode - IDLE, HOT WATER, HEATING ZONES, COOLING, HOT WATER STORAGE, FREEZE STAT, LEGIONELLA, HEATING ECO, MODE 1, MODE 2, MODE 3, HEATING UP /// Unit Status - HEAT, COOL
                                         name = heatPumpName;
                                         operationModeZone = operationMode;
-                                        currentOperationMode = !power ? 0 : [1, 2, 2, 3, 2, 1, 1, 2, 1, 1, 1, 2][operationMode]; //INACTIVE, IDLE, HEATING, COOLING
+                                        currentOperationMode = !power ? 0 : (inStandbyMode ? 1 : [1, 2, 2, 3, 2, 1, 1, 2, 1, 1, 1, 2][operationMode]); //INACTIVE, IDLE, HEATING, COOLING
                                         targetOperationMode = [1, 2][unitStatus]; //AUTO, HEAT, COOL
                                         roomTemperature = outdoorTemperature;
                                         setTemperature = outdoorTemperature;
 
-                                        lockPhysicalControl = hasHotWaterTank && hasZone2 ? (prohibitZone1 && prohibitHotWater && prohibitZone2 ? 1 : 0) : hasHotWaterTank ? (prohibitZone1 && prohibitHotWater ? 1 : 0) : hasZone2 ? (prohibitZone1 && prohibitZone2 ? 1 : 0) : 0;
+                                        lockPhysicalControl = supportsHotWaterTank && supportsZone2 ? (prohibitZone1 && prohibitHotWater && prohibitZone2 ? 1 : 0) : supportsHotWaterTank ? (prohibitZone1 && prohibitHotWater ? 1 : 0) : supportsZone2 ? (prohibitZone1 && prohibitZone2 ? 1 : 0) : 0;
                                         operationModeSetPropsMinValue = [1, 1, 2, 0][heatCoolModes];
                                         operationModeSetPropsMaxValue = [2, 1, 2, 0][heatCoolModes];
                                         operationModeSetPropsValidValues = [[1, 2], [1], [2], [0]][heatCoolModes];
@@ -1627,7 +1666,7 @@ class DeviceAtw extends EventEmitter {
                                     case caseZone1: //Zone 1 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
                                         name = zone1Name;
                                         operationModeZone = operationMode;
-                                        currentOperationMode = !power ? 0 : idleZone1 ? 1 : [2, 2, 2, 3, 3, 2][operationModeZone1]; //INACTIVE, IDLE, HEATING, COOLING
+                                        currentOperationMode = !power ? 0 : (idleZone1 ? 1 : [2, 2, 2, 3, 3, 2][operationModeZone1]); //INACTIVE, IDLE, HEATING, COOLING
                                         targetOperationMode = [1, 2, 0, 1, 2, 1][operationModeZone1]; //AUTO, HEAT, COOL
 
                                         switch (operationModeZone1) {
@@ -1659,7 +1698,7 @@ class DeviceAtw extends EventEmitter {
                                     case caseHotWater: //Hot Water - NORMAL, HEAT NOW
                                         name = hotWaterName;
                                         operationModeZone = operationMode;
-                                        currentOperationMode = !power ? 0 : operationMode === 1 ? 2 : [1, 2][forcedHotWaterMode]; //INACTIVE, IDLE, HEATING, COOLING
+                                        currentOperationMode = !power ? 0 : (operationMode === 1 ? 2 : [1, 2][forcedHotWaterMode]); //INACTIVE, IDLE, HEATING, COOLING
                                         targetOperationMode = [0, 1][forcedHotWaterMode] //AUTO, HEAT, COOL
                                         roomTemperature = tankWaterTemperature;
                                         setTemperature = setTankWaterTemperature;
@@ -1674,7 +1713,7 @@ class DeviceAtw extends EventEmitter {
                                     case caseZone2: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
                                         name = zone2Name;
                                         operationModeZone = operationMode;
-                                        currentOperationMode = !power ? 0 : idleZone2 ? 1 : [2, 2, 2, 3, 3, 2][operationModeZone2]; //INACTIVE, IDLE, HEATING, COOLING
+                                        currentOperationMode = !power ? 0 : (idleZone2 ? 1 : [2, 2, 2, 3, 3, 2][operationModeZone2]); //INACTIVE, IDLE, HEATING, COOLING
                                         targetOperationMode = [1, 2, 0, 1, 2, 1][operationModeZone2]; //AUTO, HEAT, COOL
 
                                         switch (operationModeZone2) {
@@ -1765,7 +1804,7 @@ class DeviceAtw extends EventEmitter {
                                     case caseHotWater: //Hot Water - NORMAL, HEAT NOW
                                         name = hotWaterName;
                                         operationModeZone = operationMode;
-                                        currentOperationMode = !power ? 0 : operationMode === 1 ? 1 : [0, 1][forcedHotWaterMode]; //OFF, HEAT, COOL
+                                        currentOperationMode = !power ? 0 : (operationMode === 1 ? 1 : [0, 1][forcedHotWaterMode]); //OFF, HEAT, COOL
                                         targetOperationMode = [3, 1][forcedHotWaterMode] //OFF, HEAT, COOL, AUTO
                                         roomTemperature = tankWaterTemperature;
                                         setTemperature = setTankWaterTemperature;
@@ -1779,7 +1818,7 @@ class DeviceAtw extends EventEmitter {
                                     case caseZone2: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
                                         name = zone2Name;
                                         operationModeZone = operationMode;
-                                        currentOperationMode = !power ? 0 : idleZone2 ? 0 : [1, 1, 1, 2, 2, 1][operationModeZone2]; //OFF, HEAT, COOL
+                                        currentOperationMode = !power ? 0 : (idleZone2 ? 0 : [1, 1, 1, 2, 2, 1][operationModeZone2]); //OFF, HEAT, COOL
                                         targetOperationMode = [1, 2, 3, 1, 2, 1][operationModeZone2]; //OFF, HEAT, COOL, AUTO
 
                                         switch (operationModeZone2) {
@@ -1961,7 +2000,9 @@ class DeviceAtw extends EventEmitter {
                     };
                     this.accessory = obj;
 
-                    //error sensor
+                    //other sensors
+                    this.inStandbyService?.updateCharacteristic(Characteristic.ContactSensorState, inStandbyMode);
+                    this.connectService?.updateCharacteristic(Characteristic.ContactSensorState, isConnected);
                     this.errorService?.updateCharacteristic(Characteristic.ContactSensorState, isInError);
 
                     //holiday mode

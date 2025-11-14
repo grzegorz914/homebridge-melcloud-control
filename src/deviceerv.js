@@ -30,6 +30,8 @@ class DeviceErv extends EventEmitter {
         this.temperatureSensor = device.temperatureSensor || false;
         this.temperatureOutdoorSensor = device.temperatureOutdoorSensor || false;
         this.temperatureSupplySensor = device.temperatureSupplySensor || false;
+        this.inStandbySensor = device.inStandbySensor || false;
+        this.connectSensor = device.connectSensor || false;
         this.errorSensor = device.errorSensor || false;
         this.holidayModeSupport = device.holidayModeSupport || false;
         this.presets = this.accountType === 'melcloud' ? (device.presets || []).filter(preset => (preset.displayType ?? 0) > 0 && preset.id !== '0') : [];
@@ -261,16 +263,17 @@ class DeviceErv extends EventEmitter {
             const accountName = this.accountName;
             const presetsOnServer = this.accessory.presets;
             const schedulesOnServer = this.accessory.schedules;
-            const hasRoomTemperature = this.accessory.hasRoomTemperature;
-            const hasSupplyTemperature = this.accessory.hasSupplyTemperature;
-            const hasOutdoorTemperature = this.accessory.hasOutdoorTemperature;
-            const hasCoolOperationMode = this.accessory.hasCoolOperationMode;
-            const hasHeatOperationMode = this.accessory.hasHeatOperationMode;
-            const hasAutoVentilationMode = this.accessory.hasAutoVentilationMode;
-            const hasBypassVentilationMode = this.accessory.hasBypassVentilationMode;
-            const hasAutomaticFanSpeed = this.accessory.hasAutomaticFanSpeed;
-            const hasCO2Sensor = this.accessory.hasCO2Sensor;
-            const hasPM25Sensor = this.accessory.hasPM25Sensor;
+            const supportsRoomTemperature = this.accessory.supportsRoomTemperature;
+            const supportsSupplyTemperature = this.accessory.supportsSupplyTemperature;
+            const supportsOutdoorTemperature = this.accessory.supportsOutdoorTemperature;
+            const supportsCoolOperationMode = this.accessory.supportsCoolOperationMode;
+            const supportsHeatOperationMode = this.accessory.supportsHeatOperationMode;
+            const supportsAutoVentilationMode = this.accessory.supportsAutoVentilationMode;
+            const supportsBypassVentilationMode = this.accessory.supportsBypassVentilationMode;
+            const supportsAutomaticFanSpeed = this.accessory.supportsAutomaticFanSpeed;
+            const supportsCO2Sensor = this.accessory.supportsCO2Sensor;
+            const supportsPM25Sensor = this.accessory.supportsPM25Sensor;
+            const supportsFanSpeed = this.accessory.supportsFanSpeed;
             const numberOfFanSpeeds = this.accessory.numberOfFanSpeeds;
 
             //accessory
@@ -331,13 +334,13 @@ class DeviceErv extends EventEmitter {
                             try {
                                 switch (value) {
                                     case 0: //AUTO - AUTO
-                                        deviceData.Device.VentilationMode = hasAutoVentilationMode ? 2 : 0;
+                                        deviceData.Device.VentilationMode = supportsAutoVentilationMode ? 2 : 0;
                                         break;
                                     case 1: //HEAT - LOSSNAY
                                         deviceData.Device.VentilationMode = 0;
                                         break;
                                     case 2: //COOL - BYPASS
-                                        deviceData.Device.VentilationMode = hasBypassVentilationMode ? 1 : 0;
+                                        deviceData.Device.VentilationMode = supportsBypassVentilationMode ? 1 : 0;
                                         break;
                                 };
 
@@ -353,42 +356,44 @@ class DeviceErv extends EventEmitter {
                             const value = this.accessory.roomTemperature;
                             return value;
                         });
-                    this.melCloudService.getCharacteristic(Characteristic.RotationSpeed)
-                        .setProps({
-                            minValue: 0,
-                            maxValue: this.accessory.fanSpeedSetPropsMaxValue,
-                            minStep: 1
-                        })
-                        .onGet(async () => {
-                            const value = this.accessory.fanSpeed; //STOP, 1, 2, 3, 4, OFF
-                            return value;
-                        })
-                        .onSet(async (value) => {
-                            try {
-                                switch (numberOfFanSpeeds) {
-                                    case 2: //Fan speed mode 2
-                                        value = hasAutomaticFanSpeed ? [0, 1, 2, 0][value] : [1, 1, 2][value];
-                                        break;
-                                    case 3: //Fan speed mode 3
-                                        value = hasAutomaticFanSpeed ? [0, 1, 2, 3, 0][value] : [1, 1, 2, 3][value];
-                                        break;
-                                    case 4: //Fan speed mode 4
-                                        value = hasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 0][value] : [1, 1, 2, 3, 4][value];
-                                        break;
-                                    case 5: //Fan speed mode 5
-                                        value = hasAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 0][value] : [1, 1, 2, 3, 4, 5][value];
-                                        break;;
-                                };
+                    if (supportsFanSpeed) {
+                        this.melCloudService.getCharacteristic(Characteristic.RotationSpeed)
+                            .setProps({
+                                minValue: 0,
+                                maxValue: this.accessory.fanSpeedSetPropsMaxValue,
+                                minStep: 1
+                            })
+                            .onGet(async () => {
+                                const value = this.accessory.fanSpeed; //STOP, 1, 2, 3, 4, OFF
+                                return value;
+                            })
+                            .onSet(async (value) => {
+                                try {
+                                    switch (numberOfFanSpeeds) {
+                                        case 2: //Fan speed mode 2
+                                            value = supportsAutomaticFanSpeed ? [0, 1, 2, 0][value] : [1, 1, 2][value];
+                                            break;
+                                        case 3: //Fan speed mode 3
+                                            value = supportsAutomaticFanSpeed ? [0, 1, 2, 3, 0][value] : [1, 1, 2, 3][value];
+                                            break;
+                                        case 4: //Fan speed mode 4
+                                            value = supportsAutomaticFanSpeed ? [0, 1, 2, 3, 4, 0][value] : [1, 1, 2, 3, 4][value];
+                                            break;
+                                        case 5: //Fan speed mode 5
+                                            value = supportsAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 0][value] : [1, 1, 2, 3, 4, 5][value];
+                                            break;;
+                                    };
 
-                                deviceData.Device.SetFanSpeed = value
-                                await this.melCloudErv.send(this.accountType, this.displayType, deviceData, Ventilation.EffectiveFlags.SetFanSpeed);
-                                if (this.logInfo) this.emit('info', `Set fan speed mode: ${Ventilation.FanSpeedMapEnumToString[value]}`);
-                            } catch (error) {
-                                if (this.logWarn) this.emit('warn', `Set fan speed mode error: ${error}`);
-                            };
-                        });
+                                    deviceData.Device.SetFanSpeed = value
+                                    await this.melCloudErv.send(this.accountType, this.displayType, deviceData, Ventilation.EffectiveFlags.SetFanSpeed);
+                                    if (this.logInfo) this.emit('info', `Set fan speed mode: ${Ventilation.FanSpeedMapEnumToString[value]}`);
+                                } catch (error) {
+                                    if (this.logWarn) this.emit('warn', `Set fan speed mode error: ${error}`);
+                                };
+                            });
+                    }
                     //device can cool
-                    if (hasAutoVentilationMode && hasCoolOperationMode) {
+                    if (supportsAutoVentilationMode && supportsCoolOperationMode) {
                         this.melCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
                             .setProps({
                                 minValue: this.accessory.minTempCoolDry,
@@ -410,7 +415,7 @@ class DeviceErv extends EventEmitter {
                             });
                     };
                     //device can heat
-                    if (hasAutoVentilationMode && hasHeatOperationMode) {
+                    if (supportsAutoVentilationMode && supportsHeatOperationMode) {
                         this.melCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
                             .setProps({
                                 minValue: this.accessory.minTempHeat,
@@ -500,12 +505,12 @@ class DeviceErv extends EventEmitter {
                                         break;
                                     case 2: //COOL - BYPASS
                                         deviceData.Device.Power = true;
-                                        deviceData.Device.VentilationMode = hasBypassVentilationMode ? 1 : 0;
+                                        deviceData.Device.VentilationMode = supportsBypassVentilationMode ? 1 : 0;
                                         effectiveFlags = Ventilation.EffectiveFlags.Power + Ventilation.EffectiveFlags.VentilationMode;
                                         break;
                                     case 3: //AUTO - AUTO
                                         deviceData.Device.Power = true;
-                                        deviceData.Device.VentilationMode = hasAutoVentilationMode ? 2 : 0;
+                                        deviceData.Device.VentilationMode = supportsAutoVentilationMode ? 2 : 0;
                                         effectiveFlags = Ventilation.EffectiveFlags.Power + Ventilation.EffectiveFlags.VentilationMode;
                                         break;
                                 };
@@ -563,7 +568,7 @@ class DeviceErv extends EventEmitter {
             };
 
             //temperature sensor service room
-            if (this.temperatureSensor && hasRoomTemperature && this.accessory.roomTemperature !== null) {
+            if (this.temperatureSensor && supportsRoomTemperature && this.accessory.roomTemperature !== null) {
                 if (this.logDebug) this.emit('debug', `Prepare room temperature sensor service`);
                 this.roomTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Room`, `Room Temperature Sensor ${deviceId}`);
                 this.roomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
@@ -582,7 +587,7 @@ class DeviceErv extends EventEmitter {
             };
 
             //temperature sensor service supply
-            if (this.temperatureSupplySensor && hasSupplyTemperature && this.accessory.supplyTemperature !== null) {
+            if (this.temperatureSupplySensor && supportsSupplyTemperature && this.accessory.supplyTemperature !== null) {
                 if (this.logDebug) this.emit('debug', `Prepare supply temperature sensor service`);
                 this.supplyTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Supply`, `Supply Temperature Sensor ${deviceId}`);
                 this.supplyTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
@@ -601,7 +606,7 @@ class DeviceErv extends EventEmitter {
             };
 
             //temperature sensor service outdoor
-            if (this.temperatureOutdoorSensor && hasOutdoorTemperature && this.accessory.outdoorTemperature !== null) {
+            if (this.temperatureOutdoorSensor && supportsOutdoorTemperature && this.accessory.outdoorTemperature !== null) {
                 if (this.logDebug) this.emit('debug', `Prepare outdoor temperature sensor service`);
                 this.outdoorTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Outdoor`, `Outdoor Temperature Sensor ${deviceId}`);
                 this.outdoorTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
@@ -652,7 +657,7 @@ class DeviceErv extends EventEmitter {
             }
 
             //room CO2 sensor
-            if (hasCO2Sensor) {
+            if (supportsCO2Sensor) {
                 this.carbonDioxideSensorService = new Service.CarbonDioxideSensor(`${serviceName} CO2 Sensor`, `CO2Sensor ${deviceId}`);
                 this.carbonDioxideSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                 this.carbonDioxideSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} CO2 Sensor`);
@@ -670,7 +675,7 @@ class DeviceErv extends EventEmitter {
             }
 
             //room PM2.5 sensor
-            if (hasPM25Sensor) {
+            if (supportsPM25Sensor) {
                 this.airQualitySensorService = new Service.AirQualitySensor(`${serviceName} PM2.5 Sensor`, `PM25Sensor ${deviceId}`);
                 this.airQualitySensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                 this.airQualitySensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} PM2.5 Sensor`);
@@ -687,10 +692,37 @@ class DeviceErv extends EventEmitter {
                 accessory.addService(this.airQualitySensorService);
             }
 
+            if (this.inStandbySensor && this.accessory.inStandbyMode !== null) {
+                if (this.logDebug) this.emit('debug', `Prepare in standby mode service`);
+                this.inStandbyService = new Service.ContactSensor(`${serviceName} In Standby`, `inStandbyService${deviceId}`);
+                this.inStandbyService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                this.inStandbyService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} In Standby`);
+                this.inStandbyService.getCharacteristic(Characteristic.ContactSensorState)
+                    .onGet(async () => {
+                        const state = this.accessory.inStandbyMode;
+                        return state;
+                    })
+                accessory.addService(this.inStandbyService);
+            }
+
+            //connect sensor
+            if (this.connectSensor && this.accessory.isConnected !== null) {
+                if (this.logDebug) this.emit('debug', `Prepare connect service`);
+                this.connectService = new Service.ContactSensor(`${serviceName} Connected`, `connectService${deviceId}`);
+                this.connectService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                this.connectService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Connected`);
+                this.connectService.getCharacteristic(Characteristic.ContactSensorState)
+                    .onGet(async () => {
+                        const state = this.accessory.isConnected;
+                        return state;
+                    })
+                accessory.addService(this.connectService);
+            }
+
             //error sensor
             if (this.errorSensor && this.accessory.isInError !== null) {
                 if (this.logDebug) this.emit('debug', `Prepare error service`);
-                this.errorService = new Service.ContactSensor(`${serviceName} Error`, `Error Sensor ${deviceId}`);
+                this.errorService = new Service.ContactSensor(`${serviceName} Error`, `errorService${deviceId}`);
                 this.errorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                 this.errorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Error`);
                 this.errorService.getCharacteristic(Characteristic.ContactSensorState)
@@ -1016,8 +1048,11 @@ class DeviceErv extends EventEmitter {
                     this.deviceData = deviceData;
 
                     //keys
+                    const accountTypeMelcloud = this.accountType === 'melcloud';
                     const tempStepKey = this.accountType === 'melcloud' ? 'TemperatureIncrement' : 'HasHalfDegreeIncrements';
+                    const connectKey = this.accountType === 'melcloud' ? 'Offline' : 'IsConnected';
                     const errorKey = this.accountType === 'melcloud' ? 'HasError' : 'IsInError';
+                    const supportStandbyKey = accountTypeMelcloud ? 'ModelSupportsStandbyMode' : 'HasStandby';
 
                     //presets schedule
                     const scheduleEnabled = deviceData.ScheduleEnabled;
@@ -1032,26 +1067,28 @@ class DeviceErv extends EventEmitter {
                     const hideOutdoorTemperature = deviceData.HideOutdoorTemperature;
 
                     //device info
-                    const hasCoolOperationMode = deviceData.Device.HasCoolOperationMode ?? false;
-                    const hasHeatOperationMode = deviceData.Device.HasHeatOperationMode ?? false;
-                    const hasAutoOperationMode = deviceData.Device.HasAutoOperationMode ?? false;
-                    const hasRoomTemperature = deviceData.Device.HasRoomTemperature ?? false;
-                    const hasSupplyTemperature = deviceData.Device.HasSupplyTemperature ?? false;
-                    const hasOutdoorTemperature = deviceData.Device.HasOutdoorTemperature ?? false;
-                    const hasCO2Sensor = deviceData.Device.HasCO2Sensor ?? false;
+                    const supportsStanbyMode = deviceData.Device[supportStandbyKey];
+                    const supportsCoolOperationMode = deviceData.Device.HasCoolOperationMode ?? false;
+                    const supportsHeatOperationMode = deviceData.Device.HasHeatOperationMode ?? false;
+                    const supportsAutoOperationMode = deviceData.Device.HasAutoOperationMode ?? false;
+                    const supportsRoomTemperature = deviceData.Device.HasRoomTemperature ?? false;
+                    const supportsSupplyTemperature = deviceData.Device.HasSupplyTemperature ?? false;
+                    const supportsOutdoorTemperature = deviceData.Device.HasOutdoorTemperature ?? false;
+                    const supportsCO2Sensor = deviceData.Device.HasCO2Sensor ?? false;
                     const roomCO2Level = deviceData.Device.RoomCO2Level ?? false;
-                    const roomCO2Detected = hasCO2Sensor && roomCO2Level > 1000 ? true : false;
-                    const hasPM25Sensor = deviceData.Device.HasPM25Sensor ?? false;
-                    const pM25SensorStatus = hasPM25Sensor ? deviceData.Device.PM25SensorStatus : 0;
-                    const pM25Level = hasPM25Sensor ? deviceData.Device.PM25Level : 0;
-                    const pM25AirQuality = hasPM25Sensor ? pM25Level <= 13 ? 1 : pM25Level <= 35 ? 2 : pM25Level <= 55 ? 3 : pM25Level <= 75 ? 4 : pM25Level <= 110 ? 5 : 0 : 0;
-                    const hasAutoVentilationMode = deviceData.Device.HasAutoVentilationMode ?? false;
-                    const hasBypassVentilationMode = deviceData.Device.HasBypassVentilationMode ?? false;
-                    const hasAutomaticFanSpeed = deviceData.Device.HasAutomaticFanSpeed ?? false;
-                    const coreMaintenanceRequired = deviceData.Device.CoreMaintenanceRequired;
-                    const filterMaintenanceRequired = deviceData.Device.FilterMaintenanceRequired;
+                    const roomCO2Detected = supportsCO2Sensor && roomCO2Level > 1000 ? true : false;
+                    const supportsPM25Sensor = deviceData.Device.HasPM25Sensor ?? false;
+                    const pM25SensorStatus = supportsPM25Sensor ? deviceData.Device.PM25SensorStatus : 0;
+                    const pM25Level = supportsPM25Sensor ? deviceData.Device.PM25Level : 0;
+                    const pM25AirQuality = supportsPM25Sensor ? pM25Level <= 13 ? 1 : pM25Level <= 35 ? 2 : pM25Level <= 55 ? 3 : pM25Level <= 75 ? 4 : pM25Level <= 110 ? 5 : 0 : 0;
+                    const supportsAutoVentilationMode = deviceData.Device.HasAutoVentilationMode ?? false;
+                    const supportsBypassVentilationMode = deviceData.Device.HasBypassVentilationMode ?? false;
+                    const supportsAutomaticFanSpeed = deviceData.Device.HasAutomaticFanSpeed ?? false;
                     const actualVentilationMode = deviceData.Device.ActualVentilationMode;
                     const numberOfFanSpeeds = deviceData.Device.NumberOfFanSpeeds;
+                    const supportsFanSpeed = numberOfFanSpeeds > 0;
+                    const coreMaintenanceRequired = deviceData.Device.CoreMaintenanceRequired;
+                    const filterMaintenanceRequired = deviceData.Device.FilterMaintenanceRequired;
                     const temperatureIncrement = deviceData.Device[tempStepKey] ?? 1;
                     const minTempHeat = 10;
                     const maxTempHeat = 31;
@@ -1060,6 +1097,7 @@ class DeviceErv extends EventEmitter {
 
                     //device state
                     const power = deviceData.Device.Power;
+                    const inStandbyMode = deviceData.Device.InStandbyMode;
                     const roomTemperature = deviceData.Device.RoomTemperature;
                     const supplyTemperature = deviceData.Device.SupplyTemperature;
                     const outdoorTemperature = deviceData.Device.OutdoorTemperature;
@@ -1070,32 +1108,36 @@ class DeviceErv extends EventEmitter {
                     const setFanSpeed = deviceData.Device.SetFanSpeed;
                     const operationMode = deviceData.Device.OperationMode;
                     const ventilationMode = deviceData.Device.VentilationMode;
+                    const isConnected = accountTypeMelcloud ? !deviceData.Device[connectKey] : deviceData.Device[connectKey];
                     const isInError = deviceData.Device[errorKey];
 
                     //accessory
                     const obj = {
                         presets: presetsOnServer,
                         schedules: schedulesOnServer,
-                        hasRoomTemperature: hasRoomTemperature,
-                        hasSupplyTemperature: hasSupplyTemperature,
-                        hasOutdoorTemperature: hasOutdoorTemperature,
-                        hasCoolOperationMode: hasCoolOperationMode,
-                        hasHeatOperationMode: hasHeatOperationMode,
-                        hasCO2Sensor: hasCO2Sensor,
+                        supportsRoomTemperature: supportsRoomTemperature,
+                        supportsSupplyTemperature: supportsSupplyTemperature,
+                        supportsOutdoorTemperature: supportsOutdoorTemperature,
+                        supportsCoolOperationMode: supportsCoolOperationMode,
+                        supportsHeatOperationMode: supportsHeatOperationMode,
+                        supportsCO2Sensor: supportsCO2Sensor,
                         roomCO2Level: roomCO2Level,
                         roomCO2Detected: roomCO2Detected,
-                        hasPM25Sensor: hasPM25Sensor,
+                        supportsPM25Sensor: supportsPM25Sensor,
                         pM25SensorStatus: pM25SensorStatus,
                         pM25Level: pM25Level,
                         pM25AirQuality: pM25AirQuality,
-                        hasAutoVentilationMode: hasAutoVentilationMode,
-                        hasBypassVentilationMode: hasBypassVentilationMode,
-                        hasAutomaticFanSpeed: hasAutomaticFanSpeed,
+                        supportsAutoVentilationMode: supportsAutoVentilationMode,
+                        supportsBypassVentilationMode: supportsBypassVentilationMode,
+                        supportsAutomaticFanSpeed: supportsAutomaticFanSpeed,
+                        supportsStanbyMode: supportsStanbyMode,
                         coreMaintenanceRequired: coreMaintenanceRequired,
                         filterMaintenanceRequired: filterMaintenanceRequired,
                         actualVentilationMode: actualVentilationMode,
                         numberOfFanSpeeds: numberOfFanSpeeds,
+                        supportsFanSpeed: supportsFanSpeed,
                         power: power ? 1 : 0,
+                        inStandbyMode: inStandbyMode,
                         operationMode: operationMode,
                         currentOperationMode: 0,
                         targetOperationMode: 0,
@@ -1114,6 +1156,7 @@ class DeviceErv extends EventEmitter {
                         maxTempCoolDry: maxTempCoolDry,
                         useFahrenheit: this.useFahrenheit,
                         temperatureUnit: TemperatureDisplayUnits[this.useFahrenheit],
+                        isConnected: isConnected,
                         isInError: isInError,
                         scheduleEnabled: scheduleEnabled,
                         holidayModeEnabled: holidayModeEnabled,
@@ -1154,26 +1197,27 @@ class DeviceErv extends EventEmitter {
 
                             obj.currentOperationMode = !power ? 0 : obj.currentOperationMode;
                             obj.targetOperationMode = obj.targetOperationMode;
-                            obj.operationModeSetPropsMinValue = hasAutoVentilationMode ? 0 : 1;
-                            obj.operationModeSetPropsMaxValue = hasAutoVentilationMode ? 2 : 2;
-                            obj.operationModeSetPropsValidValues = hasAutoVentilationMode ? (hasBypassVentilationMode ? [0, 1, 2] : [0, 2]) : (hasBypassVentilationMode ? [1, 2] : [2]);
+                            obj.operationModeSetPropsMinValue = supportsAutoVentilationMode ? 0 : 1;
+                            obj.operationModeSetPropsMaxValue = supportsAutoVentilationMode ? 2 : 2;
+                            obj.operationModeSetPropsValidValues = supportsAutoVentilationMode ? (supportsBypassVentilationMode ? [0, 1, 2] : [0, 2]) : (supportsBypassVentilationMode ? [1, 2] : [2]);
 
                             //fan speed mode
                             obj.fanSpeedSetPropsMaxValue = 2;
-                            switch (numberOfFanSpeeds) {
-                                case 2: //Fan speed mode 2
-                                    obj.fanSpeed = hasAutomaticFanSpeed ? [3, 1, 2][setFanSpeed] : [0, 1, 2][setFanSpeed];
-                                    obj.fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 3 : 2;
-                                    break;
-                                case 3: //Fan speed mode 3
-                                    this.obj.fanSpeed = hasAutomaticFanSpeed ? [4, 1, 2, 3][setFanSpeed] : [0, 1, 2, 3][setFanSpeed];
-                                    obj.fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 4 : 3;
-                                    break;
-                                case 4: //Fan speed mode 4
-                                    obj.fanSpeed = hasAutomaticFanSpeed ? [5, 1, 2, 3, 4][setFanSpeed] : [0, 1, 2, 3, 4][setFanSpeed];
-                                    obj.fanSpeedSetPropsMaxValue = hasAutomaticFanSpeed ? 5 : 4;
-                                    break;
-                            };
+
+                            // fan speed mode
+                            if (supportsFanSpeed) {
+                                const max = numberOfFanSpeeds;
+                                const autoIndex = supportsAutomaticFanSpeed ? max + 1 : 0;
+
+                                // Tworzymy tablicę prędkości: [auto?, 1..N]
+                                const speeds = [autoIndex];
+                                for (let i = 1; i <= max; i++) {
+                                    speeds.push(i);
+                                }
+
+                                obj.fanSpeed = speeds[setFanSpeed];
+                                obj.fanSpeedSetPropsMaxValue = supportsAutomaticFanSpeed ? max + 1 : max;
+                            }
 
                             //update characteristics
                             this.melCloudService
@@ -1184,8 +1228,8 @@ class DeviceErv extends EventEmitter {
                                 .updateCharacteristic(Characteristic.RotationSpeed, obj.fanSpeed)
                                 .updateCharacteristic(Characteristic.LockPhysicalControls, obj.lockPhysicalControl)
                                 .updateCharacteristic(Characteristic.TemperatureDisplayUnits, obj.useFahrenheit);
-                            const updateDefCool = hasCoolOperationMode ? this.melCloudService?.updateCharacteristic(Characteristic.CoolingThresholdTemperature, defaultCoolingSetTemperature) : false;
-                            const updateDefHeat = hasHeatOperationMode ? this.melCloudService?.updateCharacteristic(Characteristic.HeatingThresholdTemperature, defaultHeatingSetTemperature) : false;
+                            const updateDefCool = supportsCoolOperationMode ? this.melCloudService?.updateCharacteristic(Characteristic.CoolingThresholdTemperature, defaultCoolingSetTemperature) : false;
+                            const updateDefHeat = supportsHeatOperationMode ? this.melCloudService?.updateCharacteristic(Characteristic.HeatingThresholdTemperature, defaultHeatingSetTemperature) : false;
                             break;
                         case 2: //Thermostat
                             //operation mode - 0, HEAT, 2, COOL, 4, 5, 6, FAN, AUTO
@@ -1219,9 +1263,9 @@ class DeviceErv extends EventEmitter {
 
                             obj.currentOperationMode = !power ? 0 : obj.currentOperationMode;
                             obj.targetOperationMode = !power ? 0 : obj.targetOperationMode;
-                            obj.operationModeSetPropsMinValue = hasAutoVentilationMode ? 0 : 0;
-                            obj.operationModeSetPropsMaxValue = hasAutoVentilationMode ? 3 : 2;
-                            obj.operationModeSetPropsValidValues = hasAutoVentilationMode ? (hasBypassVentilationMode ? [0, 1, 2, 3] : [0, 2, 3]) : (hasBypassVentilationMode ? [0, 1, 2] : [0, 2]);
+                            obj.operationModeSetPropsMinValue = supportsAutoVentilationMode ? 0 : 0;
+                            obj.operationModeSetPropsMaxValue = supportsAutoVentilationMode ? 3 : 2;
+                            obj.operationModeSetPropsValidValues = supportsAutoVentilationMode ? (supportsBypassVentilationMode ? [0, 1, 2, 3] : [0, 2, 3]) : (supportsBypassVentilationMode ? [0, 1, 2] : [0, 2]);
 
                             //update characteristics
                             this.melCloudService
@@ -1255,7 +1299,9 @@ class DeviceErv extends EventEmitter {
                         ?.updateCharacteristic(Characteristic.AirQuality, pM25AirQuality)
                         .updateCharacteristic(Characteristic.PM2_5Density, pM25Level);
 
-                    //error sensor
+                    //other sensors
+                    this.inStandbyService?.updateCharacteristic(Characteristic.ContactSensorState, inStandbyMode);
+                    this.connectService?.updateCharacteristic(Characteristic.ContactSensorState, isConnected);
                     this.errorService?.updateCharacteristic(Characteristic.ContactSensorState, isInError);
 
                     //holiday mode
@@ -1361,16 +1407,16 @@ class DeviceErv extends EventEmitter {
                         this.emit('info', `Current ventilation mode: ${Ventilation.OperationModeMapEnumToString[actualVentilationMode]}`);
                         this.emit('info', `Target temperature: ${setTemperature}${obj.temperatureUnit}`);
                         this.emit('info', `Room temperature: ${roomTemperature}${obj.temperatureUnit}`);
-                        if (hasSupplyTemperature && deviceData.Device.SupplyTemperature !== null) this.emit('info', `Supply temperature: ${roomTemperature}${obj.temperatureUnit}`);
-                        if (hasOutdoorTemperature && deviceData.Device.OutdoorTemperature !== null) this.emit('info', `Outdoor temperature: ${roomTemperature}${obj.temperatureUnit}`);
+                        if (supportsSupplyTemperature && deviceData.Device.SupplyTemperature !== null) this.emit('info', `Supply temperature: ${roomTemperature}${obj.temperatureUnit}`);
+                        if (supportsOutdoorTemperature && deviceData.Device.OutdoorTemperature !== null) this.emit('info', `Outdoor temperature: ${roomTemperature}${obj.temperatureUnit}`);
                         this.emit('info', `Fan speed mode: ${Ventilation.FanSpeedMapEnumToString[setFanSpeed]}`);
                         this.emit('info', `Temperature display unit: ${obj.temperatureUnit}`);
                         this.emit('info', `Core maintenance: ${Ventilation.CoreMaintenanceMapEnumToString[coreMaintenanceRequired]}`);
                         this.emit('info', `Filter maintenance: ${Ventilation.FilterMaintenanceMapEnumToString[filterMaintenanceRequired]}`);
-                        if (hasCO2Sensor) this.emit('info', `CO2 detected: ${Ventilation.Co2DetectedMapEnumToString[roomCO2Detected]}`);
-                        if (hasCO2Sensor) this.emit('info', `CO2 level: ${roomCO2Level} ppm`);
-                        if (hasPM25Sensor) this.emit('info', `PM2.5 air quality: ${Ventilation.PM25AirQualityMapEnumToString[pM25AirQuality]}`);
-                        if (hasPM25Sensor) this.emit('info', `PM2.5 level: ${pM25Level} µg/m`);
+                        if (supportsCO2Sensor) this.emit('info', `CO2 detected: ${Ventilation.Co2DetectedMapEnumToString[roomCO2Detected]}`);
+                        if (supportsCO2Sensor) this.emit('info', `CO2 level: ${roomCO2Level} ppm`);
+                        if (supportsPM25Sensor) this.emit('info', `PM2.5 air quality: ${Ventilation.PM25AirQualityMapEnumToString[pM25AirQuality]}`);
+                        if (supportsPM25Sensor) this.emit('info', `PM2.5 level: ${pM25Level} µg/m`);
                     };
                 })
                 .on('success', (success) => this.emit('success', success))

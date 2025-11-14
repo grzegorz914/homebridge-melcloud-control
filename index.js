@@ -201,9 +201,9 @@ class MelCloudPlatform {
 										if (logLevel.success) log.success(`${accountName}, ${deviceTypeText}, ${deviceName}, Published as external accessory.`);
 
 										//start impulse generators\
-										const timmers = accountType === 'melcloudhome' ? [{ name: 'connect', sampling: 3000000 }, { name: 'checkDevicesList', sampling: deviceRefreshInterval }] : [{ name: 'checkDevicesList', sampling: refreshInterval }];
+										const timmers = accountType === 'melcloudhome' ? [{ name: 'connect', sampling: 1800000 }, { name: 'checkDevicesList', sampling: deviceRefreshInterval }] : [{ name: 'checkDevicesList', sampling: refreshInterval }];
 										await melCloud.impulseGenerator.state(true, timmers, false);
-										await configuredDevice.startStopImpulseGenerator(true, [{ name: 'checkState', sampling: deviceRefreshInterval }]);
+										await configuredDevice.startStopImpulseGenerator(true, [{ name: 'checkState', sampling: deviceRefreshInterval + 500 }]);
 
 										//stop impulse generator
 										await impulseGenerator.state(false);

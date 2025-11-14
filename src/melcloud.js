@@ -76,22 +76,19 @@ class MelCloud extends EventEmitter {
             });
 
             if (this.logDebug) this.emit('debug', `Scanning for devices...`);
-
             const listDevicesData = await axiosInstance(ApiUrls.ListDevices);
 
             if (!listDevicesData || !listDevicesData.data) {
-                if (this.logWarn) this.emit('warn', `Invalid or empty response from MELCloud API`);
-                return null;
+                devicesList.Info = 'Invalid or empty response from MELCloud API'
+                return devicesList;
             }
 
             const buildingsList = listDevicesData.data;
-
-            if (this.logDebug)
-                this.emit('debug', `Buildings: ${JSON.stringify(buildingsList, null, 2)}`);
+            if (this.logDebug) this.emit('debug', `Buildings: ${JSON.stringify(buildingsList, null, 2)}`);
 
             if (!Array.isArray(buildingsList) || buildingsList.length === 0) {
-                if (this.logWarn) this.emit('warn', `No buildings found in MELCloud account`);
-                return null;
+                devicesList.Info = 'No building found'
+                return devicesList;
             }
 
             await this.functions.saveData(this.buildingsFile, buildingsList);
@@ -137,8 +134,7 @@ class MelCloud extends EventEmitter {
             devicesList.Info = `Found ${devicesCount} devices`;
             return devicesList;
         } catch (error) {
-            const msg = error.response ? `HTTP ${error.response.status}: ${error.response.statusText}` : error.message;
-            throw new Error(`Check devices list error: ${msg}`);
+            throw new Error(`Check devices list error: ${error.message}`);
         }
     }
 
@@ -227,7 +223,6 @@ class MelCloud extends EventEmitter {
             if (this.logDebug) this.emit('debug', `Buildings: ${JSON.stringify(buildingsList, null, 2)}`);
 
             if (!buildingsList) {
-                devicesList.State = false;
                 devicesList.Info = 'No building found'
                 return devicesList;
             }
@@ -280,17 +275,15 @@ class MelCloud extends EventEmitter {
                     const deviceObject = {
                         ...capitalizeKeys(device.Capabilities || {}),
                         ...settingsObject,
-                        DeviceType: type
+                        DeviceType: type,
+                        IsConnected: device.IsConnected
                     };
 
                     // Kapitalizacja brakujących obiektów/tablic
                     if (device.FrostProtection) device.FrostProtection = { ...capitalizeKeys(device.FrostProtection || {}) };
                     if (device.OverheatProtection) device.OverheatProtection = { ...capitalizeKeys(device.OverheatProtection || {}) };
                     if (device.HolidayMode) device.HolidayMode = { ...capitalizeKeys(device.HolidayMode || {}) };
-
-                    if (Array.isArray(device.Schedule)) {
-                        device.Schedule = device.Schedule.map(capitalizeKeysDeep);
-                    }
+                    if (Array.isArray(device.Schedule)) device.Schedule = device.Schedule.map(capitalizeKeysDeep);
 
                     // Usuń stare pola Settings i Capabilities
                     const { Settings, Capabilities, Id, GivenDisplayName, ...rest } = device;
@@ -326,6 +319,12 @@ class MelCloud extends EventEmitter {
             devicesList.Devices = devices;
             return devicesList;
         } catch (error) {
+            if (error.response?.status === 401) {
+                await connectToMelCloudHome();
+                if (this.logWarn) this.emit('warn', 'Check devices list not possible, cookies expired, trying to get new.');
+                return;
+            }
+
             throw new Error(`Check devices list error: ${error.message}`);
         }
     }
@@ -412,7 +411,7 @@ class MelCloud extends EventEmitter {
                 accountInfo.Info = `Login button ${loginText} not found`;
                 return accountInfo;
             }
-            ;
+
             await loginBtn.click();
             await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: GLOBAL_TIMEOUT / 3 });
 

@@ -395,6 +395,18 @@
                     "default": false,
                     "description": "This enable extra outdoor temperature sensor to use with automations in HomeKit app."
                   },
+                  "inStandbySensor": {
+                    "title": "In Standby",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable in standby mode sensor to use with automations in HomeKit app."
+                  },
+                  "connectSensor": {
+                    "title": "Connect",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable connect state sensor to use with automations in HomeKit app."
+                  },
                   "errorSensor": {
                     "title": "Error",
                     "type": "boolean",
@@ -1107,6 +1119,18 @@
                     "default": false,
                     "description": "This enable extra Return Zone 2 temperature sensor to use with automations in HomeKit app."
                   },
+                  "inStandbySensor": {
+                    "title": "In Standby",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable in standby mode sensor to use with automations in HomeKit app."
+                  },
+                  "connectSensor": {
+                    "title": "Connect",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable connect state sensor to use with automations in HomeKit app."
+                  },
                   "errorSensor": {
                     "title": "Error",
                     "type": "boolean",
@@ -1578,6 +1602,18 @@
                     "type": "boolean",
                     "default": false,
                     "description": "This enable extra supply temperature sensor to use with automations in HomeKit app."
+                  },
+                  "inStandbySensor": {
+                    "title": "In Standby",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable in standby mode sensor to use with automations in HomeKit app."
+                  },
+                  "connectSensor": {
+                    "title": "Connect",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable connect state sensor to use with automations in HomeKit app."
                   },
                   "errorSensor": {
                     "title": "Error",
@@ -2221,6 +2257,8 @@
                                 {
                                   "title": "System",
                                   "items": [
+                                    "accounts[].ataDevices[].inStandbySensor",
+                                    "accounts[].ataDevices[].connectSensor",
                                     "accounts[].ataDevices[].errorSensor"
                                   ]
                                 },
@@ -2372,6 +2410,8 @@
                                 {
                                   "title": "System",
                                   "items": [
+                                    "accounts[].atwDevices[].inStandbySensor",
+                                    "accounts[].atwDevices[].connectSensor",
                                     "accounts[].atwDevices[].errorSensor"
                                   ]
                                 },
@@ -2516,6 +2556,8 @@
                                 {
                                   "title": "System",
                                   "items": [
+                                    "accounts[].ervDevices[].inStandbySensor",
+                                    "accounts[].ervDevices[].connectSensor",
                                     "accounts[].ervDevices[].errorSensor"
                                   ]
                                 },

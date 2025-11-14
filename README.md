@@ -245,6 +245,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ataDevices[].autoDryFanMode` | Here select the operatiing mode for `Auto`, if this mode is not supported, it will be disabled.. |
 | `ataDevices[].temperatureSensor` | This enable extra `Room` temperature sensor to use with automations in HomeKit app. |
 | `ataDevices[].temperatureOutdoorSensor` | This enable extra `Outdoor` temperature sensor to use with automations in HomeKit app. |
+| `ataDevices[].inStandbySensor` | This enable `In Standby Mode` sensor to use with automations in HomeKit app. |
+| `ataDevices[].connectSensor` | This enable `Connect State` sensor to use with automations in HomeKit app. |
 | `ataDevices[].errorSensor` | This enable `Error` sensor to use with automations in HomeKit app. |
 | `ataDevices[].frostProtectionSupport` | This enable extra `Frost Protectio` control and sensors to use with automations in HomeKit app. |
 | `ataDevices[].overheatProtectionSupport` | This enable extra `Overheat Protection` control and sensors to use with automations in HomeKit app. |
@@ -279,6 +281,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `atwDevices[].temperatureReturnWaterTankSensor` | This enable extra `Return Water Tank` temperature sensor to use with automations in HomeKit app. |
 | `atwDevices[].temperatureFlowZone2Sensor` | This enable extra `Flow Zone 2` temperature sensor to use with automations in HomeKit app. |
 | `atwDevices[].temperatureReturnZone2Sensor` | This enable extra `Return Zone 2` temperature sensor to use with automations in HomeKit app. |
+| `atwDevices[].inStandbySensor` | This enable `In Standby Mode` sensor to use with automations in HomeKit app. |
+| `atwDevices[].connectSensor` | This enable `Connect State` sensor to use with automations in HomeKit app. |
 | `atwDevices[].errorSensor` | This enable `Error` sensors to use with automations in HomeKit app. |
 | `atwDevices[].holidayModeSupport` | This enable extra `Holiday Mode` control and sensors to use with automations in HomeKit app. |
 | `atwDevices[].refreshInterval` | Here set the background devices state refresh time in (sec), default `5s`. |
@@ -304,6 +308,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ervDevices[].temperatureSensor` | This enable extra `Room` temperature sensor to use with automations in HomeKit app. |
 | `ervDevices[].temperatureOutdoorSensor` | This enable extra `Outdoor` temperature sensor to use with automations in HomeKit app. |
 | `ervDevices[].temperatureSupplySensor` | This enable extra `Supply` temperature sensor to use with automations in HomeKit app. |
+| `atwDevices[].inStandbySensor` | This enable `In Standby Mode` sensor to use with automations in HomeKit app. |
+| `ervDevices[].connectSensor` | This enable `Connect State` sensor to use with automations in HomeKit app. |
 | `ervDevices[].errorSensor` | This enable `Error` sensors to use with automations in HomeKit app. |
 | `ervDevices[].holidayModeSupport` | This enable extra `Holiday Mode` control and sensors to use with automations in HomeKit app. |
 | `ervDevices[].refreshInterval` | Here set the background devices state refresh time in (sec), default `5s`. |

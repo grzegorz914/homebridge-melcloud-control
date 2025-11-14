@@ -23,13 +23,12 @@ class MelCloudAta extends EventEmitter {
 
         //set default values
         this.deviceData = {};
+        this.headers = {};
 
         //lock flags
-        this.locks = {
-            checkState: false,
-        };
+        this.locks = true;
         this.impulseGenerator = new ImpulseGenerator()
-            .on('checkState', () => this.handleWithLock('checkState', async () => {
+            .on('checkState', () => this.handleWithLock(async () => {
                 await this.checkState();
             }))
             .on('state', (state) => {
@@ -37,16 +36,16 @@ class MelCloudAta extends EventEmitter {
             });
     }
 
-    async handleWithLock(lockKey, fn) {
-        if (this.locks[lockKey]) return;
+    async handleWithLock(fn) {
+        if (this.locks) return;
 
-        this.locks[lockKey] = true;
+        this.locks = true;
         try {
             await fn();
         } catch (error) {
             this.emit('error', `Inpulse generator error: ${error}`);
         } finally {
-            this.locks[lockKey] = false;
+            this.locks = false;
         }
     }
 
@@ -59,6 +58,7 @@ class MelCloudAta extends EventEmitter {
                 return null;
             }
             const deviceData = devicesData.find(device => device.DeviceID === this.deviceId);
+            this.headers = deviceData.Headers;
 
             if (this.accountType === 'melcloudhome') {
                 deviceData.SerialNumber = deviceData.DeviceID || '4.0.0';
@@ -104,9 +104,7 @@ class MelCloudAta extends EventEmitter {
             }, { indoor: {}, outdoor: {} });
 
             //display info if units are not configured in MELCloud service
-            if (unitsCount === 0) {
-                if (this.logDebug) this.emit('debug', `Units are not configured in MELCloud service`);
-            };
+            if (unitsCount === 0 && this.logDebug) if (this.logDebug) this.emit('debug', `Units are not configured in MELCloud service`);
 
             //restFul
             if (this.restFulEnabled) {
@@ -151,7 +149,7 @@ class MelCloudAta extends EventEmitter {
                         method: 'POST',
                         baseURL: ApiUrls.BaseURL,
                         timeout: 10000,
-                        headers: deviceData.Headers,
+                        headers: this.headers,
                         withCredentials: true
                     });
 
@@ -264,7 +262,7 @@ class MelCloudAta extends EventEmitter {
                         method: method,
                         baseURL: ApiUrlsHome.BaseURL,
                         timeout: 10000,
-                        headers: deviceData.Headers,
+                        headers: this.headers,
                         withCredentials: true
                     });
 
@@ -282,9 +280,12 @@ class MelCloudAta extends EventEmitter {
     }
 
     updateData(deviceData) {
+        this.lock = true;
+        this.emit('deviceState', deviceData);
+
         setTimeout(() => {
-            this.emit('deviceState', deviceData);
-        }, 300);
+            this.lock = false
+        }, 3000);
     }
 
 };
