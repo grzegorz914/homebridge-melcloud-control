@@ -246,10 +246,11 @@
           }
 
           // Initialize devices arrays
-          const newDevices = { ata: [], ataPresets: [], atw: [], atwPresets: [], erv: [], ervPresets: [] };
+          const newDevices = { ata: [], ataPresets: [], ataSchedules: [], atw: [], atwPresets: [], atwSchedules: [], erv: [], ervPresets: [], ervSchedules: [], scenes: [] };
           const devicesByType = { ata: [], atw: [], erv: [] };
 
           response.Devices.forEach(d => {
+            d.Scenes = response.Scenes ?? [];
             if (d.Type === 0) devicesByType.ata.push(d);
             if (d.Type === 1) devicesByType.atw.push(d);
             if (d.Type === 3) devicesByType.erv.push(d);
@@ -263,7 +264,7 @@
           const removedAtw = removeStaleDevices(account.atwDevices, devicesByType.atw);
           const removedErv = removeStaleDevices(account.ervDevices, devicesByType.erv);
 
-          const handleDevices = (devicesInMelCloud, devicesInConfig, typeString, newArr, newPresets) => {
+          const handleDevices = (devicesInMelCloud, devicesInConfig, typeString, newArr, newPresets, newSchedules, newScenes) => {
             try {
               const configDevicesMap = new Map(devicesInConfig.map(dev => [String(dev.id), dev]));
               const isMelcloud = account.type === 'melcloud';
@@ -286,6 +287,7 @@
                     name: device.DeviceName,
                     presets: [],
                     schedules: [],
+                    scenes: [],
                     buttonsSensors: []
                   };
                   devicesInConfig.push(deviceInConfig);
@@ -294,19 +296,18 @@
                 }
 
                 // === Process presets/schedules ===
-                const presets = device[typeKey] || [];
-                const presetsInConfig = deviceInConfig[typeKey1] || [];
+                const presets = device.Presets || [];
+                const presetsInConfig = deviceInConfig.presets || [];
                 const presetIds = new Set(presetsInConfig.map(p => String(p.id)));
 
                 let addedNewPreset = false;
-
                 presets.forEach((preset, index) => {
-                  const presetId = String(preset[idKey]);
+                  const presetId = String(preset.ID);
                   if (!presetIds.has(presetId)) {
                     const presetObj = {
                       id: presetId,
                       displayType: 0,
-                      name: preset.NumberDescription || `Schedule ${index}`,
+                      name: preset.NumberDescription || `Preset ${index}`,
                       namePrefix: false
                     };
                     presetsInConfig.push(presetObj);
@@ -319,13 +320,80 @@
                 // === Remove placeholder presets/schedules (id === '0') if new ones were added ===
                 if (addedNewPreset) {
                   const beforeCount = presetsInConfig.length;
-                  deviceInConfig[typeKey1] = presetsInConfig.filter(p => String(p.id) !== '0');
-                  const removedCount = beforeCount - deviceInConfig[typeKey1].length;
+                  deviceInConfig.presets = presetsInConfig.filter(p => String(p.id) !== '0');
+                  const removedCount = beforeCount - deviceInConfig.presets.length;
 
                   if (removedCount > 0 && removedCount < beforeCount) {
-                    updateInfo('info2', `Removed ${removedCount} placeholder ${typeKey1} from device ${device.DeviceID}`, 'yellow');
+                    updateInfo('info2', `Removed ${removedCount} placeholder preset from device ${device.DeviceID}`, 'yellow');
                   }
                 }
+
+                // === Process presets/schedules ===
+                const schedules = device.Schedules || [];
+                const schedulesInConfig = deviceInConfig.schedules || [];
+                const scheduleIds = new Set(schedulesInConfig.map(s => String(s.id)));
+
+                let addedNewSchedule = false;
+                schedules.forEach((schedule, index) => {
+                  const scheduleId = String(schedule.Id);
+                  if (!scheduleIds.has(scheduleId)) {
+                    const presetObj = {
+                      id: scheduleId,
+                      displayType: 0,
+                      name: `Schedule ${index}`,
+                      namePrefix: false
+                    };
+                    schedulesInConfig.push(presetObj);
+                    newPresets.push(presetObj);
+                    scheduleIds.add(scheduleId);
+                    addedNewSchedule = true;
+                  }
+                });
+
+                // === Remove placeholder schedules (id === '0') if new ones were added ===
+                if (addedNewSchedule) {
+                  const beforeCount = schedulesInConfig.length;
+                  deviceInConfig.schedules = schedulesInConfig.filter(s => String(s.id) !== '0');
+                  const removedCount = beforeCount - deviceInConfig.schedules.length;
+
+                  if (removedCount > 0 && removedCount < beforeCount) {
+                    updateInfo('info2', `Removed ${removedCount} placeholder schedule from device ${device.DeviceID}`, 'yellow');
+                  }
+                }
+
+                // === Process scenes ===
+                const scenes = device.Scenes || [];
+                const scenesInConfig = deviceInConfig.scenes || [];
+                const sceneIds = new Set(scenesInConfig.map(s => String(s.id)));
+
+                let addedNewScenes = false;
+                scenes.forEach((scene, index) => {
+                  const sceneId = String(scene.Id);
+                  if (!sceneIds.has(sceneId)) {
+                    const sceneObj = {
+                      id: sceneId,
+                      displayType: 0,
+                      name: scene.Name || `Scene ${index}`,
+                      namePrefix: false
+                    };
+                    scenesInConfig.push(sceneObj);
+                    newScenes.push(sceneObj);
+                    sceneIds.add(sceneId);
+                    addedNewScenes = true;
+                  }
+                });
+
+                // === Remove placeholder scenes (id === '0') if new ones were added ===
+                if (addedNewScenes) {
+                  const beforeCount = scenesInConfig.length;
+                  deviceInConfig.scenes = scenesInConfig.filter(s => String(s.id) !== '0');
+                  const removedCount = beforeCount - deviceInConfig.scenes.length;
+
+                  if (removedCount > 0 && removedCount < beforeCount) {
+                    updateInfo('info2', `Removed ${removedCount} placeholder scene from device ${device.DeviceID}`, 'yellow');
+                  }
+                }
+
               });
 
               // Return filtered devicesInConfig to make sure upstream code uses it
@@ -336,21 +404,23 @@
             }
           };
 
-          account.ataDevices = handleDevices(devicesByType.ata, account.ataDevices, "Air Conditioner", newDevices.ata, newDevices.ataPresets);
-          account.atwDevices = handleDevices(devicesByType.atw, account.atwDevices, "Heat Pump", newDevices.atw, newDevices.atwPresets);
-          account.ervDevices = handleDevices(devicesByType.erv, account.ervDevices, "Energy Recovery Ventilation", newDevices.erv, newDevices.ervPresets);
+          account.ataDevices = handleDevices(devicesByType.ata, account.ataDevices, "Air Conditioner", newDevices.ata, newDevices.ataPresets, newDevices.ataSchedules, newDevices.scenes);
+          account.atwDevices = handleDevices(devicesByType.atw, account.atwDevices, "Heat Pump", newDevices.atw, newDevices.atwPresets, newDevices.atwSchedules, newDevices.scenes);
+          account.ervDevices = handleDevices(devicesByType.erv, account.ervDevices, "Energy Recovery Ventilation", newDevices.erv, newDevices.ervPresets, newDevices.ervSchedules, newDevices.scenes);
 
           const newDevicesCount = newDevices.ata.length + newDevices.atw.length + newDevices.erv.length;
           const newPresetsCount = newDevices.ataPresets.length + newDevices.atwPresets.length + newDevices.ervPresets.length;
+          const newSchedulesCount = newDevices.ataSchedules.length + newDevices.atwSchedules.length + newDevices.ervSchedules.length;
+          const newScenesCount = newDevices.scenes.length;
           const removedDevicesCount = removedAta.length + removedAtw.length + removedErv.length;
 
-          if (!newDevicesCount && !newPresetsCount && !removedDevicesCount) {
+          if (!newDevicesCount && !newPresetsCount && !newSchedulesCount && !newScenesCount && !removedDevicesCount) {
             updateInfo('info', 'No changes detected.', 'white');
           } else {
             if (newDevicesCount)
               updateInfo('info', `Found new devices: ATA: ${newDevices.ata.length}, ATW: ${newDevices.atw.length}, ERV: ${newDevices.erv.length}.`, 'green');
-            if (newPresetsCount)
-              updateInfo('info1', `Found new ${account.type === 'melcloud' ? 'presets' : 'schedules'}: ATA: ${newDevices.ataPresets.length}, ATW: ${newDevices.atwPresets.length}, ERV: ${newDevices.ervPresets.length}.`, 'green');
+            if (newPresetsCount || newScenesCount || newSchedulesCount)
+              updateInfo('info1', `Found new ${account.type === 'melcloud' ? 'presets' : 'schedules'}: ATA: ${account.type === 'melcloud' ? newDevices.ataPresets.length : newDevices.ataSchedules.length}, ATW: ${account.type === 'melcloud' ? newDevices.atwPresets.length : newDevices.atwSchedules.length}, ERV: ${account.type === 'melcloud' ? newDevices.ervPresets.length : newDevices.ervSchedules.length}, Scenes: ${newDevices.scenes.length}.`, 'green');
             if (removedDevicesCount)
               updateInfo('info2', `Removed devices: ATA: ${removedAta.length}, ATW: ${removedAtw.length}, ERV: ${removedErv.length}.`, 'orange');
           }

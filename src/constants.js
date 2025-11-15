@@ -20,14 +20,28 @@ export const ApiUrls = {
 export const ApiUrlsHome = {
     BaseURL: "https://melcloudhome.com",
     GetUserContext: "/api/user/context",
-    SetAta: "/api/ataunit/deviceid",
-    SetAtw: "/api/atwunit/deviceid",
-    SetErv: "/api/ervunit/deviceid",
-    PutScheduleEnable: "/api/cloudschedule/deviceid/enabled", // PUT {"enabled":true}
+    GetUserScenes: "/api/user/scenes",
+    PutAta: "/api/ataunit/deviceid",
+    PutAtw: "/api/atwunit/deviceid",
+    PutErv: "/api/ervunit/deviceid",
     PostSchedule: " /api/cloudschedule/deviceid", // POST {"days":[2],"time":"17:59:00","enabled":true,"id":"53c5e804-0663-47d0-85c2-2d8ccd2573de","power":false,"operationMode":null,"setPoint":null,"vaneVerticalDirection":null,"vaneHorizontalDirection":null,"setFanSpeed":null}
     PostProtectionFrost: "/api/protection/frost", // POST {"enabled":true,"min":13,"max":16,"units":{"ATA":["ef333525-2699-4290-af5a-2922566676da"]}}
     PostProtectionOverheat: "api/protection/overheat", // POST {"enabled":true,"min":32,"max":35,"units":{"ATA":["ef333525-2699-4290-af5a-2922566676da"]}}
-    PostHolidayMode: " /api/holidaymode" // POST {"enabled":true,"startDate":"2025-11-11T17:42:24.913","endDate":"2026-06-01T09:18:00","units":{"ATA":["ef333525-2699-4290-af5a-2922566676da"]}}
+    PostHolidayMode: " /api/holidaymode", // POST {"enabled":true,"startDate":"2025-11-11T17:42:24.913","endDate":"2026-06-01T09:18:00","units":{"ATA":["ef333525-2699-4290-af5a-2922566676da"]}}
+    PutScheduleEnabled: "/api/cloudschedule/deviceid/enabled", // PUT {"enabled":true}
+    PutScene: {
+        Enable: "/api/scene/sceneid/enable",
+        Disable: "/api/scene/sceneid/disable",
+    },
+    Referers: {
+        GetPutScenes: "https://melcloudhome.com/scenes",
+        PostHolidayMode: "https://melcloudhome.com/ata/deviceid/holidaymode",
+        PostProtectionFrost: "https://melcloudhome.com/ata/deviceid/frostprotection",
+        PostProtectionOverheat: "https://melcloudhome.com/ata/deviceid/overheatprotection",
+        PutDeviceSettings: "https://melcloudhome.com/dashboard",
+        PutScheduleEnabled: "https://melcloudhome.com/ata/deviceid/schedule",
+    },
+    Origin: "https://melcloudhome.com"
 };
 
 export const DeviceType = [
@@ -162,4 +176,33 @@ export const Ventilation = {
 export const AccessLevel = {
     Quest: 3,
     Owner: 4
+};
+
+export const LanguageLocaleMap = {
+    "0": "en-US,en;q=0.9",
+    "1": "bg-BG,bg;q=0.9",
+    "2": "cs-CZ,cs;q=0.9",
+    "3": "da-DK,da;q=0.9",
+    "4": "de-DE,de;q=0.9",
+    "5": "et-EE,et;q=0.9",
+    "6": "es-ES,es;q=0.9",
+    "7": "fr-FR,fr;q=0.9",
+    "8": "hy-AM,hy;q=0.9",
+    "9": "lv-LV,lv;q=0.9",
+    "10": "lt-LT,lt;q=0.9",
+    "11": "hu-HU,hu;q=0.9",
+    "12": "nl-NL,nl;q=0.9",
+    "13": "no-NO,no;q=0.9",
+    "14": "pl-PL,pl;q=0.9",
+    "15": "pt-PT,pt;q=0.9",
+    "16": "ru-RU,ru;q=0.9",
+    "17": "fi-FI,fi;q=0.9",
+    "18": "sv-SE,sv;q=0.9",
+    "19": "it-IT,it;q=0.9",
+    "20": "uk-UA,uk;q=0.9",
+    "21": "tr-TR,tr;q=0.9",
+    "22": "el-GR,el;q=0.9",
+    "23": "hr-HR,hr;q=0.9",
+    "24": "ro-RO,ro;q=0.9",
+    "25": "sl-SI,sl;q=0.9"
 };

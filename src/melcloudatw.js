@@ -23,7 +23,6 @@ class MelCloudAtw extends EventEmitter {
 
         //set default values
         this.devicesData = {};
-        this.headers = {};
 
         //lock flags
         this.locks = true;
@@ -53,33 +52,29 @@ class MelCloudAtw extends EventEmitter {
         try {
             //read device info from file
             const devicesData = await this.functions.readData(this.devicesFile, true);
-            if (!Array.isArray(devicesData)) {
-                if (this.logWarn) this.emit('warn', `Device data not found`);
-                return null;
-            }
-            const deviceData = devicesData.find(device => device.DeviceID === this.deviceId);
-            this.headers = deviceData.Headers;
+            const scenes = devicesData.Scenes ?? [];
+            const deviceData = devicesData.Devices.find(device => device.DeviceID === this.deviceId);
 
             if (this.accountType === 'melcloudhome') {
-                deviceData.SerialNumber = deviceData.DeviceID || '4.0.0';
-                deviceData.Device.FirmwareAppVersion = deviceData.ConnectedInterfaceIdentifier || '4.0.0';
+                deviceData.Scenes = scenes;
             }
+
             const safeConfig = {
                 ...deviceData,
-                headers: 'removed',
+                Headers: 'removed',
             };
             if (this.logDebug) this.emit('debug', `Device Data: ${JSON.stringify(safeConfig, null, 2)}`);
 
             //device
-            const serialNumber = deviceData.SerialNumber;
+            //device
+            const serialNumber = deviceData.SerialNumber || '4.0.0';
+            const firmwareAppVersion = deviceData.Device?.FirmwareAppVersion || '4.0.0';
             const hasHotWaterTank = deviceData.Device?.HasHotWaterTank;
-            const firmwareAppVersion = deviceData.Device?.FirmwareAppVersion;
             const hasZone2 = deviceData.Device?.HasZone2;
 
             //units
             const units = Array.isArray(deviceData.Device?.Units) ? deviceData.Device?.Units : [];
             const unitsCount = units.length;
-            const manufacturer = 'Mitsubishi';
 
             const { indoor, outdoor } = units.reduce((acc, unit) => {
                 const target = unit.IsIndoor ? 'indoor' : 'outdoor';
@@ -111,14 +106,11 @@ class MelCloudAtw extends EventEmitter {
 
             //check state changes
             const deviceDataHasNotChanged = JSON.stringify(devicesData) === JSON.stringify(this.devicesData);
-            if (deviceDataHasNotChanged) {
-                if (this.logDebug) this.emit('debug', `Device state not changed`);
-                return;
-            }
+            if (deviceDataHasNotChanged) return;
             this.devicesData = devicesData;
 
             //emit info
-            this.emit('deviceInfo', manufacturer, indoor.model, outdoor.model, serialNumber, firmwareAppVersion, hasHotWaterTank, hasZone2);
+            this.emit('deviceInfo', indoor.model, outdoor.model, serialNumber, firmwareAppVersion, hasHotWaterTank, hasZone2);
 
             //emit state
             this.emit('deviceState', deviceData);
@@ -129,7 +121,7 @@ class MelCloudAtw extends EventEmitter {
         };
     };
 
-    async send(accountType, displayType, deviceData, effectiveFlags) {
+    async send(accountType, displayType, deviceData, flag, flagData) {
         try {
 
             //prevent to set out of range temp
@@ -150,94 +142,97 @@ class MelCloudAtw extends EventEmitter {
             let path = '';
             switch (accountType) {
                 case "melcloud":
-                    const axiosInstancePost = axios.create({
+                    deviceData.Device.EffectiveFlags = flag;
+                    payload = {
+                        DeviceID: deviceData.Device.DeviceID,
+                        EffectiveFlags: deviceData.Device.EffectiveFlags,
+                        Power: deviceData.Device.Power,
+                        SetTemperatureZone1: deviceData.Device.SetTemperatureZone1,
+                        SetTemperatureZone2: deviceData.Device.SetTemperatureZone2,
+                        OperationMode: deviceData.Device.OperationMode,
+                        OperationModeZone1: deviceData.Device.OperationModeZone1,
+                        OperationModeZone2: deviceData.Device.OperationModeZone2,
+                        SetHeatFlowTemperatureZone1: deviceData.Device.SetHeatFlowTemperatureZone1,
+                        SetHeatFlowTemperatureZone2: deviceData.Device.SetHeatFlowTemperatureZone2,
+                        SetCoolFlowTemperatureZone1: deviceData.Device.SetCoolFlowTemperatureZone1,
+                        SetCoolFlowTemperatureZone2: deviceData.Device.SetCoolFlowTemperatureZone2,
+                        SetTankWaterTemperature: deviceData.Device.SetTankWaterTemperature,
+                        ForcedHotWaterMode: deviceData.Device.ForcedHotWaterMode,
+                        EcoHotWater: deviceData.Device.EcoHotWater,
+                        HolidayMode: deviceData.Device.HolidayMode,
+                        ProhibitZone1: deviceData.Device.ProhibitHeatingZone1,
+                        ProhibitZone2: deviceData.Device.ProhibitHeatingZone2,
+                        ProhibitHotWater: deviceData.Device.ProhibitHotWater,
+                        HasPendingCommand: true
+                    }
+
+                    if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(payload, null, 2)}`);
+                    await axios(ApiUrls.SetAtw, {
                         method: 'POST',
                         baseURL: ApiUrls.BaseURL,
                         timeout: 10000,
-                        headers: this.headers,
-                        withCredentials: true
+                        headers: deviceData.Headers,
+                        data: payload
                     });
-
-                    deviceData.Device.EffectiveFlags = effectiveFlags;
-                    payload = {
-                        data: {
-                            DeviceID: deviceData.Device.DeviceID,
-                            EffectiveFlags: deviceData.Device.EffectiveFlags,
-                            Power: deviceData.Device.Power,
-                            SetTemperatureZone1: deviceData.Device.SetTemperatureZone1,
-                            SetTemperatureZone2: deviceData.Device.SetTemperatureZone2,
-                            OperationMode: deviceData.Device.OperationMode,
-                            OperationModeZone1: deviceData.Device.OperationModeZone1,
-                            OperationModeZone2: deviceData.Device.OperationModeZone2,
-                            SetHeatFlowTemperatureZone1: deviceData.Device.SetHeatFlowTemperatureZone1,
-                            SetHeatFlowTemperatureZone2: deviceData.Device.SetHeatFlowTemperatureZone2,
-                            SetCoolFlowTemperatureZone1: deviceData.Device.SetCoolFlowTemperatureZone1,
-                            SetCoolFlowTemperatureZone2: deviceData.Device.SetCoolFlowTemperatureZone2,
-                            SetTankWaterTemperature: deviceData.Device.SetTankWaterTemperature,
-                            ForcedHotWaterMode: deviceData.Device.ForcedHotWaterMode,
-                            EcoHotWater: deviceData.Device.EcoHotWater,
-                            HolidayMode: deviceData.Device.HolidayMode,
-                            ProhibitZone1: deviceData.Device.ProhibitHeatingZone1,
-                            ProhibitZone2: deviceData.Device.ProhibitHeatingZone2,
-                            ProhibitHotWater: deviceData.Device.ProhibitHotWater,
-                            HasPendingCommand: true
-                        }
-                    }
-
-                    await axiosInstancePost(ApiUrls.SetAtw, payload);
                     this.updateData(deviceData);
                     return true;
                 case "melcloudhome":
-                    switch (effectiveFlags) {
+                    switch (flag) {
                         case 'holidaymode':
                             payload = {
-                                data: { enabled: deviceData.HolidayMode.Enabled, startDate: deviceData.HolidayMode.StartDate, endDate: deviceData.HolidayMode.EndDate, units: { "ATW": [deviceData.DeviceID] } }
+                                enabled: deviceData.HolidayMode.Enabled,
+                                startDate: deviceData.HolidayMode.StartDate,
+                                endDate: deviceData.HolidayMode.EndDate,
+                                units: { "ATW": [deviceData.DeviceID] }
                             };
                             method = 'POST';
                             path = ApiUrlsHome.PostHolidayMode;
+                            deviceData.Headers.Referer = ApiUrlsHome.Referers.PostHolidayMode.replace('deviceid', deviceData.DeviceID);
                             break;
                         case 'schedule':
-                            payload = {
-                                data: {
-                                    enabled: deviceData.ScheduleEnabled
-                                }
-                            };
+                            payload = { enabled: deviceData.ScheduleEnabled };
                             method = 'PUT';
-                            path = ApiUrlsHome.PutScheduleEnable.replace('deviceid', deviceData.DeviceID);
+                            path = ApiUrlsHome.PutScheduleEnabled.replace('deviceid', deviceData.DeviceID);
+                            deviceData.Headers.Referer = ApiUrlsHome.Referers.PutScheduleEnabled.replace('deviceid', deviceData.DeviceID);
+                            break;
+                        case 'scene':
+                            method = 'PUT';
+                            const state = flagData.Enabled ? 'Enable' : 'Disable';
+                            path = ApiUrlsHome.PutScene[state].replace('sceneid', flagData.Id);
+                            deviceData.Headers.Referer = ApiUrlsHome.Referers.GetPutScenes;
                             break;
                         default:
                             payload = {
-                                data: {
-                                    Power: deviceData.Device.Power,
-                                    SetTemperatureZone1: deviceData.Device.SetTemperatureZone1,
-                                    SetTemperatureZone2: deviceData.Device.SetTemperatureZone2,
-                                    OperationMode: HeatPump.OperationModeMapEnumToString[deviceData.Device.OperationMode],
-                                    OperationModeZone1: HeatPump.OperationModeMapEnumToString[deviceData.Device.OperationModeZone1],
-                                    OperationModeZone2: HeatPump.OperationModeMapEnumToString[deviceData.Device.OperationModeZone2],
-                                    SetHeatFlowTemperatureZone1: deviceData.Device.SetHeatFlowTemperatureZone1,
-                                    SetHeatFlowTemperatureZone2: deviceData.Device.SetHeatFlowTemperatureZone2,
-                                    SetCoolFlowTemperatureZone1: deviceData.Device.SetCoolFlowTemperatureZone1,
-                                    SetCoolFlowTemperatureZone2: deviceData.Device.SetCoolFlowTemperatureZone2,
-                                    SetTankWaterTemperature: deviceData.Device.SetTankWaterTemperature,
-                                    ForcedHotWaterMode: deviceData.Device.ForcedHotWaterMode,
-                                    EcoHotWater: deviceData.Device.EcoHotWater,
-                                }
+                                power: deviceData.Device.Power,
+                                setTemperatureZone1: deviceData.Device.SetTemperatureZone1,
+                                setTemperatureZone2: deviceData.Device.SetTemperatureZone2,
+                                operationMode: HeatPump.OperationModeMapEnumToString[deviceData.Device.OperationMode],
+                                operationModeZone1: HeatPump.OperationModeMapEnumToString[deviceData.Device.OperationModeZone1],
+                                operationModeZone2: HeatPump.OperationModeMapEnumToString[deviceData.Device.OperationModeZone2],
+                                opetHeatFlowTemperatureZone1: deviceData.Device.SetHeatFlowTemperatureZone1,
+                                setHeatFlowTemperatureZone2: deviceData.Device.SetHeatFlowTemperatureZone2,
+                                setCoolFlowTemperatureZone1: deviceData.Device.SetCoolFlowTemperatureZone1,
+                                setCoolFlowTemperatureZone2: deviceData.Device.SetCoolFlowTemperatureZone2,
+                                setTankWaterTemperature: deviceData.Device.SetTankWaterTemperature,
+                                forcedHotWaterMode: deviceData.Device.ForcedHotWaterMode,
+                                ecoHotWater: deviceData.Device.EcoHotWater,
                             };
                             method = 'PUT';
-                            path = ApiUrlsHome.SetAtw.replace('deviceid', deviceData.DeviceID);
+                            path = ApiUrlsHome.PutAtw.replace('deviceid', deviceData.DeviceID);
+                            deviceData.Headers.Referer = ApiUrlsHome.Referers.PutDeviceSettings
                             break
                     }
 
-                    const axiosInstancePut = axios.create({
+                    deviceData.Headers['Content-Type'] = 'application/json; charset=utf-8';
+                    deviceData.Headers.Origin = ApiUrlsHome.Origin;
+                    if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(payload, null, 2)}, Headers: ${JSON.stringify(deviceData.Headers, null, 2)}`);
+                    await axios(path, {
                         method: method,
                         baseURL: ApiUrlsHome.BaseURL,
                         timeout: 10000,
-                        headers: this.headers,
-                        withCredentials: true
+                        headers: deviceData.Headers,
+                        data: payload
                     });
-
-                    if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(settings.data, null, 2)}`);
-                    await axiosInstancePut(path, settings);
                     this.updateData(deviceData);
                     return true;
                 default:
@@ -255,7 +250,7 @@ class MelCloudAtw extends EventEmitter {
 
         setTimeout(() => {
             this.lock = false
-        }, 3000);
+        }, 2500);
     }
 };
 export default MelCloudAtw;

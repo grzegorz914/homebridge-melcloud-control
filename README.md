@@ -71,6 +71,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Overheat protection `ON/OFF`.
       * Holiday mode `ON/OFF`.
       * Schedule `ON/OFF`.
+      * Scene `ON/OFF`.
   * Sensors:
     * For automation and notifications.
       * Power `ON/OFF`.
@@ -88,8 +89,9 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Overheat protection.
       * Holiday mode.
       * Shedule control.
-      * Shedule active
-      * Error
+      * Shedule active.
+      * Scene control.
+      * Error.
 * Heat Pump:
   * Heater Cooler:
     * Heat Pump:
@@ -128,6 +130,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Presets `SET/UNSET`.
       * Holiday mode `ON/OFF`.
       * Schedule `ON/OFF`.
+      * Scene `ON/OFF`.
   * Sensors:
     * For automation and notifications.
       * Power `ON/OFF`.
@@ -142,8 +145,9 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Return Temperature Zone 1, 2, Hot Water.
       * Holiday mode.
       * Shedule control.
-      * Shedule active
-      * Error
+      * Shedule active.
+      * Scene control.
+      * Error.
 * Energy Recovery Ventilation Lossnay:
   * Heater Cooler:
     * Power `ON/OFF`.
@@ -162,6 +166,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Presets `SET/UNSET`.
       * Holiday mode `ON/OFF`.
       * Schedule `ON/OFF`.
+      * Scene `ON/OFF`.
   * Sensors:
     * For automation and notifications.
       * Power `ON/OFF`.
@@ -177,8 +182,9 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * PM2.5 air quality and level.
       * Holiday mode.
       * Shedule control.
-      * Shedule active
-      * Error
+      * Shedule active.
+      * Scene control.
+      * Error.
 
 ### HOME app current device mode display
 
@@ -238,7 +244,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ataDevices[].id` | Read only data, do not change it. |
 | `ataDevices[].type` | Read only data, do not change it. |
 | `ataDevices[].typeString` | Read only data, do not change it. |
-| `ataDevices[].name` | Here You can schange the `Accessory Name` which is exposed to the `Homebridge/HomeKit`. |
+| `ataDevices[].name` | Here You can change the `Accessory Name` which is exposed to the `Homebridge/HomeKit`. |
 | `ataDevices[].displayType` | Here select device control mode `None/Disabled`, `Heater/Cooler`, `Thermostat`. |
 | `ataDevices[].heatDryFanMode` | Here select the operatiing mode for `Heat`, if this mode is not supported, it will be disabled. |
 | `ataDevices[].coolDryFanMode` | Here select the operatiing mode for `Cool`, if this mode is not supported, it will be disabled. |
@@ -254,12 +260,15 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ataDevices[].refreshInterval` | Here set the background devices state refresh time in (sec), default `5s`. |
 | `ataDevices[].presets[]` | Array of ATA device `Presets` created automatically after login to MELCloud from plugin config UI. |
 | `ataDevices[].presets[].id` | Read only data, do not change it. |
-| `ataDevices[].presets[].name` | Here You can schange the `Preset Name` which is exposed to the `Homebridge/HomeKit`. |
-| `ataDevices[].presets[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Outlet`, `2 - Switch`, `3 - Motion Sensor`, `4 - Occupancy Sensor`, `5 - Contact Sensor`. |
+| `ataDevices[].presets[].name` | Here You can change the `Preset Name` which is exposed to the `Homebridge/HomeKit`. |
+| `ataDevices[].presets[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Motion Sensor`, `2 - Occupancy Sensor`, `3 - Contact Sensor`, `4 - Switch + Motion Sensor`, `5 - Switch +Occupancy Sensor`, `6 - Switch +Contact Sensor`. |
 | `ataDevices[].schedules[]` | Array of ATA device `Schedules` created automatically after login to MELCloud Home from plugin config UI. |
 | `ataDevices[].schedules[].id` | Read only data, do not change it. |
-| `ataDevices[].schedules[].name` | Here You can schange the `Schedule Name` which is exposed to the `Homebridge/HomeKit`. |
-| `ataDevices[].schedules[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Motion Sensor`, `2 - Occupancy Sensor`, `3 - Contact Sensor`. |
+| `ataDevices[].schedules[].name` | Here You can change the `Schedule Name` which is exposed to the `Homebridge/HomeKit`. |
+| `ataDevices[].schedules[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Motion Sensor`, `2 - Occupancy Sensor`, `3 - Contact Sensor`, `4 - Switch + Motion Sensor`, `5 - Switch +Occupancy Sensor`, `6 - Switch +Contact Sensor`. |
+| `ataDevices[].scenes[].id` | Read only data, do not change it. |
+| `ataDevices[].scenes[].name` | Here You can change the `Scene Name` which is exposed to the `Homebridge/HomeKit`. |
+| `ataDevices[].scenes[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Motion Sensor`, `2 - Occupancy Sensor`, `3 - Contact Sensor`, `4 - Switch + Motion Sensor`, `5 - Switch +Occupancy Sensor`, `6 - Switch +Contact Sensor`. |
 | `ataDevices[].buttonsSensors[]` | Array of buttons sensors. |
 | `ataDevices[].buttonsSensors[].name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
 | `ataDevices[].buttonsSensors[].mode` | Here select button mode, VH - Vane Horizontal, VV - Vane Horizontal. |
@@ -269,7 +278,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `atwDevices[].id` | Read only data, do not change it. |
 | `atwDevices[].type` | Read only data, do not change it. |
 | `atwDevices[].typeString` | Read only data, do not change it. |
-| `atwDevices[].name` | Here You can schange the `Accessory Name` which is exposed to the `Homebridge/HomeKit`. |
+| `atwDevices[].name` | Here You can change the `Accessory Name` which is exposed to the `Homebridge/HomeKit`. |
 | `atwDevices[].displayType` | Here select main control mode `None/Disabled`, `Heater/Cooler`, `Thermostat`. |
 | `atwDevices[].hideZone` | Here select which zone need to be hidden `None/Disabled`, `Heat Pump`, `Heat Pump / Zone 1`, `Heat Pump / Zone 1 / Hot Water`, `Heat Pump / Zone 1 / Zone 2`, `Heat Pump / Hot Water`,`Heat Pump / Hot Water / Zone 2`, `Heat Pump / Zone 2`, `Zone 1`, `Zone 1 / Hot Water`, `Zone 1 / Hot Water / Zone 2`, `Zone 1 / Zone 2`, `Hot Water`, `Hot Water / Zone 2`, `Zone 2`, `All`. |
 | `atwDevices[].temperatureSensor` | This enable extra `Room` temperature sensor to use with automations in HomeKit app. |
@@ -288,12 +297,15 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `atwDevices[].refreshInterval` | Here set the background devices state refresh time in (sec), default `5s`. |
 | `atwDevices[].presets[]` | Array of ATW device `Presets` created automatically after login to MELCloud from plugin config UI. |
 | `atwDevices[].presets[].id` | Read only data, do not change it. |
-| `atwDevices[].presets[].name` | Here You can schange the `Preset Name` which is exposed to the `Homebridge/HomeKit`. |
-| `atwDevices[].presets[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Outlet`, `2 - Switch`, `3 - Motion Sensor`, `4 - Occupancy Sensor`, `5 - Contact Sensor`. |
+| `atwDevices[].presets[].name` | Here You can change the `Preset Name` which is exposed to the `Homebridge/HomeKit`. |
+| `atwDevices[].presets[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Motion Sensor`, `2 - Occupancy Sensor`, `3 - Contact Sensor`, `4 - Switch + Motion Sensor`, `5 - Switch +Occupancy Sensor`, `6 - Switch +Contact Sensor`. |
 | `atwDevices[].schedules[]` | Array of ATW device `Schedules` created automatically after login to MELCloud Home from plugin config UI. |
 | `atwDevices[].schedules[].id` | Read only data, do not change it. |
-| `atwDevices[].schedules[].name` | Here You can schange the `Schedule Name` which is exposed to the `Homebridge/HomeKit`. |
-| `atwDevices[].schedules[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Motion Sensor`, `2 - Occupancy Sensor`, `3 - Contact Sensor`. |
+| `atwDevices[].schedules[].name` | Here You can change the `Schedule Name` which is exposed to the `Homebridge/HomeKit`. |
+| `atwDevices[].schedules[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Motion Sensor`, `2 - Occupancy Sensor`, `3 - Contact Sensor`, `4 - Switch + Motion Sensor`, `5 - Switch +Occupancy Sensor`, `6 - Switch +Contact Sensor`. |
+| `atwDevices[].scenes[].id` | Read only data, do not change it. |
+| `atwDevices[].scenes[].name` | Here You can change the `Scene Name` which is exposed to the `Homebridge/HomeKit`. |
+| `atwDevices[].scenes[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Motion Sensor`, `2 - Occupancy Sensor`, `3 - Contact Sensor`, `4 - Switch + Motion Sensor`, `5 - Switch +Occupancy Sensor`, `6 - Switch +Contact Sensor`. |
 | `atwDevices[].buttonsSensors[]` | Array of buttons sensors. |
 | `atwDevices[].buttonsSensors[].name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
 | `atwDevices[].buttonsSensors[].mode` | Here select button mode. |
@@ -303,7 +315,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ervDevices[].id` | Read only data, do not change it. |
 | `ervDevices[].type` | Read only data, do not change it. |
 | `ervDevices[].typeString` | Read only data, do not change it. |
-| `ervDevices[].name` | Here You can schange the `Accessory Name` which is exposed to the `Homebridge/HomeKit`. |
+| `ervDevices[].name` | Here You can change the `Accessory Name` which is exposed to the `Homebridge/HomeKit`. |
 | `ervDevices[].displayType` | Here select main control mode `None/Disabled`, `Heater/Cooler`, `Thermostat`. |
 | `ervDevices[].temperatureSensor` | This enable extra `Room` temperature sensor to use with automations in HomeKit app. |
 | `ervDevices[].temperatureOutdoorSensor` | This enable extra `Outdoor` temperature sensor to use with automations in HomeKit app. |
@@ -315,12 +327,15 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ervDevices[].refreshInterval` | Here set the background devices state refresh time in (sec), default `5s`. |
 | `ervDevices[].presets[]` | Array of ERV device `Presets` created automatically after login to MELCloud from plugin config UI. |
 | `ervDevices[].presets[].id` | Read only data, do not change it. |
-| `ervDevices[].presets[].name` | Here You can schange the `Preset Name` which is exposed to the `Homebridge/HomeKit`. |
-| `ervDevices[].presets[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Outlet`, `2 - Switch`, `3 - Motion Sensor`, `4 - Occupancy Sensor`, `5 - Contact Sensor`. |
+| `ervDevices[].presets[].name` | Here You can change the `Preset Name` which is exposed to the `Homebridge/HomeKit`. |
+| `ervDevices[].presets[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Motion Sensor`, `2 - Occupancy Sensor`, `3 - Contact Sensor`, `4 - Switch + Motion Sensor`, `5 - Switch +Occupancy Sensor`, `6 - Switch +Contact Sensor`. |
 | `ervDevices[].schedules[]` | Array of ERV device `Schedules` created automatically after login to MELCloud Home from plugin config UI. |
 | `ervDevices[].schedules[].id` | Read only data, do not change it. |
-| `ervDevices[].schedules[].name` | Here You can schange the `Schedule Name` which is exposed to the `Homebridge/HomeKit`. |
-| `ervDevices[].schedules[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Motion Sensor`, `2 - Occupancy Sensor`, `3 - Contact Sensor`. |
+| `ervDevices[].schedules[].name` | Here You can change the `Schedule Name` which is exposed to the `Homebridge/HomeKit`. |
+| `ervDevices[].schedules[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Motion Sensor`, `2 - Occupancy Sensor`, `3 - Contact Sensor`, `4 - Switch + Motion Sensor`, `5 - Switch +Occupancy Sensor`, `6 - Switch +Contact Sensor`. |
+| `ervDevices[].scenes[].id` | Read only data, do not change it. |
+| `ervDevices[].scenes[].name` | Here You can change the `Scene Name` which is exposed to the `Homebridge/HomeKit`. |
+| `ervDevices[].scenes[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Motion Sensor`, `2 - Occupancy Sensor`, `3 - Contact Sensor`, `4 - Switch + Motion Sensor`, `5 - Switch +Occupancy Sensor`, `6 - Switch +Contact Sensor`. |
 | `ervDevices[].buttonsSensors[]` | Array of buttons sensors. |
 | `ervDevices[].buttonsSensors[].name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
 | `ervDevices[].buttonsSensors[].mode` | Here select button mode. |

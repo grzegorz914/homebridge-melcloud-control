@@ -1,6 +1,7 @@
 import { join } from 'path';
 import { mkdirSync, existsSync, writeFileSync } from 'fs';
 import MelCloud from './src/melcloud.js';
+import MelCloudHome from './src/melcloudhome.js';
 import DeviceAta from './src/deviceata.js';
 import DeviceAtw from './src/deviceatw.js';
 import DeviceErv from './src/deviceerv.js';
@@ -84,8 +85,8 @@ class MelCloudPlatform {
 						.on('start', async () => {
 							try {
 								//melcloud account
-								const melCloud = new MelCloud(account, accountFile, buildingsFile, devicesFile, true)
-									.on('success', (msg) => logLevel.success && log.success(`${accountName}, ${msg}`))
+								const melCloud = account.type === 'melcloud' ? new MelCloud(account, accountFile, buildingsFile, devicesFile, true) : new MelCloudHome(account, accountFile, buildingsFile, devicesFile, true);
+								melCloud.on('success', (msg) => logLevel.success && log.success(`${accountName}, ${msg}`))
 									.on('info', (msg) => logLevel.info && log.info(`${accountName}, ${msg}`))
 									.on('debug', (msg) => logLevel.debug && log.info(`${accountName}, debug: ${msg}`))
 									.on('warn', (msg) => logLevel.warn && log.warn(`${accountName}, ${msg}`))
@@ -182,8 +183,8 @@ class MelCloudPlatform {
 
 									configuredDevice.on('melCloud', async (key, value) => {
 										try {
-											accountInfo.LoginData[key] = value;
-											await melCloud.send(accountInfo);
+											const accountDate = account.type === 'melcloud' ? accountInfo.LoginData[key] = value : accountInfo[key];
+											await melCloud.send(accountDate);
 										} catch (error) {
 											if (logLevel.error) log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error.message ?? error}.`);
 										}
@@ -203,7 +204,7 @@ class MelCloudPlatform {
 										//start impulse generators\
 										const timmers = accountType === 'melcloudhome' ? [{ name: 'connect', sampling: 1800000 }, { name: 'checkDevicesList', sampling: deviceRefreshInterval }] : [{ name: 'checkDevicesList', sampling: refreshInterval }];
 										await melCloud.impulseGenerator.state(true, timmers, false);
-										await configuredDevice.startStopImpulseGenerator(true, [{ name: 'checkState', sampling: deviceRefreshInterval + 500 }]);
+										await configuredDevice.startStopImpulseGenerator(true, [{ name: 'checkState', sampling: deviceRefreshInterval }]);
 
 										//stop impulse generator
 										await impulseGenerator.state(false);
