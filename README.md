@@ -31,12 +31,13 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 * Support multiple accounts, buildings, floors, areas.
 * Support temperature display units `Celsius/Fahrenheit`.
 * Support assing inividual operating mode for `Heat/Cool/Auto`.
-* Support direct `Presets` control, only MELCloud.
-* Support direct `Schedules` control, only MELCloud Home.
-* Support direct `Frost protection` control, only MELCloud Home.
-* Support direct `Overheat Protection` control, only MELCloud Home.
-* Support direct `Holiday Mode` control.
-* Support direct `Functions` control using extra `Buttons`, switch it to `OFF` restore previous device state.
+* Support direct `Presets`, only MELCloud.
+* Support direct `Schedules`, only MELCloud Home.
+* Support direct `Scenes`, only MELCloud Home.
+* Support direct `Frost protection`, only MELCloud Home.
+* Support direct `Overheat Protection`, only MELCloud Home.
+* Support direct `Holiday Mode`.
+* Support direct `Functions`, using extra `Buttons`, switch it to `OFF` restore previous device state.
 * Support automations, shortcuts and Siri.
 * Support external integrations, [RESTFul](https://github.com/grzegorz914/homebridge-melcloud-control?tab=readme-ov-file#restful-integration), [MQTT](https://github.com/grzegorz914/homebridge-melcloud-control?tab=readme-ov-file#mqtt-integration).
 * Control devices over local network You need use ESP module and [Tasmota Control](https://github.com/grzegorz914/homebridge-tasmota-control) plugin.
@@ -70,7 +71,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Frost protection `ON/OFF`.
       * Overheat protection `ON/OFF`.
       * Holiday mode `ON/OFF`.
-      * Schedule `ON/OFF`.
+      * Schedules `ON/OFF`.
       * Scene `ON/OFF`.
   * Sensors:
     * For automation and notifications.
@@ -88,7 +89,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Frost protection.
       * Overheat protection.
       * Holiday mode.
-      * Shedule control.
+      * Shedules control.
       * Shedule active.
       * Scene control.
       * Error.
@@ -129,7 +130,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Physical lock controls `LOCK/UNLOCK`.
       * Presets `SET/UNSET`.
       * Holiday mode `ON/OFF`.
-      * Schedule `ON/OFF`.
+      * Schedules `ON/OFF`.
       * Scene `ON/OFF`.
   * Sensors:
     * For automation and notifications.
@@ -144,7 +145,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Flow Temperature Zone 1, 2, Hot Water.
       * Return Temperature Zone 1, 2, Hot Water.
       * Holiday mode.
-      * Shedule control.
+      * Shedules control.
       * Shedule active.
       * Scene control.
       * Error.
@@ -165,7 +166,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Fan speed mode `AUTO/1/2/3/4`.
       * Presets `SET/UNSET`.
       * Holiday mode `ON/OFF`.
-      * Schedule `ON/OFF`.
+      * Schedules `ON/OFF`.
       * Scene `ON/OFF`.
   * Sensors:
     * For automation and notifications.
@@ -181,7 +182,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * CO2 detected and level.
       * PM2.5 air quality and level.
       * Holiday mode.
-      * Shedule control.
+      * Shedules control.
       * Shedule active.
       * Scene control.
       * Error.
@@ -272,7 +273,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ataDevices[].buttonsSensors[]` | Array of buttons sensors. |
 | `ataDevices[].buttonsSensors[].name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
 | `ataDevices[].buttonsSensors[].mode` | Here select button mode, VH - Vane Horizontal, VV - Vane Horizontal. |
-| `ataDevices[].buttonsSensors[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Outlet`, `2 - Switch`, `3 - Motion Sensor`, `4 - Occupancy Sensor`, `5 - Contact Sensor`. |
+| `ataDevices[].buttonsSensors[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Motion Sensor`, `2 - Occupancy Sensor`, `3 - Contact Sensor`, `4 - Switch + Motion Sensor`, `5 - Switch +Occupancy Sensor`, `6 - Switch +Contact Sensor`. |
 | `ataDevices[].buttonsSensors[].namePrefix` | Here enable/disable the accessory name as a prefix for button/sensor name. |
 | `atwDevices[]` | Array of ATA devices created automatically after login to MELCloud from plugin config UI. |
 | `atwDevices[].id` | Read only data, do not change it. |
@@ -309,7 +310,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `atwDevices[].buttonsSensors[]` | Array of buttons sensors. |
 | `atwDevices[].buttonsSensors[].name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
 | `atwDevices[].buttonsSensors[].mode` | Here select button mode. |
-| `atwDevices[].buttonsSensors[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Outlet`, `2 - Switch`, `3 - Motion Sensor`, `4 - Occupancy Sensor`, `5 - Contact Sensor`. |
+| `atwDevices[].buttonsSensors[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Motion Sensor`, `2 - Occupancy Sensor`, `3 - Contact Sensor`, `4 - Switch + Motion Sensor`, `5 - Switch +Occupancy Sensor`, `6 - Switch +Contact Sensor`. |
 | `atwDevices[].buttonsSensors[].namePrefix` | Here enable/disable the accessory name as a prefix for button/sensor name. |
 | `ervDevices[]` | Array of ATA devices created automatically after login to MELCloud from plugin config UI. |
 | `ervDevices[].id` | Read only data, do not change it. |
@@ -339,7 +340,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ervDevices[].buttonsSensors[]` | Array of buttons sensors. |
 | `ervDevices[].buttonsSensors[].name` | Here set `Button Name` which You want expose to the `Homebridge/HomeKit`. |
 | `ervDevices[].buttonsSensors[].mode` | Here select button mode. |
-| `ervDevices[].buttonsSensors[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Outlet`, `2 - Switch`, `3 - Motion Sensor`, `4 - Occupancy Sensor`, `5 - Contact Sensor`. |
+| `ervDevices[].buttonsSensors[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Motion Sensor`, `2 - Occupancy Sensor`, `3 - Contact Sensor`, `4 - Switch + Motion Sensor`, `5 - Switch +Occupancy Sensor`, `6 - Switch +Contact Sensor`. |
 | `ervDevices[].buttonsSensors[].namePrefix` | Here enable/disable the accessory name as a prefix for button/sensor name. |
 | `refreshInterval` | Here set the background account data refresh time in (sec) , only for old MELCLoud, default `120s`. |
 | `log{}` | Log object. |
@@ -394,7 +395,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 |     | `http//ip:port` | `FrostProtection` | `true`, `false` | boolean | Frost protectin. |
 |     | `http//ip:port` | `OverheatProtection` | `true`, `false` | boolean | Overheat protection. |
 |     | `http//ip:port` | `HolidayMode` | `true`, `false` | boolean | Holiday mode. |
-|     | `http//ip:port` | `ScheduleEnabled` | `true`, `false` | boolean | Schedules. |
+|     | `http//ip:port` | `Schedules` | `true`, `false` | boolean | Schedules. |
 | Heat Pump |     |     |     |      |     |
 | POST | `http//ip:port` | `Power` | `true`, `false` | boolean | Power state. |
 |     | `http//ip:port` | `ForcedHotWaterMode` | `true`, `false` | boolean | Force hot water. |
@@ -413,7 +414,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 |     | `http//ip:port` | `SetCoolFlowTemperatureZone2` | `0.0` | float | Cool flow temperature zone 2. |
 |     | `http//ip:port` | `SetTankWaterTemperature` | `0.0` | float | Hot water temperature. |
 |     | `http//ip:port` | `HolidayMode` | `true`, `false` | boolean | Holiday mode. |
-|     | `http//ip:port` | `ScheduleEnabled` | `true`, `false` | boolean | Schedules. |
+|     | `http//ip:port` | `Schedules` | `true`, `false` | boolean | Schedules. |
 | Energy Recovery Ventilation |     |     |     |      |     |
 | POST | `http//ip:port` | `Power` | `true`, `false` | boolean | Power state. |
 |     | `http//ip:port` | `NightPurgeMode` | `true`, `false` | boolean | Night purge mode. |
@@ -427,7 +428,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 |     | `http//ip:port` | `DefaultCoolingSetTemperature` | `0.0` | float | Default cooling temperature. |
 |     | `http//ip:port` | `DefaultHeatingSetTemperature` | `0.0` | float | Default heating temperature. |
 |     | `http//ip:port` | `HolidayMode` | `true`, `false` | boolean | Holiday mode. |
-|     | `http//ip:port` | `ScheduleEnabled` | `true`, `false` | boolean | Schedules. |
+|     | `http//ip:port` | `Schedules` | `true`, `false` | boolean | Schedules. |
 
 ### MQTT Integration
 
@@ -456,7 +457,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 |     | `Set` | `FrostProtection` | `true`, `false` | boolean | Frost protectin. |
 |     | `Set` | `OverheatProtection` | `true`, `false` | boolean | Overheat protection. |
 |     | `Set` | `HolidayMode` | `true`, `false` | boolean | Holiday mode. |
-|     | `Set` | `ScheduleEnabled` | `true`, `false` | boolean | Schedules. |
+|     | `Set` | `Schedules` | `true`, `false` | boolean | Schedules. |
 | Heat Pump |     |     |     |      |     |
 | Subscribe | `Set` | `Power` | `true`, `false` | boolean | Power state. |
 |     | `Set` | `ForcedHotWaterMode` | `true`, `false` | boolean | Force hot water. |
@@ -475,7 +476,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 |     | `Set` | `SetCoolFlowTemperatureZone2` | `0.0` | float | Cool flow temperature zone 2. |
 |     | `Set` | `SetTankWaterTemperature` | `0.0` | float | Hot water temperature. |
 |     | `Set` | `HolidayMode` | `true`, `false` | boolean | Holiday mode. |
-|     | `Set` | `ScheduleEnabled` | `true`, `false` | boolean | Schedules. |
+|     | `Set` | `Schedules` | `true`, `false` | boolean | Schedules. |
 | Energy Recovery Ventilation |     |     |     |      |     |
 | Subscribe | `Set` | `Power` | `true`, `false` | boolean | Power state. |
 |     | `Set` | `NightPurgeMode` | `true`, `false` | boolean | Night purge mode. |
@@ -489,4 +490,4 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 |     | `Set` | `DefaultCoolingSetTemperature` | `23.0` | float | Default cooling temperature. |
 |     | `Set` | `DefaultHeatingSetTemperature` | `21.0` | float | Default heating temperature. |
 |     | `Set` | `HolidayMode` | `true`, `false` | boolean | Holiday mode. |
-|     | `Set` | `ScheduleEnabled` | `true`, `false` | boolean | Schedules. |
+|     | `Set` | `Schedules` | `true`, `false` | boolean | Schedules. |

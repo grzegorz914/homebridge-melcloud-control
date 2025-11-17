@@ -6,7 +6,7 @@ import { TemperatureDisplayUnits, Ventilation } from './constants.js';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceErv extends EventEmitter {
-    constructor(api, account, device, devicesFile, defaultTempsFile, useFahrenheit) {
+    constructor(api, account, device, devicesFile, defaultTempsFile, accountInfo, accountFile) {
         super();
 
         Accessory = api.platformAccessory;
@@ -43,6 +43,8 @@ class DeviceErv extends EventEmitter {
         this.deviceTypeText = device.typeString;
         this.devicesFile = devicesFile;
         this.defaultTempsFile = defaultTempsFile;
+        this.accountInfo = accountInfo;
+        this.accountFile = accountFile;
         this.displayDeviceInfo = true;
 
         //external integrations
@@ -82,8 +84,8 @@ class DeviceErv extends EventEmitter {
         //buttons configured
         for (const button of this.buttons) {
             button.name = button.name || 'Button'
-            button.serviceType = [null, Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][button.displayType];
-            button.characteristicType = [null, Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][button.displayType];
+            button.serviceType = serviceType[button.displayType];
+            button.characteristicType = characteristicType[button.displayType];
             button.state = false;
             button.previousValue = null;
         }
@@ -93,7 +95,6 @@ class DeviceErv extends EventEmitter {
 
         //accessory
         this.accessory = {};
-        this.useFahrenheit = useFahrenheit ? 1 : 0;
     };
 
     async externalIntegrations() {
@@ -320,8 +321,8 @@ class DeviceErv extends EventEmitter {
                         .onSet(async (state) => {
                             try {
                                 deviceData.Device.Power = state ? true : false;
-                                await this.melCloudErv.send(this.accountType, this.displayType, deviceData, Ventilation.EffectiveFlags.Power);
                                 if (this.logInfo) this.emit('info', `Set power: ${state ? 'On' : 'Off'}`);
+                                await this.melCloudErv.send(this.accountType, this.displayType, deviceData, Ventilation.EffectiveFlags.Power);
                             } catch (error) {
                                 if (this.logWarn) this.emit('warn', `Set power error: ${error}`);
                             };
@@ -355,9 +356,8 @@ class DeviceErv extends EventEmitter {
                                         break;
                                 };
 
+                                if (this.logInfo) this.emit('info', `Set operation mode: ${Ventilation.VentilationModeMapEnumToString[deviceData.Device.VentilationMode]}`);
                                 await this.melCloudErv.send(this.accountType, this.displayType, deviceData, Ventilation.EffectiveFlags.VentilationMode);
-                                const operationModeText = Ventilation.VentilationModeMapEnumToString[deviceData.Device.VentilationMode];
-                                if (this.logInfo) this.emit('info', `Set operation mode: ${operationModeText}`);
                             } catch (error) {
                                 if (this.logWarn) this.emit('warn', `Set operation mode error: ${error}`);
                             };
@@ -395,9 +395,9 @@ class DeviceErv extends EventEmitter {
                                             break;;
                                     };
 
-                                    deviceData.Device.SetFanSpeed = value
-                                    await this.melCloudErv.send(this.accountType, this.displayType, deviceData, Ventilation.EffectiveFlags.SetFanSpeed);
+                                    deviceData.Device.SetFanSpeed = value;
                                     if (this.logInfo) this.emit('info', `Set fan speed mode: ${Ventilation.FanSpeedMapEnumToString[value]}`);
+                                    await this.melCloudErv.send(this.accountType, this.displayType, deviceData, Ventilation.EffectiveFlags.SetFanSpeed);
                                 } catch (error) {
                                     if (this.logWarn) this.emit('warn', `Set fan speed mode error: ${error}`);
                                 };
@@ -418,8 +418,8 @@ class DeviceErv extends EventEmitter {
                             .onSet(async (value) => {
                                 try {
                                     deviceData.Device.DefaultCoolingSetTemperature = value;
-                                    await this.melCloudErv.send(this.accountType, this.displayType, deviceData, Ventilation.EffectiveFlags.SetTemperature);
                                     if (this.logInfo) this.emit('info', `Set cooling threshold temperature: ${value}${this.accessory.temperatureUnit}`);
+                                    await this.melCloudErv.send(this.accountType, this.displayType, deviceData, Ventilation.EffectiveFlags.SetTemperature);
                                 } catch (error) {
                                     if (this.logWarn) this.emit('warn', `Set cooling threshold temperature error: ${error}`);
                                 };
@@ -440,29 +440,13 @@ class DeviceErv extends EventEmitter {
                             .onSet(async (value) => {
                                 try {
                                     deviceData.Device.DefaultHeatingSetTemperature = value;
-                                    await this.melCloudErv.send(this.accountType, this.displayType, deviceData, Ventilation.EffectiveFlags.SetTemperature);
                                     if (this.logInfo) this.emit('info', `Set heating threshold temperature: ${value}${this.accessory.temperatureUnit}`);
+                                    await this.melCloudErv.send(this.accountType, this.displayType, deviceData, Ventilation.EffectiveFlags.SetTemperature);
                                 } catch (error) {
                                     if (this.logWarn) this.emit('warn', `Set heating threshold temperature error: ${error}`);
                                 };
                             });
                     };
-                    //this.melCloudService.getCharacteristic(Characteristic.LockPhysicalControls)
-                    //    .onGet(async () => {
-                    //        const value = this.accessory.lockPhysicalControl;
-                    //        if (this.logInfo) this.emit('info', `Lock physical controls: ${value ? 'LOCKED' : 'UNLOCKED'}`);
-                    //        return value;
-                    //    })
-                    //    .onSet(async (value) => {
-                    //       try {
-                    //         value = value ? true : false;
-                    //         deviceData.Device = deviceData.Device;
-                    //         await this.melCloudErv.send(this.accountType, this.displayType, deviceData, Ventilation.EffectiveFlags.Prohibit);
-                    //         if (this.logInfo) this.emit('info', `Set local physical controls: ${value ? 'LOCK' : 'UNLOCK'}`);
-                    //     } catch (error) {
-                    //          if (this.logWarn) this.emit('warn', `Set lock physical controls error: ${error}`);
-                    //      };
-                    //   });
                     this.melCloudService.getCharacteristic(Characteristic.TemperatureDisplayUnits)
                         .onGet(async () => {
                             const value = this.accessory.useFahrenheit;
@@ -472,10 +456,10 @@ class DeviceErv extends EventEmitter {
                             if (this.account.type === 'melcloudhome') return;
 
                             try {
-                                value = [false, true][value];
-                                this.accessory.useFahrenheit = value;
-                                this.emit('melCloud', 'UseFahrenheit', value);
+                                this.accessory.useFahrenheit = value ? true : false;
                                 if (this.logInfo) this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
+                                this.accountInfo.UseFahrenheit = value ? true : false;
+                                await this.melCloudErv.send(this.accountType, this.displayType, deviceData, 'account', this.accountInfo);
                             } catch (error) {
                                 if (this.logWarn) this.emit('warn', `Set temperature display unit error: ${error}`);
                             };
@@ -526,9 +510,8 @@ class DeviceErv extends EventEmitter {
                                         break;
                                 };
 
+                                if (this.logInfo) this.emit('info', `Set operation mode: ${Ventilation.VentilationModeMapEnumToString[deviceData.Device.VentilationMode]}`);
                                 await this.melCloudErv.send(this.accountType, this.displayType, deviceData, flag);
-                                const operationModeText = Ventilation.VentilationModeMapEnumToString[deviceData.Device.VentilationMode];
-                                if (this.logInfo) this.emit('info', `Set operation mode: ${operationModeText}`);
                             } catch (error) {
                                 if (this.logWarn) this.emit('warn', `Set operation mode error: ${error}`);
                             };
@@ -551,8 +534,8 @@ class DeviceErv extends EventEmitter {
                         .onSet(async (value) => {
                             try {
                                 deviceData.Device.SetTemperature = value;
-                                await this.melCloudErv.send(this.accountType, this.displayType, deviceData, Ventilation.EffectiveFlags.SetTemperature);
                                 if (this.logInfo) this.emit('info', `Set temperature: ${value}${this.accessory.temperatureUnit}`);
+                                await this.melCloudErv.send(this.accountType, this.displayType, deviceData, Ventilation.EffectiveFlags.SetTemperature);
                             } catch (error) {
                                 if (this.logWarn) this.emit('warn', `Set temperature error: ${error}`);
                             };
@@ -566,10 +549,10 @@ class DeviceErv extends EventEmitter {
                             if (this.account.type === 'melcloudhome') return;
 
                             try {
-                                value = [false, true][value];
-                                this.accessory.useFahrenheit = value;
-                                this.emit('melCloud', 'UseFahrenheit', value);
+                                this.accessory.useFahrenheit = value ? true : false;
                                 if (this.logInfo) this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
+                                this.accountInfo.UseFahrenheit = value ? true : false;
+                                await this.melCloudErv.send(this.accountType, this.displayType, deviceData, 'account', this.accountInfo);
                             } catch (error) {
                                 if (this.logWarn) this.emit('warn', `Set temperature display unit error: ${error}`);
                             };
@@ -759,8 +742,8 @@ class DeviceErv extends EventEmitter {
                     .onSet(async (state) => {
                         try {
                             deviceData.HolidayMode.Enabled = state;
-                            await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'holidaymode');
                             if (this.logInfo) this.emit('info', `Holiday mode: ${state ? 'Enabled' : 'Disabled'}`);
+                            await this.melCloudErv.send(this.accountType, this.displayType, deviceData, 'holidaymode');
                         } catch (error) {
                             if (this.logWarn) this.emit('warn', `Set holiday mode error: ${error}`);
                         };
@@ -799,16 +782,17 @@ class DeviceErv extends EventEmitter {
                 this.presets.forEach((preset, i) => {
                     const presetData = presetsOnServer.find(p => p.ID === preset.id);
 
-                    //get preset name
+                    //get name
                     const name = preset.name;
 
-                    //get preset name prefix
+                    //get name prefix
                     const namePrefix = preset.namePrefix;
 
                     const serviceName1 = namePrefix ? `${accessoryName} ${name}` : name;
                     const serviceType = preset.serviceType;
                     const characteristicType = preset.characteristicType;
 
+                    //control
                     if (preset.displayType > 3) {
                         if (this.logDebug) this.emit('debug', `Prepare preset control ${name} service`);
                         const presetControlService = new Service.Switch(serviceName1, `presetControlService${deviceId} ${i}`);
@@ -841,8 +825,8 @@ class DeviceErv extends EventEmitter {
                                             break;
                                     };
 
-                                    await this.melCloudAta.send(this.accountType, this.displayType, deviceData, AirConditioner.EffectiveFlags.Presets);
-                                    if (this.logInfo) this.emit('info', `Preset ${name}: ${state ? 'Set:' : 'Unset:'} ${name}`);
+                                    if (this.logInfo) this.emit('info', `Preset ${name}: ${state ? 'Set' : 'Unset'}`);
+                                    await this.melCloudErv.send(this.accountType, this.displayType, deviceData, AirConditioner.EffectiveFlags.Presets);
                                 } catch (error) {
                                     if (this.logWarn) this.emit('warn', `Set preset error: ${error}`);
                                 };
@@ -871,13 +855,14 @@ class DeviceErv extends EventEmitter {
                 if (this.logDebug) this.emit('debug', `Prepare schedules services`);
                 this.scheduleSensorServices = [];
                 this.schedules.forEach((schedule, i) => {
-                    //get preset name
+                    const scheduleData = schedulesOnServer.find(s => s.Id === schedule.id);
+
+                    //get name
                     const name = schedule.name;
 
-                    //get preset name prefix
+                    //get name prefix
                     const namePrefix = schedule.namePrefix;
 
-                    //control sensor
                     const serviceName1 = namePrefix ? `${accessoryName} ${name}` : name;
                     const serviceName2 = namePrefix ? `${accessoryName} Schedules` : 'Schedules';
                     const serviceType = schedule.serviceType;
@@ -898,10 +883,10 @@ class DeviceErv extends EventEmitter {
                                 .onSet(async (state) => {
                                     try {
                                         deviceData.ScheduleEnabled = state;
-                                        await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'schedule');
-                                        if (this.logInfo) this.emit('info', `Schedule ${name}: ${state ? 'Enabled' : 'Disabled'}`);
+                                        if (this.logInfo) this.emit('info', `Schedules: ${state ? 'Enabled' : 'Disabled'}`);
+                                        await this.melCloudErv.send(this.accountType, this.displayType, deviceData, 'schedule', scheduleData);
                                     } catch (error) {
-                                        if (this.logWarn) this.emit('warn', `Set schedule error: ${error}`);
+                                        if (this.logWarn) this.emit('warn', `Set schedule serror: ${error}`);
                                     };
                                 });
                             accessory.addService(this.scheduleControlService);
@@ -943,10 +928,10 @@ class DeviceErv extends EventEmitter {
                 this.scenes.forEach((scene, i) => {
                     const sceneData = scenesOnServer.find(s => s.Id === scene.id);
 
-                    //get preset name
+                    //get name
                     const name = scene.name;
 
-                    //get preset name prefix
+                    //get name prefix
                     const namePrefix = scene.namePrefix;
 
                     const serviceName1 = namePrefix ? `${accessoryName} ${name}` : name;
@@ -967,8 +952,8 @@ class DeviceErv extends EventEmitter {
                             .onSet(async (state) => {
                                 try {
                                     sceneData.Enabled = state;
-                                    await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'scene', sceneData);
-                                    if (this.logInfo) this.emit('info', `Scene ${name}: ${state ? 'Enabled' : 'Disabled'}`);
+                                    if (this.logInfo) this.emit('info', `Scene ${name}: ${state ? 'Set' : 'Unset'}`);
+                                    await this.melCloudErv.send(this.accountType, this.displayType, deviceData, 'scene', sceneData);
                                 } catch (error) {
                                     if (this.logWarn) this.emit('warn', `Set scene error: ${error}`);
                                 };
@@ -993,116 +978,135 @@ class DeviceErv extends EventEmitter {
 
             //buttons services
             if (this.buttons.length > 0) {
-                if (this.logDebug) this.emit('debug', `Prepare buttons services`);
-                this.buttonsServices = [];
+                if (this.logDebug) this.emit('debug', `Prepare buttons / sensors services`);
+                this.buttonControlServices = [];
+                this.buttonControlSensorServices = [];
                 this.buttons.forEach((button, i) => {
-                    //get button mode
+                    //get mode
                     const mode = button.mode;
 
-                    //get button name
-                    const buttonName = button.name;
+                    //get name
+                    const name = button.name;
 
-                    //get button name prefix
+                    //get name prefix
                     const namePrefix = button.namePrefix;
 
-                    const serviceName1 = namePrefix ? `${accessoryName} ${buttonName}` : buttonName;
+                    const serviceName1 = namePrefix ? `${accessoryName} ${name}` : name;
                     const serviceType = button.serviceType;
                     const characteristicType = button.characteristicType;
-                    const buttonService = new serviceType(serviceName1, `Button ${deviceId} ${i}`);
-                    buttonService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                    buttonService.setCharacteristic(Characteristic.ConfiguredName, serviceName1);
-                    buttonService.getCharacteristic(characteristicType)
+
+                    //control
+                    if (button.displayType > 3) {
+                        if (this.logDebug) this.emit('debug', `Prepare button control ${name} service`);
+                        const buttonControlService = new serviceType(serviceName1, `buttonControlService${deviceId} ${i}`);
+                        buttonControlService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                        buttonControlService.setCharacteristic(Characteristic.ConfiguredName, serviceName1);
+                        buttonControlService.getCharacteristic(Characteristic.On)
+                            .onGet(async () => {
+                                const state = button.state;
+                                return state;
+                            })
+                            .onSet(async (state) => {
+                                try {
+                                    let flag = null;
+                                    switch (mode) {
+                                        case 0: //POWER ON,OFF
+                                            deviceData.Device.Power = state;
+                                            flag = Ventilation.EffectiveFlags.Power;
+                                            break;
+                                        case 1: //OPERATING MODE RECOVERY
+                                            button.previousValue = state ? deviceData.Device.VentilationMode : button.previousValue ?? deviceData.Device.VentilationMode;
+                                            deviceData.Device.Power = true;
+                                            deviceData.Device.VentilationMode = state ? 0 : button.previousValue;
+                                            flag = Ventilation.EffectiveFlags.Power + Ventilation.EffectiveFlags.VentilationMode;
+                                            break;
+                                        case 2: //OPERATING MODE BYPASS
+                                            button.previousValue = state ? deviceData.Device.VentilationMode : button.previousValue ?? deviceData.Device.VentilationMode;
+                                            deviceData.Device.Power = true;
+                                            deviceData.Device.VentilationMode = state ? 1 : button.previousValue;
+                                            flag = Ventilation.EffectiveFlags.Power + Ventilation.EffectiveFlags.VentilationMode;
+                                            break
+                                        case 3: //OPERATING MODE AUTO
+                                            button.previousValue = state ? deviceData.Device.VentilationMode : button.previousValue ?? deviceData.Device.VentilationMode;
+                                            deviceData.Device.Power = true;
+                                            deviceData.Device.VentilationMode = state ? 2 : button.previousValue;
+                                            flag = Ventilation.EffectiveFlags.Power + Ventilation.EffectiveFlags.VentilationMode;
+                                            break;
+                                        case 4: //NIGHT PURGE MODE
+                                            deviceData.Device.Power = true;
+                                            deviceData.Device.NightPurgeMode = state;
+                                            flag = Ventilation.EffectiveFlags.Power
+                                            break;
+                                        case 10: //FAN SPEED MODE AUTO
+                                            button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue ?? deviceData.Device.SetFanSpeed;
+                                            deviceData.Device.Power = true;
+                                            deviceData.Device.SetFanSpeed = state ? 0 : button.previousValue;
+                                            flag = Ventilation.EffectiveFlags.Power + Ventilation.EffectiveFlags.SetFanSpeed;
+                                            break;
+                                        case 11: //FAN SPEED MODE 1
+                                            button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue ?? deviceData.Device.SetFanSpeed;
+                                            deviceData.Device.Power = true;
+                                            deviceData.Device.SetFanSpeed = state ? 1 : button.previousValue;
+                                            flag = Ventilation.EffectiveFlags.Power + Ventilation.EffectiveFlags.SetFanSpeed;
+                                            break;
+                                        case 12: //FAN SPEED MODE 2
+                                            button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue ?? deviceData.Device.SetFanSpeed;
+                                            deviceData.Device.Power = true;
+                                            deviceData.Device.SetFanSpeed = state ? 2 : button.previousValue;
+                                            flag = Ventilation.EffectiveFlags.Power + Ventilation.EffectiveFlags.SetFanSpeed;
+                                            break;
+                                        case 13: //FAN SPEED MODE 3
+                                            button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue ?? deviceData.Device.SetFanSpeed;
+                                            deviceData.Device.Power = true;
+                                            deviceData.Device.SetFanSpeed = state ? 3 : button.previousValue;
+                                            flag = Ventilation.EffectiveFlags.Power + Ventilation.EffectiveFlags.SetFanSpeed;
+                                            break;
+                                        case 14: //FAN MODE 4
+                                            button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue ?? deviceData.Device.SetFanSpeed;
+                                            deviceData.Device.Power = true;
+                                            deviceData.Device.SetFanSpeed = state ? 4 : button.previousValue;
+                                            flag = Ventilation.EffectiveFlags.Power + Ventilation.EffectiveFlags.SetFanSpeed;
+                                            break;
+                                        case 15: //PHYSICAL LOCK CONTROLS
+                                            deviceData.Device = deviceData.Device;
+                                            flag = Ventilation.EffectiveFlags.Prohibit;
+                                            break;
+                                        case 16: //ROOM TEMP HIDE
+                                            deviceData.HideRoomTemperature = state;
+                                            break;
+                                        case 17: //SUPPLY TEMP HIDE
+                                            deviceData.HideSupplyTemperature = state;
+                                            break;
+                                        case 18: //OUTDOOR EMP HIDE
+                                            deviceData.hideOutdoorTemperature = state;
+                                            break;
+                                        default:
+                                            if (this.logWarn) this.emit('warn', `Unknown button mode: ${mode}`);
+                                            break;
+                                    };
+
+                                    if (this.logInfo) this.emit('info', `Button ${name}: ${state ? `Enabled` : `Disabled`}`);
+                                    await this.melCloudErv.send(this.accountType, this.displayType, deviceData, flag);
+                                } catch (error) {
+                                    if (this.logWarn) this.emit('warn', `Set button error: ${error}`);
+                                };
+                            });
+                        this.buttonControlServices.push(buttonControlService);
+                        accessory.addService(buttonControlService);
+                    }
+
+                    //sensor
+                    if (this.logDebug) this.emit('debug', `Prepare button control sensor ${name} service`);
+                    const buttonControlSensorService = new serviceType(serviceName1, `buttonControlSensorService${deviceId} ${i}`);
+                    buttonControlSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                    buttonControlSensorService.setCharacteristic(Characteristic.ConfiguredName, serviceName1);
+                    buttonControlSensorService.getCharacteristic(characteristicType)
                         .onGet(async () => {
                             const state = button.state;
                             return state;
                         })
-                        .onSet(async (state) => {
-                            try {
-                                let flag = null;
-                                switch (mode) {
-                                    case 0: //POWER ON,OFF
-                                        deviceData.Device.Power = state;
-                                        flag = Ventilation.EffectiveFlags.Power;
-                                        break;
-                                    case 1: //OPERATING MODE RECOVERY
-                                        button.previousValue = state ? deviceData.Device.VentilationMode : button.previousValue ?? deviceData.Device.VentilationMode;
-                                        deviceData.Device.Power = true;
-                                        deviceData.Device.VentilationMode = state ? 0 : button.previousValue;
-                                        flag = Ventilation.EffectiveFlags.Power + Ventilation.EffectiveFlags.VentilationMode;
-                                        break;
-                                    case 2: //OPERATING MODE BYPASS
-                                        button.previousValue = state ? deviceData.Device.VentilationMode : button.previousValue ?? deviceData.Device.VentilationMode;
-                                        deviceData.Device.Power = true;
-                                        deviceData.Device.VentilationMode = state ? 1 : button.previousValue;
-                                        flag = Ventilation.EffectiveFlags.Power + Ventilation.EffectiveFlags.VentilationMode;
-                                        break
-                                    case 3: //OPERATING MODE AUTO
-                                        button.previousValue = state ? deviceData.Device.VentilationMode : button.previousValue ?? deviceData.Device.VentilationMode;
-                                        deviceData.Device.Power = true;
-                                        deviceData.Device.VentilationMode = state ? 2 : button.previousValue;
-                                        flag = Ventilation.EffectiveFlags.Power + Ventilation.EffectiveFlags.VentilationMode;
-                                        break;
-                                    case 4: //NIGHT PURGE MODE
-                                        deviceData.Device.Power = true;
-                                        deviceData.Device.NightPurgeMode = state;
-                                        flag = Ventilation.EffectiveFlags.Power
-                                        break;
-                                    case 10: //FAN SPEED MODE AUTO
-                                        button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue ?? deviceData.Device.SetFanSpeed;
-                                        deviceData.Device.Power = true;
-                                        deviceData.Device.SetFanSpeed = state ? 0 : button.previousValue;
-                                        flag = Ventilation.EffectiveFlags.Power + Ventilation.EffectiveFlags.SetFanSpeed;
-                                        break;
-                                    case 11: //FAN SPEED MODE 1
-                                        button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue ?? deviceData.Device.SetFanSpeed;
-                                        deviceData.Device.Power = true;
-                                        deviceData.Device.SetFanSpeed = state ? 1 : button.previousValue;
-                                        flag = Ventilation.EffectiveFlags.Power + Ventilation.EffectiveFlags.SetFanSpeed;
-                                        break;
-                                    case 12: //FAN SPEED MODE 2
-                                        button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue ?? deviceData.Device.SetFanSpeed;
-                                        deviceData.Device.Power = true;
-                                        deviceData.Device.SetFanSpeed = state ? 2 : button.previousValue;
-                                        flag = Ventilation.EffectiveFlags.Power + Ventilation.EffectiveFlags.SetFanSpeed;
-                                        break;
-                                    case 13: //FAN SPEED MODE 3
-                                        button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue ?? deviceData.Device.SetFanSpeed;
-                                        deviceData.Device.Power = true;
-                                        deviceData.Device.SetFanSpeed = state ? 3 : button.previousValue;
-                                        flag = Ventilation.EffectiveFlags.Power + Ventilation.EffectiveFlags.SetFanSpeed;
-                                        break;
-                                    case 14: //FAN MODE 4
-                                        button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue ?? deviceData.Device.SetFanSpeed;
-                                        deviceData.Device.Power = true;
-                                        deviceData.Device.SetFanSpeed = state ? 4 : button.previousValue;
-                                        flag = Ventilation.EffectiveFlags.Power + Ventilation.EffectiveFlags.SetFanSpeed;
-                                        break;
-                                    case 15: //PHYSICAL LOCK CONTROLS
-                                        deviceData.Device = deviceData.Device;
-                                        flag = Ventilation.EffectiveFlags.Prohibit;
-                                        break;
-                                    case 16: //ROOM TEMP HIDE
-                                        deviceData.HideRoomTemperature = state;
-                                        break;
-                                    case 17: //SUPPLY TEMP HIDE
-                                        deviceData.HideSupplyTemperature = state;
-                                        break;
-                                    case 18: //OUTDOOR EMP HIDE
-                                        deviceData.hideOutdoorTemperature = state;
-                                        break;
-                                    default:
-                                        if (this.logWarn) this.emit('warn', `Unknown button mode: ${mode}`);
-                                        break;
-                                };
-
-                                await this.melCloudErv.send(this.accountType, this.displayType, deviceData, flag);
-                                if (this.logInfo) this.emit('info', `${state ? `Set: ${buttonName}` : `Unset: ${buttonName}, Set: ${button.previousValue}`}`);
-                            } catch (error) {
-                                if (this.logWarn) this.emit('warn', `Set button error: ${error}`);
-                            };
-                        });
-                    this.buttonsServices.push(buttonService);
-                    accessory.addService(buttonService);
+                    this.buttonControlSensorServices.push(buttonControlSensorService);
+                    accessory.addService(buttonControlSensorService);
                 });
             };
 
@@ -1116,7 +1120,7 @@ class DeviceErv extends EventEmitter {
     async start() {
         try {
             //melcloud device
-            this.melCloudErv = new MelCloudErv(this.account, this.device, this.devicesFile, this.defaultTempsFile)
+            this.melCloudErv = new MelCloudErv(this.account, this.device, this.devicesFile, this.defaultTempsFile, this.accountFile)
                 .on('deviceInfo', (modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) => {
                     if (this.logDeviceInfo && this.displayDeviceInfo) {
                         this.emit('devInfo', `---- ${this.deviceTypeText}: ${this.deviceName} ----`);
@@ -1250,8 +1254,8 @@ class DeviceErv extends EventEmitter {
                         temperatureIncrement: maxTempHeat,
                         minTempCoolDry: minTempCoolDry,
                         maxTempCoolDry: maxTempCoolDry,
-                        useFahrenheit: this.useFahrenheit,
-                        temperatureUnit: TemperatureDisplayUnits[this.useFahrenheit],
+                        useFahrenheit: this.accountInfo.useFahrenheit ? 1 : 0,
+                        temperatureUnit: TemperatureDisplayUnits[this.accountInfo.useFahrenheit ? 1 : 0],
                         isConnected: isConnected,
                         isInError: isInError,
                         scheduleEnabled: scheduleEnabled,
@@ -1434,7 +1438,7 @@ class DeviceErv extends EventEmitter {
                         this.schedules.forEach((schedule, i) => {
                             const scheduleData = schedulesOnServer.find(s => s.Id === schedule.id);
                             const characteristicType = schedule.characteristicType;
-                            schedule.state = scheduleEnabled ? scheduleData.Enabled ?? false : false;
+                            schedule.state = scheduleEnabled ? (scheduleData.Enabled ?? false) : false;
 
                             //control
                             if (i === 0) {
@@ -1518,9 +1522,14 @@ class DeviceErv extends EventEmitter {
                                     break;
                             };
 
-                            //update services
-                            const characteristicType = button.characteristicType;
-                            this.buttonsServices?.[i]?.updateCharacteristic(characteristicType, button.state);
+                            //control
+                            if (button.displayType > 3) {
+                                this.buttonControlServices?.[i]?.updateCharacteristic(Characteristic.On, button.state);
+                            }
+
+                            //sensor
+                            const characteristicType = scene.characteristicType;
+                            this.buttonControlSensorServices?.[i]?.updateCharacteristic(characteristicType, button.state);
                         });
                     };
 

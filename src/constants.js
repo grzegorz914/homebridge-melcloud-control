@@ -19,6 +19,7 @@ export const ApiUrls = {
 
 export const ApiUrlsHome = {
     BaseURL: "https://melcloudhome.com",
+    GetConfiguration: "https://melcloudhome.com/api/configuration",
     GetUserContext: "/api/user/context",
     GetUserScenes: "/api/user/scenes",
     PutAta: "/api/ataunit/deviceid",

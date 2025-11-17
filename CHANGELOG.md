@@ -22,6 +22,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Do not use Homebridge UI > v5.5.0 because of break config.json
 
+# [4.2.5] - (17.11.2025)
+
+## Changes
+
+- fix device control stop working after some time
+- fix device state not refresh
+- updated presets, schedules and scenes characteristics
+- stability and performance improvements
+- config schema updated
+- readme updated
+- cleanup
+
 ## [4.2.3] - (15.11.2025)
 
 ## Changes

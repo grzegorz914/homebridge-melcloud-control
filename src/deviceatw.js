@@ -6,7 +6,7 @@ import { TemperatureDisplayUnits, HeatPump } from './constants.js';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceAtw extends EventEmitter {
-    constructor(api, account, device, devicesFile, defaultTempsFile, useFahrenheit) {
+    constructor(api, account, device, devicesFile, defaultTempsFile, accountInfo, accountFile) {
         super();
 
         Accessory = api.platformAccessory;
@@ -50,6 +50,8 @@ class DeviceAtw extends EventEmitter {
         this.deviceTypeText = device.typeString;
         this.devicesFile = devicesFile;
         this.defaultTempsFile = defaultTempsFile;
+        this.accountInfo = accountInfo;
+        this.accountFile = accountFile;
         this.displayDeviceInfo = true;
 
         //external integrations
@@ -89,8 +91,8 @@ class DeviceAtw extends EventEmitter {
         //buttons configured
         for (const button of this.buttons) {
             button.name = button.name || 'Button'
-            button.serviceType = [null, Service.Outlet, Service.Switch, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor][button.displayType];
-            button.characteristicType = [null, Characteristic.On, Characteristic.On, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState][button.displayType];
+            button.serviceType = serviceType[button.displayType];
+            button.characteristicType = characteristicType[button.displayType];
             button.state = false;
             button.previousValue = null;
         }
@@ -100,7 +102,6 @@ class DeviceAtw extends EventEmitter {
 
         //accessory
         this.accessory = {};
-        this.useFahrenheit = useFahrenheit ? 1 : 0;
     };
 
     async externalIntegrations() {
@@ -357,8 +358,8 @@ class DeviceAtw extends EventEmitter {
                                         switch (i) {
                                             case 0: //Heat Pump
                                                 deviceData.Device.Power = state ? true : false;
-                                                await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, HeatPump.EffectiveFlags.Power);
                                                 if (this.logInfo) this.emit('info', `${zoneName}, Set power: ${state ? 'On' : 'Off'}`);
+                                                await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, HeatPump.EffectiveFlags.Power);
                                                 break;
                                         };
                                     } catch (error) {
@@ -457,8 +458,8 @@ class DeviceAtw extends EventEmitter {
                                                 break;
                                         };
 
-                                        await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, flag);
                                         if (this.logInfo) this.emit('info', `${zoneName}, Set operation mode: ${operationModeText}`);
+                                        await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, flag);
                                     } catch (error) {
                                         if (this.logWarn) this.emit('warn', `${zoneName}, Set operation mode error: ${error}`);
                                     };
@@ -531,8 +532,8 @@ class DeviceAtw extends EventEmitter {
                                                     break;
                                             };
 
-                                            if (i > 0) await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, flag);
                                             if (this.logInfo && i !== 0) this.emit('info', `${zoneName}, Set cooling threshold temperature: ${value}${this.accessory.temperatureUnit}`);
+                                            if (i > 0) await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, flag);
                                         } catch (error) {
                                             if (this.logWarn) this.emit('warn', `${zoneName}, Set cooling threshold temperature error: ${error}`);
                                         };
@@ -596,8 +597,8 @@ class DeviceAtw extends EventEmitter {
                                                     break;
                                             };
 
-                                            if (i > 0) await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, flag);
                                             if (this.logInfo && i !== 0) this.emit('info', `${zoneName}, Set heating threshold temperature: ${value}${this.accessory.temperatureUnit}`);
+                                            if (i > 0) await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, flag);
                                         } catch (error) {
                                             if (this.logWarn) this.emit('warn', `${zoneName}, Set heating threshold temperature error: ${error}`);
                                         };
@@ -634,8 +635,8 @@ class DeviceAtw extends EventEmitter {
                                                 break;
                                         };
 
+                                        if (this.logInfo) this.emit('info', `${zoneName}, Set lock physical controls: ${value ? 'Lock' : 'Unlock'}`);
                                         await this.melCloudAtw.send(this.accountType, this.displayType, deviceData);
-                                        if (this.logInfo) this.emit('info', `${zoneName}, Set lock physical controls: ${value ? 'LOCK' : 'UNLOCK'}`);
                                     } catch (error) {
                                         if (this.logWarn) this.emit('warn', `${zoneName}, Set lock physical controls error: ${error}`);
                                     };
@@ -649,10 +650,10 @@ class DeviceAtw extends EventEmitter {
                                     if (this.account.type === 'melcloudhome') return;
 
                                     try {
-                                        value = [false, true][value];
-                                        this.accessory.useFahrenheit = value;
-                                        this.emit('melCloud', 'UseFahrenheit', value);
+                                        this.accessory.useFahrenheit = value ? true : false;
                                         if (this.logInfo) this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
+                                        this.accountInfo.UseFahrenheit = value ? true : false;
+                                        await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, 'account', this.accountInfo);
                                     } catch (error) {
                                         if (this.logWarn) this.emit('warn', `Set temperature display unit error: ${error}`);
                                     };
@@ -772,8 +773,8 @@ class DeviceAtw extends EventEmitter {
                                                 break;
                                         };
 
-                                        await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, flag);
                                         if (this.logInfo) this.emit('info', `${zoneName}, Set operation mode: ${operationModeText}`);
+                                        await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, flag);
                                     } catch (error) {
                                         if (this.logWarn) this.emit('warn', `${zoneName}, Set operation mode error: ${error}`);
                                     };
@@ -820,8 +821,8 @@ class DeviceAtw extends EventEmitter {
                                                 break;
                                         };
 
-                                        if (i > 0) await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, flag);
                                         if (this.logInfo && i !== 0) this.emit('info', `${zoneName}, Set temperature: ${value}${this.accessory.temperatureUnit}`);
+                                        if (i > 0) await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, flag);
                                     } catch (error) {
                                         if (this.logWarn) this.emit('warn', `${zoneName}, Set temperature error: ${error}`);
                                     };
@@ -835,10 +836,10 @@ class DeviceAtw extends EventEmitter {
                                     if (this.account.type === 'melcloudhome') return;
 
                                     try {
-                                        value = [false, true][value];
-                                        this.accessory.useFahrenheit = value;
-                                        this.emit('melCloud', 'UseFahrenheit', value);
+                                        this.accessory.useFahrenheit = value ? true : false;
                                         if (this.logInfo) this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
+                                        this.accountInfo.UseFahrenheit = value ? true : false;
+                                        await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, 'account', this.accountInfo);
                                     } catch (error) {
                                         if (this.logWarn) this.emit('warn', `Set temperature display unit error: ${error}`);
                                     };
@@ -1137,8 +1138,8 @@ class DeviceAtw extends EventEmitter {
                     .onSet(async (state) => {
                         try {
                             deviceData.HolidayMode.Enabled = state;
-                            await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'holidaymode');
                             if (this.logInfo) this.emit('info', `Holiday mode: ${state ? 'Enabled' : 'Disabled'}`);
+                            await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, 'holidaymode');
                         } catch (error) {
                             if (this.logWarn) this.emit('warn', `Set holiday mode error: ${error}`);
                         };
@@ -1177,16 +1178,17 @@ class DeviceAtw extends EventEmitter {
                 this.presets.forEach((preset, i) => {
                     const presetData = presetsOnServer.find(p => p.ID === preset.id);
 
-                    //get preset name
+                    //get name
                     const name = preset.name;
 
-                    //get preset name prefix
+                    //get name prefix
                     const namePrefix = preset.namePrefix;
 
                     const serviceName1 = namePrefix ? `${accessoryName} ${name}` : name;
                     const serviceType = preset.serviceType;
                     const characteristicType = preset.characteristicType;
 
+                     //control
                     if (preset.displayType > 3) {
                         if (this.logDebug) this.emit('debug', `Prepare preset control ${name} service`);
                         const presetControlService = new Service.Switch(serviceName1, `presetControlService${deviceId} ${i}`);
@@ -1219,8 +1221,8 @@ class DeviceAtw extends EventEmitter {
                                             break;
                                     };
 
-                                    await this.melCloudAta.send(this.accountType, this.displayType, deviceData, AirConditioner.EffectiveFlags.Presets);
-                                    if (this.logInfo) this.emit('info', `Preset ${name}: ${state ? 'Set:' : 'Unset:'} ${name}`);
+                                    if (this.logInfo) this.emit('info', `Preset ${name}: ${state ? 'Set' : 'Unset'}`);
+                                    await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, AirConditioner.EffectiveFlags.Presets);
                                 } catch (error) {
                                     if (this.logWarn) this.emit('warn', `Set preset error: ${error}`);
                                 };
@@ -1249,13 +1251,14 @@ class DeviceAtw extends EventEmitter {
                 if (this.logDebug) this.emit('debug', `Prepare schedules services`);
                 this.scheduleSensorServices = [];
                 this.schedules.forEach((schedule, i) => {
-                    //get preset name
+                    const scheduleData = schedulesOnServer.find(s => s.Id === schedule.id);
+
+                    //get name
                     const name = schedule.name;
 
-                    //get preset name prefix
+                    //get name prefix
                     const namePrefix = schedule.namePrefix;
 
-                    //control sensor
                     const serviceName1 = namePrefix ? `${accessoryName} ${name}` : name;
                     const serviceName2 = namePrefix ? `${accessoryName} Schedules` : 'Schedules';
                     const serviceType = schedule.serviceType;
@@ -1276,10 +1279,10 @@ class DeviceAtw extends EventEmitter {
                                 .onSet(async (state) => {
                                     try {
                                         deviceData.ScheduleEnabled = state;
-                                        await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'schedule');
-                                        if (this.logInfo) this.emit('info', `Schedule ${name}: ${state ? 'Enabled' : 'Disabled'}`);
+                                        if (this.logInfo) this.emit('info', `Schedules: ${state ? 'Enabled' : 'Disabled'}`);
+                                        await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, 'schedule', scheduleData);
                                     } catch (error) {
-                                        if (this.logWarn) this.emit('warn', `Set schedule error: ${error}`);
+                                        if (this.logWarn) this.emit('warn', `Set schedules error: ${error}`);
                                     };
                                 });
                             accessory.addService(this.scheduleControlService);
@@ -1321,10 +1324,10 @@ class DeviceAtw extends EventEmitter {
                 this.scenes.forEach((scene, i) => {
                     const sceneData = scenesOnServer.find(s => s.Id === scene.id);
 
-                    //get preset name
+                    //get name
                     const name = scene.name;
 
-                    //get preset name prefix
+                    //get name prefix
                     const namePrefix = scene.namePrefix;
 
                     const serviceName1 = namePrefix ? `${accessoryName} ${name}` : name;
@@ -1345,8 +1348,8 @@ class DeviceAtw extends EventEmitter {
                             .onSet(async (state) => {
                                 try {
                                     sceneData.Enabled = state;
-                                    await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'scene', sceneData);
-                                    if (this.logInfo) this.emit('info', `Scene ${name}: ${state ? 'Enabled' : 'Disabled'}`);
+                                    if (this.logInfo) this.emit('info', `Scene ${name}: ${state ? 'Set' : 'Unset'}`);
+                                    await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, 'scene', sceneData);
                                 } catch (error) {
                                     if (this.logWarn) this.emit('warn', `Set scene error: ${error}`);
                                 };
@@ -1371,178 +1374,194 @@ class DeviceAtw extends EventEmitter {
 
             //buttons services
             if (this.buttons.length > 0) {
-                if (this.logDebug) this.emit('debug', `Prepare buttons services`);
-                this.buttonsServices = [];
+                if (this.logDebug) this.emit('debug', `Prepare buttons / sensors services`);
+                this.buttonControlServices = [];
+                this.buttonControlSensorServices = [];
                 this.buttons.lengthforEach((button, i) => {
-                    //get button mode
+                    //get mode
                     const mode = button.mode;
 
-                    //get button display type
-                    const displayType = button.displayType;
-
-                    //get button name
+                    //get name
                     const name = button.name;
 
-                    //get button name prefix
+                    //get name prefix
                     const namePrefix = button.namePrefix;
 
                     const serviceName1 = namePrefix ? `${accessoryName} ${name}` : name;
                     const serviceType = button.serviceType;
                     const characteristicType = button.characteristicType;
-                    const buttonService = new serviceType(serviceName, `Button ${deviceId} ${i}`);
-                    buttonService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                    buttonService.setCharacteristic(Characteristic.ConfiguredName, serviceName1);
-                    buttonService.getCharacteristic(characteristicType)
+
+                    //control
+                    if (button.displayType > 3) {
+                        if (this.logDebug) this.emit('debug', `Prepare button control ${name} service`);
+                        const buttonControlService = new serviceType(serviceName1, `buttonControlService${deviceId} ${i}`);
+                        buttonControlService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                        buttonControlService.setCharacteristic(Characteristic.ConfiguredName, serviceName1);
+                        buttonControlService.getCharacteristic(Characteristic.On)
+                            .onGet(async () => {
+                                const state = button.state;
+                                return state;
+                            })
+                            .onSet(async (state) => {
+                                if (displayType > 0 && displayType < 3) {
+                                    try {
+                                        let flag = null;
+                                        switch (mode) {
+                                            case 0: //POWER ON,OFF
+                                                deviceData.Device.Power = state;
+                                                flag = HeatPump.EffectiveFlags.Power;
+                                                break;
+                                            case 1: //HEAT PUMP HEAT
+                                                button.previousValue = state ? deviceData.Device.UnitStatus : button.previousValue ?? deviceData.Device.UnitStatus;
+                                                deviceData.Device.Power = true;
+                                                deviceData.Device.UnitStatus = state ? 0 : button.previousValue;
+                                                flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationMode;
+                                                break;
+                                            case 2: //COOL
+                                                button.previousValue = state ? deviceData.Device.UnitStatus : button.previousValue ?? deviceData.Device.UnitStatus;
+                                                deviceData.Device.Power = true;
+                                                deviceData.Device.UnitStatus = state ? 1 : button.previousValue;
+                                                flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationMode;
+                                                break;
+                                            case 3: //HOLIDAY
+                                                if (this.accountType === 'melcloud') {
+                                                    deviceData.Device.HolidayMode = state;
+                                                    flag = HeatPump.EffectiveFlags.HolidayMode;
+                                                }
+
+                                                if (this.accountType === 'melcloudhome') {
+                                                    deviceData.Device.HolidayMode.Enabled = state;
+                                                    flag = 'holidaymode';
+                                                }
+                                                break;
+                                            case 10: //ALL ZONES PHYSICAL LOCK CONTROL
+                                                deviceData.Device.ProhibitZone1 = state;
+                                                deviceData.Device.ProhibitHotWater = state;
+                                                deviceData.Device.ProhibitZone2 = state;
+                                                flag = HeatPump.EffectiveFlags.ProhibitHeatingZone1 + HeatPump.EffectiveFlags.ProhibitHotWater + HeatPump.EffectiveFlags.ProhibitHeatingZone2;
+                                                break;
+                                            case 20: //ZONE 1 HEAT THERMOSTAT
+                                                button.previousValue = state ? deviceData.Device.OperationModeZone1 : button.previousValue ?? deviceData.Device.OperationModeZone1;
+                                                deviceData.Device.Power = true;
+                                                deviceData.Device.OperationModeZone1 = state ? 0 : button.previousValue;
+                                                flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationModeZone1;
+                                                break;
+                                            case 21: //HEAT FLOW
+                                                button.previousValue = state ? deviceData.Device.OperationModeZone1 : button.previousValue ?? deviceData.Device.OperationModeZone1;
+                                                deviceData.Device.Power = true;
+                                                deviceData.Device.OperationModeZone1 = state ? 1 : button.previousValue;
+                                                flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationModeZone1;
+                                                break;
+                                            case 22: //HEAT CURVE
+                                                button.previousValue = state ? deviceData.Device.OperationModeZone1 : button.previousValue ?? deviceData.Device.OperationModeZone1;
+                                                deviceData.Device.Power = true;
+                                                deviceData.Device.OperationModeZone1 = state ? 2 : button.previousValue;
+                                                flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationModeZone1;
+                                                break;
+                                            case 23: //COOL THERMOSTAT
+                                                button.previousValue = state ? deviceData.Device.OperationModeZone1 : button.previousValue ?? deviceData.Device.OperationModeZone1;
+                                                deviceData.Device.Power = true;
+                                                deviceData.Device.OperationModeZone1 = state ? 3 : button.previousValue;
+                                                flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationModeZone1;
+                                                break;
+                                            case 24: //COOL FLOW
+                                                button.previousValue = state ? deviceData.Device.OperationModeZone1 : button.previousValue ?? deviceData.Device.OperationModeZone1;
+                                                deviceData.Device.Power = true;
+                                                deviceData.Device.OperationModeZone1 = state ? 4 : button.previousValue;
+                                                flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationModeZone1;
+                                                break;
+                                            case 25: //FLOOR DRY UP
+                                                button.previousValue = state ? deviceData.Device.OperationModeZone1 : button.previousValue ?? deviceData.Device.OperationModeZone1;
+                                                deviceData.Device.Power = true;
+                                                deviceData.Device.OperationModeZone1 = state ? 5 : button.previousValue;
+                                                flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationModeZone1;
+                                                break;
+                                            case 30: //PHYSICAL LOCK CONTROL
+                                                deviceData.Device.ProhibitZone1 = state;
+                                                flag = HeatPump.EffectiveFlags.ProhibitHeatingZone1;
+                                                break;
+                                            case 40: //HOT WATER NORMAL/FORCE HOT WATER
+                                                deviceData.Device.Power = true;
+                                                deviceData.Device.ForcedHotWaterMode = state;
+                                                flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.ForcedHotWaterMode;
+                                                break;
+                                            case 41: //NORMAL/ECO
+                                                deviceData.Device.Power = true;
+                                                deviceData.Device.EcoHotWater = state;
+                                                flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.EcoHotWater;
+                                                break;
+                                            case 50: //PHYSICAL LOCK CONTROL
+                                                deviceData.Device.ProhibitHotWater = state;
+                                                flag = HeatPump.EffectiveFlags.ProhibitHotWater;
+                                                break;
+                                            case 60: //ZONE 2 HEAT THERMOSTAT
+                                                button.previousValue = state ? deviceData.Device.OperationModeZone2 : button.previousValue ?? deviceData.Device.OperationModeZone2;
+                                                deviceData.Device.Power = true;
+                                                deviceData.Device.OperationModeZone2 = state ? 0 : button.previousValue;
+                                                flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationModeZone2;
+                                                break;
+                                            case 61: // HEAT FLOW
+                                                button.previousValue = state ? deviceData.Device.OperationModeZone2 : button.previousValue ?? deviceData.Device.OperationModeZone2;
+                                                deviceData.Device.Power = true;
+                                                deviceData.Device.OperationModeZone2 = state ? 1 : button.previousValue;
+                                                flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationModeZone2;
+                                                break;
+                                            case 62: //HEAT CURVE
+                                                button.previousValue = state ? deviceData.Device.OperationModeZone2 : button.previousValue ?? deviceData.Device.OperationModeZone2;
+                                                deviceData.Device.Power = true;
+                                                deviceData.Device.OperationModeZone2 = state ? 2 : button.previousValue;
+                                                flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationModeZone2;
+                                                break;
+                                            case 63: //COOL THERMOSTAT
+                                                button.previousValue = state ? deviceData.Device.OperationModeZone2 : button.previousValue ?? deviceData.Device.OperationModeZone2;
+                                                deviceData.Device.Power = true;
+                                                deviceData.Device.OperationModeZone2 = state ? 3 : button.previousValue;
+                                                flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationModeZone2;
+                                                break;
+                                            case 64: //COOL FLOW
+                                                button.previousValue = state ? deviceData.Device.OperationModeZone2 : button.previousValue ?? deviceData.Device.OperationModeZone2;
+                                                deviceData.Device.Power = true;
+                                                deviceData.Device.OperationModeZone2 = state ? 4 : button.previousValue;
+                                                flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationModeZone2;
+                                                break;
+                                            case 65: //FLOOR DRY UP
+                                                button.previousValue = state ? deviceData.Device.OperationModeZone2 : button.previousValue ?? deviceData.Device.OperationModeZone2;
+                                                deviceData.Device.Power = true;
+                                                deviceData.Device.OperationModeZone2 = state ? 5 : button.previousValue;
+                                                flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationModeZone2;
+                                                break;
+                                            case 70: //PHYSICAL LOCK CONTROL
+                                                deviceData.Device.ProhibitZone2 = state;
+                                                HeatPump.EffectiveFlags.ProhibitHeatingZone2;
+                                                break;
+                                            default:
+                                                if (this.logWarn) this.emit('warn', `Unknown button mode: ${mode}`);
+                                                break;
+                                        };
+
+                                        if (this.logInfo) this.emit('info', `Button ${name}: ${state ? `Enabled` : `Disabled`}`);
+                                        await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, flag);
+                                    } catch (error) {
+                                        if (this.logWarn) this.emit('warn', `Set button error: ${error}`);
+                                    };
+                                };
+                            });
+                        this.buttonControlServices.push(buttonControlService);
+                        accessory.addService(buttonControlService)
+                    }
+
+                    //sensor
+                    if (this.logDebug) this.emit('debug', `Prepare button control sensor ${name} service`);
+                    const buttonControlSensorService = new serviceType(serviceName1, `buttonControlSensorService${deviceId} ${i}`);
+                    buttonControlSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                    buttonControlSensorService.setCharacteristic(Characteristic.ConfiguredName, serviceName1);
+                    buttonControlSensorService.getCharacteristic(characteristicType)
                         .onGet(async () => {
                             const state = button.state;
                             return state;
                         })
-                        .onSet(async (state) => {
-                            if (displayType > 0 && displayType < 3) {
-                                try {
-                                    let flag = null;
-                                    switch (mode) {
-                                        case 0: //POWER ON,OFF
-                                            deviceData.Device.Power = state;
-                                            flag = HeatPump.EffectiveFlags.Power;
-                                            break;
-                                        case 1: //HEAT PUMP HEAT
-                                            button.previousValue = state ? deviceData.Device.UnitStatus : button.previousValue ?? deviceData.Device.UnitStatus;
-                                            deviceData.Device.Power = true;
-                                            deviceData.Device.UnitStatus = state ? 0 : button.previousValue;
-                                            flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationMode;
-                                            break;
-                                        case 2: //COOL
-                                            button.previousValue = state ? deviceData.Device.UnitStatus : button.previousValue ?? deviceData.Device.UnitStatus;
-                                            deviceData.Device.Power = true;
-                                            deviceData.Device.UnitStatus = state ? 1 : button.previousValue;
-                                            flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationMode;
-                                            break;
-                                        case 3: //HOLIDAY
-                                            if (this.accountType === 'melcloud') {
-                                                deviceData.Device.HolidayMode = state;
-                                                flag = HeatPump.EffectiveFlags.HolidayMode;
-                                            }
-
-                                            if (this.accountType === 'melcloudhome') {
-                                                deviceData.Device.HolidayMode.Enabled = state;
-                                                flag = 'holidaymode';
-                                            }
-                                            break;
-                                        case 10: //ALL ZONES PHYSICAL LOCK CONTROL
-                                            deviceData.Device.ProhibitZone1 = state;
-                                            deviceData.Device.ProhibitHotWater = state;
-                                            deviceData.Device.ProhibitZone2 = state;
-                                            flag = HeatPump.EffectiveFlags.ProhibitHeatingZone1 + HeatPump.EffectiveFlags.ProhibitHotWater + HeatPump.EffectiveFlags.ProhibitHeatingZone2;
-                                            break;
-                                        case 20: //ZONE 1 HEAT THERMOSTAT
-                                            button.previousValue = state ? deviceData.Device.OperationModeZone1 : button.previousValue ?? deviceData.Device.OperationModeZone1;
-                                            deviceData.Device.Power = true;
-                                            deviceData.Device.OperationModeZone1 = state ? 0 : button.previousValue;
-                                            flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationModeZone1;
-                                            break;
-                                        case 21: //HEAT FLOW
-                                            button.previousValue = state ? deviceData.Device.OperationModeZone1 : button.previousValue ?? deviceData.Device.OperationModeZone1;
-                                            deviceData.Device.Power = true;
-                                            deviceData.Device.OperationModeZone1 = state ? 1 : button.previousValue;
-                                            flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationModeZone1;
-                                            break;
-                                        case 22: //HEAT CURVE
-                                            button.previousValue = state ? deviceData.Device.OperationModeZone1 : button.previousValue ?? deviceData.Device.OperationModeZone1;
-                                            deviceData.Device.Power = true;
-                                            deviceData.Device.OperationModeZone1 = state ? 2 : button.previousValue;
-                                            flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationModeZone1;
-                                            break;
-                                        case 23: //COOL THERMOSTAT
-                                            button.previousValue = state ? deviceData.Device.OperationModeZone1 : button.previousValue ?? deviceData.Device.OperationModeZone1;
-                                            deviceData.Device.Power = true;
-                                            deviceData.Device.OperationModeZone1 = state ? 3 : button.previousValue;
-                                            flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationModeZone1;
-                                            break;
-                                        case 24: //COOL FLOW
-                                            button.previousValue = state ? deviceData.Device.OperationModeZone1 : button.previousValue ?? deviceData.Device.OperationModeZone1;
-                                            deviceData.Device.Power = true;
-                                            deviceData.Device.OperationModeZone1 = state ? 4 : button.previousValue;
-                                            flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationModeZone1;
-                                            break;
-                                        case 25: //FLOOR DRY UP
-                                            button.previousValue = state ? deviceData.Device.OperationModeZone1 : button.previousValue ?? deviceData.Device.OperationModeZone1;
-                                            deviceData.Device.Power = true;
-                                            deviceData.Device.OperationModeZone1 = state ? 5 : button.previousValue;
-                                            flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationModeZone1;
-                                            break;
-                                        case 30: //PHYSICAL LOCK CONTROL
-                                            deviceData.Device.ProhibitZone1 = state;
-                                            flag = HeatPump.EffectiveFlags.ProhibitHeatingZone1;
-                                            break;
-                                        case 40: //HOT WATER NORMAL/FORCE HOT WATER
-                                            deviceData.Device.Power = true;
-                                            deviceData.Device.ForcedHotWaterMode = state;
-                                            flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.ForcedHotWaterMode;
-                                            break;
-                                        case 41: //NORMAL/ECO
-                                            deviceData.Device.Power = true;
-                                            deviceData.Device.EcoHotWater = state;
-                                            flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.EcoHotWater;
-                                            break;
-                                        case 50: //PHYSICAL LOCK CONTROL
-                                            deviceData.Device.ProhibitHotWater = state;
-                                            flag = HeatPump.EffectiveFlags.ProhibitHotWater;
-                                            break;
-                                        case 60: //ZONE 2 HEAT THERMOSTAT
-                                            button.previousValue = state ? deviceData.Device.OperationModeZone2 : button.previousValue ?? deviceData.Device.OperationModeZone2;
-                                            deviceData.Device.Power = true;
-                                            deviceData.Device.OperationModeZone2 = state ? 0 : button.previousValue;
-                                            flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationModeZone2;
-                                            break;
-                                        case 61: // HEAT FLOW
-                                            button.previousValue = state ? deviceData.Device.OperationModeZone2 : button.previousValue ?? deviceData.Device.OperationModeZone2;
-                                            deviceData.Device.Power = true;
-                                            deviceData.Device.OperationModeZone2 = state ? 1 : button.previousValue;
-                                            flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationModeZone2;
-                                            break;
-                                        case 62: //HEAT CURVE
-                                            button.previousValue = state ? deviceData.Device.OperationModeZone2 : button.previousValue ?? deviceData.Device.OperationModeZone2;
-                                            deviceData.Device.Power = true;
-                                            deviceData.Device.OperationModeZone2 = state ? 2 : button.previousValue;
-                                            flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationModeZone2;
-                                            break;
-                                        case 63: //COOL THERMOSTAT
-                                            button.previousValue = state ? deviceData.Device.OperationModeZone2 : button.previousValue ?? deviceData.Device.OperationModeZone2;
-                                            deviceData.Device.Power = true;
-                                            deviceData.Device.OperationModeZone2 = state ? 3 : button.previousValue;
-                                            flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationModeZone2;
-                                            break;
-                                        case 64: //COOL FLOW
-                                            button.previousValue = state ? deviceData.Device.OperationModeZone2 : button.previousValue ?? deviceData.Device.OperationModeZone2;
-                                            deviceData.Device.Power = true;
-                                            deviceData.Device.OperationModeZone2 = state ? 4 : button.previousValue;
-                                            flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationModeZone2;
-                                            break;
-                                        case 65: //FLOOR DRY UP
-                                            button.previousValue = state ? deviceData.Device.OperationModeZone2 : button.previousValue ?? deviceData.Device.OperationModeZone2;
-                                            deviceData.Device.Power = true;
-                                            deviceData.Device.OperationModeZone2 = state ? 5 : button.previousValue;
-                                            flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationModeZone2;
-                                            break;
-                                        case 70: //PHYSICAL LOCK CONTROL
-                                            deviceData.Device.ProhibitZone2 = state;
-                                            HeatPump.EffectiveFlags.ProhibitHeatingZone2;
-                                            break;
-                                        default:
-                                            if (this.logWarn) this.emit('warn', `Unknown button mode: ${mode}`);
-                                            break;
-                                    };
-
-                                    await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, flag);
-                                    if (this.logInfo) this.emit('info', `${state ? `Set: ${name}` : `Unset: ${name}, Set: ${button.previousValue}`}`);
-                                } catch (error) {
-                                    if (this.logWarn) this.emit('warn', `Set button error: ${error}`);
-                                };
-                            };
-                        });
-                    this.buttonsServices.push(buttonService);
-                    accessory.addService(buttonService)
+                    this.buttonControlSensorServices.push(buttonControlSensorService);
+                    accessory.addService(buttonControlSensorService);
                 });
             };
 
@@ -1556,7 +1575,7 @@ class DeviceAtw extends EventEmitter {
     async start() {
         try {
             //melcloud device
-            this.melCloudAtw = new MelCloudAtw(this.account, this.device, this.devicesFile, this.defaultTempsFile)
+            this.melCloudAtw = new MelCloudAtw(this.account, this.device, this.devicesFile, this.defaultTempsFile, this.accountFile)
                 .on('deviceInfo', (modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, supportsHotWaterTank, supportsZone2) => {
                     if (this.logDeviceInfo && this.displayDeviceInfo) {
                         this.emit('devInfo', `---- ${this.deviceTypeText}: ${this.deviceName} ----`);
@@ -1704,8 +1723,8 @@ class DeviceAtw extends EventEmitter {
                         caseHotWaterSensor: caseHotWaterSensor,
                         caseZone2Sensor: caseZone2Sensor,
                         sensorsCount: zonesSensorsCount,
-                        useFahrenheit: this.useFahrenheit,
-                        temperatureUnit: TemperatureDisplayUnits[this.useFahrenheit],
+                        useFahrenheit: this.accountInfo.useFahrenheit ? 1 : 0,
+                        temperatureUnit: TemperatureDisplayUnits[this.accountInfo.useFahrenheit ? 1 : 0],
                         isConnected: isConnected,
                         isInError: isInError,
                         scheduleEnabled: scheduleEnabled,
@@ -2134,7 +2153,7 @@ class DeviceAtw extends EventEmitter {
                         this.schedules.forEach((schedule, i) => {
                             const scheduleData = schedulesOnServer.find(s => s.Id === schedule.id);
                             const characteristicType = schedule.characteristicType;
-                            schedule.state = scheduleEnabled ? scheduleData.Enabled ?? false : false;
+                            schedule.state = scheduleEnabled ? (scheduleData.Enabled ?? false) : false;
 
                             //control
                             if (i === 0) {
@@ -2245,9 +2264,14 @@ class DeviceAtw extends EventEmitter {
                                     break;
                             };
 
-                            //update services
-                            const characteristicType = button.characteristicType;
-                            this.buttonsServices?.[i]?.updateCharacteristic(characteristicType, button.state);
+                            //control
+                            if (button.displayType > 3) {
+                                this.buttonControlServices?.[i]?.updateCharacteristic(Characteristic.On, button.state);
+                            }
+
+                            //sensor
+                            const characteristicType = scene.characteristicType;
+                            this.buttonControlSensorServices?.[i]?.updateCharacteristic(characteristicType, button.state);
                         });
                     };
                 })

@@ -24,7 +24,7 @@
             "user": {
               "title": "User",
               "type": "string",
-              "placeholder": "User",
+              "placeholder": "Email",
               "description": "MELCloud account username."
             },
             "passwd": {
@@ -41,7 +41,7 @@
               "maxLength": 2,
               "pattern": "^[0-9]+$",
               "default": "0",
-              "description": "Here select the language used in MELCloud account.",
+              "description": "Here select the account language.",
               "anyOf": [
                 {
                   "title": "English",
@@ -205,7 +205,7 @@
               "title": "Account Type",
               "type": "string",
               "default": "disabled",
-              "description": "Here select the MELCloud account type.",
+              "description": "Here select the account type.",
               "anyOf": [
                 {
                   "title": "None/Disabled",
@@ -698,7 +698,7 @@
                           "title": "Prefix",
                           "type": "boolean",
                           "default": false,
-                          "description": "Enable/disable the accessory name as a prefix for schedule name.",
+                          "description": "Enable/disable the accessory name as a prefix for scene name.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].scenes[arrayIndices[2]].displayType > 0;"
                           }
@@ -719,7 +719,7 @@
                           "title": "Display Type",
                           "type": "integer",
                           "minimum": 0,
-                          "maximum": 5,
+                          "maximum": 6,
                           "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
@@ -730,33 +730,39 @@
                               ]
                             },
                             {
-                              "title": "Outlet",
+                              "title": "Motion Sensor",
                               "enum": [
                                 1
                               ]
                             },
                             {
-                              "title": "Switch",
+                              "title": "Occupancy Sensor",
                               "enum": [
                                 2
                               ]
                             },
                             {
-                              "title": "Motion Sensor",
+                              "title": "Contact Sensor",
                               "enum": [
                                 3
                               ]
                             },
                             {
-                              "title": "Occupancy Sensor",
+                              "title": "Switch + Motion Sensor",
                               "enum": [
                                 4
                               ]
                             },
                             {
-                              "title": "Contact Sensor",
+                              "title": "Switch + Occupancy Sensor",
                               "enum": [
                                 5
+                              ]
+                            },
+                            {
+                              "title": "Switch + Contact Sensor",
+                              "enum": [
+                                6
                               ]
                             }
                           ]
@@ -1515,7 +1521,7 @@
                           "title": "Prefix",
                           "type": "boolean",
                           "default": false,
-                          "description": "Enable/disable the accessory name as a prefix for schedule name.",
+                          "description": "Enable/disable the accessory name as a prefix for scene name.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].scenes[arrayIndices[2]].displayType > 0;"
                           }
@@ -1536,7 +1542,7 @@
                           "title": "Display Type",
                           "type": "integer",
                           "minimum": 0,
-                          "maximum": 5,
+                          "maximum": 6,
                           "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
@@ -1547,33 +1553,39 @@
                               ]
                             },
                             {
-                              "title": "Outlet",
+                              "title": "Motion Sensor",
                               "enum": [
                                 1
                               ]
                             },
                             {
-                              "title": "Switch",
+                              "title": "Occupancy Sensor",
                               "enum": [
                                 2
                               ]
                             },
                             {
-                              "title": "Motion Sensor",
+                              "title": "Contact Sensor",
                               "enum": [
                                 3
                               ]
                             },
                             {
-                              "title": "Occupancy Sensor",
+                              "title": "Switch + Motion Sensor",
                               "enum": [
                                 4
                               ]
                             },
                             {
-                              "title": "Contact Sensor",
+                              "title": "Switch + Occupancy Sensor",
                               "enum": [
                                 5
+                              ]
+                            },
+                            {
+                              "title": "Switch + Contact Sensor",
+                              "enum": [
+                                6
                               ]
                             }
                           ]
@@ -2111,7 +2123,7 @@
                           "title": "Prefix",
                           "type": "boolean",
                           "default": false,
-                          "description": "Enable/disable the accessory name as a prefix for schedule name.",
+                          "description": "Enable/disable the accessory name as a prefix for scene name.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].scenes[arrayIndices[2]].displayType > 0;"
                           }
@@ -2132,7 +2144,7 @@
                           "title": "Display Type",
                           "type": "integer",
                           "minimum": 0,
-                          "maximum": 5,
+                          "maximum": 6,
                           "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
@@ -2143,33 +2155,39 @@
                               ]
                             },
                             {
-                              "title": "Outlet",
+                              "title": "Motion Sensor",
                               "enum": [
                                 1
                               ]
                             },
                             {
-                              "title": "Switch",
+                              "title": "Occupancy Sensor",
                               "enum": [
                                 2
                               ]
                             },
                             {
-                              "title": "Motion Sensor",
+                              "title": "Contact Sensor",
                               "enum": [
                                 3
                               ]
                             },
                             {
-                              "title": "Occupancy Sensor",
+                              "title": "Switch + Motion Sensor",
                               "enum": [
                                 4
                               ]
                             },
                             {
-                              "title": "Contact Sensor",
+                              "title": "Switch + Occupancy Sensor",
                               "enum": [
                                 5
+                              ]
+                            },
+                            {
+                              "title": "Switch + Contact Sensor",
+                              "enum": [
+                                6
                               ]
                             }
                           ]
@@ -2322,27 +2340,27 @@
                   "description": "This enable logging device info on plugin start."
                 },
                 "success": {
-                  "title": "Log Success",
+                  "title": "Success",
                   "type": "boolean",
                   "default": true
                 },
                 "info": {
-                  "title": "Log Info",
+                  "title": "Info",
                   "type": "boolean",
                   "default": false
                 },
                 "warn": {
-                  "title": "Log Warn",
+                  "title": "Warn",
                   "type": "boolean",
                   "default": true
                 },
                 "error": {
-                  "title": "Log Error",
+                  "title": "Error",
                   "type": "boolean",
                   "default": true
                 },
                 "debug": {
-                  "title": "Log Debug",
+                  "title": "Debug",
                   "type": "boolean",
                   "default": false
                 }

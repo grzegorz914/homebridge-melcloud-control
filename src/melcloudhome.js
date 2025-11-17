@@ -9,7 +9,7 @@ import Functions from './functions.js';
 import { ApiUrlsHome, LanguageLocaleMap } from './constants.js';
 const execPromise = promisify(exec);
 
-class MelCloud extends EventEmitter {
+class MelCloudHome extends EventEmitter {
     constructor(account, accountFile, buildingsFile, devicesFile, pluginStart = false) {
         super();
         this.accountType = account.type;
@@ -61,16 +61,10 @@ class MelCloud extends EventEmitter {
         }
     }
 
-    // MELCloud Home
     async checkScenesList() {
         try {
             if (this.logDebug) this.emit('debug', `Scanning for scenes`);
-            const listScenesData = await axios(ApiUrlsHome.GetUserScenes, {
-                method: 'GET',
-                baseURL: ApiUrlsHome.BaseURL,
-                timeout: 25000,
-                headers: this.headers
-            });
+            const listScenesData = await this.axiosInstance(ApiUrlsHome.GetUserScenes, { method: 'GET', });
 
             const scenesList = listScenesData.data;
             if (this.logDebug) this.emit('debug', `Scenes: ${JSON.stringify(scenesList, null, 2)}`);
@@ -102,12 +96,7 @@ class MelCloud extends EventEmitter {
         try {
             const devicesList = { State: false, Info: null, Devices: [], Scenes: [] }
             if (this.logDebug) this.emit('debug', `Scanning for devices`);
-            const listDevicesData = await axios(ApiUrlsHome.GetUserContext, {
-                method: 'GET',
-                baseURL: ApiUrlsHome.BaseURL,
-                timeout: 25000,
-                headers: this.headers
-            });
+            const listDevicesData = await this.axiosInstance(ApiUrlsHome.GetUserContext, { method: 'GET' });
 
             const userContext = listDevicesData.data;
             const buildings = userContext.buildings ?? [];
@@ -189,7 +178,6 @@ class MelCloud extends EventEmitter {
                         DeviceName: GivenDisplayName,
                         SerialNumber: Id,
                         Device: deviceObject,
-                        Headers: this.headers
                     };
                 };
 
@@ -206,24 +194,26 @@ class MelCloud extends EventEmitter {
                 return devicesList;
             }
 
-            const scenes = await this.checkScenesList();
+            // Get scenes
+            let scenes = [];
+            try {
+                scenes = await this.checkScenesList();
+                if (this.logDebug) this.emit('debug', `Found ${scenes.length} svenes`);
+            } catch (error) {
+                if (this.logDebug) this.emit('debug', `Get scenes error: ${error} `);
+            }
 
             devicesList.State = true;
-            devicesList.Info = `Found ${devicesCount} devices`;
+            devicesList.Info = `Found ${devicesCount} devices and ${scenes.length} scenes`;
             devicesList.Devices = devices;
             devicesList.Scenes = scenes;
+            devicesList.Headers = this.headers;
 
             await this.functions.saveData(this.devicesFile, devicesList);
             if (this.logDebug) this.emit('debug', `${devicesCount} devices saved`);
 
             return devicesList;
         } catch (error) {
-            if (error.response?.status === 401) {
-                if (this.logWarn) this.emit('warn', 'Check devices list not possible, cookies expired, trying to get new.');
-                await this.connect();
-                return;
-            }
-
             throw new Error(`Check devices list error: ${error.message}`);
         }
     }
@@ -234,7 +224,7 @@ class MelCloud extends EventEmitter {
 
         let browser;
         try {
-            const accountInfo = { State: false, Info: '', Headers: {}, UseFahrenheit: false };
+            const accountInfo = { State: false, Info: '', Account: {}, UseFahrenheit: false };
             let chromiumPath = await this.functions.ensureChromiumInstalled();
 
             // === Fallback to Puppeteer's built-in Chromium ===
@@ -286,14 +276,6 @@ class MelCloud extends EventEmitter {
             page.setDefaultTimeout(GLOBAL_TIMEOUT);
             page.setDefaultNavigationTimeout(GLOBAL_TIMEOUT);
 
-            // Clear cookies before navigation
-            try {
-                const client = await page.createCDPSession();
-                await client.send('Network.clearBrowserCookies');
-            } catch (error) {
-                if (this.logError) this.emit('error', `Clear cookies error: ${error.message}`);
-            }
-
             try {
                 await page.goto(ApiUrlsHome.BaseURL, { waitUntil: ['domcontentloaded', 'networkidle2'], timeout: GLOBAL_TIMEOUT });
             } catch (error) {
@@ -303,7 +285,7 @@ class MelCloud extends EventEmitter {
 
             // Wait extra to ensure UI is rendered
             await new Promise(r => setTimeout(r, 3000));
-            const loginBtn = await page.waitForSelector('button.btn--blue', { timeout: GLOBAL_TIMEOUT / 4 });
+            const loginBtn = await page.waitForSelector('button.btn--blue', { timeout: GLOBAL_TIMEOUT / 3 });
             const loginText = await page.evaluate(el => el.textContent.trim(), loginBtn);
 
             if (!['Zaloguj', 'Sign In', 'Login'].includes(loginText)) {
@@ -329,13 +311,13 @@ class MelCloud extends EventEmitter {
                 accountInfo.Info = 'Submit button not found';
                 return accountInfo;
             }
-            await Promise.race([Promise.all([submitButton.click(), page.waitForNavigation({ waitUntil: ['domcontentloaded', 'networkidle2'], timeout: GLOBAL_TIMEOUT / 4 })]), new Promise(r => setTimeout(r, GLOBAL_TIMEOUT / 3))]);
+            await Promise.race([Promise.all([submitButton.click(), page.waitForNavigation({ waitUntil: ['domcontentloaded', 'networkidle2'], timeout: GLOBAL_TIMEOUT / 3 })]), new Promise(r => setTimeout(r, GLOBAL_TIMEOUT / 3))]);
 
             // Extract cookies
             let c1 = null, c2 = null;
             const start = Date.now();
             while ((!c1 || !c2) && Date.now() - start < GLOBAL_TIMEOUT / 2) {
-                const cookies = await page.browserContext().cookies();
+                const cookies = await browser.cookies();
                 c1 = cookies.find(c => c.name === '__Secure-monitorandcontrolC1')?.value || c1;
                 c2 = cookies.find(c => c.name === '__Secure-monitorandcontrolC2')?.value || c2;
                 if (!c1 || !c2) await new Promise(r => setTimeout(r, 500));
@@ -352,7 +334,9 @@ class MelCloud extends EventEmitter {
                 `__Secure-monitorandcontrolC2=${c2}`
             ].join('; ');
 
-            this.headers = {
+
+            const userAgent = await page.evaluate(() => navigator.userAgent);
+            const headers = {
                 'Accept': '*/*',
                 'Accept-Encoding': 'gzip, deflate, br',
                 'Accept-Language': LanguageLocaleMap[this.language],
@@ -362,12 +346,18 @@ class MelCloud extends EventEmitter {
                 'Sec-Fetch-Dest': 'empty',
                 'Sec-Fetch-Mode': 'cors',
                 'Sec-Fetch-Site': 'same-origin',
+                'User-Agent': userAgent,
                 'x-csrf': '1'
             };
+            this.headers = headers;
+            this.axiosInstance = axios.create({
+                baseURL: ApiUrlsHome.BaseURL,
+                timeout: 30000,
+                headers: headers
+            })
 
             accountInfo.State = true;
             accountInfo.Info = 'Connect to MELCloud Home Success';
-            accountInfo.Headers = this.headers;
             await this.functions.saveData(this.accountFile, accountInfo);
 
             return accountInfo;
@@ -382,22 +372,7 @@ class MelCloud extends EventEmitter {
             }
         }
     }
-
-    async send(accountInfo) {
-        try {
-            await axios(ApiUrlsHome.UpdateApplicationOptions, {
-                method: 'POST',
-                baseURL: ApiUrlsHome.BaseURL,
-                timeout: 15000,
-                headers: accountInfo.Headers
-            });
-            await this.functions.saveData(this.accountFile, accountInfo);
-            return true;
-        } catch (error) {
-            throw new Error(`Send data error: ${error.message}`);
-        }
-    }
 }
 
-export default MelCloud;
+export default MelCloudHome;
 

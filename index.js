@@ -106,7 +106,6 @@ class MelCloudPlatform {
 									return;
 								}
 								if (logLevel.success) log.success(accountInfo.Info);
-								const useFahrenheit = accountInfo.UseFahrenheit;
 
 								//check devices list
 								let devicesList;
@@ -166,30 +165,22 @@ class MelCloudPlatform {
 									let configuredDevice;
 									switch (deviceType) {
 										case 0: //ATA
-											configuredDevice = new DeviceAta(api, account, device, devicesFile, defaultTempsFile, useFahrenheit);
+											configuredDevice = new DeviceAta(api, account, device, devicesFile, defaultTempsFile, accountInfo, accountFile);
 											break;
 										case 1: //ATW
-											configuredDevice = new DeviceAtw(api, account, device, devicesFile, defaultTempsFile, useFahrenheit);
+											configuredDevice = new DeviceAtw(api, account, device, devicesFile, defaultTempsFile, accountInfo, accountFile);
 											break;
 										case 2:
 											break;
 										case 3: //ERV
-											configuredDevice = new DeviceErv(api, account, device, devicesFile, defaultTempsFile, useFahrenheit);
+											configuredDevice = new DeviceErv(api, account, device, devicesFile, defaultTempsFile, accountInfo, accountFile);
 											break;
 										default:
 											if (logLevel.warn) log.warn(`${accountName}, ${deviceTypeText}, ${deviceName}, unknown device: ${deviceType}.`);
 											return;
 									}
 
-									configuredDevice.on('melCloud', async (key, value) => {
-										try {
-											const accountDate = account.type === 'melcloud' ? accountInfo.LoginData[key] = value : accountInfo[key];
-											await melCloud.send(accountDate);
-										} catch (error) {
-											if (logLevel.error) log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${error.message ?? error}.`);
-										}
-									})
-										.on('devInfo', (info) => logLevel.devInfo && log.info(info))
+									configuredDevice.on('devInfo', (info) => logLevel.devInfo && log.info(info))
 										.on('success', (msg) => logLevel.success && log.success(`${accountName}, ${deviceTypeText}, ${deviceName}, ${msg}`))
 										.on('info', (msg) => logLevel.info && log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, ${msg}`))
 										.on('debug', (msg) => logLevel.debug && log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, debug: ${msg}`))
@@ -202,9 +193,9 @@ class MelCloudPlatform {
 										if (logLevel.success) log.success(`${accountName}, ${deviceTypeText}, ${deviceName}, Published as external accessory.`);
 
 										//start impulse generators\
-										const timmers = accountType === 'melcloudhome' ? [{ name: 'connect', sampling: 1800000 }, { name: 'checkDevicesList', sampling: deviceRefreshInterval }] : [{ name: 'checkDevicesList', sampling: refreshInterval }];
-										await melCloud.impulseGenerator.state(true, timmers, false);
 										await configuredDevice.startStopImpulseGenerator(true, [{ name: 'checkState', sampling: deviceRefreshInterval }]);
+										const timmers = accountType === 'melcloudhome' ? [{ name: 'connect', sampling: 3000000 }, { name: 'checkDevicesList', sampling: 3000 }] : [{ name: 'checkDevicesList', sampling: refreshInterval }];
+										await melCloud.impulseGenerator.state(true, timmers, false);
 
 										//stop impulse generator
 										await impulseGenerator.state(false);

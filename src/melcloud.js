@@ -52,17 +52,11 @@ class MelCloud extends EventEmitter {
         }
     }
 
-    // MELCloud
     async checkDevicesList() {
         try {
             const devicesList = { State: false, Info: null, Devices: [], Scenes: [] }
             if (this.logDebug) this.emit('debug', `Scanning for devices...`);
-            const listDevicesData = await axios(ApiUrls.ListDevices, {
-                method: 'GET',
-                baseURL: ApiUrls.BaseURL,
-                timeout: 15000,
-                headers: this.headers
-            });
+            const listDevicesData = await this.axiosInstance(ApiUrls.ListDevices, { method: 'GET', });
 
             if (!listDevicesData || !listDevicesData.data) {
                 devicesList.Info = 'Invalid or empty response from MELCloud API'
@@ -101,7 +95,6 @@ class MelCloud extends EventEmitter {
                 // Zamiana ID na string
                 allDevices.forEach(device => {
                     device.DeviceID = String(device.DeviceID);
-                    device.Headers = this.headers;
                 });
 
                 if (this.logDebug) this.emit('debug', `Found ${allDevices.length} devices in building: ${building.Name || 'Unnamed'}`);
@@ -117,6 +110,7 @@ class MelCloud extends EventEmitter {
             devicesList.State = true;
             devicesList.Info = `Found ${devicesCount} devices`;
             devicesList.Devices = devices;
+            devicesList.Headers = this.headers;
 
             await this.functions.saveData(this.devicesFile, devicesList);
             if (this.logDebug) this.emit('debug', `${devicesCount} devices saved`);
@@ -131,7 +125,7 @@ class MelCloud extends EventEmitter {
         if (this.logDebug) this.emit('debug', `Connecting to MELCloud`);
 
         try {
-            const accountInfo = { State: false, Info: '', LoginData: null, Headers: {}, UseFahrenheit: false }
+            const accountInfo = { State: false, Info: '', Account: null, UseFahrenheit: false }
 
             const payload = {
                 Email: this.user,
@@ -168,37 +162,26 @@ class MelCloud extends EventEmitter {
                 return accountInfo;
             }
 
-            this.headers = {
+            const headers = {
                 'X-MitsContextKey': contextKey,
                 'Content-Type': 'application/json'
             };
+            this.headers = headers;
+            this.axiosInstance = axios.create({
+                baseURL: ApiUrls.BaseURL,
+                timeout: 30000,
+                headers: headers
+            });
 
             accountInfo.State = true;
             accountInfo.Info = 'Connect to MELCloud Success';
-            accountInfo.LoginData = loginData;
-            accountInfo.Headers = this.headers;
+            accountInfo.UseFahrenheit = loginData.UseFahrenheit;
+            accountInfo.Account = account;
             await this.functions.saveData(this.accountFile, accountInfo);
 
             return accountInfo
         } catch (error) {
             throw new Error(`Connect error: ${error.message}`);
-        }
-    }
-
-    async send(accountInfo) {
-        try {
-            const payload = { data: accountInfo.LoginData };
-            await axios(ApiUrls.UpdateApplicationOptions, {
-                method: 'POST',
-                baseURL: ApiUrls.BaseURL,
-                timeout: 15000,
-                headers: accountInfo.Headers,
-                data: payload
-            });
-            await this.functions.saveData(this.accountFile, accountInfo);
-            return true;
-        } catch (error) {
-            throw new Error(`Send data error: ${error.message}`);
         }
     }
 }
