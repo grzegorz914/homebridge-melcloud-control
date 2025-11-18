@@ -238,13 +238,13 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `user` | Here set the account username. |
 | `passwd` | Here set the account password. |
 | `language` | Here select the account language. |
-| `type` | Here select the account type `None/Disabled`, `MELCloud`, `MELCloud Home`. |
+| `type` | Here select the account type `0 - None/Disabled`, `1 - MELCloud`, `2 - MELCloud Home`. |
 | `ataDevices[]` | Array of ATA devices created automatically after login to MELCloud from plugin config UI. |
 | `ataDevices[].id` | Read only data, do not change it. |
 | `ataDevices[].type` | Read only data, do not change it. |
 | `ataDevices[].typeString` | Read only data, do not change it. |
 | `ataDevices[].name` | Here You can change the `Accessory Name` which is exposed to the `Homebridge/HomeKit`. |
-| `ataDevices[].displayType` | Here select device control mode `None/Disabled`, `Heater/Cooler`, `Thermostat`. |
+| `ataDevices[].displayType` | Here select device control mode `0 - None/Disabled`, `1 - Heater/Cooler`, `2 - Thermostat`. |
 | `ataDevices[].heatDryFanMode` | Here select the operatiing mode for `Heat`, if this mode is not supported, it will be disabled. |
 | `ataDevices[].coolDryFanMode` | Here select the operatiing mode for `Cool`, if this mode is not supported, it will be disabled. |
 | `ataDevices[].autoDryFanMode` | Here select the operatiing mode for `Auto`, if this mode is not supported, it will be disabled.. |
