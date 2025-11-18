@@ -181,25 +181,13 @@ class MelCloudAta extends EventEmitter {
                     this.updateData(deviceData);
                     return true;
                 case "melcloudhome":
-                    if (displayType === 1 && deviceData.Device.OperationMode === 8) {
-                        deviceData.Device.SetTemperature = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
-
-                        if (this.deviceState.DefaultCoolingSetTemperature !== deviceData.Device.DefaultCoolingSetTemperature || this.deviceState.DefaultHeatingSetTemperature !== deviceData.Device.DefaultHeatingSetTemperature) {
-                            const temps = {
-                                defaultCoolingSetTemperature: deviceData.Device.DefaultCoolingSetTemperature,
-                                defaultHeatingSetTemperature: deviceData.Device.DefaultHeatingSetTemperature
-                            };
-                            await this.functions.saveData(this.defaultTempsFile, temps);
-                        }
-                    }
-
                     switch (flag) {
                         case 'frostprotection':
                             payload = {
                                 enabled: deviceData.FrostProtection.Enabled,
                                 min: deviceData.FrostProtection.Min,
                                 max: deviceData.FrostProtection.Max,
-                                units: { "ATA": [deviceData.DeviceID] }
+                                units: { ATA: [deviceData.DeviceID] }
                             };
                             method = 'POST';
                             path = ApiUrlsHome.PostProtectionFrost;
@@ -210,7 +198,7 @@ class MelCloudAta extends EventEmitter {
                                 enabled: deviceData.OverheatProtection.Enabled,
                                 min: deviceData.OverheatProtection.Min,
                                 max: deviceData.OverheatProtection.Max,
-                                units: { "ATA": [deviceData.DeviceID] }
+                                units: { ATA: [deviceData.DeviceID] }
                             };
                             method = 'POST';
                             path = ApiUrlsHome.PostProtectionOverheat;
@@ -221,7 +209,7 @@ class MelCloudAta extends EventEmitter {
                                 enabled: deviceData.HolidayMode.Enabled,
                                 startDate: deviceData.HolidayMode.StartDate,
                                 endDate: deviceData.HolidayMode.EndDate,
-                                units: { "ATA": [deviceData.DeviceID] }
+                                units: { ATA: [deviceData.DeviceID] }
                             };
                             method = 'POST';
                             path = ApiUrlsHome.PostHolidayMode;
@@ -235,11 +223,22 @@ class MelCloudAta extends EventEmitter {
                             break;
                         case 'scene':
                             method = 'PUT';
-                            const state = flagData.Enabled ? 'Enable' : 'Disable';
-                            path = ApiUrlsHome.PutScene[state].replace('sceneid', flagData.Id);
+                            path = ApiUrlsHome.PutScene[flagData.Enabled ? 'Enable' : 'Disable'].replace('sceneid', flagData.Id);
                             this.headers.Referer = ApiUrlsHome.Referers.GetPutScenes;
                             break;
                         default:
+                            if (displayType === 1 && deviceData.Device.OperationMode === 8) {
+                                deviceData.Device.SetTemperature = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
+
+                                if (this.deviceData.Device.DefaultCoolingSetTemperature !== deviceData.Device.DefaultCoolingSetTemperature || this.deviceData.Device.DefaultHeatingSetTemperature !== deviceData.Device.DefaultHeatingSetTemperature) {
+                                    const temps = {
+                                        defaultCoolingSetTemperature: deviceData.Device.DefaultCoolingSetTemperature,
+                                        defaultHeatingSetTemperature: deviceData.Device.DefaultHeatingSetTemperature
+                                    };
+                                    await this.functions.saveData(this.defaultTempsFile, temps);
+                                }
+                            }
+
                             payload = {
                                 power: deviceData.Device.Power,
                                 setTemperature: deviceData.Device.SetTemperature,
@@ -258,7 +257,7 @@ class MelCloudAta extends EventEmitter {
 
                     this.headers['Content-Type'] = 'application/json; charset=utf-8';
                     this.headers.Origin = ApiUrlsHome.Origin;
-                    if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(payload, null, 2)}, Headers: ${JSON.stringify(this.headers, null, 2)}`);
+                    if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(payload, null, 2)}`);
                     await axios(path, {
                         method: method,
                         baseURL: ApiUrlsHome.BaseURL,

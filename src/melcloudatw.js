@@ -195,7 +195,7 @@ class MelCloudAtw extends EventEmitter {
                                 enabled: deviceData.HolidayMode.Enabled,
                                 startDate: deviceData.HolidayMode.StartDate,
                                 endDate: deviceData.HolidayMode.EndDate,
-                                units: { "ATW": [deviceData.DeviceID] }
+                                units: { ATW: [deviceData.DeviceID] }
                             };
                             method = 'POST';
                             path = ApiUrlsHome.PostHolidayMode;
@@ -209,8 +209,7 @@ class MelCloudAtw extends EventEmitter {
                             break;
                         case 'scene':
                             method = 'PUT';
-                            const state = flagData.Enabled ? 'Enable' : 'Disable';
-                            path = ApiUrlsHome.PutScene[state].replace('sceneid', flagData.Id);
+                            path = ApiUrlsHome.PutScene[flagData.Enabled ? 'Enable' : 'Disable'].replace('sceneid', flagData.Id);
                             this.headers.Referer = ApiUrlsHome.Referers.GetPutScenes;
                             break;
                         default:
@@ -237,7 +236,7 @@ class MelCloudAtw extends EventEmitter {
 
                     this.headers['Content-Type'] = 'application/json; charset=utf-8';
                     this.headers.Origin = ApiUrlsHome.Origin;
-                    if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(payload, null, 2)}, Headers: ${JSON.stringify(this.headers, null, 2)}`);
+                    if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(payload, null, 2)}`);
                     await axios(path, {
                         method: method,
                         baseURL: ApiUrlsHome.BaseURL,

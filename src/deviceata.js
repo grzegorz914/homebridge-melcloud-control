@@ -2,6 +2,7 @@ import EventEmitter from 'events';
 import MelCloudAta from './melcloudata.js';
 import RestFul from './restful.js';
 import Mqtt from './mqtt.js';
+import Functions from './functions.js';
 import { TemperatureDisplayUnits, AirConditioner } from './constants.js';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
@@ -96,6 +97,11 @@ class DeviceAta extends EventEmitter {
             button.previousValue = null;
         }
 
+        this.functions = new Functions(this.logWarn, this.logError, this.logDebug)
+            .on('warn', warn => this.emit('warn', warn))
+            .on('error', error => this.emit('error', error))
+            .on('debug', debug => this.emit('debug', debug));
+
         //device data
         this.deviceData = {};
 
@@ -104,10 +110,11 @@ class DeviceAta extends EventEmitter {
     };
 
     async externalIntegrations() {
-        try {
-            //RESTFul server
-            const restFulEnabled = this.restFul.enable || false;
-            if (restFulEnabled) {
+        //RESTFul server
+        const restFulEnabled = this.restFul.enable || false;
+        if (restFulEnabled) {
+            try {
+
                 if (!this.restFulConnected) {
                     this.restFul1 = new RestFul({
                         port: this.restFul.port,
@@ -135,11 +142,15 @@ class DeviceAta extends EventEmitter {
                             this.emit('error', error);
                         });
                 }
-            }
+            } catch (error) {
+                this.emit('warn', `RESTFul integration start error: ${error}`);
+            };
+        }
 
-            //MQTT client
-            const mqttEnabled = this.mqtt.enable || false;
-            if (mqttEnabled) {
+        //MQTT client
+        const mqttEnabled = this.mqtt.enable || false;
+        if (mqttEnabled) {
+            try {
                 if (!this.mqttConnected) {
                     this.mqtt1 = new Mqtt({
                         host: this.mqtt.host,
@@ -175,10 +186,10 @@ class DeviceAta extends EventEmitter {
                             this.emit('error', error);
                         });
                 }
-            }
-        } catch (error) {
-            this.emit('warn', `External integration start error: ${error}`);
-        };
+            } catch (error) {
+                this.emit('warn', `MQTT integration start error: ${error}`);
+            };
+        }
     }
 
     async setOverExternalIntegration(integration, deviceData, key, value) {
@@ -340,9 +351,9 @@ class DeviceAta extends EventEmitter {
             switch (this.displayType) {
                 case 1: //Heater Cooler
                     if (this.logDebug) this.emit('debug', `Prepare heater/cooler service`);
-                    this.melCloudService = new Service.HeaterCooler(serviceName, `HeaterCooler ${deviceId}`);
-                    this.melCloudService.setPrimaryService(true);
-                    this.melCloudService.getCharacteristic(Characteristic.Active)
+                    const melCloudService = new Service.HeaterCooler(serviceName, `HeaterCooler ${deviceId}`);
+                    melCloudService.setPrimaryService(true);
+                    melCloudService.getCharacteristic(Characteristic.Active)
                         .onGet(async () => {
                             const state = this.accessory.power;
                             return state;
@@ -350,19 +361,18 @@ class DeviceAta extends EventEmitter {
                         .onSet(async (state) => {
                             try {
                                 deviceData.Device.Power = state ? true : false;
-
                                 if (this.logInfo) this.emit('info', `Set power: ${state ? 'On' : 'Off'}`);
                                 await this.melCloudAta.send(this.accountType, this.displayType, deviceData, AirConditioner.EffectiveFlags.Power);
                             } catch (error) {
                                 if (this.logWarn) this.emit('warn', `Set power error: ${error}`);
                             };
                         });
-                    this.melCloudService.getCharacteristic(Characteristic.CurrentHeaterCoolerState)
+                    melCloudService.getCharacteristic(Characteristic.CurrentHeaterCoolerState)
                         .onGet(async () => {
                             const value = this.accessory.currentOperationMode;
                             return value;
                         });
-                    this.melCloudService.getCharacteristic(Characteristic.TargetHeaterCoolerState)
+                    melCloudService.getCharacteristic(Characteristic.TargetHeaterCoolerState)
                         .setProps({
                             minValue: this.accessory.operationModeSetPropsMinValue,
                             maxValue: this.accessory.operationModeSetPropsMaxValue,
@@ -377,31 +387,29 @@ class DeviceAta extends EventEmitter {
                                 switch (value) {
                                     case 0: //AUTO - AUTO
                                         value = autoDryFanMode;
-                                        deviceData.Device.OperationMode = value;
                                         break;
                                     case 1: //HEAT - HEAT
                                         value = heatDryFanMode;
-                                        deviceData.Device.OperationMode = value;
                                         break;
                                     case 2: //COOL - COOL
                                         value = coolDryFanMode;
-                                        deviceData.Device.OperationMode = value;
                                         break;
                                 };
 
+                                deviceData.Device.OperationMode = value;
                                 if (this.logInfo) this.emit('info', `Set operation mode: ${AirConditioner.OperationModeMapEnumToString[value]}`);
                                 await this.melCloudAta.send(this.accountType, this.displayType, deviceData, AirConditioner.EffectiveFlags.OperationMode);
                             } catch (error) {
                                 if (this.logWarn) this.emit('warn', `Set operation mode error: ${error}`);
                             };
                         });
-                    this.melCloudService.getCharacteristic(Characteristic.CurrentTemperature)
+                    melCloudService.getCharacteristic(Characteristic.CurrentTemperature)
                         .onGet(async () => {
                             const value = this.accessory.roomTemperature;
                             return value;
                         });
                     if (supportsFanSpeed) {
-                        this.melCloudService.getCharacteristic(Characteristic.RotationSpeed)
+                        melCloudService.getCharacteristic(Characteristic.RotationSpeed)
                             .setProps({
                                 minValue: 0,
                                 maxValue: this.accessory.fanSpeedSetPropsMaxValue,
@@ -438,7 +446,7 @@ class DeviceAta extends EventEmitter {
                             });
                     };
                     if (supportsSwingFunction) {
-                        this.melCloudService.getCharacteristic(Characteristic.SwingMode)
+                        melCloudService.getCharacteristic(Characteristic.SwingMode)
                             .onGet(async () => {
                                 //Vane Horizontal: Auto, 1, 2, 3, 4, 5, 6, 7 = Sp;it, 12 = Swing //Vertical: Auto, 1, 2, 3, 4, 5, 7 = Swing
                                 const value = this.accessory.currentSwingMode;
@@ -451,11 +459,11 @@ class DeviceAta extends EventEmitter {
                                     if (this.logInfo) this.emit('info', `Set air direction mode: ${AirConditioner.AirDirectionMapEnumToString[value]}`);
                                     await this.melCloudAta.send(this.accountType, this.displayType, deviceData, AirConditioner.EffectiveFlags.VaneVerticalVaneHorizontal);
                                 } catch (error) {
-                                    if (this.logWarn) this.emit('warn', `Set vane swing mode error: ${error}`);
+                                    if (this.logWarn) this.emit('warn', `Set air direction mode error: ${error}`);
                                 };
                             });
                     };
-                    this.melCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
+                    melCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
                         .setProps({
                             minValue: this.accessory.minTempCoolDryAuto,
                             maxValue: this.accessory.maxTempCoolDryAuto,
@@ -476,7 +484,7 @@ class DeviceAta extends EventEmitter {
                             };
                         });
                     if (supportsHeat) {
-                        this.melCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
+                        melCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
                             .setProps({
                                 minValue: this.accessory.minTempHeat,
                                 maxValue: this.accessory.maxTempHeat,
@@ -497,7 +505,7 @@ class DeviceAta extends EventEmitter {
                                 };
                             });
                     };
-                    this.melCloudService.getCharacteristic(Characteristic.LockPhysicalControls)
+                    melCloudService.getCharacteristic(Characteristic.LockPhysicalControls)
                         .onGet(async () => {
                             const value = this.accessory.lockPhysicalControl;
                             return value;
@@ -516,7 +524,7 @@ class DeviceAta extends EventEmitter {
                                 if (this.logWarn) this.emit('warn', `Set lock physical controls error: ${error}`);
                             };
                         });
-                    this.melCloudService.getCharacteristic(Characteristic.TemperatureDisplayUnits)
+                    melCloudService.getCharacteristic(Characteristic.TemperatureDisplayUnits)
                         .onGet(async () => {
                             const value = this.accessory.useFahrenheit;
                             return value;
@@ -533,18 +541,19 @@ class DeviceAta extends EventEmitter {
                                 if (this.logWarn) this.emit('warn', `Set temperature display unit error: ${error}`);
                             };
                         });
-                    accessory.addService(this.melCloudService);
+                    this.melCloudService = melCloudService;
+                    accessory.addService(melCloudService);
                     break;
                 case 2: //Thermostat
                     if (this.logDebug) this.emit('debug', `Prepare thermostat service`);
-                    this.melCloudService = new Service.Thermostat(serviceName, `Thermostat ${deviceId}`);
-                    this.melCloudService.setPrimaryService(true);
-                    this.melCloudService.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
+                    const melCloudServiceT = new Service.Thermostat(serviceName, `Thermostat ${deviceId}`);
+                    melCloudServiceT.setPrimaryService(true);
+                    melCloudServiceT.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
                         .onGet(async () => {
                             const value = this.accessory.currentOperationMode;
                             return value;
                         });
-                    this.melCloudService.getCharacteristic(Characteristic.TargetHeatingCoolingState)
+                    melCloudServiceT.getCharacteristic(Characteristic.TargetHeatingCoolingState)
                         .setProps({
                             minValue: this.accessory.operationModeSetPropsMinValue,
                             maxValue: this.accessory.operationModeSetPropsMaxValue,
@@ -560,26 +569,23 @@ class DeviceAta extends EventEmitter {
                                 switch (value) {
                                     case 0: //OFF - POWER OFF
                                         value = deviceData.Device.OperationMode;
-                                        deviceData.Device.Power = false;
                                         flag = AirConditioner.EffectiveFlags.Power;
                                         break;
                                     case 1: //HEAT - HEAT
-                                        deviceData.Device.Power = true;
                                         value = heatDryFanMode;
                                         flag = AirConditioner.EffectiveFlags.PowerOperationModeSetTemperature;
                                         break;
                                     case 2: //COOL - COOL
                                         value = coolDryFanMode;
-                                        deviceData.Device.Power = true;
                                         flag = AirConditioner.EffectiveFlags.PowerOperationModeSetTemperature
                                         break;
                                     case 3: //AUTO - AUTO
                                         value = autoDryFanMode;
-                                        deviceData.Device.Power = true;
                                         flag = AirConditioner.EffectiveFlags.PowerOperationModeSetTemperature;
                                         break;
                                 };
 
+                                deviceData.Device.Power = value > 0 ? true : false;
                                 deviceData.Device.OperationMode = value;
                                 if (this.logInfo) this.emit('info', `Set operation mode: ${AirConditioner.OperationModeMapEnumToString[value]}`);
                                 await this.melCloudAta.send(this.accountType, this.displayType, deviceData, flag);
@@ -587,12 +593,12 @@ class DeviceAta extends EventEmitter {
                                 if (this.logWarn) this.emit('warn', `Set operation mode error: ${error}`);
                             };
                         });
-                    this.melCloudService.getCharacteristic(Characteristic.CurrentTemperature)
+                    melCloudServiceT.getCharacteristic(Characteristic.CurrentTemperature)
                         .onGet(async () => {
                             const value = this.accessory.roomTemperature;
                             return value;
                         });
-                    this.melCloudService.getCharacteristic(Characteristic.TargetTemperature)
+                    melCloudServiceT.getCharacteristic(Characteristic.TargetTemperature)
                         .setProps({
                             minValue: this.accessory.minTempHeat,
                             maxValue: this.accessory.maxTempHeat,
@@ -611,7 +617,7 @@ class DeviceAta extends EventEmitter {
                                 if (this.logWarn) this.emit('warn', `Set temperature error: ${error}`);
                             };
                         });
-                    this.melCloudService.getCharacteristic(Characteristic.TemperatureDisplayUnits)
+                    melCloudServiceT.getCharacteristic(Characteristic.TemperatureDisplayUnits)
                         .onGet(async () => {
                             const value = this.accessory.useFahrenheit;
                             return value;
@@ -628,22 +634,18 @@ class DeviceAta extends EventEmitter {
                                 if (this.logWarn) this.emit('warn', `Set temperature display unit error: ${error}`);
                             };
                         });
-                    accessory.addService(this.melCloudService);
+                    this.melCloudService = melCloudServiceT;
+                    accessory.addService(melCloudServiceT);
                     break;
             };
 
             //temperature sensor services
             if (this.temperatureSensor && this.accessory.roomTemperature !== null) {
                 if (this.logDebug) this.emit('debug', `Prepare room temperature sensor service`);
-                this.roomTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Room`, `Room Temperature Sensor ${deviceId}`);
+                this.roomTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Room`, `roomTemperatureSensorService${deviceId}`);
                 this.roomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                 this.roomTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Room`);
                 this.roomTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                    .setProps({
-                        minValue: -35,
-                        maxValue: 150,
-                        minStep: 0.5
-                    })
                     .onGet(async () => {
                         const state = this.accessory.roomTemperature;
                         return state;
@@ -653,15 +655,10 @@ class DeviceAta extends EventEmitter {
 
             if (this.temperatureOutdoorSensor && supportsOutdoorTemperature && this.accessory.outdoorTemperature !== null) {
                 if (this.logDebug) this.emit('debug', `Prepare outdoor temperature sensor service`);
-                this.outdoorTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Outdoor`, `Outdoor Temperature Sensor ${deviceId}`);
+                this.outdoorTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Outdoor`, `outdoorTemperatureSensorService${deviceId}`);
                 this.outdoorTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                 this.outdoorTemperatureSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Outdoor`);
                 this.outdoorTemperatureSensorService.getCharacteristic(Characteristic.CurrentTemperature)
-                    .setProps({
-                        minValue: -35,
-                        maxValue: 150,
-                        minStep: 0.5
-                    })
                     .onGet(async () => {
                         const state = this.accessory.outdoorTemperature;
                         return state;
@@ -669,7 +666,7 @@ class DeviceAta extends EventEmitter {
                 accessory.addService(this.outdoorTemperatureSensorService);
             };
 
-            //connect sensor
+            //in standby sensor
             if (this.inStandbySensor && this.accessory.inStandbyMode !== null) {
                 if (this.logDebug) this.emit('debug', `Prepare in standby mode service`);
                 this.inStandbyService = new Service.ContactSensor(`${serviceName} In Standby`, `inStandbyService${deviceId}`);
@@ -1478,6 +1475,9 @@ class DeviceAta extends EventEmitter {
                         scheduleEnabled: scheduleEnabled
                     };
 
+                    //characteristics array
+                    const characteristics = [];
+
                     //operating mode 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
                     switch (this.displayType) {
                         case 1: //Heater Cooler
@@ -1542,18 +1542,20 @@ class DeviceAta extends EventEmitter {
                                 obj.fanSpeedSetPropsMaxValue = supportsAutomaticFanSpeed ? max + 1 : max;
                             }
 
-                            //update characteristics
-                            this.melCloudService
-                                ?.updateCharacteristic(Characteristic.Active, power)
-                                .updateCharacteristic(Characteristic.CurrentHeaterCoolerState, obj.currentOperationMode)
-                                .updateCharacteristic(Characteristic.TargetHeaterCoolerState, obj.targetOperationMode)
-                                .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-                                .updateCharacteristic(Characteristic.LockPhysicalControls, obj.lockPhysicalControl)
-                                .updateCharacteristic(Characteristic.TemperatureDisplayUnits, obj.useFahrenheit)
-                                .updateCharacteristic(Characteristic.CoolingThresholdTemperature, operationMode === 8 ? defaultCoolingSetTemperature : setTemperature);
-                            if (supportsHeat) this.melCloudService?.updateCharacteristic(Characteristic.HeatingThresholdTemperature, operationMode === 8 ? defaultHeatingSetTemperature : setTemperature);
-                            if (supportsFanSpeed) this.melCloudService?.updateCharacteristic(Characteristic.RotationSpeed, obj.currentFanSpeed);
-                            if (supportsSwingFunction) this.melCloudService?.updateCharacteristic(Characteristic.SwingMode, obj.currentSwingMode);
+                            //create characteristics
+                            characteristics.push(
+                                { type: Characteristic.Active, value: power },
+                                { type: Characteristic.CurrentHeaterCoolerState, value: obj.currentOperationMode },
+                                { type: Characteristic.TargetHeaterCoolerState, value: obj.targetOperationMode },
+                                { type: Characteristic.CurrentTemperature, value: roomTemperature },
+                                { type: Characteristic.LockPhysicalControls, value: obj.lockPhysicalControl },
+                                { type: Characteristic.TemperatureDisplayUnits, value: obj.useFahrenheit },
+                                { type: Characteristic.CoolingThresholdTemperature, value: operationMode === 8 ? defaultCoolingSetTemperature : setTemperature }
+                            );
+
+                            if (supportsHeat) characteristics.push({ type: Characteristic.HeatingThresholdTemperature, value: operationMode === 8 ? defaultHeatingSetTemperature : setTemperature });
+                            if (supportsFanSpeed) characteristics.push({ type: Characteristic.RotationSpeed, value: obj.currentFanSpeed });
+                            if (supportsSwingFunction) characteristics.push({ type: Characteristic.SwingMode, value: obj.currentSwingMode });
                             break;
                         case 2: //Thermostat
                             // Helper for mapping target operation in DRY / FAN modes
@@ -1613,16 +1615,23 @@ class DeviceAta extends EventEmitter {
                             obj.operationModeSetPropsMaxValue = supportsAuto && supportsHeat ? 3 : !supportsAuto && supportsHeat ? 2 : supportsAuto && !supportsHeat ? 3 : 2;
                             obj.operationModeSetPropsValidValues = supportsAuto && supportsHeat ? [0, 1, 2, 3] : !supportsAuto && supportsHeat ? [0, 1, 2] : supportsAuto && !supportsHeat ? [0, 2, 3] : [0, 2];
 
-                            //update characteristics
-                            this.melCloudService
-                                ?.updateCharacteristic(Characteristic.CurrentHeatingCoolingState, obj.currentOperationMode)
-                                .updateCharacteristic(Characteristic.TargetHeatingCoolingState, obj.targetOperationMode)
-                                .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
-                                .updateCharacteristic(Characteristic.TargetTemperature, setTemperature)
-                                .updateCharacteristic(Characteristic.TemperatureDisplayUnits, obj.useFahrenheit);
+                            //create characteristics
+                            characteristics.push(
+                                { type: Characteristic.CurrentHeatingCoolingState, value: obj.currentOperationMode },
+                                { type: Characteristic.TargetHeatingCoolingState, value: obj.targetOperationMode },
+                                { type: Characteristic.CurrentTemperature, value: roomTemperature },
+                                { type: Characteristic.TargetTemperature, value: setTemperature },
+                                { type: Characteristic.TemperatureDisplayUnits, value: obj.useFahrenheit }
+                            );
                             break;
                     };
                     this.accessory = obj;
+
+                    //update services
+                    for (const { type, value } of characteristics) {
+                        if (!this.functions.isValidValue(value)) continue;
+                        this.melCloudService?.updateCharacteristic(type, value);
+                    }
 
                     //other sensors
                     this.roomTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature);

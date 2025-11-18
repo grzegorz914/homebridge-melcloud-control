@@ -156,5 +156,9 @@ class Functions extends EventEmitter {
         }
     }
 
+    isValidValue(v) {
+        return v !== undefined && v !== null && !(typeof v === 'number' && Number.isNaN(v));
+    }
+
 }
 export default Functions
