@@ -86,8 +86,6 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Outdoor temperature.
       * Frost protection.
       * Overheat protection.
-      * Frost protection.
-      * Overheat protection.
       * Holiday mode.
       * Shedules control.
       * Shedule active.
@@ -255,7 +253,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ataDevices[].inStandbySensor` | This enable `In Standby Mode` sensor to use with automations in HomeKit app. |
 | `ataDevices[].connectSensor` | This enable `Connect State` sensor to use with automations in HomeKit app. |
 | `ataDevices[].errorSensor` | This enable `Error` sensor to use with automations in HomeKit app. |
-| `ataDevices[].frostProtectionSupport` | This enable extra `Frost Protectio` control and sensors to use with automations in HomeKit app. |
+| `ataDevices[].frostProtectionSupport` | This enable extra `Frost Protection` control and sensors to use with automations in HomeKit app. |
 | `ataDevices[].overheatProtectionSupport` | This enable extra `Overheat Protection` control and sensors to use with automations in HomeKit app. |
 | `ataDevices[].holidayModeSupport` | This enable extra `Holiday Mode` control and sensors to use with automations in HomeKit app. |
 | `ataDevices[].refreshInterval` | Here set the background devices state refresh time in (sec), default `5s`. |
