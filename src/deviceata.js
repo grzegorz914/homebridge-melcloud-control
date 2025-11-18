@@ -1842,7 +1842,7 @@ class DeviceAta extends EventEmitter {
                             }
 
                             //sensor
-                            const characteristicType = scene.characteristicType;
+                            const characteristicType = button.characteristicType;
                             this.buttonControlSensorServices?.[i]?.updateCharacteristic(characteristicType, button.state);
                         });
                     };
