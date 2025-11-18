@@ -136,7 +136,7 @@ class MelCloudPlatform {
 									device.id = String(device.id);
 									const deviceName = device.name;
 									const deviceType = device.type;
-									const deviceTypeText = device.typeString;
+									const deviceTypeString = device.typeString;
 									const deviceRefreshInterval = (device.refreshInterval ?? 5) * 1000;
 									const defaultTempsFile = `${prefDir}/${accountName}_${device.id}_Temps`;
 
@@ -176,21 +176,21 @@ class MelCloudPlatform {
 											configuredDevice = new DeviceErv(api, account, device, devicesFile, defaultTempsFile, accountInfo, accountFile);
 											break;
 										default:
-											if (logLevel.warn) log.warn(`${accountName}, ${deviceTypeText}, ${deviceName}, unknown device: ${deviceType}.`);
+											if (logLevel.warn) log.warn(`${accountName}, ${deviceTypeString}, ${deviceName}, unknown device: ${deviceType}.`);
 											return;
 									}
 
 									configuredDevice.on('devInfo', (info) => logLevel.devInfo && log.info(info))
-										.on('success', (msg) => logLevel.success && log.success(`${accountName}, ${deviceTypeText}, ${deviceName}, ${msg}`))
-										.on('info', (msg) => logLevel.info && log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, ${msg}`))
-										.on('debug', (msg) => logLevel.debug && log.info(`${accountName}, ${deviceTypeText}, ${deviceName}, debug: ${msg}`))
-										.on('warn', (msg) => logLevel.warn && log.warn(`${accountName}, ${deviceTypeText}, ${deviceName}, ${msg}`))
-										.on('error', (msg) => logLevel.error && log.error(`${accountName}, ${deviceTypeText}, ${deviceName}, ${msg}`));
+										.on('success', (msg) => logLevel.success && log.success(`${accountName}, ${deviceTypeString}, ${deviceName}, ${msg}`))
+										.on('info', (msg) => logLevel.info && log.info(`${accountName}, ${deviceTypeString}, ${deviceName}, ${msg}`))
+										.on('debug', (msg) => logLevel.debug && log.info(`${accountName}, ${deviceTypeString}, ${deviceName}, debug: ${msg}`))
+										.on('warn', (msg) => logLevel.warn && log.warn(`${accountName}, ${deviceTypeString}, ${deviceName}, ${msg}`))
+										.on('error', (msg) => logLevel.error && log.error(`${accountName}, ${deviceTypeString}, ${deviceName}, ${msg}`));
 
 									const accessory = await configuredDevice.start();
 									if (accessory) {
 										api.publishExternalAccessories(PluginName, [accessory]);
-										if (logLevel.success) log.success(`${accountName}, ${deviceTypeText}, ${deviceName}, Published as external accessory.`);
+										if (logLevel.success) log.success(`${accountName}, ${deviceTypeString}, ${deviceName}, Published as external accessory.`);
 
 										//start impulse generators\
 										await configuredDevice.startStopImpulseGenerator(true, [{ name: 'checkState', sampling: deviceRefreshInterval }]);

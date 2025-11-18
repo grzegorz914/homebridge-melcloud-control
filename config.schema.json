@@ -463,7 +463,7 @@
                           "title": "Display Type",
                           "type": "integer",
                           "minimum": 0,
-                          "maximum": 6,
+                          "maximum": 7,
                           "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
@@ -507,6 +507,12 @@
                               "title": "Switch + Contact Sensor",
                               "enum": [
                                 6
+                              ]
+                            },
+                            {
+                              "title": "Switch",
+                              "enum": [
+                                7
                               ]
                             }
                           ]
@@ -550,7 +556,7 @@
                           "title": "Display Type",
                           "type": "integer",
                           "minimum": 0,
-                          "maximum": 6,
+                          "maximum": 7,
                           "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
@@ -594,6 +600,12 @@
                               "title": "Switch + Contact Sensor",
                               "enum": [
                                 6
+                              ]
+                            },
+                            {
+                              "title": "Switch",
+                              "enum": [
+                                7
                               ]
                             }
                           ]
@@ -637,7 +649,7 @@
                           "title": "Display Type",
                           "type": "integer",
                           "minimum": 0,
-                          "maximum": 6,
+                          "maximum": 7,
                           "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
@@ -681,6 +693,12 @@
                               "title": "Switch + Contact Sensor",
                               "enum": [
                                 6
+                              ]
+                            },
+                            {
+                              "title": "Switch",
+                              "enum": [
+                                7
                               ]
                             }
                           ]
@@ -719,7 +737,7 @@
                           "title": "Display Type",
                           "type": "integer",
                           "minimum": 0,
-                          "maximum": 6,
+                          "maximum": 7,
                           "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
@@ -763,6 +781,12 @@
                               "title": "Switch + Contact Sensor",
                               "enum": [
                                 6
+                              ]
+                            },
+                            {
+                              "title": "Switch",
+                              "enum": [
+                                7
                               ]
                             }
                           ]
@@ -1286,7 +1310,7 @@
                           "title": "Display Type",
                           "type": "integer",
                           "minimum": 0,
-                          "maximum": 6,
+                          "maximum": 7,
                           "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
@@ -1330,6 +1354,12 @@
                               "title": "Switch + Contact Sensor",
                               "enum": [
                                 6
+                              ]
+                            },
+                            {
+                              "title": "Switch",
+                              "enum": [
+                                7
                               ]
                             }
                           ]
@@ -1373,7 +1403,7 @@
                           "title": "Display Type",
                           "type": "integer",
                           "minimum": 0,
-                          "maximum": 6,
+                          "maximum": 7,
                           "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
@@ -1417,6 +1447,12 @@
                               "title": "Switch + Contact Sensor",
                               "enum": [
                                 6
+                              ]
+                            },
+                            {
+                              "title": "Switch",
+                              "enum": [
+                                7
                               ]
                             }
                           ]
@@ -1460,7 +1496,7 @@
                           "title": "Display Type",
                           "type": "integer",
                           "minimum": 0,
-                          "maximum": 6,
+                          "maximum": 7,
                           "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
@@ -1504,6 +1540,12 @@
                               "title": "Switch + Contact Sensor",
                               "enum": [
                                 6
+                              ]
+                            },
+                            {
+                              "title": "Switch",
+                              "enum": [
+                                7
                               ]
                             }
                           ]
@@ -1542,7 +1584,7 @@
                           "title": "Display Type",
                           "type": "integer",
                           "minimum": 0,
-                          "maximum": 6,
+                          "maximum": 7,
                           "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
@@ -1586,6 +1628,12 @@
                               "title": "Switch + Contact Sensor",
                               "enum": [
                                 6
+                              ]
+                            },
+                            {
+                              "title": "Switch",
+                              "enum": [
+                                7
                               ]
                             }
                           ]
@@ -1888,7 +1936,7 @@
                           "title": "Display Type",
                           "type": "integer",
                           "minimum": 0,
-                          "maximum": 6,
+                          "maximum": 7,
                           "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
@@ -1932,6 +1980,12 @@
                               "title": "Switch + Contact Sensor",
                               "enum": [
                                 6
+                              ]
+                            },
+                            {
+                              "title": "Switch",
+                              "enum": [
+                                7
                               ]
                             }
                           ]
@@ -1975,7 +2029,7 @@
                           "title": "Display Type",
                           "type": "integer",
                           "minimum": 0,
-                          "maximum": 6,
+                          "maximum": 7,
                           "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
@@ -2019,6 +2073,12 @@
                               "title": "Switch + Contact Sensor",
                               "enum": [
                                 6
+                              ]
+                            },
+                            {
+                              "title": "Switch",
+                              "enum": [
+                                7
                               ]
                             }
                           ]
@@ -2062,7 +2122,7 @@
                           "title": "Display Type",
                           "type": "integer",
                           "minimum": 0,
-                          "maximum": 6,
+                          "maximum": 7,
                           "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
@@ -2106,6 +2166,12 @@
                               "title": "Switch + Contact Sensor",
                               "enum": [
                                 6
+                              ]
+                            },
+                            {
+                              "title": "Switch",
+                              "enum": [
+                                7
                               ]
                             }
                           ]
@@ -2144,7 +2210,7 @@
                           "title": "Display Type",
                           "type": "integer",
                           "minimum": 0,
-                          "maximum": 6,
+                          "maximum": 7,
                           "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
@@ -2188,6 +2254,12 @@
                               "title": "Switch + Contact Sensor",
                               "enum": [
                                 6
+                              ]
+                            },
+                            {
+                              "title": "Switch",
+                              "enum": [
+                                7
                               ]
                             }
                           ]

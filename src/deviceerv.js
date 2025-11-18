@@ -29,7 +29,7 @@ class DeviceErv extends EventEmitter {
         this.device = device;
         this.deviceId = device.id;
         this.deviceName = device.name;
-        this.deviceTypeText = device.typeString;
+        this.deviceTypeString = device.typeString;
         this.displayType = device.displayType;
         this.temperatureSensor = device.temperatureSensor || false;
         this.temperatureOutdoorSensor = device.temperatureOutdoorSensor || false;
@@ -42,11 +42,12 @@ class DeviceErv extends EventEmitter {
         this.schedules = this.accountType === 'melcloudhome' ? (device.schedules || []).filter(schedule => (schedule.displayType ?? 0) > 0 && schedule.id !== '0') : [];
         this.scenes = this.accountType === 'melcloudhome' ? (device.scenes || []).filter(scene => (scene.displayType ?? 0) > 0 && scene.id !== '0') : [];
         this.buttons = (device.buttonsSensors || []).filter(button => (button.displayType ?? 0) > 0);
+
+        //files
         this.devicesFile = devicesFile;
         this.defaultTempsFile = defaultTempsFile;
         this.accountInfo = accountInfo;
         this.accountFile = accountFile;
-        this.displayDeviceInfo = true;
 
         //external integrations
         this.restFul = account.restFul ?? {};
@@ -54,8 +55,8 @@ class DeviceErv extends EventEmitter {
         this.mqtt = account.mqtt ?? {};
         this.mqttConnected = false;
 
-        const serviceType = [null, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor];
-        const characteristicType = [null, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState];
+        const serviceType = [null, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor, null];
+        const characteristicType = [null, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState, null];
 
         //presets configured
         for (const preset of this.presets) {
@@ -96,12 +97,21 @@ class DeviceErv extends EventEmitter {
             .on('error', error => this.emit('error', error))
             .on('debug', debug => this.emit('debug', debug));
 
-        //device data
+        //other variables
+        this.displayDeviceInfo = true;
         this.deviceData = {};
-
-        //accessory
         this.accessory = {};
     };
+
+    async startStopImpulseGenerator(state, timers = []) {
+        try {
+            //start impulse generator 
+            await this.melCloudErv.impulseGenerator.state(state, timers)
+            return true;
+        } catch (error) {
+            throw new Error(`Impulse generator start error: ${error}`);
+        }
+    }
 
     async externalIntegrations() {
         //RESTFul server
@@ -150,7 +160,7 @@ class DeviceErv extends EventEmitter {
                         host: this.mqtt.host,
                         port: this.mqtt.port || 1883,
                         clientId: this.mqtt.clientId ? `melcloud_${this.mqtt.clientId}_${Math.random().toString(16).slice(3)}` : `melcloud_${Math.random().toString(16).slice(3)}`,
-                        prefix: this.mqtt.prefix ? `melcloud/${this.mqtt.prefix}/${this.deviceTypeText}/${this.deviceName}` : `melcloud/${this.deviceTypeText}/${this.deviceName}`,
+                        prefix: this.mqtt.prefix ? `melcloud/${this.mqtt.prefix}/${this.deviceTypeString}/${this.deviceName}` : `melcloud/${this.deviceTypeString}/${this.deviceName}`,
                         user: this.mqtt.auth?.user,
                         passwd: this.mqtt.auth?.passwd,
                         logWarn: this.logWarn,
@@ -267,22 +277,12 @@ class DeviceErv extends EventEmitter {
         };
     }
 
-    async startStopImpulseGenerator(state, timers = []) {
-        try {
-            //start impulse generator 
-            await this.melCloudErv.impulseGenerator.state(state, timers)
-            return true;
-        } catch (error) {
-            throw new Error(`Impulse generator start error: ${error}`);
-        }
-    }
-
     //prepare accessory
     async prepareAccessory() {
         try {
             const deviceData = this.deviceData;
             const deviceId = this.deviceId;
-            const deviceTypeText = this.deviceTypeText;
+            const deviceTypeString = this.deviceTypeString;
             const deviceName = this.deviceName;
             const accountName = this.accountName;
             const presetsOnServer = this.accessory.presets;
@@ -318,7 +318,7 @@ class DeviceErv extends EventEmitter {
                 .setCharacteristic(Characteristic.ConfiguredName, accessoryName);
 
             //services
-            const serviceName = `${deviceTypeText} ${accessoryName}`;
+            const serviceName = `${deviceTypeString} ${accessoryName}`;
             switch (this.displayType) {
                 case 1: //Heater Cooler
                     if (this.logDebug) this.emit('debug', `Prepare heather/cooler service`);
@@ -835,17 +835,19 @@ class DeviceErv extends EventEmitter {
                     }
 
                     //sensor
-                    if (this.logDebug) this.emit('debug', `Prepare preset control sensor s${name}  ervice`);
-                    const presetControlSensorService = new serviceType(serviceName1, `presetControlSensorService${deviceId} ${i}`);
-                    presetControlSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                    presetControlSensorService.setCharacteristic(Characteristic.ConfiguredName, `${serviceName1} Control`);
-                    presetControlSensorService.getCharacteristic(characteristicType)
-                        .onGet(async () => {
-                            const state = this.accessory.scheduleEnabled;
-                            return state;
-                        })
-                    this.presetControlSensorServices.push(presetControlSensorService);
-                    accessory.addService(presetControlSensorService);
+                    if (preset.displayType < 7) {
+                        if (this.logDebug) this.emit('debug', `Prepare preset control sensor s${name}  ervice`);
+                        const presetControlSensorService = new serviceType(serviceName1, `presetControlSensorService${deviceId} ${i}`);
+                        presetControlSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                        presetControlSensorService.setCharacteristic(Characteristic.ConfiguredName, `${serviceName1} Control`);
+                        presetControlSensorService.getCharacteristic(characteristicType)
+                            .onGet(async () => {
+                                const state = this.accessory.scheduleEnabled;
+                                return state;
+                            })
+                        this.presetControlSensorServices.push(presetControlSensorService);
+                        accessory.addService(presetControlSensorService);
+                    }
                 });
             };
 
@@ -892,30 +894,34 @@ class DeviceErv extends EventEmitter {
                         }
 
                         //sensor
-                        if (this.logDebug) this.emit('debug', `Prepare schedule control sensor ${name} service`);
-                        this.scheduleControlSensorService = new serviceType(`${serviceName2} Control`, `scheduleControlSensorService${deviceId} ${i}`);
-                        this.scheduleControlSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                        this.scheduleControlSensorService.setCharacteristic(Characteristic.ConfiguredName, `${serviceName2} Control`);
-                        this.scheduleControlSensorService.getCharacteristic(characteristicType)
-                            .onGet(async () => {
-                                const state = this.accessory.scheduleEnabled;
-                                return state;
-                            })
-                        accessory.addService(this.scheduleControlSensorService);
+                        if (schedule.displayType < 7) {
+                            if (this.logDebug) this.emit('debug', `Prepare schedule control sensor ${name} service`);
+                            this.scheduleControlSensorService = new serviceType(`${serviceName2} Control`, `scheduleControlSensorService${deviceId} ${i}`);
+                            this.scheduleControlSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                            this.scheduleControlSensorService.setCharacteristic(Characteristic.ConfiguredName, `${serviceName2} Control`);
+                            this.scheduleControlSensorService.getCharacteristic(characteristicType)
+                                .onGet(async () => {
+                                    const state = this.accessory.scheduleEnabled;
+                                    return state;
+                                })
+                            accessory.addService(this.scheduleControlSensorService);
+                        }
                     }
 
                     //sensors
-                    if (this.logDebug) this.emit('debug', `Prepare schedule sensor ${name} service`);
-                    const scheduleSensorService = new serviceType(serviceName1, `scheduleSensorService${deviceId} ${i}`);
-                    scheduleSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                    scheduleSensorService.setCharacteristic(Characteristic.ConfiguredName, serviceName1);
-                    scheduleSensorService.getCharacteristic(characteristicType)
-                        .onGet(async () => {
-                            const state = schedule.state;
-                            return state;
-                        });
-                    this.scheduleSensorServices.push(scheduleSensorService);
-                    accessory.addService(scheduleSensorService);
+                    if (schedule.displayType < 7) {
+                        if (this.logDebug) this.emit('debug', `Prepare schedule sensor ${name} service`);
+                        const scheduleSensorService = new serviceType(serviceName1, `scheduleSensorService${deviceId} ${i}`);
+                        scheduleSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                        scheduleSensorService.setCharacteristic(Characteristic.ConfiguredName, serviceName1);
+                        scheduleSensorService.getCharacteristic(characteristicType)
+                            .onGet(async () => {
+                                const state = schedule.state;
+                                return state;
+                            });
+                        this.scheduleSensorServices.push(scheduleSensorService);
+                        accessory.addService(scheduleSensorService);
+                    }
                 });
             };
 
@@ -961,17 +967,20 @@ class DeviceErv extends EventEmitter {
                         accessory.addService(sceneControlService);
                     }
 
-                    if (this.logDebug) this.emit('debug', `Prepare scene control sensor ${name} service`);
-                    const sceneControlSensorService = new serviceType(`${serviceName1} Control`, `sceneControlSensorService${deviceId} ${i}`);
-                    sceneControlSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                    sceneControlSensorService.setCharacteristic(Characteristic.ConfiguredName, `${serviceName1} Control`);
-                    sceneControlSensorService.getCharacteristic(characteristicType)
-                        .onGet(async () => {
-                            const state = scene.state;
-                            return state;
-                        })
-                    this.sceneControlSensorServices.push(sceneControlSensorService);
-                    accessory.addService(sceneControlSensorService);
+                    //sensor
+                    if (scene.displayType < 7) {
+                        if (this.logDebug) this.emit('debug', `Prepare scene control sensor ${name} service`);
+                        const sceneControlSensorService = new serviceType(`${serviceName1} Control`, `sceneControlSensorService${deviceId} ${i}`);
+                        sceneControlSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                        sceneControlSensorService.setCharacteristic(Characteristic.ConfiguredName, `${serviceName1} Control`);
+                        sceneControlSensorService.getCharacteristic(characteristicType)
+                            .onGet(async () => {
+                                const state = scene.state;
+                                return state;
+                            })
+                        this.sceneControlSensorServices.push(sceneControlSensorService);
+                        accessory.addService(sceneControlSensorService);
+                    }
                 });
             };
 
@@ -1095,17 +1104,19 @@ class DeviceErv extends EventEmitter {
                     }
 
                     //sensor
-                    if (this.logDebug) this.emit('debug', `Prepare button control sensor ${name} service`);
-                    const buttonControlSensorService = new serviceType(serviceName1, `buttonControlSensorService${deviceId} ${i}`);
-                    buttonControlSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                    buttonControlSensorService.setCharacteristic(Characteristic.ConfiguredName, serviceName1);
-                    buttonControlSensorService.getCharacteristic(characteristicType)
-                        .onGet(async () => {
-                            const state = button.state;
-                            return state;
-                        })
-                    this.buttonControlSensorServices.push(buttonControlSensorService);
-                    accessory.addService(buttonControlSensorService);
+                    if (button.displayType < 7) {
+                        if (this.logDebug) this.emit('debug', `Prepare button control sensor ${name} service`);
+                        const buttonControlSensorService = new serviceType(serviceName1, `buttonControlSensorService${deviceId} ${i}`);
+                        buttonControlSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                        buttonControlSensorService.setCharacteristic(Characteristic.ConfiguredName, serviceName1);
+                        buttonControlSensorService.getCharacteristic(characteristicType)
+                            .onGet(async () => {
+                                const state = button.state;
+                                return state;
+                            })
+                        this.buttonControlSensorServices.push(buttonControlSensorService);
+                        accessory.addService(buttonControlSensorService);
+                    }
                 });
             };
 
@@ -1122,7 +1133,7 @@ class DeviceErv extends EventEmitter {
             this.melCloudErv = new MelCloudErv(this.account, this.device, this.devicesFile, this.defaultTempsFile, this.accountFile)
                 .on('deviceInfo', (modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) => {
                     if (this.logDeviceInfo && this.displayDeviceInfo) {
-                        this.emit('devInfo', `---- ${this.deviceTypeText}: ${this.deviceName} ----`);
+                        this.emit('devInfo', `---- ${this.deviceTypeString}: ${this.deviceName} ----`);
                         this.emit('devInfo', `Account: ${this.accountName}`);
                         if (modelIndoor) this.emit('devInfo', `Indoor: ${modelIndoor}`);
                         if (modelOutdoor) this.emit('devInfo', `Outdoor: ${modelOutdoor}`);
@@ -1135,7 +1146,7 @@ class DeviceErv extends EventEmitter {
 
                     //accessory info
                     this.manufacturer = 'Mitsubishi';
-                    this.model = modelIndoor ? modelIndoor : modelOutdoor ? modelOutdoor : `${this.deviceTypeText} ${this.deviceId}`;
+                    this.model = modelIndoor ? modelIndoor : modelOutdoor ? modelOutdoor : `${this.deviceTypeString} ${this.deviceId}`;
                     this.serialNumber = serialNumber.toString();
                     this.firmwareRevision = firmwareAppVersion.toString();
 
@@ -1436,12 +1447,10 @@ class DeviceErv extends EventEmitter {
                                 && presetData.SetFanSpeed === setFanSpeed) : false;
 
                             //control
-                            if (preset.displayType > 3) {
-                                this.presetControlServices?.[i]?.updateCharacteristic(Characteristic.On, preset.state);
-                            }
+                            if (preset.displayType > 3) this.presetControlServices?.[i]?.updateCharacteristic(Characteristic.On, preset.state);
 
-                            //sencor
-                            this.presetControlSensorServices?.[i]?.updateCharacteristic(characteristicType, preset.state);
+                            //sensor
+                            if (preset.displayType < 7) this.presetControlSensorServices?.[i]?.updateCharacteristic(characteristicType, preset.state);
                         });
                     };
 
@@ -1454,38 +1463,35 @@ class DeviceErv extends EventEmitter {
 
                             //control
                             if (i === 0) {
-                                if (schedule.displayType > 3) {
-                                    this.scheduleControlService?.updateCharacteristic(Characteristic.On, scheduleEnabled);
-                                }
-                                this.scheduleControlSensorService?.updateCharacteristic(characteristicType, scheduleEnabled);
+                                if (schedule.displayType > 3) this.scheduleControlService?.updateCharacteristic(Characteristic.On, scheduleEnabled);
+                                if (schedule.displayType < 7) this.scheduleControlSensorService?.updateCharacteristic(characteristicType, scheduleEnabled);
                             }
 
                             //sensor
-                            this.scheduleSensorServices?.[i]?.updateCharacteristic(characteristicType, schedule.state);
+                            if (schedule.displayType < 7) this.scheduleSensorServices?.[i]?.updateCharacteristic(characteristicType, schedule.state);
                         });
                     };
 
-                    //schedules
+                    //scenes
                     if (this.scenes.length > 0) {
                         this.scenes.forEach((scene, i) => {
                             const sceneData = scenesOnServer.find(s => s.Id === scene.id);
+                            const characteristicType = scene.characteristicType;
                             scene.state = sceneData.Enabled;
 
                             //control
-                            if (scene.displayType > 3) {
-                                this.sceneControlServices?.[i]?.updateCharacteristic(Characteristic.On, scene.state);
-                            }
+                            if (scene.displayType > 3) this.sceneControlServices?.[i]?.updateCharacteristic(Characteristic.On, scene.state);
 
                             //sensor
-                            const characteristicType = scene.characteristicType;
-                            this.sceneControlSensorServices?.[i]?.updateCharacteristic(characteristicType, scene.state);
+                            if (scene.displayType < 7) this.sceneControlSensorServices?.[i]?.updateCharacteristic(characteristicType, scene.state);
                         });
                     };
 
                     //buttons
                     if (this.buttons.length > 0) {
                         this.buttons.forEach((button, i) => {
-                            const mode = button.mode;;
+                            const characteristicType = button.characteristicType;
+                            const mode = button.mode;
                             switch (mode) {
                                 case 0: //POWER ON,OFF
                                     button.state = (power === true);
@@ -1535,13 +1541,10 @@ class DeviceErv extends EventEmitter {
                             };
 
                             //control
-                            if (button.displayType > 3) {
-                                this.buttonControlServices?.[i]?.updateCharacteristic(Characteristic.On, button.state);
-                            }
+                            if (button.displayType > 3) this.buttonControlServices?.[i]?.updateCharacteristic(Characteristic.On, button.state);
 
                             //sensor
-                            const characteristicType = button.characteristicType;
-                            this.buttonControlSensorServices?.[i]?.updateCharacteristic(characteristicType, button.state);
+                            if (button.displayType < 7) this.buttonControlSensorServices?.[i]?.updateCharacteristic(characteristicType, button.state);
                         });
                     };
 
