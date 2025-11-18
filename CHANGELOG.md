@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Changes
 
-- added option to set only switch for presets, scenses, schedules or buttons
+- added option to set only switch for presets, scenes, schedules or buttons
 - readme updated
 - cleanup
 
