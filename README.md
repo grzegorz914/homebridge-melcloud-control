@@ -91,6 +91,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Shedule active.
       * Scene control.
       * In standby.
+      * Is connected.
       * Error.
 * Heat Pump:
   * Heater Cooler:
@@ -148,6 +149,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Shedule active.
       * Scene control.
       * In standby.
+      * Is connected.
       * Error.
 * Energy Recovery Ventilation Lossnay:
   * Heater Cooler:
@@ -186,6 +188,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Shedule active.
       * Scene control.
       * In standby.
+      * Is connected.
       * Error.
 
 ### HOME app current device mode display
