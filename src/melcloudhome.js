@@ -16,6 +16,7 @@ class MelCloudHome extends EventEmitter {
         this.user = account.user;
         this.passwd = account.passwd;
         this.language = account.language;
+        this.logSuccess = account.log?.success;
         this.logWarn = account.log?.warn;
         this.logError = account.log?.error;
         this.logDebug = account.log?.debug;
@@ -23,6 +24,7 @@ class MelCloudHome extends EventEmitter {
         this.buildingsFile = buildingsFile;
         this.devicesFile = devicesFile;
         this.headers = {};
+        this.webSocketOptions = {};
 
         this.functions = new Functions(this.logWarn, this.logError, this.logDebug)
             .on('warn', warn => this.emit('warn', warn))
@@ -208,6 +210,7 @@ class MelCloudHome extends EventEmitter {
             devicesList.Devices = devices;
             devicesList.Scenes = scenes;
             devicesList.Headers = this.headers;
+            devicesList.WebSocketOptions = this.webSocketOptions;
 
             await this.functions.saveData(this.devicesFile, devicesList);
             if (this.logDebug) this.emit('debug', `${devicesCount} devices saved`);
@@ -275,6 +278,22 @@ class MelCloudHome extends EventEmitter {
             page.on('pageerror', error => this.emit('error', `Browser error: ${error.message}`));
             page.setDefaultTimeout(GLOBAL_TIMEOUT);
             page.setDefaultNavigationTimeout(GLOBAL_TIMEOUT);
+
+            // === CDP session ===
+            let hash = null;
+            const client = await page.createCDPSession();
+            await client.send('Network.enable')
+            client.on('Network.webSocketCreated', ({ url }) => {
+                try {
+                    if (url.startsWith('wss://ws.melcloudhome.com/?hash=')) {
+                        const params = new URL(url).searchParams;
+                        hash = params.get('hash');
+                        if (this.logDebug) this.emit('debug', `MelCloudHome WS hash detected: ${hash}`);
+                    }
+                } catch (err) {
+                    this.emit('error', `CDP WebSocketCreated handler error: ${err.message}`);
+                }
+            });
 
             try {
                 await page.goto(ApiUrlsHome.BaseURL, { waitUntil: ['domcontentloaded', 'networkidle2'], timeout: GLOBAL_TIMEOUT });
@@ -355,6 +374,16 @@ class MelCloudHome extends EventEmitter {
                 timeout: 30000,
                 headers: headers
             })
+
+            this.webSocketOptions = {
+                Hash: hash,
+                Headers: {
+                    'Origin': ApiUrlsHome.BaseURL,
+                    'Pragma': 'no-cache',
+                    'Cache-Control': 'no-cache'
+                }
+            };
+
 
             accountInfo.State = true;
             accountInfo.Info = 'Connect to MELCloud Home Success';

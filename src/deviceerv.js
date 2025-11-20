@@ -1006,7 +1006,7 @@ class DeviceErv extends EventEmitter {
                     //control
                     if (button.displayType > 3) {
                         if (this.logDebug) this.emit('debug', `Prepare button control ${name} service`);
-                        const buttonControlService = new serviceType(serviceName1, `buttonControlService${deviceId} ${i}`);
+                        const buttonControlService = new Service.Switch(serviceName1, `buttonControlService${deviceId} ${i}`);
                         buttonControlService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                         buttonControlService.setCharacteristic(Characteristic.ConfiguredName, serviceName1);
                         buttonControlService.getCharacteristic(Characteristic.On)
@@ -1438,6 +1438,8 @@ class DeviceErv extends EventEmitter {
                     if (this.presets.length > 0) {
                         this.presets.forEach((preset, i) => {
                             const presetData = presetsOnServer.find(p => p.ID === preset.id);
+                            if (!presetData) return;
+
                             const characteristicType = preset.characteristicType;
 
                             preset.state = presetData ? (presetData.Power === power
@@ -1458,6 +1460,8 @@ class DeviceErv extends EventEmitter {
                     if (this.schedules.length > 0 && scheduleEnabled !== null) {
                         this.schedules.forEach((schedule, i) => {
                             const scheduleData = schedulesOnServer.find(s => s.Id === schedule.id);
+                            if (!scheduleData) return;
+
                             const characteristicType = schedule.characteristicType;
                             schedule.state = scheduleEnabled ? (scheduleData.Enabled ?? false) : false;
 
@@ -1476,6 +1480,8 @@ class DeviceErv extends EventEmitter {
                     if (this.scenes.length > 0) {
                         this.scenes.forEach((scene, i) => {
                             const sceneData = scenesOnServer.find(s => s.Id === scene.id);
+                            if (!sceneData) return;
+
                             const characteristicType = scene.characteristicType;
                             scene.state = sceneData.Enabled;
 

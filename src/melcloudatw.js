@@ -8,6 +8,7 @@ class MelCloudAtw extends EventEmitter {
     constructor(account, device, devicesFile, defaultTempsFile, accountFile) {
         super();
         this.accountType = account.type;
+        this.logSuccess = account.log?.success;
         this.logWarn = account.log?.warn;
         this.logError = account.log?.error;
         this.logDebug = account.log?.debug;
@@ -141,6 +142,8 @@ class MelCloudAtw extends EventEmitter {
             let method = null
             let payload = {};
             let path = '';
+            let headers = this.headers;
+            let updateState = true;
             switch (accountType) {
                 case "melcloud":
                     switch (flag) {
@@ -183,7 +186,7 @@ class MelCloudAtw extends EventEmitter {
                         method: 'POST',
                         baseURL: ApiUrls.BaseURL,
                         timeout: 30000,
-                        headers: this.headers,
+                        headers: headers,
                         data: payload
                     });
                     this.updateData(deviceData);
@@ -199,18 +202,18 @@ class MelCloudAtw extends EventEmitter {
                             };
                             method = 'POST';
                             path = ApiUrlsHome.PostHolidayMode;
-                            this.headers.Referer = ApiUrlsHome.Referers.PostHolidayMode.replace('deviceid', deviceData.DeviceID);
+                            headers.Referer = ApiUrlsHome.Referers.PostHolidayMode.replace('deviceid', deviceData.DeviceID);
                             break;
                         case 'schedule':
                             payload = { enabled: deviceData.ScheduleEnabled };
                             method = 'PUT';
                             path = ApiUrlsHome.PutScheduleEnabled.replace('deviceid', deviceData.DeviceID);
-                            this.headers.Referer = ApiUrlsHome.Referers.PutScheduleEnabled.replace('deviceid', deviceData.DeviceID);
+                            headers.Referer = ApiUrlsHome.Referers.PutScheduleEnabled.replace('deviceid', deviceData.DeviceID);
                             break;
                         case 'scene':
                             method = 'PUT';
                             path = ApiUrlsHome.PutScene[flagData.Enabled ? 'Enable' : 'Disable'].replace('sceneid', flagData.Id);
-                            this.headers.Referer = ApiUrlsHome.Referers.GetPutScenes;
+                            headers.Referer = ApiUrlsHome.Referers.GetPutScenes;
                             break;
                         default:
                             payload = {
@@ -230,21 +233,22 @@ class MelCloudAtw extends EventEmitter {
                             };
                             method = 'PUT';
                             path = ApiUrlsHome.PutAtw.replace('deviceid', deviceData.DeviceID);
-                            this.headers.Referer = ApiUrlsHome.Referers.PutDeviceSettings;
+                            headers.Referer = ApiUrlsHome.Referers.PutDeviceSettings;
+                            updateState = false;
                             break
                     }
 
-                    this.headers['Content-Type'] = 'application/json; charset=utf-8';
-                    this.headers.Origin = ApiUrlsHome.Origin;
+                    headers['Content-Type'] = 'application/json; charset=utf-8';
+                    headers.Origin = ApiUrlsHome.Origin;
                     if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(payload, null, 2)}`);
                     await axios(path, {
                         method: method,
                         baseURL: ApiUrlsHome.BaseURL,
                         timeout: 30000,
-                        headers: this.headers,
+                        headers: headers,
                         data: payload
                     });
-                    this.updateData(deviceData);
+                    this.updateData(deviceData, updateState);
                     return true;
                 default:
                     return;
@@ -255,9 +259,9 @@ class MelCloudAtw extends EventEmitter {
         }
     }
 
-    updateData(deviceData) {
+    updateData(deviceData, updateState = true) {
         this.locks = true;
-        this.emit('deviceState', deviceData);
+        if (updateState) this.emit('deviceState', deviceData);
 
         setTimeout(() => {
             this.locks = false

@@ -85,12 +85,12 @@ class MelCloudPlatform {
 						.on('start', async () => {
 							try {
 								//melcloud account
-								const melCloud = account.type === 'melcloud' ? new MelCloud(account, accountFile, buildingsFile, devicesFile, true) : new MelCloudHome(account, accountFile, buildingsFile, devicesFile, true);
-								melCloud.on('success', (msg) => logLevel.success && log.success(`${accountName}, ${msg}`))
-									.on('info', (msg) => logLevel.info && log.info(`${accountName}, ${msg}`))
-									.on('debug', (msg) => logLevel.debug && log.info(`${accountName}, debug: ${msg}`))
-									.on('warn', (msg) => logLevel.warn && log.warn(`${accountName}, ${msg}`))
-									.on('error', (msg) => logLevel.error && log.error(`${accountName}, ${msg}`));
+								const melCloud = account.type === 'melcloud' ? new MelCloud(account, accountFile, buildingsFile, devicesFile, true) : new MelCloudHome(account, accountFile, buildingsFile, devicesFile, true)
+									.on('success', (msg) => log.success(`${accountName}, ${msg}`))
+									.on('info', (msg) => log.info(`${accountName}, ${msg}`))
+									.on('debug', (msg) => log.info(`${accountName}, debug: ${msg}`))
+									.on('warn', (msg) => log.warn(`${accountName}, ${msg}`))
+									.on('error', (msg) => log.error(`${accountName}, ${msg}`));
 
 								//connect
 								let accountInfo;
@@ -181,11 +181,11 @@ class MelCloudPlatform {
 									}
 
 									configuredDevice.on('devInfo', (info) => logLevel.devInfo && log.info(info))
-										.on('success', (msg) => logLevel.success && log.success(`${accountName}, ${deviceTypeString}, ${deviceName}, ${msg}`))
-										.on('info', (msg) => logLevel.info && log.info(`${accountName}, ${deviceTypeString}, ${deviceName}, ${msg}`))
-										.on('debug', (msg) => logLevel.debug && log.info(`${accountName}, ${deviceTypeString}, ${deviceName}, debug: ${msg}`))
-										.on('warn', (msg) => logLevel.warn && log.warn(`${accountName}, ${deviceTypeString}, ${deviceName}, ${msg}`))
-										.on('error', (msg) => logLevel.error && log.error(`${accountName}, ${deviceTypeString}, ${deviceName}, ${msg}`));
+										.on('success', (msg) => log.success(`${accountName}, ${deviceTypeString}, ${deviceName}, ${msg}`))
+										.on('info', (msg) => log.info(`${accountName}, ${deviceTypeString}, ${deviceName}, ${msg}`))
+										.on('debug', (msg) => log.info(`${accountName}, ${deviceTypeString}, ${deviceName}, debug: ${msg}`))
+										.on('warn', (msg) => log.warn(`${accountName}, ${deviceTypeString}, ${deviceName}, ${msg}`))
+										.on('error', (msg) => log.error(`${accountName}, ${deviceTypeString}, ${deviceName}, ${msg}`));
 
 									const accessory = await configuredDevice.start();
 									if (accessory) {
@@ -194,7 +194,7 @@ class MelCloudPlatform {
 
 										//start impulse generators\
 										await configuredDevice.startStopImpulseGenerator(true, [{ name: 'checkState', sampling: deviceRefreshInterval }]);
-										const timmers = accountType === 'melcloudhome' ? [{ name: 'connect', sampling: 3000000 }, { name: 'checkDevicesList', sampling: 3000 }] : [{ name: 'checkDevicesList', sampling: refreshInterval }];
+										const timmers = accountType === 'melcloudhome' ? [{ name: 'connect', sampling: 3300000 }, { name: 'checkDevicesList', sampling: 3000 }] : [{ name: 'checkDevicesList', sampling: refreshInterval }];
 										await melCloud.impulseGenerator.state(true, timmers, false);
 
 										//stop impulse generator

@@ -1,3 +1,4 @@
+import WebSocket from 'ws';
 import axios from 'axios';
 import EventEmitter from 'events';
 import ImpulseGenerator from './impulsegenerator.js';
@@ -8,6 +9,7 @@ class MelCloudAta extends EventEmitter {
     constructor(account, device, devicesFile, defaultTempsFile, accountFile) {
         super();
         this.accountType = account.type;
+        this.logSuccess = account.log?.success;
         this.logWarn = account.log?.warn;
         this.logError = account.log?.error;
         this.logDebug = account.log?.debug;
@@ -25,6 +27,10 @@ class MelCloudAta extends EventEmitter {
         //set default values
         this.deviceData = {};
         this.headers = {};
+        this.socket = null;
+        this.connecting = false;
+        this.socketConnected = false;
+        this.heartbeat = null;
 
         //lock flag
         this.locks = false;
@@ -50,26 +56,123 @@ class MelCloudAta extends EventEmitter {
         }
     }
 
+    cleanupSocket() {
+        if (this.heartbeat) {
+            clearInterval(this.heartbeat);
+            this.heartbeat = null;
+        }
+
+        if (this.socket) {
+            try { this.socket.close(); } catch { }
+            this.socket = null;
+        }
+
+        this.socketConnected = false;
+    }
+
     async checkState() {
         try {
+
             //read device info from file
             const devicesData = await this.functions.readData(this.devicesFile, true);
             if (!devicesData) return;
 
             this.headers = devicesData.Headers;
             const deviceData = devicesData.Devices.find(device => device.DeviceID === this.deviceId);
+            deviceData.Scenes = devicesData.Scenes ?? [];
+
             if (this.accountType === 'melcloudhome') {
-                deviceData.Scenes = devicesData.Scenes ?? [];
                 deviceData.Device.OperationMode = AirConditioner.OperationModeMapStringToEnum[deviceData.Device.OperationMode] ?? deviceData.Device.OperationMode;
                 deviceData.Device.ActualFanSpeed = AirConditioner.FanSpeedMapStringToEnum[deviceData.Device.ActualFanSpeed] ?? deviceData.Device.ActualFanSpeed;
                 deviceData.Device.SetFanSpeed = AirConditioner.FanSpeedMapStringToEnum[deviceData.Device.SetFanSpeed] ?? deviceData.Device.SetFanSpeed;
                 deviceData.Device.VaneVerticalDirection = AirConditioner.VaneVerticalDirectionMapStringToEnum[deviceData.Device.VaneVerticalDirection] ?? deviceData.Device.VaneVerticalDirection;
-                deviceData.Device.VaneHorizontalDirection = AirConditioner.VaneHorizontalDirectionMapStringToEnum[deviceData.Device.VaneHorizontalDirection] ?? deviceData.Device.VaneHorizontalDirection;
+                deviceData.Device.VaneHorizontalDirection = AirConditioner.VaneHorizontalDirectionMapStringToEnum[deviceData.Device.VaneHorizontalDirection] ?? deviceData.Device.VaneHorizontalDirection
 
                 //read default temps
                 const temps = await this.functions.readData(this.defaultTempsFile, true);
                 deviceData.Device.DefaultHeatingSetTemperature = temps?.defaultHeatingSetTemperature ?? 20;
                 deviceData.Device.DefaultCoolingSetTemperature = temps?.defaultCoolingSetTemperature ?? 24;
+
+                if (!this.connecting && !this.socketConnected) {
+                    this.connecting = true;
+
+                    const url = `${ApiUrlsHome.WebSocketURL}${devicesData.WebSocketOptions.Hash}`;
+                    try {
+                        const socket = new WebSocket(url, { headers: devicesData.WebSocketOptions.Headers })
+                            .on('error', (error) => {
+                                if (this.logError) this.emit('error', `Socket error: ${error}`);
+                                socket.close();
+                            })
+                            .on('close', () => {
+                                if (this.logDebug) this.emit('debug', `Socket closed`);
+                                this.cleanupSocket();
+                            })
+                            .on('open', () => {
+                                this.socket = socket;
+                                this.socketConnected = true;
+                                this.connecting = false;
+                                if (this.logSuccess) this.emit('success', `Socket Connect Success`);
+
+                                // heartbeat
+                                this.heartbeat = setInterval(() => {
+                                    if (socket.readyState === socket.OPEN) {
+                                        if (!this.logDebug) this.emit('debug', `Socket send heartbeat`);
+                                        socket.ping();
+                                    }
+                                }, 30000);
+                            })
+                            .on('pong', () => {
+                                if (this.logDebug) this.emit('debug', `Socket received heartbeat`);
+                            })
+                            .on('message', (message) => {
+                                const parsedMessage = JSON.parse(message);
+                                const stringifyMessage = JSON.stringify(parsedMessage, null, 2);
+                                if (this.logDebug) this.emit('debug', `Incoming message: ${stringifyMessage}`);
+                                if (parsedMessage.message === 'Forbidden') return;
+
+                                const messageData = parsedMessage?.[0]?.Data;
+                                if (!messageData) return;
+
+                                let updateDeviceState = false;
+                                const unitId = messageData?.id;
+                                switch (unitId) {
+                                    case this.deviceId:
+                                        const messageType = parsedMessage[0].messageType;
+                                        switch (messageType) {
+                                            case 'unitStateChanged':
+                                                const settings = Object.fromEntries(
+                                                    messageData.settings.map(({ name, value }) => {
+                                                        let parsedValue = value;
+                                                        if (value === "True") parsedValue = true;
+                                                        else if (value === "False") parsedValue = false;
+                                                        else if (!isNaN(value) && value !== "") parsedValue = Number(value);
+                                                        return [name, parsedValue];
+                                                    })
+                                                );
+                                                Object.assign(deviceData.Device, settings);
+                                                updateDeviceState = true;
+                                                break;
+                                            case 'unitWifiSignalChanged':
+                                                Object.assign(deviceData, messageData.rssi);
+                                                updateDeviceState = true;
+                                                break;
+                                            default:
+                                                if (this.logDebug) this.emit('debug', `Unit ${unitId}, received unknown message type: ${stringifyMessage}`);
+                                                return;
+                                        }
+                                        break;
+                                    default:
+                                        if (this.logDebug) this.emit('debug', `Incoming unknown unit id: ${stringifyMessage}`);
+                                        return;
+                                }
+
+                                if (updateDeviceState) this.emit('deviceState', deviceData);
+                            });
+                    } catch (error) {
+                        if (this.logError) this.emit('error', `Socket connection failed: ${error}`);
+                        this.cleanupSocket();
+                    }
+                }
             }
             if (this.logDebug) this.emit('debug', `Device Data: ${JSON.stringify(deviceData, null, 2)}`);
 
@@ -134,6 +237,8 @@ class MelCloudAta extends EventEmitter {
             let method = null
             let payload = {};
             let path = '';
+            let headers = this.headers;
+            let updateState = true;
             switch (accountType) {
                 case "melcloud":
                     switch (flag) {
@@ -175,10 +280,10 @@ class MelCloudAta extends EventEmitter {
                         method: 'POST',
                         baseURL: ApiUrls.BaseURL,
                         timeout: 30000,
-                        headers: this.headers,
+                        headers: headers,
                         data: payload
                     });
-                    this.updateData(deviceData);
+                    this.updateData(deviceData, updateState);
                     return true;
                 case "melcloudhome":
                     switch (flag) {
@@ -191,7 +296,7 @@ class MelCloudAta extends EventEmitter {
                             };
                             method = 'POST';
                             path = ApiUrlsHome.PostProtectionFrost;
-                            this.headers.Referer = ApiUrlsHome.Referers.PostProtectionFrost.replace('deviceid', deviceData.DeviceID);
+                            headers.Referer = ApiUrlsHome.Referers.PostProtectionFrost.replace('deviceid', deviceData.DeviceID);
                             break;
                         case 'overheatprotection':
                             payload = {
@@ -202,7 +307,7 @@ class MelCloudAta extends EventEmitter {
                             };
                             method = 'POST';
                             path = ApiUrlsHome.PostProtectionOverheat;
-                            this.headers.Referer = ApiUrlsHome.Referers.PostProtectionOverheat.replace('deviceid', deviceData.DeviceID);
+                            headers.Referer = ApiUrlsHome.Referers.PostProtectionOverheat.replace('deviceid', deviceData.DeviceID);
                             break;
                         case 'holidaymode':
                             payload = {
@@ -213,7 +318,7 @@ class MelCloudAta extends EventEmitter {
                             };
                             method = 'POST';
                             path = ApiUrlsHome.PostHolidayMode;
-                            this.headers.Referer = ApiUrlsHome.Referers.PostHolidayMode.replace('deviceid', deviceData.DeviceID);
+                            headers.Referer = ApiUrlsHome.Referers.PostHolidayMode.replace('deviceid', deviceData.DeviceID);
                             break;
                         case 'schedule':
                             payload = { enabled: deviceData.ScheduleEnabled };
@@ -224,7 +329,7 @@ class MelCloudAta extends EventEmitter {
                         case 'scene':
                             method = 'PUT';
                             path = ApiUrlsHome.PutScene[flagData.Enabled ? 'Enable' : 'Disable'].replace('sceneid', flagData.Id);
-                            this.headers.Referer = ApiUrlsHome.Referers.GetPutScenes;
+                            headers.Referer = ApiUrlsHome.Referers.GetPutScenes;
                             break;
                         default:
                             if (displayType === 1 && deviceData.Device.OperationMode === 8) {
@@ -251,22 +356,24 @@ class MelCloudAta extends EventEmitter {
                             };
                             method = 'PUT';
                             path = ApiUrlsHome.PutAta.replace('deviceid', deviceData.DeviceID);
-                            this.headers.Referer = ApiUrlsHome.Referers.PutDeviceSettings;
-                            break
+                            headers.Referer = ApiUrlsHome.Referers.PutDeviceSettings;
+                            updateState = false;
+                            break;
                     }
 
-                    this.headers['Content-Type'] = 'application/json; charset=utf-8';
-                    this.headers.Origin = ApiUrlsHome.Origin;
+                    //sens payload
+                    headers['Content-Type'] = 'application/json; charset=utf-8';
+                    headers.Origin = ApiUrlsHome.Origin;
                     if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(payload, null, 2)}`);
                     await axios(path, {
                         method: method,
                         baseURL: ApiUrlsHome.BaseURL,
                         timeout: 30000,
-                        headers: this.headers,
+                        headers: headers,
                         data: payload
                     });
 
-                    this.updateData(deviceData);
+                    this.updateData(deviceData, updateState);
                     return true;
                 default:
                     return;
@@ -277,9 +384,9 @@ class MelCloudAta extends EventEmitter {
         }
     }
 
-    updateData(deviceData) {
+    updateData(deviceData, updateState = true) {
         this.locks = true;
-        this.emit('deviceState', deviceData);
+        if (updateState) this.emit('deviceState', deviceData);
 
         setTimeout(() => {
             this.locks = false

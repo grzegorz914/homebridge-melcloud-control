@@ -12,6 +12,7 @@ export const ApiUrls = {
     SetAta: "/Device/SetAta",
     SetAtw: "/Device/SetAtw",
     SetErv: "/Device/SetErv",
+    GetRefreshUnit: "/Device/RequestRefresh?id=deviceid",
     UpdateApplicationOptions: "/User/UpdateApplicationOptions",
     HolidayModeUpdate: "/HolidayMode/Update",
     EnergyCostReport: "/EnergyCost/Report",
@@ -42,7 +43,8 @@ export const ApiUrlsHome = {
         PutDeviceSettings: "https://melcloudhome.com/dashboard",
         PutScheduleEnabled: "https://melcloudhome.com/ata/deviceid/schedule",
     },
-    Origin: "https://melcloudhome.com"
+    Origin: "https://melcloudhome.com",
+    WebSocketURL: "wss://ws.melcloudhome.com/?hash="
 };
 
 export const DeviceType = [
