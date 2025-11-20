@@ -93,6 +93,7 @@ class MelCloudAta extends EventEmitter {
                 deviceData.Device.DefaultHeatingSetTemperature = temps?.defaultHeatingSetTemperature ?? 20;
                 deviceData.Device.DefaultCoolingSetTemperature = temps?.defaultCoolingSetTemperature ?? 24;
 
+                //web cocket connection
                 if (!this.connecting && !this.socketConnected) {
                     this.connecting = true;
 
@@ -116,7 +117,7 @@ class MelCloudAta extends EventEmitter {
                                 // heartbeat
                                 this.heartbeat = setInterval(() => {
                                     if (socket.readyState === socket.OPEN) {
-                                        if (!this.logDebug) this.emit('debug', `Socket send heartbeat`);
+                                        if (this.logDebug) this.emit('debug', `Socket send heartbeat`);
                                         socket.ping();
                                     }
                                 }, 30000);
