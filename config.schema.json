@@ -1287,6 +1287,15 @@
                       "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
                     }
                   },
+                  "frostProtectionSupport": {
+                    "title": "Frost Protection Support",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable extra frost protection control and sensors to use with automations in HomeKit app.",
+                    "condition": {
+                      "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
+                    }
+                  },
                   "refreshInterval": {
                     "title": "Refresh Interval",
                     "type": "integer",
@@ -2769,6 +2778,7 @@
                           "items": [
                             "accounts[].atwDevices[].hideZone",
                             "accounts[].atwDevices[].name",
+                            "accounts[].atwDevices[].frostProtectionSupport",
                             "accounts[].atwDevices[].holidayModeSupport",
                             "accounts[].atwDevices[].refreshInterval"
                           ],

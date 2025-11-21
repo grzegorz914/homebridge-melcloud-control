@@ -70,17 +70,8 @@ class MelCloudAta extends EventEmitter {
         this.socketConnected = false;
     }
 
-    async checkState() {
+    async updateState(deviceData) {
         try {
-
-            //read device info from file
-            const devicesData = await this.functions.readData(this.devicesFile, true);
-            if (!devicesData) return;
-
-            this.headers = devicesData.Headers;
-            const deviceData = devicesData.Devices.find(device => device.DeviceID === this.deviceId);
-            deviceData.Scenes = devicesData.Scenes ?? [];
-
             if (this.accountType === 'melcloudhome') {
                 deviceData.Device.OperationMode = AirConditioner.OperationModeMapStringToEnum[deviceData.Device.OperationMode] ?? deviceData.Device.OperationMode;
                 deviceData.Device.ActualFanSpeed = AirConditioner.FanSpeedMapStringToEnum[deviceData.Device.ActualFanSpeed] ?? deviceData.Device.ActualFanSpeed;
@@ -93,87 +84,6 @@ class MelCloudAta extends EventEmitter {
                 deviceData.Device.DefaultHeatingSetTemperature = temps?.defaultHeatingSetTemperature ?? 20;
                 deviceData.Device.DefaultCoolingSetTemperature = temps?.defaultCoolingSetTemperature ?? 24;
 
-                //web cocket connection
-                if (!this.connecting && !this.socketConnected) {
-                    this.connecting = true;
-
-                    const url = `${ApiUrlsHome.WebSocketURL}${devicesData.WebSocketOptions.Hash}`;
-                    try {
-                        const socket = new WebSocket(url, { headers: devicesData.WebSocketOptions.Headers })
-                            .on('error', (error) => {
-                                if (this.logError) this.emit('error', `Socket error: ${error}`);
-                                socket.close();
-                            })
-                            .on('close', () => {
-                                if (this.logDebug) this.emit('debug', `Socket closed`);
-                                this.cleanupSocket();
-                            })
-                            .on('open', () => {
-                                this.socket = socket;
-                                this.socketConnected = true;
-                                this.connecting = false;
-                                if (this.logSuccess) this.emit('success', `Socket Connect Success`);
-
-                                // heartbeat
-                                this.heartbeat = setInterval(() => {
-                                    if (socket.readyState === socket.OPEN) {
-                                        if (this.logDebug) this.emit('debug', `Socket send heartbeat`);
-                                        socket.ping();
-                                    }
-                                }, 30000);
-                            })
-                            .on('pong', () => {
-                                if (this.logDebug) this.emit('debug', `Socket received heartbeat`);
-                            })
-                            .on('message', (message) => {
-                                const parsedMessage = JSON.parse(message);
-                                const stringifyMessage = JSON.stringify(parsedMessage, null, 2);
-                                if (this.logDebug) this.emit('debug', `Incoming message: ${stringifyMessage}`);
-                                if (parsedMessage.message === 'Forbidden') return;
-
-                                const messageData = parsedMessage?.[0]?.Data;
-                                if (!messageData) return;
-
-                                let updateDeviceState = false;
-                                const unitId = messageData?.id;
-                                switch (unitId) {
-                                    case this.deviceId:
-                                        const messageType = parsedMessage[0].messageType;
-                                        switch (messageType) {
-                                            case 'unitStateChanged':
-                                                const settings = Object.fromEntries(
-                                                    messageData.settings.map(({ name, value }) => {
-                                                        let parsedValue = value;
-                                                        if (value === "True") parsedValue = true;
-                                                        else if (value === "False") parsedValue = false;
-                                                        else if (!isNaN(value) && value !== "") parsedValue = Number(value);
-                                                        return [name, parsedValue];
-                                                    })
-                                                );
-                                                Object.assign(deviceData.Device, settings);
-                                                updateDeviceState = true;
-                                                break;
-                                            case 'unitWifiSignalChanged':
-                                                Object.assign(deviceData, messageData.rssi);
-                                                updateDeviceState = true;
-                                                break;
-                                            default:
-                                                if (this.logDebug) this.emit('debug', `Unit ${unitId}, received unknown message type: ${stringifyMessage}`);
-                                                return;
-                                        }
-                                        break;
-                                    default:
-                                        if (this.logDebug) this.emit('debug', `Incoming unknown unit id: ${stringifyMessage}`);
-                                        return;
-                                }
-
-                                if (updateDeviceState) this.emit('deviceState', deviceData);
-                            });
-                    } catch (error) {
-                        if (this.logError) this.emit('error', `Socket connection failed: ${error}`);
-                        this.cleanupSocket();
-                    }
-                }
             }
             if (this.logDebug) this.emit('debug', `Device Data: ${JSON.stringify(deviceData, null, 2)}`);
 
@@ -217,8 +127,8 @@ class MelCloudAta extends EventEmitter {
             }
 
             //check state changes
-            const deviceDataHasNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);
-            if (deviceDataHasNotChanged) return;
+            const deviceDataNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);
+            if (deviceDataNotChanged) return;
             this.deviceData = deviceData;
 
             //emit info
@@ -226,6 +136,106 @@ class MelCloudAta extends EventEmitter {
 
             //emit state
             this.emit('deviceState', deviceData);
+
+            return true;
+        } catch (error) {
+            throw new Error(`Update state error: ${error.message}`);
+        };
+    };
+
+    async checkState() {
+        try {
+
+            //read device info from file
+            const devicesData = await this.functions.readData(this.devicesFile, true);
+            if (!devicesData) return;
+
+            this.headers = devicesData.Headers;
+            const deviceData = devicesData.Devices.find(device => device.DeviceID === this.deviceId);
+            deviceData.Scenes = devicesData.Scenes ?? [];
+
+            //web cocket connection
+            if (this.accountType === 'melcloudhome' && !this.connecting && !this.socketConnected) {
+                this.connecting = true;
+
+                const url = `${ApiUrlsHome.WebSocketURL}${devicesData.WebSocketOptions.Hash}`;
+                try {
+                    const socket = new WebSocket(url, { headers: devicesData.WebSocketOptions.Headers })
+                        .on('error', (error) => {
+                            if (this.logError) this.emit('error', `Socket error: ${error}`);
+                            socket.close();
+                        })
+                        .on('close', () => {
+                            if (this.logDebug) this.emit('debug', `Socket closed`);
+                            this.cleanupSocket();
+                        })
+                        .on('open', () => {
+                            this.socket = socket;
+                            this.socketConnected = true;
+                            this.connecting = false;
+                            if (this.logSuccess) this.emit('success', `Socket Connect Success`);
+
+                            // heartbeat
+                            this.heartbeat = setInterval(() => {
+                                if (socket.readyState === socket.OPEN) {
+                                    if (this.logDebug) this.emit('debug', `Socket send heartbeat`);
+                                    socket.ping();
+                                }
+                            }, 30000);
+                        })
+                        .on('pong', () => {
+                            if (this.logDebug) this.emit('debug', `Socket received heartbeat`);
+                        })
+                        .on('message', async (message) => {
+                            const parsedMessage = JSON.parse(message);
+                            const stringifyMessage = JSON.stringify(parsedMessage, null, 2);
+                            if (this.logDebug) this.emit('debug', `Incoming message: ${stringifyMessage}`);
+                            if (parsedMessage.message === 'Forbidden') return;
+
+                            const messageData = parsedMessage?.[0]?.Data;
+                            if (!messageData) return;
+
+                            let updateState = false;
+                            const unitId = messageData?.id;
+                            switch (unitId) {
+                                case this.deviceId:
+                                    const messageType = parsedMessage[0].messageType;
+                                    switch (messageType) {
+                                        case 'unitStateChanged':
+                                            const settings = Object.fromEntries(
+                                                messageData.settings.map(({ name, value }) => {
+                                                    let parsedValue = this.functions.convertValue(value);
+                                                    return [name, parsedValue];
+                                                })
+                                            );
+                                            Object.assign(deviceData.Device, settings);
+                                            updateState = true;
+                                            break;
+                                        case 'unitWifiSignalChanged':
+                                            deviceData.Rssi = messageData.rssi;
+                                            updateState = true;
+                                            break;
+                                        default:
+                                            if (this.logDebug) this.emit('debug', `Unit ${unitId}, received unknown message type: ${stringifyMessage}`);
+                                            return;
+                                    }
+                                    break;
+                                default:
+                                    if (this.logDebug) this.emit('debug', `Incoming unknown unit id: ${stringifyMessage}`);
+                                    return;
+                            }
+
+                            //update state
+                            if (updateState) await this.updateState(deviceData);
+                        });
+                } catch (error) {
+                    if (this.logError) this.emit('error', `Socket connection failed: ${error}`);
+                    this.cleanupSocket();
+                }
+            }
+
+            //update state
+            await this.updateState(deviceData);
 
             return true;
         } catch (error) {

@@ -44,6 +44,7 @@ class DeviceAtw extends EventEmitter {
         this.inStandbySensor = device.inStandbySensor || false;
         this.connectSensor = device.connectSensor || false;
         this.errorSensor = device.errorSensor || false;
+        this.frostProtectionSupport = device.frostProtectionSupport || false;
         this.holidayModeSupport = device.holidayModeSupport || false;
         this.presets = this.accountType === 'melcloud' ? (device.presets || []).filter(preset => (preset.displayType ?? 0) > 0 && preset.id !== '0') : [];
         this.schedules = this.accountType === 'melcloudhome' ? (device.schedules || []).filter(schedule => (schedule.displayType ?? 0) > 0 && schedule.id !== '0') : [];
@@ -851,7 +852,7 @@ class DeviceAtw extends EventEmitter {
                             break;
                     };
                 });
-            };
+            }
 
             //sensor services
             if (zonesSensorsCount > 0) {
@@ -1022,7 +1023,7 @@ class DeviceAtw extends EventEmitter {
                             break;
                     };
                 });
-            };
+            }
 
             //in standby sensor
             if (this.inStandbySensor && this.accessory.inStandbyMode !== null) {
@@ -1064,6 +1065,53 @@ class DeviceAtw extends EventEmitter {
                         return state;
                     })
                 accessory.addService(this.errorService);
+            }
+
+            //frost protection
+            if (this.frostProtectionSupport && this.accessory.frostProtectionEnabled !== null) {
+                //control
+                if (this.logDebug) this.emit('debug', `Prepare frost protection control service`);
+                this.frostProtectionControlService = new Service.Switch(`${serviceName} Frost Protection`, `frostProtectionControlService${deviceId}`);
+                this.frostProtectionControlService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                this.frostProtectionControlService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Frost Protection`);
+                this.frostProtectionControlService.getCharacteristic(Characteristic.On)
+                    .onGet(async () => {
+                        const state = this.accessory.frostProtectionEnabled;
+                        return state;
+                    })
+                    .onSet(async (state) => {
+                        try {
+                            deviceData.FrostProtection.Enabled = state;
+                            if (this.logInfo) this.emit('info', `Frost protection: ${state ? 'Enabled' : 'Disabled'}`);
+                            await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'frostprotection');
+                        } catch (error) {
+                            if (this.logWarn) this.emit('warn', `Set frost protection error: ${error}`);
+                        };
+                    });
+                accessory.addService(this.frostProtectionControlService);
+
+                if (this.logDebug) this.emit('debug', `Prepare frost protection control sensor service`);
+                this.frostProtectionControlSensorService = new Service.ContactSensor(`${serviceName} Frost Protection Control`, `frostProtectionControlSensorService${deviceId}`);
+                this.frostProtectionControlSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                this.frostProtectionControlSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Frost Protection Control`);
+                this.frostProtectionControlSensorService.getCharacteristic(Characteristic.ContactSensorState)
+                    .onGet(async () => {
+                        const state = this.accessory.frostProtectionEnabled;
+                        return state;
+                    })
+                accessory.addService(this.frostProtectionControlSensorService);
+
+                //sensor
+                if (this.logDebug) this.emit('debug', `Prepare frost protection service`);
+                this.frostProtectionSensorService = new Service.ContactSensor(`${serviceName} Frost Protection`, `frostProtectionSensorService${deviceId}`);
+                this.frostProtectionSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                this.frostProtectionSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Frost Protection`);
+                this.frostProtectionSensorService.getCharacteristic(Characteristic.ContactSensorState)
+                    .onGet(async () => {
+                        const state = this.accessory.frostProtectionActive;
+                        return state;
+                    })
+                accessory.addService(this.frostProtectionSensorService);
             }
 
             //holiday mode
@@ -1189,7 +1237,7 @@ class DeviceAtw extends EventEmitter {
                         accessory.addService(presetControlSensorService);
                     }
                 });
-            };
+            }
 
             //schedules services
             if (this.schedules.length > 0 && this.accessory.scheduleEnabled !== null) {
@@ -1263,7 +1311,7 @@ class DeviceAtw extends EventEmitter {
                         accessory.addService(scheduleSensorService);
                     }
                 });
-            };
+            }
 
             //scenes
             if (this.scenes.length > 0) {
@@ -1322,7 +1370,7 @@ class DeviceAtw extends EventEmitter {
                         accessory.addService(sceneControlSensorService);
                     }
                 });
-            };
+            }
 
             //buttons services
             if (this.buttons.length > 0) {
@@ -1517,7 +1565,7 @@ class DeviceAtw extends EventEmitter {
                         accessory.addService(buttonControlSensorService);
                     }
                 });
-            };
+            }
 
             return accessory;
         } catch (error) {
@@ -1573,6 +1621,10 @@ class DeviceAtw extends EventEmitter {
                     const holidayMode = deviceData.Device.HolidayMode;
                     const holidayModeEnabled = accountTypeMelcloud ? holidayMode : deviceData.HolidayMode?.Enabled;
                     const holidayModeActive = deviceData.HolidayMode?.Active ?? false;
+
+                    //protection
+                    const frostProtectionEnabled = deviceData.FrostProtection?.Enabled;
+                    const frostProtectionActive = deviceData.FrostProtection?.Active ?? false;
 
                     //device info
                     const supportsStanbyMode = deviceData.Device[supportStandbyKey];
@@ -1681,6 +1733,8 @@ class DeviceAtw extends EventEmitter {
                         temperatureUnit: TemperatureDisplayUnits[this.accountInfo.useFahrenheit ? 1 : 0],
                         isConnected: isConnected,
                         isInError: isInError,
+                        frostProtectionEnabled: frostProtectionEnabled,
+                        frostProtectionActive: frostProtectionActive,
                         scheduleEnabled: scheduleEnabled,
                         holidayModeEnabled: holidayModeEnabled,
                         holidayModeActive: holidayModeActive,
@@ -1947,39 +2001,40 @@ class DeviceAtw extends EventEmitter {
                             let operationModeText = '';
                             switch (i) {
                                 case caseHeatPump: //Heat Pump - HEAT, COOL, OFF
-                                    this.emit('info', `${heatPumpName}, Power: ${power ? 'On' : 'Off'}`)
-                                    this.emit('info', `${heatPumpName}, Operation mode: ${HeatPump.SystemMapEnumToString[unitStatus]}`);
-                                    this.emit('info', `${heatPumpName},'Outdoor temperature: ${roomTemperature}${obj.temperatureUnit}`);
-                                    this.emit('info', `${heatPumpName}, Temperature display unit: ${obj.temperatureUnit}`);
-                                    this.emit('info', `${heatPumpName}, Lock physical controls: ${lockPhysicalControl ? 'Locked' : 'Unlocked'}`);
+                                    this.emit('info', `Power: ${power ? 'On' : 'Off'}`)
+                                    this.emit('info', `Operation mode: ${HeatPump.SystemMapEnumToString[unitStatus]}`);
+                                    this.emit('info', `Outdoor temperature: ${roomTemperature}${obj.temperatureUnit}`);
+                                    this.emit('info', `Temperature display unit: ${obj.temperatureUnit}`);
+                                    this.emit('info', `Lock physical controls: ${lockPhysicalControl ? 'Locked' : 'Unlocked'}`);
+                                    if (this.accountType === 'melcloudhome') this.emit('info', `Signal strength: ${deviceData.Rssi}dBm`);
                                     break;
                                 case caseZone1: //Zone 1 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
                                     operationModeText = idleZone1 ? HeatPump.ZoneOperationMapEnumToString[6] : HeatPump.ZoneOperationMapEnumToString[operationModeZone1];
-                                    this.emit('info', `${zone1Name}, Operation mode: ${operationModeText}`);
-                                    this.emit('info', `${zone1Name}, Temperature: ${roomTemperature}${obj.temperatureUnit}`);
-                                    this.emit('info', `${zone1Name}, Target temperature: ${setTemperature}${obj.temperatureUnit}`)
-                                    this.emit('info', `${zone1Name}, Temperature display unit: ${obj.temperatureUnit}`);
-                                    this.emit('info', `${zone1Name}, Lock physical controls: ${lockPhysicalControl ? 'Locked' : 'Unlocked'}`);
+                                    this.emit('info', `Operation mode: ${operationModeText}`);
+                                    this.emit('info', `Temperature: ${roomTemperature}${obj.temperatureUnit}`);
+                                    this.emit('info', `Target temperature: ${setTemperature}${obj.temperatureUnit}`)
+                                    this.emit('info', `Temperature display unit: ${obj.temperatureUnit}`);
+                                    this.emit('info', `Lock physical controls: ${lockPhysicalControl ? 'Locked' : 'Unlocked'}`);
                                     break;
                                 case caseHotWater: //Hot Water - AUTO, HEAT NOW
                                     operationModeText = operationMode === 1 ? HeatPump.ForceDhwMapEnumToString[1] : HeatPump.ForceDhwMapEnumToString[forcedHotWaterMode ? 1 : 0];
-                                    this.emit('info', `${hotWaterName}, Operation mode: ${operationModeText}`);
-                                    this.emit('info', `${hotWaterName}, Temperature: ${roomTemperature}${obj.temperatureUnit}`);
-                                    this.emit('info', `${hotWaterName}, Target temperature: ${setTemperature}${obj.temperatureUnit}`)
-                                    this.emit('info', `${hotWaterName}, Temperature display unit: ${obj.temperatureUnit}`);
-                                    this.emit('info', `${hotWaterName}, Lock physical controls: ${lockPhysicalControl ? 'Locked' : 'Unlocked'}`);
+                                    this.emit('info', `Operation mode: ${operationModeText}`);
+                                    this.emit('info', `Temperature: ${roomTemperature}${obj.temperatureUnit}`);
+                                    this.emit('info', `Target temperature: ${setTemperature}${obj.temperatureUnit}`)
+                                    this.emit('info', `Temperature display unit: ${obj.temperatureUnit}`);
+                                    this.emit('info', `Lock physical controls: ${lockPhysicalControl ? 'Locked' : 'Unlocked'}`);
                                     break;
                                 case caseZone2: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
                                     operationModeText = idleZone2 ? HeatPump.ZoneOperationMapEnumToString[6] : HeatPump.ZoneOperationMapEnumToString[operationModeZone2];
-                                    this.emit('info', `${zone2Name}, Operation mode: ${operationModeText}`);
-                                    this.emit('info', `${zone2Name}, Temperature: ${roomTemperature}${obj.temperatureUnit}`);
-                                    this.emit('info', `${zone2Name}, Target temperature: ${setTemperature}${obj.temperatureUnit}`)
-                                    this.emit('info', `${zone2Name}, Temperature display unit: ${obj.temperatureUnit}`);
-                                    this.emit('info', `${zone2Name}, Lock physical controls: ${lockPhysicalControl ? 'Locked' : 'Unlocked'}`);
+                                    this.emit('info', `Operation mode: ${operationModeText}`);
+                                    this.emit('info', `Temperature: ${roomTemperature}${obj.temperatureUnit}`);
+                                    this.emit('info', `Target temperature: ${setTemperature}${obj.temperatureUnit}`)
+                                    this.emit('info', `Temperature display unit: ${obj.temperatureUnit}`);
+                                    this.emit('info', `Lock physical controls: ${lockPhysicalControl ? 'Locked' : 'Unlocked'}`);
                                     break;
                             };
-                        };
-                    };
+                        }
+                    }
 
                     //update sensors characteristics
                     for (let i = 0; i < zonesSensorsCount; i++) {
@@ -2064,7 +2119,7 @@ class DeviceAtw extends EventEmitter {
                                     break;
                             };
                         };
-                    };
+                    }
                     this.accessory = obj;
 
                     //update services
@@ -2077,6 +2132,13 @@ class DeviceAtw extends EventEmitter {
                     this.inStandbyService?.updateCharacteristic(Characteristic.ContactSensorState, inStandbyMode);
                     this.connectService?.updateCharacteristic(Characteristic.ContactSensorState, isConnected);
                     this.errorService?.updateCharacteristic(Characteristic.ContactSensorState, isInError);
+
+                    //frost protection
+                    if (this.frostProtectionSupport && frostProtectionEnabled !== null) {
+                        this.frostProtectionControlService?.updateCharacteristic(Characteristic.On, frostProtectionEnabled);
+                        this.frostProtectionControlSensorService?.updateCharacteristic(Characteristic.ContactSensorState, frostProtectionEnabled);
+                        this.frostProtectionSensorService?.updateCharacteristic(Characteristic.ContactSensorState, frostProtectionActive);
+                    }
 
                     //holiday mode
                     if (this.holidayModeSupport && holidayModeEnabled !== null) {
@@ -2112,7 +2174,7 @@ class DeviceAtw extends EventEmitter {
                             //sensor
                             if (preset.displayType < 7) this.presetControlSensorServices?.[i]?.updateCharacteristic(characteristicType, preset.state);
                         });
-                    };
+                    }
 
                     ///schedules
                     if (this.schedules.length > 0 && scheduleEnabled !== null) {
@@ -2132,7 +2194,7 @@ class DeviceAtw extends EventEmitter {
                             //sensor
                             if (schedule.displayType < 7) this.scheduleSensorServices?.[i]?.updateCharacteristic(characteristicType, schedule.state);
                         });
-                    };
+                    }
 
                     //scenes
                     if (this.scenes.length > 0) {
@@ -2149,7 +2211,7 @@ class DeviceAtw extends EventEmitter {
                             //sensor
                             if (scene.displayType < 7) this.sceneControlSensorServices?.[i]?.updateCharacteristic(characteristicType, scene.state);
                         });
-                    };
+                    }
 
                     //buttons
                     if (this.buttons.length > 0) {
@@ -2237,7 +2299,7 @@ class DeviceAtw extends EventEmitter {
                             //sensor
                             if (button.displayType < 7) this.buttonControlSensorServices?.[i]?.updateCharacteristic(characteristicType, button.state);
                         });
-                    };
+                    }
                 })
                 .on('success', (success) => this.emit('success', success))
                 .on('info', (info) => this.emit('info', info))

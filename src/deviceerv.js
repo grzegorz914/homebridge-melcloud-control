@@ -586,7 +586,7 @@ class DeviceErv extends EventEmitter {
                         return state;
                     })
                 accessory.addService(this.roomTemperatureSensorService);
-            };
+            }
 
             //temperature sensor service supply
             if (this.temperatureSupplySensor && supportsSupplyTemperature && this.accessory.supplyTemperature !== null) {
@@ -600,7 +600,7 @@ class DeviceErv extends EventEmitter {
                         return state;
                     })
                 accessory.addService(this.supplyTemperatureSensorService);
-            };
+            }
 
             //temperature sensor service outdoor
             if (this.temperatureOutdoorSensor && supportsOutdoorTemperature && this.accessory.outdoorTemperature !== null) {
@@ -614,7 +614,7 @@ class DeviceErv extends EventEmitter {
                         return state;
                     })
                 accessory.addService(this.outdoorTemperatureSensorService);
-            };
+            }
 
             //core maintenance
             if (this.accessory.coreMaintenanceRequired !== null) {
@@ -849,7 +849,7 @@ class DeviceErv extends EventEmitter {
                         accessory.addService(presetControlSensorService);
                     }
                 });
-            };
+            }
 
             //schedules services
             if (this.schedules.length > 0 && this.accessory.scheduleEnabled !== null) {
@@ -923,7 +923,7 @@ class DeviceErv extends EventEmitter {
                         accessory.addService(scheduleSensorService);
                     }
                 });
-            };
+            }
 
             //scenes
             if (this.scenes.length > 0) {
@@ -982,7 +982,7 @@ class DeviceErv extends EventEmitter {
                         accessory.addService(sceneControlSensorService);
                     }
                 });
-            };
+            }
 
             //buttons services
             if (this.buttons.length > 0) {
@@ -1118,7 +1118,7 @@ class DeviceErv extends EventEmitter {
                         accessory.addService(buttonControlSensorService);
                     }
                 });
-            };
+            }
 
             return accessory;
         } catch (error) {
@@ -1454,7 +1454,7 @@ class DeviceErv extends EventEmitter {
                             //sensor
                             if (preset.displayType < 7) this.presetControlSensorServices?.[i]?.updateCharacteristic(characteristicType, preset.state);
                         });
-                    };
+                    }
 
                     ///schedules
                     if (this.schedules.length > 0 && scheduleEnabled !== null) {
@@ -1474,7 +1474,7 @@ class DeviceErv extends EventEmitter {
                             //sensor
                             if (schedule.displayType < 7) this.scheduleSensorServices?.[i]?.updateCharacteristic(characteristicType, schedule.state);
                         });
-                    };
+                    }
 
                     //scenes
                     if (this.scenes.length > 0) {
@@ -1491,7 +1491,7 @@ class DeviceErv extends EventEmitter {
                             //sensor
                             if (scene.displayType < 7) this.sceneControlSensorServices?.[i]?.updateCharacteristic(characteristicType, scene.state);
                         });
-                    };
+                    }
 
                     //buttons
                     if (this.buttons.length > 0) {
@@ -1552,7 +1552,7 @@ class DeviceErv extends EventEmitter {
                             //sensor
                             if (button.displayType < 7) this.buttonControlSensorServices?.[i]?.updateCharacteristic(characteristicType, button.state);
                         });
-                    };
+                    }
 
                     //log current state
                     if (this.logInfo) {
@@ -1571,7 +1571,8 @@ class DeviceErv extends EventEmitter {
                         if (supportsCO2Sensor) this.emit('info', `CO2 level: ${roomCO2Level} ppm`);
                         if (supportsPM25Sensor) this.emit('info', `PM2.5 air quality: ${Ventilation.PM25AirQualityMapEnumToString[pM25AirQuality]}`);
                         if (supportsPM25Sensor) this.emit('info', `PM2.5 level: ${pM25Level} µg/m`);
-                    };
+                        if (this.accountType === 'melcloudhome') this.emit('info', `Signal strength: ${deviceData.Rssi}dBm`);
+                    }
                 })
                 .on('success', (success) => this.emit('success', success))
                 .on('info', (info) => this.emit('info', info))

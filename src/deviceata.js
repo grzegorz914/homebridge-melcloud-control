@@ -649,7 +649,7 @@ class DeviceAta extends EventEmitter {
                         return state;
                     })
                 accessory.addService(this.roomTemperatureSensorService);
-            };
+            }
 
             if (this.temperatureOutdoorSensor && supportsOutdoorTemperature && this.accessory.outdoorTemperature !== null) {
                 if (this.logDebug) this.emit('debug', `Prepare outdoor temperature sensor service`);
@@ -662,7 +662,7 @@ class DeviceAta extends EventEmitter {
                         return state;
                     })
                 accessory.addService(this.outdoorTemperatureSensorService);
-            };
+            }
 
             //in standby sensor
             if (this.inStandbySensor && this.accessory.inStandbyMode !== null) {
@@ -922,7 +922,7 @@ class DeviceAta extends EventEmitter {
                         accessory.addService(presetControlSensorService);
                     }
                 });
-            };
+            }
 
             //schedules services
             if (this.schedules.length > 0 && this.accessory.scheduleEnabled !== null) {
@@ -996,7 +996,7 @@ class DeviceAta extends EventEmitter {
                         accessory.addService(scheduleSensorService);
                     }
                 });
-            };
+            }
 
             //scenes
             if (this.scenes.length > 0) {
@@ -1055,7 +1055,7 @@ class DeviceAta extends EventEmitter {
                         accessory.addService(sceneControlSensorService);
                     }
                 });
-            };
+            }
 
             //buttons services
             if (this.buttons.length > 0) {
@@ -1318,7 +1318,7 @@ class DeviceAta extends EventEmitter {
                         accessory.addService(buttonControlSensorService);
                     }
                 });
-            };
+            }
 
             return accessory;
         } catch (error) {
@@ -1690,7 +1690,7 @@ class DeviceAta extends EventEmitter {
                             //sensor
                             if (preset.displayType < 7) this.presetControlSensorServices?.[i]?.updateCharacteristic(characteristicType, preset.state);
                         });
-                    };
+                    }
 
                     ///schedules
                     if (this.schedules.length > 0 && scheduleEnabled !== null) {
@@ -1710,7 +1710,7 @@ class DeviceAta extends EventEmitter {
                             //sensor
                             if (schedule.displayType < 7) this.scheduleSensorServices?.[i]?.updateCharacteristic(characteristicType, schedule.state);
                         });
-                    };
+                    }
 
                     //scenes
                     if (this.scenes.length > 0) {
@@ -1727,7 +1727,7 @@ class DeviceAta extends EventEmitter {
                             //sensor
                             if (scene.displayType < 7) this.sceneControlSensorServices?.[i]?.updateCharacteristic(characteristicType, scene.state);
                         });
-                    };
+                    }
 
                     //buttons
                     if (this.buttons.length > 0) {
@@ -1851,7 +1851,7 @@ class DeviceAta extends EventEmitter {
                             //sensor
                             if (button.displayType < 7) this.buttonControlSensorServices?.[i]?.updateCharacteristic(characteristicType, button.state);
                         });
-                    };
+                    }
 
                     //log current state
                     if (this.logInfo) {
@@ -1868,7 +1868,8 @@ class DeviceAta extends EventEmitter {
                         if (supportsSwingFunction) this.emit('info', `Air direction: ${AirConditioner.AirDirectionMapEnumToString[obj.currentSwingMode]}`);
                         this.emit('info', `Temperature display unit: ${obj.temperatureUnit}`);
                         this.emit('info', `Lock physical controls: ${obj.lockPhysicalControl ? 'Locked' : 'Unlocked'}`);
-                    };
+                        if (this.accountType === 'melcloudhome') this.emit('info', `Signal strength: ${deviceData.Rssi}dBm`);
+                    }
                 })
                 .on('success', (success) => this.emit('success', success))
                 .on('info', (info) => this.emit('info', info))

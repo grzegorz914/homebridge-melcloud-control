@@ -160,5 +160,12 @@ class Functions extends EventEmitter {
         return v !== undefined && v !== null && !(typeof v === 'number' && Number.isNaN(v));
     }
 
+    convertValue(v) {
+        let parsedValue = v;
+        if (v === "True") parsedValue = true;
+        else if (v === "False") parsedValue = false;
+        else if (!isNaN(v) && v !== "") parsedValue = Number(v);
+        return parsedValue;
+    }
 }
 export default Functions

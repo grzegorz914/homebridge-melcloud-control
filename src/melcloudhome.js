@@ -145,11 +145,7 @@ class MelCloudHome extends EventEmitter {
 
                     const settingsObject = Object.fromEntries(
                         settingsArray.map(({ name, value }) => {
-                            let parsedValue = value;
-                            if (value === "True") parsedValue = true;
-                            else if (value === "False") parsedValue = false;
-                            else if (!isNaN(value) && value !== "") parsedValue = Number(value);
-
+                            let parsedValue = this.functions.convertValue(value);
                             const key = name.charAt(0).toUpperCase() + name.slice(1);
                             return [key, parsedValue];
                         })
