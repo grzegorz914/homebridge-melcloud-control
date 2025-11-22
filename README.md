@@ -129,6 +129,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Operating mode `HEAT/COOL/CURVE/HOLIDAY/AUTO HOT WATER/ECO HOT WATER/FORCE HOT WATER`.
       * Physical lock controls `LOCK/UNLOCK`.
       * Presets `SET/UNSET`.
+      * Frost protection `ON/OFF`.
       * Holiday mode `ON/OFF`.
       * Schedules `ON/OFF`.
       * Scene `ON/OFF`.
@@ -144,6 +145,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Water tank temperature.
       * Flow Temperature Zone 1, 2, Hot Water.
       * Return Temperature Zone 1, 2, Hot Water.
+      * Frost protection.
       * Holiday mode.
       * Shedules control.
       * Shedule active.
