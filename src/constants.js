@@ -107,8 +107,8 @@ export const HeatPump = {
     ForceDhwMapEnumToString: { 0: "Normal", 1: "Heat Now" },
     HolidayMapStringToEnum: { "Normal": 0, "Holiday": 1 },
     HolidayMapEnumToString: { 0: "Normal", 1: "Holiday" },
-    ZoneOperationMapStringToEnum: { "Heat Thermostat": 0, "Heat Flow": 1, "Heat Curve": 2, "Cool Thermostat": 3, "Cool Flow": 4, "Flor Dry Up": 5, "Idle": 6 },
-    ZoneOperationMapEnumToString: { 0: "Heat Thermostat", 1: "Heat Flow", 2: "Heat Curve", 3: "Cool Thermostat", 4: "Cool Flow", 5: "Flor Dry Up", 6: "Idle" },
+    OperationModeZoneMapStringToEnum: { "Heat Thermostat": 0, "Heat Flow": 1, "Heat Curve": 2, "Cool Thermostat": 3, "Cool Flow": 4, "Flor Dry Up": 5, "Idle": 6 },
+    OperationModeZoneMapEnumToString: { 0: "Heat Thermostat", 1: "Heat Flow", 2: "Heat Curve", 3: "Cool Thermostat", 4: "Cool Flow", 5: "Flor Dry Up", 6: "Idle" },
     EffectiveFlags: {
         Power: 1,
         OperationMode: 2,

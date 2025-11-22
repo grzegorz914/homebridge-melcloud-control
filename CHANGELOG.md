@@ -22,6 +22,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Do not use Homebridge UI > v5.5.0 because of break config.json
 
+# [4.3.3] - (22.11.2025)
+
+## Changes
+
+- fix [#224](https://github.com/grzegorz914/homebridge-melcloud-control/issues/224)
+- fix presets report wrong state
+- fix schedules assign to the config
+- stability improvements
+- bump dependencies
+- cleanup
+
 # [4.3.2] - (21.11.2025)
 
 ## Changes

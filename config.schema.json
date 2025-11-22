@@ -2640,32 +2640,6 @@
                           }
                         },
                         {
-                          "title": "Schedules",
-                          "type": "section",
-                          "description": "Section for setup device schedules",
-                          "expandable": true,
-                          "expanded": false,
-                          "items": [
-                            {
-                              "key": "accounts[].ataDevices[].schedules",
-                              "type": "tabarray",
-                              "title": "{{ value.name }}",
-                              "items": [
-                                {
-                                  "key": "accounts[].ataDevices[].schedules[].id",
-                                  "readonly": true
-                                },
-                                "accounts[].ataDevices[].schedules[].displayType",
-                                "accounts[].ataDevices[].schedules[].name",
-                                "accounts[].ataDevices[].schedules[].namePrefix"
-                              ]
-                            }
-                          ],
-                          "condition": {
-                            "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome' && model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayType > 0;"
-                          }
-                        },
-                        {
                           "title": "Scenes",
                           "type": "section",
                           "description": "Section for setup device scenes",
@@ -2684,6 +2658,32 @@
                                 "accounts[].ataDevices[].scenes[].displayType",
                                 "accounts[].ataDevices[].scenes[].name",
                                 "accounts[].ataDevices[].scenes[].namePrefix"
+                              ]
+                            }
+                          ],
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome' && model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayType > 0;"
+                          }
+                        },
+                        {
+                          "title": "Schedules",
+                          "type": "section",
+                          "description": "Section for setup device schedules",
+                          "expandable": true,
+                          "expanded": false,
+                          "items": [
+                            {
+                              "key": "accounts[].ataDevices[].schedules",
+                              "type": "tabarray",
+                              "title": "{{ value.name }}",
+                              "items": [
+                                {
+                                  "key": "accounts[].ataDevices[].schedules[].id",
+                                  "readonly": true
+                                },
+                                "accounts[].ataDevices[].schedules[].displayType",
+                                "accounts[].ataDevices[].schedules[].name",
+                                "accounts[].ataDevices[].schedules[].namePrefix"
                               ]
                             }
                           ],
@@ -2813,32 +2813,6 @@
                           }
                         },
                         {
-                          "title": "Schedules",
-                          "type": "section",
-                          "description": "Section for setup device schedules",
-                          "expandable": true,
-                          "expanded": false,
-                          "items": [
-                            {
-                              "key": "accounts[].atwDevices[].schedules",
-                              "type": "tabarray",
-                              "title": "{{ value.name }}",
-                              "items": [
-                                {
-                                  "key": "accounts[].atwDevices[].schedules[].id",
-                                  "readonly": true
-                                },
-                                "accounts[].atwDevices[].schedules[].displayType",
-                                "accounts[].atwDevices[].schedules[].name",
-                                "accounts[].atwDevices[].schedules[].namePrefix"
-                              ]
-                            }
-                          ],
-                          "condition": {
-                            "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome' && model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].displayType > 0;"
-                          }
-                        },
-                        {
                           "title": "Scenes",
                           "type": "section",
                           "description": "Section for setup device scenes",
@@ -2857,6 +2831,32 @@
                                 "accounts[].atwDevices[].scenes[].displayType",
                                 "accounts[].atwDevices[].scenes[].name",
                                 "accounts[].atwDevices[].scenes[].namePrefix"
+                              ]
+                            }
+                          ],
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome' && model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].displayType > 0;"
+                          }
+                        },
+                        {
+                          "title": "Schedules",
+                          "type": "section",
+                          "description": "Section for setup device schedules",
+                          "expandable": true,
+                          "expanded": false,
+                          "items": [
+                            {
+                              "key": "accounts[].atwDevices[].schedules",
+                              "type": "tabarray",
+                              "title": "{{ value.name }}",
+                              "items": [
+                                {
+                                  "key": "accounts[].atwDevices[].schedules[].id",
+                                  "readonly": true
+                                },
+                                "accounts[].atwDevices[].schedules[].displayType",
+                                "accounts[].atwDevices[].schedules[].name",
+                                "accounts[].atwDevices[].schedules[].namePrefix"
                               ]
                             }
                           ],
@@ -2991,32 +2991,6 @@
                           }
                         },
                         {
-                          "title": "Schedules",
-                          "type": "section",
-                          "description": "Section for setup device schedules",
-                          "expandable": true,
-                          "expanded": false,
-                          "items": [
-                            {
-                              "key": "accounts[].ervDevices[].schedules",
-                              "type": "tabarray",
-                              "title": "{{ value.name }}",
-                              "items": [
-                                {
-                                  "key": "accounts[].ervDevices[].schedules[].id",
-                                  "readonly": true
-                                },
-                                "accounts[].ervDevices[].schedules[].displayType",
-                                "accounts[].ervDevices[].schedules[].name",
-                                "accounts[].ervDevices[].schedules[].namePrefix"
-                              ]
-                            }
-                          ],
-                          "condition": {
-                            "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome' && model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].displayType > 0;"
-                          }
-                        },
-                        {
                           "title": "Scenes",
                           "type": "section",
                           "description": "Section for setup device scenes",
@@ -3035,6 +3009,32 @@
                                 "accounts[].ervDevices[].scenes[].displayType",
                                 "accounts[].ervDevices[].scenes[].name",
                                 "accounts[].ervDevices[].scenes[].namePrefix"
+                              ]
+                            }
+                          ],
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome' && model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].displayType > 0;"
+                          }
+                        },
+                        {
+                          "title": "Schedules",
+                          "type": "section",
+                          "description": "Section for setup device schedules",
+                          "expandable": true,
+                          "expanded": false,
+                          "items": [
+                            {
+                              "key": "accounts[].ervDevices[].schedules",
+                              "type": "tabarray",
+                              "title": "{{ value.name }}",
+                              "items": [
+                                {
+                                  "key": "accounts[].ervDevices[].schedules[].id",
+                                  "readonly": true
+                                },
+                                "accounts[].ervDevices[].schedules[].displayType",
+                                "accounts[].ervDevices[].schedules[].name",
+                                "accounts[].ervDevices[].schedules[].namePrefix"
                               ]
                             }
                           ],

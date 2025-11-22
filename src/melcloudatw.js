@@ -1,3 +1,4 @@
+import WebSocket from 'ws';
 import axios from 'axios';
 import EventEmitter from 'events';
 import ImpulseGenerator from './impulsegenerator.js';
@@ -26,8 +27,12 @@ class MelCloudAtw extends EventEmitter {
         //set default values
         this.deviceData = {};
         this.headers = {};
+        this.socket = null;
+        this.connecting = false;
+        this.socketConnected = false;
+        this.heartbeat = null;
 
-        //lock flags
+        //lock flag
         this.locks = false;
         this.impulseGenerator = new ImpulseGenerator()
             .on('checkState', () => this.handleWithLock(async () => {
@@ -51,20 +56,29 @@ class MelCloudAtw extends EventEmitter {
         }
     }
 
-    async checkState() {
-        try {
-            //read device info from file
-            const devicesData = await this.functions.readData(this.devicesFile, true);
-            if (!devicesData) return;
+    cleanupSocket() {
+        if (this.heartbeat) {
+            clearInterval(this.heartbeat);
+            this.heartbeat = null;
+        }
 
-            this.headers = devicesData.Headers;
-            const deviceData = devicesData.Devices.find(device => device.DeviceID === this.deviceId);
+        if (this.socket) {
+            try { this.socket.close(); } catch { }
+            this.socket = null;
+        }
+
+        this.socketConnected = false;
+    }
+
+    async updateState(deviceData) {
+        try {
             if (this.accountType === 'melcloudhome') {
-                deviceData.Scenes = devicesData.Scenes ?? [];
+                deviceData.Device.OperationMode = HeatPump.OperationModeMapStringToEnum[deviceData.Device.OperationMode] ?? deviceData.Device.OperationMode;
+                deviceData.Device.OperationModeZone1 = HeatPump.OperationModeZoneMapStringToEnum[deviceData.Device.OperationModeZone1] ?? deviceData.Device.OperationModeZone1;
+                deviceData.Device.OperationModeZone2 = HeatPump.OperationModeZoneMapStringToEnum[deviceData.Device.OperationModeZone2] ?? deviceData.Device.OperationModeZone2;
             }
             if (this.logDebug) this.emit('debug', `Device Data: ${JSON.stringify(deviceData, null, 2)}`);
 
-            //device
             //device
             const serialNumber = deviceData.SerialNumber || '4.0.0';
             const firmwareAppVersion = deviceData.Device?.FirmwareAppVersion || '4.0.0';
@@ -116,6 +130,106 @@ class MelCloudAtw extends EventEmitter {
 
             //emit state
             this.emit('deviceState', deviceData);
+
+            return true;
+        } catch (error) {
+            throw new Error(`Check state error: ${error.message}`);
+        };
+    };
+
+    async checkState() {
+        try {
+            //read device info from file
+            const devicesData = await this.functions.readData(this.devicesFile, true);
+            if (!devicesData) return;
+
+            this.headers = devicesData.Headers;
+            const deviceData = devicesData.Devices.find(device => device.DeviceID === this.deviceId);
+            if (!deviceData) return;
+            deviceData.Scenes = devicesData.Scenes ?? [];
+
+            //web cocket connection
+            if (this.accountType === 'melcloudhome' && !this.connecting && !this.socketConnected) {
+                this.connecting = true;
+
+                const url = `${ApiUrlsHome.WebSocketURL}${devicesData.WebSocketOptions.Hash}`;
+                try {
+                    const socket = new WebSocket(url, { headers: devicesData.WebSocketOptions.Headers })
+                        .on('error', (error) => {
+                            if (this.logError) this.emit('error', `Socket error: ${error}`);
+                            socket.close();
+                        })
+                        .on('close', () => {
+                            if (this.logDebug) this.emit('debug', `Socket closed`);
+                            this.cleanupSocket();
+                        })
+                        .on('open', () => {
+                            this.socket = socket;
+                            this.socketConnected = true;
+                            this.connecting = false;
+                            if (this.logSuccess) this.emit('success', `Socket Connect Success`);
+
+                            // heartbeat
+                            this.heartbeat = setInterval(() => {
+                                if (socket.readyState === socket.OPEN) {
+                                    if (this.logDebug) this.emit('debug', `Socket send heartbeat`);
+                                    socket.ping();
+                                }
+                            }, 30000);
+                        })
+                        .on('pong', () => {
+                            if (this.logDebug) this.emit('debug', `Socket received heartbeat`);
+                        })
+                        .on('message', async (message) => {
+                            const parsedMessage = JSON.parse(message);
+                            const stringifyMessage = JSON.stringify(parsedMessage, null, 2);
+                            if (this.logDebug) this.emit('debug', `Incoming message: ${stringifyMessage}`);
+                            if (parsedMessage.message === 'Forbidden') return;
+
+                            const messageData = parsedMessage?.[0]?.Data;
+                            if (!messageData) return;
+
+                            let updateState = false;
+                            const unitId = messageData?.id;
+                            switch (unitId) {
+                                case this.deviceId:
+                                    const messageType = parsedMessage[0].messageType;
+                                    switch (messageType) {
+                                        case 'unitStateChanged':
+                                            const settings = Object.fromEntries(
+                                                messageData.settings.map(({ name, value }) => {
+                                                    let parsedValue = this.functions.convertValue(value);
+                                                    return [name, parsedValue];
+                                                })
+                                            );
+                                            Object.assign(deviceData.Device, settings);
+                                            updateState = true;
+                                            break;
+                                        case 'unitWifiSignalChanged':
+                                            deviceData.Rssi = messageData.rssi;
+                                            updateState = true;
+                                            break;
+                                        default:
+                                            if (this.logDebug) this.emit('debug', `Unit ${unitId}, received unknown message type: ${stringifyMessage}`);
+                                            return;
+                                    }
+                                    break;
+                                default:
+                                    if (this.logDebug) this.emit('debug', `Incoming unknown unit id: ${stringifyMessage}`);
+                                    return;
+                            }
+
+                            //update state
+                            if (updateState) await this.updateState(deviceData);
+                        });
+                } catch (error) {
+                    if (this.logError) this.emit('error', `Socket connection failed: ${error}`);
+                    this.cleanupSocket();
+                }
+            }
+
+            //update state
+            await this.updateState(deviceData);
 
             return true;
         } catch (error) {
@@ -248,6 +362,7 @@ class MelCloudAtw extends EventEmitter {
                         headers: headers,
                         data: payload
                     });
+
                     this.updateData(deviceData, updateState);
                     return true;
                 default:

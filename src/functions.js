@@ -167,5 +167,16 @@ class Functions extends EventEmitter {
         else if (!isNaN(v) && v !== "") parsedValue = Number(v);
         return parsedValue;
     }
+
+    parseArrayNameValue(data) {
+        if (!Array.isArray(data)) return {};
+
+        return Object.fromEntries(
+            data.map(({ name, value }) => {
+                const parsedValue = this.convertValue(value);
+                return [name, parsedValue];
+            })
+        );
+    }
 }
 export default Functions

@@ -915,7 +915,7 @@ class DeviceAta extends EventEmitter {
                         presetControlSensorService.setCharacteristic(Characteristic.ConfiguredName, `${serviceName1} Control`);
                         presetControlSensorService.getCharacteristic(characteristicType)
                             .onGet(async () => {
-                                const state = this.accessory.scheduleEnabled;
+                                const state = preset.state;
                                 return state;
                             })
                         this.presetControlSensorServices.push(presetControlSensorService);

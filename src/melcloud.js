@@ -143,7 +143,7 @@ class MelCloud extends EventEmitter {
                 data: payload
             });
             const account = accountData.data;
-            const loginData = account.LoginData ?? [];
+            const loginData = account.LoginData ?? {};
             const contextKey = loginData.ContextKey;
 
             const safeConfig = {

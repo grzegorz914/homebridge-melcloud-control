@@ -142,7 +142,6 @@ class MelCloudHome extends EventEmitter {
                 const createDevice = (device, type) => {
                     // Settings już kapitalizowane w nazwach
                     const settingsArray = device.Settings || [];
-
                     const settingsObject = Object.fromEntries(
                         settingsArray.map(({ name, value }) => {
                             let parsedValue = this.functions.convertValue(value);
@@ -267,11 +266,11 @@ class MelCloudHome extends EventEmitter {
                     '--no-zygote'
                 ]
             });
-            browser.on('disconnected', () => this.emit('debug', 'Browser disconnected'));
+            browser.on('disconnected', () => this.logDebug && this.emit('debug', 'Browser disconnected'));
 
             const page = await browser.newPage();
-            page.on('error', error => this.emit('error', `Page crashed: ${error.message}`));
-            page.on('pageerror', error => this.emit('error', `Browser error: ${error.message}`));
+            page.on('error', error => this.logError && this.emit('error', `Page crashed: ${error.message}`));
+            page.on('pageerror', error => this.logError && this.emit('error', `Browser error: ${error.message}`));
             page.setDefaultTimeout(GLOBAL_TIMEOUT);
             page.setDefaultNavigationTimeout(GLOBAL_TIMEOUT);
 

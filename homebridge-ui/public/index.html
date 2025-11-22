@@ -249,11 +249,11 @@
           const newDevices = { ata: [], ataPresets: [], ataSchedules: [], atw: [], atwPresets: [], atwSchedules: [], erv: [], ervPresets: [], ervSchedules: [], scenes: [] };
           const devicesByType = { ata: [], atw: [], erv: [] };
 
-          response.Devices.forEach(d => {
-            d.Scenes = response.Scenes ?? [];
-            if (d.Type === 0) devicesByType.ata.push(d);
-            if (d.Type === 1) devicesByType.atw.push(d);
-            if (d.Type === 3) devicesByType.erv.push(d);
+          response.Devices.forEach(device => {
+            device.Scenes = response.Scenes ?? [];
+            if (device.Type === 0) devicesByType.ata.push(device);
+            if (device.Type === 1) devicesByType.atw.push(device);
+            if (device.Type === 3) devicesByType.erv.push(device);
           });
 
           account.ataDevices ??= [];
@@ -295,105 +295,112 @@
                   configDevicesMap.set(deviceId, deviceInConfig);
                 }
 
-                // === Process presets/schedules ===
-                const presets = device.Presets || [];
-                const presetsInConfig = deviceInConfig.presets || [];
-                const presetIds = new Set(presetsInConfig.map(p => String(p.id)));
+                //only for melcloud
+                if (account.type === 'melcloud') {
 
-                let addedNewPreset = false;
-                presets.forEach((preset, index) => {
-                  const presetId = String(preset.ID);
-                  if (!presetIds.has(presetId)) {
-                    const presetObj = {
-                      id: presetId,
-                      displayType: 0,
-                      name: preset.NumberDescription || `Preset ${index}`,
-                      namePrefix: false
-                    };
-                    presetsInConfig.push(presetObj);
-                    newPresets.push(presetObj);
-                    presetIds.add(presetId);
-                    addedNewPreset = true;
-                  }
-                });
+                  // === Process presets ===
+                  const presetsInMelCloud = device.Presets || [];
+                  const presetsInConfig = deviceInConfig.presets || [];
+                  const presetIds = new Set(presetsInConfig.map(p => String(p.id)));
 
-                // === Remove placeholder presets/schedules (id === '0') if new ones were added ===
-                if (addedNewPreset) {
-                  const beforeCount = presetsInConfig.length;
-                  deviceInConfig.presets = presetsInConfig.filter(p => String(p.id) !== '0');
-                  const removedCount = beforeCount - deviceInConfig.presets.length;
+                  let addedNewPreset = false;
+                  presetsInMelCloud.forEach((preset, index) => {
+                    const presetId = String(preset.ID);
+                    if (!presetIds.has(presetId)) {
+                      const presetObj = {
+                        id: presetId,
+                        displayType: 0,
+                        name: preset.NumberDescription || `Preset ${index}`,
+                        namePrefix: false
+                      };
+                      presetsInConfig.push(presetObj);
+                      newPresets.push(presetObj);
+                      presetIds.add(presetId);
+                      addedNewPreset = true;
+                    }
+                  });
 
-                  if (removedCount > 0 && removedCount < beforeCount) {
-                    updateInfo('info2', `Removed ${removedCount} placeholder preset from device ${device.DeviceID}`, 'yellow');
-                  }
-                }
+                  // === Remove placeholder presets/schedules (id === '0') if new ones were added ===
+                  if (addedNewPreset) {
+                    const beforeCount = presetsInConfig.length;
+                    deviceInConfig.presets = presetsInConfig.filter(p => String(p.id) !== '0');
+                    const removedCount = beforeCount - deviceInConfig.presets.length;
 
-                // === Process presets/schedules ===
-                const schedules = device.Schedules || [];
-                const schedulesInConfig = deviceInConfig.schedules || [];
-                const scheduleIds = new Set(schedulesInConfig.map(s => String(s.id)));
-
-                let addedNewSchedule = false;
-                schedules.forEach((schedule, index) => {
-                  const scheduleId = String(schedule.Id);
-                  if (!scheduleIds.has(scheduleId)) {
-                    const presetObj = {
-                      id: scheduleId,
-                      displayType: 0,
-                      name: `Schedule ${index}`,
-                      namePrefix: false
-                    };
-                    schedulesInConfig.push(presetObj);
-                    newPresets.push(presetObj);
-                    scheduleIds.add(scheduleId);
-                    addedNewSchedule = true;
-                  }
-                });
-
-                // === Remove placeholder schedules (id === '0') if new ones were added ===
-                if (addedNewSchedule) {
-                  const beforeCount = schedulesInConfig.length;
-                  deviceInConfig.schedules = schedulesInConfig.filter(s => String(s.id) !== '0');
-                  const removedCount = beforeCount - deviceInConfig.schedules.length;
-
-                  if (removedCount > 0 && removedCount < beforeCount) {
-                    updateInfo('info2', `Removed ${removedCount} placeholder schedule from device ${device.DeviceID}`, 'yellow');
+                    if (removedCount > 0 && removedCount < beforeCount) {
+                      updateInfo('info2', `Removed ${removedCount} placeholder preset from device ${device.DeviceID}`, 'yellow');
+                    }
                   }
                 }
 
-                // === Process scenes ===
-                const scenes = device.Scenes || [];
-                const scenesInConfig = deviceInConfig.scenes || [];
-                const sceneIds = new Set(scenesInConfig.map(s => String(s.id)));
+                //only for melcloudhome
+                if (account.type === 'melcloudhome') {
 
-                let addedNewScenes = false;
-                scenes.forEach((scene, index) => {
-                  const sceneId = String(scene.Id);
-                  if (!sceneIds.has(sceneId)) {
-                    const sceneObj = {
-                      id: sceneId,
-                      displayType: 0,
-                      name: scene.Name || `Scene ${index}`,
-                      namePrefix: false
-                    };
-                    scenesInConfig.push(sceneObj);
-                    newScenes.push(sceneObj);
-                    sceneIds.add(sceneId);
-                    addedNewScenes = true;
+                  // === Process schedules ===
+                  const schedulesInMelCloud = device.Schedule || [];
+                  const schedulesInConfig = deviceInConfig.schedules || [];
+                  const scheduleIds = new Set(schedulesInConfig.map(s => String(s.id)));
+
+                  let addedNewSchedule = false;
+                  schedulesInMelCloud.forEach((schedule, index) => {
+                    const scheduleId = String(schedule.Id);
+                    if (!scheduleIds.has(scheduleId)) {
+                      const scheduleObj = {
+                        id: scheduleId,
+                        displayType: 0,
+                        name: `Schedule ${index}`,
+                        namePrefix: false
+                      };
+                      schedulesInConfig.push(scheduleObj);
+                      newSchedules.push(scheduleObj);
+                      scheduleIds.add(scheduleId);
+                      addedNewSchedule = true;
+                    }
+                  });
+
+                  // === Remove placeholder schedules (id === '0') if new ones were added ===
+                  if (addedNewSchedule) {
+                    const beforeCount = schedulesInConfig.length;
+                    deviceInConfig.schedules = schedulesInConfig.filter(s => String(s.id) !== '0');
+                    const removedCount = beforeCount - deviceInConfig.schedules.length;
+
+                    if (removedCount > 0 && removedCount < beforeCount) {
+                      updateInfo('info2', `Removed ${removedCount} placeholder schedule from device ${device.DeviceID}`, 'yellow');
+                    }
                   }
-                });
 
-                // === Remove placeholder scenes (id === '0') if new ones were added ===
-                if (addedNewScenes) {
-                  const beforeCount = scenesInConfig.length;
-                  deviceInConfig.scenes = scenesInConfig.filter(s => String(s.id) !== '0');
-                  const removedCount = beforeCount - deviceInConfig.scenes.length;
+                  // === Process scenes ===
+                  const scenesInMelCloud = device.Scenes || [];
+                  const scenesInConfig = deviceInConfig.scenes || [];
+                  const sceneIds = new Set(scenesInConfig.map(s => String(s.id)));
 
-                  if (removedCount > 0 && removedCount < beforeCount) {
-                    updateInfo('info2', `Removed ${removedCount} placeholder scene from device ${device.DeviceID}`, 'yellow');
+                  let addedNewScenes = false;
+                  scenesInMelCloud.forEach((scene, index) => {
+                    const sceneId = String(scene.Id);
+                    if (!sceneIds.has(sceneId)) {
+                      const sceneObj = {
+                        id: sceneId,
+                        displayType: 0,
+                        name: scene.Name || `Scene ${index}`,
+                        namePrefix: false
+                      };
+                      scenesInConfig.push(sceneObj);
+                      newScenes.push(sceneObj);
+                      sceneIds.add(sceneId);
+                      addedNewScenes = true;
+                    }
+                  });
+
+                  // === Remove placeholder scenes (id === '0') if new ones were added ===
+                  if (addedNewScenes) {
+                    const beforeCount = scenesInConfig.length;
+                    deviceInConfig.scenes = scenesInConfig.filter(s => String(s.id) !== '0');
+                    const removedCount = beforeCount - deviceInConfig.scenes.length;
+
+                    if (removedCount > 0 && removedCount < beforeCount) {
+                      updateInfo('info2', `Removed ${removedCount} placeholder scene from device ${device.DeviceID}`, 'yellow');
+                    }
                   }
                 }
-
               });
 
               // Return filtered devicesInConfig to make sure upstream code uses it
@@ -418,17 +425,19 @@
             updateInfo('info', 'No changes detected.', 'white');
           } else {
             if (newDevicesCount)
-              updateInfo('info', `Found new devices: ATA: ${newDevices.ata.length}, ATW: ${newDevices.atw.length}, ERV: ${newDevices.erv.length}.`, 'green');
-            if (newPresetsCount || newScenesCount || newSchedulesCount)
-              updateInfo('info1', `Found new ${account.type === 'melcloud' ? 'presets' : 'schedules'}: ATA: ${account.type === 'melcloud' ? newDevices.ataPresets.length : newDevices.ataSchedules.length}, ATW: ${account.type === 'melcloud' ? newDevices.atwPresets.length : newDevices.atwSchedules.length}, ERV: ${account.type === 'melcloud' ? newDevices.ervPresets.length : newDevices.ervSchedules.length}, Scenes: ${newDevices.scenes.length}.`, 'green');
+              updateInfo('info', `Found new devices: ${newDevices.ata.length ? `ATA: ${newDevices.ata.length},` : ''} ${newDevices.atw.length ? `ATW: ${newDevices.atw.length},` : ''} ${newDevices.erv.length ? `ERV: ${newDevices.erv.length},` : ''}.`, 'green');
+            if (newPresetsCount)
+              updateInfo('info1', `Found new presets: ${newDevices.ataPresets.length ? `ATA: ${newDevices.ataPresets.length},` : ''} ${newDevices.atwPresets.length ? `ATW: ${newDevices.atwPresets.length},` : ''} ${newDevices.ervPresets.length ? `ERV: ${newDevices.ervPresets.length}` : ''}.`, 'green');
+            if (newScenesCount || newSchedulesCount)
+              updateInfo('info1', `Found new ${newSchedulesCount ? `schedules:` : ''} ${newDevices.ataSchedules.length ? `ATA: ${newDevices.ataSchedules.length},` : ''} ${newDevices.atwSchedules.length ? `ATW: ${newDevices.atwSchedules.length},` : ''}  ${newDevices.ervSchedules.length ? `ERV: ${newDevices.ervSchedules.length},` : ''} ${newScenesCount ? `scenes: ${newScenesCount}` : ''}.`, 'green');
             if (removedDevicesCount)
-              updateInfo('info2', `Removed devices: ATA: ${removedAta.length}, ATW: ${removedAtw.length}, ERV: ${removedErv.length}.`, 'orange');
+              updateInfo('info2', `Removed devices: ${removedAta.length ? `ATA: ${removedAta.length},` : ''} ${removedAtw.length ? `ATW: ${removedAtw.length},` : ''} ${removedErv.length ? `ERV: ${removedErv.length}` : ''}.`, 'orange');
           }
 
           await homebridge.updatePluginConfig(pluginConfig);
           await homebridge.savePluginConfig(pluginConfig);
         } catch (error) {
-          updateInfo('info', `Connect error ${JSON.stringify(error)}`, 'red');
+          updateInfo('info', `Prepare config error ${JSON.stringify(error)}`, 'red');
           document.getElementById('logIn').className = "btn btn-secondary";
         } finally {
           document.getElementById('logIn').className = "btn btn-secondary";

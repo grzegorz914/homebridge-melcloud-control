@@ -76,8 +76,8 @@ class MelCloudAta extends EventEmitter {
                 deviceData.Device.OperationMode = AirConditioner.OperationModeMapStringToEnum[deviceData.Device.OperationMode] ?? deviceData.Device.OperationMode;
                 deviceData.Device.ActualFanSpeed = AirConditioner.FanSpeedMapStringToEnum[deviceData.Device.ActualFanSpeed] ?? deviceData.Device.ActualFanSpeed;
                 deviceData.Device.SetFanSpeed = AirConditioner.FanSpeedMapStringToEnum[deviceData.Device.SetFanSpeed] ?? deviceData.Device.SetFanSpeed;
-                deviceData.Device.VaneVerticalDirection = AirConditioner.VaneVerticalDirectionMapStringToEnum[deviceData.Device.VaneVerticalDirection] ?? deviceData.Device.VaneVerticalDirection;
                 deviceData.Device.VaneHorizontalDirection = AirConditioner.VaneHorizontalDirectionMapStringToEnum[deviceData.Device.VaneHorizontalDirection] ?? deviceData.Device.VaneHorizontalDirection
+                deviceData.Device.VaneVerticalDirection = AirConditioner.VaneVerticalDirectionMapStringToEnum[deviceData.Device.VaneVerticalDirection] ?? deviceData.Device.VaneVerticalDirection;
 
                 //read default temps
                 const temps = await this.functions.readData(this.defaultTempsFile, true);
@@ -145,21 +145,21 @@ class MelCloudAta extends EventEmitter {
 
     async checkState() {
         try {
-
             //read device info from file
             const devicesData = await this.functions.readData(this.devicesFile, true);
             if (!devicesData) return;
 
             this.headers = devicesData.Headers;
             const deviceData = devicesData.Devices.find(device => device.DeviceID === this.deviceId);
+            if (!deviceData) return;
             deviceData.Scenes = devicesData.Scenes ?? [];
 
             //web cocket connection
             if (this.accountType === 'melcloudhome' && !this.connecting && !this.socketConnected) {
                 this.connecting = true;
 
-                const url = `${ApiUrlsHome.WebSocketURL}${devicesData.WebSocketOptions.Hash}`;
                 try {
+                    const url = `${ApiUrlsHome.WebSocketURL}${devicesData.WebSocketOptions.Hash}`;
                     const socket = new WebSocket(url, { headers: devicesData.WebSocketOptions.Headers })
                         .on('error', (error) => {
                             if (this.logError) this.emit('error', `Socket error: ${error}`);
@@ -189,7 +189,6 @@ class MelCloudAta extends EventEmitter {
                         .on('message', async (message) => {
                             const parsedMessage = JSON.parse(message);
                             const stringifyMessage = JSON.stringify(parsedMessage, null, 2);
-                            if (this.logDebug) this.emit('debug', `Incoming message: ${stringifyMessage}`);
                             if (parsedMessage.message === 'Forbidden') return;
 
                             const messageData = parsedMessage?.[0]?.Data;
@@ -199,16 +198,33 @@ class MelCloudAta extends EventEmitter {
                             const unitId = messageData?.id;
                             switch (unitId) {
                                 case this.deviceId:
+                                    if (this.logDebug) this.emit('debug', `Incoming message: ${stringifyMessage}`);
                                     const messageType = parsedMessage[0].messageType;
+                                    const settings = this.functions.parseArrayNameValue(messageData.settings);
                                     switch (messageType) {
                                         case 'unitStateChanged':
-                                            const settings = Object.fromEntries(
-                                                messageData.settings.map(({ name, value }) => {
-                                                    let parsedValue = this.functions.convertValue(value);
-                                                    return [name, parsedValue];
-                                                })
-                                            );
-                                            Object.assign(deviceData.Device, settings);
+
+                                            //update values
+                                            for (const [key, value] of Object.entries(settings)) {
+                                                if (!this.functions.isValidValue(value)) continue;
+
+                                                //update holiday mode
+                                                if (key === 'HolidayMode') {
+                                                    deviceData.HolidayMode.Enabled = value;
+                                                    continue;
+                                                }
+
+                                                //update device settings
+                                                if (key in deviceData.Device) {
+                                                    deviceData.Device[key] = value;
+                                                }
+                                            }
+                                            updateState = true;
+                                            break;
+                                        case 'unitHolidayModeTriggered':
+                                            deviceData.Device.Power = settings.Power;
+                                            deviceData.HolidayMode.Enabled = settings.HolidayMode;
+                                            deviceData.HolidayMode.Active = messageData.active;
                                             updateState = true;
                                             break;
                                         case 'unitWifiSignalChanged':
@@ -330,6 +346,7 @@ class MelCloudAta extends EventEmitter {
                             method = 'POST';
                             path = ApiUrlsHome.PostHolidayMode;
                             headers.Referer = ApiUrlsHome.Referers.PostHolidayMode.replace('deviceid', deviceData.DeviceID);
+                            updateState = false;
                             break;
                         case 'schedule':
                             payload = { enabled: deviceData.ScheduleEnabled };

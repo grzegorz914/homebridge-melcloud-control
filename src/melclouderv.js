@@ -1,3 +1,4 @@
+import WebSocket from 'ws';
 import axios from 'axios';
 import EventEmitter from 'events';
 import ImpulseGenerator from './impulsegenerator.js';
@@ -59,6 +60,7 @@ class MelCloudErv extends EventEmitter {
 
             this.headers = devicesData.Headers;
             const deviceData = devicesData.Devices.find(device => device.DeviceID === this.deviceId);
+            if (!deviceData) return;
             if (this.accountType === 'melcloudhome') {
                 deviceData.Scenes = devicesData.Scenes ?? [];
 
