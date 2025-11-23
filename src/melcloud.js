@@ -97,7 +97,6 @@ class MelCloud extends EventEmitter {
                     device.DeviceID = String(device.DeviceID);
                 });
 
-                if (this.logDebug) this.emit('debug', `Found ${allDevices.length} devices in building: ${building.Name || 'Unnamed'}`);
                 devices.push(...allDevices);
             }
 

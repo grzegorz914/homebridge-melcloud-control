@@ -85,8 +85,22 @@ class MelCloudPlatform {
 						.on('start', async () => {
 							try {
 								//melcloud account
-								const melCloud = account.type === 'melcloud' ? new MelCloud(account, accountFile, buildingsFile, devicesFile, true) : new MelCloudHome(account, accountFile, buildingsFile, devicesFile, true)
-									.on('success', (msg) => log.success(`${accountName}, ${msg}`))
+								let configureAccount;
+								let timmers = []
+								switch (account.type) {
+									case 'melcloud':
+										timmers = [{ name: 'checkDevicesList', sampling: refreshInterval }];
+										configureAccount = new MelCloud(account, accountFile, buildingsFile, devicesFile, true);
+										break;
+									case 'melcloudhome':
+										timmers = [{ name: 'connect', sampling: 3300000 }, { name: 'checkDevicesList', sampling: 3000 }];
+										configureAccount = new MelCloudHome(account, accountFile, buildingsFile, devicesFile, true);
+										break;
+									default:
+										if (logLevel.warn) log.warn(`Unknown account type: ${account.type}.`);
+										return;
+								}
+								configureAccount.on('success', (msg) => log.success(`${accountName}, ${msg}`))
 									.on('info', (msg) => log.info(`${accountName}, ${msg}`))
 									.on('debug', (msg) => log.info(`${accountName}, debug: ${msg}`))
 									.on('warn', (msg) => log.warn(`${accountName}, ${msg}`))
@@ -95,14 +109,13 @@ class MelCloudPlatform {
 								//connect
 								let accountInfo;
 								try {
-									accountInfo = await melCloud.connect();
+									accountInfo = await configureAccount.connect();
+									if (!accountInfo.State) {
+										if (logLevel.warn) log.warn(`${accountName}, ${accountInfo.Info}`);
+										return;
+									}
 								} catch (error) {
 									if (logLevel.error) log.error(`${accountName}, Connect error: ${error.message ?? error}`);
-									return;
-								}
-
-								if (!accountInfo.State) {
-									if (logLevel.warn) log.warn(`${accountName}, ${accountInfo.Info}`);
 									return;
 								}
 								if (logLevel.success) log.success(accountInfo.Info);
@@ -110,15 +123,16 @@ class MelCloudPlatform {
 								//check devices list
 								let devicesList;
 								try {
-									devicesList = await melCloud.checkDevicesList();
+									devicesList = await configureAccount.checkDevicesList();
+									if (!devicesList.State) {
+										if (logLevel.warn) log.warn(`${accountName}, ${devicesList.Info}`);
+										return;
+									}
 								} catch (error) {
 									if (logLevel.error) log.error(`${accountName}, Check devices list error: ${error.message ?? error}`);
 									return;
 								}
-								if (!devicesList.State) {
-									if (logLevel.warn) log.warn(`${accountName}, ${devicesList.Info}`);
-									return;
-								}
+								if (logLevel.debug) log.info(devicesList.Info);
 
 								//configured devices
 								const ataDevices = (account.ataDevices || []).filter(device => device.id != null && String(device.id) !== '0');
@@ -157,7 +171,7 @@ class MelCloudPlatform {
 												if (logLevel.debug) log.debug(`Default temperature file created: ${defaultTempsFile}`);
 											}
 										} catch (error) {
-											if (logLevel.error) log.error(`Device: ${host} ${deviceName}, File init error: ${error.message}`);
+											if (logLevel.error) log.error(`${accountName}, ${deviceTypeString}, ${deviceName}, File init error: ${error.message}`);
 											continue;
 										}
 									}
@@ -192,15 +206,16 @@ class MelCloudPlatform {
 										api.publishExternalAccessories(PluginName, [accessory]);
 										if (logLevel.success) log.success(`${accountName}, ${deviceTypeString}, ${deviceName}, Published as external accessory.`);
 
-										//start impulse generators\
+										//start impulse generators for device
 										await configuredDevice.startStopImpulseGenerator(true, [{ name: 'checkState', sampling: deviceRefreshInterval }]);
-										const timmers = accountType === 'melcloudhome' ? [{ name: 'connect', sampling: 3300000 }, { name: 'checkDevicesList', sampling: 3000 }] : [{ name: 'checkDevicesList', sampling: refreshInterval }];
-										await melCloud.impulseGenerator.state(true, timmers, false);
-
-										//stop impulse generator
-										await impulseGenerator.state(false);
 									}
 								}
+
+								//start account impulse generator
+								await configureAccount.impulseGenerator.state(true, timmers, false);
+
+								//stop start impulse generator
+								await impulseGenerator.state(false);
 							} catch (error) {
 								if (logLevel.error) log.error(`${accountName}, Start impulse generator error, ${error.message ?? error}, trying again.`);
 							}

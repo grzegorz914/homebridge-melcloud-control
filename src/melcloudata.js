@@ -198,7 +198,7 @@ class MelCloudAta extends EventEmitter {
                             const unitId = messageData?.id;
                             switch (unitId) {
                                 case this.deviceId:
-                                    if (this.logDebug) this.emit('debug', `Incoming message: ${stringifyMessage}`);
+                                    if (!this.logDebug) this.emit('debug', `Incoming message: ${stringifyMessage}`);
                                     const messageType = parsedMessage[0].messageType;
                                     const settings = this.functions.parseArrayNameValue(messageData.settings);
                                     switch (messageType) {
