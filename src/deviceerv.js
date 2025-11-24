@@ -1581,7 +1581,7 @@ class DeviceErv extends EventEmitter {
             if (this.restFul.enable || this.mqtt.enable) await this.externalIntegrations();
 
             //check state
-            await this.melCloudAta.checkState(this.melcloudDevicesList);
+            await this.melCloudErv.checkState(this.melcloudDevicesList);
 
             //prepare accessory
             await new Promise(r => setTimeout(r, 1000));
