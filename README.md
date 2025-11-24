@@ -264,7 +264,6 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ataDevices[].frostProtectionSupport` | This enable extra `Frost Protection` control and sensors to use with automations in HomeKit app. |
 | `ataDevices[].overheatProtectionSupport` | This enable extra `Overheat Protection` control and sensors to use with automations in HomeKit app. |
 | `ataDevices[].holidayModeSupport` | This enable extra `Holiday Mode` control and sensors to use with automations in HomeKit app. |
-| `ataDevices[].refreshInterval` | Here set the background devices state refresh time in (sec), default `5s`. |
 | `ataDevices[].presets[]` | Array of ATA device `Presets` created automatically after login to MELCloud from plugin config UI. |
 | `ataDevices[].presets[].id` | Read only data, do not change it. |
 | `ataDevices[].presets[].name` | Here You can change the `Preset Name` which is exposed to the `Homebridge/HomeKit`. |
@@ -301,7 +300,6 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `atwDevices[].connectSensor` | This enable `Connect State` sensor to use with automations in HomeKit app. |
 | `atwDevices[].errorSensor` | This enable `Error` sensors to use with automations in HomeKit app. |
 | `atwDevices[].holidayModeSupport` | This enable extra `Holiday Mode` control and sensors to use with automations in HomeKit app. |
-| `atwDevices[].refreshInterval` | Here set the background devices state refresh time in (sec), default `5s`. |
 | `atwDevices[].presets[]` | Array of ATW device `Presets` created automatically after login to MELCloud from plugin config UI. |
 | `atwDevices[].presets[].id` | Read only data, do not change it. |
 | `atwDevices[].presets[].name` | Here You can change the `Preset Name` which is exposed to the `Homebridge/HomeKit`. |
@@ -331,7 +329,6 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ervDevices[].connectSensor` | This enable `Connect State` sensor to use with automations in HomeKit app. |
 | `ervDevices[].errorSensor` | This enable `Error` sensors to use with automations in HomeKit app. |
 | `ervDevices[].holidayModeSupport` | This enable extra `Holiday Mode` control and sensors to use with automations in HomeKit app. |
-| `ervDevices[].refreshInterval` | Here set the background devices state refresh time in (sec), default `5s`. |
 | `ervDevices[].presets[]` | Array of ERV device `Presets` created automatically after login to MELCloud from plugin config UI. |
 | `ervDevices[].presets[].id` | Read only data, do not change it. |
 | `ervDevices[].presets[].name` | Here You can change the `Preset Name` which is exposed to the `Homebridge/HomeKit`. |

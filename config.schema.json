@@ -440,14 +440,6 @@
                       "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
                     }
                   },
-                  "refreshInterval": {
-                    "title": "Refresh Interval",
-                    "type": "integer",
-                    "default": 5,
-                    "minimum": 1,
-                    "maximum": 60,
-                    "description": "Set the background device state refresh time in seconds."
-                  },
                   "presets": {
                     "title": "Presets",
                     "type": "array",
@@ -1296,14 +1288,6 @@
                       "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
                     }
                   },
-                  "refreshInterval": {
-                    "title": "Refresh Interval",
-                    "type": "integer",
-                    "default": 5,
-                    "minimum": 1,
-                    "maximum": 60,
-                    "description": "Set the background device state refresh time in seconds."
-                  },
                   "presets": {
                     "title": "Presets",
                     "type": "array",
@@ -1920,14 +1904,6 @@
                     "condition": {
                       "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
                     }
-                  },
-                  "refreshInterval": {
-                    "title": "Refresh Interval",
-                    "type": "integer",
-                    "default": 5,
-                    "minimum": 1,
-                    "maximum": 60,
-                    "description": "Set the background device state refresh time in seconds."
                   },
                   "presets": {
                     "title": "Presets",
@@ -2606,8 +2582,7 @@
                             "accounts[].ataDevices[].autoDryFanMode",
                             "accounts[].ataDevices[].frostProtectionSupport",
                             "accounts[].ataDevices[].overheatProtectionSupport",
-                            "accounts[].ataDevices[].holidayModeSupport",
-                            "accounts[].ataDevices[].refreshInterval"
+                            "accounts[].ataDevices[].holidayModeSupport"
                           ],
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].displayType > 0;"
@@ -2779,8 +2754,7 @@
                             "accounts[].atwDevices[].hideZone",
                             "accounts[].atwDevices[].name",
                             "accounts[].atwDevices[].frostProtectionSupport",
-                            "accounts[].atwDevices[].holidayModeSupport",
-                            "accounts[].atwDevices[].refreshInterval"
+                            "accounts[].atwDevices[].holidayModeSupport"
                           ],
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].displayType > 0;"
@@ -2957,8 +2931,7 @@
                           "expanded": false,
                           "items": [
                             "accounts[].ervDevices[].name",
-                            "accounts[].ervDevices[].holidayModeSupport",
-                            "accounts[].ervDevices[].refreshInterval"
+                            "accounts[].ervDevices[].holidayModeSupport"
                           ],
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].displayType > 0;"

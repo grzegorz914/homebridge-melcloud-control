@@ -1,12 +1,10 @@
-import WebSocket from 'ws';
 import axios from 'axios';
 import EventEmitter from 'events';
-import ImpulseGenerator from './impulsegenerator.js';
 import Functions from './functions.js';
 import { ApiUrls, ApiUrlsHome, AirConditioner } from './constants.js';
 
 class MelCloudAta extends EventEmitter {
-    constructor(account, device, devicesFile, defaultTempsFile, accountFile) {
+    constructor(account, device, defaultTempsFile, accountFile, melcloud) {
         super();
         this.accountType = account.type;
         this.logSuccess = account.log?.success;
@@ -16,9 +14,9 @@ class MelCloudAta extends EventEmitter {
         this.restFulEnabled = account.restFul?.enable;
         this.mqttEnabled = account.mqtt?.enable;
         this.deviceId = device.id;
-        this.devicesFile = devicesFile;
         this.defaultTempsFile = defaultTempsFile;
         this.accountFile = accountFile;
+
         this.functions = new Functions(this.logWarn, this.logError, this.logDebug)
             .on('warn', warn => this.emit('warn', warn))
             .on('error', error => this.emit('error', error))
@@ -26,48 +24,74 @@ class MelCloudAta extends EventEmitter {
 
         //set default values
         this.deviceData = {};
-        this.headers = {};
-        this.socket = null;
-        this.connecting = false;
-        this.socketConnected = false;
-        this.heartbeat = null;
+        this.headers = {}
 
-        //lock flag
-        this.locks = false;
-        this.impulseGenerator = new ImpulseGenerator()
-            .on('checkState', () => this.handleWithLock(async () => {
-                await this.checkState();
-            }))
-            .on('state', (state) => {
-                this.emit(state ? 'success' : 'warn', `Impulse generator ${state ? 'started' : 'stopped'}`);
-            });
-    }
+        let deviceData = null;
+        melcloud.on('devicesList', async (devicesData) => {
+            this.headers = devicesData.Headers;
+            deviceData = devicesData.Devices.find(device => device.DeviceID === this.deviceId);
+            if (!deviceData) return;
+            deviceData.Scenes = devicesData.Scenes ?? [];
 
-    async handleWithLock(fn) {
-        if (this.locks) return;
+            //update state
+            await this.updateState(deviceData);
+        }).on('webSocket', async (parsedMessage) => {
+            try {
+                const messageData = parsedMessage?.[0]?.Data;
+                if (!messageData || !deviceData) return;
 
-        this.locks = true;
-        try {
-            await fn();
-        } catch (error) {
-            this.emit('error', `Inpulse generator error: ${error}`);
-        } finally {
-            this.locks = false;
-        }
-    }
+                let updateState = false;
+                const unitId = messageData?.id;
+                switch (unitId) {
+                    case this.deviceId:
+                        const messageType = parsedMessage[0].messageType;
+                        const settings = this.functions.parseArrayNameValue(messageData.settings);
+                        switch (messageType) {
+                            case 'unitStateChanged':
 
-    cleanupSocket() {
-        if (this.heartbeat) {
-            clearInterval(this.heartbeat);
-            this.heartbeat = null;
-        }
+                                //update values
+                                for (const [key, value] of Object.entries(settings)) {
+                                    if (!this.functions.isValidValue(value)) continue;
 
-        if (this.socket) {
-            try { this.socket.close(); } catch { }
-            this.socket = null;
-        }
+                                    //update holiday mode
+                                    if (key === 'HolidayMode') {
+                                        deviceData.HolidayMode.Enabled = value;
+                                        continue;
+                                    }
 
-        this.socketConnected = false;
+                                    //update device settings
+                                    if (key in deviceData.Device) {
+                                        deviceData.Device[key] = value;
+                                    }
+                                }
+                                updateState = true;
+                                break;
+                            case 'unitHolidayModeTriggered':
+                                deviceData.Device.Power = settings.Power;
+                                deviceData.HolidayMode.Enabled = settings.HolidayMode;
+                                deviceData.HolidayMode.Active = messageData.active;
+                                updateState = true;
+                                break;
+                            case 'unitWifiSignalChanged':
+                                deviceData.Rssi = messageData.rssi;
+                                updateState = true;
+                                break;
+                            default:
+                                if (this.logDebug) this.emit('debug', `Unit ${unitId}, received unknown message type: ${stringifyMessage}`);
+                                return;
+                        }
+                        break;
+                    default:
+                        if (this.logDebug) this.emit('debug', `Incoming unknown unit id: ${stringifyMessage}`);
+                        return;
+                }
+
+                //update state
+                if (updateState) await this.updateState(deviceData);
+            } catch (error) {
+                if (this.logError) this.emit('error', `Web socket process message error: ${error}`);
+            }
+        });
     }
 
     async updateState(deviceData) {
@@ -143,121 +167,18 @@ class MelCloudAta extends EventEmitter {
         };
     };
 
-    async checkState() {
+    async checkState(devicesData) {
         try {
-            //read device info from file
-            const devicesData = await this.functions.readData(this.devicesFile, true);
-            if (!devicesData) return;
-
             this.headers = devicesData.Headers;
             const deviceData = devicesData.Devices.find(device => device.DeviceID === this.deviceId);
-            if (!deviceData) return;
             deviceData.Scenes = devicesData.Scenes ?? [];
-
-            //web cocket connection
-            if (this.accountType === 'melcloudhome' && !this.connecting && !this.socketConnected) {
-                this.connecting = true;
-
-                try {
-                    const url = `${ApiUrlsHome.WebSocketURL}${devicesData.WebSocketOptions.Hash}`;
-                    const socket = new WebSocket(url, { headers: devicesData.WebSocketOptions.Headers })
-                        .on('error', (error) => {
-                            if (this.logError) this.emit('error', `Socket error: ${error}`);
-                            socket.close();
-                        })
-                        .on('close', () => {
-                            if (this.logDebug) this.emit('debug', `Socket closed`);
-                            this.cleanupSocket();
-                        })
-                        .on('open', () => {
-                            this.socket = socket;
-                            this.socketConnected = true;
-                            this.connecting = false;
-                            if (this.logSuccess) this.emit('success', `Socket Connect Success`);
-
-                            // heartbeat
-                            this.heartbeat = setInterval(() => {
-                                if (socket.readyState === socket.OPEN) {
-                                    if (this.logDebug) this.emit('debug', `Socket send heartbeat`);
-                                    socket.ping();
-                                }
-                            }, 30000);
-                        })
-                        .on('pong', () => {
-                            if (this.logDebug) this.emit('debug', `Socket received heartbeat`);
-                        })
-                        .on('message', async (message) => {
-                            const parsedMessage = JSON.parse(message);
-                            const stringifyMessage = JSON.stringify(parsedMessage, null, 2);
-                            if (parsedMessage.message === 'Forbidden') return;
-
-                            const messageData = parsedMessage?.[0]?.Data;
-                            if (!messageData) return;
-
-                            let updateState = false;
-                            const unitId = messageData?.id;
-                            switch (unitId) {
-                                case this.deviceId:
-                                    if (!this.logDebug) this.emit('debug', `Incoming message: ${stringifyMessage}`);
-                                    const messageType = parsedMessage[0].messageType;
-                                    const settings = this.functions.parseArrayNameValue(messageData.settings);
-                                    switch (messageType) {
-                                        case 'unitStateChanged':
-
-                                            //update values
-                                            for (const [key, value] of Object.entries(settings)) {
-                                                if (!this.functions.isValidValue(value)) continue;
-
-                                                //update holiday mode
-                                                if (key === 'HolidayMode') {
-                                                    deviceData.HolidayMode.Enabled = value;
-                                                    continue;
-                                                }
-
-                                                //update device settings
-                                                if (key in deviceData.Device) {
-                                                    deviceData.Device[key] = value;
-                                                }
-                                            }
-                                            updateState = true;
-                                            break;
-                                        case 'unitHolidayModeTriggered':
-                                            deviceData.Device.Power = settings.Power;
-                                            deviceData.HolidayMode.Enabled = settings.HolidayMode;
-                                            deviceData.HolidayMode.Active = messageData.active;
-                                            updateState = true;
-                                            break;
-                                        case 'unitWifiSignalChanged':
-                                            deviceData.Rssi = messageData.rssi;
-                                            updateState = true;
-                                            break;
-                                        default:
-                                            if (this.logDebug) this.emit('debug', `Unit ${unitId}, received unknown message type: ${stringifyMessage}`);
-                                            return;
-                                    }
-                                    break;
-                                default:
-                                    if (this.logDebug) this.emit('debug', `Incoming unknown unit id: ${stringifyMessage}`);
-                                    return;
-                            }
-
-                            //update state
-                            if (updateState) await this.updateState(deviceData);
-                        });
-                } catch (error) {
-                    if (this.logError) this.emit('error', `Socket connection failed: ${error}`);
-                    this.cleanupSocket();
-                }
-            }
-
-            //update state
             await this.updateState(deviceData);
 
             return true;
         } catch (error) {
-            throw new Error(`Check state error: ${error.message}`);
+            throw new Error(`Chaeck state error: ${error.message}`);
         };
-    };
+    }
 
     async send(accountType, displayType, deviceData, flag, flagData) {
         try {
@@ -310,7 +231,8 @@ class MelCloudAta extends EventEmitter {
                         headers: headers,
                         data: payload
                     });
-                    this.updateData(deviceData, updateState);
+
+                    this.emit('deviceState', deviceData);
                     return true;
                 case "melcloudhome":
                     switch (flag) {
@@ -401,7 +323,6 @@ class MelCloudAta extends EventEmitter {
                         data: payload
                     });
 
-                    this.updateData(deviceData, updateState);
                     return true;
                 default:
                     return;
@@ -410,15 +331,6 @@ class MelCloudAta extends EventEmitter {
             if (error.response?.status === 500) return true; // Return 500 for schedule hovewer working correct
             throw new Error(`Send data error: ${error.message}`);
         }
-    }
-
-    updateData(deviceData, updateState = true) {
-        this.locks = true;
-        if (updateState) this.emit('deviceState', deviceData);
-
-        setTimeout(() => {
-            this.locks = false
-        }, 5000);
     }
 };
 export default MelCloudAta;

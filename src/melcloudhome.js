@@ -1,5 +1,6 @@
 import fs from 'fs';
 import axios from 'axios';
+import WebSocket from 'ws';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import EventEmitter from 'events';
@@ -10,7 +11,7 @@ import { ApiUrlsHome, LanguageLocaleMap } from './constants.js';
 const execPromise = promisify(exec);
 
 class MelCloudHome extends EventEmitter {
-    constructor(account, accountFile, buildingsFile, devicesFile, pluginStart = false) {
+    constructor(account, accountFile, buildingsFile, pluginStart = false) {
         super();
         this.accountType = account.type;
         this.user = account.user;
@@ -22,9 +23,13 @@ class MelCloudHome extends EventEmitter {
         this.logDebug = account.log?.debug;
         this.accountFile = accountFile;
         this.buildingsFile = buildingsFile;
-        this.devicesFile = devicesFile;
+
         this.headers = {};
         this.webSocketOptions = {};
+        this.socket = null;
+        this.connecting = false;
+        this.socketConnected = false;
+        this.heartbeat = null;
 
         this.functions = new Functions(this.logWarn, this.logError, this.logDebug)
             .on('warn', warn => this.emit('warn', warn))
@@ -61,6 +66,20 @@ class MelCloudHome extends EventEmitter {
         } finally {
             this.locks[lockKey] = false;
         }
+    }
+
+    cleanupSocket() {
+        if (this.heartbeat) {
+            clearInterval(this.heartbeat);
+            this.heartbeat = null;
+        }
+
+        if (this.socket) {
+            try { this.socket.close(); } catch { }
+            this.socket = null;
+        }
+
+        this.socketConnected = false;
     }
 
     async checkScenesList() {
@@ -200,15 +219,56 @@ class MelCloudHome extends EventEmitter {
                 if (this.logDebug) this.emit('debug', `Get scenes error: ${error} `);
             }
 
+            //web cocket connection
+            if (!this.connecting && !this.socketConnected) {
+                this.connecting = true;
+
+                try {
+                    const url = `${ApiUrlsHome.WebSocketURL}${this.webSocketOptions.Hash}`;
+                    this.socket = new WebSocket(url, { headers: this.webSocketOptions.Headers })
+                        .on('error', (error) => {
+                            if (this.logError) this.emit('error', `Socket error: ${error}`);
+                            this.socket.close();
+                        })
+                        .on('close', () => {
+                            if (this.logDebug) this.emit('debug', `Socket closed`);
+                            this.cleanupSocket();
+                        })
+                        .on('open', () => {
+                            this.socketConnected = true;
+                            this.connecting = false;
+                            if (this.logSuccess) this.emit('success', `Socket Connect Success`);
+
+                            // heartbeat
+                            this.heartbeat = setInterval(() => {
+                                if (this.socket.readyState === this.socket.OPEN) {
+                                    if (this.logDebug) this.emit('debug', `Socket send heartbeat`);
+                                    this.socket.ping();
+                                }
+                            }, 30000);
+                        })
+                        .on('pong', () => {
+                            if (this.logDebug) this.emit('debug', `Socket received heartbeat`);
+                        })
+                        .on('message', (message) => {
+                            const parsedMessage = JSON.parse(message);
+                            if (this.logDebug) this.emit('debug', `Incoming message: ${JSON.stringify(parsedMessage, null, 2)}`);
+                            if (parsedMessage.message === 'Forbidden') return;
+
+                            this.emit('webSocket', parsedMessage);
+                        });
+                } catch (error) {
+                    if (this.logError) this.emit('error', `Socket connection failed: ${error}`);
+                    this.cleanupSocket();
+                }
+            }
+
             devicesList.State = true;
             devicesList.Info = `Found ${devicesCount} devices and ${scenes.length} scenes`;
             devicesList.Devices = devices;
             devicesList.Scenes = scenes;
             devicesList.Headers = this.headers;
-            devicesList.WebSocketOptions = this.webSocketOptions;
-
-            await this.functions.saveData(this.devicesFile, devicesList);
-            if (this.logDebug) this.emit('debug', `${devicesCount} devices saved`);
+            this.emit('devicesList', devicesList);
 
             return devicesList;
         } catch (error) {
@@ -379,9 +439,8 @@ class MelCloudHome extends EventEmitter {
                 }
             };
 
-
             accountInfo.State = true;
-            accountInfo.Info = 'Connect to MELCloud Home Success';
+            accountInfo.Info = 'Connect Success';
             await this.functions.saveData(this.accountFile, accountInfo);
 
             return accountInfo;

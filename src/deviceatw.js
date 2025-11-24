@@ -7,7 +7,7 @@ import { TemperatureDisplayUnits, HeatPump } from './constants.js';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceAtw extends EventEmitter {
-    constructor(api, account, device, devicesFile, defaultTempsFile, accountInfo, accountFile) {
+    constructor(api, account, device, defaultTempsFile, accountInfo, accountFile, melcloud, melcloudDevicesList) {
         super();
 
         Accessory = api.platformAccessory;
@@ -17,6 +17,8 @@ class DeviceAtw extends EventEmitter {
         AccessoryUUID = api.hap.uuid;
 
         //account config
+        this.melcloud = melcloud;
+        this.melcloudDevicesList = melcloudDevicesList;
         this.account = account;
         this.accountType = account.type;
         this.accountName = account.name;
@@ -52,7 +54,6 @@ class DeviceAtw extends EventEmitter {
         this.buttons = (device.buttonsSensors || []).filter(button => (button.displayType ?? 0) > 0);
 
         //files
-        this.devicesFile = devicesFile;
         this.defaultTempsFile = defaultTempsFile;
         this.accountInfo = accountInfo;
         this.accountFile = accountFile;
@@ -110,17 +111,6 @@ class DeviceAtw extends EventEmitter {
         this.deviceData = {};
         this.accessory = {};
     };
-
-    async startStopImpulseGenerator(state, timers = []) {
-        try {
-            //start impulse generator 
-            await this.melCloudAtw.impulseGenerator.state(state, timers)
-            return true;
-        } catch (error) {
-            throw new Error(`Impulse generator start error: ${error}`);
-        }
-    }
-
 
     async externalIntegrations() {
         //RESTFul server
@@ -1577,7 +1567,7 @@ class DeviceAtw extends EventEmitter {
     async start() {
         try {
             //melcloud device
-            this.melCloudAtw = new MelCloudAtw(this.account, this.device, this.devicesFile, this.defaultTempsFile, this.accountFile)
+            this.melCloudAtw = new MelCloudAtw(this.account, this.device, this.defaultTempsFile, this.accountFile, this.melcloud)
                 .on('deviceInfo', (modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, supportsHotWaterTank, supportsZone2) => {
                     if (this.logDeviceInfo && this.displayDeviceInfo) {
                         this.emit('devInfo', `---- ${this.deviceTypeString}: ${this.deviceName} ----`);
@@ -2317,9 +2307,10 @@ class DeviceAtw extends EventEmitter {
             if (this.restFul.enable || this.mqtt.enable) await this.externalIntegrations();
 
             //check state
-            await this.melCloudAtw.checkState();
+            await this.melCloudAta.checkState(this.melcloudDevicesList);
 
             //prepare accessory
+            await new Promise(r => setTimeout(r, 1000));
             const accessory = await this.prepareAccessory();
             return accessory;
         } catch (error) {

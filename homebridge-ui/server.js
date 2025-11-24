@@ -17,8 +17,7 @@ class PluginUiServer extends HomebridgePluginUiServer {
     const accountName = account.name;
     const accountFile = `${this.homebridgeStoragePath}/melcloud/${accountName}_Account`;
     const buildingsFile = `${this.homebridgeStoragePath}/melcloud/${accountName}_Buildings`;
-    const devicesFile = `${this.homebridgeStoragePath}/melcloud/${accountName}_Devices`;
-    const melCloud = account.type === 'melcloud' ? new MelCloud(account, accountFile, buildingsFile, devicesFile) : new MelCloudHome(account, accountFile, buildingsFile, devicesFile);
+    const melCloud = account.type === 'melcloud' ? new MelCloud(account, accountFile, buildingsFile) : new MelCloudHome(account, accountFile, buildingsFile);
 
     try {
       const accountInfo = await melCloud.connect();

@@ -22,11 +22,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Do not use Homebridge UI > v5.5.0 because of break config.json
 
+# [4.3.5] - (24.11.2025)
+
+## Changes
+
+- removed device refresh time settings
+- stability and performance improvements
+- redme updated
+- cleanup
+
 # [4.3.4] - (23.11.2025)
 
 ## Changes
 
-- fix acount monitoring start
+- fix account monitoring start
 - stability improvements
 - cleanup
 

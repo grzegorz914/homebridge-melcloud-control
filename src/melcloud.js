@@ -5,7 +5,7 @@ import Functions from './functions.js';
 import { ApiUrls } from './constants.js';
 
 class MelCloud extends EventEmitter {
-    constructor(account, accountFile, buildingsFile, devicesFile, pluginStart = false) {
+    constructor(account, accountFile, buildingsFile, pluginStart = false) {
         super();
         this.accountType = account.type;
         this.user = account.user;
@@ -14,9 +14,9 @@ class MelCloud extends EventEmitter {
         this.logWarn = account.log?.warn;
         this.logError = account.log?.error;
         this.logDebug = account.log?.debug;
+
         this.accountFile = accountFile;
         this.buildingsFile = buildingsFile;
-        this.devicesFile = devicesFile;
         this.headers = {};
 
         this.functions = new Functions(this.logWarn, this.logError, this.logDebug)
@@ -110,9 +110,7 @@ class MelCloud extends EventEmitter {
             devicesList.Info = `Found ${devicesCount} devices`;
             devicesList.Devices = devices;
             devicesList.Headers = this.headers;
-
-            await this.functions.saveData(this.devicesFile, devicesList);
-            if (this.logDebug) this.emit('debug', `${devicesCount} devices saved`);
+            this.emit('devicesList', devicesList);
 
             return devicesList;
         } catch (error) {
@@ -173,7 +171,7 @@ class MelCloud extends EventEmitter {
             });
 
             accountInfo.State = true;
-            accountInfo.Info = 'Connect to MELCloud Success';
+            accountInfo.Info = 'Connect Success';
             accountInfo.UseFahrenheit = loginData.UseFahrenheit;
             accountInfo.Account = account;
             await this.functions.saveData(this.accountFile, accountInfo);
