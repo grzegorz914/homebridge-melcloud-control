@@ -12,8 +12,10 @@
     "properties": {
       "accounts": {
         "type": "array",
+        "title": "Accounts",
         "items": {
           "type": "object",
+          "title": "Account",
           "properties": {
             "name": {
               "title": "Name",
@@ -25,13 +27,13 @@
               "title": "User",
               "type": "string",
               "placeholder": "Email",
-              "description": "MELCloud account username."
+              "description": "Account username."
             },
             "passwd": {
               "title": "Password",
               "type": "string",
               "placeholder": "Password",
-              "description": "MELCloud account password.",
+              "description": "Account password.",
               "format": "password"
             },
             "language": {
@@ -228,7 +230,7 @@
               ]
             },
             "ataDevices": {
-              "title": "Devices ATA",
+              "title": "ATA Devices",
               "type": "array",
               "items": {
                 "type": "object",
@@ -1039,7 +1041,7 @@
               }
             },
             "atwDevices": {
-              "title": "Devices ATW",
+              "title": "ATW Devices",
               "type": "array",
               "items": {
                 "type": "object",
@@ -1807,7 +1809,7 @@
               }
             },
             "ervDevices": {
-              "title": "Devices ERV",
+              "title": "ERV Devices",
               "type": "array",
               "items": {
                 "type": "object",
@@ -3092,7 +3094,7 @@
               "title": "{{ value.name }}",
               "items": [
                 {
-                  "title": "Account Data Refresh",
+                  "title": "Account",
                   "items": [
                     "accounts[].refreshInterval"
                   ]

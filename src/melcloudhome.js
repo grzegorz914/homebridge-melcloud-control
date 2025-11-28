@@ -126,7 +126,7 @@ class MelCloudHome extends EventEmitter {
             if (this.logDebug) this.emit('debug', `Buildings: ${JSON.stringify(buildingsList, null, 2)}`);
 
             if (!buildingsList) {
-                devicesList.Info = 'No building found'
+                devicesList.Info = 'No buildings found'
                 return devicesList;
             }
 
@@ -214,9 +214,9 @@ class MelCloudHome extends EventEmitter {
             let scenes = [];
             try {
                 scenes = await this.checkScenesList();
-                if (this.logDebug) this.emit('debug', `Found ${scenes.length} svenes`);
+                if (this.logDebug) this.emit('debug', `Found ${scenes.length} scenes`);
             } catch (error) {
-                if (this.logDebug) this.emit('debug', `Get scenes error: ${error} `);
+                if (this.logError) this.emit('error', `Get scenes error: ${error}`);
             }
 
             //web cocket connection

@@ -86,7 +86,7 @@ class DeviceErv extends EventEmitter {
 
         //buttons configured
         for (const button of this.buttons) {
-            button.name = button.name || 'Button'
+            button.name = button.name;
             button.serviceType = serviceType[button.displayType];
             button.characteristicType = characteristicType[button.displayType];
             button.state = false;
@@ -773,7 +773,7 @@ class DeviceErv extends EventEmitter {
                     const presetData = presetsOnServer.find(p => p.ID === preset.id);
 
                     //get name
-                    const name = preset.name;
+                    const name = preset.name || `Preset ${i}`;
 
                     //get name prefix
                     const namePrefix = preset.namePrefix;
@@ -850,7 +850,7 @@ class DeviceErv extends EventEmitter {
                     const scheduleData = schedulesOnServer.find(s => s.Id === schedule.id);
 
                     //get name
-                    const name = schedule.name;
+                    const name = schedule.name || `Schedule ${i}`;
 
                     //get name prefix
                     const namePrefix = schedule.namePrefix;
@@ -925,7 +925,7 @@ class DeviceErv extends EventEmitter {
                     const sceneData = scenesOnServer.find(s => s.Id === scene.id);
 
                     //get name
-                    const name = scene.name;
+                    const name = scene.name || `Scene ${i}`;
 
                     //get name prefix
                     const namePrefix = scene.namePrefix;
@@ -985,7 +985,7 @@ class DeviceErv extends EventEmitter {
                     const mode = button.mode;
 
                     //get name
-                    const name = button.name;
+                    const name = button.name || `Button ${i}`;
 
                     //get name prefix
                     const namePrefix = button.namePrefix;
@@ -1584,7 +1584,6 @@ class DeviceErv extends EventEmitter {
             await this.melCloudErv.checkState(this.melcloudDevicesList);
 
             //prepare accessory
-            await new Promise(r => setTimeout(r, 1000));
             const accessory = await this.prepareAccessory();
             return accessory;
         } catch (error) {

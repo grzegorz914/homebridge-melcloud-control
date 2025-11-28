@@ -26,6 +26,7 @@ class MelCloudAta extends EventEmitter {
         this.deviceData = {};
         this.headers = {}
 
+        //handle melcloud events
         let deviceData = null;
         melcloud.on('devicesList', async (devicesData) => {
             this.headers = devicesData.Headers;
@@ -186,7 +187,6 @@ class MelCloudAta extends EventEmitter {
             let payload = {};
             let path = '';
             let headers = this.headers;
-            let updateState = true;
             switch (accountType) {
                 case "melcloud":
                     switch (flag) {
@@ -224,6 +224,7 @@ class MelCloudAta extends EventEmitter {
                     }
 
                     if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(payload, null, 2)}`);
+                    
                     await axios(path, {
                         method: 'POST',
                         baseURL: ApiUrls.BaseURL,
@@ -268,7 +269,6 @@ class MelCloudAta extends EventEmitter {
                             method = 'POST';
                             path = ApiUrlsHome.PostHolidayMode;
                             headers.Referer = ApiUrlsHome.Referers.PostHolidayMode.replace('deviceid', deviceData.DeviceID);
-                            updateState = false;
                             break;
                         case 'schedule':
                             payload = { enabled: deviceData.ScheduleEnabled };
@@ -307,7 +307,6 @@ class MelCloudAta extends EventEmitter {
                             method = 'PUT';
                             path = ApiUrlsHome.PutAta.replace('deviceid', deviceData.DeviceID);
                             headers.Referer = ApiUrlsHome.Referers.PutDeviceSettings;
-                            updateState = false;
                             break;
                     }
 
@@ -315,6 +314,7 @@ class MelCloudAta extends EventEmitter {
                     headers['Content-Type'] = 'application/json; charset=utf-8';
                     headers.Origin = ApiUrlsHome.Origin;
                     if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(payload, null, 2)}`);
+
                     await axios(path, {
                         method: method,
                         baseURL: ApiUrlsHome.BaseURL,

@@ -26,6 +26,7 @@ class MelCloudErv extends EventEmitter {
         this.deviceData = {};
         this.headers = {};
 
+        //handle melcloud events
         let deviceData = null;
         melcloud.on('devicesList', async (devicesData) => {
             this.headers = devicesData.Headers;
@@ -179,7 +180,6 @@ class MelCloudErv extends EventEmitter {
             let payload = {};
             let path = '';
             let headers = this.headers;
-            let updateState = true;
             switch (accountType) {
                 case "melcloud":
                     switch (flag) {
@@ -233,6 +233,7 @@ class MelCloudErv extends EventEmitter {
                     }
 
                     if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(payload, null, 2)}`);
+                    
                     await axios(path, {
                         method: 'POST',
                         baseURL: ApiUrls.BaseURL,
@@ -290,13 +291,13 @@ class MelCloudErv extends EventEmitter {
                             method = 'PUT';
                             path = ApiUrlsHome.PutErv.replace('deviceid', deviceData.DeviceID);
                             headers.Referer = ApiUrlsHome.Referers.PutDeviceSettings;
-                            updateState = false;
                             break
                     }
 
                     headers['Content-Type'] = 'application/json; charset=utf-8';
                     headers.Origin = ApiUrlsHome.Origin;
                     if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(payload, null, 2)}`);
+
                     await axios(path, {
                         method: method,
                         baseURL: ApiUrlsHome.BaseURL,

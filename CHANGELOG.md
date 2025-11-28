@@ -22,6 +22,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Do not use Homebridge UI > v5.5.0 because of break config.json
 
+# [4.3.5] - (28.11.2025)
+
+## Changes
+
+- fix operation mode FAN and AUTO for MELCloud Home ATA
+- stability and performance improvements
+- config schema updated
+- cleanup
+
 # [4.3.5] - (24.11.2025)
 
 ## Changes

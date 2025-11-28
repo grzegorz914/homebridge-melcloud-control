@@ -90,7 +90,7 @@ class DeviceAta extends EventEmitter {
 
         //buttons configured
         for (const button of this.buttons) {
-            button.name = button.name || 'Button'
+            button.name = button.name;
             button.serviceType = serviceType[button.displayType];
             button.characteristicType = characteristicType[button.displayType];
             button.state = false;
@@ -189,6 +189,8 @@ class DeviceAta extends EventEmitter {
                 this.emit('warn', `MQTT integration start error: ${error}`);
             };
         }
+
+        return true;
     }
 
     async setOverExternalIntegration(integration, deviceData, key, value) {
@@ -846,7 +848,7 @@ class DeviceAta extends EventEmitter {
                     const presetData = presetsOnServer.find(p => p.ID === preset.id);
 
                     //get name
-                    const name = preset.name;
+                    const name = preset.name || `Preset ${i}`;
 
                     //get name prefix
                     const namePrefix = preset.namePrefix;
@@ -923,7 +925,7 @@ class DeviceAta extends EventEmitter {
                     const scheduleData = schedulesOnServer.find(s => s.Id === schedule.id);
 
                     //get name
-                    const name = schedule.name;
+                    const name = schedule.name || `Schedule ${i}`;
 
                     //get name prefix
                     const namePrefix = schedule.namePrefix;
@@ -998,7 +1000,7 @@ class DeviceAta extends EventEmitter {
                     const sceneData = scenesOnServer.find(s => s.Id === scene.id);
 
                     //get preset name
-                    const name = scene.name;
+                    const name = scene.name || `Scene ${i}`;
 
                     //get preset name prefix
                     const namePrefix = scene.namePrefix;
@@ -1058,7 +1060,7 @@ class DeviceAta extends EventEmitter {
                     const mode = button.mode;
 
                     //get name
-                    const name = button.name;
+                    const name = button.name || `Button ${i}`;
 
                     //get name prefix
                     const namePrefix = button.namePrefix;
@@ -1848,12 +1850,12 @@ class DeviceAta extends EventEmitter {
                     if (this.logInfo) {
                         this.emit('info', `Power: ${power ? 'On' : 'Off'}`);
                         this.emit('info', `Target operation mode: ${AirConditioner.OperationModeMapEnumToString[operationMode]}`);
-                        this.emit('info', `Current operation mode: ${this.displayType === 1 ? AirConditioner.CurrentOperationModeHeatherCoolerMapEnumToString[obj.currentOperationMode] : AirConditioner.CurrentOperationModeThermostatMapEnumToString[obj.currentOperationMode]}`);
+                        this.emit('info', `Current operation mode: ${this.displayType === 1 ? AirConditioner.CurrentOperationModeMapEnumToStringHeatherCooler[obj.currentOperationMode] : AirConditioner.CurrentOperationModeMapEnumToStringThermostat[obj.currentOperationMode]}`);
                         this.emit('info', `Target temperature: ${setTemperature}${obj.temperatureUnit}`);
                         this.emit('info', `Current temperature: ${roomTemperature}${obj.temperatureUnit}`);
                         if (supportsOutdoorTemperature && outdoorTemperature !== null) this.emit('info', `Outdoor temperature: ${outdoorTemperature}${obj.temperatureUnit}`);
                         if (supportsFanSpeed) this.emit('info', `Target fan speed: ${AirConditioner.FanSpeedMapEnumToString[setFanSpeed]}`);
-                        if (supportsFanSpeed) this.emit('info', `Current fan speed: ${AirConditioner.FanSpeedCurrentMapEnumToString[actualFanSpeed]}`);
+                        if (supportsFanSpeed) this.emit('info', `Current fan speed: ${AirConditioner.AktualFanSpeedMapEnumToString[actualFanSpeed]}`);
                         if (vaneHorizontalDirection !== null) this.emit('info', `Vane horizontal: ${AirConditioner.VaneHorizontalDirectionMapEnumToString[vaneHorizontalDirection]}`);
                         if (vaneVerticalDirection !== null) this.emit('info', `Vane vertical: ${AirConditioner.VaneVerticalDirectionMapEnumToString[vaneVerticalDirection]}`);
                         if (supportsSwingFunction) this.emit('info', `Air direction: ${AirConditioner.AirDirectionMapEnumToString[obj.currentSwingMode]}`);
@@ -1881,7 +1883,6 @@ class DeviceAta extends EventEmitter {
             await this.melCloudAta.checkState(this.melcloudDevicesList);
 
             //prepare accessory
-            await new Promise(r => setTimeout(r, 5000));
             const accessory = await this.prepareAccessory();
             return accessory;
         } catch (error) {

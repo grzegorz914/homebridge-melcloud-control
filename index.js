@@ -45,6 +45,7 @@ class MelCloudPlatform {
 					continue;
 				}
 				accountsName.push(accountName);
+				const accountRefreshInterval = (account.refreshInterval ?? 120) * 1000
 
 				//log config
 				const logLevel = {
@@ -75,9 +76,6 @@ class MelCloudPlatform {
 				const accountFile = `${prefDir}/${accountName}_Account`;
 				const buildingsFile = `${prefDir}/${accountName}_Buildings`;
 
-				//set account refresh interval
-				const accountRefreshInterval = (account.refreshInterval ?? 120) * 1000
-
 				try {
 					//create impulse generator
 					const impulseGenerator = new ImpulseGenerator()
@@ -106,33 +104,24 @@ class MelCloudPlatform {
 									.on('error', (msg) => log.error(`${accountName}, ${msg}`));
 
 								//connect
-								let accountInfo;
-								try {
-									accountInfo = await melcloud.connect();
-									if (!accountInfo.State) {
-										if (logLevel.warn) log.warn(`${accountName}, ${accountInfo.Info}`);
-										return;
-									}
-								} catch (error) {
-									if (logLevel.error) log.error(`${accountName}, Connect error: ${error.message ?? error}`);
+								const accountInfo = await melcloud.connect();
+								if (!accountInfo.State) {
+									if (logLevel.warn) log.warn(`${accountName}, ${accountInfo.Info}`);
 									return;
 								}
 								if (logLevel.success) log.success(`${accountName}, ${accountInfo.Info}`);
 
 								//check devices list
-								let melcloudDevicesList;
-								try {
-									melcloudDevicesList = await melcloud.checkDevicesList();
-									if (!melcloudDevicesList.State) {
-										if (logLevel.warn) log.warn(`${accountName}, ${melcloudDevicesList.Info}`);
-										return;
-									}
-								} catch (error) {
-									if (logLevel.error) log.error(`${accountName}, Check devices list error: ${error.message ?? error}`);
+								const melcloudDevicesList = await melcloud.checkDevicesList();
+								if (!melcloudDevicesList.State) {
+									if (logLevel.warn) log.warn(`${accountName}, ${melcloudDevicesList.Info}`);
 									return;
 								}
 								if (logLevel.debug) log.info(melcloudDevicesList.Info);
 								await new Promise(r => setTimeout(r, 1000));
+
+								//start account impulse generator
+								await melcloud.impulseGenerator.state(true, timmers, false);
 
 								//configured devices
 								const ataDevices = (account.ataDevices || []).filter(device => device.id != null && String(device.id) !== '0');
@@ -144,10 +133,10 @@ class MelCloudPlatform {
 								for (const [index, device] of devices.entries()) {
 									//chack device from config exist on melcloud
 									const displayType = device.displayType > 0;
+									device.id = String(device.id);
 									const deviceExistInMelCloud = melcloudDevicesList.Devices.some(dev => dev.DeviceID === device.id);
 									if (!deviceExistInMelCloud || !displayType) continue;
 
-									device.id = String(device.id);
 									const deviceName = device.name;
 									const deviceType = device.type;
 									const deviceTypeString = device.typeString;
@@ -209,9 +198,6 @@ class MelCloudPlatform {
 
 								//stop start impulse generator
 								await impulseGenerator.state(false);
-
-								//start account impulse generator
-								await melcloud.impulseGenerator.state(true, timmers, false);
 							} catch (error) {
 								if (logLevel.error) log.error(`${accountName}, Start impulse generator error, ${error.message ?? error}, trying again.`);
 							}
