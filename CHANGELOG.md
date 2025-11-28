@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Do not use Homebridge UI > v5.5.0 because of break config.json
 
-# [4.3.5] - (28.11.2025)
+# [4.3.7] - (28.11.2025)
 
 ## Changes
 
