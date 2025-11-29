@@ -166,7 +166,7 @@ class MelCloudAta extends EventEmitter {
         } catch (error) {
             throw new Error(`Update state error: ${error.message}`);
         };
-    };
+    }
 
     async checkState(devicesData) {
         try {
@@ -332,5 +332,6 @@ class MelCloudAta extends EventEmitter {
             throw new Error(`Send data error: ${error.message}`);
         }
     }
-};
+}
+
 export default MelCloudAta;

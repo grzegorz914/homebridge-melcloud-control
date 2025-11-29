@@ -22,6 +22,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Do not use Homebridge UI > v5.5.0 because of break config.json
 
+# [4.3.8] - (29.11.2025)
+
+## Changes
+
+- display warning if device is disabled in config
+- display warning if device not exist in MELCLoud and is configured in config
+- cleanup
+
 # [4.3.7] - (28.11.2025)
 
 ## Changes

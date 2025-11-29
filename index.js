@@ -128,19 +128,28 @@ class MelCloudPlatform {
 								const atwDevices = (account.atwDevices || []).filter(device => device.id != null && String(device.id) !== '0');
 								const ervDevices = (account.ervDevices || []).filter(device => device.id != null && String(device.id) !== '0');
 								const devices = [...ataDevices, ...atwDevices, ...ervDevices];
-								if (logLevel.debug) log.info(`Found configured devices ATA: ${ataDevices.length}, ATW: ${atwDevices.length}, ERV: ${ervDevices.length}.`);
+								if (logLevel.debug) log.info(`${accountName}, found configured devices ATA: ${ataDevices.length}, ATW: ${atwDevices.length}, ERV: ${ervDevices.length}.`);
 
 								for (const [index, device] of devices.entries()) {
-									//chack device from config exist on melcloud
-									const displayType = device.displayType > 0;
 									device.id = String(device.id);
-									const deviceExistInMelCloud = melcloudDevicesList.Devices.some(dev => dev.DeviceID === device.id);
-									if (!deviceExistInMelCloud || !displayType) continue;
-
 									const deviceName = device.name;
 									const deviceType = device.type;
 									const deviceTypeString = device.typeString;
 									const defaultTempsFile = `${prefDir}/${accountName}_${device.id}_Temps`;
+
+									//chack device is not disabled in config
+									const displayType = device.displayType > 0;
+									if (!displayType) {
+										if (logLevel.warn) log.warn(`${accountName}, ${deviceTypeString}, ${deviceName}, disabled in config, will not be published in Home app.`);
+										continue;
+									}
+
+									//chack device from config exist on melcloud
+									const deviceExistInMelCloud = melcloudDevicesList.Devices.some(dev => dev.DeviceID === device.id);
+									if (!deviceExistInMelCloud) {
+										if (logLevel.warn) log.warn(`${accountName}, ${deviceTypeString}, ${deviceName}, not exist on server, please login to MELCLoud from plugin UI to fix this issue.`);
+										continue;
+									}
 
 									// set rest ful port
 									account.restFul.port = (device.id).slice(-4).replace(/^0/, '9');

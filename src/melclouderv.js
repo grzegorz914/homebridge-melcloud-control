@@ -159,7 +159,7 @@ class MelCloudErv extends EventEmitter {
         } catch (error) {
             throw new Error(`Check state error: ${error.message}`);
         };
-    };
+    }
 
     async checkState(devicesData) {
         try {
@@ -315,5 +315,6 @@ class MelCloudErv extends EventEmitter {
             throw new Error(`Send data error: ${error.message}`);
         }
     }
-};
+}
+
 export default MelCloudErv;

@@ -50,6 +50,7 @@ class Mqtt extends EventEmitter {
         });
 
         this.emit('connect');
-    };
-};
+    }
+}
+
 export default Mqtt;

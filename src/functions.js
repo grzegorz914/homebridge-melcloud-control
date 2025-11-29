@@ -179,4 +179,5 @@ class Functions extends EventEmitter {
         );
     }
 }
+
 export default Functions

@@ -88,7 +88,6 @@ class MelCloudAtw extends EventEmitter {
                 if (this.logError) this.emit('error', `Web socket process message error: ${error}`);
             }
         });
-
     }
 
     async updateState(deviceData) {
@@ -156,7 +155,7 @@ class MelCloudAtw extends EventEmitter {
         } catch (error) {
             throw new Error(`Check state error: ${error.message}`);
         };
-    };
+    }
 
     async checkState(devicesData) {
         try {
@@ -307,5 +306,6 @@ class MelCloudAtw extends EventEmitter {
             throw new Error(`Send data error: ${error.message}`);
         }
     }
-};
+}
+
 export default MelCloudAtw;

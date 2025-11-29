@@ -102,7 +102,7 @@ class DeviceErv extends EventEmitter {
         this.displayDeviceInfo = true;
         this.deviceData = {};
         this.accessory = {};
-    };
+    }
 
     async externalIntegrations() {
         //RESTFul server
@@ -1115,7 +1115,7 @@ class DeviceErv extends EventEmitter {
         } catch (error) {
             throw new Error(`Prepare accessory error: ${error}`);
         };
-    };
+    }
 
     //start
     async start() {
@@ -1589,6 +1589,7 @@ class DeviceErv extends EventEmitter {
         } catch (error) {
             throw new Error(`Start error: ${error}`);
         };
-    };
-};
+    }
+}
+
 export default DeviceErv;

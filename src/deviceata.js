@@ -106,7 +106,7 @@ class DeviceAta extends EventEmitter {
         this.displayDeviceInfo = true;
         this.deviceData = {};
         this.accessory = {};
-    };
+    }
 
     async externalIntegrations() {
         //RESTFul server
@@ -1888,6 +1888,7 @@ class DeviceAta extends EventEmitter {
         } catch (error) {
             throw new Error(`Start error: ${error}`);
         };
-    };
-};
+    }
+}
+
 export default DeviceAta;
