@@ -22,6 +22,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Do not use Homebridge UI > v5.5.0 because of break config.json
 
+# [4.3.9] - (01.12.2025)
+
+## Changes
+
+- stability and performance improvements
+- fix vane H/V display wrong state
+- cleanup
+
 # [4.3.8] - (29.11.2025)
 
 ## Changes

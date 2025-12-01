@@ -140,7 +140,7 @@ class MelCloudPlatform {
 									//chack device is not disabled in config
 									const displayType = device.displayType > 0;
 									if (!displayType) {
-										if (logLevel.warn) log.warn(`${accountName}, ${deviceTypeString}, ${deviceName}, disabled in config, will not be published in Home app.`);
+										if (logLevel.warn) log.warn(`${accountName}, ${deviceTypeString}, ${deviceName}, disabled in configuration, will not be published in the Home app.`);
 										continue;
 									}
 

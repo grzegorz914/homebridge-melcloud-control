@@ -135,24 +135,13 @@ class MelCloudHome extends EventEmitter {
 
             const devices = buildingsList.flatMap(building => {
                 // Funkcja kapitalizująca klucze obiektu
-                const capitalizeKeys = obj =>
-                    Object.fromEntries(
-                        Object.entries(obj).map(([key, value]) => [
-                            key.charAt(0).toUpperCase() + key.slice(1),
-                            value
-                        ])
-                    );
+                const capitalizeKeys = obj => Object.fromEntries(Object.entries(obj).map(([key, value]) => [key.charAt(0).toUpperCase() + key.slice(1), value]));
 
                 // Rekurencyjna kapitalizacja kluczy w obiekcie lub tablicy
                 const capitalizeKeysDeep = obj => {
                     if (Array.isArray(obj)) return obj.map(capitalizeKeysDeep);
                     if (obj && typeof obj === 'object') {
-                        return Object.fromEntries(
-                            Object.entries(obj).map(([key, value]) => [
-                                key.charAt(0).toUpperCase() + key.slice(1),
-                                capitalizeKeysDeep(value)
-                            ])
-                        );
+                        return Object.fromEntries(Object.entries(obj).map(([key, value]) => [key.charAt(0).toUpperCase() + key.slice(1), capitalizeKeysDeep(value)]));
                     }
                     return obj;
                 };
@@ -264,7 +253,7 @@ class MelCloudHome extends EventEmitter {
             }
 
             devicesList.State = true;
-            devicesList.Info = `Found ${devicesCount} devices and ${scenes.length} scenes`;
+            devicesList.Info = `Found ${devicesCount} devices ${scenes.length > 0 ? `and ${scenes.length} scenes` : ''}`;
             devicesList.Devices = devices;
             devicesList.Scenes = scenes;
             devicesList.Headers = this.headers;

@@ -29,13 +29,18 @@ class MelCloudErv extends EventEmitter {
         //handle melcloud events
         let deviceData = null;
         melcloud.on('devicesList', async (devicesData) => {
-            this.headers = devicesData.Headers;
-            deviceData = devicesData.Devices.find(device => device.DeviceID === this.deviceId);
-            if (!deviceData) return;
-            deviceData.Scenes = devicesData.Scenes ?? [];
+            try {
+                this.headers = devicesData.Headers;
+                deviceData = devicesData.Devices.find(device => device.DeviceID === this.deviceId);
+                if (!deviceData) return;
+                deviceData.Scenes = devicesData.Scenes ?? [];
 
-            //update state
-            await this.updateState(deviceData);
+                //update state
+                if (this.logDebug) this.emit('debug', `Request update settings: ${JSON.stringify(deviceData.Device, null, 2)}`);
+                await this.updateState(deviceData);
+            } catch (error) {
+                if (this.logError) this.emit('error', `Request process message error: ${error}`);
+            }
         }).on('webSocket', async (parsedMessage) => {
             try {
                 const messageData = parsedMessage?.[0]?.Data;
@@ -65,6 +70,8 @@ class MelCloudErv extends EventEmitter {
                                         deviceData.Device[key] = value;
                                     }
                                 }
+
+                                if (this.logDebug) this.emit('debug', `WS update settings: ${JSON.stringify(deviceData.Device, null, 2)}`);
                                 updateState = true;
                                 break;
                             case 'unitHolidayModeTriggered':
@@ -78,24 +85,24 @@ class MelCloudErv extends EventEmitter {
                                 updateState = true;
                                 break;
                             default:
-                                if (this.logDebug) this.emit('debug', `Unit ${unitId}, received unknown message type: ${stringifyMessage}`);
+                                if (this.logDebug) this.emit('debug', `Unit ${unitId}, received unknown message type: ${parsedMessage}`);
                                 return;
                         }
                         break;
                     default:
-                        if (this.logDebug) this.emit('debug', `Incoming unknown unit id: ${stringifyMessage}`);
+                        if (this.logDebug) this.emit('debug', `Incoming unknown unit id: ${parsedMessage}`);
                         return;
                 }
 
                 //update state
-                if (updateState) await this.updateState(deviceData);
+                if (updateState) await this.updateState(deviceData, 'ws');
             } catch (error) {
                 if (this.logError) this.emit('error', `Web socket process message error: ${error}`);
             }
         });
     }
 
-    async updateState(deviceData) {
+    async updateState(deviceData, type) {
         try {
             if (this.accountType === 'melcloudhome') {
                 //read default temps
@@ -233,7 +240,7 @@ class MelCloudErv extends EventEmitter {
                     }
 
                     if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(payload, null, 2)}`);
-                    
+
                     await axios(path, {
                         method: 'POST',
                         baseURL: ApiUrls.BaseURL,

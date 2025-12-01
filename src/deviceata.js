@@ -439,7 +439,8 @@ class DeviceAta extends EventEmitter {
                     if (supportsSwingFunction) {
                         melCloudService.getCharacteristic(Characteristic.SwingMode)
                             .onGet(async () => {
-                                //Vane Horizontal: Auto, 1, 2, 3, 4, 5, 6, 7 = Sp;it, 12 = Swing //Vertical: Auto, 1, 2, 3, 4, 5, 7 = Swing
+                                //Vane Horizontal: Auto, 1, 2, 3, 4, 5, 6, 7 = Split, 12 = Swing //Vertical: Auto, 1, 2, 3, 4, 5, 7 = Swing
+                                //Home Vane Horizontal: Auto, 1, 2, 3, 4, 5, 6, 7 = Swing, 8 = Split //Vertical: Auto, 1, 2, 3, 4, 5, 6 = Swing
                                 const value = this.accessory.currentSwingMode;
                                 return value;
                             })
@@ -1396,11 +1397,11 @@ class DeviceAta extends EventEmitter {
                     const supportsDry = deviceData.Device[supportDryKey];
                     const supportsCool1 = deviceData.Device[supportCoolKey];
                     const supportsCool = this.coolDryFanMode >= 1 && supportsCool1;
-                    const numberOfFanSpeeds = supportsFanSpeed ? deviceData.Device.NumberOfFanSpeeds : 0;
-                    const minTempHeat = 10;
-                    const maxTempHeat = 31;
-                    const minTempCoolDryAuto = 16;
-                    const maxTempCoolDryAuto = 31;
+                    const numberOfFanSpeeds = deviceData.Device.NumberOfFanSpeeds;
+                    const minTempHeat = deviceData.Device.MinTempHeat ?? 10;
+                    const maxTempHeat = deviceData.Device.MaxTempHeat ?? 31;
+                    const minTempCoolDryAuto = deviceData.Device.MinTempAutomatic ?? 16;
+                    const maxTempCoolDryAuto = deviceData.Device.MaxTempAutomatic ?? 31;
 
                     //device state
                     const power = deviceData.Device.Power ?? false;
