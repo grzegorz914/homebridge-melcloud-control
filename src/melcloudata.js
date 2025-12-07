@@ -307,7 +307,7 @@ class MelCloudAta extends EventEmitter {
                     }
 
                     //send payload
-                    if (!this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);
+                    if (this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);
                     await this.client(path, { method: method, data: payload });
 
                     return true;

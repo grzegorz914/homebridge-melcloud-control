@@ -230,22 +230,19 @@ class MelCloudHome extends EventEmitter {
 
             // === Fallback to Puppeteer's built-in Chromium ===
             if (!chromiumPath) {
-                if (!arch.startsWith('arm')) {
-                    try {
-                        const puppeteerPath = puppeteer.executablePath();
-                        if (puppeteerPath && fs.existsSync(puppeteerPath)) {
-                            chromiumPath = puppeteerPath;
-                            if (this.logDebug) this.emit('debug', `Using Puppeteer Chromium at ${chromiumPath}`);
-                        }
-                    } catch { }
-                } else {
-                    if (this.logDebug) this.emit('debug', 'Skipping Puppeteer Chromium on ARM (incompatible)');
+                try {
+                    const puppeteerPath = puppeteer.executablePath();
+                    if (puppeteerPath && puppeteerPath.length > 0) {
+                        chromiumPath = puppeteerPath;
+                        if (this.logDebug) this.emit('debug', `Using Puppeteer bundled Chromium at ${chromiumPath}`);
+                    } else {
+                        accountInfo.Info = `Puppeteer returned empty Chromium path`;
+                        return accountInfo;
+                    }
+                } catch (error) {
+                    accountInfo.Info = `Failed to get Puppeteer Chromium path: ${error.message}`;
+                    return accountInfo;
                 }
-            }
-
-            if (!chromiumPath) {
-                accountInfo.Info = 'Chromium not found on Your device, please install it manually and try again';
-                return accountInfo;
             }
 
             // Verify executable works
@@ -288,7 +285,7 @@ class MelCloudHome extends EventEmitter {
                     if (url.startsWith(`${ApiUrlsHome.WebSocketURL}`)) {
                         const params = new URL(url).searchParams;
                         const hash = params.get('hash');
-                        if (this.logDebug) this.emit('debug', `MelCloudHome WS hash detected: ${hash}`);
+                        if (this.logDebug) this.emit('debug', `Web socket hash detected: ${hash}`);
 
                         //web socket connection
                         if (!this.connecting && !this.socketConnected) {
@@ -302,24 +299,24 @@ class MelCloudHome extends EventEmitter {
                                 };
                                 const webSocket = new WebSocket(`${ApiUrlsHome.WebSocketURL}${hash}`, { headers: headers })
                                     .on('error', (error) => {
-                                        if (this.logError) this.emit('error', `Socket error: ${error}`);
+                                        if (this.logError) this.emit('error', `Web socket error: ${error}`);
                                         try {
                                             webSocket.close();
                                         } catch { }
                                     })
                                     .on('close', () => {
-                                        if (this.logDebug) this.emit('debug', `Socket closed`);
+                                        if (this.logDebug) this.emit('debug', `Web socket closed`);
                                         this.cleanupSocket();
                                     })
                                     .on('open', () => {
                                         this.socketConnected = true;
                                         this.connecting = false;
-                                        if (this.logSuccess) this.emit('success', `Socket Connect Success`);
+                                        if (this.logSuccess) this.emit('success', `Web Socket Connect Success`);
 
                                         // heartbeat
                                         this.heartbeat = setInterval(() => {
                                             if (webSocket.readyState === webSocket.OPEN) {
-                                                if (this.logDebug) this.emit('debug', `Socket send heartbeat`);
+                                                if (this.logDebug) this.emit('debug', `Web socket send heartbeat`);
                                                 webSocket.ping();
                                             }
                                         }, 30000);
@@ -335,13 +332,13 @@ class MelCloudHome extends EventEmitter {
                                         this.emit('webSocket', parsedMessage);
                                     });
                             } catch (error) {
-                                if (this.logError) this.emit('error', `Socket connection failed: ${error}`);
+                                if (this.logError) this.emit('error', `Web socket connection failed: ${error}`);
                                 this.cleanupSocket();
                             }
                         }
                     }
                 } catch (error) {
-                    if (this.logError) this.emit('error', `CDP WebSocketCreated handler error: ${error.message}`);
+                    if (this.logError) this.emit('error', `CDP web socket created handler error: ${error.message}`);
                 }
             });
 
