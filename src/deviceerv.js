@@ -138,7 +138,7 @@ class DeviceErv extends EventEmitter {
                         });
                 }
             } catch (error) {
-                this.emit('warn', `RESTFul integration start error: ${error}`);
+                if (this.logWarn) this.emit('warn', `RESTFul integration start error: ${error}`);
             };
         }
 
@@ -182,7 +182,7 @@ class DeviceErv extends EventEmitter {
                         });
                 }
             } catch (error) {
-                this.emit('warn', `MQTT integration start error: ${error}`);
+                if (this.logWarn) this.emit('warn', `MQTT integration start error: ${error}`);
             };
         }
     }

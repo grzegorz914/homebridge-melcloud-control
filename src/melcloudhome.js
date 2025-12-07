@@ -21,12 +21,11 @@ class MelCloudHome extends EventEmitter {
         this.logWarn = account.log?.warn;
         this.logError = account.log?.error;
         this.logDebug = account.log?.debug;
+
         this.accountFile = accountFile;
         this.buildingsFile = buildingsFile;
 
-        this.headers = {};
-        this.webSocketOptions = {};
-        this.socket = null;
+        this.client = null;
         this.connecting = false;
         this.socketConnected = false;
         this.heartbeat = null;
@@ -74,18 +73,13 @@ class MelCloudHome extends EventEmitter {
             this.heartbeat = null;
         }
 
-        if (this.socket) {
-            try { this.socket.close(); } catch { }
-            this.socket = null;
-        }
-
         this.socketConnected = false;
     }
 
     async checkScenesList() {
         try {
             if (this.logDebug) this.emit('debug', `Scanning for scenes`);
-            const listScenesData = await this.axiosInstance(ApiUrlsHome.GetUserScenes, { method: 'GET', });
+            const listScenesData = await this.client(ApiUrlsHome.GetUserScenes, { method: 'GET', });
 
             const scenesList = listScenesData.data;
             if (this.logDebug) this.emit('debug', `Scenes: ${JSON.stringify(scenesList, null, 2)}`);
@@ -117,7 +111,7 @@ class MelCloudHome extends EventEmitter {
         try {
             const devicesList = { State: false, Info: null, Devices: [], Scenes: [] }
             if (this.logDebug) this.emit('debug', `Scanning for devices`);
-            const listDevicesData = await this.axiosInstance(ApiUrlsHome.GetUserContext, { method: 'GET' });
+            const listDevicesData = await this.client(ApiUrlsHome.GetUserContext, { method: 'GET' });
 
             const userContext = listDevicesData.data;
             const buildings = userContext.buildings ?? [];
@@ -202,61 +196,19 @@ class MelCloudHome extends EventEmitter {
             // Get scenes
             let scenes = [];
             try {
-                scenes = await this.checkScenesList();
-                if (this.logDebug) this.emit('debug', `Found ${scenes.length} scenes`);
+                const scenesList = await this.checkScenesList();
+                if (this.logDebug) this.emit('debug', `Found ${scenesList.length} scenes`);
+                if (scenesList.length > 0) {
+                    scenes = scenesList;
+                }
             } catch (error) {
                 if (this.logError) this.emit('error', `Get scenes error: ${error}`);
-            }
-
-            //web cocket connection
-            if (!this.connecting && !this.socketConnected) {
-                this.connecting = true;
-
-                try {
-                    const url = `${ApiUrlsHome.WebSocketURL}${this.webSocketOptions.Hash}`;
-                    this.socket = new WebSocket(url, { headers: this.webSocketOptions.Headers })
-                        .on('error', (error) => {
-                            if (this.logError) this.emit('error', `Socket error: ${error}`);
-                            this.socket.close();
-                        })
-                        .on('close', () => {
-                            if (this.logDebug) this.emit('debug', `Socket closed`);
-                            this.cleanupSocket();
-                        })
-                        .on('open', () => {
-                            this.socketConnected = true;
-                            this.connecting = false;
-                            if (this.logSuccess) this.emit('success', `Socket Connect Success`);
-
-                            // heartbeat
-                            this.heartbeat = setInterval(() => {
-                                if (this.socket.readyState === this.socket.OPEN) {
-                                    if (this.logDebug) this.emit('debug', `Socket send heartbeat`);
-                                    this.socket.ping();
-                                }
-                            }, 30000);
-                        })
-                        .on('pong', () => {
-                            if (this.logDebug) this.emit('debug', `Socket received heartbeat`);
-                        })
-                        .on('message', (message) => {
-                            const parsedMessage = JSON.parse(message);
-                            if (this.logDebug) this.emit('debug', `Incoming message: ${JSON.stringify(parsedMessage, null, 2)}`);
-                            if (parsedMessage.message === 'Forbidden') return;
-
-                            this.emit('webSocket', parsedMessage);
-                        });
-                } catch (error) {
-                    if (this.logError) this.emit('error', `Socket connection failed: ${error}`);
-                    this.cleanupSocket();
-                }
             }
 
             devicesList.State = true;
             devicesList.Info = `Found ${devicesCount} devices ${scenes.length > 0 ? `and ${scenes.length} scenes` : ''}`;
             devicesList.Devices = devices;
             devicesList.Scenes = scenes;
-            devicesList.Headers = this.headers;
             this.emit('devicesList', devicesList);
 
             return devicesList;
@@ -272,19 +224,23 @@ class MelCloudHome extends EventEmitter {
         let browser;
         try {
             const accountInfo = { State: false, Info: '', Account: {}, UseFahrenheit: false };
+
+            // Get Chromium path
             let chromiumPath = await this.functions.ensureChromiumInstalled();
 
             // === Fallback to Puppeteer's built-in Chromium ===
             if (!chromiumPath) {
-                try {
-                    const puppeteerPath = puppeteer.executablePath();
-                    if (puppeteerPath && fs.existsSync(puppeteerPath)) {
-                        chromiumPath = puppeteerPath;
-                        if (this.logDebug) this.emit('debug', `Using puppeteer Chromium at ${chromiumPath}`);
-                    }
-                } catch { }
-            } else {
-                if (this.logDebug) this.emit('debug', `Using system Chromium at ${chromiumPath}`);
+                if (!arch.startsWith('arm')) {
+                    try {
+                        const puppeteerPath = puppeteer.executablePath();
+                        if (puppeteerPath && fs.existsSync(puppeteerPath)) {
+                            chromiumPath = puppeteerPath;
+                            if (this.logDebug) this.emit('debug', `Using Puppeteer Chromium at ${chromiumPath}`);
+                        }
+                    } catch { }
+                } else {
+                    if (this.logDebug) this.emit('debug', 'Skipping Puppeteer Chromium on ARM (incompatible)');
+                }
             }
 
             if (!chromiumPath) {
@@ -301,6 +257,7 @@ class MelCloudHome extends EventEmitter {
                 return accountInfo;
             }
 
+            // Launch Chromium
             if (this.logDebug) this.emit('debug', `Launching Chromium...`);
             browser = await puppeteer.launch({
                 headless: true,
@@ -324,18 +281,67 @@ class MelCloudHome extends EventEmitter {
             page.setDefaultNavigationTimeout(GLOBAL_TIMEOUT);
 
             // === CDP session ===
-            let hash = null;
             const client = await page.createCDPSession();
             await client.send('Network.enable')
             client.on('Network.webSocketCreated', ({ url }) => {
                 try {
-                    if (url.startsWith('wss://ws.melcloudhome.com/?hash=')) {
+                    if (url.startsWith(`${ApiUrlsHome.WebSocketURL}`)) {
                         const params = new URL(url).searchParams;
-                        hash = params.get('hash');
+                        const hash = params.get('hash');
                         if (this.logDebug) this.emit('debug', `MelCloudHome WS hash detected: ${hash}`);
+
+                        //web socket connection
+                        if (!this.connecting && !this.socketConnected) {
+                            this.connecting = true;
+
+                            try {
+                                const headers = {
+                                    'Origin': ApiUrlsHome.BaseURL,
+                                    'Pragma': 'no-cache',
+                                    'Cache-Control': 'no-cache'
+                                };
+                                const webSocket = new WebSocket(`${ApiUrlsHome.WebSocketURL}${hash}`, { headers: headers })
+                                    .on('error', (error) => {
+                                        if (this.logError) this.emit('error', `Socket error: ${error}`);
+                                        try {
+                                            webSocket.close();
+                                        } catch { }
+                                    })
+                                    .on('close', () => {
+                                        if (this.logDebug) this.emit('debug', `Socket closed`);
+                                        this.cleanupSocket();
+                                    })
+                                    .on('open', () => {
+                                        this.socketConnected = true;
+                                        this.connecting = false;
+                                        if (this.logSuccess) this.emit('success', `Socket Connect Success`);
+
+                                        // heartbeat
+                                        this.heartbeat = setInterval(() => {
+                                            if (webSocket.readyState === webSocket.OPEN) {
+                                                if (this.logDebug) this.emit('debug', `Socket send heartbeat`);
+                                                webSocket.ping();
+                                            }
+                                        }, 30000);
+                                    })
+                                    .on('pong', () => {
+                                        if (this.logDebug) this.emit('debug', `Socket received heartbeat`);
+                                    })
+                                    .on('message', (message) => {
+                                        const parsedMessage = JSON.parse(message);
+                                        if (this.logDebug) this.emit('debug', `Incoming message: ${JSON.stringify(parsedMessage, null, 2)}`);
+                                        if (parsedMessage.message === 'Forbidden') return;
+
+                                        this.emit('webSocket', parsedMessage);
+                                    });
+                            } catch (error) {
+                                if (this.logError) this.emit('error', `Socket connection failed: ${error}`);
+                                this.cleanupSocket();
+                            }
+                        }
                     }
-                } catch (err) {
-                    this.emit('error', `CDP WebSocketCreated handler error: ${err.message}`);
+                } catch (error) {
+                    if (this.logError) this.emit('error', `CDP WebSocketCreated handler error: ${error.message}`);
                 }
             });
 
@@ -412,21 +418,13 @@ class MelCloudHome extends EventEmitter {
                 'User-Agent': userAgent,
                 'x-csrf': '1'
             };
-            this.headers = headers;
-            this.axiosInstance = axios.create({
+
+            this.client = axios.create({
                 baseURL: ApiUrlsHome.BaseURL,
                 timeout: 30000,
                 headers: headers
             })
-
-            this.webSocketOptions = {
-                Hash: hash,
-                Headers: {
-                    'Origin': ApiUrlsHome.BaseURL,
-                    'Pragma': 'no-cache',
-                    'Cache-Control': 'no-cache'
-                }
-            };
+            this.emit('client', this.client);
 
             accountInfo.State = true;
             accountInfo.Info = 'Connect Success';

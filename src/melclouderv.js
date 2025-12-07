@@ -1,4 +1,3 @@
-import axios from 'axios';
 import EventEmitter from 'events';
 import Functions from './functions.js';
 import { ApiUrls, ApiUrlsHome, Ventilation } from './constants.js';
@@ -24,20 +23,21 @@ class MelCloudErv extends EventEmitter {
 
         //set default values
         this.deviceData = {};
-        this.headers = {};
+        this.client = melcloud.client;
 
         //handle melcloud events
         let deviceData = null;
-        melcloud.on('devicesList', async (devicesData) => {
+        melcloud.on('client', (client) => {
+            this.client = client;
+        }).on('devicesList', async (devicesData) => {
             try {
-                this.headers = devicesData.Headers;
                 deviceData = devicesData.Devices.find(device => device.DeviceID === this.deviceId);
                 if (!deviceData) return;
                 deviceData.Scenes = devicesData.Scenes ?? [];
 
                 //update state
                 if (this.logDebug) this.emit('debug', `Request update settings: ${JSON.stringify(deviceData.Device, null, 2)}`);
-                await this.updateState(deviceData);
+                await this.updateState('request', deviceData);
             } catch (error) {
                 if (this.logError) this.emit('error', `Request process message error: ${error}`);
             }
@@ -95,14 +95,14 @@ class MelCloudErv extends EventEmitter {
                 }
 
                 //update state
-                if (updateState) await this.updateState(deviceData, 'ws');
+                if (updateState) await this.updateState('ws', deviceData);
             } catch (error) {
                 if (this.logError) this.emit('error', `Web socket process message error: ${error}`);
             }
         });
     }
 
-    async updateState(deviceData, type) {
+    async updateState(type, deviceData) {
         try {
             if (this.accountType === 'melcloudhome') {
                 //read default temps
@@ -132,9 +132,6 @@ class MelCloudErv extends EventEmitter {
                 };
                 return acc;
             }, { indoor: {}, outdoor: {} });
-
-            //display info if units are not configured in MELCloud service
-            if (unitsCount === 0 && this.logDebug) if (this.logDebug) this.emit('debug', `Units are not configured in MELCloud service`);
 
             //filter info
             const { Device: _ignored, ...info } = deviceData;
@@ -170,10 +167,9 @@ class MelCloudErv extends EventEmitter {
 
     async checkState(devicesData) {
         try {
-            this.headers = devicesData.Headers;
             const deviceData = devicesData.Devices.find(device => device.DeviceID === this.deviceId);
             deviceData.Scenes = devicesData.Scenes ?? [];
-            await this.updateState(deviceData);
+            await this.updateState('request', deviceData);
 
             return true;
         } catch (error) {
@@ -186,7 +182,6 @@ class MelCloudErv extends EventEmitter {
             let method = null
             let payload = {};
             let path = '';
-            let headers = this.headers;
             switch (accountType) {
                 case "melcloud":
                     switch (flag) {
@@ -239,15 +234,8 @@ class MelCloudErv extends EventEmitter {
                             break;
                     }
 
-                    if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(payload, null, 2)}`);
-
-                    await axios(path, {
-                        method: 'POST',
-                        baseURL: ApiUrls.BaseURL,
-                        timeout: 30000,
-                        headers: headers,
-                        data: payload
-                    });
+                    if (this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);
+                    await this.client(path, { method: 'POST', data: payload });
 
                     this.emit('deviceState', deviceData);
                     return true;
@@ -262,18 +250,15 @@ class MelCloudErv extends EventEmitter {
                             };
                             method = 'POST';
                             path = ApiUrlsHome.PostHolidayMode;
-                            headers.Referer = ApiUrlsHome.Referers.PostHolidayMode.replace('deviceid', deviceData.DeviceID);
                             break;
                         case 'schedule':
                             payload = { enabled: deviceData.ScheduleEnabled };
                             method = 'PUT';
                             path = ApiUrlsHome.PutScheduleEnabled.replace('deviceid', deviceData.DeviceID);
-                            headers.Referer = ApiUrlsHome.Referers.PutScheduleEnabled.replace('deviceid', deviceData.DeviceID);
                             break;
                         case 'scene':
                             method = 'PUT';
                             path = ApiUrlsHome.PutScene[flagData.Enabled ? 'Enable' : 'Disable'].replace('sceneid', flagData.Id);
-                            headers.Referer = ApiUrlsHome.Referers.GetPutScenes;
                             break;
                         default:
                             if (displayType === 1 && deviceData.Device.VentilationMode === 2) {
@@ -297,28 +282,17 @@ class MelCloudErv extends EventEmitter {
                             };
                             method = 'PUT';
                             path = ApiUrlsHome.PutErv.replace('deviceid', deviceData.DeviceID);
-                            headers.Referer = ApiUrlsHome.Referers.PutDeviceSettings;
                             break
                     }
 
-                    headers['Content-Type'] = 'application/json; charset=utf-8';
-                    headers.Origin = ApiUrlsHome.Origin;
-                    if (this.logDebug) this.emit('debug', `Send Data: ${JSON.stringify(payload, null, 2)}`);
-
-                    await axios(path, {
-                        method: method,
-                        baseURL: ApiUrlsHome.BaseURL,
-                        timeout: 30000,
-                        headers: headers,
-                        data: payload
-                    });
+                    if (this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);
+                    await this.client(path, { method: method, data: payload });
 
                     return true;
                 default:
                     return;
             }
         } catch (error) {
-            if (error.response?.status === 500) return true; // Return 500 for schedule hovewer working correct
             throw new Error(`Send data error: ${error.message}`);
         }
     }

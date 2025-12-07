@@ -58,30 +58,30 @@ class Functions extends EventEmitter {
         let chromiumPath = '/usr/bin/chromium-browser';
 
         try {
-            // --- Detect OS ---
+            // Detect OS
             const { stdout: osOut } = await execPromise('uname -s');
             const osName = osOut.trim();
             if (this.logDebug) this.emit('debug', `Detected OS: ${osName}`);
 
-            // --- Detect Architecture ---
+            // Detect Architecture
             const { stdout: archOut } = await execPromise('uname -m');
             const arch = archOut.trim();
             if (this.logDebug) this.emit('debug', `Detected architecture: ${arch}`);
 
-            // --- Detect Docker ---
+            // Docker detection
             let isDocker = false;
             try {
-                await access('/.dockerenv', fs.constants.F_OK); isDocker = true;
+                await access('/.dockerenv', fs.constants.F_OK);
+                isDocker = true;
             } catch { }
 
             try {
                 const { stdout } = await execPromise('cat /proc/1/cgroup || true');
                 if (stdout.includes('docker') || stdout.includes('containerd')) isDocker = true;
             } catch { }
+            if (isDocker && this.logDebug) this.emit('debug', 'Running inside Docker container');
 
-            if (isDocker && this.logDebug) this.emit('debug', 'Running inside Docker container.');
-
-            // === macOS ===
+            // macOS
             if (osName === 'Darwin') {
                 chromiumPath = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
                 try {
@@ -92,10 +92,9 @@ class Functions extends EventEmitter {
                 }
             }
 
-            // === ARM ===
-            if (arch.startsWith('arm')) {
+            // ARM
+            if (arch.startsWith('arm') || arch.startsWith('aarch')) {
                 try {
-                    chromiumPath = '/usr/bin/chromium-browser';
                     await access(chromiumPath, fs.constants.X_OK);
                     return chromiumPath;
                 } catch {
@@ -108,7 +107,7 @@ class Functions extends EventEmitter {
                 }
             }
 
-            // === Linux x64 ===
+            // Linux x64
             if (osName === 'Linux') {
                 let systemChromium = null;
                 try {
@@ -116,7 +115,7 @@ class Functions extends EventEmitter {
                     systemChromium = checkOut.trim() || null;
                 } catch { }
 
-                // --- Detect Entware (QNAP) ---
+                // Entware (QNAP)
                 let entwareExists = false;
                 try {
                     await access('/opt/bin/opkg', fs.constants.X_OK);
@@ -131,24 +130,24 @@ class Functions extends EventEmitter {
                     } catch { }
                 }
 
-                // --- Generic Linux installs missing libs for Puppeteer ---
-                const depInstall = [
+                // Install missing libs
+                const depCommands = [
                     'apt-get update -y && apt-get install -y libnspr4 libnss3 libx11-6 libxcomposite1 libxdamage1 libxrandr2 libatk1.0-0 libcups2 libdrm2 libgbm1 libasound2',
                     'apk add --no-cache nspr nss libx11 libxcomposite libxdamage libxrandr atk cups libdrm libgbm alsa-lib',
                     'yum install -y nspr nss libX11 libXcomposite libXdamage libXrandr atk cups libdrm libgbm alsa-lib'
                 ];
-                for (const cmd of depInstall) {
+
+                for (const cmd of depCommands) {
                     try {
                         await execPromise(`sudo ${cmd}`);
                     } catch { }
                 }
 
-                // Set LD_LIBRARY_PATH so Puppeteer's Chromium can find libs
                 process.env.LD_LIBRARY_PATH = `/usr/lib:/usr/lib64:${process.env.LD_LIBRARY_PATH || ''}`;
                 return systemChromium;
             }
 
-            if (this.logDebug) this.emit('debug', `Unsupported OS: ${osName}.`);
+            if (this.logDebug) this.emit('debug', `Unsupported OS: ${osName}`);
             return null;
         } catch (error) {
             if (this.logError) this.emit('error', `Chromium detection/install error: ${error.message}`);

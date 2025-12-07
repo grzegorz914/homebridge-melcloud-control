@@ -105,8 +105,8 @@ class MelCloudPlatform {
 
 								//connect
 								const accountInfo = await melcloud.connect();
-								if (!accountInfo.State) {
-									if (logLevel.warn) log.warn(`${accountName}, ${accountInfo.Info}`);
+								if (!accountInfo?.State) {
+									if (logLevel.warn) log.warn(`${accountName}, ${accountInfo?.Info}`);
 									return;
 								}
 								if (logLevel.success) log.success(`${accountName}, ${accountInfo.Info}`);

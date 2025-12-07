@@ -17,8 +17,8 @@ class MelCloud extends EventEmitter {
 
         this.accountFile = accountFile;
         this.buildingsFile = buildingsFile;
-        this.headers = {};
 
+        this.client = null;
         this.functions = new Functions(this.logWarn, this.logError, this.logDebug)
             .on('warn', warn => this.emit('warn', warn))
             .on('error', error => this.emit('error', error))
@@ -56,7 +56,7 @@ class MelCloud extends EventEmitter {
         try {
             const devicesList = { State: false, Info: null, Devices: [], Scenes: [] }
             if (this.logDebug) this.emit('debug', `Scanning for devices...`);
-            const listDevicesData = await this.axiosInstance(ApiUrls.ListDevices, { method: 'GET', });
+            const listDevicesData = await this.client(ApiUrls.ListDevices, { method: 'GET', });
 
             if (!listDevicesData || !listDevicesData.data) {
                 devicesList.Info = 'Invalid or empty response from MELCloud API'
@@ -109,7 +109,6 @@ class MelCloud extends EventEmitter {
             devicesList.State = true;
             devicesList.Info = `Found ${devicesCount} devices`;
             devicesList.Devices = devices;
-            devicesList.Headers = this.headers;
             this.emit('devicesList', devicesList);
 
             return devicesList;
@@ -163,12 +162,13 @@ class MelCloud extends EventEmitter {
                 'X-MitsContextKey': contextKey,
                 'Content-Type': 'application/json'
             };
-            this.headers = headers;
-            this.axiosInstance = axios.create({
+
+            this.client = axios.create({
                 baseURL: ApiUrls.BaseURL,
                 timeout: 30000,
                 headers: headers
             });
+            this.emit('client', this.client);
 
             accountInfo.State = true;
             accountInfo.Info = 'Connect Success';

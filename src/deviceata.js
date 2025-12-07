@@ -142,7 +142,7 @@ class DeviceAta extends EventEmitter {
                         });
                 }
             } catch (error) {
-                this.emit('warn', `RESTFul integration start error: ${error}`);
+                if (this.logWarn) this.emit('warn', `RESTFul integration start error: ${error}`);
             };
         }
 
@@ -186,7 +186,7 @@ class DeviceAta extends EventEmitter {
                         });
                 }
             } catch (error) {
-                this.emit('warn', `MQTT integration start error: ${error}`);
+                if (this.logWarn) this.emit('warn', `MQTT integration start error: ${error}`);
             };
         }
 
@@ -317,6 +317,7 @@ class DeviceAta extends EventEmitter {
             const supportsOutdoorTemperature = this.accessory.supportsOutdoorTemperature;
             const numberOfFanSpeeds = this.accessory.numberOfFanSpeeds;
             const supportsSwingFunction = this.accessory.supportsSwingFunction;
+            const supportsVideWane = this.accessory.supportsVideWane;
             const autoDryFanMode = [this.accessory.operationMode, 8, supportsDry ? 2 : 8, 7][this.autoDryFanMode]; //NONE, AUTO - 8, DRY - 2, FAN - 7
             const heatDryFanMode = [this.accessory.operationMode, 1, supportsDry ? 2 : 1, 7][this.heatDryFanMode]; //NONE, HEAT - 1, DRY - 2, FAN - 7
             const coolDryFanMode = [this.accessory.operationMode, 3, supportsDry ? 2 : 3, 7][this.coolDryFanMode]; //NONE, COOL - 3, DRY - 2, FAN - 7
@@ -446,7 +447,7 @@ class DeviceAta extends EventEmitter {
                             })
                             .onSet(async (value) => {
                                 try {
-                                    deviceData.Device.VaneHorizontalDirection = value ? 12 : 0;
+                                    if (supportsVideWane) deviceData.Device.VaneHorizontalDirection = value ? 12 : 0;
                                     deviceData.Device.VaneVerticalDirection = value ? 7 : 0;
                                     if (this.logInfo) this.emit('info', `Set air direction mode: ${AirConditioner.AirDirectionMapEnumToString[value]}`);
                                     await this.melCloudAta.send(this.accountType, this.displayType, deviceData, AirConditioner.EffectiveFlags.VaneVerticalVaneHorizontal);
@@ -1129,91 +1130,91 @@ class DeviceAta extends EventEmitter {
                                         case 7: //OPERATING MODE DRY CONTROL HIDE
                                             deviceData.HideDryModeControl = state;
                                             break;
-                                        case 10: //VANE H SWING MODE AUTO
+                                        case 10: //VANE H MODE AUTO
                                             button.previousValue = state ? deviceData.Device.VaneHorizontalDirection : button.previousValue ?? deviceData.Device.VaneHorizontalDirection;
                                             deviceData.Device.Power = true;
                                             deviceData.Device.VaneHorizontalDirection = state ? 0 : button.previousValue;
                                             flag = AirConditioner.EffectiveFlags.PowerVaneHorizontal;
                                             break;
-                                        case 11: //VANE H SWING MODE 1
+                                        case 11: //VANE H MODE 1
                                             button.previousValue = state ? deviceData.Device.VaneHorizontalDirection : button.previousValue ?? deviceData.Device.VaneHorizontalDirection;
                                             deviceData.Device.Power = true;
                                             deviceData.Device.VaneHorizontalDirection = state ? 1 : button.previousValue;
                                             flag = AirConditioner.EffectiveFlags.PowerVaneHorizontal;
                                             break;
-                                        case 12: //VANE H SWING MODE 2
+                                        case 12: //VANE H MODE 2
                                             button.previousValue = state ? deviceData.Device.VaneHorizontalDirection : button.previousValue ?? deviceData.Device.VaneHorizontalDirection;
                                             deviceData.Device.Power = true;
                                             deviceData.Device.VaneHorizontalDirection = state ? 2 : button.previousValue;
                                             flag = AirConditioner.EffectiveFlags.PowerVaneHorizontal;
                                             break;
-                                        case 13: //VANE H SWING MODE 3
+                                        case 13: //VANE H MODE 3
                                             button.previousValue = state ? deviceData.Device.VaneHorizontalDirection : button.previousValue ?? deviceData.Device.VaneHorizontalDirection;
                                             deviceData.Device.Power = true;
                                             deviceData.Device.VaneHorizontalDirection = state ? 3 : button.previousValue;
                                             flag = AirConditioner.EffectiveFlags.PowerVaneHorizontal;
                                             break;
-                                        case 14: //VANE H SWING MODE 4
+                                        case 14: //VANE H MODE 4
                                             button.previousValue = state ? deviceData.Device.VaneHorizontalDirection : button.previousValue ?? deviceData.Device.VaneHorizontalDirection;
                                             deviceData.Device.Power = true;
                                             deviceData.Device.VaneHorizontalDirection = state ? 4 : button.previousValue;
                                             flag = AirConditioner.EffectiveFlags.PowerVaneHorizontal;
                                             break;
-                                        case 15: //VANE H SWING MODE 5
+                                        case 15: //VANE H MODE 5
                                             button.previousValue = state ? deviceData.Device.VaneHorizontalDirection : button.previousValue ?? deviceData.Device.VaneHorizontalDirection;
                                             deviceData.Device.Power = true;
                                             deviceData.Device.VaneHorizontalDirection = state ? 5 : button.previousValue;
                                             flag = AirConditioner.EffectiveFlags.PowerVaneHorizontal;
                                             break;
-                                        case 16: //VANE H SWING MODE SPLIT
+                                        case 16: //VANE H MODE SPLIT
                                             button.previousValue = state ? deviceData.Device.VaneHorizontalDirection : button.previousValue ?? deviceData.Device.VaneHorizontalDirection;
                                             deviceData.Device.Power = true;
                                             deviceData.Device.VaneHorizontalDirection = state ? 8 : button.previousValue;
                                             flag = AirConditioner.EffectiveFlags.PowerVaneHorizontal;
                                             break;
-                                        case 17: //VANE H SWING MODE SWING
+                                        case 17: //VANE H MODE SWING
                                             button.previousValue = state ? deviceData.Device.VaneHorizontalDirection : button.previousValue ?? deviceData.Device.VaneHorizontalDirection;
                                             deviceData.Device.Power = true;
                                             deviceData.Device.VaneHorizontalDirection = state ? 12 : button.previousValue;
                                             flag = AirConditioner.EffectiveFlags.PowerVaneHorizontal;
                                             break;
-                                        case 20: //VANE V SWING MODE AUTO
+                                        case 20: //VANE V MODE AUTO
                                             button.previousValue = state ? deviceData.Device.VaneVerticalDirection : button.previousValue ?? deviceData.Device.VaneVerticalDirection;
                                             deviceData.Device.Power = true;
                                             deviceData.Device.VaneVerticalDirection = state ? 0 : button.previousValue;
                                             flag = AirConditioner.EffectiveFlags.PowerVaneVertical;
                                             break;
-                                        case 21: //VANE V SWING MODE 1
+                                        case 21: //VANE V MODE 1
                                             button.previousValue = state ? deviceData.Device.VaneVerticalDirection : button.previousValue ?? deviceData.Device.VaneVerticalDirection;
                                             deviceData.Device.Power = true;
                                             deviceData.Device.VaneVerticalDirection = state ? 1 : button.previousValue;
                                             flag = AirConditioner.EffectiveFlags.PowerVaneVertical;
                                             break;
-                                        case 22: //VANE V SWING MODE 2
+                                        case 22: //VANE V MODE 2
                                             button.previousValue = state ? deviceData.Device.VaneVerticalDirection : button.previousValue ?? deviceData.Device.VaneVerticalDirection;
                                             deviceData.Device.Power = true;
                                             deviceData.Device.VaneVerticalDirection = state ? 2 : button.previousValue;
                                             flag = AirConditioner.EffectiveFlags.PowerVaneVertical;
                                             break;
-                                        case 23: //VANE V SWING MODE 3
+                                        case 23: //VANE V MODE 3
                                             button.previousValue = state ? deviceData.Device.VaneVerticalDirection : button.previousValue ?? deviceData.Device.VaneVerticalDirection;
                                             deviceData.Device.Power = true;
                                             deviceData.Device.VaneVerticalDirection = state ? 3 : button.previousValue;
                                             flag = AirConditioner.EffectiveFlags.PowerVaneVertical;
                                             break;
-                                        case 24: //VANE V SWING MODE 4
+                                        case 24: //VANE V MODE 4
                                             button.previousValue = state ? deviceData.Device.VaneVerticalDirection : button.previousValue ?? deviceData.Device.VaneVerticalDirection;
                                             deviceData.Device.Power = true;
                                             deviceData.Device.VaneVerticalDirection = state ? 4 : button.previousValue;
                                             flag = AirConditioner.EffectiveFlags.PowerVaneVertical;
                                             break;
-                                        case 25: //VANE V SWING MODE 5
+                                        case 25: //VANE V MODE 5
                                             button.previousValue = state ? deviceData.Device.VaneVerticalDirection : button.previousValue ?? deviceData.Device.VaneVerticalDirection;
                                             deviceData.Device.Power = true;
                                             deviceData.Device.VaneVerticalDirection = state ? 5 : button.previousValue;
                                             flag = AirConditioner.EffectiveFlags.PowerVaneVertical;
                                             break;
-                                        case 26: //VANE V SWING MODE SWING
+                                        case 26: //VANE V MODE SWING
                                             button.previousValue = state ? deviceData.Device.VaneVerticalDirection : button.previousValue ?? deviceData.Device.VaneVerticalDirection;
                                             deviceData.Device.Power = true;
                                             deviceData.Device.VaneVerticalDirection = state ? 7 : button.previousValue;
@@ -1425,6 +1426,7 @@ class DeviceAta extends EventEmitter {
                     const outdoorTemperature = deviceData.Device.OutdoorTemperature;
                     const isConnected = accountTypeMelcloud ? !deviceData.Device[connectKey] : deviceData.Device[connectKey];
                     const isInError = deviceData.Device[errorKey];
+                    const currentSwingMode = supportsSwingFunction ? (supportsWideVane ? vaneHorizontalDirection === 12 && vaneVerticalDirection === 7 ? 1 : 0 : vaneVerticalDirection === 7 ? 1 : 0) : 0;
 
                     //accessory
                     const obj = {
@@ -1461,7 +1463,7 @@ class DeviceAta extends EventEmitter {
                         automaticFanSpeed: automaticFanSpeed,
                         vaneVerticalSwing: vaneVerticalSwing,
                         vaneHorizontalSwing: vaneHorizontalSwing,
-                        currentSwingMode: supportsSwingFunction && vaneHorizontalDirection === 12 && vaneVerticalDirection === 7 ? 1 : 0,
+                        currentSwingMode: currentSwingMode,
                         lockPhysicalControl: prohibitSetTemperature && prohibitOperationMode && prohibitPower ? 1 : 0,
                         temperatureStep: temperatureStep,
                         useFahrenheit: this.accountInfo.useFahrenheit ? 1 : 0,
@@ -1753,49 +1755,49 @@ class DeviceAta extends EventEmitter {
                                 case 7: //OPERATING MODE DRY CONTROL HIDE
                                     button.state = power ? (hideDryModeControl === true) : false;
                                     break;
-                                case 10: //VANE H SWING MODE AUTO
+                                case 10: //VANE H MODE AUTO
                                     button.state = power ? (vaneHorizontalDirection === 0) : false;
                                     break;
-                                case 11: //VANE H SWING MODE 1
+                                case 11: //VANE H MODE 1
                                     button.state = power ? (vaneHorizontalDirection === 1) : false;
                                     break;
-                                case 12: //VANE H SWING MODE 2
+                                case 12: //VANE H MODE 2
                                     button.state = power ? (vaneHorizontalDirection === 2) : false;
                                     break;
-                                case 13: //VANE H SWING MODE 3
+                                case 13: //VANE H MODE 3
                                     button.state = power ? (vaneHorizontalDirection === 3) : false;
                                     break;
-                                case 14: //VANE H SWING MODE 4
+                                case 14: //VANE H MODE 4
                                     button.state = power ? (vaneHorizontalDirection === 4) : false;
                                     break;
-                                case 15: //VANE H SWING MODE 5
+                                case 15: //VANE H MODE 5
                                     button.state = power ? (vaneHorizontalDirection === 5) : false;
                                     break;
-                                case 16: //VANE H SWING MODE SPLIT
+                                case 16: //VANE H MODE SPLIT
                                     button.state = power ? (vaneHorizontalDirection === 8) : false;
                                     break;
-                                case 17: //VANE H SWING MODE SWING
+                                case 17: //VANE H MODE SWING
                                     button.state = power ? (vaneHorizontalDirection === 12) : false;
                                     break;
-                                case 20: //VANE V SWING MODE AUTO
+                                case 20: //VANE V MODE AUTO
                                     button.state = power ? (vaneVerticalDirection === 0) : false;
                                     break;
-                                case 21: //VANE V SWING MODE 1
+                                case 21: //VANE V MODE 1
                                     button.state = power ? (vaneVerticalDirection === 1) : false;
                                     break;
-                                case 22: //VANE V SWING MODE 2
+                                case 22: //VANE V MODE 2
                                     button.state = power ? (vaneVerticalDirection === 2) : false;
                                     break;
-                                case 23: //VANE V SWING MODE 3
+                                case 23: //VANE V MODE 3
                                     button.state = power ? (vaneVerticalDirection === 3) : false;
                                     break;
-                                case 24: //VANE V SWING MODE 4
+                                case 24: //VANE V MODE 4
                                     button.state = power ? (vaneVerticalDirection === 4) : false;
                                     break;
-                                case 25: //VANE V SWING MODE 5
+                                case 25: //VANE V MODE 5
                                     button.state = power ? (vaneVerticalDirection === 5) : false;
                                     break;
-                                case 26: //VANE V SWING MODE SWING
+                                case 26: //VANE V MODE SWING
                                     button.state = power ? (vaneVerticalDirection === 7) : false;
                                     break;
                                 case 27: //VANE H/V CONTROLS HIDE
@@ -1859,7 +1861,7 @@ class DeviceAta extends EventEmitter {
                         if (supportsFanSpeed) this.emit('info', `Current fan speed: ${AirConditioner.AktualFanSpeedMapEnumToString[actualFanSpeed]}`);
                         if (vaneHorizontalDirection !== null) this.emit('info', `Vane horizontal: ${AirConditioner.VaneHorizontalDirectionMapEnumToString[vaneHorizontalDirection]}`);
                         if (vaneVerticalDirection !== null) this.emit('info', `Vane vertical: ${AirConditioner.VaneVerticalDirectionMapEnumToString[vaneVerticalDirection]}`);
-                        if (supportsSwingFunction) this.emit('info', `Air direction: ${AirConditioner.AirDirectionMapEnumToString[obj.currentSwingMode]}`);
+                        if (supportsSwingFunction) this.emit('info', `Air direction: ${AirConditioner.AirDirectionMapEnumToString[currentSwingMode]}`);
                         this.emit('info', `Temperature display unit: ${obj.temperatureUnit}`);
                         this.emit('info', `Lock physical controls: ${obj.lockPhysicalControl ? 'Locked' : 'Unlocked'}`);
                         if (this.accountType === 'melcloudhome') this.emit('info', `Signal strength: ${deviceData.Rssi}dBm`);
