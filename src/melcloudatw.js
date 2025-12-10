@@ -197,6 +197,7 @@ class MelCloudAtw extends EventEmitter {
             let method = null
             let payload = {};
             let path = '';
+            let update = false;
             switch (accountType) {
                 case "melcloud":
                     switch (flag) {
@@ -241,6 +242,17 @@ class MelCloudAtw extends EventEmitter {
                     return true;
                 case "melcloudhome":
                     switch (flag) {
+                        case 'frostprotection':
+                            payload = {
+                                enabled: deviceData.FrostProtection.Enabled,
+                                min: deviceData.FrostProtection.Min,
+                                max: deviceData.FrostProtection.Max,
+                                units: { ATA: [deviceData.DeviceID] }
+                            };
+                            method = 'POST';
+                            path = ApiUrlsHome.PostProtectionFrost;
+                            update = true;
+                            break;
                         case 'holidaymode':
                             payload = {
                                 enabled: deviceData.HolidayMode.Enabled,
@@ -255,6 +267,7 @@ class MelCloudAtw extends EventEmitter {
                             payload = { enabled: deviceData.ScheduleEnabled };
                             method = 'PUT';
                             path = ApiUrlsHome.PutScheduleEnabled.replace('deviceid', deviceData.DeviceID);
+                            update = true;
                             break;
                         case 'scene':
                             method = 'PUT';
@@ -283,6 +296,12 @@ class MelCloudAtw extends EventEmitter {
 
                     if (this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);
                     await this.client(path, { method: method, data: payload });
+
+                    if (update) {
+                        setTimeout(() => {
+                            this.emit('deviceState', deviceData);
+                        }, 500);
+                    }
 
                     return true;
                 default:

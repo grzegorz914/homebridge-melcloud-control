@@ -22,6 +22,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Do not use Homebridge UI > v5.5.0 because of break config.json
 
+# [4.4.0] - (10.12.2025)
+
+## Changes
+
+- added possibility to set frost protection min/max temperaure (ATA, ATW)
+- added possibility to set overheat protection min/max temperture (ATA)
+- stability and performance improvements
+- moved MQTT to v5
+- bump dependencies
+- cleanup
+
 # [4.3.11] - (07.12.2025)
 
 ## Changes

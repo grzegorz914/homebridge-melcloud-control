@@ -118,33 +118,31 @@ class DeviceAtw extends EventEmitter {
         if (restFulEnabled) {
             try {
 
-                if (!this.restFulConnected) {
-                    this.restFul1 = new RestFul({
-                        port: this.restFul.port,
-                        logWarn: this.logWarn,
-                        logDebug: this.logDebug
+                this.restFul1 = new RestFul({
+                    port: this.restFul.port,
+                    logWarn: this.logWarn,
+                    logDebug: this.logDebug
+                })
+                    .on('connected', (message) => {
+                        this.restFulConnected = true;
+                        this.emit('success', message);
                     })
-                        .on('connected', (message) => {
-                            this.restFulConnected = true;
-                            this.emit('success', message);
-                        })
-                        .on('set', async (key, value) => {
-                            try {
-                                await this.setOverExternalIntegration('RESTFul', this.deviceData, key, value);
-                            } catch (error) {
-                                this.emit('warn', error);
-                            };
-                        })
-                        .on('debug', (debug) => {
-                            this.emit('debug', debug);
-                        })
-                        .on('warn', (warn) => {
-                            this.emit('warn', warn);
-                        })
-                        .on('error', (error) => {
-                            this.emit('error', error);
-                        });
-                }
+                    .on('set', async (key, value) => {
+                        try {
+                            await this.setOverExternalIntegration('RESTFul', this.deviceData, key, value);
+                        } catch (error) {
+                            this.emit('warn', error);
+                        };
+                    })
+                    .on('debug', (debug) => {
+                        this.emit('debug', debug);
+                    })
+                    .on('warn', (warn) => {
+                        this.emit('warn', warn);
+                    })
+                    .on('error', (error) => {
+                        this.emit('error', error);
+                    });
             } catch (error) {
                 if (this.logWarn) this.emit('warn', `RESTFul integration start error: ${error}`);
             };
@@ -154,41 +152,39 @@ class DeviceAtw extends EventEmitter {
         const mqttEnabled = this.mqtt.enable || false;
         if (mqttEnabled) {
             try {
-                if (!this.mqttConnected) {
-                    this.mqtt1 = new Mqtt({
-                        host: this.mqtt.host,
-                        port: this.mqtt.port || 1883,
-                        clientId: this.mqtt.clientId ? `melcloud_${this.mqtt.clientId}_${Math.random().toString(16).slice(3)}` : `melcloud_${Math.random().toString(16).slice(3)}`,
-                        prefix: this.mqtt.prefix ? `melcloud/${this.mqtt.prefix}/${this.deviceTypeString}/${this.deviceName}` : `melcloud/${this.deviceTypeString}/${this.deviceName}`,
-                        user: this.mqtt.auth?.user,
-                        passwd: this.mqtt.auth?.passwd,
-                        logWarn: this.logWarn,
-                        logDebug: this.logDebug
+                this.mqtt1 = new Mqtt({
+                    host: this.mqtt.host,
+                    port: this.mqtt.port || 1883,
+                    clientId: this.mqtt.clientId ? `melcloud_${this.mqtt.clientId}_${Math.random().toString(16).slice(3)}` : `melcloud_${Math.random().toString(16).slice(3)}`,
+                    prefix: this.mqtt.prefix ? `melcloud/${this.mqtt.prefix}/${this.deviceTypeString}/${this.deviceName}` : `melcloud/${this.deviceTypeString}/${this.deviceName}`,
+                    user: this.mqtt.auth?.user,
+                    passwd: this.mqtt.auth?.passwd,
+                    logWarn: this.logWarn,
+                    logDebug: this.logDebug
+                })
+                    .on('connected', (message) => {
+                        this.mqttConnected = true;
+                        this.emit('success', message);
                     })
-                        .on('connected', (message) => {
-                            this.mqttConnected = true;
-                            this.emit('success', message);
-                        })
-                        .on('subscribed', (message) => {
-                            this.emit('success', message);
-                        })
-                        .on('set', async (key, value) => {
-                            try {
-                                await this.setOverExternalIntegration('MQTT', this.deviceData, key, value);
-                            } catch (error) {
-                                this.emit('warn', error);
-                            };
-                        })
-                        .on('debug', (debug) => {
-                            this.emit('debug', debug);
-                        })
-                        .on('warn', (warn) => {
-                            this.emit('warn', warn);
-                        })
-                        .on('error', (error) => {
-                            this.emit('error', error);
-                        });
-                }
+                    .on('subscribed', (message) => {
+                        this.emit('success', message);
+                    })
+                    .on('set', async (key, value) => {
+                        try {
+                            await this.setOverExternalIntegration('MQTT', this.deviceData, key, value);
+                        } catch (error) {
+                            this.emit('warn', error);
+                        };
+                    })
+                    .on('debug', (debug) => {
+                        this.emit('debug', debug);
+                    })
+                    .on('warn', (warn) => {
+                        this.emit('warn', warn);
+                    })
+                    .on('error', (error) => {
+                        this.emit('error', error);
+                    });
             } catch (error) {
                 if (this.logWarn) this.emit('warn', `MQTT integration start error: ${error}`);
             };
@@ -1058,27 +1054,99 @@ class DeviceAtw extends EventEmitter {
             }
 
             //frost protection
-            if (this.frostProtectionSupport && this.accessory.frostProtectionEnabled !== null) {
+            if (this.frostProtectionSupport && this.accessory.frostProtection.Enabled !== null) {
                 //control
                 if (this.logDebug) this.emit('debug', `Prepare frost protection control service`);
-                this.frostProtectionControlService = new Service.Switch(`${serviceName} Frost Protection`, `frostProtectionControlService${deviceId}`);
-                this.frostProtectionControlService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                this.frostProtectionControlService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Frost Protection`);
-                this.frostProtectionControlService.getCharacteristic(Characteristic.On)
+                const frostProtectionControlService = new Service.HeaterCooler(`${serviceName} Frost Protection`, `frostProtectionControlService${deviceId}`);
+                frostProtectionControlService.addOptionalCharacteristic(Characteristic.ConfiguredName);
+                frostProtectionControlService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Frost Protection`);
+                frostProtectionControlService.getCharacteristic(Characteristic.Active)
                     .onGet(async () => {
-                        const state = this.accessory.frostProtectionEnabled;
+                        const state = this.accessory.frostProtection.Enabled;
                         return state;
                     })
                     .onSet(async (state) => {
                         try {
-                            deviceData.FrostProtection.Enabled = state;
+                            deviceData.FrostProtection.Enabled = state ? true : false;
                             if (this.logInfo) this.emit('info', `Frost protection: ${state ? 'Enabled' : 'Disabled'}`);
                             await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'frostprotection');
                         } catch (error) {
                             if (this.logWarn) this.emit('warn', `Set frost protection error: ${error}`);
                         };
                     });
-                accessory.addService(this.frostProtectionControlService);
+                frostProtectionControlService.getCharacteristic(Characteristic.CurrentHeaterCoolerState)
+                    .onGet(async () => {
+                        const value = this.accessory.frostProtection.Active ? 2 : 1;
+                        return value;
+                    })
+                frostProtectionControlService.getCharacteristic(Characteristic.TargetHeaterCoolerState)
+                    .setProps({
+                        minValue: 0,
+                        maxValue: 0,
+                        validValues: [0]
+                    })
+                    .onGet(async () => {
+                        const value = 0
+                        return value;
+                    })
+                    .onSet(async (value) => {
+                        try {
+                            deviceData.FrostProtection.Enabled = true;
+                            if (this.logInfo) this.emit('info', `Frost protection: Enabled`);
+                            await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'frostprotection');
+                        } catch (error) {
+                            if (this.logWarn) this.emit('warn', `Set frost protection error: ${error}`);
+                        };
+                    });
+                frostProtectionControlService.getCharacteristic(Characteristic.CurrentTemperature)
+                    .onGet(async () => {
+                        const value = this.accessory.roomTemperature;
+                        return value;
+                    });
+                frostProtectionControlService.getCharacteristic(Characteristic.CoolingThresholdTemperature) //max
+                    .setProps({
+                        minValue: 6,
+                        maxValue: 16,
+                        minStep: 1
+                    })
+                    .onGet(async () => {
+                        const value = this.accessory.frostProtection.Max;
+                        return value;
+                    })
+                    .onSet(async (value) => {
+                        try {
+                            let { min, max } = await this.functions.adjustTempProtection(deviceData.FrostProtection.Min, deviceData.FrostProtection.Max, value, 'max', 4, 14, 6, 16);
+                            deviceData.FrostProtection.Min = min;
+                            deviceData.FrostProtection.Max = max;
+                            if (this.logInfo) this.emit('info', `Set frost protection max. temperature: ${max}${this.accessory.temperatureUnit}`);
+                            await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'frostprotection');
+                        } catch (error) {
+                            if (this.logWarn) this.emit('warn', `Set frost protection max. temperature error: ${error}`);
+                        };
+                    });
+                frostProtectionControlService.getCharacteristic(Characteristic.HeatingThresholdTemperature) //min
+                    .setProps({
+                        minValue: 4,
+                        maxValue: 14,
+                        minStep: 1
+                    })
+                    .onGet(async () => {
+                        const value = this.accessory.frostProtection.Min;
+                        return value;
+                    })
+                    .onSet(async (value) => {
+                        try {
+                            let { min, max } = await this.functions.adjustTempProtection(deviceData.FrostProtection.Min, deviceData.FrostProtection.Max, value, 'min', 4, 14, 6, 16);
+                            deviceData.FrostProtection.Min = min;
+                            deviceData.FrostProtection.Max = max;
+                            if (this.logInfo) this.emit('info', `Set frost protection min. temperature: ${min}${this.accessory.temperatureUnit}`);
+                            await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'frostprotection');
+                        } catch (error) {
+                            if (this.logWarn) this.emit('warn', `Set frost protection min. temperature error: ${error}`);
+                        };
+                    });
+                this.frostProtectionControlService = frostProtectionControlService;
+                accessory.addService(frostProtectionControlService);
 
                 if (this.logDebug) this.emit('debug', `Prepare frost protection control sensor service`);
                 this.frostProtectionControlSensorService = new Service.ContactSensor(`${serviceName} Frost Protection Control`, `frostProtectionControlSensorService${deviceId}`);
@@ -1086,7 +1154,7 @@ class DeviceAtw extends EventEmitter {
                 this.frostProtectionControlSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Frost Protection Control`);
                 this.frostProtectionControlSensorService.getCharacteristic(Characteristic.ContactSensorState)
                     .onGet(async () => {
-                        const state = this.accessory.frostProtectionEnabled;
+                        const state = this.accessory.frostProtection.Enabled;
                         return state;
                     })
                 accessory.addService(this.frostProtectionControlSensorService);
@@ -1098,7 +1166,7 @@ class DeviceAtw extends EventEmitter {
                 this.frostProtectionSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Frost Protection`);
                 this.frostProtectionSensorService.getCharacteristic(Characteristic.ContactSensorState)
                     .onGet(async () => {
-                        const state = this.accessory.frostProtectionActive;
+                        const state = this.accessory.frostProtection.Active;
                         return state;
                     })
                 accessory.addService(this.frostProtectionSensorService);
@@ -1613,8 +1681,7 @@ class DeviceAtw extends EventEmitter {
                     const holidayModeActive = deviceData.HolidayMode?.Active ?? false;
 
                     //protection
-                    const frostProtectionEnabled = deviceData.FrostProtection?.Enabled;
-                    const frostProtectionActive = deviceData.FrostProtection?.Active ?? false;
+                    const frostProtection = deviceData.FrostProtection ?? {};
 
                     //device info
                     const supportsStanbyMode = deviceData.Device[supportStandbyKey];
@@ -1723,8 +1790,7 @@ class DeviceAtw extends EventEmitter {
                         temperatureUnit: TemperatureDisplayUnits[this.accountInfo.useFahrenheit ? 1 : 0],
                         isConnected: isConnected,
                         isInError: isInError,
-                        frostProtectionEnabled: frostProtectionEnabled,
-                        frostProtectionActive: frostProtectionActive,
+                        frostProtection: frostProtection,
                         scheduleEnabled: scheduleEnabled,
                         holidayModeEnabled: holidayModeEnabled,
                         holidayModeActive: holidayModeActive,
@@ -2124,10 +2190,15 @@ class DeviceAtw extends EventEmitter {
                     this.errorService?.updateCharacteristic(Characteristic.ContactSensorState, isInError);
 
                     //frost protection
-                    if (this.frostProtectionSupport && frostProtectionEnabled !== null) {
-                        this.frostProtectionControlService?.updateCharacteristic(Characteristic.On, frostProtectionEnabled);
-                        this.frostProtectionControlSensorService?.updateCharacteristic(Characteristic.ContactSensorState, frostProtectionEnabled);
-                        this.frostProtectionSensorService?.updateCharacteristic(Characteristic.ContactSensorState, frostProtectionActive);
+                    if (this.frostProtectionSupport && frostProtection.Enabled !== null) {
+                        this.frostProtectionControlService?.updateCharacteristic(Characteristic.Active, frostProtection.Enabled);
+                        this.frostProtectionControlService?.updateCharacteristic(Characteristic.CurrentHeaterCoolerState, frostProtection.Active ? 2 : 1);
+                        this.frostProtectionControlService?.updateCharacteristic(Characteristic.TargetHeaterCoolerState, 0);
+                        this.frostProtectionControlService?.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature);
+                        this.frostProtectionControlService?.updateCharacteristic(Characteristic.CoolingThresholdTemperature, frostProtection.Max);
+                        this.frostProtectionControlService?.updateCharacteristic(Characteristic.HeatingThresholdTemperature, frostProtection.Min);
+                        this.frostProtectionControlSensorService?.updateCharacteristic(Characteristic.ContactSensorState, frostProtection.Enabled);
+                        this.frostProtectionSensorService?.updateCharacteristic(Characteristic.ContactSensorState, frostProtection.Active);
                     }
 
                     //holiday mode

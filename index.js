@@ -90,7 +90,7 @@ class MelCloudPlatform {
 										melcloud = new MelCloud(account, accountFile, buildingsFile, true);
 										break;
 									case 'melcloudhome':
-										timmers = [{ name: 'connect', sampling: 3300000 }, { name: 'checkDevicesList', sampling: 3000 }];
+										timmers = [{ name: 'connect', sampling: 3300000 }, { name: 'checkDevicesList', sampling: 5000 }];
 										melcloud = new MelCloudHome(account, accountFile, buildingsFile, true);
 										break;
 									default:

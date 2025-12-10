@@ -219,7 +219,7 @@ class MelCloudHome extends EventEmitter {
 
     async connect() {
         if (this.logDebug) this.emit('debug', 'Connecting to MELCloud Home');
-        const GLOBAL_TIMEOUT = 90000;
+        const GLOBAL_TIMEOUT = 120000;
 
         let browser;
         try {
@@ -228,7 +228,7 @@ class MelCloudHome extends EventEmitter {
             // Get Chromium path
             let chromiumPath = await this.functions.ensureChromiumInstalled();
 
-            // === Fallback to Puppeteer's built-in Chromium ===
+            // Fallback to Puppeteer's bundled Chromium
             if (!chromiumPath) {
                 try {
                     const puppeteerPath = puppeteer.executablePath();
@@ -245,7 +245,7 @@ class MelCloudHome extends EventEmitter {
                 }
             }
 
-            // Verify executable works
+            // Verify Chromium executable
             try {
                 const { stdout } = await execPromise(`"${chromiumPath}" --version`);
                 if (this.logDebug) this.emit('debug', `Chromium detected: ${stdout.trim()}`);
@@ -277,7 +277,7 @@ class MelCloudHome extends EventEmitter {
             page.setDefaultTimeout(GLOBAL_TIMEOUT);
             page.setDefaultNavigationTimeout(GLOBAL_TIMEOUT);
 
-            // === CDP session ===
+            // CDP session
             const client = await page.createCDPSession();
             await client.send('Network.enable')
             client.on('Network.webSocketCreated', ({ url }) => {
@@ -311,7 +311,7 @@ class MelCloudHome extends EventEmitter {
                                     .on('open', () => {
                                         this.socketConnected = true;
                                         this.connecting = false;
-                                        if (this.logSuccess) this.emit('success', `Web Socket Connect Success`);
+                                        if (this.logDebug) this.emit('debug', `Web Socket Connected`);
 
                                         // heartbeat
                                         this.heartbeat = setInterval(() => {
@@ -400,7 +400,6 @@ class MelCloudHome extends EventEmitter {
                 `__Secure-monitorandcontrolC2=${c2}`
             ].join('; ');
 
-
             const userAgent = await page.evaluate(() => navigator.userAgent);
             const headers = {
                 'Accept': '*/*',
@@ -424,7 +423,7 @@ class MelCloudHome extends EventEmitter {
             this.emit('client', this.client);
 
             accountInfo.State = true;
-            accountInfo.Info = 'Connect Success';
+            accountInfo.Info = `Connect Success${this.socketConnected ? ', Web Socket Connected' : ''}`;
             await this.functions.saveData(this.accountFile, accountInfo);
 
             return accountInfo;

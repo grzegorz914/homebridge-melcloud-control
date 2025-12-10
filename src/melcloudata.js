@@ -24,6 +24,7 @@ class MelCloudAta extends EventEmitter {
         //set default values
         this.deviceData = {};
         this.client = melcloud.client;
+        this.lock = false;
 
         //handle melcloud events
         let deviceData = null;
@@ -196,6 +197,7 @@ class MelCloudAta extends EventEmitter {
             let method = null
             let payload = {};
             let path = '';
+            let update = false;
             switch (accountType) {
                 case "melcloud":
                     switch (flag) {
@@ -248,6 +250,7 @@ class MelCloudAta extends EventEmitter {
                             };
                             method = 'POST';
                             path = ApiUrlsHome.PostProtectionFrost;
+                            update = true;
                             break;
                         case 'overheatprotection':
                             payload = {
@@ -258,6 +261,7 @@ class MelCloudAta extends EventEmitter {
                             };
                             method = 'POST';
                             path = ApiUrlsHome.PostProtectionOverheat;
+                            update = true;
                             break;
                         case 'holidaymode':
                             payload = {
@@ -273,6 +277,7 @@ class MelCloudAta extends EventEmitter {
                             payload = { enabled: deviceData.ScheduleEnabled };
                             method = 'PUT';
                             path = ApiUrlsHome.PutScheduleEnabled.replace('deviceid', deviceData.DeviceID);
+                            update = true;
                             break;
                         case 'scene':
                             method = 'PUT';
@@ -309,6 +314,12 @@ class MelCloudAta extends EventEmitter {
                     //send payload
                     if (this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);
                     await this.client(path, { method: method, data: payload });
+
+                    if (update) {
+                        setTimeout(() => {
+                            this.emit('deviceState', deviceData);
+                        }, 500);
+                    }
 
                     return true;
                 default:

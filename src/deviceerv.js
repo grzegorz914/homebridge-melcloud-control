@@ -109,34 +109,31 @@ class DeviceErv extends EventEmitter {
         const restFulEnabled = this.restFul.enable || false;
         if (restFulEnabled) {
             try {
-
-                if (!this.restFulConnected) {
-                    this.restFul1 = new RestFul({
-                        port: this.restFul.port,
-                        logWarn: this.logWarn,
-                        logDebug: this.logDebug
+                this.restFul1 = new RestFul({
+                    port: this.restFul.port,
+                    logWarn: this.logWarn,
+                    logDebug: this.logDebug
+                })
+                    .on('connected', (message) => {
+                        this.restFulConnected = true;
+                        this.emit('success', message);
                     })
-                        .on('connected', (message) => {
-                            this.restFulConnected = true;
-                            this.emit('success', message);
-                        })
-                        .on('set', async (key, value) => {
-                            try {
-                                await this.setOverExternalIntegration('RESTFul', this.deviceData, key, value);
-                            } catch (error) {
-                                this.emit('warn', error);
-                            };
-                        })
-                        .on('debug', (debug) => {
-                            this.emit('debug', debug);
-                        })
-                        .on('warn', (warn) => {
-                            this.emit('warn', warn);
-                        })
-                        .on('error', (error) => {
-                            this.emit('error', error);
-                        });
-                }
+                    .on('set', async (key, value) => {
+                        try {
+                            await this.setOverExternalIntegration('RESTFul', this.deviceData, key, value);
+                        } catch (error) {
+                            this.emit('warn', error);
+                        };
+                    })
+                    .on('debug', (debug) => {
+                        this.emit('debug', debug);
+                    })
+                    .on('warn', (warn) => {
+                        this.emit('warn', warn);
+                    })
+                    .on('error', (error) => {
+                        this.emit('error', error);
+                    });
             } catch (error) {
                 if (this.logWarn) this.emit('warn', `RESTFul integration start error: ${error}`);
             };
@@ -146,41 +143,39 @@ class DeviceErv extends EventEmitter {
         const mqttEnabled = this.mqtt.enable || false;
         if (mqttEnabled) {
             try {
-                if (!this.mqttConnected) {
-                    this.mqtt1 = new Mqtt({
-                        host: this.mqtt.host,
-                        port: this.mqtt.port || 1883,
-                        clientId: this.mqtt.clientId ? `melcloud_${this.mqtt.clientId}_${Math.random().toString(16).slice(3)}` : `melcloud_${Math.random().toString(16).slice(3)}`,
-                        prefix: this.mqtt.prefix ? `melcloud/${this.mqtt.prefix}/${this.deviceTypeString}/${this.deviceName}` : `melcloud/${this.deviceTypeString}/${this.deviceName}`,
-                        user: this.mqtt.auth?.user,
-                        passwd: this.mqtt.auth?.passwd,
-                        logWarn: this.logWarn,
-                        logDebug: this.logDebug
+                this.mqtt1 = new Mqtt({
+                    host: this.mqtt.host,
+                    port: this.mqtt.port || 1883,
+                    clientId: this.mqtt.clientId ? `melcloud_${this.mqtt.clientId}_${Math.random().toString(16).slice(3)}` : `melcloud_${Math.random().toString(16).slice(3)}`,
+                    prefix: this.mqtt.prefix ? `melcloud/${this.mqtt.prefix}/${this.deviceTypeString}/${this.deviceName}` : `melcloud/${this.deviceTypeString}/${this.deviceName}`,
+                    user: this.mqtt.auth?.user,
+                    passwd: this.mqtt.auth?.passwd,
+                    logWarn: this.logWarn,
+                    logDebug: this.logDebug
+                })
+                    .on('connected', (message) => {
+                        this.mqttConnected = true;
+                        this.emit('success', message);
                     })
-                        .on('connected', (message) => {
-                            this.mqttConnected = true;
-                            this.emit('success', message);
-                        })
-                        .on('subscribed', (message) => {
-                            this.emit('success', message);
-                        })
-                        .on('set', async (key, value) => {
-                            try {
-                                await this.setOverExternalIntegration('MQTT', this.deviceData, key, value);
-                            } catch (error) {
-                                this.emit('warn', error);
-                            };
-                        })
-                        .on('debug', (debug) => {
-                            this.emit('debug', debug);
-                        })
-                        .on('warn', (warn) => {
-                            this.emit('warn', warn);
-                        })
-                        .on('error', (error) => {
-                            this.emit('error', error);
-                        });
-                }
+                    .on('subscribed', (message) => {
+                        this.emit('success', message);
+                    })
+                    .on('set', async (key, value) => {
+                        try {
+                            await this.setOverExternalIntegration('MQTT', this.deviceData, key, value);
+                        } catch (error) {
+                            this.emit('warn', error);
+                        };
+                    })
+                    .on('debug', (debug) => {
+                        this.emit('debug', debug);
+                    })
+                    .on('warn', (warn) => {
+                        this.emit('warn', warn);
+                    })
+                    .on('error', (error) => {
+                        this.emit('error', error);
+                    });
             } catch (error) {
                 if (this.logWarn) this.emit('warn', `MQTT integration start error: ${error}`);
             };
