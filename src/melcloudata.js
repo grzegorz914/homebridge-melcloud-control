@@ -122,7 +122,6 @@ class MelCloudAta extends EventEmitter {
                         }
                         break;
                     default:
-                        if (this.logDebug) this.emit('debug', `Incoming unknown unit id: ${parsedMessage}`);
                         return;
                 }
 
@@ -137,7 +136,6 @@ class MelCloudAta extends EventEmitter {
     async updateState(type, deviceData) {
         try {
             if (this.accountType === 'melcloudhome') {
-
                 if (type === 'ws') {
                     deviceData.Device.OperationMode = AirConditioner.OperationModeMapEnumToEnumWs[deviceData.Device.OperationMode] ?? deviceData.Device.OperationMode;
                     deviceData.Device.VaneHorizontalDirection = AirConditioner.VaneHorizontalDirectionMapEnumToEnumWs[deviceData.Device.VaneHorizontalDirection] ?? deviceData.Device.VaneHorizontalDirection;

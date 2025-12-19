@@ -106,7 +106,6 @@ class MelCloudAtw extends EventEmitter {
                         }
                         break;
                     default:
-                        if (this.logDebug) this.emit('debug', `Incoming unknown unit id: ${parsedMessage}`);
                         return;
                 }
 

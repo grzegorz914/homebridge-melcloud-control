@@ -460,7 +460,7 @@ class DeviceAta extends EventEmitter {
                         .onSet(async (value) => {
                             try {
                                 const tempKey = this.accessory.operationMode === 8 ? 'DefaultCoolingSetTemperature' : 'SetTemperature';
-                                deviceData.Device[tempKey] = value;
+                                deviceData.Device[tempKey] = value < 16 ? 16 : value;
                                 if (this.logInfo) this.emit('info', `Set cooling threshold temperature: ${value}${this.accessory.temperatureUnit}`);
                                 await this.melCloudAta.send(this.accountType, this.displayType, deviceData, AirConditioner.EffectiveFlags.SetTemperature);
                             } catch (error) {
@@ -1533,7 +1533,7 @@ class DeviceAta extends EventEmitter {
                     const numberOfFanSpeeds = deviceData.Device.NumberOfFanSpeeds;
                     const minTempHeat = deviceData.Device.MinTempHeat ?? 10;
                     const maxTempHeat = deviceData.Device.MaxTempHeat ?? 31;
-                    const minTempCoolDryAuto = deviceData.Device.MinTempAutomatic ?? 16;
+                    const minTempCoolDryAuto = accountTypeMelcloud ? 4 : deviceData.Device.MinTempAutomatic ?? 16;
                     const maxTempCoolDryAuto = deviceData.Device.MaxTempAutomatic ?? 31;
 
                     //device state
