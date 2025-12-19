@@ -22,6 +22,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Do not use Homebridge UI > v5.5.0 because of break config.json
 
+# [4.5.0] - (19.12.2025)
+
+## Changes
+
+- stability and performance improvements
+- remove oldnot existed presets, schedules, scenes fom config during (Connect To Melcloud)
+- bump dependencies
+- config schema updated
+- redme updated
+- cleanup
+
 # [4.4.0] - (10.12.2025)
 
 ## Changes

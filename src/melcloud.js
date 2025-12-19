@@ -54,9 +54,9 @@ class MelCloud extends EventEmitter {
 
     async checkDevicesList() {
         try {
-            const devicesList = { State: false, Info: null, Devices: [], Scenes: [] }
+            const devicesList = { State: false, Info: null, Buildings: [], Devices: [], Scenes: [] }
             if (this.logDebug) this.emit('debug', `Scanning for devices...`);
-            const listDevicesData = await this.client(ApiUrls.ListDevices, { method: 'GET', });
+            const listDevicesData = await this.client(ApiUrls.Get.ListDevices, { method: 'GET', });
 
             if (!listDevicesData || !listDevicesData.data) {
                 devicesList.Info = 'Invalid or empty response from MELCloud API'
@@ -70,9 +70,6 @@ class MelCloud extends EventEmitter {
                 devicesList.Info = 'No building found'
                 return devicesList;
             }
-
-            await this.functions.saveData(this.buildingsFile, buildingsList);
-            if (this.logDebug) this.emit('debug', `Buildings list saved`);
 
             const devices = [];
             for (const building of buildingsList) {
@@ -108,7 +105,12 @@ class MelCloud extends EventEmitter {
 
             devicesList.State = true;
             devicesList.Info = `Found ${devicesCount} devices`;
+            devicesList.Buildings = buildingsList;
             devicesList.Devices = devices;
+
+            await this.functions.saveData(this.buildingsFile, devicesList);
+            if (this.logDebug) this.emit('debug', `Buildings list saved`);
+
             this.emit('devicesList', devicesList);
 
             return devicesList;
@@ -132,9 +134,9 @@ class MelCloud extends EventEmitter {
                 CaptchaResponse: '',
                 Persist: true
             };
-            const accountData = await axios(ApiUrls.ClientLogin, {
+            const accountData = await axios(ApiUrls.Post.ClientLogin, {
                 method: 'POST',
-                baseURL: ApiUrls.BaseURL,
+                baseURL: ApiUrls.Base,
                 timeout: 15000,
                 data: payload
             });
@@ -164,7 +166,7 @@ class MelCloud extends EventEmitter {
             };
 
             this.client = axios.create({
-                baseURL: ApiUrls.BaseURL,
+                baseURL: ApiUrls.Base,
                 timeout: 30000,
                 headers: headers
             });

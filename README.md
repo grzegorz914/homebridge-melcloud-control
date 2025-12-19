@@ -22,24 +22,25 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | Package | Installation | Role | Required |
 | --- | --- | --- | --- |
 | [Homebridge v2.0.0](https://github.com/homebridge/homebridge) | [Homebridge Wiki](https://github.com/homebridge/homebridge/wiki) | HomeKit Bridge | Required |
-| [Homebridge UI <= v5.5.0](https://github.com/homebridge/homebridge-config-ui-x) | [Homebridge UI Wiki](https://github.com/homebridge/homebridge-config-ui-x/wiki) | Homebridge Web User Interface | Required |
-| [MELCloud](https://github.com/grzegorz914/homebridge-melcloud-control) | [Plug-In Wiki](https://github.com/grzegorz914/homebridge-melcloud-control/wiki) | Homebridge Plug-In | Required |
+| [Homebridge UI <= v5.5.0](https://github.com/homebridge/homebridge-config-ui-x) | [Homebridge UI Wiki](https://github.com/homebridge/homebridge-config-ui-x/wiki) | Homebridge User Interface | Required |
+| [MELCloud](https://github.com/grzegorz914/homebridge-melcloud-control) | [Plug-In Wiki](https://github.com/grzegorz914/homebridge-melcloud-control/wiki) | Plug-In | Required |
 
 ### About The Plugin
 
-* Support devices connected to MELCloud or MELCloud Home.
-* Support multiple accounts, buildings, floors, areas.
-* Support temperature display units `Celsius/Fahrenheit`.
-* Support assing inividual operating mode for `Heat/Cool/Auto`.
-* Support direct `Presets`, only MELCloud.
-* Support direct `Schedules`, only MELCloud Home.
-* Support direct `Scenes`, only MELCloud Home.
-* Support direct `Frost protection`, only MELCloud Home.
-* Support direct `Overheat Protection`, only MELCloud Home.
-* Support direct `Holiday Mode`.
-* Support direct `Functions`, using extra `Buttons`, switch it to `OFF` restore previous device state.
-* Support automations, shortcuts and Siri.
-* Support external integrations, [RESTFul](https://github.com/grzegorz914/homebridge-melcloud-control?tab=readme-ov-file#restful-integration), [MQTT](https://github.com/grzegorz914/homebridge-melcloud-control?tab=readme-ov-file#mqtt-integration).
+* Support:
+  * Devices connected to MELCloud or MELCloud Home.
+  * Multiple accounts, buildings, floors, areas.
+  * Temperature display units `Celsius/Fahrenheit`.
+  * Assing individual operating mode for `Heat/Cool/Auto`.
+  * Presets, only MELCloud.
+  * Scenes, only MELCloud Home.
+  * Frost protection, only MELCloud Home.
+  * Overheat Protection, only MELCloud Home.
+  * Holiday Mode, only MELCloud Home.
+  * Physical lock controls `LOCK/UNLOCK`, only MELCloud.
+  * Functions, using extra `Buttons`, switch to `OFF` restore previous state.
+  * Automations, shortcuts and Siri.
+  * External integrations, [RESTFul](https://github.com/grzegorz914/homebridge-melcloud-control?tab=readme-ov-file#restful-integration), [MQTT](https://github.com/grzegorz914/homebridge-melcloud-control?tab=readme-ov-file#mqtt-integration).
 * Control devices over local network You need use ESP module and [Tasmota Control](https://github.com/grzegorz914/homebridge-tasmota-control) plugin.
 
 ### Control Mode
@@ -58,18 +59,17 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
     * Operating mode `POWER OFF/HEAT/COOL/AUTO`.
     * Temperature `HEATING/COOLING/AUTO`.
     * Temperature display unit `°F/°C`.
-    * Assign operating mode for `HEAT/AUTO`
   * Buttons:
     * For direct device control.
       * Power `ON/OFF`.
       * Operating mode `HEAT/DRY/COOL/FAN/AUTO`.
-      * Physical lock controls `LOCK/UNLOCK`.
+      * Physical lock controls `LOCK/UNLOCK`
       * Vane H mode `AUTO/1/2/3/4/5/SPLIT/SWING`.
       * Vane V mode `AUTO/1/2/3/4/5/SWING`.
       * Fan speed mode `AUTO/1/2/3/4/5`.
-      * Presets `SET/UNSET`.
-      * Frost protection `ON/OFF`.
-      * Overheat protection `ON/OFF`.
+      * Preset `SET/UNSET`
+      * Frost protection `ON/OFF/MINTEMP/MAXTEMP`.
+      * Overheat protection `ON/OFF/MINTEMP/MAXTEMP`.
       * Holiday mode `ON/OFF`.
       * Schedules `ON/OFF`.
       * Scene `ON/OFF`.
@@ -81,7 +81,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Vane H mode `AUTO/1/2/3/4/5/SPLIT/SWING`.
       * Vane V mode `AUTO/1/2/3/4/5/SWING`.
       * Fan speed mode `AUTO/1/2/3/4/5/`.
-      * Presets `ACTIV/UNACTIV`.
+      * Preset `ACTIV/UNACTIV`.
       * Room temperature.
       * Outdoor temperature.
       * Frost protection.
@@ -128,8 +128,8 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Power `ON/OFF`.
       * Operating mode `HEAT/COOL/CURVE/HOLIDAY/AUTO HOT WATER/ECO HOT WATER/FORCE HOT WATER`.
       * Physical lock controls `LOCK/UNLOCK`.
-      * Presets `SET/UNSET`.
-      * Frost protection `ON/OFF`.
+      * Preset `SET/UNSET`.
+      * Frost protection `ON/OFF/MINTEMP/MAXTEMP`.
       * Holiday mode `ON/OFF`.
       * Schedules `ON/OFF`.
       * Scene `ON/OFF`.
@@ -138,7 +138,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Power `ON/OFF`.
       * Operating mode `HEAT/COOL/CURVE/HOLIDAY/AUTO HOT WATER/ECO HOT WATER/FORCE HOT WATER`.
       * Physical lock controls `LOCK/UNLOCK`.
-      * Presets `ACTIV/UNACTIV`.
+      * Preset `ACTIV/UNACTIV`.
       * Outdoor temperature.
       * Zone 1 temperature.
       * Zone 2 temperature.
@@ -168,7 +168,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
       * Power `ON/OFF`.
       * Operating mode `LOSSNAY/BYPASS/AUTO/NIGHT PURGE`.
       * Fan speed mode `AUTO/1/2/3/4`.
-      * Presets `SET/UNSET`.
+      * Preset `SET/UNSET`.
       * Holiday mode `ON/OFF`.
       * Schedules `ON/OFF`.
       * Scene `ON/OFF`.
@@ -210,7 +210,7 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
   * Target temperature is calculated as a middle value between `LO` and `HI` and the rest is calculated internally.
 * Thermostat
   * In this mode we can set only target temperature:
-  * Target temperature issend to device and calculated internally:
+  * Target temperature is send to device and calculated internally:
 * Calculation method in device internally:  
   * If the room temperature `<` Heating Setpoint, the unit will be set to HEAT with a setpoint of 23°C.
   * In HEAT, if the room temperature `>` Heating Setpoint `+` 1°C, the unit will be set to FAN.

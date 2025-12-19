@@ -1,6 +1,6 @@
 import EventEmitter from 'events';
 import Functions from './functions.js';
-import { ApiUrls, ApiUrlsHome, HeatPump } from './constants.js';
+import { ApiUrls, HeatPump } from './constants.js';
 
 class MelCloudAtw extends EventEmitter {
     constructor(account, device, defaultTempsFile, accountFile, melcloud) {
@@ -71,7 +71,19 @@ class MelCloudAtw extends EventEmitter {
                                     }
                                 }
 
-                                if (this.logDebug) this.emit('debug', `WS update settings: ${JSON.stringify(deviceData.Device, null, 2)}`);
+                                updateState = true;
+                                break;
+                            case 'atwUnitFrostProtectionTriggered':
+                                deviceData.FrostProtection.Active = messageData.active;
+
+                                //update device settings
+                                for (const [key, value] of Object.entries(settings)) {
+                                    if (!this.functions.isValidValue(value)) continue;
+
+                                    if (key in deviceData.Device) {
+                                        deviceData.Device[key] = value;
+                                    }
+                                }
                                 updateState = true;
                                 break;
                             case 'unitHolidayModeTriggered':
@@ -83,6 +95,10 @@ class MelCloudAtw extends EventEmitter {
                             case 'unitWifiSignalChanged':
                                 deviceData.Rssi = messageData.rssi;
                                 updateState = true;
+                                break;
+                            case 'unitCommunicationRestored':
+                                timestamp = messageData.timestamp;
+                                deviceData.Device.IsConnected = true;
                                 break;
                             default:
                                 if (this.logDebug) this.emit('debug', `Unit ${unitId}, received unknown message type: ${parsedMessage}`);
@@ -204,7 +220,7 @@ class MelCloudAtw extends EventEmitter {
                         case 'account':
                             flagData.Account.LoginData.UseFahrenheit = flagData.UseFahrenheit;
                             payload = { data: flagData.LoginData };
-                            path = ApiUrls.UpdateApplicationOptions;
+                            path = ApiUrls.Post.UpdateApplicationOptions;
                             await this.functions.saveData(this.accountFile, flagData);
                             break;
                         default:
@@ -231,14 +247,19 @@ class MelCloudAtw extends EventEmitter {
                                 ProhibitHotWater: deviceData.Device.ProhibitHotWater,
                                 HasPendingCommand: true
                             }
-                            path = ApiUrls.SetAtw;
+                            path = ApiUrls.Post.Atw;
+                            update = true;
                             break;
                     }
 
                     if (this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);
                     await this.client(path, { method: 'POST', data: payload });
 
-                    this.emit('deviceState', deviceData);
+                    if (update) {
+                        setTimeout(() => {
+                            this.emit('deviceState', deviceData);
+                        }, 500);
+                    }
                     return true;
                 case "melcloudhome":
                     switch (flag) {
@@ -250,7 +271,7 @@ class MelCloudAtw extends EventEmitter {
                                 units: { ATA: [deviceData.DeviceID] }
                             };
                             method = 'POST';
-                            path = ApiUrlsHome.PostProtectionFrost;
+                            path = ApiUrls.Home.Post.ProtectionFrost;
                             update = true;
                             break;
                         case 'holidaymode':
@@ -261,17 +282,17 @@ class MelCloudAtw extends EventEmitter {
                                 units: { ATW: [deviceData.DeviceID] }
                             };
                             method = 'POST';
-                            path = ApiUrlsHome.PostHolidayMode;
+                            path = ApiUrls.Home.Post.HolidayMode;
                             break;
                         case 'schedule':
                             payload = { enabled: deviceData.ScheduleEnabled };
                             method = 'PUT';
-                            path = ApiUrlsHome.PutScheduleEnabled.replace('deviceid', deviceData.DeviceID);
+                            path = ApiUrls.Home.Put.ScheduleEnableDisable.Home.replace('deviceid', deviceData.DeviceID);
                             update = true;
                             break;
                         case 'scene':
                             method = 'PUT';
-                            path = ApiUrlsHome.PutScene[flagData.Enabled ? 'Enable' : 'Disable'].replace('sceneid', flagData.Id);
+                            path = `${ApiUrls.Home.Put.SceneEnableDisable.replace('sceneid', flagData.Id)}${flagData.Enabled ? 'enable' : 'disable'}`;
                             break;
                         default:
                             payload = {
@@ -290,7 +311,7 @@ class MelCloudAtw extends EventEmitter {
                                 ecoHotWater: deviceData.Device.EcoHotWater,
                             };
                             method = 'PUT';
-                            path = ApiUrlsHome.PutAtw.replace('deviceid', deviceData.DeviceID);
+                            path = ApiUrls.Home.Put.Atw.replace('deviceid', deviceData.DeviceID);
                             break
                     }
 
@@ -302,7 +323,6 @@ class MelCloudAtw extends EventEmitter {
                             this.emit('deviceState', deviceData);
                         }, 500);
                     }
-
                     return true;
                 default:
                     return;

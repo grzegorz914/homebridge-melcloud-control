@@ -1,6 +1,6 @@
 import EventEmitter from 'events';
 import Functions from './functions.js';
-import { ApiUrls, ApiUrlsHome, AirConditioner } from './constants.js';
+import { ApiUrls, AirConditioner } from './constants.js';
 
 class MelCloudAta extends EventEmitter {
     constructor(account, device, defaultTempsFile, accountFile, melcloud) {
@@ -72,7 +72,34 @@ class MelCloudAta extends EventEmitter {
                                     }
                                 }
 
-                                if (this.logDebug) this.emit('debug', `WS update settings: ${JSON.stringify(deviceData.Device, null, 2)}`);
+                                updateState = true;
+                                break;
+                            case 'ataUnitFrostProtectionTriggered':
+                                deviceData.FrostProtection.Active = messageData.active;
+
+                                //update device settings
+                                for (const [key, value] of Object.entries(settings)) {
+                                    if (!this.functions.isValidValue(value)) continue;
+
+                                    if (key in deviceData.Device) {
+                                        deviceData.Device[key] = value;
+                                    }
+                                }
+
+                                updateState = true;
+                                break;
+                            case 'ataUnitOverheatProtectionTriggered':
+                                deviceData.OverheatProtection.Active = messageData.active;
+
+                                //update device settings
+                                for (const [key, value] of Object.entries(settings)) {
+                                    if (!this.functions.isValidValue(value)) continue;
+
+                                    if (key in deviceData.Device) {
+                                        deviceData.Device[key] = value;
+                                    }
+                                }
+
                                 updateState = true;
                                 break;
                             case 'unitHolidayModeTriggered':
@@ -84,6 +111,10 @@ class MelCloudAta extends EventEmitter {
                             case 'unitWifiSignalChanged':
                                 deviceData.Rssi = messageData.rssi;
                                 updateState = true;
+                                break;
+                            case 'unitCommunicationRestored':
+                                timestamp = messageData.timestamp;
+                                deviceData.Device.IsConnected = true;
                                 break;
                             default:
                                 if (this.logDebug) this.emit('debug', `Unit ${unitId}, received unknown message type: ${parsedMessage}`);
@@ -204,7 +235,7 @@ class MelCloudAta extends EventEmitter {
                         case 'account':
                             flagData.Account.LoginData.UseFahrenheit = flagData.UseFahrenheit;
                             payload = { data: flagData.LoginData };
-                            path = ApiUrls.UpdateApplicationOptions;
+                            path = ApiUrls.Post.UpdateApplicationOptions;
                             await this.functions.saveData(this.accountFile, flagData);
                             break;
                         default:
@@ -230,14 +261,19 @@ class MelCloudAta extends EventEmitter {
                                 HideDryModeControl: deviceData.HideDryModeControl,
                                 HasPendingCommand: true
                             };
-                            path = ApiUrls.SetAta;
+                            path = ApiUrls.Post.Ata;
+                            update = true;
                             break;
                     }
 
                     if (this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);
                     await this.client(path, { method: 'POST', data: payload });
 
-                    this.emit('deviceState', deviceData);
+                    if (update) {
+                        setTimeout(() => {
+                            this.emit('deviceState', deviceData);
+                        }, 500);
+                    }
                     return true;
                 case "melcloudhome":
                     switch (flag) {
@@ -249,7 +285,7 @@ class MelCloudAta extends EventEmitter {
                                 units: { ATA: [deviceData.DeviceID] }
                             };
                             method = 'POST';
-                            path = ApiUrlsHome.PostProtectionFrost;
+                            path = ApiUrls.Home.Post.ProtectionFrost;
                             update = true;
                             break;
                         case 'overheatprotection':
@@ -260,7 +296,7 @@ class MelCloudAta extends EventEmitter {
                                 units: { ATA: [deviceData.DeviceID] }
                             };
                             method = 'POST';
-                            path = ApiUrlsHome.PostProtectionOverheat;
+                            path = ApiUrls.Home.Post.ProtectionOverheat;
                             update = true;
                             break;
                         case 'holidaymode':
@@ -271,17 +307,17 @@ class MelCloudAta extends EventEmitter {
                                 units: { ATA: [deviceData.DeviceID] }
                             };
                             method = 'POST';
-                            path = ApiUrlsHome.PostHolidayMode;
+                            path = ApiUrls.Home.Post.HolidayMode;
                             break;
                         case 'schedule':
                             payload = { enabled: deviceData.ScheduleEnabled };
                             method = 'PUT';
-                            path = ApiUrlsHome.PutScheduleEnabled.replace('deviceid', deviceData.DeviceID);
+                            path = ApiUrls.Home.Put.ScheduleEnableDisable.Home.replace('deviceid', deviceData.DeviceID);
                             update = true;
                             break;
                         case 'scene':
                             method = 'PUT';
-                            path = ApiUrlsHome.PutScene[flagData.Enabled ? 'Enable' : 'Disable'].replace('sceneid', flagData.Id);
+                            path = `${ApiUrls.Home.Put.SceneEnableDisable.replace('sceneid', flagData.Id)}${flagData.Enabled ? 'enable' : 'disable'}`;
                             break;
                         default:
                             if (displayType === 1 && deviceData.Device.OperationMode === 8) {
@@ -307,7 +343,7 @@ class MelCloudAta extends EventEmitter {
                                 inStandbyMode: null
                             };
                             method = 'PUT';
-                            path = ApiUrlsHome.PutAta.replace('deviceid', deviceData.DeviceID);
+                            path = ApiUrls.Home.Put.Ata.replace('deviceid', deviceData.DeviceID);
                             break;
                     }
 
@@ -320,7 +356,6 @@ class MelCloudAta extends EventEmitter {
                             this.emit('deviceState', deviceData);
                         }, 500);
                     }
-
                     return true;
                 default:
                     return;

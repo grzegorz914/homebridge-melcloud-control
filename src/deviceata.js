@@ -7,7 +7,7 @@ import { TemperatureDisplayUnits, AirConditioner } from './constants.js';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceAta extends EventEmitter {
-    constructor(api, account, device, defaultTempsFile, accountInfo, accountFile, melcloud, melcloudDevicesList) {
+    constructor(api, account, device, presets, schedules, scenes, buttons, defaultTempsFile, accountInfo, accountFile, melcloud, melcloudDevicesList) {
         super();
 
         Accessory = api.platformAccessory;
@@ -44,10 +44,10 @@ class DeviceAta extends EventEmitter {
         this.frostProtectionSupport = device.frostProtectionSupport || false;
         this.overheatProtectionSupport = device.overheatProtectionSupport || false;
         this.holidayModeSupport = device.holidayModeSupport || false;
-        this.presets = this.accountType === 'melcloud' ? (device.presets || []).filter(preset => (preset.displayType ?? 0) > 0 && preset.id !== '0') : [];
-        this.schedules = this.accountType === 'melcloudhome' ? (device.schedules || []).filter(schedule => (schedule.displayType ?? 0) > 0 && schedule.id !== '0') : [];
-        this.scenes = this.accountType === 'melcloudhome' ? (device.scenes || []).filter(scene => (scene.displayType ?? 0) > 0 && scene.id !== '0') : [];
-        this.buttons = (device.buttonsSensors || []).filter(button => (button.displayType ?? 0) > 0);
+        this.presets = presets;
+        this.schedules = schedules;
+        this.scenes = scenes;
+        this.buttons = buttons;
 
         //files
         this.defaultTempsFile = defaultTempsFile;
@@ -65,7 +65,6 @@ class DeviceAta extends EventEmitter {
 
         //presets configured
         for (const preset of this.presets) {
-            preset.name = preset.name;
             preset.serviceType = serviceType[preset.displayType];
             preset.characteristicType = characteristicType[preset.displayType];
             preset.state = false;
@@ -74,7 +73,6 @@ class DeviceAta extends EventEmitter {
 
         //schedules configured
         for (const schedule of this.schedules) {
-            schedule.name = schedule.name;
             schedule.serviceType = serviceType[schedule.displayType];
             schedule.characteristicType = characteristicType[schedule.displayType];
             schedule.state = false;
@@ -82,7 +80,6 @@ class DeviceAta extends EventEmitter {
 
         //scenes configured
         for (const scene of this.scenes) {
-            scene.name = scene.name;
             scene.serviceType = serviceType[scene.displayType];
             scene.characteristicType = characteristicType[scene.displayType];
             scene.state = false;
@@ -90,7 +87,6 @@ class DeviceAta extends EventEmitter {
 
         //buttons configured
         for (const button of this.buttons) {
-            button.name = button.name;
             button.serviceType = serviceType[button.displayType];
             button.characteristicType = characteristicType[button.displayType];
             button.state = false;
@@ -522,8 +518,8 @@ class DeviceAta extends EventEmitter {
 
                             try {
                                 this.accessory.useFahrenheit = value ? true : false;
-                                if (this.logInfo) this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
                                 this.accountInfo.UseFahrenheit = value ? true : false;
+                                if (this.logInfo) this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
                                 await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'account', this.accountInfo);
                             } catch (error) {
                                 if (this.logWarn) this.emit('warn', `Set temperature display unit error: ${error}`);
@@ -615,8 +611,8 @@ class DeviceAta extends EventEmitter {
 
                             try {
                                 this.accessory.useFahrenheit = value ? true : false;
-                                if (this.logInfo) this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
                                 this.accountInfo.UseFahrenheit = value ? true : false;
+                                if (this.logInfo) this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
                                 await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'account', this.accountInfo);
                             } catch (error) {
                                 if (this.logWarn) this.emit('warn', `Set temperature display unit error: ${error}`);
@@ -697,7 +693,7 @@ class DeviceAta extends EventEmitter {
             }
 
             //frost protection
-            if (this.frostProtectionSupport && this.accessory.frostProtection.Enabled !== null) {
+            if (supportsHeat && this.frostProtectionSupport && this.accessory.frostProtection.Enabled !== null) {
                 //control
                 if (this.logDebug) this.emit('debug', `Prepare frost protection control service`);
                 const frostProtectionControlService = new Service.HeaterCooler(`${serviceName} Frost Protection`, `frostProtectionControlService${deviceId}`);
@@ -934,7 +930,7 @@ class DeviceAta extends EventEmitter {
             }
 
             //holiday mode
-            if (this.holidayModeSupport && this.accessory.holidayModeEnabled !== null) {
+            if (this.holidayModeSupport && this.accessory.holidayMode.Enabled !== null) {
                 //control
                 if (this.logDebug) this.emit('debug', `Prepare holiday mode control service`);
                 this.holidayModeControlService = new Service.Switch(`${serviceName} Holiday Mode`, `holidayModeControlService${deviceId}`);
@@ -942,7 +938,7 @@ class DeviceAta extends EventEmitter {
                 this.holidayModeControlService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Holiday Mode`);
                 this.holidayModeControlService.getCharacteristic(Characteristic.On)
                     .onGet(async () => {
-                        const state = this.accessory.holidayModeEnabled;
+                        const state = this.accessory.holidayMode.Enabled;
                         return state;
                     })
                     .onSet(async (state) => {
@@ -962,7 +958,7 @@ class DeviceAta extends EventEmitter {
                 this.holidayModeControlSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Holiday Mode Control`);
                 this.holidayModeControlSensorService.getCharacteristic(Characteristic.ContactSensorState)
                     .onGet(async () => {
-                        const state = this.accessory.holidayModeEnabled;
+                        const state = this.accessory.holidayMode.Enabled;
                         return state;
                     })
                 accessory.addService(this.holidayModeControlSensorService);
@@ -974,7 +970,7 @@ class DeviceAta extends EventEmitter {
                 this.holidayModeSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Holiday Mode`);
                 this.holidayModeSensorService.getCharacteristic(Characteristic.ContactSensorState)
                     .onGet(async () => {
-                        const state = this.accessory.holidayModeActive;
+                        const state = this.accessory.holidayMode.Active;
                         return state;
                     })
                 accessory.addService(this.holidayModeSensorService);
@@ -1506,15 +1502,14 @@ class DeviceAta extends EventEmitter {
 
                     //presets schedules
                     const presetsOnServer = deviceData.Presets ?? [];
-                    const scheduleEnabled = deviceData.ScheduleEnabled;
                     const schedulesOnServer = deviceData.Schedule ?? [];
+                    const scheduleEnabled = deviceData.ScheduleEnabled;
                     const scenesOnServer = deviceData.Scenes ?? [];
-                    const holidayModeEnabled = deviceData.HolidayMode?.Enabled;
-                    const holidayModeActive = deviceData.HolidayMode?.Active ?? false;
 
                     //protection
                     const frostProtection = deviceData.FrostProtection ?? {};
                     const overheatProtection = deviceData.OverheatProtection ?? {};
+                    const holidayMode = deviceData.HolidayMode ?? {};
 
                     //device control
                     const hideVaneControls = deviceData.HideVaneControls ?? false;
@@ -1569,7 +1564,11 @@ class DeviceAta extends EventEmitter {
                     const obj = {
                         presets: presetsOnServer,
                         schedules: schedulesOnServer,
+                        scheduleEnabled: scheduleEnabled,
                         scenes: scenesOnServer,
+                        frostProtection: frostProtection,
+                        overheatProtection: overheatProtection,
+                        holidayMode: holidayMode,
                         supportsAutomaticFanSpeed: supportsAutomaticFanSpeed,
                         supportsAirDirectionFunction: supportsAirDirectionFunction,
                         supportsSwingFunction: supportsSwingFunction,
@@ -1606,16 +1605,12 @@ class DeviceAta extends EventEmitter {
                         useFahrenheit: this.accountInfo.useFahrenheit ? 1 : 0,
                         temperatureUnit: TemperatureDisplayUnits[this.accountInfo.useFahrenheit ? 1 : 0],
                         isConnected: isConnected,
-                        isInError: isInError,
-                        frostProtection: frostProtection,
-                        overheatProtection: overheatProtection,
-                        holidayModeEnabled: holidayModeEnabled,
-                        holidayModeActive: holidayModeActive,
-                        scheduleEnabled: scheduleEnabled
+                        isInError: isInError
                     };
 
                     //characteristics array
                     const characteristics = [];
+                    const operationModevalidValues = [];
 
                     //operating mode 0, HEAT, DRY, COOL, 4, 5, 6, FAN, AUTO, ISEE HEAT, ISEE DRY, ISEE COOL
                     switch (this.displayType) {
@@ -1661,11 +1656,15 @@ class DeviceAta extends EventEmitter {
                                 default:
                                     if (this.logWarn) this.emit('warn', `Unknown operating mode: ${operationMode}`);
                             }
-
                             obj.currentOperationMode = !power ? 0 : (inStandbyMode ? 1 : obj.currentOperationMode);
-                            obj.operationModeSetPropsMinValue = supportsAuto && supportsHeat ? 0 : !supportsAuto && supportsHeat ? 1 : supportsAuto && !supportsHeat ? 0 : 2;
-                            obj.operationModeSetPropsMaxValue = 2
-                            obj.operationModeSetPropsValidValues = supportsAuto && supportsHeat ? [0, 1, 2] : !supportsAuto && supportsHeat ? [1, 2] : supportsAuto && !supportsHeat ? [0, 2] : [2];
+
+                            if (supportsAuto) operationModevalidValues.push(0);
+                            if (supportsHeat) operationModevalidValues.push(1);
+                            if (supportsCool) operationModevalidValues.push(2);
+
+                            obj.operationModeSetPropsMinValue = operationModevalidValues[0];
+                            obj.operationModeSetPropsMaxValue = operationModevalidValues.at(-1);
+                            obj.operationModeSetPropsValidValues = operationModevalidValues;
 
                             //fan speed mode
                             if (supportsFanSpeed) {
@@ -1742,9 +1741,15 @@ class DeviceAta extends EventEmitter {
 
                             obj.currentOperationMode = !power ? 0 : obj.currentOperationMode;
                             obj.targetOperationMode = !power ? 0 : obj.targetOperationMode;
-                            obj.operationModeSetPropsMinValue = 0
-                            obj.operationModeSetPropsMaxValue = supportsAuto && supportsHeat ? 3 : !supportsAuto && supportsHeat ? 2 : supportsAuto && !supportsHeat ? 3 : 2;
-                            obj.operationModeSetPropsValidValues = supportsAuto && supportsHeat ? [0, 1, 2, 3] : !supportsAuto && supportsHeat ? [0, 1, 2] : supportsAuto && !supportsHeat ? [0, 2, 3] : [0, 2];
+
+                            operationModevalidValues.push(0);
+                            if (supportsHeat) operationModevalidValues.push(1);
+                            if (supportsCool) operationModevalidValues.push(2);
+                            if (supportsAuto) operationModevalidValues.push(3);
+
+                            obj.operationModeSetPropsMinValue = operationModevalidValues[0];
+                            obj.operationModeSetPropsMaxValue = operationModevalidValues.at(-1);
+                            obj.operationModeSetPropsValidValues = operationModevalidValues;
 
                             //create characteristics
                             characteristics.push(
@@ -1796,10 +1801,10 @@ class DeviceAta extends EventEmitter {
                     }
 
                     //holiday mode
-                    if (this.holidayModeSupport && holidayModeEnabled !== null) {
-                        this.holidayModeControlService?.updateCharacteristic(Characteristic.On, holidayModeEnabled);
-                        this.holidayModeControlSensorService?.updateCharacteristic(Characteristic.ContactSensorState, holidayModeEnabled);
-                        this.holidayModeSensorService?.updateCharacteristic(Characteristic.ContactSensorState, holidayModeActive);
+                    if (this.holidayModeSupport && holidayMode.Enabled !== null) {
+                        this.holidayModeControlService?.updateCharacteristic(Characteristic.On, holidayMode.Enabled);
+                        this.holidayModeControlSensorService?.updateCharacteristic(Characteristic.ContactSensorState, holidayMode.Enabled);
+                        this.holidayModeSensorService?.updateCharacteristic(Characteristic.ContactSensorState, holidayMode.Active);
                     }
 
                     //presets

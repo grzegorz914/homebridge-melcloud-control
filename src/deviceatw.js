@@ -7,7 +7,7 @@ import { TemperatureDisplayUnits, HeatPump } from './constants.js';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceAtw extends EventEmitter {
-    constructor(api, account, device, defaultTempsFile, accountInfo, accountFile, melcloud, melcloudDevicesList) {
+    constructor(api, account, device, presets, schedules, scenes, buttons, defaultTempsFile, accountInfo, accountFile, melcloud, melcloudDevicesList) {
         super();
 
         Accessory = api.platformAccessory;
@@ -48,10 +48,10 @@ class DeviceAtw extends EventEmitter {
         this.errorSensor = device.errorSensor || false;
         this.frostProtectionSupport = device.frostProtectionSupport || false;
         this.holidayModeSupport = device.holidayModeSupport || false;
-        this.presets = this.accountType === 'melcloud' ? (device.presets || []).filter(preset => (preset.displayType ?? 0) > 0 && preset.id !== '0') : [];
-        this.schedules = this.accountType === 'melcloudhome' ? (device.schedules || []).filter(schedule => (schedule.displayType ?? 0) > 0 && schedule.id !== '0') : [];
-        this.scenes = this.accountType === 'melcloudhome' ? (device.scenes || []).filter(scene => (scene.displayType ?? 0) > 0 && scene.id !== '0') : [];
-        this.buttons = (device.buttonsSensors || []).filter(button => (button.displayType ?? 0) > 0);
+        this.presets = presets;
+        this.schedules = schedules;
+        this.scenes = scenes;
+        this.buttons = buttons;
 
         //files
         this.defaultTempsFile = defaultTempsFile;
@@ -69,7 +69,6 @@ class DeviceAtw extends EventEmitter {
 
         //presets configured
         for (const preset of this.presets) {
-            preset.name = preset.name;
             preset.serviceType = serviceType[preset.displayType];
             preset.characteristicType = characteristicType[preset.displayType];
             preset.state = false;
@@ -78,7 +77,6 @@ class DeviceAtw extends EventEmitter {
 
         //schedules configured
         for (const schedule of this.schedules) {
-            schedule.name = schedule.name;
             schedule.serviceType = serviceType[schedule.displayType];
             schedule.characteristicType = characteristicType[schedule.displayType];
             schedule.state = false;
@@ -86,7 +84,6 @@ class DeviceAtw extends EventEmitter {
 
         //scenes configured
         for (const scene of this.scenes) {
-            scene.name = scene.name;
             scene.serviceType = serviceType[scene.displayType];
             scene.characteristicType = characteristicType[scene.displayType];
             scene.state = false;
@@ -94,7 +91,6 @@ class DeviceAtw extends EventEmitter {
 
         //buttons configured
         for (const button of this.buttons) {
-            button.name = button.name;
             button.serviceType = serviceType[button.displayType];
             button.characteristicType = characteristicType[button.displayType];
             button.state = false;
@@ -645,8 +641,8 @@ class DeviceAtw extends EventEmitter {
 
                                     try {
                                         this.accessory.useFahrenheit = value ? true : false;
-                                        if (this.logInfo) this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
                                         this.accountInfo.UseFahrenheit = value ? true : false;
+                                        if (this.logInfo) this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
                                         await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, 'account', this.accountInfo);
                                     } catch (error) {
                                         if (this.logWarn) this.emit('warn', `Set temperature display unit error: ${error}`);
@@ -826,8 +822,8 @@ class DeviceAtw extends EventEmitter {
 
                                     try {
                                         this.accessory.useFahrenheit = value ? true : false;
-                                        if (this.logInfo) this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
                                         this.accountInfo.UseFahrenheit = value ? true : false;
+                                        if (this.logInfo) this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
                                         await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, 'account', this.accountInfo);
                                     } catch (error) {
                                         if (this.logWarn) this.emit('warn', `Set temperature display unit error: ${error}`);
@@ -1173,7 +1169,7 @@ class DeviceAtw extends EventEmitter {
             }
 
             //holiday mode
-            if (this.holidayModeSupport && this.accessory.holidayModeEnabled !== null) {
+            if (this.holidayModeSupport && this.accessory.holidayMode.Enabled !== null) {
                 //control
                 if (this.logDebug) this.emit('debug', `Prepare holiday mode control service`);
                 this.holidayModeControlService = new Service.Switch(`${serviceName} Holiday Mode`, `holidayModeControlService${deviceId}`);
@@ -1181,7 +1177,7 @@ class DeviceAtw extends EventEmitter {
                 this.holidayModeControlService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Holiday Mode`);
                 this.holidayModeControlService.getCharacteristic(Characteristic.On)
                     .onGet(async () => {
-                        const state = this.accessory.holidayModeEnabled;
+                        const state = this.accessory.holidayMode.Enabled;
                         return state;
                     })
                     .onSet(async (state) => {
@@ -1201,7 +1197,7 @@ class DeviceAtw extends EventEmitter {
                 this.holidayModeControlSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Holiday Mode Control`);
                 this.holidayModeControlSensorService.getCharacteristic(Characteristic.ContactSensorState)
                     .onGet(async () => {
-                        const state = this.accessory.holidayModeEnabled;
+                        const state = this.accessory.holidayMode.Enabled;
                         return state;
                     })
                 accessory.addService(this.holidayModeControlSensorService);
@@ -1213,7 +1209,7 @@ class DeviceAtw extends EventEmitter {
                 this.holidayModeSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Holiday Mode State`);
                 this.holidayModeSensorService.getCharacteristic(Characteristic.ContactSensorState)
                     .onGet(async () => {
-                        const state = this.accessory.holidayModeActive;
+                        const state = this.accessory.holidayMode.Active;
                         return state;
                     })
                 accessory.addService(this.holidayModeSensorService);
@@ -1676,12 +1672,10 @@ class DeviceAtw extends EventEmitter {
                     const scheduleEnabled = deviceData.ScheduleEnabled;
                     const schedulesOnServer = deviceData.Schedule ?? [];
                     const scenesOnServer = deviceData.Scenes ?? [];
-                    const holidayMode = deviceData.Device.HolidayMode;
-                    const holidayModeEnabled = accountTypeMelcloud ? holidayMode : deviceData.HolidayMode?.Enabled;
-                    const holidayModeActive = deviceData.HolidayMode?.Active ?? false;
 
                     //protection
                     const frostProtection = deviceData.FrostProtection ?? {};
+                    const holidayMode = deviceData.HolidayMode ?? {};
 
                     //device info
                     const supportsStanbyMode = deviceData.Device[supportStandbyKey];
@@ -1763,7 +1757,10 @@ class DeviceAtw extends EventEmitter {
                     const obj = {
                         presets: presetsOnServer,
                         schedules: schedulesOnServer,
+                        scheduleEnabled: scheduleEnabled,
                         scenes: scenesOnServer,
+                        frostProtection: frostProtection,
+                        holidayMode: holidayMode,
                         power: power,
                         inStandbyMode: inStandbyMode,
                         unitStatus: unitStatus,
@@ -1790,11 +1787,6 @@ class DeviceAtw extends EventEmitter {
                         temperatureUnit: TemperatureDisplayUnits[this.accountInfo.useFahrenheit ? 1 : 0],
                         isConnected: isConnected,
                         isInError: isInError,
-                        frostProtection: frostProtection,
-                        scheduleEnabled: scheduleEnabled,
-                        holidayModeEnabled: holidayModeEnabled,
-                        holidayModeActive: holidayModeActive,
-                        scheduleEnabled: scheduleEnabled,
                         zones: [],
                         zonesSensors: []
                     };
@@ -2202,10 +2194,10 @@ class DeviceAtw extends EventEmitter {
                     }
 
                     //holiday mode
-                    if (this.holidayModeSupport && holidayModeEnabled !== null) {
-                        this.holidayModeControlService?.updateCharacteristic(Characteristic.On, holidayModeEnabled);
-                        this.holidayModeControlSensorService?.updateCharacteristic(Characteristic.ContactSensorState, holidayModeEnabled);
-                        this.holidayModeSensorService?.updateCharacteristic(Characteristic.ContactSensorState, holidayModeActive);
+                    if (this.holidayModeSupport && holidayMode.Enabled !== null) {
+                        this.holidayModeControlService?.updateCharacteristic(Characteristic.On, holidayMode.Enabled);
+                        this.holidayModeControlSensorService?.updateCharacteristic(Characteristic.ContactSensorState, holidayMode.Enabled);
+                        this.holidayModeSensorService?.updateCharacteristic(Characteristic.ContactSensorState, holidayMode.Active);
                     }
 
                     //presets
@@ -2290,7 +2282,7 @@ class DeviceAtw extends EventEmitter {
                                     button.state = power ? (operationMode === 1) : false;
                                     break;
                                 case 53: //HOLIDAY
-                                    button.state = power ? (holidayModeEnabled === true) : false;
+                                    button.state = power ? (holidayMode.Enabled === true) : false;
                                     break;
                                 case 10: //ALL ZONES PHYSICAL LOCK CONTROL
                                     button.state = power ? (prohibitZone1 === true && prohibitHotWater === true && prohibitZone2 === true) : false;

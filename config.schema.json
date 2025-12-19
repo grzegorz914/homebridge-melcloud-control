@@ -210,7 +210,7 @@
               "description": "Here select the account type.",
               "anyOf": [
                 {
-                  "title": "None/Disabled",
+                  "title": "None / Disabled",
                   "enum": [
                     "disabled"
                   ]
@@ -259,13 +259,13 @@
                     "description": "Select accessory control type displayed in HomeKit app.",
                     "anyOf": [
                       {
-                        "title": "None/Disabled",
+                        "title": "None / Disabled",
                         "enum": [
                           0
                         ]
                       },
                       {
-                        "title": "Heater/Cooler",
+                        "title": "Heater / Cooler",
                         "enum": [
                           1
                         ]
@@ -292,7 +292,7 @@
                     "description": "Select the operating mode for Heat, if this mode is not supported, it will be disabled.",
                     "anyOf": [
                       {
-                        "title": "None/Disabled",
+                        "title": "None / Disabled",
                         "enum": [
                           0
                         ]
@@ -326,7 +326,7 @@
                     "description": "Select the operating mode for Cool, if this mode is not supported, it will be disabled.",
                     "anyOf": [
                       {
-                        "title": "None/Disabled",
+                        "title": "None / Disabled",
                         "enum": [
                           0
                         ]
@@ -360,7 +360,7 @@
                     "description": "Select the operating mode for Auto, if this mode is not supported, it will be disabled.",
                     "anyOf": [
                       {
-                        "title": "None/Disabled",
+                        "title": "None / Disabled",
                         "enum": [
                           0
                         ]
@@ -419,7 +419,7 @@
                     "title": "Frost Protection Support",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra frost protection control and sensors to use with automations in HomeKit app.",
+                    "description": "This enable frost protection control and sensors to use with automations in HomeKit app.",
                     "condition": {
                       "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
                     }
@@ -428,7 +428,7 @@
                     "title": "Overheat Protection Support",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra overheat protection control and sensors to use with automations in HomeKit app.",
+                    "description": "This enable overheat protection control and sensors to use with automations in HomeKit app.",
                     "condition": {
                       "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
                     }
@@ -437,7 +437,7 @@
                     "title": "Holiday Mode Support",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra holiday mode control and sensors to use with automations in HomeKit app.",
+                    "description": "This enable holiday mode control and sensors to use with automations in HomeKit app.",
                     "condition": {
                       "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
                     }
@@ -462,7 +462,7 @@
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
                             {
-                              "title": "None/Disabled",
+                              "title": "None / Disabled",
                               "enum": [
                                 0
                               ]
@@ -515,7 +515,7 @@
                           "title": "Name",
                           "type": "string",
                           "default": "Preset",
-                          "description": "Your own name displayed in Homebridge/HomeKit app.",
+                          "description": "Your own name displayed in Homebridge / HomeKit app.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].presets[arrayIndices[2]].displayType > 0;"
                           }
@@ -524,7 +524,7 @@
                           "title": "Prefix",
                           "type": "boolean",
                           "default": false,
-                          "description": "Enable/disable the accessory name as a prefix for preset name.",
+                          "description": "Enable the accessory name as a prefix for preset name.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].presets[arrayIndices[2]].displayType > 0;"
                           }
@@ -555,7 +555,7 @@
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
                             {
-                              "title": "None/Disabled",
+                              "title": "None / Disabled",
                               "enum": [
                                 0
                               ]
@@ -608,7 +608,7 @@
                           "title": "Name",
                           "type": "string",
                           "default": "Schedule",
-                          "description": "Your own name displayed in Homebridge/HomeKit app.",
+                          "description": "Your own name displayed in Homebridge / HomeKit app.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].schedules[arrayIndices[2]].displayType > 0;"
                           }
@@ -617,7 +617,7 @@
                           "title": "Prefix",
                           "type": "boolean",
                           "default": false,
-                          "description": "Enable/disable the accessory name as a prefix for schedule name.",
+                          "description": "Enable the accessory name as a prefix for schedule name.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].schedules[arrayIndices[2]].displayType > 0;"
                           }
@@ -648,7 +648,7 @@
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
                             {
-                              "title": "None/Disabled",
+                              "title": "None / Disabled",
                               "enum": [
                                 0
                               ]
@@ -701,7 +701,7 @@
                           "title": "Name",
                           "type": "string",
                           "default": "Scene",
-                          "description": "Your own name displayed in Homebridge/HomeKit app.",
+                          "description": "Your own name displayed in Homebridge / HomeKit app.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].scenes[arrayIndices[2]].displayType > 0;"
                           }
@@ -710,7 +710,7 @@
                           "title": "Prefix",
                           "type": "boolean",
                           "default": false,
-                          "description": "Enable/disable the accessory name as a prefix for scene name.",
+                          "description": "Enable the accessory name as a prefix for scene name.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].scenes[arrayIndices[2]].displayType > 0;"
                           }
@@ -736,7 +736,7 @@
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
                             {
-                              "title": "None/Disabled",
+                              "title": "None / Disabled",
                               "enum": [
                                 0
                               ]
@@ -793,7 +793,7 @@
                           "description": "Function, VH - Vane Horizontal, VV - Vane Vertical.",
                           "anyOf": [
                             {
-                              "title": "POWER ON/OFF",
+                              "title": "POWER ON / OFF",
                               "enum": [
                                 0
                               ]
@@ -931,7 +931,7 @@
                               ]
                             },
                             {
-                              "title": "VH/VV CONTROLS HIDE",
+                              "title": "VH / VV CONTROLS HIDE",
                               "enum": [
                                 27
                               ]
@@ -1011,7 +1011,7 @@
                           "title": "Name",
                           "type": "string",
                           "placeholder": "Button name",
-                          "description": "Your own name displayed in Homebridge/HomeKit app.",
+                          "description": "Your own name displayed in Homebridge / HomeKit app.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].buttonsSensors[arrayIndices[2]].displayType > 0;"
                           }
@@ -1020,7 +1020,7 @@
                           "title": "Prefix",
                           "type": "boolean",
                           "default": false,
-                          "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
+                          "description": "Enable the accessory name as a prefix for button / sensor name.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].buttonsSensors[arrayIndices[2]].displayType > 0;"
                           }
@@ -1075,13 +1075,13 @@
                     "description": "Select accessory control type displayed in HomeKit app.",
                     "anyOf": [
                       {
-                        "title": "None/Disabled",
+                        "title": "None / Disabled",
                         "enum": [
                           0
                         ]
                       },
                       {
-                        "title": "Heater/Cooler",
+                        "title": "Heater / Cooler",
                         "enum": [
                           1
                         ]
@@ -1103,7 +1103,7 @@
                     "description": "Select zone to hidde in HomeKit app, if present.",
                     "anyOf": [
                       {
-                        "title": "None/Disabled",
+                        "title": "None / Disabled",
                         "enum": [
                           0
                         ]
@@ -1272,20 +1272,20 @@
                     "default": false,
                     "description": "This enable error sensor to use with automations in HomeKit app."
                   },
-                  "holidayModeSupport": {
-                    "title": "Holiday Mode Support",
-                    "type": "boolean",
-                    "default": false,
-                    "description": "This enable extra holiday mode control and sensors to use with automations in HomeKit app.",
-                    "condition": {
-                      "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
-                    }
-                  },
                   "frostProtectionSupport": {
                     "title": "Frost Protection Support",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra frost protection control and sensors to use with automations in HomeKit app.",
+                    "description": "This enable frost protection control and sensors to use with automations in HomeKit app.",
+                    "condition": {
+                      "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
+                    }
+                  },
+                  "holidayModeSupport": {
+                    "title": "Holiday Mode Support",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "This enable holiday mode control and sensors to use with automations in HomeKit app.",
                     "condition": {
                       "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
                     }
@@ -1310,7 +1310,7 @@
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
                             {
-                              "title": "None/Disabled",
+                              "title": "None / Disabled",
                               "enum": [
                                 0
                               ]
@@ -1363,7 +1363,7 @@
                           "title": "Name",
                           "type": "string",
                           "default": "Preset",
-                          "description": "Your own name displayed in Homebridge/HomeKit app.",
+                          "description": "Your own name displayed in Homebridge / HomeKit app.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].presets[arrayIndices[2]].displayType > 0;"
                           }
@@ -1372,7 +1372,7 @@
                           "title": "Prefix",
                           "type": "boolean",
                           "default": false,
-                          "description": "Enable/disable the accessory name as a prefix for preset name.",
+                          "description": "Enable the accessory name as a prefix for preset name.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].presets[arrayIndices[2]].displayType > 0;"
                           }
@@ -1403,7 +1403,7 @@
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
                             {
-                              "title": "None/Disabled",
+                              "title": "None / Disabled",
                               "enum": [
                                 0
                               ]
@@ -1456,7 +1456,7 @@
                           "title": "Name",
                           "type": "string",
                           "default": "Schedule",
-                          "description": "Your own name displayed in Homebridge/HomeKit app.",
+                          "description": "Your own name displayed in Homebridge / HomeKit app.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].schedules[arrayIndices[2]].displayType > 0;"
                           }
@@ -1465,7 +1465,7 @@
                           "title": "Prefix",
                           "type": "boolean",
                           "default": false,
-                          "description": "Enable/disable the accessory name as a prefix for schedule name.",
+                          "description": "Enable the accessory name as a prefix for schedule name.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].schedules[arrayIndices[2]].displayType > 0;"
                           }
@@ -1496,7 +1496,7 @@
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
                             {
-                              "title": "None/Disabled",
+                              "title": "None / Disabled",
                               "enum": [
                                 0
                               ]
@@ -1549,7 +1549,7 @@
                           "title": "Name",
                           "type": "string",
                           "default": "Scene",
-                          "description": "Your own name displayed in Homebridge/HomeKit app.",
+                          "description": "Your own name displayed in Homebridge / HomeKit app.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].scenes[arrayIndices[2]].displayType > 0;"
                           }
@@ -1558,7 +1558,7 @@
                           "title": "Prefix",
                           "type": "boolean",
                           "default": false,
-                          "description": "Enable/disable the accessory name as a prefix for scene name.",
+                          "description": "Enable the accessory name as a prefix for scene name.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].scenes[arrayIndices[2]].displayType > 0;"
                           }
@@ -1584,7 +1584,7 @@
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
                             {
-                              "title": "None/Disabled",
+                              "title": "None / Disabled",
                               "enum": [
                                 0
                               ]
@@ -1641,7 +1641,7 @@
                           "description": "Select the function.",
                           "anyOf": [
                             {
-                              "title": "POWER ON/OFF",
+                              "title": "POWER ON / OFF",
                               "enum": [
                                 0
                               ]
@@ -1781,7 +1781,7 @@
                           "title": "Name",
                           "type": "string",
                           "placeholder": "Button name",
-                          "description": "Your own name displayed in Homebridge/HomeKit app.",
+                          "description": "Your own name displayed in Homebridge / HomeKit app.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].buttonsSensors[arrayIndices[2]].displayType > 0;"
                           }
@@ -1790,7 +1790,7 @@
                           "title": "Prefix",
                           "type": "boolean",
                           "default": false,
-                          "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
+                          "description": "Enable the accessory name as a prefix for button / sensor name.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].buttonsSensors[arrayIndices[2]].displayType > 0;"
                           }
@@ -1843,13 +1843,13 @@
                     "description": "Select accessory control type displayed in HomeKit app.",
                     "anyOf": [
                       {
-                        "title": "None/Disabled",
+                        "title": "None / Disabled",
                         "enum": [
                           0
                         ]
                       },
                       {
-                        "title": "Heater/Cooler",
+                        "title": "Heater / Cooler",
                         "enum": [
                           1
                         ]
@@ -1902,7 +1902,7 @@
                     "title": "Holiday Mode Support",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra holiday mode control and sensors to use with automations in HomeKit app.",
+                    "description": "This enable holiday mode control and sensors to use with automations in HomeKit app.",
                     "condition": {
                       "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
                     }
@@ -1928,7 +1928,7 @@
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
                             {
-                              "title": "None/Disabled",
+                              "title": "None / Disabled",
                               "enum": [
                                 0
                               ]
@@ -1981,7 +1981,7 @@
                           "title": "Name",
                           "type": "string",
                           "default": "Preset",
-                          "description": "Your own name displayed in Homebridge/HomeKit app.",
+                          "description": "Your own name displayed in Homebridge / HomeKit app.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].presets[arrayIndices[2]].displayType > 0;"
                           }
@@ -1990,7 +1990,7 @@
                           "title": "Prefix",
                           "type": "boolean",
                           "default": false,
-                          "description": "Enable/disable the accessory name as a prefix for preset name.",
+                          "description": "Enable the accessory name as a prefix for preset name.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].presets[arrayIndices[2]].displayType > 0;"
                           }
@@ -2021,7 +2021,7 @@
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
                             {
-                              "title": "None/Disabled",
+                              "title": "None / Disabled",
                               "enum": [
                                 0
                               ]
@@ -2074,7 +2074,7 @@
                           "title": "Name",
                           "type": "string",
                           "default": "Preset",
-                          "description": "Your own name displayed in Homebridge/HomeKit app.",
+                          "description": "Your own name displayed in Homebridge / HomeKit app.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].schedules[arrayIndices[2]].displayType > 0;"
                           }
@@ -2083,7 +2083,7 @@
                           "title": "Prefix",
                           "type": "boolean",
                           "default": false,
-                          "description": "Enable/disable the accessory name as a prefix for schedule name.",
+                          "description": "Enable the accessory name as a prefix for schedule name.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].schedules[arrayIndices[2]].displayType > 0;"
                           }
@@ -2114,7 +2114,7 @@
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
                             {
-                              "title": "None/Disabled",
+                              "title": "None / Disabled",
                               "enum": [
                                 0
                               ]
@@ -2167,7 +2167,7 @@
                           "title": "Name",
                           "type": "string",
                           "default": "Scene",
-                          "description": "Your own name displayed in Homebridge/HomeKit app.",
+                          "description": "Your own name displayed in Homebridge / HomeKit app.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].scenes[arrayIndices[2]].displayType > 0;"
                           }
@@ -2176,7 +2176,7 @@
                           "title": "Prefix",
                           "type": "boolean",
                           "default": false,
-                          "description": "Enable/disable the accessory name as a prefix for scene name.",
+                          "description": "Enable the accessory name as a prefix for scene name.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].scenes[arrayIndices[2]].displayType > 0;"
                           }
@@ -2202,7 +2202,7 @@
                           "description": "Select the characteristic type to be displayed in HomeKit app.",
                           "anyOf": [
                             {
-                              "title": "None/Disabled",
+                              "title": "None / Disabled",
                               "enum": [
                                 0
                               ]
@@ -2259,7 +2259,7 @@
                           "description": "Select the function.",
                           "anyOf": [
                             {
-                              "title": "POWER ON/OFF",
+                              "title": "POWER ON / OFF",
                               "enum": [
                                 0
                               ]
@@ -2351,7 +2351,7 @@
                           "title": "Name",
                           "type": "string",
                           "placeholder": "Button name",
-                          "description": "Your own name displayed in Homebridge/HomeKit app.",
+                          "description": "Your own name displayed in Homebridge / HomeKit app.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].buttonsSensors[arrayIndices[2]].displayType > 0;"
                           }
@@ -2360,7 +2360,7 @@
                           "title": "Prefix",
                           "type": "boolean",
                           "default": false,
-                          "description": "Enable/disable the accessory name as a prefix for button/sensor name.",
+                          "description": "Enable the accessory name as a prefix for button / sensor name.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].buttonsSensors[arrayIndices[2]].displayType > 0;"
                           }
@@ -2448,11 +2448,11 @@
                   "description": "This enable MQTT client."
                 },
                 "host": {
-                  "title": "IP/Hostname",
+                  "title": "IP / Hostname",
                   "type": "string",
                   "placeholder": "ip or hostname",
                   "format": "hostname",
-                  "description": "Here set the IP/Hostname of MQTT Broker.",
+                  "description": "Here set the IP / Hostname of MQTT Broker.",
                   "condition": {
                     "functionBody": "return model.accounts[arrayIndices].mqtt.enable === true;"
                   }
@@ -3050,7 +3050,7 @@
                                     {
                                       "key": "accounts[].ervDevices[].buttonsSensors",
                                       "type": "tabarray",
-                                      "title": "{{ value.name || 'button/sensor' }}",
+                                      "title": "{{ value.name || 'button / sensor' }}",
                                       "items": [
                                         "accounts[].ervDevices[].buttonsSensors[].displayType",
                                         "accounts[].ervDevices[].buttonsSensors[].mode",

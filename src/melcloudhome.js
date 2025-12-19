@@ -1,4 +1,3 @@
-import fs from 'fs';
 import axios from 'axios';
 import WebSocket from 'ws';
 import { exec } from 'child_process';
@@ -7,7 +6,7 @@ import EventEmitter from 'events';
 import puppeteer from 'puppeteer';
 import ImpulseGenerator from './impulsegenerator.js';
 import Functions from './functions.js';
-import { ApiUrlsHome, LanguageLocaleMap } from './constants.js';
+import { ApiUrls, LanguageLocaleMap } from './constants.js';
 const execPromise = promisify(exec);
 
 class MelCloudHome extends EventEmitter {
@@ -17,7 +16,6 @@ class MelCloudHome extends EventEmitter {
         this.user = account.user;
         this.passwd = account.passwd;
         this.language = account.language;
-        this.logSuccess = account.log?.success;
         this.logWarn = account.log?.warn;
         this.logError = account.log?.error;
         this.logDebug = account.log?.debug;
@@ -79,7 +77,7 @@ class MelCloudHome extends EventEmitter {
     async checkScenesList() {
         try {
             if (this.logDebug) this.emit('debug', `Scanning for scenes`);
-            const listScenesData = await this.client(ApiUrlsHome.GetUserScenes, { method: 'GET', });
+            const listScenesData = await this.client(ApiUrls.Home.Get.Scenes, { method: 'GET', });
 
             const scenesList = listScenesData.data;
             if (this.logDebug) this.emit('debug', `Scenes: ${JSON.stringify(scenesList, null, 2)}`);
@@ -109,9 +107,9 @@ class MelCloudHome extends EventEmitter {
 
     async checkDevicesList() {
         try {
-            const devicesList = { State: false, Info: null, Devices: [], Scenes: [] }
+            const devicesList = { State: false, Info: null, Buildings: {}, Devices: [], Scenes: [] }
             if (this.logDebug) this.emit('debug', `Scanning for devices`);
-            const listDevicesData = await this.client(ApiUrlsHome.GetUserContext, { method: 'GET' });
+            const listDevicesData = await this.client(ApiUrls.Home.Get.ListDevices, { method: 'GET' });
 
             const userContext = listDevicesData.data;
             const buildings = userContext.buildings ?? [];
@@ -123,9 +121,6 @@ class MelCloudHome extends EventEmitter {
                 devicesList.Info = 'No buildings found'
                 return devicesList;
             }
-
-            await this.functions.saveData(this.buildingsFile, userContext);
-            if (this.logDebug) this.emit('debug', `Buildings list saved`);
 
             const devices = buildingsList.flatMap(building => {
                 // Funkcja kapitalizująca klucze obiektu
@@ -207,8 +202,13 @@ class MelCloudHome extends EventEmitter {
 
             devicesList.State = true;
             devicesList.Info = `Found ${devicesCount} devices ${scenes.length > 0 ? `and ${scenes.length} scenes` : ''}`;
+            devicesList.Buildings = userContext;
             devicesList.Devices = devices;
             devicesList.Scenes = scenes;
+
+            await this.functions.saveData(this.buildingsFile, devicesList);
+            if (this.logDebug) this.emit('debug', `Buildings list saved`);
+
             this.emit('devicesList', devicesList);
 
             return devicesList;
@@ -225,32 +225,36 @@ class MelCloudHome extends EventEmitter {
         try {
             const accountInfo = { State: false, Info: '', Account: {}, UseFahrenheit: false };
 
-            // Get Chromium path
-            let chromiumPath = await this.functions.ensureChromiumInstalled();
+            // Get Chromium path from resolver
+            const chromiumInfo = await this.functions.ensureChromiumInstalled();
+            let chromiumPath = chromiumInfo.path;
+            const arch = chromiumInfo.arch;
+            const system = chromiumInfo.system;
 
-            // Fallback to Puppeteer's bundled Chromium
-            if (!chromiumPath) {
-                try {
-                    const puppeteerPath = puppeteer.executablePath();
-                    if (puppeteerPath && puppeteerPath.length > 0) {
-                        chromiumPath = puppeteerPath;
-                        if (this.logDebug) this.emit('debug', `Using Puppeteer bundled Chromium at ${chromiumPath}`);
-                    } else {
-                        accountInfo.Info = `Puppeteer returned empty Chromium path`;
+            // If path is found, use it
+            if (chromiumPath) {
+                if (!this.logDebug) this.emit('debug', `Using Chromium for ${system} (${arch}) at ${chromiumPath}`);
+            } else {
+                if (arch === 'arm') {
+                    accountInfo.Info = `No Chromium found for ${system} (${arch}). Please install it manually and try again.`;
+                    return accountInfo;
+                } else {
+                    try {
+                        chromiumPath = puppeteer.executablePath();
+                        if (!this.logDebug) this.emit('debug', `Using Puppeteer Chromium for ${system} (${arch}) at ${chromiumPath}`);
+                    } catch (error) {
+                        accountInfo.Info = `No Puppeteer Chromium for ${system} (${arch}), error: ${error.message}`;
                         return accountInfo;
                     }
-                } catch (error) {
-                    accountInfo.Info = `Failed to get Puppeteer Chromium path: ${error.message}`;
-                    return accountInfo;
                 }
             }
 
             // Verify Chromium executable
             try {
                 const { stdout } = await execPromise(`"${chromiumPath}" --version`);
-                if (this.logDebug) this.emit('debug', `Chromium detected: ${stdout.trim()}`);
+                if (!this.logDebug) this.emit('debug', `Chromium for ${system} (${arch}) detected: ${stdout.trim()}`);
             } catch (error) {
-                accountInfo.Info = `Chromium found at ${chromiumPath}, but cannot be executed: ${error.message}`;
+                accountInfo.Info = `Chromium for ${system} (${arch}) found at ${chromiumPath}, but execute error: ${error.message}. Please install it manually and try again.`;
                 return accountInfo;
             }
 
@@ -282,22 +286,22 @@ class MelCloudHome extends EventEmitter {
             await client.send('Network.enable')
             client.on('Network.webSocketCreated', ({ url }) => {
                 try {
-                    if (url.startsWith(`${ApiUrlsHome.WebSocketURL}`)) {
+                    if (url.startsWith(`${ApiUrls.Home.WebSocket}`)) {
                         const params = new URL(url).searchParams;
                         const hash = params.get('hash');
                         if (this.logDebug) this.emit('debug', `Web socket hash detected: ${hash}`);
 
-                        //web socket connection
+                        // Web socket connection
                         if (!this.connecting && !this.socketConnected) {
                             this.connecting = true;
 
                             try {
                                 const headers = {
-                                    'Origin': ApiUrlsHome.BaseURL,
+                                    'Origin': ApiUrls.Home.Base,
                                     'Pragma': 'no-cache',
                                     'Cache-Control': 'no-cache'
                                 };
-                                const webSocket = new WebSocket(`${ApiUrlsHome.WebSocketURL}${hash}`, { headers: headers })
+                                const webSocket = new WebSocket(`${ApiUrls.Home.WebSocket}${hash}`, { headers: headers })
                                     .on('error', (error) => {
                                         if (this.logError) this.emit('error', `Web socket error: ${error}`);
                                         try {
@@ -326,7 +330,7 @@ class MelCloudHome extends EventEmitter {
                                     })
                                     .on('message', (message) => {
                                         const parsedMessage = JSON.parse(message);
-                                        if (this.logDebug) this.emit('debug', `Incoming message: ${JSON.stringify(parsedMessage, null, 2)}`);
+                                        if (!this.logDebug) this.emit('debug', `Incoming message: ${JSON.stringify(parsedMessage, null, 2)}`);
                                         if (parsedMessage.message === 'Forbidden') return;
 
                                         this.emit('webSocket', parsedMessage);
@@ -343,9 +347,9 @@ class MelCloudHome extends EventEmitter {
             });
 
             try {
-                await page.goto(ApiUrlsHome.BaseURL, { waitUntil: ['domcontentloaded', 'networkidle2'], timeout: GLOBAL_TIMEOUT });
+                await page.goto(ApiUrls.Home.Base, { waitUntil: ['domcontentloaded', 'networkidle2'], timeout: GLOBAL_TIMEOUT });
             } catch (error) {
-                accountInfo.Info = `Navigation to ${ApiUrlsHome.BaseURL} failed: ${error.message}`;
+                accountInfo.Info = `Navigation to ${ApiUrls.Home.Base} failed: ${error.message}`;
                 return accountInfo;
             }
 
@@ -407,7 +411,7 @@ class MelCloudHome extends EventEmitter {
                 'Accept-Language': LanguageLocaleMap[this.language],
                 'Cookie': cookies,
                 'Priority': 'u=3, i',
-                'Referer': ApiUrlsHome.Dashboard,
+                'Referer': ApiUrls.Home.Dashboard,
                 'Sec-Fetch-Dest': 'empty',
                 'Sec-Fetch-Mode': 'cors',
                 'Sec-Fetch-Site': 'same-origin',
@@ -416,10 +420,10 @@ class MelCloudHome extends EventEmitter {
             };
 
             this.client = axios.create({
-                baseURL: ApiUrlsHome.BaseURL,
+                baseURL: ApiUrls.Home.Base,
                 timeout: 30000,
                 headers: headers
-            })
+            });
             this.emit('client', this.client);
 
             accountInfo.State = true;

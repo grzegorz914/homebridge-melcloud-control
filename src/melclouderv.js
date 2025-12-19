@@ -1,6 +1,6 @@
 import EventEmitter from 'events';
 import Functions from './functions.js';
-import { ApiUrls, ApiUrlsHome, Ventilation } from './constants.js';
+import { ApiUrls, Ventilation } from './constants.js';
 
 class MelCloudErv extends EventEmitter {
     constructor(account, device, defaultTempsFile, accountFile, melcloud) {
@@ -71,7 +71,19 @@ class MelCloudErv extends EventEmitter {
                                     }
                                 }
 
-                                if (this.logDebug) this.emit('debug', `WS update settings: ${JSON.stringify(deviceData.Device, null, 2)}`);
+                                updateState = true;
+                                break;
+                            case 'ervUnitFrostProtectionTriggered':
+                                deviceData.FrostProtection.Active = messageData.active;
+
+                                //update device settings
+                                for (const [key, value] of Object.entries(settings)) {
+                                    if (!this.functions.isValidValue(value)) continue;
+
+                                    if (key in deviceData.Device) {
+                                        deviceData.Device[key] = value;
+                                    }
+                                }
                                 updateState = true;
                                 break;
                             case 'unitHolidayModeTriggered':
@@ -83,6 +95,10 @@ class MelCloudErv extends EventEmitter {
                             case 'unitWifiSignalChanged':
                                 deviceData.Rssi = messageData.rssi;
                                 updateState = true;
+                                break;
+                            case 'unitCommunicationRestored':
+                                timestamp = messageData.timestamp;
+                                deviceData.Device.IsConnected = true;
                                 break;
                             default:
                                 if (this.logDebug) this.emit('debug', `Unit ${unitId}, received unknown message type: ${parsedMessage}`);
@@ -182,13 +198,14 @@ class MelCloudErv extends EventEmitter {
             let method = null
             let payload = {};
             let path = '';
+            let update = false;
             switch (accountType) {
                 case "melcloud":
                     switch (flag) {
                         case 'account':
                             flagData.Account.LoginData.UseFahrenheit = flagData.UseFahrenheit;
                             payload = { data: flagData.LoginData };
-                            path = ApiUrls.UpdateApplicationOptions;
+                            path = ApiUrls.Post.UpdateApplicationOptions;
                             await this.functions.saveData(this.accountFile, flagData);
                             break;
                         default:
@@ -230,14 +247,19 @@ class MelCloudErv extends EventEmitter {
                                 NightPurgeMode: deviceData.Device.NightPurgeMode,
                                 HasPendingCommand: true
                             }
-                            path = ApiUrls.SetErv;
+                            path = ApiUrls.Post.Erv;
+                            update = true;
                             break;
                     }
 
                     if (this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);
                     await this.client(path, { method: 'POST', data: payload });
 
-                    this.emit('deviceState', deviceData);
+                    if (update) {
+                        setTimeout(() => {
+                            this.emit('deviceState', deviceData);
+                        }, 500);
+                    } this.emit('deviceState', deviceData);
                     return true;
                 case "melcloudhome":
                     switch (flag) {
@@ -249,16 +271,17 @@ class MelCloudErv extends EventEmitter {
                                 units: { ERV: [deviceData.DeviceID] }
                             };
                             method = 'POST';
-                            path = ApiUrlsHome.PostHolidayMode;
+                            path = ApiUrls.Home.Post.HolidayMode;
                             break;
                         case 'schedule':
                             payload = { enabled: deviceData.ScheduleEnabled };
                             method = 'PUT';
-                            path = ApiUrlsHome.PutScheduleEnabled.replace('deviceid', deviceData.DeviceID);
+                            path = ApiUrls.Home.Put.ScheduleEnableDisable.Home.replace('deviceid', deviceData.DeviceID);
+                            update = true;
                             break;
                         case 'scene':
                             method = 'PUT';
-                            path = ApiUrlsHome.PutScene[flagData.Enabled ? 'Enable' : 'Disable'].replace('sceneid', flagData.Id);
+                            path = `${ApiUrls.Home.Put.SceneEnableDisable.replace('sceneid', flagData.Id)}${flagData.Enabled ? 'enable' : 'disable'}`;
                             break;
                         default:
                             if (displayType === 1 && deviceData.Device.VentilationMode === 2) {
@@ -281,13 +304,18 @@ class MelCloudErv extends EventEmitter {
                                 ventilationMode: Ventilation.VentilationModeMapEnumToString[deviceData.Device.VentilationMode],
                             };
                             method = 'PUT';
-                            path = ApiUrlsHome.PutErv.replace('deviceid', deviceData.DeviceID);
+                            path = ApiUrls.Home.Put.Erv.replace('deviceid', deviceData.DeviceID);
                             break
                     }
 
                     if (this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);
                     await this.client(path, { method: method, data: payload });
 
+                    if (update) {
+                        setTimeout(() => {
+                            this.emit('deviceState', deviceData);
+                        }, 500);
+                    }
                     return true;
                 default:
                     return;

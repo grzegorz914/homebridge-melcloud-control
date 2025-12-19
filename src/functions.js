@@ -56,162 +56,157 @@ class Functions extends EventEmitter {
 
     async ensureChromiumInstalled() {
         try {
-            // Detect OS
-            const { stdout: osOut } = await execPromise("uname -s");
+            const { stdout: osOut } = await execPromise('uname -s');
             const osName = osOut.trim();
-            const { stdout: archOut } = await execPromise("uname -m");
-            const arch = archOut.trim();
 
-            const isARM = arch.startsWith("arm") || arch.startsWith("aarch64") || arch.startsWith("aarch");
-            const isMac = osName === "Darwin";
-            const isLinux = osName === "Linux";
+            const { stdout: archOut } = await execPromise('uname -m');
+            let arch = archOut.trim() || 'unknown';
+
+            // Normalizacja architektury
+            if (arch.startsWith('arm') || arch.startsWith('aarch')) arch = 'arm';
+            else if (arch.includes('64')) arch = 'x64';
+            else arch = 'x86';
+
+            const isARM = arch === 'arm';
+            const isMac = osName === 'Darwin';
+            const isLinux = osName === 'Linux';
+            const isQnap = fs.existsSync('/etc/config/uLinux.conf') || fs.existsSync('/etc/config/qpkg.conf');
 
             // Detect Docker
             let isDocker = false;
             try {
-                await access("/.dockerenv");
+                await access('/.dockerenv');
                 isDocker = true;
             } catch { }
+
             try {
-                const { stdout } = await execPromise("cat /proc/1/cgroup || true");
-                if (stdout.includes("docker") || stdout.includes("containerd")) isDocker = true;
+                const { stdout } = await execPromise('cat /proc/1/cgroup');
+                if (stdout.includes('docker') || stdout.includes('containerd')) isDocker = true;
             } catch { }
 
-            // macOS
+            const result = { path: null, arch, system: 'unknown' };
+
+            /* ===================== macOS ===================== */
             if (isMac) {
-                const macCandidates = [
-                    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-                    "/Applications/Chromium.app/Contents/MacOS/Chromium"
-                ];
-                for (const p of macCandidates) {
+                const macCandidates = ['/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', '/Applications/Chromium.app/Contents/MacOS/Chromium'];
+                for (const path of macCandidates) {
                     try {
-                        await access(p, fs.constants.X_OK);
-                        return p;
+                        await access(path, fs.constants.X_OK);
+                        result.path = path;
+                        result.system = 'macOS';
+                        return result;
                     } catch { }
                 }
-                return null;
+                return result;
             }
 
-            // ARM / Raspberry Pi
-            if (isARM && isLinux) {
-                const armCandidates = [
-                    "/usr/bin/chromium-browser",
-                    "/usr/bin/chromium",
-                    "/snap/bin/chromium"
-                ];
-
-                // Try existing
-                for (const p of armCandidates) {
+            /* ===================== QNAP ===================== */
+            if (isQnap) {
+                const qnapCandidates = ['/opt/bin/chromium', '/opt/bin/chromium-browser'];
+                for (const path of qnapCandidates) {
                     try {
-                        await access(p, fs.constants.X_OK);
-                        return p;
+                        await access(path, fs.constants.X_OK);
+                        result.path = path;
+                        result.system = 'Qnap';
+                        return result;
                     } catch { }
                 }
 
-                // If not in Docker, try apt installation
+                try {
+                    await access('/opt/bin/opkg', fs.constants.X_OK);
+                    await execPromise('/opt/bin/opkg update');
+                    await execPromise('opkg install chromium nspr nss libx11 libxcomposite libxdamage libxrandr atk libcups libdrm libgbm alsa-lib');
+                    process.env.LD_LIBRARY_PATH = `/opt/lib:${process.env.LD_LIBRARY_PATH || ''}`;
+                } catch (error) {
+                    if (this.logError) this.emit('error', `Install package for Qnap error: ${error}`);
+                }
+
+                for (const path of qnapCandidates) {
+                    try {
+                        await access(path, fs.constants.X_OK);
+                        result.path = path;
+                        result.system = 'Qnap';
+                        return result;
+                    } catch { }
+                }
+                return result;
+            }
+
+            /* ===================== Linux ARM ===================== */
+            if (isLinux && isARM) {
+                const armCandidates = ['/usr/bin/chromium-browser', '/usr/bin/chromium', '/snap/bin/chromium'];
+                for (const path of armCandidates) {
+                    try {
+                        await access(path, fs.constants.X_OK);
+                        result.path = path;
+                        result.system = 'Linux';
+                        return result;
+                    } catch { }
+                }
+
                 if (!isDocker) {
                     try {
-                        await execPromise("sudo apt-get update -y");
-                    } catch { }
-                    try {
-                        await execPromise("sudo apt-get install -y chromium-browser chromium-codecs-ffmpeg || true");
-                    } catch { }
-                    try {
-                        await execPromise("sudo apt-get install -y chromium || true");
-                    } catch { }
+                        await execPromise('sudo apt update -y');
+                        await execPromise('sudo apt install -y libnspr4 libnss3 libx11-6 libxcomposite1 libxdamage1 libxrandr2 libatk1.0-0 libcups2 libdrm2 libgbm1 libasound2');
+                        await execPromise('sudo apt install -y chromium chromium-browser chromium-codecs-ffmpeg');
+                    } catch (error) {
+                        if (this.logError) this.emit('error', `Install package for Linux ARM error: ${error}`);
+                    }
                 }
 
-                // Retry after installation
-                for (const p of armCandidates) {
+                for (const path of armCandidates) {
                     try {
-                        await access(p, fs.constants.X_OK);
-                        return p;
+                        await access(path, fs.constants.X_OK);
+                        result.path = path;
+                        result.system = 'Linux';
+                        return result;
                     } catch { }
                 }
-
-                return null;
+                return result;
             }
 
-            // QNAP / Entware
-            let entwareExists = false;
-            try {
-                await access("/opt/bin/opkg", fs.constants.X_OK);
-                entwareExists = true;
-            } catch { }
-
-            if (entwareExists) {
-                try {
-                    await execPromise("/opt/bin/opkg update");
-                    await execPromise("/opt/bin/opkg install nspr nss libx11 libxcomposite libxdamage libxrandr atk libcups libdrm libgbm alsa-lib");
-                    process.env.LD_LIBRARY_PATH = `/opt/lib:${process.env.LD_LIBRARY_PATH || ""}`;
-                } catch { }
-            }
-
-            // Synology DSM 7
-            const synoCandidates = [
-                "/var/packages/Chromium/target/usr/bin/chromium",
-                "/usr/local/chromium/bin/chromium"
-            ];
-            for (const p of synoCandidates) {
-                try {
-                    await access(p, fs.constants.X_OK);
-                    return p;
-                } catch { }
-            }
-
-            // Linux x64
+            /* ===================== Linux x64 ===================== */
             if (isLinux) {
-                const linuxCandidates = [
-                    "/usr/bin/chromium",
-                    "/usr/bin/chromium-browser",
-                    "/usr/bin/google-chrome",
-                    "/snap/bin/chromium",
-                    "/usr/local/bin/chromium"
-                ];
-
+                const linuxCandidates = ['/usr/bin/chromium', '/usr/bin/chromium-browser', '/usr/bin/google-chrome', '/snap/bin/chromium', '/usr/local/bin/chromium'];
                 try {
-                    const { stdout } = await execPromise("which chromium || which chromium-browser || which google-chrome || true");
-                    const found = stdout.trim();
-                    if (found) return found;
+                    const { stdout } = await execPromise('which chromium || which chromium-browser || which google-chrome');
+                    if (stdout.trim()) {
+                        result.path = stdout.trim();
+                        return result;
+                    }
                 } catch { }
 
-                for (const p of linuxCandidates) {
+                for (const path of linuxCandidates) {
                     try {
-                        await access(p, fs.constants.X_OK);
-                        return p;
+                        await access(path, fs.constants.X_OK);
+                        result.path = path;
+                        result.system = 'Linux';
+                        return result;
                     } catch { }
                 }
 
-                // Docker: try installing chromium inside container (if allowed)
                 if (isDocker) {
                     try {
-                        await execPromise("apt-get update -y && apt-get install -y chromium || true");
-                    } catch { }
-                    try {
-                        await access("/usr/bin/chromium", fs.constants.X_OK);
-                        return "/usr/bin/chromium";
-                    } catch { }
-                }
+                        await execPromise('apt update -y && apt install -y chromium');
+                    } catch (error) {
+                        if (this.logError) this.emit('error', `Install package for Linux Docker error: ${error}`);
+                    }
 
-                // Install missing libraries
-                const depCommands = [
-                    "apt-get update -y && apt-get install -y libnspr4 libnss3 libx11-6 libxcomposite1 libxdamage1 libxrandr2 libatk1.0-0 libcups2 libdrm2 libgbm1 libasound2 || true",
-                    "yum install -y nspr nss libX11 libXcomposite libXdamage libXrandr atk cups libdrm libgbm alsa-lib || true",
-                    "apk add --no-cache nspr nss libx11 libxcomposite libxdamage libxrandr atk cups libdrm libgbm alsa-lib || true"
-                ];
-                for (const cmd of depCommands) {
-                    try {
-                        await execPromise(`sudo ${cmd}`);
-                    } catch { }
+                    for (const path of linuxCandidates) {
+                        try {
+                            await access(path, fs.constants.X_OK);
+                            result.path = path;
+                            result.system = 'Linux Docker';
+                            return result;
+                        } catch { }
+                    }
                 }
-
-                return null;
             }
 
-            return null;
-        } catch (err) {
-            if (this.logError) this.emit("error", `Chromium detection error: ${err.message}`);
-            return null;
+            return result;
+        } catch (error) {
+            if (this.logError) this.emit('error', `Chromium detection error: ${error.message}`);
+            return { path: null, arch: 'unknown', system: 'unknown' };
         }
     }
 
@@ -238,14 +233,14 @@ class Functions extends EventEmitter {
         );
     }
 
-    async adjustTempProtection(oldMin, oldMax, newValue, type, minRangeMin, maxRangeMin, minRangeMax, maxRangeMax) {
-        let min = oldMin;
-        let max = oldMax;
+    async adjustTempProtection(currentMin, currentMax, value, type, minRangeMin, maxRangeMin, minRangeMax, maxRangeMax) {
+        let min = currentMin;
+        let max = currentMax;
 
         if (type === "min") {
-            min = Math.min(Math.max(newValue, minRangeMin), maxRangeMin);
+            min = Math.min(Math.max(value, minRangeMin), maxRangeMin);
 
-            if (min > oldMin && max - min < 2) {
+            if (min > currentMin && max - min < 2) {
                 max = Math.min(min + 2, maxRangeMax);
 
                 // jeśli max uderza w górną granicę → obniż min o 2
@@ -261,9 +256,9 @@ class Functions extends EventEmitter {
         }
 
         if (type === "max") {
-            max = Math.min(Math.max(newValue, minRangeMax), maxRangeMax);
+            max = Math.min(Math.max(value, minRangeMax), maxRangeMax);
 
-            if (max < oldMax && max - min < 2) {
+            if (max < currentMax && max - min < 2) {
                 min = Math.max(max - 2, minRangeMin);
 
                 // jeśli min uderza w dolną granicę → podbij max o 2
@@ -280,7 +275,6 @@ class Functions extends EventEmitter {
 
         return { min, max };
     }
-
 }
 
 export default Functions

@@ -7,7 +7,7 @@ import { TemperatureDisplayUnits, Ventilation } from './constants.js';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceErv extends EventEmitter {
-    constructor(api, account, device, defaultTempsFile, accountInfo, accountFile, melcloud, melcloudDevicesList) {
+    constructor(api, account, device, presets, schedules, scenes, buttons, defaultTempsFile, accountInfo, accountFile, melcloud, melcloudDevicesList) {
         super();
 
         Accessory = api.platformAccessory;
@@ -40,10 +40,10 @@ class DeviceErv extends EventEmitter {
         this.connectSensor = device.connectSensor || false;
         this.errorSensor = device.errorSensor || false;
         this.holidayModeSupport = device.holidayModeSupport || false;
-        this.presets = this.accountType === 'melcloud' ? (device.presets || []).filter(preset => (preset.displayType ?? 0) > 0 && preset.id !== '0') : [];
-        this.schedules = this.accountType === 'melcloudhome' ? (device.schedules || []).filter(schedule => (schedule.displayType ?? 0) > 0 && schedule.id !== '0') : [];
-        this.scenes = this.accountType === 'melcloudhome' ? (device.scenes || []).filter(scene => (scene.displayType ?? 0) > 0 && scene.id !== '0') : [];
-        this.buttons = (device.buttonsSensors || []).filter(button => (button.displayType ?? 0) > 0);
+        this.presets = presets;
+        this.schedules = schedules;
+        this.scenes = scenes;
+        this.buttons = buttons;
 
         //files
         this.defaultTempsFile = defaultTempsFile;
@@ -61,7 +61,6 @@ class DeviceErv extends EventEmitter {
 
         //presets configured
         for (const preset of this.presets) {
-            preset.name = preset.name;
             preset.serviceType = serviceType[preset.displayType];
             preset.characteristicType = characteristicType[preset.displayType];
             preset.state = false;
@@ -70,7 +69,6 @@ class DeviceErv extends EventEmitter {
 
         //schedules configured
         for (const schedule of this.schedules) {
-            schedule.name = schedule.name;
             schedule.serviceType = serviceType[schedule.displayType];
             schedule.characteristicType = characteristicType[schedule.displayType];
             schedule.state = false;
@@ -78,7 +76,6 @@ class DeviceErv extends EventEmitter {
 
         //scenes configured
         for (const scene of this.scenes) {
-            scene.name = scene.name;
             scene.serviceType = serviceType[scene.displayType];
             scene.characteristicType = characteristicType[scene.displayType];
             scene.state = false;
@@ -86,7 +83,6 @@ class DeviceErv extends EventEmitter {
 
         //buttons configured
         for (const button of this.buttons) {
-            button.name = button.name;
             button.serviceType = serviceType[button.displayType];
             button.characteristicType = characteristicType[button.displayType];
             button.state = false;
@@ -404,8 +400,8 @@ class DeviceErv extends EventEmitter {
                     if (supportsAutoVentilationMode && supportsCoolOperationMode) {
                         melCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
                             .setProps({
-                                minValue: this.accessory.minTempCoolDry,
-                                maxValue: this.accessory.maxTempCoolDry,
+                                minValue: this.accessory.minTempCoolDryAuto,
+                                maxValue: this.accessory.maxTempCoolDryAuto,
                                 minStep: this.accessory.temperatureIncrement
                             })
                             .onGet(async () => {
@@ -454,8 +450,8 @@ class DeviceErv extends EventEmitter {
 
                             try {
                                 this.accessory.useFahrenheit = value ? true : false;
-                                if (this.logInfo) this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
                                 this.accountInfo.UseFahrenheit = value ? true : false;
+                                if (this.logInfo) this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
                                 await this.melCloudErv.send(this.accountType, this.displayType, deviceData, 'account', this.accountInfo);
                             } catch (error) {
                                 if (this.logWarn) this.emit('warn', `Set temperature display unit error: ${error}`);
@@ -548,8 +544,8 @@ class DeviceErv extends EventEmitter {
 
                             try {
                                 this.accessory.useFahrenheit = value ? true : false;
-                                if (this.logInfo) this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
                                 this.accountInfo.UseFahrenheit = value ? true : false;
+                                if (this.logInfo) this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
                                 await this.melCloudErv.send(this.accountType, this.displayType, deviceData, 'account', this.accountInfo);
                             } catch (error) {
                                 if (this.logWarn) this.emit('warn', `Set temperature display unit error: ${error}`);
@@ -713,7 +709,7 @@ class DeviceErv extends EventEmitter {
             }
 
             //holiday mode
-            if (this.holidayModeSupport && this.accessory.holidayModeEnabled !== null) {
+            if (this.holidayModeSupport && this.accessory.holidayMode.Enabled !== null) {
                 //control
                 if (this.logDebug) this.emit('debug', `Prepare holiday mode control service`);
                 this.holidayModeControlService = new Service.Switch(`${serviceName} Holiday Mode`, `holidayModeControlService${deviceId}`);
@@ -721,7 +717,7 @@ class DeviceErv extends EventEmitter {
                 this.holidayModeControlService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Holiday Mode`);
                 this.holidayModeControlService.getCharacteristic(Characteristic.On)
                     .onGet(async () => {
-                        const state = this.accessory.holidayModeEnabled;
+                        const state = this.accessory.holidayMode.Enabled;
                         return state;
                     })
                     .onSet(async (state) => {
@@ -741,7 +737,7 @@ class DeviceErv extends EventEmitter {
                 this.holidayModeControlSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Holiday Mode Control`);
                 this.holidayModeControlSensorService.getCharacteristic(Characteristic.ContactSensorState)
                     .onGet(async () => {
-                        const state = this.accessory.holidayModeEnabled;
+                        const state = this.accessory.holidayMode.Enabled;
                         return state;
                     })
                 accessory.addService(this.holidayModeControlSensorService);
@@ -753,7 +749,7 @@ class DeviceErv extends EventEmitter {
                 this.holidayModeSensorService.setCharacteristic(Characteristic.ConfiguredName, `${accessoryName} Holiday Mode State`);
                 this.holidayModeSensorService.getCharacteristic(Characteristic.ContactSensorState)
                     .onGet(async () => {
-                        const state = this.accessory.holidayModeActive;
+                        const state = this.accessory.holidayMode.Active;
                         return state;
                     })
                 accessory.addService(this.holidayModeSensorService);
@@ -1150,11 +1146,12 @@ class DeviceErv extends EventEmitter {
 
                     //presets schedule
                     const presetsOnServer = deviceData.Presets ?? [];
-                    const scheduleEnabled = deviceData.ScheduleEnabled;
                     const schedulesOnServer = deviceData.Schedule ?? [];
+                    const scheduleEnabled = deviceData.ScheduleEnabled;
                     const scenesOnServer = deviceData.Scenes ?? [];
-                    const holidayModeEnabled = deviceData.HolidayMode?.Enabled;
-                    const holidayModeActive = deviceData.HolidayMode?.Active ?? false;
+
+                    //protection
+                    const holidayMode = deviceData.HolidayMode ?? {};
 
                     //device control
                     const hideRoomTemperature = deviceData.HideRoomTemperature;
@@ -1187,8 +1184,8 @@ class DeviceErv extends EventEmitter {
                     const temperatureIncrement = deviceData.Device[tempStepKey] ?? 1;
                     const minTempHeat = 10;
                     const maxTempHeat = 31;
-                    const minTempCoolDry = 16;
-                    const maxTempCoolDry = 31;
+                    const minTempCoolDryAuto = 16;
+                    const maxTempCoolDryAuto = 31;
 
                     //device state
                     const power = deviceData.Device.Power;
@@ -1210,7 +1207,9 @@ class DeviceErv extends EventEmitter {
                     const obj = {
                         presets: presetsOnServer,
                         schedules: schedulesOnServer,
+                        scheduleEnabled: scheduleEnabled,
                         scenes: scenesOnServer,
+                        holidayMode: holidayMode,
                         supportsRoomTemperature: supportsRoomTemperature,
                         supportsSupplyTemperature: supportsSupplyTemperature,
                         supportsOutdoorTemperature: supportsOutdoorTemperature,
@@ -1227,6 +1226,10 @@ class DeviceErv extends EventEmitter {
                         supportsBypassVentilationMode: supportsBypassVentilationMode,
                         supportsAutomaticFanSpeed: supportsAutomaticFanSpeed,
                         supportsStanbyMode: supportsStanbyMode,
+                        minTempHeat: minTempHeat,
+                        maxTempHeat: maxTempHeat,
+                        minTempCoolDryAuto: minTempCoolDryAuto,
+                        maxTempCoolDryAuto: maxTempCoolDryAuto,
                         coreMaintenanceRequired: coreMaintenanceRequired,
                         filterMaintenanceRequired: filterMaintenanceRequired,
                         actualVentilationMode: actualVentilationMode,
@@ -1246,59 +1249,52 @@ class DeviceErv extends EventEmitter {
                         defaultCoolingSetTemperature: defaultCoolingSetTemperature,
                         lockPhysicalControl: 0,
                         temperatureIncrement: temperatureIncrement,
-                        minTempHeat: minTempHeat,
-                        temperatureIncrement: maxTempHeat,
-                        minTempCoolDry: minTempCoolDry,
-                        maxTempCoolDry: maxTempCoolDry,
                         useFahrenheit: this.accountInfo.useFahrenheit ? 1 : 0,
                         temperatureUnit: TemperatureDisplayUnits[this.accountInfo.useFahrenheit ? 1 : 0],
                         isConnected: isConnected,
-                        isInError: isInError,
-                        scheduleEnabled: scheduleEnabled,
-                        holidayModeEnabled: holidayModeEnabled,
-                        holidayModeActive: holidayModeActive,
-                        scheduleEnabled: scheduleEnabled
+                        isInError: isInError
                     };
 
                     //characteristics array
                     const characteristics = [];
+                    const operationModevalidValues = [];
 
                     //ventilation mode - 0, HEAT, 2, COOL, 4, 5, 6, FAN, AUTO
                     switch (this.displayType) {
                         case 1: //Heater Cooler
                             switch (ventilationMode) {
-                                case 0: //LOSSNAY
-                                    obj.currentOperationMode = 2; //INACTIVE, IDLE, HEATING, COOLIN
-                                    obj.targetOperationMode = 1; //AUTO, HEAT, COOL
+                                case 0: // LOSSNAY
+                                    obj.currentOperationMode = 2; // heating
+                                    obj.targetOperationMode = 1;  // heat
                                     break;
-                                case 1: //BYPASS
-                                    obj.currentOperationMode = 3;
-                                    obj.targetOperationMode = 2;
+                                case 1: // BYPASS
+                                    obj.currentOperationMode = 3; // cooling
+                                    obj.targetOperationMode = 2;  // cool
                                     break;
-                                case 2: //AUTO
-                                    switch (actualVentilationMode) {
-                                        case 0: //LOSSNAY
-                                            obj.currentOperationMode = 2;
-                                            break;
-                                        case 1: //BYPASS
-                                            obj.currentOperationMode = 3;
-                                            break;
-                                        default:
-                                            if (this.logWarn) this.emit('warn', `Unknown actual ventilation mode: ${actualVentilationMode}`);
-                                            break;
-                                    };
-                                    obj.targetOperationMode = 0;
+                                case 2: // AUTO
+                                    if (actualVentilationMode === 0) {
+                                        obj.currentOperationMode = 2; // heating
+                                    } else if (actualVentilationMode === 1) {
+                                        obj.currentOperationMode = 3; // cooling
+                                    } else if (this.logWarn) this.emit('warn', `Unknown actual ventilation mode: ${actualVentilationMode}`);
+
+                                    obj.targetOperationMode = 0; // auto
                                     break;
                                 default:
                                     if (this.logWarn) this.emit('warn', `Unknown ventilation mode: ${ventilationMode}`);
                                     break;
-                            };
+                            }
 
-                            obj.currentOperationMode = !power ? 0 : obj.currentOperationMode;
-                            obj.targetOperationMode = obj.targetOperationMode;
-                            obj.operationModeSetPropsMinValue = supportsAutoVentilationMode ? 0 : 1;
-                            obj.operationModeSetPropsMaxValue = supportsAutoVentilationMode ? 2 : 2;
-                            obj.operationModeSetPropsValidValues = supportsAutoVentilationMode ? (supportsBypassVentilationMode ? [0, 1, 2] : [0, 2]) : (supportsBypassVentilationMode ? [1, 2] : [2]);
+                            // power override
+                            if (!power) obj.currentOperationMode = 0; // inactive
+
+                            if (supportsAutoVentilationMode) operationModevalidValues.push(0);
+                            if (supportsBypassVentilationMode) operationModevalidValues.push(1);
+                            operationModevalidValues.push(2); // manual zawsze dostępny
+
+                            obj.operationModeSetPropsMinValue = operationModevalidValues[0];
+                            obj.operationModeSetPropsMaxValue = operationModevalidValues.at(-1);
+                            obj.operationModeSetPropsValidValues = operationModevalidValues;
 
                             //fan speed mode
                             obj.fanSpeedSetPropsMaxValue = 2;
@@ -1335,38 +1331,42 @@ class DeviceErv extends EventEmitter {
                         case 2: //Thermostat
                             //operation mode - 0, HEAT, 2, COOL, 4, 5, 6, FAN, AUTO
                             switch (ventilationMode) {
-                                case 0: //LOSSNAY
-                                    obj.currentOperationMode = 1; //OFF, HEAT, COOL
-                                    obj.targetOperationMode = 1; //OFF, HEAT, COOL, AUTO
+                                case 0: // LOSSNAY
+                                    obj.currentOperationMode = 1; // HEAT
+                                    obj.targetOperationMode = 1;  // HEAT
                                     break;
-                                case 1: //BYPASS
-                                    obj.currentOperationMode = 2;
-                                    obj.targetOperationMode = 2;
+                                case 1: // BYPASS
+                                    obj.currentOperationMode = 2; // COOL
+                                    obj.targetOperationMode = 2;  // COOL
                                     break;
-                                case 2: //AUTO
-                                    switch (actualVentilationMode) {
-                                        case 0: //LOSSNAY
-                                            obj.currentOperationMode = 1;
-                                            break;
-                                        case 1: //BYPASS
-                                            obj.currentOperationMode = 2;
-                                            break;
-                                        default:
-                                            if (this.logWarn) this.emit('warn', `Unknown actual ventilation mode: ${actualVentilationMode}`);
-                                            break;
-                                    };
-                                    obj.targetOperationMode = 3;
+                                case 2: // AUTO
+                                    if (actualVentilationMode === 0) {
+                                        obj.currentOperationMode = 1; // HEAT
+                                    } else if (actualVentilationMode === 1) {
+                                        obj.currentOperationMode = 2; // COOL
+                                    } else if (this.logWarn) this.emit('warn', `Unknown actual ventilation mode: ${actualVentilationMode}`);
+
+                                    obj.targetOperationMode = 3; // AUTO
                                     break;
                                 default:
                                     if (this.logWarn) this.emit('warn', `Unknown ventilation mode: ${ventilationMode}`);
                                     break;
-                            };
+                            }
 
-                            obj.currentOperationMode = !power ? 0 : obj.currentOperationMode;
-                            obj.targetOperationMode = !power ? 0 : obj.targetOperationMode;
-                            obj.operationModeSetPropsMinValue = supportsAutoVentilationMode ? 0 : 0;
-                            obj.operationModeSetPropsMaxValue = supportsAutoVentilationMode ? 3 : 2;
-                            obj.operationModeSetPropsValidValues = supportsAutoVentilationMode ? (supportsBypassVentilationMode ? [0, 1, 2, 3] : [0, 2, 3]) : (supportsBypassVentilationMode ? [0, 1, 2] : [0, 2]);
+                            // power override (single source of truth)
+                            if (!power) {
+                                obj.currentOperationMode = 0;
+                                obj.targetOperationMode = 0;
+                            }
+
+                            operationModevalidValues.push(0); // manual zawsze dostępny
+                            if (supportsBypassVentilationMode) operationModevalidValues.push(1);
+                            operationModevalidValues.push(2); // manual / normal
+                            if (supportsAutoVentilationMode) operationModevalidValues.push(3);
+
+                            obj.operationModeSetPropsMinValue = operationModevalidValues[0];
+                            obj.operationModeSetPropsMaxValue = operationModevalidValues.at(-1);
+                            obj.operationModeSetPropsValidValues = operationModevalidValues;
 
                             //create characteristics
                             characteristics.push(
@@ -1414,10 +1414,10 @@ class DeviceErv extends EventEmitter {
                     this.errorService?.updateCharacteristic(Characteristic.ContactSensorState, isInError);
 
                     //holiday mode
-                    if (this.holidayModeSupport && holidayModeEnabled !== null) {
-                        this.holidayModeControlService?.updateCharacteristic(Characteristic.On, holidayModeEnabled);
-                        this.holidayModeControlSensorService?.updateCharacteristic(Characteristic.ContactSensorState, holidayModeEnabled);
-                        this.holidayModeSensorService?.updateCharacteristic(Characteristic.ContactSensorState, holidayModeActive);
+                    if (this.holidayModeSupport && holidayMode.Enabled !== null) {
+                        this.holidayModeControlService?.updateCharacteristic(Characteristic.On, holidayMode.Enabled);
+                        this.holidayModeControlSensorService?.updateCharacteristic(Characteristic.ContactSensorState, holidayMode.Enabled);
+                        this.holidayModeSensorService?.updateCharacteristic(Characteristic.ContactSensorState, holidayMode.Active);
                     }
 
                     //presets
