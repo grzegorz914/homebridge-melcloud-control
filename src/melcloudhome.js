@@ -233,7 +233,7 @@ class MelCloudHome extends EventEmitter {
 
             // If path is found, use it
             if (chromiumPath) {
-                if (!this.logDebug) this.emit('debug', `Using Chromium for ${system} (${arch}) at ${chromiumPath}`);
+                if (this.logDebug) this.emit('debug', `Using Chromium for ${system} (${arch}) at ${chromiumPath}`);
             } else {
                 if (arch === 'arm') {
                     accountInfo.Info = `No Chromium found for ${system} (${arch}). Please install it manually and try again.`;
@@ -241,7 +241,7 @@ class MelCloudHome extends EventEmitter {
                 } else {
                     try {
                         chromiumPath = puppeteer.executablePath();
-                        if (!this.logDebug) this.emit('debug', `Using Puppeteer Chromium for ${system} (${arch}) at ${chromiumPath}`);
+                        if (this.logDebug) this.emit('debug', `Using Puppeteer Chromium for ${system} (${arch}) at ${chromiumPath}`);
                     } catch (error) {
                         accountInfo.Info = `No Puppeteer Chromium for ${system} (${arch}), error: ${error.message}`;
                         return accountInfo;
@@ -252,7 +252,7 @@ class MelCloudHome extends EventEmitter {
             // Verify Chromium executable
             try {
                 const { stdout } = await execPromise(`"${chromiumPath}" --version`);
-                if (!this.logDebug) this.emit('debug', `Chromium for ${system} (${arch}) detected: ${stdout.trim()}`);
+                if (this.logDebug) this.emit('debug', `Chromium for ${system} (${arch}) detected: ${stdout.trim()}`);
             } catch (error) {
                 accountInfo.Info = `Chromium for ${system} (${arch}) found at ${chromiumPath}, but execute error: ${error.message}. Please install it manually and try again.`;
                 return accountInfo;
@@ -330,7 +330,7 @@ class MelCloudHome extends EventEmitter {
                                     })
                                     .on('message', (message) => {
                                         const parsedMessage = JSON.parse(message);
-                                        if (!this.logDebug) this.emit('debug', `Incoming message: ${JSON.stringify(parsedMessage, null, 2)}`);
+                                        if (this.logDebug) this.emit('debug', `Incoming message: ${JSON.stringify(parsedMessage, null, 2)}`);
                                         if (parsedMessage.message === 'Forbidden') return;
 
                                         this.emit('webSocket', parsedMessage);
