@@ -78,7 +78,7 @@ class MelCloudErv extends EventEmitter {
 
                                 //update device settings
                                 for (const [key, value] of Object.entries(settings)) {
-                                    if (!this.functions.isValidValue(value)) continue;
+                                    if (!this.functions.isValidValue(value) || key === 'SetTemperature') continue;
 
                                     if (key in deviceData.Device) {
                                         deviceData.Device[key] = value;
