@@ -22,6 +22,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Do not use Homebridge UI > v5.5.0 because of break config.json
 
+# [4.5.5] - (21.12.2025)
+
+## Changes
+
+- fix characteristics warning in Thermostat mode if frost protection active
+- fix device type shows undefined
+- config schema updated
+- redme updated
+- cleanup
+
 # [4.5.4] - (19.12.2025)
 
 ## Changes

@@ -5,7 +5,7 @@
   "fixArrays": true,
   "strictValidation": true,
   "customUi": true,
-  "headerDisplay": "This plugin works with Mitsubishi Air Conditioner, Heat Pump and Energy Recovery Ventilation connected to MELCloud and MELCloud Home. Devices are exposed to HomeKit as separate accessories and each needs to be manually [paired](https://github.com/grzegorz914/homebridge-melcloud-control/wiki#adding-to-homekit).",
+  "headerDisplay": "Plugin for Mitsubishi Air Conditioner, Heat Pump and Energy Recovery Ventilation connected to MELCloud and MELCloud Home. Devices are exposed to HomeKit as separate accessories and each needs to be manually [paired](https://github.com/grzegorz914/homebridge-melcloud-control/wiki#adding-to-homekit).",
   "footerDisplay": "For documentation please see [GitHub repository](https://github.com/grzegorz914/homebridge-melcloud-control).",
   "schema": {
     "type": "object",
@@ -20,20 +20,20 @@
             "name": {
               "title": "Name",
               "type": "string",
-              "placeholder": "Account name",
-              "description": "Your own account name."
+              "placeholder": "Name",
+              "description": "Your own account name displayed in HomeKit."
             },
             "user": {
               "title": "User",
               "type": "string",
               "placeholder": "Email",
-              "description": "Account username."
+              "description": "Account credential (username)."
             },
             "passwd": {
               "title": "Password",
               "type": "string",
               "placeholder": "Password",
-              "description": "Account password.",
+              "description": "Account credential (password).",
               "format": "password"
             },
             "language": {
@@ -245,18 +245,13 @@
                     "type": "integer",
                     "default": 0
                   },
-                  "typeString": {
-                    "title": "Type",
-                    "type": "string",
-                    "default": "Air Conditioner"
-                  },
                   "displayType": {
                     "title": "Display Type",
                     "type": "integer",
                     "minimum": 0,
                     "maximum": 2,
                     "default": 0,
-                    "description": "Select accessory control type displayed in HomeKit app.",
+                    "description": "Select accessory control type displayed in HomeKit.",
                     "anyOf": [
                       {
                         "title": "None / Disabled",
@@ -281,7 +276,8 @@
                   "name": {
                     "title": "Name",
                     "type": "string",
-                    "default": "Air Conditioner"
+                    "default": "Air Conditioner",
+                    "description": "Here set Your own name displayed in HomeKit."
                   },
                   "heatDryFanMode": {
                     "title": "Heat",
@@ -289,7 +285,7 @@
                     "minimum": 0,
                     "maximum": 3,
                     "default": 1,
-                    "description": "Select the operating mode for Heat, if this mode is not supported, it will be disabled.",
+                    "description": "Select the operating mode for Heat, work only if mode supported by device.",
                     "anyOf": [
                       {
                         "title": "None / Disabled",
@@ -323,7 +319,7 @@
                     "minimum": 0,
                     "maximum": 3,
                     "default": 1,
-                    "description": "Select the operating mode for Cool, if this mode is not supported, it will be disabled.",
+                    "description": "Select the operating mode for Cool, work only if mode supported by device.",
                     "anyOf": [
                       {
                         "title": "None / Disabled",
@@ -357,7 +353,7 @@
                     "minimum": 0,
                     "maximum": 3,
                     "default": 1,
-                    "description": "Select the operating mode for Auto, if this mode is not supported, it will be disabled.",
+                    "description": "Select the operating mode for Auto, work only if mode supported by device.",
                     "anyOf": [
                       {
                         "title": "None / Disabled",
@@ -389,37 +385,37 @@
                     "title": "Room",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra room temperature sensor to use with automations in HomeKit app."
+                    "description": "This enable extra room temperature sensor and use in HomeKit automations."
                   },
                   "temperatureOutdoorSensor": {
                     "title": "Outdoor",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra outdoor temperature sensor to use with automations in HomeKit app."
+                    "description": "This enable extra outdoor temperature sensor and use in HomeKit automations."
                   },
                   "inStandbySensor": {
                     "title": "In Standby",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable in standby mode sensor to use with automations in HomeKit app."
+                    "description": "This enable in standby mode sensor and use in HomeKit automations."
                   },
                   "connectSensor": {
                     "title": "Connect",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable connect state sensor to use with automations in HomeKit app."
+                    "description": "This enable connect state sensor and use in HomeKit automations."
                   },
                   "errorSensor": {
                     "title": "Error",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable error sensor to use with automations in HomeKit app."
+                    "description": "This enable error sensor and use in HomeKit automations."
                   },
                   "frostProtectionSupport": {
                     "title": "Frost Protection Support",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable frost protection control and sensors to use with automations in HomeKit app.",
+                    "description": "This enable frost protection control and sensors and use in HomeKit automations.",
                     "condition": {
                       "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
                     }
@@ -428,7 +424,7 @@
                     "title": "Overheat Protection Support",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable overheat protection control and sensors to use with automations in HomeKit app.",
+                    "description": "This enable overheat protection control and sensors and use in HomeKit automations.",
                     "condition": {
                       "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
                     }
@@ -437,7 +433,7 @@
                     "title": "Holiday Mode Support",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable holiday mode control and sensors to use with automations in HomeKit app.",
+                    "description": "This enable holiday mode control and sensors and use in HomeKit automations.",
                     "condition": {
                       "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
                     }
@@ -459,7 +455,7 @@
                           "minimum": 0,
                           "maximum": 7,
                           "default": 0,
-                          "description": "Select the characteristic type to be displayed in HomeKit app.",
+                          "description": "Select the characteristic type to be displayed in HomeKit.",
                           "anyOf": [
                             {
                               "title": "None / Disabled",
@@ -514,8 +510,8 @@
                         "name": {
                           "title": "Name",
                           "type": "string",
-                          "default": "Preset",
-                          "description": "Your own name displayed in Homebridge / HomeKit app.",
+                          "placeholder": "Preset",
+                          "description": "Here set Your own name displayed in HomeKit.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].presets[arrayIndices[2]].displayType > 0;"
                           }
@@ -552,7 +548,7 @@
                           "minimum": 0,
                           "maximum": 7,
                           "default": 0,
-                          "description": "Select the characteristic type to be displayed in HomeKit app.",
+                          "description": "Select the characteristic type to be displayed in HomeKit.",
                           "anyOf": [
                             {
                               "title": "None / Disabled",
@@ -607,8 +603,8 @@
                         "name": {
                           "title": "Name",
                           "type": "string",
-                          "default": "Schedule",
-                          "description": "Your own name displayed in Homebridge / HomeKit app.",
+                          "placeholder": "Schedule",
+                          "description": "Here set Your own name displayed in HomeKit.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].schedules[arrayIndices[2]].displayType > 0;"
                           }
@@ -645,7 +641,7 @@
                           "minimum": 0,
                           "maximum": 7,
                           "default": 0,
-                          "description": "Select the characteristic type to be displayed in HomeKit app.",
+                          "description": "Select the characteristic type to be displayed in HomeKit.",
                           "anyOf": [
                             {
                               "title": "None / Disabled",
@@ -700,8 +696,8 @@
                         "name": {
                           "title": "Name",
                           "type": "string",
-                          "default": "Scene",
-                          "description": "Your own name displayed in Homebridge / HomeKit app.",
+                          "placeholder": "Scene",
+                          "description": "Here set Your own name displayed in HomeKit.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].scenes[arrayIndices[2]].displayType > 0;"
                           }
@@ -733,7 +729,7 @@
                           "minimum": 0,
                           "maximum": 7,
                           "default": 0,
-                          "description": "Select the characteristic type to be displayed in HomeKit app.",
+                          "description": "Select the characteristic type to be displayed in HomeKit.",
                           "anyOf": [
                             {
                               "title": "None / Disabled",
@@ -1011,7 +1007,7 @@
                           "title": "Name",
                           "type": "string",
                           "placeholder": "Button name",
-                          "description": "Your own name displayed in Homebridge / HomeKit app.",
+                          "description": "Here set Your own name displayed in HomeKit.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].buttonsSensors[arrayIndices[2]].displayType > 0;"
                           }
@@ -1056,15 +1052,11 @@
                     "type": "integer",
                     "default": 1
                   },
-                  "typeString": {
-                    "title": "Type",
-                    "type": "string",
-                    "default": "Heat Pump"
-                  },
                   "name": {
                     "title": "Name",
                     "type": "string",
-                    "default": "Heat Pump"
+                    "default": "Heat Pump",
+                    "description": "Here set Your own name displayed in HomeKit."
                   },
                   "displayType": {
                     "title": "Display Type",
@@ -1072,7 +1064,7 @@
                     "minimum": 0,
                     "maximum": 2,
                     "default": 0,
-                    "description": "Select accessory control type displayed in HomeKit app.",
+                    "description": "Select accessory control type displayed in HomeKit.",
                     "anyOf": [
                       {
                         "title": "None / Disabled",
@@ -1100,7 +1092,7 @@
                     "minimum": 0,
                     "maximum": 15,
                     "default": 0,
-                    "description": "Select zone to hidde in HomeKit app, if present.",
+                    "description": "Select zone to hidde in HomeKit, if present.",
                     "anyOf": [
                       {
                         "title": "None / Disabled",
@@ -1204,79 +1196,79 @@
                     "title": "Temperature Sensor Room",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra temperature sensor to use with automations in HomeKit app."
+                    "description": "This enable extra temperature sensor and use in HomeKit automations."
                   },
                   "temperatureFlowSensor": {
                     "title": "Temperature Sensor Flow",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra Flow temperature sensor to use with automations in HomeKit app."
+                    "description": "This enable extra Flow temperature sensor and use in HomeKit automations."
                   },
                   "temperatureReturnSensor": {
                     "title": "Temperature Sensor Return",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra Return temperature sensor to use with automations in HomeKit app."
+                    "description": "This enable extra Return temperature sensor and use in HomeKit automations."
                   },
                   "temperatureFlowZone1Sensor": {
                     "title": "Temperature Sensor Flow Zone 1",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra Flow Zone 1 temperature sensor to use with automations in HomeKit app."
+                    "description": "This enable extra Flow Zone 1 temperature sensor and use in HomeKit automations."
                   },
                   "temperatureReturnZone1Sensor": {
                     "title": "Temperature Sensor Return Zone 1",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra Return Zone 1 temperature sensor to use with automations in HomeKit app."
+                    "description": "This enable extra Return Zone 1 temperature sensor and use in HomeKit automations."
                   },
                   "temperatureFlowWaterTankSensor": {
                     "title": "Temperature Sensor Flow Water Tank",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra Flow Water Tank temperature sensor to use with automations in HomeKit app."
+                    "description": "This enable extra Flow Water Tank temperature sensor and use in HomeKit automations."
                   },
                   "temperatureReturnWaterTankSensor": {
                     "title": "Temperature Sensor Return Water Tank",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra Return Water Tank temperature sensor to use with automations in HomeKit app."
+                    "description": "This enable extra Return Water Tank temperature sensor and use in HomeKit automations."
                   },
                   "temperatureFlowZone2Sensor": {
                     "title": "Temperature Sensor Flow Zone 2",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra Flow Zone 2 temperature sensor to use with automations in HomeKit app."
+                    "description": "This enable extra Flow Zone 2 temperature sensor and use in HomeKit automations."
                   },
                   "temperatureReturnZone2Sensor": {
                     "title": "Temperature Sensor Return Zone 2",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra Return Zone 2 temperature sensor to use with automations in HomeKit app."
+                    "description": "This enable extra Return Zone 2 temperature sensor and use in HomeKit automations."
                   },
                   "inStandbySensor": {
                     "title": "In Standby",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable in standby mode sensor to use with automations in HomeKit app."
+                    "description": "This enable in standby mode sensor and use in HomeKit automations."
                   },
                   "connectSensor": {
                     "title": "Connect",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable connect state sensor to use with automations in HomeKit app."
+                    "description": "This enable connect state sensor and use in HomeKit automations."
                   },
                   "errorSensor": {
                     "title": "Error",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable error sensor to use with automations in HomeKit app."
+                    "description": "This enable error sensor and use in HomeKit automations."
                   },
                   "frostProtectionSupport": {
                     "title": "Frost Protection Support",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable frost protection control and sensors to use with automations in HomeKit app.",
+                    "description": "This enable frost protection control and sensors and use in HomeKit automations.",
                     "condition": {
                       "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
                     }
@@ -1285,7 +1277,7 @@
                     "title": "Holiday Mode Support",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable holiday mode control and sensors to use with automations in HomeKit app.",
+                    "description": "This enable holiday mode control and sensors and use in HomeKit automations.",
                     "condition": {
                       "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
                     }
@@ -1307,7 +1299,7 @@
                           "minimum": 0,
                           "maximum": 7,
                           "default": 0,
-                          "description": "Select the characteristic type to be displayed in HomeKit app.",
+                          "description": "Select the characteristic type to be displayed in HomeKit.",
                           "anyOf": [
                             {
                               "title": "None / Disabled",
@@ -1362,8 +1354,8 @@
                         "name": {
                           "title": "Name",
                           "type": "string",
-                          "default": "Preset",
-                          "description": "Your own name displayed in Homebridge / HomeKit app.",
+                          "placeholder": "Preset",
+                          "description": "Here set Your own name displayed in HomeKit.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].presets[arrayIndices[2]].displayType > 0;"
                           }
@@ -1400,7 +1392,7 @@
                           "minimum": 0,
                           "maximum": 7,
                           "default": 0,
-                          "description": "Select the characteristic type to be displayed in HomeKit app.",
+                          "description": "Select the characteristic type to be displayed in HomeKit.",
                           "anyOf": [
                             {
                               "title": "None / Disabled",
@@ -1455,8 +1447,8 @@
                         "name": {
                           "title": "Name",
                           "type": "string",
-                          "default": "Schedule",
-                          "description": "Your own name displayed in Homebridge / HomeKit app.",
+                          "placeholder": "Schedule",
+                          "description": "Here set Your own name displayed in HomeKit.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].schedules[arrayIndices[2]].displayType > 0;"
                           }
@@ -1493,7 +1485,7 @@
                           "minimum": 0,
                           "maximum": 7,
                           "default": 0,
-                          "description": "Select the characteristic type to be displayed in HomeKit app.",
+                          "description": "Select the characteristic type to be displayed in HomeKit.",
                           "anyOf": [
                             {
                               "title": "None / Disabled",
@@ -1548,8 +1540,8 @@
                         "name": {
                           "title": "Name",
                           "type": "string",
-                          "default": "Scene",
-                          "description": "Your own name displayed in Homebridge / HomeKit app.",
+                          "placeholder": "Scene",
+                          "description": "Here set Your own name displayed in HomeKit.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].scenes[arrayIndices[2]].displayType > 0;"
                           }
@@ -1581,7 +1573,7 @@
                           "minimum": 0,
                           "maximum": 7,
                           "default": 0,
-                          "description": "Select the characteristic type to be displayed in HomeKit app.",
+                          "description": "Select the characteristic type to be displayed in HomeKit.",
                           "anyOf": [
                             {
                               "title": "None / Disabled",
@@ -1781,7 +1773,7 @@
                           "title": "Name",
                           "type": "string",
                           "placeholder": "Button name",
-                          "description": "Your own name displayed in Homebridge / HomeKit app.",
+                          "description": "Here set Your own name displayed in HomeKit.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].buttonsSensors[arrayIndices[2]].displayType > 0;"
                           }
@@ -1824,15 +1816,11 @@
                     "type": "integer",
                     "default": 3
                   },
-                  "typeString": {
-                    "title": "Type",
-                    "type": "string",
-                    "default": "Ventilation"
-                  },
                   "name": {
                     "title": "Name",
                     "type": "string",
-                    "default": "Ventilation"
+                    "default": "Ventilation",
+                    "description": "Here set Your own name displayed in HomeKit."
                   },
                   "displayType": {
                     "title": "Display Type",
@@ -1840,7 +1828,7 @@
                     "minimum": 0,
                     "maximum": 2,
                     "default": 0,
-                    "description": "Select accessory control type displayed in HomeKit app.",
+                    "description": "Select accessory control type displayed in HomeKit.",
                     "anyOf": [
                       {
                         "title": "None / Disabled",
@@ -1866,43 +1854,43 @@
                     "title": "Temperature Sensor Room",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra temperature sensor to use with automations in HomeKit app."
+                    "description": "This enable extra temperature sensor and use in HomeKit automations."
                   },
                   "temperatureOutdoorSensor": {
                     "title": "Temperature Sensor Outdoor",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra outdoor temperature sensor to use with automations in HomeKit app."
+                    "description": "This enable extra outdoor temperature sensor and use in HomeKit automations."
                   },
                   "temperatureSensorSupply": {
                     "title": "Temperature Sensor Supply",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra supply temperature sensor to use with automations in HomeKit app."
+                    "description": "This enable extra supply temperature sensor and use in HomeKit automations."
                   },
                   "inStandbySensor": {
                     "title": "In Standby",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable in standby mode sensor to use with automations in HomeKit app."
+                    "description": "This enable in standby mode sensor and use in HomeKit automations."
                   },
                   "connectSensor": {
                     "title": "Connect",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable connect state sensor to use with automations in HomeKit app."
+                    "description": "This enable connect state sensor and use in HomeKit automations."
                   },
                   "errorSensor": {
                     "title": "Error",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable error sensor to use with automations in HomeKit app."
+                    "description": "This enable error sensor and use in HomeKit automations."
                   },
                   "holidayModeSupport": {
                     "title": "Holiday Mode Support",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable holiday mode control and sensors to use with automations in HomeKit app.",
+                    "description": "This enable holiday mode control and sensors and use in HomeKit automations.",
                     "condition": {
                       "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
                     }
@@ -1925,7 +1913,7 @@
                           "minimum": 0,
                           "maximum": 7,
                           "default": 0,
-                          "description": "Select the characteristic type to be displayed in HomeKit app.",
+                          "description": "Select the characteristic type to be displayed in HomeKit.",
                           "anyOf": [
                             {
                               "title": "None / Disabled",
@@ -1980,8 +1968,8 @@
                         "name": {
                           "title": "Name",
                           "type": "string",
-                          "default": "Preset",
-                          "description": "Your own name displayed in Homebridge / HomeKit app.",
+                          "placeholder": "Preset",
+                          "description": "Here set Your own name displayed in Homebridge / Homebridge / HomeKit app.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].presets[arrayIndices[2]].displayType > 0;"
                           }
@@ -2018,7 +2006,7 @@
                           "minimum": 0,
                           "maximum": 7,
                           "default": 0,
-                          "description": "Select the characteristic type to be displayed in HomeKit app.",
+                          "description": "Select the characteristic type to be displayed in HomeKit.",
                           "anyOf": [
                             {
                               "title": "None / Disabled",
@@ -2073,8 +2061,8 @@
                         "name": {
                           "title": "Name",
                           "type": "string",
-                          "default": "Preset",
-                          "description": "Your own name displayed in Homebridge / HomeKit app.",
+                          "placeholder": "Preset",
+                          "description": "Here set Your own name displayed in HomeKit.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].schedules[arrayIndices[2]].displayType > 0;"
                           }
@@ -2111,7 +2099,7 @@
                           "minimum": 0,
                           "maximum": 7,
                           "default": 0,
-                          "description": "Select the characteristic type to be displayed in HomeKit app.",
+                          "description": "Select the characteristic type to be displayed in HomeKit.",
                           "anyOf": [
                             {
                               "title": "None / Disabled",
@@ -2166,8 +2154,8 @@
                         "name": {
                           "title": "Name",
                           "type": "string",
-                          "default": "Scene",
-                          "description": "Your own name displayed in Homebridge / HomeKit app.",
+                          "placeholder": "Scene",
+                          "description": "Here set Your own name displayed in HomeKit.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].scenes[arrayIndices[2]].displayType > 0;"
                           }
@@ -2199,7 +2187,7 @@
                           "minimum": 0,
                           "maximum": 7,
                           "default": 0,
-                          "description": "Select the characteristic type to be displayed in HomeKit app.",
+                          "description": "Select the characteristic type to be displayed in HomeKit.",
                           "anyOf": [
                             {
                               "title": "None / Disabled",
@@ -2351,7 +2339,7 @@
                           "title": "Name",
                           "type": "string",
                           "placeholder": "Button name",
-                          "description": "Your own name displayed in Homebridge / HomeKit app.",
+                          "description": "Here set Your own name displayed in HomeKit.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].buttonsSensors[arrayIndices[2]].displayType > 0;"
                           }
@@ -2566,10 +2554,6 @@
                           "key": "accounts[].ataDevices[].id",
                           "readonly": true
                         },
-                        {
-                          "key": "accounts[].ataDevices[].typeString",
-                          "readonly": true
-                        },
                         "accounts[].ataDevices[].displayType",
                         {
                           "title": "Settings",
@@ -2671,6 +2655,7 @@
                         {
                           "title": "Buttons / Sensors",
                           "type": "section",
+                          "description": "Section for setup control buttons / sensors",
                           "expandable": true,
                           "expanded": false,
                           "items": [
@@ -2739,10 +2724,6 @@
                       "items": [
                         {
                           "key": "accounts[].atwDevices[].id",
-                          "readonly": true
-                        },
-                        {
-                          "key": "accounts[].atwDevices[].typeString",
                           "readonly": true
                         },
                         "accounts[].atwDevices[].displayType",
@@ -2843,6 +2824,7 @@
                         {
                           "title": "Buttons / Sensors",
                           "type": "section",
+                          "description": "Section for setup control buttons / sensors",
                           "expandable": true,
                           "expanded": false,
                           "items": [
@@ -2918,10 +2900,6 @@
                       "items": [
                         {
                           "key": "accounts[].ervDevices[].id",
-                          "readonly": true
-                        },
-                        {
-                          "key": "accounts[].ervDevices[].typeString",
                           "readonly": true
                         },
                         "accounts[].ervDevices[].displayType",
@@ -3020,6 +2998,7 @@
                         {
                           "title": "Buttons / Sensors",
                           "type": "section",
+                          "description": "Section for setup control buttons / sensors",
                           "expandable": true,
                           "expanded": false,
                           "items": [

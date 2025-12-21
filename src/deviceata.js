@@ -3,7 +3,7 @@ import MelCloudAta from './melcloudata.js';
 import RestFul from './restful.js';
 import Mqtt from './mqtt.js';
 import Functions from './functions.js';
-import { TemperatureDisplayUnits, AirConditioner } from './constants.js';
+import { TemperatureDisplayUnits, AirConditioner, DeviceType } from './constants.js';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceAta extends EventEmitter {
@@ -31,7 +31,7 @@ class DeviceAta extends EventEmitter {
         this.device = device;
         this.deviceId = device.id;
         this.deviceName = device.name;
-        this.deviceTypeString = device.typeString;
+        this.deviceTypeString = DeviceType[device.type];
         this.displayType = device.displayType;
         this.heatDryFanMode = device.heatDryFanMode || 1; //NONE, HEAT, DRY, FAN
         this.coolDryFanMode = device.coolDryFanMode || 1; //NONE, COOL, DRY, FAN
@@ -447,7 +447,7 @@ class DeviceAta extends EventEmitter {
                                 };
                             });
                     };
-                    melCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature)
+                    melCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature) // 16 - 31
                         .setProps({
                             minValue: this.accessory.minTempCoolDryAuto,
                             maxValue: this.accessory.maxTempCoolDryAuto,
@@ -468,7 +468,7 @@ class DeviceAta extends EventEmitter {
                             };
                         });
                     if (supportsHeat) {
-                        melCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature)
+                        melCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature) // 10 - 31
                             .setProps({
                                 minValue: this.accessory.minTempHeat,
                                 maxValue: this.accessory.maxTempHeat,
@@ -584,8 +584,8 @@ class DeviceAta extends EventEmitter {
                         });
                     melCloudServiceT.getCharacteristic(Characteristic.TargetTemperature)
                         .setProps({
-                            minValue: this.accessory.minTempHeat,
-                            maxValue: this.accessory.maxTempHeat,
+                            minValue: this.accessory.minTempCoolDryAuto,
+                            maxValue: this.accessory.maxTempCoolDryAuto,
                             minStep: this.accessory.temperatureStep
                         })
                         .onGet(async () => {
@@ -594,6 +594,12 @@ class DeviceAta extends EventEmitter {
                         })
                         .onSet(async (value) => {
                             try {
+                                if (deviceData.Device.OperationMode === 1 && value < this.accessory.minTempHeat) {
+                                    value = this.accessory.minTempHeat;
+                                } else if (value < 16) {
+                                    value = 16;
+                                }
+
                                 deviceData.Device.SetTemperature = value;
                                 if (this.logInfo) this.emit('info', `Set temperature: ${value}${this.accessory.temperatureUnit}`);
                                 await this.melCloudAta.send(this.accountType, this.displayType, deviceData, AirConditioner.EffectiveFlags.SetTemperature);
@@ -1453,8 +1459,8 @@ class DeviceAta extends EventEmitter {
             return accessory;
         } catch (error) {
             throw new Error(`Prepare accessory error: ${error}`);
-        };
-    };
+        }
+    }
 
     //start
     async start() {

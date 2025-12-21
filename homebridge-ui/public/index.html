@@ -18,9 +18,9 @@
     <form id="configForm">
       <div class="text-center">
         <label id="accountName" class="fw-bold" style="font-size: 23px;">Account</label><br>
-        <label id="info" class="d-block" style="font-size: 14px;"></label>
-        <label id="info1" class="d-block" style="font-size: 12px;"></label>
-        <label id="info2" class="d-block" style="font-size: 12px;"></label>
+        <label id="info" class="d-block" style="font-size: 15px;"></label>
+        <label id="info1" class="d-block" style="font-size: 13px;"></label>
+        <label id="info2" class="d-block" style="font-size: 13px;"></label>
       </div>
 
       <div class="mb-2">
@@ -139,8 +139,6 @@
       container.appendChild(button);
 
       button.addEventListener('click', async () => {
-        this.account = account;
-
         // Zmieniamy klasę wszystkich przycisków
         accounts.forEach((_, j) => {
           document.getElementById(`button${j}`).className = (j === i ? 'btn btn-primary' : 'btn btn-secondary');
@@ -157,6 +155,8 @@
         formElements.language.value = account.language || '0';
         formElements.accountType.value = account.type || 'disabled';
         formElements.logIn.disabled = !(account.name && account.user && account.passwd && account.language && account.type);
+
+        this.account = account;
       });
     });
 
@@ -249,19 +249,19 @@
 
     // Login & Sync Logic
     document.getElementById('logIn').addEventListener('click', async () => {
-      homebridge.showSpinner();
       document.getElementById('logIn').className = "btn btn-primary";
-      updateInfo('info', '', 'white');
+      updateInfo('info', 'Connecting to MELCloud', 'white');
       updateInfo('info1', '', 'white');
       updateInfo('info2', '', 'white');
+      homebridge.showSpinner();
 
       try {
         const account = this.account;
         const response = await homebridge.request('/connect', account);
 
         if (!response.State) {
-          homebridge.hideSpinner();
           updateInfo('info', response.Info, 'red');
+          homebridge.hideSpinner();
           return;
         }
 
@@ -271,27 +271,28 @@
         const scenesInMelCloud = response.Scenes ?? [];
 
         // Split devices by type
-        response.Devices.forEach(device => {
+        const devices = response.Devices;
+        for (const device of devices) {
           if (device.Type === 0) devicesInMelCloudByType.ata.push(device);
           if (device.Type === 1) devicesInMelCloudByType.atw.push(device);
           if (device.Type === 3) devicesInMelCloudByType.erv.push(device);
-        });
+        };
 
         // Clean up local config
         account.ataDevices = (account.ataDevices ?? []).filter(d => String(d.id) !== '0');
         account.atwDevices = (account.atwDevices ?? []).filter(d => String(d.id) !== '0');
         account.ervDevices = (account.ervDevices ?? []).filter(d => String(d.id) !== '0');
 
-        const removedFromConfigAta = removeStaleEntities(account.ataDevices, devicesInMelCloudByType.ata, d => d.id, d => d.DeviceID);
-        const removedFromConfigAtw = removeStaleEntities(account.atwDevices, devicesInMelCloudByType.atw, d => d.id, d => d.DeviceID);
-        const removedFromConfigErv = removeStaleEntities(account.ervDevices, devicesInMelCloudByType.erv, d => d.id, d => d.DeviceID);
-        const removedFromConfig = { presets: [], schedules: [], scenes: [] };
+        const removedFromConfig = { ata: [], atw: [], erv: [], presets: [], schedules: [], scenes: [] };
+        removedFromConfig.ata = removeStaleEntities(account.ataDevices, devicesInMelCloudByType.ata, d => d.id, d => d.DeviceID);
+        removedFromConfig.atw = removeStaleEntities(account.atwDevices, devicesInMelCloudByType.atw, d => d.id, d => d.DeviceID);
+        removedFromConfig.erv = removeStaleEntities(account.ervDevices, devicesInMelCloudByType.erv, d => d.id, d => d.DeviceID);
 
         // Map UnitId → Scenes
         const unitIdToScenes = mapUnitIdToScenes(scenesInMelCloud);
 
         // Generic device handler (obsługuje urządzenia, presety, harmonogramy i sceny)
-        const handleDevices = (devicesInMelCloud, devicesInConfig, deviceTypeString, newDevices, newPresets, newSchedules, newScenes) => {
+        const handleDevices = (devicesInMelCloud, devicesInConfig, newDevices, newPresets, newSchedules, newScenes) => {
           const configDevicesMap = new Map(devicesInConfig.map(dev => [String(dev.id), dev]));
 
           devicesInMelCloud.forEach(device => {
@@ -299,7 +300,12 @@
             let deviceInConfig = configDevicesMap.get(deviceId);
 
             if (!deviceInConfig) {
-              deviceInConfig = { id: deviceId, type: device.Type, deviceTypeString, displayType: 0, name: device.DeviceName };
+              deviceInConfig = {
+                id: deviceId,
+                type: device.Type,
+                displayType: 0,
+                name: device.DeviceName
+              };
               devicesInConfig.push(deviceInConfig);
               newDevices.push(deviceInConfig);
               configDevicesMap.set(deviceId, deviceInConfig);
@@ -372,40 +378,40 @@
         };
 
         // Execute device handlers
-        account.ataDevices = handleDevices(devicesInMelCloudByType.ata, account.ataDevices, "Air Conditioner", newInMelCloud.ata, newInMelCloud.ataPresets, newInMelCloud.ataSchedules, newInMelCloud.ataScenes);
-        account.atwDevices = handleDevices(devicesInMelCloudByType.atw, account.atwDevices, "Heat Pump", newInMelCloud.atw, newInMelCloud.atwPresets, newInMelCloud.atwSchedules, newInMelCloud.atwScenes);
-        account.ervDevices = handleDevices(devicesInMelCloudByType.erv, account.ervDevices, "Energy Recovery Ventilation", newInMelCloud.erv, newInMelCloud.ervPresets, newInMelCloud.ervSchedules, newInMelCloud.ervScenes);
+        account.ataDevices = handleDevices(devicesInMelCloudByType.ata, account.ataDevices, newInMelCloud.ata, newInMelCloud.ataPresets, newInMelCloud.ataSchedules, newInMelCloud.ataScenes);
+        account.atwDevices = handleDevices(devicesInMelCloudByType.atw, account.atwDevices, newInMelCloud.atw, newInMelCloud.atwPresets, newInMelCloud.atwSchedules, newInMelCloud.atwScenes);
+        account.ervDevices = handleDevices(devicesInMelCloudByType.erv, account.ervDevices, newInMelCloud.erv, newInMelCloud.ervPresets, newInMelCloud.ervSchedules, newInMelCloud.ervScenes);
 
         // Summary counts
         const newDevicesCount = newInMelCloud.ata.length + newInMelCloud.atw.length + newInMelCloud.erv.length;
         const newPresetsCount = newInMelCloud.ataPresets.length + newInMelCloud.atwPresets.length + newInMelCloud.ervPresets.length;
         const newSchedulesCount = newInMelCloud.ataSchedules.length + newInMelCloud.atwSchedules.length + newInMelCloud.ervSchedules.length;
         const newScenesCount = newInMelCloud.ataScenes.length + newInMelCloud.atwScenes.length + newInMelCloud.ervScenes.length;
-        const removedDevicesCount = removedFromConfigAta.length + removedFromConfigAtw.length + removedFromConfigErv.length;
+        const removedDevicesCount = removedFromConfig.ata.length + removedFromConfig.atw.length + removedFromConfig.erv.length;
         const removedPresetsCount = removedFromConfig.presets.length;
         const removedSchedulesCount = removedFromConfig.schedules.length;
         const removedScenesCount = removedFromConfig.scenes.length;
 
         if (!newDevicesCount && !newPresetsCount && !newSchedulesCount && !newScenesCount && !removedDevicesCount && !removedPresetsCount && !removedSchedulesCount && !removedScenesCount) {
           updateInfo('info', 'No changes detected.', 'white');
-        } else {
-          if (newDevicesCount || newPresetsCount || newSchedulesCount || newScenesCount) {
-            updateInfo('info', `Found new ${newDevicesCount ? `devices:` : ''} ${newInMelCloud.ata.length ? `ATA: ${newInMelCloud.ata.length}` : ''}${newInMelCloud.atw.length ? `, ATW: ${newInMelCloud.atw.length}` : ''}${newInMelCloud.erv.length ? `, ERV: ${newInMelCloud.erv.length},` : ''}${newPresetsCount ? `, presets:` : ''} ${newInMelCloud.ataPresets.length ? `ATA: ${newInMelCloud.ataPresets.length}` : ''}${newInMelCloud.atwPresets.length ? `, ATW: ${newInMelCloud.atwPresets.length}` : ''}${newInMelCloud.ervPresets.length ? `, ERV: ${newInMelCloud.ervPresets.length}` : ''}${newSchedulesCount ? `, schedules:` : ''} ${newInMelCloud.ataSchedules.length ? `ATA: ${newInMelCloud.ataSchedules.length}` : ''}${newInMelCloud.atwSchedules.length ? `, ATW: ${newInMelCloud.atwSchedules.length}` : ''}${newInMelCloud.ervSchedules.length ? `, ERV: ${newInMelCloud.ervSchedules.length}` : ''}${newScenesCount ? `, scenes:` : ''} ${newInMelCloud.ataScenes.length ? `,ATA: ${newInMelCloud.ataScenes.length}` : ''}${newInMelCloud.atwScenes.length ? `, ATW: ${newInMelCloud.atwScenes.length}` : ''}${newInMelCloud.ervScenes.length ? `, ERV: ${newInMelCloud.ervScenes.length}` : ''}.`, 'green');
-          }
-          if (removedDevicesCount || removedPresetsCount || removedSchedulesCount || removedScenesCount) {
-            updateInfo('info1', `Removed old ${removedDevicesCount ? `devices:` : ''} ${removedFromConfigAta.length ? `ATA: ${removedFromConfigAta.length}` : ''}${removedFromConfigAtw.length ? `, ATW: ${removedFromConfigAtw.length}` : ''}${removedFromConfigErv.length ? `, ERV: ${removedFromConfigErv.length}` : ''}${removedPresetsCount ? `, presets: ${removedPresetsCount}` : ''}${removedSchedulesCount ? `, schedules: ${removedSchedulesCount}` : ''}${removedScenesCount ? `, scenes: ${removedScenesCount}` : ''}.`, 'orange');
-          }
+        }
+        if (newDevicesCount || newPresetsCount || newSchedulesCount || newScenesCount) {
+          updateInfo('info', `Found new ${newDevicesCount ? `devices:` : ''} ${newInMelCloud.ata.length ? `ATA: ${newInMelCloud.ata.length},` : ''} ${newInMelCloud.atw.length ? `ATW: ${newInMelCloud.atw.length},` : ''} ${newInMelCloud.erv.length ? `ERV: ${newInMelCloud.erv.length},` : ''} ${newPresetsCount ? `presets:` : ''} ${newInMelCloud.ataPresets.length ? `ATA: ${newInMelCloud.ataPresets.length},` : ''} ${newInMelCloud.atwPresets.length ? `ATW: ${newInMelCloud.atwPresets.length}, ` : ''} ${newInMelCloud.ervPresets.length ? `ERV: ${newInMelCloud.ervPresets.length},` : ''} ${newSchedulesCount ? `schedules:` : ''} ${newInMelCloud.ataSchedules.length ? `ATA: ${newInMelCloud.ataSchedules.length},` : ''} ${newInMelCloud.atwSchedules.length ? `ATW: ${newInMelCloud.atwSchedules.length},` : ''} ${newInMelCloud.ervSchedules.length ? `ERV: ${newInMelCloud.ervSchedules.length}, ` : ''} ${newScenesCount ? `scenes:` : ''} ${newInMelCloud.ataScenes.length ? `ATA: ${newInMelCloud.ataScenes.length},` : ''} ${newInMelCloud.atwScenes.length ? `ATW: ${newInMelCloud.atwScenes.length},` : ''} ${newInMelCloud.ervScenes.length ? `ERV: ${newInMelCloud.ervScenes.length}` : ''}.`, 'green');
+        }
+        if (removedDevicesCount || removedPresetsCount || removedSchedulesCount || removedScenesCount) {
+          updateInfo('info1', `Removed old ${removedDevicesCount ? `devices:` : ''} ${removedFromConfig.ata.length ? `ATA: ${removedFromConfig.ata.length},` : ''} ${removedFromConfig.atw.length ? `ATW: ${removedFromConfig.atw.length},` : ''} ${removedFromConfig.erv.length ? `ERV: ${removedFromConfig.erv.length},` : ''} ${removedPresetsCount ? `presets: ${removedPresetsCount},` : ''} ${removedSchedulesCount ? `schedules: ${removedSchedulesCount},` : ''} ${removedScenesCount ? `scenes: ${removedScenesCount}` : ''}.`, 'orange');
         }
 
         await homebridge.updatePluginConfig(pluginConfig);
         await homebridge.savePluginConfig(pluginConfig);
-
       } catch (error) {
-        updateInfo('info', `Prepare config error ${JSON.stringify(error)}`, 'red');
+        updateInfo('info', `Prepare config error`, "yellow");
+        updateInfo('info1', `Error: ${JSON.stringify(error)}`, "red");
       } finally {
         document.getElementById('logIn').className = "btn btn-secondary";
         homebridge.hideSpinner();
       }
     });
+
   })();
 </script>

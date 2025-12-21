@@ -3,7 +3,7 @@ import MelCloudErv from './melclouderv.js';
 import RestFul from './restful.js';
 import Mqtt from './mqtt.js';
 import Functions from './functions.js';
-import { TemperatureDisplayUnits, Ventilation } from './constants.js';
+import { TemperatureDisplayUnits, Ventilation, DeviceType } from './constants.js';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceErv extends EventEmitter {
@@ -31,7 +31,7 @@ class DeviceErv extends EventEmitter {
         this.device = device;
         this.deviceId = device.id;
         this.deviceName = device.name;
-        this.deviceTypeString = device.typeString;
+        this.deviceTypeString = DeviceType[device.type];
         this.displayType = device.displayType;
         this.temperatureSensor = device.temperatureSensor || false;
         this.temperatureOutdoorSensor = device.temperatureOutdoorSensor || false;

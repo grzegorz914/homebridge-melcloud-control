@@ -27,9 +27,9 @@ class PluginUiServer extends HomebridgePluginUiServer {
       return devicesList;
     } catch (error) {
       throw new Error(error);
-    };
-  };
-};
+    }
+  }
+}
 
 (() => {
   return new PluginUiServer();

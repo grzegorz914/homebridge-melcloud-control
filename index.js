@@ -6,7 +6,7 @@ import DeviceAta from './src/deviceata.js';
 import DeviceAtw from './src/deviceatw.js';
 import DeviceErv from './src/deviceerv.js';
 import ImpulseGenerator from './src/impulsegenerator.js';
-import { PluginName, PlatformName } from './src/constants.js';
+import { PluginName, PlatformName, DeviceType } from './src/constants.js';
 
 class MelCloudPlatform {
 	constructor(log, config, api) {
@@ -126,7 +126,7 @@ class MelCloudPlatform {
 									device.id = String(device.id);
 									const deviceName = device.name;
 									const deviceType = device.type;
-									const deviceTypeString = device.typeString;
+									const deviceTypeString = DeviceType[device.type];
 									const defaultTempsFile = `${prefDir}/${name}_${device.id}_Temps`;
 
 									//chack device is not disabled in config

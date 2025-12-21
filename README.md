@@ -243,37 +243,36 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | Key | Description |
 | --- | --- |
 | `name` | Here set the own account name. |
-| `user` | Here set the account username. |
-| `passwd` | Here set the account password. |
+| `user` | Here set the account credential (username). |
+| `passwd` | Here set the account credential (password). |
 | `language` | Here select the account language. |
 | `type` | Here select the account type `0 - None / Disabled`, `1 - MELCloud`, `2 - MELCloud Home`. |
 | `ataDevices[]` | Array of ATA devices created automatically after login to MELCloud from plugin config UI. |
 | `ataDevices[].id` | Read only data, do not change it. |
 | `ataDevices[].type` | Read only data, do not change it. |
-| `ataDevices[].typeString` | Read only data, do not change it. |
-| `ataDevices[].name` | Here You can change the `Accessory Name` which is exposed to the `Homebridge / HomeKit`. |
+| `ataDevices[].name` | Here set Your own name `Accessory Name` which is exposed to the `Homebridge / HomeKit`. |
 | `ataDevices[].displayType` | Here select device control mode `0 - None / Disabled`, `1 - Heater / Cooler`, `2 - Thermostat`. |
 | `ataDevices[].heatDryFanMode` | Here select the operatiing mode for `Heat`, if this mode is not supported, it will be disabled. |
 | `ataDevices[].coolDryFanMode` | Here select the operatiing mode for `Cool`, if this mode is not supported, it will be disabled. |
 | `ataDevices[].autoDryFanMode` | Here select the operatiing mode for `Auto`, if this mode is not supported, it will be disabled.. |
-| `ataDevices[].temperatureSensor` | This enable extra `Room` temperature sensor to use with automations in HomeKit app. |
-| `ataDevices[].temperatureOutdoorSensor` | This enable extra `Outdoor` temperature sensor to use with automations in HomeKit app. |
-| `ataDevices[].inStandbySensor` | This enable `In Standby Mode` sensor to use with automations in HomeKit app. |
-| `ataDevices[].connectSensor` | This enable `Connect State` sensor to use with automations in HomeKit app. |
-| `ataDevices[].errorSensor` | This enable `Error` sensor to use with automations in HomeKit app. |
-| `ataDevices[].frostProtectionSupport` | This enable extra `Frost Protection` control and sensors to use with automations in HomeKit app. |
-| `ataDevices[].overheatProtectionSupport` | This enable extra `Overheat Protection` control and sensors to use with automations in HomeKit app. |
-| `ataDevices[].holidayModeSupport` | This enable extra `Holiday Mode` control and sensors to use with automations in HomeKit app. |
+| `ataDevices[].temperatureSensor` | This enable extra `Room` temperature sensor and use in HomeKit automations. |
+| `ataDevices[].temperatureOutdoorSensor` | This enable extra `Outdoor` temperature sensor and use in HomeKit automations. |
+| `ataDevices[].inStandbySensor` | This enable `In Standby Mode` sensor and use in HomeKit automations. |
+| `ataDevices[].connectSensor` | This enable `Connect State` sensor and use in HomeKit automations. |
+| `ataDevices[].errorSensor` | This enable `Error` sensor and use in HomeKit automations. |
+| `ataDevices[].frostProtectionSupport` | This enable extra `Frost Protection` control and sensors and use in HomeKit automations. |
+| `ataDevices[].overheatProtectionSupport` | This enable extra `Overheat Protection` control and sensors and use in HomeKit automations. |
+| `ataDevices[].holidayModeSupport` | This enable extra `Holiday Mode` control and sensors and use in HomeKit automations. |
 | `ataDevices[].presets[]` | Array of ATA device `Presets` created automatically after login to MELCloud from plugin config UI. |
 | `ataDevices[].presets[].id` | Read only data, do not change it. |
-| `ataDevices[].presets[].name` | Here You can change the `Preset Name` which is exposed to the `Homebridge / HomeKit`. |
+| `ataDevices[].presets[].name` | Here set Your own name `Preset Name` which is exposed to the `Homebridge / HomeKit`. |
 | `ataDevices[].presets[].displayType` | Here select display type in HomeKit, `0 - None / Disabled`, `1 - Motion Sensor`, `2 - Occupancy Sensor`, `3 - Contact Sensor`, `4 - Switch + Motion Sensor`, `5 - Switch + Occupancy Sensor`, `6 - Switch + Contact Sensor`, `7 - Switch`. |
 | `ataDevices[].schedules[]` | Array of ATA device `Schedules` created automatically after login to MELCloud Home from plugin config UI. |
 | `ataDevices[].schedules[].id` | Read only data, do not change it. |
-| `ataDevices[].schedules[].name` | Here You can change the `Schedule Name` which is exposed to the `Homebridge / HomeKit`. |
+| `ataDevices[].schedules[].name` | Here set Your own name `Schedule Name` which is exposed to the `Homebridge / HomeKit`. |
 | `ataDevices[].schedules[].displayType` | Here select display type in HomeKit, `0 - None / Disabled`, `1 - Motion Sensor`, `2 - Occupancy Sensor`, `3 - Contact Sensor`, `4 - Switch + Motion Sensor`, `5 - Switch + Occupancy Sensor`, `6 - Switch + Contact Sensor`, `7 - Switch`. |
 | `ataDevices[].scenes[].id` | Read only data, do not change it. |
-| `ataDevices[].scenes[].name` | Here You can change the `Scene Name` which is exposed to the `Homebridge / HomeKit`. |
+| `ataDevices[].scenes[].name` | Here set Your own name `Scene Name` which is exposed to the `Homebridge / HomeKit`. |
 | `ataDevices[].scenes[].displayType` | Here select display type in HomeKit, `0 - None / Disabled`, `1 - Motion Sensor`, `2 - Occupancy Sensor`, `3 - Contact Sensor`, `4 - Switch + Motion Sensor`, `5 - Switch + Occupancy Sensor`, `6 - Switch + Contact Sensor`, `7 - Switch`. |
 | `ataDevices[].buttonsSensors[]` | Array of buttons sensors. |
 | `ataDevices[].buttonsSensors[].name` | Here set `Button Name` which You want expose to the `Homebridge / HomeKit`. |
@@ -283,33 +282,32 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `atwDevices[]` | Array of ATA devices created automatically after login to MELCloud from plugin config UI. |
 | `atwDevices[].id` | Read only data, do not change it. |
 | `atwDevices[].type` | Read only data, do not change it. |
-| `atwDevices[].typeString` | Read only data, do not change it. |
-| `atwDevices[].name` | Here You can change the `Accessory Name` which is exposed to the `Homebridge / HomeKit`. |
+| `atwDevices[].name` | Here set Your own name `Accessory Name` which is exposed to the `Homebridge / HomeKit`. |
 | `atwDevices[].displayType` | Here select main control mode `None / Disabled`, `Heater / Cooler`, `Thermostat`. |
 | `atwDevices[].hideZone` | Here select which zone need to be hidden `None / Disabled`, `Heat Pump`, `Heat Pump / Zone 1`, `Heat Pump / Zone 1 / Hot Water`, `Heat Pump / Zone 1 / Zone 2`, `Heat Pump / Hot Water`,`Heat Pump / Hot Water / Zone 2`, `Heat Pump / Zone 2`, `Zone 1`, `Zone 1 / Hot Water`, `Zone 1 / Hot Water / Zone 2`, `Zone 1 / Zone 2`, `Hot Water`, `Hot Water / Zone 2`, `Zone 2`, `All`. |
-| `atwDevices[].temperatureSensor` | This enable extra `Room` temperature sensor to use with automations in HomeKit app. |
-| `atwDevices[].temperatureFlowSensor` | This enable extra `Flow` temperature sensor to use with automations in HomeKit app. |
-| `atwDevices[].temperatureReturnSensor` | This enable extra `Return` temperature sensor to use with automations in HomeKit app. |
-| `atwDevices[].temperatureFlowZone1Sensor` | This enable extra `Flow Zone 1` temperature sensor to use with automations in HomeKit app. |
-| `atwDevices[].temperatureReturnZone1Sensor` | This enable extra `Return Zone 1` temperature sensor to use with automations in HomeKit app. |
-| `atwDevices[].temperatureFlowWaterTankSensor` | This enable extra `Flow Water Tank` temperature sensor to use with automations in HomeKit app. |
-| `atwDevices[].temperatureReturnWaterTankSensor` | This enable extra `Return Water Tank` temperature sensor to use with automations in HomeKit app. |
-| `atwDevices[].temperatureFlowZone2Sensor` | This enable extra `Flow Zone 2` temperature sensor to use with automations in HomeKit app. |
-| `atwDevices[].temperatureReturnZone2Sensor` | This enable extra `Return Zone 2` temperature sensor to use with automations in HomeKit app. |
-| `atwDevices[].inStandbySensor` | This enable `In Standby Mode` sensor to use with automations in HomeKit app. |
-| `atwDevices[].connectSensor` | This enable `Connect State` sensor to use with automations in HomeKit app. |
-| `atwDevices[].errorSensor` | This enable `Error` sensors to use with automations in HomeKit app. |
-| `atwDevices[].holidayModeSupport` | This enable extra `Holiday Mode` control and sensors to use with automations in HomeKit app. |
+| `atwDevices[].temperatureSensor` | This enable extra `Room` temperature sensor and use in HomeKit automations. |
+| `atwDevices[].temperatureFlowSensor` | This enable extra `Flow` temperature sensor and use in HomeKit automations. |
+| `atwDevices[].temperatureReturnSensor` | This enable extra `Return` temperature sensor and use in HomeKit automations. |
+| `atwDevices[].temperatureFlowZone1Sensor` | This enable extra `Flow Zone 1` temperature sensor and use in HomeKit automations. |
+| `atwDevices[].temperatureReturnZone1Sensor` | This enable extra `Return Zone 1` temperature sensor and use in HomeKit automations. |
+| `atwDevices[].temperatureFlowWaterTankSensor` | This enable extra `Flow Water Tank` temperature sensor and use in HomeKit automations. |
+| `atwDevices[].temperatureReturnWaterTankSensor` | This enable extra `Return Water Tank` temperature sensor and use in HomeKit automations. |
+| `atwDevices[].temperatureFlowZone2Sensor` | This enable extra `Flow Zone 2` temperature sensor and use in HomeKit automations. |
+| `atwDevices[].temperatureReturnZone2Sensor` | This enable extra `Return Zone 2` temperature sensor and use in HomeKit automations. |
+| `atwDevices[].inStandbySensor` | This enable `In Standby Mode` sensor and use in HomeKit automations. |
+| `atwDevices[].connectSensor` | This enable `Connect State` sensor and use in HomeKit automations. |
+| `atwDevices[].errorSensor` | This enable `Error` sensors and use in HomeKit automations. |
+| `atwDevices[].holidayModeSupport` | This enable extra `Holiday Mode` control and sensors and use in HomeKit automations. |
 | `atwDevices[].presets[]` | Array of ATW device `Presets` created automatically after login to MELCloud from plugin config UI. |
 | `atwDevices[].presets[].id` | Read only data, do not change it. |
-| `atwDevices[].presets[].name` | Here You can change the `Preset Name` which is exposed to the `Homebridge/HomeKit`. |
+| `atwDevices[].presets[].name` | Here set Your own name `Preset Name` which is exposed to the `Homebridge/HomeKit`. |
 | `atwDevices[].presets[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Motion Sensor`, `2 - Occupancy Sensor`, `3 - Contact Sensor`, `4 - Switch + Motion Sensor`, `5 - Switch + Occupancy Sensor`, `6 - Switch + Contact Sensor`, `7 - Switch`. |
 | `atwDevices[].schedules[]` | Array of ATW device `Schedules` created automatically after login to MELCloud Home from plugin config UI. |
 | `atwDevices[].schedules[].id` | Read only data, do not change it. |
-| `atwDevices[].schedules[].name` | Here You can change the `Schedule Name` which is exposed to the `Homebridge/HomeKit`. |
+| `atwDevices[].schedules[].name` | Here set Your own name `Schedule Name` which is exposed to the `Homebridge/HomeKit`. |
 | `atwDevices[].schedules[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Motion Sensor`, `2 - Occupancy Sensor`, `3 - Contact Sensor`, `4 - Switch + Motion Sensor`, `5 - Switch + Occupancy Sensor`, `6 - Switch + Contact Sensor`, `7 - Switch`. |
 | `atwDevices[].scenes[].id` | Read only data, do not change it. |
-| `atwDevices[].scenes[].name` | Here You can change the `Scene Name` which is exposed to the `Homebridge/HomeKit`. |
+| `atwDevices[].scenes[].name` | Here set Your own name `Scene Name` which is exposed to the `Homebridge/HomeKit`. |
 | `atwDevices[].scenes[].displayType` | Here select display type in HomeKit, `0 - None/Disabled`, `1 - Motion Sensor`, `2 - Occupancy Sensor`, `3 - Contact Sensor`, `4 - Switch + Motion Sensor`, `5 - Switch + Occupancy Sensor`, `6 - Switch + Contact Sensor`, `7 - Switch`. |
 | `atwDevices[].buttonsSensors[]` | Array of buttons sensors. |
 | `atwDevices[].buttonsSensors[].name` | Here set `Button Name` which You want expose to the `Homebridge / HomeKit`. |
@@ -319,26 +317,25 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ervDevices[]` | Array of ATA devices created automatically after login to MELCloud from plugin config UI. |
 | `ervDevices[].id` | Read only data, do not change it. |
 | `ervDevices[].type` | Read only data, do not change it. |
-| `ervDevices[].typeString` | Read only data, do not change it. |
-| `ervDevices[].name` | Here You can change the `Accessory Name` which is exposed to the `Homebridge / HomeKit`. |
+| `ervDevices[].name` | Here set Your own name `Accessory Name` which is exposed to the `Homebridge / HomeKit`. |
 | `ervDevices[].displayType` | Here select main control mode `None / Disabled`, `Heater / Cooler`, `Thermostat`. |
-| `ervDevices[].temperatureSensor` | This enable extra `Room` temperature sensor to use with automations in HomeKit app. |
-| `ervDevices[].temperatureOutdoorSensor` | This enable extra `Outdoor` temperature sensor to use with automations in HomeKit app. |
-| `ervDevices[].temperatureSupplySensor` | This enable extra `Supply` temperature sensor to use with automations in HomeKit app. |
-| `atwDevices[].inStandbySensor` | This enable `In Standby Mode` sensor to use with automations in HomeKit app. |
-| `ervDevices[].connectSensor` | This enable `Connect State` sensor to use with automations in HomeKit app. |
-| `ervDevices[].errorSensor` | This enable `Error` sensors to use with automations in HomeKit app. |
-| `ervDevices[].holidayModeSupport` | This enable extra `Holiday Mode` control and sensors to use with automations in HomeKit app. |
+| `ervDevices[].temperatureSensor` | This enable extra `Room` temperature sensor and use in HomeKit automations. |
+| `ervDevices[].temperatureOutdoorSensor` | This enable extra `Outdoor` temperature sensor and use in HomeKit automations. |
+| `ervDevices[].temperatureSupplySensor` | This enable extra `Supply` temperature sensor and use in HomeKit automations. |
+| `atwDevices[].inStandbySensor` | This enable `In Standby Mode` sensor and use in HomeKit automations. |
+| `ervDevices[].connectSensor` | This enable `Connect State` sensor and use in HomeKit automations. |
+| `ervDevices[].errorSensor` | This enable `Error` sensors and use in HomeKit automations. |
+| `ervDevices[].holidayModeSupport` | This enable extra `Holiday Mode` control and sensors and use in HomeKit automations. |
 | `ervDevices[].presets[]` | Array of ERV device `Presets` created automatically after login to MELCloud from plugin config UI. |
 | `ervDevices[].presets[].id` | Read only data, do not change it. |
-| `ervDevices[].presets[].name` | Here You can change the `Preset Name` which is exposed to the `Homebridge / HomeKit`. |
+| `ervDevices[].presets[].name` | Here set Your own name `Preset Name` which is exposed to the `Homebridge / HomeKit`. |
 | `ervDevices[].presets[].displayType` | Here select display type in HomeKit, `0 - None / Disabled`, `1 - Motion Sensor`, `2 - Occupancy Sensor`, `3 - Contact Sensor`, `4 - Switch + Motion Sensor`, `5 - Switch + Occupancy Sensor`, `6 - Switch + Contact Sensor`, `7 - Switch`. |
 | `ervDevices[].schedules[]` | Array of ERV device `Schedules` created automatically after login to MELCloud Home from plugin config UI. |
 | `ervDevices[].schedules[].id` | Read only data, do not change it. |
-| `ervDevices[].schedules[].name` | Here You can change the `Schedule Name` which is exposed to the `Homebridge / HomeKit`. |
+| `ervDevices[].schedules[].name` | Here set Your own name `Schedule Name` which is exposed to the `Homebridge / HomeKit`. |
 | `ervDevices[].schedules[].displayType` | Here select display type in HomeKit, `0 - None / Disabled`, `1 - Motion Sensor`, `2 - Occupancy Sensor`, `3 - Contact Sensor`, `4 - Switch + Motion Sensor`, `5 - Switch + Occupancy Sensor`, `6 - Switch + Contact Sensor`, `7 - Switch`. |
 | `ervDevices[].scenes[].id` | Read only data, do not change it. |
-| `ervDevices[].scenes[].name` | Here You can change the `Scene Name` which is exposed to the `Homebridge / HomeKit`. |
+| `ervDevices[].scenes[].name` | Here set Your own name `Scene Name` which is exposed to the `Homebridge / HomeKit`. |
 | `ervDevices[].scenes[].displayType` | Here select display type in HomeKit, `0 - None / Disabled`, `1 - Motion Sensor`, `2 - Occupancy Sensor`, `3 - Contact Sensor`, `4 - Switch + Motion Sensor`, `5 - Switch + Occupancy Sensor`, `6 - Switch + Contact Sensor`, `7 - Switch`. |
 | `ervDevices[].buttonsSensors[]` | Array of buttons sensors. |
 | `ervDevices[].buttonsSensors[].name` | Here set `Button Name` which You want expose to the `Homebridge / HomeKit`. |
@@ -347,16 +344,16 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | `ervDevices[].buttonsSensors[].namePrefix` | Here enable the accessory name as a prefix for button / sensor name. |
 | `refreshInterval` | Here set the background account data refresh time in (sec) , only for old MELCLoud, default `120s`. |
 | `log{}` | Log object. |
-| `log.deviceInfo` | If enabled, log device info will be displayed by every connections device to the network. |
-| `log.success` | If enabled, success log will be displayed in console. |
-| `log.info` | If enabled, info log will be displayed in console. |
-| `log.warn` | If enabled, warn log will be displayed in console. |
-| `log.error` | If enabled, error log will be displayed in console. |
-| `log.debug` | If enabled, debug log will be displayed in console. |
+| `log.deviceInfo` | This enable log device info will be displayed by every connections device to the network. |
+| `log.success` | This enable success log will be displayed in console. |
+| `log.info` | This enable info log will be displayed in console. |
+| `log.warn` | This enable warn log will be displayed in console. |
+| `log.error` | This enable error log will be displayed in console. |
+| `log.debug` | This enable debug log will be displayed in console. |
 | `restFul{}` | RSTful object. |
-| `restFul.enable` | If enabled, RESTful server will start automatically and respond to any path request. |
+| `restFul.enable` | This enable RESTful server will start automatically and respond to any path request. |
 | `mqtt{}` | MQTT object. |
-| `mqtt.enable` | If enabled, MQTT Broker will start automatically and publish all awailable PV data. |
+| `mqtt.enable` | This enable MQTT Broker will start automatically and publish all awailable PV data. |
 | `mqtt.host` | Here set the `IP Address` or `Hostname` for MQTT Broker. |
 | `mqtt.port` | Here set the `Port` for MQTT Broker, default 1883. |
 | `mqtt.clientId` | Here optional set the `Client Id` of MQTT Broker. |
