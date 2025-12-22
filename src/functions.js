@@ -60,11 +60,11 @@ class Functions extends EventEmitter {
             const osName = osOut.trim();
 
             const { stdout: archOut } = await execPromise('uname -m');
-            let arch = archOut.trim() || 'unknown';
+            const rawArch = archOut.trim() || 'unknown';
 
-            // Normalizacja architektury
-            if (arch.startsWith('arm') || arch.startsWith('aarch')) arch = 'arm';
-            else if (arch.includes('64')) arch = 'x64';
+            let arch;
+            if (/^aarch64|^arm/.test(rawArch)) arch = 'arm';
+            else if (rawArch === 'x86_64' || rawArch === 'amd64') arch = 'x64';
             else arch = 'x86';
 
             const isARM = arch === 'arm';
@@ -72,7 +72,7 @@ class Functions extends EventEmitter {
             const isLinux = osName === 'Linux';
             const isQnap = fs.existsSync('/etc/config/uLinux.conf') || fs.existsSync('/etc/config/qpkg.conf');
 
-            // Detect Docker
+            // Docker detection
             let isDocker = false;
             try {
                 await access('/.dockerenv');
@@ -84,20 +84,17 @@ class Functions extends EventEmitter {
                 if (stdout.includes('docker') || stdout.includes('containerd')) isDocker = true;
             } catch { }
 
-            const result = { path: null, arch, system: 'unknown' };
-
             /* ===================== macOS ===================== */
             if (isMac) {
                 const macCandidates = ['/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', '/Applications/Chromium.app/Contents/MacOS/Chromium'];
                 for (const path of macCandidates) {
                     try {
                         await access(path, fs.constants.X_OK);
-                        result.path = path;
-                        result.system = 'macOS';
-                        return result;
+                        return { path, arch, system: 'macOS' };
                     } catch { }
                 }
-                return result;
+
+                return { path: null, arch, system: 'macOS' };
             }
 
             /* ===================== QNAP ===================== */
@@ -106,9 +103,7 @@ class Functions extends EventEmitter {
                 for (const path of qnapCandidates) {
                     try {
                         await access(path, fs.constants.X_OK);
-                        result.path = path;
-                        result.system = 'Qnap';
-                        return result;
+                        return { path, arch, system: 'Qnap' };
                     } catch { }
                 }
 
@@ -118,97 +113,66 @@ class Functions extends EventEmitter {
                     await execPromise('opkg install chromium nspr nss libx11 libxcomposite libxdamage libxrandr atk libcups libdrm libgbm alsa-lib');
                     process.env.LD_LIBRARY_PATH = `/opt/lib:${process.env.LD_LIBRARY_PATH || ''}`;
                 } catch (error) {
-                    if (this.logError) this.emit('error', `Install package for Qnap error: ${error}`);
+                    if (this.logDebug) this.emit('debug', `Install Chromium for Qnap error: ${error}`);
+                    return { path: null, arch, system: 'Qnap' };
                 }
 
                 for (const path of qnapCandidates) {
                     try {
                         await access(path, fs.constants.X_OK);
-                        result.path = path;
-                        result.system = 'Qnap';
-                        return result;
+                        return { path, arch, system: 'Qnap' };
                     } catch { }
                 }
-                return result;
+
+                return { path: null, arch, system: 'Qnap' };
             }
 
-            /* ===================== Linux ARM ===================== */
-            if (isLinux && isARM) {
-                const armCandidates = ['/usr/bin/chromium-browser', '/usr/bin/chromium', '/snap/bin/chromium'];
-                for (const path of armCandidates) {
-                    try {
-                        await access(path, fs.constants.X_OK);
-                        result.path = path;
-                        result.system = 'Linux';
-                        return result;
-                    } catch { }
-                }
-
-                if (!isDocker) {
-                    try {
-                        await execPromise('sudo apt update -y');
-                        await execPromise('sudo apt install -y libnspr4 libnss3 libx11-6 libxcomposite1 libxdamage1 libxrandr2 libatk1.0-0 libcups2 libdrm2 libgbm1 libasound2');
-                        await execPromise('sudo apt install -y chromium chromium-browser chromium-codecs-ffmpeg');
-                    } catch (error) {
-                        if (this.logError) this.emit('error', `Install package for Linux ARM error: ${error}`);
-                    }
-                }
-
-                for (const path of armCandidates) {
-                    try {
-                        await access(path, fs.constants.X_OK);
-                        result.path = path;
-                        result.system = 'Linux';
-                        return result;
-                    } catch { }
-                }
-                return result;
-            }
-
-            /* ===================== Linux x64 ===================== */
+            /* ===================== Linux ===================== */
             if (isLinux) {
-                const linuxCandidates = ['/usr/bin/chromium', '/usr/bin/chromium-browser', '/usr/bin/google-chrome', '/snap/bin/chromium', '/usr/local/bin/chromium'];
-                try {
-                    const { stdout } = await execPromise('which chromium || which chromium-browser || which google-chrome');
-                    if (stdout.trim()) {
-                        result.path = stdout.trim();
-                        return result;
-                    }
-                } catch { }
+                const linuxCandidates = ['/usr/bin/google-chrome', '/usr/bin/chromium-browser', '/usr/bin/chromium'];
 
+                // Detect existing browser (ARM + x64)
                 for (const path of linuxCandidates) {
                     try {
                         await access(path, fs.constants.X_OK);
-                        result.path = path;
-                        result.system = 'Linux';
-                        return result;
+                        return { path, arch, system: isDocker ? 'Linux Docker' : (isARM ? 'Linux ARM' : 'Linux') };
                     } catch { }
                 }
 
+                // ARM → detect only
+                if (isARM) {
+                    return { path: null, arch, system: 'Linux ARM' };
+                }
+
+                // Docker → install Chrome
                 if (isDocker) {
                     try {
-                        await execPromise('apt update -y && apt install -y chromium');
+                        await execPromise('apt-get update -y');
+                        await execPromise('wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb');
+                        await execPromise('apt-get install -y ./google-chrome-stable_current_amd64.deb');
                     } catch (error) {
-                        if (this.logError) this.emit('error', `Install package for Linux Docker error: ${error}`);
+                        if (this.logDebug) this.emit('debug', `Install Chrome for Docker error: ${error}`);
+                        return { path: null, arch, system: 'Linux Docker' };
                     }
 
                     for (const path of linuxCandidates) {
                         try {
                             await access(path, fs.constants.X_OK);
-                            result.path = path;
-                            result.system = 'Linux Docker';
-                            return result;
+                            return { path, arch, system: 'Linux Docker' };
                         } catch { }
                     }
                 }
+
+                return { path: null, arch, system: isDocker ? 'Linux Docker' : 'Linux' };
             }
 
-            return result;
+            return { path: null, arch, system: 'unknown' };
         } catch (error) {
-            if (this.logError) this.emit('error', `Chromium detection error: ${error.message}`);
+            if (this.logDebug) this.emit('debug', `Chromium detection error: ${error.message}`);
             return { path: null, arch: 'unknown', system: 'unknown' };
         }
     }
+
 
     isValidValue(v) {
         return v !== undefined && v !== null && !(typeof v === 'number' && Number.isNaN(v));

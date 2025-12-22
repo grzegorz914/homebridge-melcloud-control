@@ -22,6 +22,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Do not use Homebridge UI > v5.5.0 because of break config.json
 
+# [4.5.6] - (22.12.2025)
+
+## Changes
+
+- improvements of arch detection
+- fix install chrome browser for docker image
+- cleanup
+
 # [4.5.5] - (21.12.2025)
 
 ## Changes
