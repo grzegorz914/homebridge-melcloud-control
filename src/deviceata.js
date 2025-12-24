@@ -1535,7 +1535,7 @@ class DeviceAta extends EventEmitter {
                     const supportsHeat = this.heatDryFanMode >= 1 && supportsHeat1;
                     const supportsDry = deviceData.Device[supportDryKey];
                     const supportsCool1 = deviceData.Device[supportCoolKey];
-                    const supportsCool = this.coolDryFanMode >= 1 && supportsCool1;
+                    const supportsCool = this.coolDryFanMode >= 1;
                     const numberOfFanSpeeds = deviceData.Device.NumberOfFanSpeeds;
                     const minTempHeat = deviceData.Device.MinTempHeat ?? 10;
                     const maxTempHeat = deviceData.Device.MaxTempHeat ?? 31;
@@ -1666,7 +1666,7 @@ class DeviceAta extends EventEmitter {
 
                             if (supportsAuto) operationModevalidValues.push(0);
                             if (supportsHeat) operationModevalidValues.push(1);
-                            if (supportsCool) operationModevalidValues.push(2);
+                            operationModevalidValues.push(2);
 
                             obj.operationModeSetPropsMinValue = operationModevalidValues[0];
                             obj.operationModeSetPropsMaxValue = operationModevalidValues.at(-1);
@@ -1750,7 +1750,7 @@ class DeviceAta extends EventEmitter {
 
                             operationModevalidValues.push(0);
                             if (supportsHeat) operationModevalidValues.push(1);
-                            if (supportsCool) operationModevalidValues.push(2);
+                            operationModevalidValues.push(2);
                             if (supportsAuto) operationModevalidValues.push(3);
 
                             obj.operationModeSetPropsMinValue = operationModevalidValues[0];

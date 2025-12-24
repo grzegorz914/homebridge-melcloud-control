@@ -97,7 +97,6 @@ class MelCloudErv extends EventEmitter {
                                 updateState = true;
                                 break;
                             case 'unitCommunicationRestored':
-                                timestamp = messageData.timestamp;
                                 deviceData.Device.IsConnected = true;
                                 break;
                             default:
