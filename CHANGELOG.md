@@ -17,10 +17,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - required Homebridge v2.0.0 and above
 - v4 Added support for MELCloud Home.
   - v4.1 Changed accessory category for ATA devices, required add accessory to KomeKit again
+  - v4.6 Added support for Homebridge UI >= v5.13.0
 
 ## Warning
 
-- Do not use Homebridge UI > v5.5.0 because of break config.json
+- For plugin < v4.6.0 use Homebridge UI <= v5.5.0
+- For plugin >= v4.6.0 use Homebridge UI >= v5.13.0
+
+# [4.6.0] - (28.12.2025)
+
+## Changes
+
+- added support for Homebridge UI >= v5.13.0, [#228](https://github.com/grzegorz914/homebridge-melcloud-control/issues/228)
+- config schema updated
+- cleanup
 
 # [4.5.7] - (24.12.2025)
 

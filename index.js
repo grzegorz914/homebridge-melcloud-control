@@ -115,13 +115,15 @@ class MelCloudPlatform {
 								//start account impulse generator
 								await melcloud.impulseGenerator.state(true, timmers, false);
 
-								//configured devices
-								const ataDevices = (account.ataDevices || []).filter(device => device.id != null && String(device.id) !== '0');
-								const atwDevices = (account.atwDevices || []).filter(device => device.id != null && String(device.id) !== '0');
-								const ervDevices = (account.ervDevices || []).filter(device => device.id != null && String(device.id) !== '0');
+								//filter configured devices
+								const devicesIds = (melcloudDevicesList.Devices ?? []).map(d => String(d.DeviceID));
+								const ataDevices = (account.ataDevices || []).filter(d => (d.displayType ?? 0) > 0 && devicesIds.includes(d.id));
+								const atwDevices = (account.atwDevices || []).filter(d => (d.displayType ?? 0) > 0 && devicesIds.includes(d.id));
+								const ervDevices = (account.ervDevices || []).filter(d => (d.displayType ?? 0) > 0 && devicesIds.includes(d.id));
 								const devices = [...ataDevices, ...atwDevices, ...ervDevices];
 								if (logLevel.debug) log.info(`${name}, found configured devices ATA: ${ataDevices.length}, ATW: ${atwDevices.length}, ERV: ${ervDevices.length}.`);
 
+								//loop through devices
 								for (const [index, device] of devices.entries()) {
 									device.id = String(device.id);
 									const deviceName = device.name;
@@ -129,31 +131,20 @@ class MelCloudPlatform {
 									const deviceTypeString = DeviceType[device.type];
 									const defaultTempsFile = `${prefDir}/${name}_${device.id}_Temps`;
 
-									//chack device is not disabled in config
-									const displayType = device.displayType;
-									if (!displayType) {
-										if (logLevel.warn) log.warn(`${name}, ${deviceTypeString}, ${deviceName}, disabled in configuration, will not be published in the Home app.`);
-										continue;
-									}
-
-									//chack device from config exist on melcloud
+									//device in melcloud
 									const deviceInMelCloud = melcloudDevicesList.Devices.find(d => d.DeviceID === device.id);
-									if (!deviceInMelCloud) {
-										if (logLevel.warn) log.warn(`${name}, ${deviceTypeString}, ${deviceName}, not exist on server, please login to MELCLoud from plugin UI to fix this issue.`);
-										continue;
-									}
 
 									//presets
 									const presetIds = (deviceInMelCloud.Presets ?? []).map(p => String(p.ID));
-									const presets = account.type === 'melcloud' ? (device.presets || []).filter(p => (p.displayType ?? 0) > 0 && p.id !== '0' && presetIds.includes(p.id)) : [];
+									const presets = account.type === 'melcloud' ? (device.presets || []).filter(p => (p.displayType ?? 0) > 0 && presetIds.includes(p.id)) : [];
 
 									//schedules
 									const schedulesIds = (deviceInMelCloud.Schedule ?? []).map(s => String(s.Id));
-									const schedules = account.type === 'melcloudhome' ? (device.schedules || []).filter(s => (s.displayType ?? 0) > 0 && s.id !== '0' && schedulesIds.includes(s.id)) : [];
+									const schedules = account.type === 'melcloudhome' ? (device.schedules || []).filter(s => (s.displayType ?? 0) > 0 && schedulesIds.includes(s.id)) : [];
 
 									//scenes
 									const scenesIds = (melcloudDevicesList.Scenes ?? []).map(s => String(s.Id));
-									const scenes = account.type === 'melcloudhome' ? (device.scenes || []).filter(s => (s.displayType ?? 0) > 0 && s.id !== '0' && scenesIds.includes(s.id)) : [];
+									const scenes = account.type === 'melcloudhome' ? (device.scenes || []).filter(s => (s.displayType ?? 0) > 0 && scenesIds.includes(s.id)) : [];
 
 									//buttons
 									const buttons = (device.buttonsSensors || []).filter(b => (b.displayType ?? 0) > 0);

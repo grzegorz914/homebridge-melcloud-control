@@ -77,7 +77,7 @@
       <div class="mb-2">
         <label for="accountType" class="form-label">Account Type</label>
         <select id="accountType" name="accountType" class="form-control">
-          <option value="disabled">None/Disabled</option>
+          <option value="disabled">Disabled</option>
           <option value="melcloud">MELCloud</option>
           <option value="melcloudhome">MELCloud Home</option>
         </select>
@@ -279,9 +279,9 @@
         };
 
         // Clean up local config
-        account.ataDevices = (account.ataDevices ?? []).filter(d => String(d.id) !== '0');
-        account.atwDevices = (account.atwDevices ?? []).filter(d => String(d.id) !== '0');
-        account.ervDevices = (account.ervDevices ?? []).filter(d => String(d.id) !== '0');
+        account.ataDevices = (account.ataDevices ?? []).filter(d => String(d.id) !== '0' && String(d.id) !== null);
+        account.atwDevices = (account.atwDevices ?? []).filter(d => String(d.id) !== '0' && String(d.id) !== null);
+        account.ervDevices = (account.ervDevices ?? []).filter(d => String(d.id) !== '0' && String(d.id) !== null);
 
         const removedFromConfig = { ata: [], atw: [], erv: [], presets: [], schedules: [], scenes: [] };
         removedFromConfig.ata = removeStaleEntities(account.ataDevices, devicesInMelCloudByType.ata, d => d.id, d => d.DeviceID);
@@ -313,7 +313,7 @@
 
             // PRESETS (melcloud)
             if (account.type === 'melcloud') {
-              deviceInConfig.presets = (deviceInConfig.presets ?? []).filter(p => String(p.id) !== '0');
+              deviceInConfig.presets = (deviceInConfig.presets ?? []).filter(p => String(p.id) !== '0' && String(p.id) !== null);
               const presetsInMelCloud = device.Presets ?? [];
               removedFromConfig.presets.push(...removeStaleEntities(deviceInConfig.presets, presetsInMelCloud, p => p.id, p => p.ID));
               const presetIds = new Set(deviceInConfig.presets.map(p => String(p.id)));
@@ -335,7 +335,7 @@
             // SCHEDULES & SCENES (melcloudhome)
             if (account.type === 'melcloudhome') {
               // SCHEDULES
-              deviceInConfig.schedules = (deviceInConfig.schedules ?? []).filter(s => String(s.id) !== '0');
+              deviceInConfig.schedules = (deviceInConfig.schedules ?? []).filter(s => String(s.id) !== '0' && String(s.id) !== null);
               const schedulesInMelCloud = device.Schedule ?? [];
               removedFromConfig.schedules.push(...removeStaleEntities(deviceInConfig.schedules, schedulesInMelCloud, s => s.id, s => s.Id));
               const scheduleIds = new Set(deviceInConfig.schedules.map(s => String(s.id)));
@@ -354,7 +354,7 @@
               });
 
               // SCENES
-              deviceInConfig.scenes = (deviceInConfig.scenes ?? []).filter(s => String(s.id) !== '0');
+              deviceInConfig.scenes = (deviceInConfig.scenes ?? []).filter(s => String(s.id) !== '0' && String(s.id) !== null);
               const scenesForDevice = unitIdToScenes.get(deviceId) ?? [];
               removedFromConfig.scenes.push(...removeStaleEntities(deviceInConfig.scenes, scenesForDevice, s => s.id, s => s.Id));
               const sceneIds = new Set(deviceInConfig.scenes.map(s => String(s.id)));
