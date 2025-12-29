@@ -1,14 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MELCloud Account Configuration</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
-</head>
-
 <div class="container mt-3">
   <div class="text-center">
     <img src="homebridge-melcloud-control.png" alt="Image" height="120" />
@@ -177,7 +166,7 @@
       formElements.logIn.disabled = !(account.name && account.user && account.passwd && account.language && account.type);
 
       await homebridge.updatePluginConfig(pluginConfig);
-      await homebridge.savePluginConfig(pluginConfig);
+      await homebridge.savePluginConfig();
     });
 
     document.getElementById('melCloudAccount').style.display = 'block';
@@ -250,9 +239,12 @@
     // Login & Sync Logic
     document.getElementById('logIn').addEventListener('click', async () => {
       document.getElementById('logIn').className = "btn btn-primary";
-      updateInfo('info', 'Connecting to MELCloud', 'white');
-      updateInfo('info1', '', 'white');
-      updateInfo('info2', '', 'white');
+      const lightingMode = homebridge.userCurrentLightingMode();
+      const fontColor = lightingMode === 'dark' ? 'black' : 'white';
+
+      updateInfo('info', 'Connecting to MELCloud', fontColor);
+      updateInfo('info1', '', fontColor);
+      updateInfo('info2', '', fontColor);
       homebridge.showSpinner();
 
       try {
@@ -279,10 +271,6 @@
         };
 
         // Clean up local config
-        account.ataDevices = (account.ataDevices ?? []).filter(d => String(d.id) !== '0' && String(d.id) !== null);
-        account.atwDevices = (account.atwDevices ?? []).filter(d => String(d.id) !== '0' && String(d.id) !== null);
-        account.ervDevices = (account.ervDevices ?? []).filter(d => String(d.id) !== '0' && String(d.id) !== null);
-
         const removedFromConfig = { ata: [], atw: [], erv: [], presets: [], schedules: [], scenes: [] };
         removedFromConfig.ata = removeStaleEntities(account.ataDevices, devicesInMelCloudByType.ata, d => d.id, d => d.DeviceID);
         removedFromConfig.atw = removeStaleEntities(account.atwDevices, devicesInMelCloudByType.atw, d => d.id, d => d.DeviceID);
@@ -393,7 +381,7 @@
         const removedScenesCount = removedFromConfig.scenes.length;
 
         if (!newDevicesCount && !newPresetsCount && !newSchedulesCount && !newScenesCount && !removedDevicesCount && !removedPresetsCount && !removedSchedulesCount && !removedScenesCount) {
-          updateInfo('info', 'No changes detected.', 'white');
+          updateInfo('info', 'No changes detected.', fontColor);
         }
         if (newDevicesCount || newPresetsCount || newSchedulesCount || newScenesCount) {
           updateInfo('info', `Found new ${newDevicesCount ? `devices:` : ''} ${newInMelCloud.ata.length ? `ATA: ${newInMelCloud.ata.length},` : ''} ${newInMelCloud.atw.length ? `ATW: ${newInMelCloud.atw.length},` : ''} ${newInMelCloud.erv.length ? `ERV: ${newInMelCloud.erv.length},` : ''} ${newPresetsCount ? `presets:` : ''} ${newInMelCloud.ataPresets.length ? `ATA: ${newInMelCloud.ataPresets.length},` : ''} ${newInMelCloud.atwPresets.length ? `ATW: ${newInMelCloud.atwPresets.length}, ` : ''} ${newInMelCloud.ervPresets.length ? `ERV: ${newInMelCloud.ervPresets.length},` : ''} ${newSchedulesCount ? `schedules:` : ''} ${newInMelCloud.ataSchedules.length ? `ATA: ${newInMelCloud.ataSchedules.length},` : ''} ${newInMelCloud.atwSchedules.length ? `ATW: ${newInMelCloud.atwSchedules.length},` : ''} ${newInMelCloud.ervSchedules.length ? `ERV: ${newInMelCloud.ervSchedules.length}, ` : ''} ${newScenesCount ? `scenes:` : ''} ${newInMelCloud.ataScenes.length ? `ATA: ${newInMelCloud.ataScenes.length},` : ''} ${newInMelCloud.atwScenes.length ? `ATW: ${newInMelCloud.atwScenes.length},` : ''} ${newInMelCloud.ervScenes.length ? `ERV: ${newInMelCloud.ervScenes.length}` : ''}.`, 'green');
@@ -403,9 +391,9 @@
         }
 
         await homebridge.updatePluginConfig(pluginConfig);
-        await homebridge.savePluginConfig(pluginConfig);
+        await homebridge.savePluginConfig();
       } catch (error) {
-        updateInfo('info', `Prepare config error`, "yellow");
+        updateInfo('info', `Prepare config error`, "red");
         updateInfo('info1', `Error: ${JSON.stringify(error)}`, "red");
       } finally {
         document.getElementById('logIn').className = "btn btn-secondary";

@@ -330,7 +330,7 @@ class MelCloudHome extends EventEmitter {
                                     })
                                     .on('message', (message) => {
                                         const parsedMessage = JSON.parse(message);
-                                        if (!this.logDebug) this.emit('debug', `Incoming message: ${JSON.stringify(parsedMessage, null, 2)}`);
+                                        if (this.logDebug) this.emit('debug', `Incoming message: ${JSON.stringify(parsedMessage, null, 2)}`);
                                         if (parsedMessage.message === 'Forbidden') return;
 
                                         this.emit('webSocket', parsedMessage);

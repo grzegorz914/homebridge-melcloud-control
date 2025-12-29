@@ -241,8 +241,7 @@
                   },
                   "type": {
                     "title": "Type",
-                    "type": "integer",
-                    "default": 0
+                    "type": "integer"
                   },
                   "displayType": {
                     "title": "Display Type",
@@ -274,7 +273,7 @@
                   "name": {
                     "title": "Name",
                     "type": "string",
-                    "default": "Air Conditioner",
+                    "placeholder": "Air Conditioner Name",
                     "description": "Here set Your own name displayed in HomeKit."
                   },
                   "heatDryFanMode": {
@@ -362,37 +361,37 @@
                     "title": "Room",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra room temperature sensor and use in HomeKit automations."
+                    "description": "This enable extra room temperature sensor to use with HomeKit automations."
                   },
                   "temperatureOutdoorSensor": {
                     "title": "Outdoor",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra outdoor temperature sensor and use in HomeKit automations."
+                    "description": "This enable extra outdoor temperature sensor to use with HomeKit automations."
                   },
                   "inStandbySensor": {
                     "title": "In Standby",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable in standby mode sensor and use in HomeKit automations."
+                    "description": "This enable in standby mode sensor to use with HomeKit automations."
                   },
                   "connectSensor": {
                     "title": "Connect",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable connect state sensor and use in HomeKit automations."
+                    "description": "This enable connect state sensor to use with HomeKit automations."
                   },
                   "errorSensor": {
                     "title": "Error",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable error sensor and use in HomeKit automations."
+                    "description": "This enable error sensor to use with HomeKit automations."
                   },
                   "frostProtectionSupport": {
                     "title": "Frost Protection Support",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable frost protection control and sensors and use in HomeKit automations.",
+                    "description": "This enable frost protection control and sensors to use with HomeKit automations.",
                     "condition": {
                       "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
                     }
@@ -401,7 +400,7 @@
                     "title": "Overheat Protection Support",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable overheat protection control and sensors and use in HomeKit automations.",
+                    "description": "This enable overheat protection control and sensors to use with HomeKit automations.",
                     "condition": {
                       "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
                     }
@@ -410,7 +409,7 @@
                     "title": "Holiday Mode Support",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable holiday mode control and sensors and use in HomeKit automations.",
+                    "description": "This enable holiday mode control and sensors to use with HomeKit automations.",
                     "condition": {
                       "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
                     }
@@ -485,7 +484,7 @@
                         "name": {
                           "title": "Name",
                           "type": "string",
-                          "default": "Preset",
+                          "placeholder": "Preset Name",
                           "description": "Here set Your own name displayed in HomeKit."
                         },
                         "namePrefix": {
@@ -567,7 +566,7 @@
                         "name": {
                           "title": "Name",
                           "type": "string",
-                          "default": "Schedule",
+                          "placeholder": "Schedule Name",
                           "description": "Here set Your own name displayed in HomeKit."
                         },
                         "namePrefix": {
@@ -652,7 +651,7 @@
                         "name": {
                           "title": "Name",
                           "type": "string",
-                          "default": "Scene",
+                          "placeholder": "Scene Name",
                           "description": "Here set Your own name displayed in HomeKit."
                         },
                         "namePrefix": {
@@ -961,7 +960,7 @@
                         "name": {
                           "title": "Name",
                           "type": "string",
-                          "default": "Button",
+                          "placeholder": "Function Name",
                           "description": "Here set Your own name displayed in HomeKit."
                         },
                         "namePrefix": {
@@ -988,13 +987,12 @@
                   },
                   "type": {
                     "title": "Type",
-                    "type": "integer",
-                    "default": 1
+                    "type": "integer"
                   },
                   "name": {
                     "title": "Name",
                     "type": "string",
-                    "default": "Heat Pump",
+                    "placeholder": "Heat Pump Name",
                     "description": "Here set Your own name displayed in HomeKit."
                   },
                   "displayType": {
@@ -1127,79 +1125,79 @@
                     "title": "Temperature Sensor Room",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra temperature sensor and use in HomeKit automations."
+                    "description": "This enable extra temperature sensor to use with HomeKit automations."
                   },
                   "temperatureFlowSensor": {
                     "title": "Temperature Sensor Flow",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra Flow temperature sensor and use in HomeKit automations."
+                    "description": "This enable extra Flow temperature sensor to use with HomeKit automations."
                   },
                   "temperatureReturnSensor": {
                     "title": "Temperature Sensor Return",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra Return temperature sensor and use in HomeKit automations."
+                    "description": "This enable extra Return temperature sensor to use with HomeKit automations."
                   },
                   "temperatureFlowZone1Sensor": {
                     "title": "Temperature Sensor Flow Zone 1",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra Flow Zone 1 temperature sensor and use in HomeKit automations."
+                    "description": "This enable extra Flow Zone 1 temperature sensor to use with HomeKit automations."
                   },
                   "temperatureReturnZone1Sensor": {
                     "title": "Temperature Sensor Return Zone 1",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra Return Zone 1 temperature sensor and use in HomeKit automations."
+                    "description": "This enable extra Return Zone 1 temperature sensor to use with HomeKit automations."
                   },
                   "temperatureFlowWaterTankSensor": {
                     "title": "Temperature Sensor Flow Water Tank",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra Flow Water Tank temperature sensor and use in HomeKit automations."
+                    "description": "This enable extra Flow Water Tank temperature sensor to use with HomeKit automations."
                   },
                   "temperatureReturnWaterTankSensor": {
                     "title": "Temperature Sensor Return Water Tank",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra Return Water Tank temperature sensor and use in HomeKit automations."
+                    "description": "This enable extra Return Water Tank temperature sensor to use with HomeKit automations."
                   },
                   "temperatureFlowZone2Sensor": {
                     "title": "Temperature Sensor Flow Zone 2",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra Flow Zone 2 temperature sensor and use in HomeKit automations."
+                    "description": "This enable extra Flow Zone 2 temperature sensor to use with HomeKit automations."
                   },
                   "temperatureReturnZone2Sensor": {
                     "title": "Temperature Sensor Return Zone 2",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra Return Zone 2 temperature sensor and use in HomeKit automations."
+                    "description": "This enable extra Return Zone 2 temperature sensor to use with HomeKit automations."
                   },
                   "inStandbySensor": {
                     "title": "In Standby",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable in standby mode sensor and use in HomeKit automations."
+                    "description": "This enable in standby mode sensor to use with HomeKit automations."
                   },
                   "connectSensor": {
                     "title": "Connect",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable connect state sensor and use in HomeKit automations."
+                    "description": "This enable connect state sensor to use with HomeKit automations."
                   },
                   "errorSensor": {
                     "title": "Error",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable error sensor and use in HomeKit automations."
+                    "description": "This enable error sensor to use with HomeKit automations."
                   },
                   "frostProtectionSupport": {
                     "title": "Frost Protection Support",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable frost protection control and sensors and use in HomeKit automations.",
+                    "description": "This enable frost protection control and sensors to use with HomeKit automations.",
                     "condition": {
                       "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
                     }
@@ -1208,7 +1206,7 @@
                     "title": "Holiday Mode Support",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable holiday mode control and sensors and use in HomeKit automations.",
+                    "description": "This enable holiday mode control and sensors to use with HomeKit automations.",
                     "condition": {
                       "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
                     }
@@ -1283,7 +1281,7 @@
                         "name": {
                           "title": "Name",
                           "type": "string",
-                          "default": "Preset",
+                          "placeholder": "Preset Name",
                           "description": "Here set Your own name displayed in HomeKit."
                         },
                         "namePrefix": {
@@ -1365,7 +1363,7 @@
                         "name": {
                           "title": "Name",
                           "type": "string",
-                          "default": "Schedule",
+                          "placeholder": "Schedule Name",
                           "description": "Here set Your own name displayed in HomeKit."
                         },
                         "namePrefix": {
@@ -1447,7 +1445,7 @@
                         "name": {
                           "title": "Name",
                           "type": "string",
-                          "default": "Scene",
+                          "placeholder": "Scene Name",
                           "description": "Here set Your own name displayed in HomeKit."
                         },
                         "namePrefix": {
@@ -1460,7 +1458,7 @@
                     }
                   },
                   "buttonsSensors": {
-                    "title": "Button",
+                    "title": "Button / Sensor",
                     "type": "array",
                     "items": {
                       "type": "object",
@@ -1669,7 +1667,7 @@
                         "name": {
                           "title": "Name",
                           "type": "string",
-                          "default": "Button",
+                          "placeholder": "Function Name",
                           "description": "Here set Your own name displayed in HomeKit."
                         },
                         "namePrefix": {
@@ -1696,13 +1694,12 @@
                   },
                   "type": {
                     "title": "Type",
-                    "type": "integer",
-                    "default": 3
+                    "type": "integer"
                   },
                   "name": {
                     "title": "Name",
                     "type": "string",
-                    "default": "Ventilation",
+                    "placeholder": "Ventilation Name",
                     "description": "Here set Your own name displayed in HomeKit."
                   },
                   "displayType": {
@@ -1730,43 +1727,43 @@
                     "title": "Temperature Sensor Room",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra temperature sensor and use in HomeKit automations."
+                    "description": "This enable extra temperature sensor to use with HomeKit automations."
                   },
                   "temperatureOutdoorSensor": {
                     "title": "Temperature Sensor Outdoor",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra outdoor temperature sensor and use in HomeKit automations."
+                    "description": "This enable extra outdoor temperature sensor to use with HomeKit automations."
                   },
                   "temperatureSensorSupply": {
                     "title": "Temperature Sensor Supply",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable extra supply temperature sensor and use in HomeKit automations."
+                    "description": "This enable extra supply temperature sensor to use with HomeKit automations."
                   },
                   "inStandbySensor": {
                     "title": "In Standby",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable in standby mode sensor and use in HomeKit automations."
+                    "description": "This enable in standby mode sensor to use with HomeKit automations."
                   },
                   "connectSensor": {
                     "title": "Connect",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable connect state sensor and use in HomeKit automations."
+                    "description": "This enable connect state sensor to use with HomeKit automations."
                   },
                   "errorSensor": {
                     "title": "Error",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable error sensor and use in HomeKit automations."
+                    "description": "This enable error sensor to use with HomeKit automations."
                   },
                   "holidayModeSupport": {
                     "title": "Holiday Mode Support",
                     "type": "boolean",
                     "default": false,
-                    "description": "This enable holiday mode control and sensors and use in HomeKit automations.",
+                    "description": "This enable holiday mode control and sensors to use with HomeKit automations.",
                     "condition": {
                       "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
                     }
@@ -1841,7 +1838,7 @@
                         "name": {
                           "title": "Name",
                           "type": "string",
-                          "default": "Preset",
+                          "placeholder": "Preset Name",
                           "description": "Here set Your own name displayed in Homebridge / Homebridge / HomeKit app."
                         },
                         "namePrefix": {
@@ -1926,7 +1923,7 @@
                         "name": {
                           "title": "Name",
                           "type": "string",
-                          "default": "Preset",
+                          "placeholder": "Schedule Name",
                           "description": "Here set Your own name displayed in HomeKit."
                         },
                         "namePrefix": {
@@ -2008,7 +2005,7 @@
                         "name": {
                           "title": "Name",
                           "type": "string",
-                          "default": "Scene",
+                          "placeholder": "Scene Name",
                           "description": "Here set Your own name displayed in HomeKit."
                         },
                         "namePrefix": {
@@ -2179,7 +2176,7 @@
                         "name": {
                           "title": "Name",
                           "type": "string",
-                          "default": "Button",
+                          "placeholder": "Function Name",
                           "description": "Here set Your own name displayed in HomeKit."
                         },
                         "namePrefix": {
@@ -2374,7 +2371,7 @@
                 {
                   "key": "accounts[].ataDevices",
                   "type": "tabarray",
-                  "title": "{{ value.name || '' }}",
+                  "title": "{{ value.name || 'Air Conditioner' }}",
                   "items": [
                     {
                       "key": "accounts[].ataDevices[]",
@@ -2394,10 +2391,7 @@
                             "accounts[].ataDevices[].name",
                             "accounts[].ataDevices[].heatDryFanMode",
                             "accounts[].ataDevices[].coolDryFanMode",
-                            "accounts[].ataDevices[].autoDryFanMode",
-                            "accounts[].ataDevices[].frostProtectionSupport",
-                            "accounts[].ataDevices[].overheatProtectionSupport",
-                            "accounts[].ataDevices[].holidayModeSupport"
+                            "accounts[].ataDevices[].autoDryFanMode"
                           ]
                         },
                         {
@@ -2410,7 +2404,7 @@
                             {
                               "key": "accounts[].ataDevices[].presets",
                               "type": "tabarray",
-                              "title": "{{ value.name || '' }}",
+                              "title": "{{ value.name || 'Preset' }}",
                               "items": [
                                 {
                                   "key": "accounts[].ataDevices[].presets[].id",
@@ -2436,7 +2430,7 @@
                             {
                               "key": "accounts[].ataDevices[].scenes",
                               "type": "tabarray",
-                              "title": "{{ value.name || '' }}",
+                              "title": "{{ value.name || 'Scene' }}",
                               "items": [
                                 {
                                   "key": "accounts[].ataDevices[].scenes[].id",
@@ -2462,7 +2456,7 @@
                             {
                               "key": "accounts[].ataDevices[].schedules",
                               "type": "tabarray",
-                              "title": "{{ value.name || '' }}",
+                              "title": "{{ value.name || 'Schedule' }}",
                               "items": [
                                 {
                                   "key": "accounts[].ataDevices[].schedules[].id",
@@ -2479,39 +2473,42 @@
                           }
                         },
                         {
-                          "title": "Buttons / Sensors",
+                          "title": "Monitoring And Control",
                           "type": "section",
-                          "description": "Section for setup control buttons / sensors",
+                          "description": "Section for setup additional monitoring and control functions.",
                           "expandable": true,
                           "expanded": false,
                           "items": [
                             {
                               "key": "accounts[].ataDevices[]",
                               "type": "tabarray",
-                              "title": "{{ value.name || '' }}",
+                              "title": "{{ value.title }}",
                               "items": [
                                 {
-                                  "title": "Temperature",
+                                  "title": "Sensors",
                                   "items": [
                                     "accounts[].ataDevices[].temperatureSensor",
-                                    "accounts[].ataDevices[].temperatureOutdoorSensor"
-                                  ]
-                                },
-                                {
-                                  "title": "System",
-                                  "items": [
+                                    "accounts[].ataDevices[].temperatureOutdoorSensor",
                                     "accounts[].ataDevices[].inStandbySensor",
                                     "accounts[].ataDevices[].connectSensor",
                                     "accounts[].ataDevices[].errorSensor"
                                   ]
                                 },
                                 {
-                                  "title": "Custom",
+                                  "title": "Functions",
+                                  "items": [
+                                    "accounts[].ataDevices[].frostProtectionSupport",
+                                    "accounts[].ataDevices[].overheatProtectionSupport",
+                                    "accounts[].ataDevices[].holidayModeSupport"
+                                  ]
+                                },
+                                {
+                                  "title": "Custom Functions",
                                   "items": [
                                     {
                                       "key": "accounts[].ataDevices[].buttonsSensors",
                                       "type": "tabarray",
-                                      "title": "{{ value.name || '' }}",
+                                      "title": "{{ value.name || 'Function' }}",
                                       "items": [
                                         "accounts[].ataDevices[].buttonsSensors[].displayType",
                                         "accounts[].ataDevices[].buttonsSensors[].mode",
@@ -2537,7 +2534,7 @@
                 {
                   "key": "accounts[].atwDevices",
                   "type": "tabarray",
-                  "title": "{{ value.name || '' }}",
+                  "title": "{{ value.name || 'Heat Pump' }}",
                   "items": [
                     {
                       "key": "accounts[].atwDevices[]",
@@ -2555,9 +2552,7 @@
                           "expanded": false,
                           "items": [
                             "accounts[].atwDevices[].hideZone",
-                            "accounts[].atwDevices[].name",
-                            "accounts[].atwDevices[].frostProtectionSupport",
-                            "accounts[].atwDevices[].holidayModeSupport"
+                            "accounts[].atwDevices[].name"
                           ]
                         },
                         {
@@ -2570,7 +2565,7 @@
                             {
                               "key": "accounts[].atwDevices[].presets",
                               "type": "tabarray",
-                              "title": "{{ value.name || '' }}",
+                              "title": "{{ value.name || 'Preset' }}",
                               "items": [
                                 {
                                   "key": "accounts[].atwDevices[].presets[].id",
@@ -2596,7 +2591,7 @@
                             {
                               "key": "accounts[].atwDevices[].scenes",
                               "type": "tabarray",
-                              "title": "{{ value.name || '' }}",
+                              "title": "{{ value.name || 'Scene' }}",
                               "items": [
                                 {
                                   "key": "accounts[].atwDevices[].scenes[].id",
@@ -2622,7 +2617,7 @@
                             {
                               "key": "accounts[].atwDevices[].schedules",
                               "type": "tabarray",
-                              "title": "{{ value.name || '' }}",
+                              "title": "{{ value.name || 'Schedule' }}",
                               "items": [
                                 {
                                   "key": "accounts[].atwDevices[].schedules[].id",
@@ -2639,19 +2634,19 @@
                           }
                         },
                         {
-                          "title": "Buttons / Sensors",
+                          "title": "Monitoring And Control",
                           "type": "section",
-                          "description": "Section for setup control buttons / sensors",
+                          "description": "Section for setup additional monitoring and control functions.",
                           "expandable": true,
                           "expanded": false,
                           "items": [
                             {
                               "key": "accounts[].atwDevices[]",
                               "type": "tabarray",
-                              "title": "{{ value.name || '' }}",
+                              "title": "{{ value.title }}",
                               "items": [
                                 {
-                                  "title": "Temperature",
+                                  "title": "Sensors",
                                   "items": [
                                     "accounts[].atwDevices[].temperatureSensor",
                                     "accounts[].atwDevices[].temperatureFlowSensor",
@@ -2661,24 +2656,26 @@
                                     "accounts[].atwDevices[].temperatureFlowWaterTankSensor",
                                     "accounts[].atwDevices[].temperatureReturnWaterTankSensor",
                                     "accounts[].atwDevices[].temperatureFlowZone2Sensor",
-                                    "accounts[].atwDevices[].temperatureReturnZone2Sensor"
-                                  ]
-                                },
-                                {
-                                  "title": "System",
-                                  "items": [
+                                    "accounts[].atwDevices[].temperatureReturnZone2Sensor",
                                     "accounts[].atwDevices[].inStandbySensor",
                                     "accounts[].atwDevices[].connectSensor",
                                     "accounts[].atwDevices[].errorSensor"
                                   ]
                                 },
                                 {
-                                  "title": "Custom",
+                                  "title": "Functions",
+                                  "items": [
+                                    "accounts[].atwDevices[].frostProtectionSupport",
+                                    "accounts[].atwDevices[].holidayModeSupport"
+                                  ]
+                                },
+                                {
+                                  "title": "Custom Functions",
                                   "items": [
                                     {
                                       "key": "accounts[].atwDevices[].buttonsSensors",
                                       "type": "tabarray",
-                                      "title": "{{ value.name || '' }}",
+                                      "title": "{{ value.name || 'Function' }}",
                                       "items": [
                                         "accounts[].atwDevices[].buttonsSensors[].displayType",
                                         "accounts[].atwDevices[].buttonsSensors[].mode",
@@ -2704,7 +2701,7 @@
                 {
                   "key": "accounts[].ervDevices",
                   "type": "tabarray",
-                  "title": "{{ value.name || '' }}",
+                  "title": "{{ value.name || 'Ventilation' }}",
                   "items": [
                     {
                       "key": "accounts[].ervDevices[]",
@@ -2721,8 +2718,7 @@
                           "expandable": true,
                           "expanded": false,
                           "items": [
-                            "accounts[].ervDevices[].name",
-                            "accounts[].ervDevices[].holidayModeSupport"
+                            "accounts[].ervDevices[].name"
                           ]
                         },
                         {
@@ -2735,7 +2731,7 @@
                             {
                               "key": "accounts[].ervDevices[].presets",
                               "type": "tabarray",
-                              "title": "{{ value.name || '' }}",
+                              "title": "{{ value.name || 'Preset' }}",
                               "items": [
                                 {
                                   "key": "accounts[].ervDevices[].presets[].id",
@@ -2761,7 +2757,7 @@
                             {
                               "key": "accounts[].ervDevices[].scenes",
                               "type": "tabarray",
-                              "title": "{{ value.name || '' }}",
+                              "title": "{{ value.name || 'Scene' }}",
                               "items": [
                                 {
                                   "key": "accounts[].ervDevices[].scenes[].id",
@@ -2787,7 +2783,7 @@
                             {
                               "key": "accounts[].ervDevices[].schedules",
                               "type": "tabarray",
-                              "title": "{{ value.name || '' }}",
+                              "title": "{{ value.name || 'Schedule' }}",
                               "items": [
                                 {
                                   "key": "accounts[].ervDevices[].schedules[].id",
@@ -2804,40 +2800,41 @@
                           }
                         },
                         {
-                          "title": "Buttons / Sensors",
+                          "title": "Monitoring And Control",
                           "type": "section",
-                          "description": "Section for setup control buttons / sensors",
+                          "description": "Section for setup additional monitoring and control functions.",
                           "expandable": true,
                           "expanded": false,
                           "items": [
                             {
                               "key": "accounts[].ervDevices[]",
                               "type": "tabarray",
-                              "title": "{{ value.name || '' }}",
+                              "title": "{{ value.title }}",
                               "items": [
                                 {
-                                  "title": "Temperature",
+                                  "title": "Sensors",
                                   "items": [
                                     "accounts[].ervDevices[].temperatureSensor",
                                     "accounts[].ervDevices[].temperatureOutdoorSensor",
-                                    "accounts[].ervDevices[].temperatureSensorSupply"
-                                  ]
-                                },
-                                {
-                                  "title": "System",
-                                  "items": [
+                                    "accounts[].ervDevices[].temperatureSensorSupply",
                                     "accounts[].ervDevices[].inStandbySensor",
                                     "accounts[].ervDevices[].connectSensor",
                                     "accounts[].ervDevices[].errorSensor"
                                   ]
                                 },
                                 {
-                                  "title": "Custom",
+                                  "title": "Functions",
+                                  "items": [
+                                    "accounts[].ervDevices[].holidayModeSupport"
+                                  ]
+                                },
+                                {
+                                  "title": "Custom Functions",
                                   "items": [
                                     {
                                       "key": "accounts[].ervDevices[].buttonsSensors",
                                       "type": "tabarray",
-                                      "title": "{{ value.name || 'button / sensor' }}",
+                                      "title": "{{ value.name || 'Function' }}",
                                       "items": [
                                         "accounts[].ervDevices[].buttonsSensors[].displayType",
                                         "accounts[].ervDevices[].buttonsSensors[].mode",
