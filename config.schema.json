@@ -281,7 +281,6 @@
                     "type": "integer",
                     "minimum": 1,
                     "maximum": 3,
-                    "default": 1,
                     "description": "Select the operating mode for Heat, work only if mode supported by device.",
                     "anyOf": [
                       {
@@ -309,7 +308,6 @@
                     "type": "integer",
                     "minimum": 1,
                     "maximum": 3,
-                    "default": 1,
                     "description": "Select the operating mode for Cool, work only if mode supported by device.",
                     "anyOf": [
                       {
@@ -335,8 +333,8 @@
                   "autoDryFanMode": {
                     "title": "Auto",
                     "type": "integer",
+                    "minimum": 1,
                     "maximum": 3,
-                    "default": 1,
                     "description": "Select the operating mode for Auto, work only if mode supported by device.",
                     "anyOf": [
                       {
@@ -362,31 +360,26 @@
                   "temperatureSensor": {
                     "title": "Room",
                     "type": "boolean",
-                    "default": false,
                     "description": "This enable extra room temperature sensor to use with HomeKit automations."
                   },
                   "temperatureOutdoorSensor": {
                     "title": "Outdoor",
                     "type": "boolean",
-                    "default": false,
                     "description": "This enable extra outdoor temperature sensor to use with HomeKit automations."
                   },
                   "inStandbySensor": {
                     "title": "In Standby",
                     "type": "boolean",
-                    "default": false,
                     "description": "This enable in standby mode sensor to use with HomeKit automations."
                   },
                   "connectSensor": {
                     "title": "Connect",
                     "type": "boolean",
-                    "default": false,
                     "description": "This enable connect state sensor to use with HomeKit automations."
                   },
                   "errorSensor": {
                     "title": "Error",
                     "type": "boolean",
-                    "default": false,
                     "description": "This enable error sensor to use with HomeKit automations."
                   },
                   "frostProtectionSupport": {
@@ -739,15 +732,8 @@
                           "type": "integer",
                           "minimum": 0,
                           "maximum": 40,
-                          "default": 0,
                           "description": "Function, VH - Vane Horizontal, VV - Vane Vertical.",
                           "anyOf": [
-                            {
-                              "title": "Disabled",
-                              "enum": [
-                                0
-                              ]
-                            },
                             {
                               "title": "POWER ON / OFF",
                               "enum": [
@@ -1162,73 +1148,61 @@
                   "temperatureSensor": {
                     "title": "Temperature Sensor Room",
                     "type": "boolean",
-                    "default": false,
                     "description": "This enable extra temperature sensor to use with HomeKit automations."
                   },
                   "temperatureFlowSensor": {
                     "title": "Temperature Sensor Flow",
                     "type": "boolean",
-                    "default": false,
                     "description": "This enable extra Flow temperature sensor to use with HomeKit automations."
                   },
                   "temperatureReturnSensor": {
                     "title": "Temperature Sensor Return",
                     "type": "boolean",
-                    "default": false,
                     "description": "This enable extra Return temperature sensor to use with HomeKit automations."
                   },
                   "temperatureFlowZone1Sensor": {
                     "title": "Temperature Sensor Flow Zone 1",
                     "type": "boolean",
-                    "default": false,
                     "description": "This enable extra Flow Zone 1 temperature sensor to use with HomeKit automations."
                   },
                   "temperatureReturnZone1Sensor": {
                     "title": "Temperature Sensor Return Zone 1",
                     "type": "boolean",
-                    "default": false,
                     "description": "This enable extra Return Zone 1 temperature sensor to use with HomeKit automations."
                   },
                   "temperatureFlowWaterTankSensor": {
                     "title": "Temperature Sensor Flow Water Tank",
                     "type": "boolean",
-                    "default": false,
                     "description": "This enable extra Flow Water Tank temperature sensor to use with HomeKit automations."
                   },
                   "temperatureReturnWaterTankSensor": {
                     "title": "Temperature Sensor Return Water Tank",
                     "type": "boolean",
-                    "default": false,
                     "description": "This enable extra Return Water Tank temperature sensor to use with HomeKit automations."
                   },
                   "temperatureFlowZone2Sensor": {
                     "title": "Temperature Sensor Flow Zone 2",
                     "type": "boolean",
-                    "default": false,
                     "description": "This enable extra Flow Zone 2 temperature sensor to use with HomeKit automations."
                   },
                   "temperatureReturnZone2Sensor": {
                     "title": "Temperature Sensor Return Zone 2",
                     "type": "boolean",
-                    "default": false,
                     "description": "This enable extra Return Zone 2 temperature sensor to use with HomeKit automations."
                   },
                   "inStandbySensor": {
                     "title": "In Standby",
                     "type": "boolean",
-                    "default": false,
                     "description": "This enable in standby mode sensor to use with HomeKit automations."
                   },
                   "connectSensor": {
                     "title": "Connect",
                     "type": "boolean",
-                    "default": false,
                     "description": "This enable connect state sensor to use with HomeKit automations."
                   },
                   "errorSensor": {
                     "title": "Error",
                     "type": "boolean",
-                    "default": false,
                     "description": "This enable error sensor to use with HomeKit automations."
                   },
                   "frostProtectionSupport": {
@@ -1803,37 +1777,31 @@
                   "temperatureSensor": {
                     "title": "Temperature Sensor Room",
                     "type": "boolean",
-                    "default": false,
                     "description": "This enable extra temperature sensor to use with HomeKit automations."
                   },
                   "temperatureOutdoorSensor": {
                     "title": "Temperature Sensor Outdoor",
                     "type": "boolean",
-                    "default": false,
                     "description": "This enable extra outdoor temperature sensor to use with HomeKit automations."
                   },
                   "temperatureSensorSupply": {
                     "title": "Temperature Sensor Supply",
                     "type": "boolean",
-                    "default": false,
                     "description": "This enable extra supply temperature sensor to use with HomeKit automations."
                   },
                   "inStandbySensor": {
                     "title": "In Standby",
                     "type": "boolean",
-                    "default": false,
                     "description": "This enable in standby mode sensor to use with HomeKit automations."
                   },
                   "connectSensor": {
                     "title": "Connect",
                     "type": "boolean",
-                    "default": false,
                     "description": "This enable connect state sensor to use with HomeKit automations."
                   },
                   "errorSensor": {
                     "title": "Error",
                     "type": "boolean",
-                    "default": false,
                     "description": "This enable error sensor to use with HomeKit automations."
                   },
                   "holidayModeSupport": {
@@ -2416,7 +2384,6 @@
                     "enable": {
                       "title": "Enable",
                       "type": "boolean",
-                      "default": false,
                       "description": "This enable authorization for MQTT Broker."
                     },
                     "user": {

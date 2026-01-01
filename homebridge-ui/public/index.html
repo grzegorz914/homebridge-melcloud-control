@@ -291,7 +291,6 @@
               deviceInConfig = {
                 id: deviceId,
                 type: device.Type,
-                displayType: 0,
                 name: device.DeviceName
               };
               devicesInConfig.push(deviceInConfig);
@@ -310,14 +309,14 @@
                 if (!presetIds.has(presetId)) {
                   const presetObj = {
                     id: presetId,
-                    displayType: 0,
-                    name: preset.NumberDescription || `Preset ${index}`,
-                    namePrefix: false
+                    name: preset.NumberDescription || `Preset ${index}`
                   };
                   deviceInConfig.presets.push(presetObj);
                   newPresets.push(presetObj);
                 }
               });
+              deviceInConfig.schedules = [];
+              deviceInConfig.scenes = [];
             }
 
             // SCHEDULES & SCENES (melcloudhome)
@@ -332,9 +331,7 @@
                 if (!scheduleIds.has(scheduleId)) {
                   const scheduleObj = {
                     id: scheduleId,
-                    displayType: 0,
                     name: `Schedule ${index}`,
-                    namePrefix: false
                   };
                   deviceInConfig.schedules.push(scheduleObj);
                   newSchedules.push(scheduleObj);
@@ -351,14 +348,14 @@
                 if (!sceneIds.has(sceneId)) {
                   const sceneObj = {
                     id: sceneId,
-                    displayType: 0,
-                    name: scene.Name || `Scene ${index}`,
-                    namePrefix: false
+                    name: scene.Name || `Scene ${index}`
                   };
                   deviceInConfig.scenes.push(sceneObj);
                   newScenes.push(sceneObj);
                 }
               });
+
+              deviceInConfig.presets = [];
             }
           });
 
