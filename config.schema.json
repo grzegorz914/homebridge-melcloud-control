@@ -246,8 +246,8 @@
                   "displayType": {
                     "title": "Display Type",
                     "type": "integer",
+                    "minimum": 0,
                     "maximum": 2,
-                    "default": 0,
                     "description": "Select accessory control type displayed in HomeKit.",
                     "anyOf": [
                       {
@@ -279,6 +279,7 @@
                   "heatDryFanMode": {
                     "title": "Heat",
                     "type": "integer",
+                    "minimum": 1,
                     "maximum": 3,
                     "default": 1,
                     "description": "Select the operating mode for Heat, work only if mode supported by device.",
@@ -306,6 +307,7 @@
                   "coolDryFanMode": {
                     "title": "Cool",
                     "type": "integer",
+                    "minimum": 1,
                     "maximum": 3,
                     "default": 1,
                     "description": "Select the operating mode for Cool, work only if mode supported by device.",
@@ -390,7 +392,6 @@
                   "frostProtectionSupport": {
                     "title": "Frost Protection Support",
                     "type": "boolean",
-                    "default": false,
                     "description": "This enable frost protection control and sensors to use with HomeKit automations.",
                     "condition": {
                       "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
@@ -399,7 +400,6 @@
                   "overheatProtectionSupport": {
                     "title": "Overheat Protection Support",
                     "type": "boolean",
-                    "default": false,
                     "description": "This enable overheat protection control and sensors to use with HomeKit automations.",
                     "condition": {
                       "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
@@ -408,7 +408,6 @@
                   "holidayModeSupport": {
                     "title": "Holiday Mode Support",
                     "type": "boolean",
-                    "default": false,
                     "description": "This enable holiday mode control and sensors to use with HomeKit automations.",
                     "condition": {
                       "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
@@ -427,8 +426,8 @@
                         "displayType": {
                           "title": "Display Type",
                           "type": "integer",
+                          "minimum": 0,
                           "maximum": 7,
-                          "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit.",
                           "anyOf": [
                             {
@@ -490,8 +489,10 @@
                         "namePrefix": {
                           "title": "Prefix",
                           "type": "boolean",
-                          "default": false,
-                          "description": "Enable the accessory name as a prefix for preset name."
+                          "description": "Enable the accessory name as a prefix for preset name.",
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].presets[arrayIndices[2]].displayType > 0;"
+                          }
                         }
                       }
                     }
@@ -509,8 +510,8 @@
                         "displayType": {
                           "title": "Display Type",
                           "type": "integer",
+                          "minimum": 0,
                           "maximum": 7,
-                          "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit.",
                           "anyOf": [
                             {
@@ -572,7 +573,6 @@
                         "namePrefix": {
                           "title": "Prefix",
                           "type": "boolean",
-                          "default": false,
                           "description": "Enable the accessory name as a prefix for schedule name.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].schedules[arrayIndices[2]].displayType > 0;"
@@ -594,8 +594,8 @@
                         "displayType": {
                           "title": "Display Type",
                           "type": "integer",
+                          "minimum": 0,
                           "maximum": 7,
-                          "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit.",
                           "anyOf": [
                             {
@@ -657,7 +657,6 @@
                         "namePrefix": {
                           "title": "Prefix",
                           "type": "boolean",
-                          "default": false,
                           "description": "Enable the accessory name as a prefix for scene name.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].scenes[arrayIndices[2]].displayType > 0;"
@@ -675,8 +674,8 @@
                         "displayType": {
                           "title": "Display Type",
                           "type": "integer",
+                          "minimum": 0,
                           "maximum": 7,
-                          "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit.",
                           "anyOf": [
                             {
@@ -729,9 +728,16 @@
                             }
                           ]
                         },
+                        "name": {
+                          "title": "Name",
+                          "type": "string",
+                          "placeholder": "Function Name",
+                          "description": "Here set Your own name displayed in HomeKit."
+                        },
                         "mode": {
                           "title": "Mode",
                           "type": "integer",
+                          "minimum": 0,
                           "maximum": 40,
                           "default": 0,
                           "description": "Function, VH - Vane Horizontal, VV - Vane Vertical.",
@@ -957,19 +963,42 @@
                             "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].buttonsSensors[arrayIndices[2]].displayType > 0;"
                           }
                         },
-                        "name": {
-                          "title": "Name",
-                          "type": "string",
-                          "placeholder": "Function Name",
-                          "description": "Here set Your own name displayed in HomeKit."
-                        },
                         "namePrefix": {
                           "title": "Prefix",
                           "type": "boolean",
-                          "default": false,
-                          "description": "Enable the accessory name as a prefix for button / sensor name."
+                          "description": "Enable the accessory name as a prefix for button / sensor name.",
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].ataDevices[arrayIndices[1]].buttonsSensors[arrayIndices[2]].displayType > 0;"
+                          }
                         }
-                      }
+                      },
+                      "allOf": [
+                        {
+                          "if": {
+                            "required": [
+                              "displayType"
+                            ],
+                            "properties": {
+                              "displayType": {
+                                "enum": [
+                                  1,
+                                  2,
+                                  3,
+                                  4,
+                                  5,
+                                  6,
+                                  7
+                                ]
+                              }
+                            }
+                          },
+                          "then": {
+                            "required": [
+                              "mode"
+                            ]
+                          }
+                        }
+                      ]
                     }
                   }
                 }
@@ -998,10 +1027,16 @@
                   "displayType": {
                     "title": "Display Type",
                     "type": "integer",
+                    "minimum": 0,
                     "maximum": 2,
-                    "default": 1,
                     "description": "Select accessory control type displayed in HomeKit.",
                     "anyOf": [
+                      {
+                        "title": "Disabled",
+                        "enum": [
+                          0
+                        ]
+                      },
                       {
                         "title": "Heater / Cooler",
                         "enum": [
@@ -1019,8 +1054,8 @@
                   "hideZone": {
                     "title": "Hide zone",
                     "type": "integer",
+                    "minimum": 0,
                     "maximum": 15,
-                    "default": 0,
                     "description": "Select zone to hidde in HomeKit, if present.",
                     "anyOf": [
                       {
@@ -1119,7 +1154,10 @@
                           15
                         ]
                       }
-                    ]
+                    ],
+                    "condition": {
+                      "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].displayType > 0;"
+                    }
                   },
                   "temperatureSensor": {
                     "title": "Temperature Sensor Room",
@@ -1196,7 +1234,6 @@
                   "frostProtectionSupport": {
                     "title": "Frost Protection Support",
                     "type": "boolean",
-                    "default": false,
                     "description": "This enable frost protection control and sensors to use with HomeKit automations.",
                     "condition": {
                       "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
@@ -1205,7 +1242,6 @@
                   "holidayModeSupport": {
                     "title": "Holiday Mode Support",
                     "type": "boolean",
-                    "default": false,
                     "description": "This enable holiday mode control and sensors to use with HomeKit automations.",
                     "condition": {
                       "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
@@ -1224,8 +1260,8 @@
                         "displayType": {
                           "title": "Display Type",
                           "type": "integer",
+                          "minimum": 0,
                           "maximum": 7,
-                          "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit.",
                           "anyOf": [
                             {
@@ -1287,8 +1323,10 @@
                         "namePrefix": {
                           "title": "Prefix",
                           "type": "boolean",
-                          "default": false,
-                          "description": "Enable the accessory name as a prefix for preset name."
+                          "description": "Enable the accessory name as a prefix for preset name.",
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].schedules[arrayIndices[2]].displayType > 0;"
+                          }
                         }
                       }
                     }
@@ -1306,8 +1344,8 @@
                         "displayType": {
                           "title": "Display Type",
                           "type": "integer",
+                          "minimum": 0,
                           "maximum": 7,
-                          "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit.",
                           "anyOf": [
                             {
@@ -1369,8 +1407,10 @@
                         "namePrefix": {
                           "title": "Prefix",
                           "type": "boolean",
-                          "default": false,
-                          "description": "Enable the accessory name as a prefix for schedule name."
+                          "description": "Enable the accessory name as a prefix for schedule name.",
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].schedules[arrayIndices[2]].displayType > 0;"
+                          }
                         }
                       }
                     }
@@ -1388,8 +1428,8 @@
                         "displayType": {
                           "title": "Display Type",
                           "type": "integer",
+                          "minimum": 0,
                           "maximum": 7,
-                          "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit.",
                           "anyOf": [
                             {
@@ -1451,8 +1491,10 @@
                         "namePrefix": {
                           "title": "Prefix",
                           "type": "boolean",
-                          "default": false,
-                          "description": "Enable the accessory name as a prefix for scene name."
+                          "description": "Enable the accessory name as a prefix for scene name.",
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].scenes[arrayIndices[2]].displayType > 0;"
+                          }
                         }
                       }
                     }
@@ -1466,8 +1508,8 @@
                         "displayType": {
                           "title": "Display Type",
                           "type": "integer",
+                          "minimum": 0,
                           "maximum": 7,
-                          "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit.",
                           "anyOf": [
                             {
@@ -1520,11 +1562,17 @@
                             }
                           ]
                         },
+                        "name": {
+                          "title": "Name",
+                          "type": "string",
+                          "placeholder": "Function Name",
+                          "description": "Here set Your own name displayed in HomeKit."
+                        },
                         "mode": {
                           "title": "Mode",
                           "type": "integer",
+                          "minimum": 0,
                           "maximum": 70,
-                          "default": 0,
                           "description": "Select the function.",
                           "anyOf": [
                             {
@@ -1664,19 +1712,42 @@
                             "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].buttonsSensors[arrayIndices[2]].displayType > 0;"
                           }
                         },
-                        "name": {
-                          "title": "Name",
-                          "type": "string",
-                          "placeholder": "Function Name",
-                          "description": "Here set Your own name displayed in HomeKit."
-                        },
                         "namePrefix": {
                           "title": "Prefix",
                           "type": "boolean",
-                          "default": false,
-                          "description": "Enable the accessory name as a prefix for button / sensor name."
+                          "description": "Enable the accessory name as a prefix for button / sensor name.",
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].buttonsSensors[arrayIndices[2]].displayType > 0;"
+                          }
                         }
-                      }
+                      },
+                      "allOf": [
+                        {
+                          "if": {
+                            "required": [
+                              "displayType"
+                            ],
+                            "properties": {
+                              "displayType": {
+                                "enum": [
+                                  1,
+                                  2,
+                                  3,
+                                  4,
+                                  5,
+                                  6,
+                                  7
+                                ]
+                              }
+                            }
+                          },
+                          "then": {
+                            "required": [
+                              "mode"
+                            ]
+                          }
+                        }
+                      ]
                     }
                   }
                 }
@@ -1705,10 +1776,16 @@
                   "displayType": {
                     "title": "Display Type",
                     "type": "integer",
+                    "minimum": 0,
                     "maximum": 2,
-                    "default": 1,
                     "description": "Select accessory control type displayed in HomeKit.",
                     "anyOf": [
+                      {
+                        "title": "Disabled",
+                        "enum": [
+                          0
+                        ]
+                      },
                       {
                         "title": "Heater / Cooler",
                         "enum": [
@@ -1762,7 +1839,6 @@
                   "holidayModeSupport": {
                     "title": "Holiday Mode Support",
                     "type": "boolean",
-                    "default": false,
                     "description": "This enable holiday mode control and sensors to use with HomeKit automations.",
                     "condition": {
                       "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
@@ -1781,8 +1857,8 @@
                         "displayType": {
                           "title": "Display Type",
                           "type": "integer",
+                          "minimum": 0,
                           "maximum": 7,
-                          "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit.",
                           "anyOf": [
                             {
@@ -1844,7 +1920,6 @@
                         "namePrefix": {
                           "title": "Prefix",
                           "type": "boolean",
-                          "default": false,
                           "description": "Enable the accessory name as a prefix for preset name.",
                           "condition": {
                             "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].presets[arrayIndices[2]].displayType > 0;"
@@ -1866,8 +1941,8 @@
                         "displayType": {
                           "title": "Display Type",
                           "type": "integer",
+                          "minimum": 0,
                           "maximum": 7,
-                          "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit.",
                           "anyOf": [
                             {
@@ -1929,8 +2004,10 @@
                         "namePrefix": {
                           "title": "Prefix",
                           "type": "boolean",
-                          "default": false,
-                          "description": "Enable the accessory name as a prefix for schedule name."
+                          "description": "Enable the accessory name as a prefix for schedule name.",
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].schedules[arrayIndices[2]].displayType > 0;"
+                          }
                         }
                       }
                     }
@@ -1948,8 +2025,8 @@
                         "displayType": {
                           "title": "Display Type",
                           "type": "integer",
+                          "minimum": 0,
                           "maximum": 7,
-                          "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit.",
                           "anyOf": [
                             {
@@ -2011,8 +2088,10 @@
                         "namePrefix": {
                           "title": "Prefix",
                           "type": "boolean",
-                          "default": false,
-                          "description": "Enable the accessory name as a prefix for scene name."
+                          "description": "Enable the accessory name as a prefix for scene name.",
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].scenes[arrayIndices[2]].displayType > 0;"
+                          }
                         }
                       }
                     }
@@ -2026,8 +2105,8 @@
                         "displayType": {
                           "title": "Display Type",
                           "type": "integer",
+                          "minimum": 0,
                           "maximum": 7,
-                          "default": 0,
                           "description": "Select the characteristic type to be displayed in HomeKit.",
                           "anyOf": [
                             {
@@ -2080,11 +2159,17 @@
                             }
                           ]
                         },
+                        "name": {
+                          "title": "Name",
+                          "type": "string",
+                          "placeholder": "Function Name",
+                          "description": "Here set Your own name displayed in HomeKit."
+                        },
                         "mode": {
                           "title": "Mode",
                           "type": "integer",
+                          "minimum": 0,
                           "maximum": 18,
-                          "default": 0,
                           "description": "Select the function.",
                           "anyOf": [
                             {
@@ -2171,21 +2256,47 @@
                                 18
                               ]
                             }
-                          ]
-                        },
-                        "name": {
-                          "title": "Name",
-                          "type": "string",
-                          "placeholder": "Function Name",
-                          "description": "Here set Your own name displayed in HomeKit."
+                          ],
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].buttonsSensors[arrayIndices[2]].displayType > 0;"
+                          }
                         },
                         "namePrefix": {
                           "title": "Prefix",
                           "type": "boolean",
-                          "default": false,
-                          "description": "Enable the accessory name as a prefix for button / sensor name."
+                          "description": "Enable the accessory name as a prefix for button / sensor name.",
+                          "condition": {
+                            "functionBody": "return model.accounts[arrayIndices[0]].ervDevices[arrayIndices[1]].buttonsSensors[arrayIndices[2]].displayType > 0;"
+                          }
                         }
-                      }
+                      },
+                      "allOf": [
+                        {
+                          "if": {
+                            "required": [
+                              "displayType"
+                            ],
+                            "properties": {
+                              "displayType": {
+                                "enum": [
+                                  1,
+                                  2,
+                                  3,
+                                  4,
+                                  5,
+                                  6,
+                                  7
+                                ]
+                              }
+                            }
+                          },
+                          "then": {
+                            "required": [
+                              "mode"
+                            ]
+                          }
+                        }
+                      ]
                     }
                   }
                 }

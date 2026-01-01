@@ -25,6 +25,11 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | [Homebridge UI](https://github.com/homebridge/homebridge-config-ui-x) | [Homebridge UI Wiki](https://github.com/homebridge/homebridge-config-ui-x/wiki) | Homebridge User Interface | Required plugin |
 | [MELCloud](https://github.com/grzegorz914/homebridge-melcloud-control) | [Plug-In Wiki](https://github.com/grzegorz914/homebridge-melcloud-control/wiki) | Plug-In | Required |
 
+## Warning
+
+* For plugin < v4.6.0 use Homebridge UI <= v5.5.0.
+* For plugin >= v4.6.0 use Homebridge UI >= v5.13.0.
+
 ### About The Plugin
 
 * Support:
