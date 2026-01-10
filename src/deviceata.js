@@ -988,7 +988,6 @@ class DeviceAta extends EventEmitter {
                 this.presetControlServices = [];
                 this.presetControlSensorServices = [];
                 this.presets.forEach((preset, i) => {
-                    const presetData = presetsOnServer.find(p => p.ID === preset.id);
 
                     //get name
                     const name = preset.name || `Preset ${i}`;
@@ -1016,6 +1015,8 @@ class DeviceAta extends EventEmitter {
                                     switch (state) {
                                         case true:
                                             preset.previousSettings = deviceData.Device;
+
+                                            const presetData = presetsOnServer.find(p => String(p.ID) === preset.id);
                                             deviceData.Device.Power = presetData.Power;
                                             deviceData.Device.OperationMode = presetData.OperationMode;
                                             deviceData.Device.SetTemperature = presetData.SetTemperature;
@@ -1065,7 +1066,6 @@ class DeviceAta extends EventEmitter {
                 if (this.logDebug) this.emit('debug', `Prepare schedules services`);
                 this.scheduleSensorServices = [];
                 this.schedules.forEach((schedule, i) => {
-                    const scheduleData = schedulesOnServer.find(s => s.Id === schedule.id);
 
                     //get name
                     const name = schedule.name || `Schedule ${i}`;
@@ -1092,6 +1092,7 @@ class DeviceAta extends EventEmitter {
                                 })
                                 .onSet(async (state) => {
                                     try {
+                                        const scheduleData = schedulesOnServer.find(s => s.Id === schedule.id);
                                         deviceData.ScheduleEnabled = state;
                                         if (this.logInfo) this.emit('info', `Schedules: ${state ? 'Enabled' : 'Disabled'}`);
                                         await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'schedule', scheduleData);
@@ -1140,7 +1141,6 @@ class DeviceAta extends EventEmitter {
                 this.sceneControlServices = [];
                 this.sceneControlSensorServices = [];
                 this.scenes.forEach((scene, i) => {
-                    const sceneData = scenesOnServer.find(s => s.Id === scene.id);
 
                     //get preset name
                     const name = scene.name || `Scene ${i}`;
@@ -1165,6 +1165,7 @@ class DeviceAta extends EventEmitter {
                             })
                             .onSet(async (state) => {
                                 try {
+                                    const sceneData = scenesOnServer.find(s => s.Id === scene.id);
                                     sceneData.Enabled = state;
                                     if (this.logInfo) this.emit('info', `Scene ${name}: ${state ? 'Set' : 'Unset'}`);
                                     await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'scene', sceneData);
@@ -1816,7 +1817,7 @@ class DeviceAta extends EventEmitter {
                     //presets
                     if (this.presets.length > 0) {
                         this.presets.forEach((preset, i) => {
-                            const presetData = presetsOnServer.find(p => p.ID === preset.id);
+                            const presetData = presetsOnServer.find(p => String(p.ID) === preset.id);
                             if (!presetData) return;
 
                             const characteristicType = preset.characteristicType;

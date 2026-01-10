@@ -89,7 +89,7 @@ class MelCloudPlatform {
 										if (logLevel.warn) log.warn(`Unknown account type: ${account.type}.`);
 										return;
 								}
-								melcloud.on('success', (msg) => log.success(`${name}, ${msg}`))
+								melcloud.on('success', (msg) => logLevel.success && log.success(`${name}, ${msg}`))
 									.on('info', (msg) => log.info(`${name}, ${msg}`))
 									.on('debug', (msg) => log.info(`${name}, debug: ${msg}`))
 									.on('warn', (msg) => log.warn(`${name}, ${msg}`))
@@ -190,7 +190,7 @@ class MelCloudPlatform {
 									}
 
 									configuredDevice.on('devInfo', (info) => logLevel.devInfo && log.info(info))
-										.on('success', (msg) => log.success(`${name}, ${deviceTypeString}, ${deviceName}, ${msg}`))
+										.on('success', (msg) => logLevel.success && log.success(`${name}, ${deviceTypeString}, ${deviceName}, ${msg}`))
 										.on('info', (msg) => log.info(`${name}, ${deviceTypeString}, ${deviceName}, ${msg}`))
 										.on('debug', (msg) => log.info(`${name}, ${deviceTypeString}, ${deviceName}, debug: ${msg}`))
 										.on('warn', (msg) => log.warn(`${name}, ${deviceTypeString}, ${deviceName}, ${msg}`))

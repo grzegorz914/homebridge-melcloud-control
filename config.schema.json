@@ -2341,13 +2341,13 @@
                   "description": "This enable MQTT client."
                 },
                 "host": {
-                  "title": "IP / Hostname",
+                  "title": "IP/Hostname",
                   "type": "string",
                   "placeholder": "ip or hostname",
                   "format": "hostname",
-                  "description": "Here set the IP / Hostname of MQTT Broker.",
+                  "description": "Here set the IP/Hostname of MQTT Broker.",
                   "condition": {
-                    "functionBody": "return model.accounts[arrayIndices].mqtt.enable === true;"
+                    "functionBody": "return model.devices[arrayIndices].mqtt.enable === true;"
                   }
                 },
                 "port": {
@@ -2356,16 +2356,16 @@
                   "placeholder": 1883,
                   "description": "Here set the port of MQTT Broker.",
                   "condition": {
-                    "functionBody": "return model.accounts[arrayIndices].mqtt.enable === true;"
+                    "functionBody": "return model.devices[arrayIndices].mqtt.enable === true;"
                   }
                 },
                 "clientId": {
-                  "title": "Client Id",
+                  "title": "Client ID",
                   "type": "string",
                   "placeholder": "client id",
-                  "description": "Here optional set the Client Id of MQTT Broker.",
+                  "description": "Here optional set the Client ID of MQTT Broker.",
                   "condition": {
-                    "functionBody": "return model.accounts[arrayIndices].mqtt.enable === true"
+                    "functionBody": "return model.devices[arrayIndices].mqtt.enable === true"
                   }
                 },
                 "prefix": {
@@ -2374,7 +2374,7 @@
                   "placeholder": "home",
                   "description": "Here set the prefix.",
                   "condition": {
-                    "functionBody": "return model.accounts[arrayIndices].mqtt.enable === true;"
+                    "functionBody": "return model.devices[arrayIndices].mqtt.enable === true;"
                   }
                 },
                 "auth": {
@@ -2392,7 +2392,7 @@
                       "placeholder": "user",
                       "description": "Here set the user of MQTT Broker.",
                       "condition": {
-                        "functionBody": "return model.accounts[arrayIndices].mqtt.auth.enable === true;"
+                        "functionBody": "return model.devices[arrayIndices].mqtt.auth.enable === true;"
                       }
                     },
                     "passwd": {
@@ -2402,13 +2402,33 @@
                       "description": "Here set the password of MQTT Broker.",
                       "format": "password",
                       "condition": {
-                        "functionBody": "return model.accounts[arrayIndices].mqtt.auth.enable === true;"
+                        "functionBody": "return model.devices[arrayIndices].mqtt.auth.enable === true;"
                       }
                     }
                   },
                   "condition": {
-                    "functionBody": "return model.accounts[arrayIndices].mqtt.enable === true;"
-                  }
+                    "functionBody": "return model.devices[arrayIndices].mqtt.enable === true;"
+                  },
+                  "allOf": [
+                    {
+                      "if": {
+                        "required": [
+                          "enable"
+                        ],
+                        "properties": {
+                          "enable": {
+                            "const": true
+                          }
+                        }
+                      },
+                      "then": {
+                        "required": [
+                          "user",
+                          "passwd"
+                        ]
+                      }
+                    }
+                  ]
                 }
               }
             }
