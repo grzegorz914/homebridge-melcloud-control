@@ -10,6 +10,11 @@
   "schema": {
     "type": "object",
     "properties": {
+      "name": {
+        "title": "Platform",
+        "type": "string",
+        "default": "MELCLoud Control"
+      },
       "accounts": {
         "type": "array",
         "title": "Accounts",
