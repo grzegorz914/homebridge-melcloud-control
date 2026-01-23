@@ -13,7 +13,7 @@
       "name": {
         "title": "Platform",
         "type": "string",
-        "default": "MELCLoud Control"
+        "default": "MELCloud Control"
       },
       "accounts": {
         "type": "array",
