@@ -1716,7 +1716,7 @@ class DeviceAtw extends EventEmitter {
                     const heatPumpName = 'Heat Pump';
                     const power = deviceData.Device.Power;
                     const inStandbyMode = deviceData.Device.InStandbyMode;
-                    const unitStatus = deviceData.Device.UnitStatus ?? 0;
+                    const unitStatus = deviceData.Device.UnitStatus ?? power; // fallback to power melcloud home
                     const operationMode = deviceData.Device.OperationMode;
                     const outdoorTemperature = deviceData.Device.OutdoorTemperature ?? deviceData.Device.RoomTemperatureZone1; // fallback to room temperature zone 1 melcloud home
                     const flowTemperatureHeatPump = deviceData.Device.FlowTemperature ?? null; // only sensor
@@ -2061,8 +2061,10 @@ class DeviceAtw extends EventEmitter {
                             let operationModeText = '';
                             switch (i) {
                                 case caseHeatPump: //Heat Pump - HEAT, COOL, OFF
+                                    operationModeText = power ? HeatPump.OperationMode[6] : HeatPump.OperationModeZoneMapEnumToString[operationModeZone1];
                                     this.emit('info', `Power: ${power ? 'On' : 'Off'}`)
-                                    this.emit('info', `Operation mode: ${HeatPump.SystemMapEnumToString[unitStatus]}`);
+                                    this.emit('info', `System status: ${HeatPump.SystemMapEnumToString[unitStatus]}`);
+                                    this.emit('info', `Operation mode: ${HeatPump.OperationModeMapEnumToString[operationMode]}`);
                                     this.emit('info', `Outdoor temperature: ${roomTemperature}${obj.temperatureUnit}`);
                                     this.emit('info', `Temperature display unit: ${obj.temperatureUnit}`);
                                     this.emit('info', `Lock physical controls: ${lockPhysicalControl ? 'Locked' : 'Unlocked'}`);

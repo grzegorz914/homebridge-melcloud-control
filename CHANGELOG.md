@@ -24,7 +24,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - For plugin < v4.6.0 use Homebridge UI <= v5.5.0
 - For plugin >= v4.6.0 use Homebridge UI >= v5.13.0
 
-# [4.7.0] - (xx.01.2026)
+# [4.7.1] - (27.01.2026)
+
+## Changes
+
+- add falback to power for unit status in melcloud home
+- constants updated
+- cleanup
+
+# [4.7.0] - (27.01.2026)
 
 ## Changes
 
