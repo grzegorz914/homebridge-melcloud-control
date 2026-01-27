@@ -24,6 +24,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - For plugin < v4.6.0 use Homebridge UI <= v5.5.0
 - For plugin >= v4.6.0 use Homebridge UI >= v5.13.0
 
+# [4.7.0] - (xx.01.2026)
+
+## Changes
+
+- add support for ATW, fix [#233](https://github.com/grzegorz914/homebridge-melcloud-control/issues/233), thanks @bastienb99
+- fix [#232](https://github.com/grzegorz914/homebridge-melcloud-control/issues/232)
+- prevent login to melcloud if account type is set to disable
+- config schema updated
+- bump dependencies
+- cleanup
+
 # [4.6.6] - (23.01.2026)
 
 ## Changes

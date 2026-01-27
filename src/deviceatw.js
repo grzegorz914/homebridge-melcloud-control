@@ -1667,6 +1667,9 @@ class DeviceAtw extends EventEmitter {
                     const connectKey = this.accountType === 'melcloud' ? 'Offline' : 'IsConnected';
                     const errorKey = this.accountType === 'melcloud' ? 'HasError' : 'IsInError';
                     const supportStandbyKey = accountTypeMelcloud ? 'ModelSupportsStandbyMode' : 'HasStandby';
+                    const supportHeatKey = accountTypeMelcloud ? 'CanHeat' : 'HasHeatMode';
+                    const supportCoolKey = accountTypeMelcloud ? 'CanCool' : 'HasCoolingMode';
+                    const supportHotWaterKey = accountTypeMelcloud ? 'HasHotWaterTank' : 'HasHotWater';
 
                     //presets schedule
                     const presetsOnServer = deviceData.Presets ?? [];
@@ -1682,15 +1685,16 @@ class DeviceAtw extends EventEmitter {
                     const supportsStanbyMode = deviceData.Device[supportStandbyKey];
                     const supportsHeatPump = ![1, 2, 3, 4, 5, 6, 7, 15].includes(this.hideZone);
                     const supportsZone1 = ![2, 3, 4, 8, 9, 10, 11, 15].includes(this.hideZone);
-                    const supportsHotWaterTank = ![3, 5, 6, 9, 10, 12, 13, 15].includes(this.hideZone) && deviceData.Device.HasHotWaterTank;
+                    const supportsHotWaterTank = ![3, 5, 6, 9, 10, 12, 13, 15].includes(this.hideZone) && deviceData.Device[supportHotWaterKey];
                     const supportsZone2 = ![4, 6, 7, 10, 11, 13, 14, 15].includes(this.hideZone) && deviceData.Device.HasZone2;
-                    const canHeat = deviceData.Device.CanHeat ?? false;
-                    const canCool = deviceData.Device.CanCool ?? false;
+                    const canHeat = deviceData.Device[supportHeatKey] ?? true;
+                    const canCool = deviceData.Device[supportCoolKey] ?? false;
                     const heatCoolModes = canHeat && canCool ? 0 : canHeat ? 1 : canCool ? 2 : 3;
                     const temperatureIncrement = deviceData.Device[tempStepKey] ?? 1;
                     const minSetTemperature = deviceData.Device.MinSetTemperature ?? 10;
                     const maxSetTemperature = deviceData.Device.MaxSetTemperature ?? 30;
-                    const maxTankTemperature = deviceData.Device.MaxTankTemperature ?? 70;
+                    const minTankTemperature = deviceData.Device.MinTankTemperature ?? 40;
+                    const maxTankTemperature = deviceData.Device.MaxTankTemperature ?? 60;
 
                     //zones
                     let currentZoneCase = 0;
@@ -1714,45 +1718,47 @@ class DeviceAtw extends EventEmitter {
                     const inStandbyMode = deviceData.Device.InStandbyMode;
                     const unitStatus = deviceData.Device.UnitStatus ?? 0;
                     const operationMode = deviceData.Device.OperationMode;
-                    const outdoorTemperature = deviceData.Device.OutdoorTemperature;
-                    const flowTemperatureHeatPump = deviceData.Device.FlowTemperature;
-                    const returnTemperatureHeatPump = deviceData.Device.ReturnTemperature;
-                    const isConnected = accountTypeMelcloud ? !deviceData.Device[connectKey] : deviceData.Device[connectKey];
-                    const isInError = deviceData.Device[errorKey];
+                    const outdoorTemperature = deviceData.Device.OutdoorTemperature ?? deviceData.Device.RoomTemperatureZone1; // fallback to room temperature zone 1 melcloud home
+                    const flowTemperatureHeatPump = deviceData.Device.FlowTemperature ?? null; // only sensor
+                    const returnTemperatureHeatPump = deviceData.Device.ReturnTemperature ?? null; // only sensor
 
                     //zone 1
                     const zone1Name = deviceData.Zone1Name ?? 'Zone 1';
                     const roomTemperatureZone1 = deviceData.Device.RoomTemperatureZone1;
                     const operationModeZone1 = deviceData.Device.OperationModeZone1;
                     const setTemperatureZone1 = deviceData.Device.SetTemperatureZone1;
-                    const setHeatFlowTemperatureZone1 = deviceData.Device.SetHeatFlowTemperatureZone1;
-                    const setCoolFlowTemperatureZone1 = deviceData.Device.SetCoolFlowTemperatureZone1;
+                    const setHeatFlowTemperatureZone1 = deviceData.Device.SetHeatFlowTemperatureZone1 ?? setTemperatureZone1;
+                    const setCoolFlowTemperatureZone1 = deviceData.Device.SetCoolFlowTemperatureZone1 ?? setTemperatureZone1;
                     const prohibitZone1 = deviceData.Device.ProhibitZone1 ?? false;
                     const idleZone1 = deviceData.Device.IdleZone1 ?? false;
-                    const flowTemperatureZone1 = deviceData.Device.FlowTemperatureZone1;
-                    const returnTemperatureZone1 = deviceData.Device.ReturnTemperatureZone1;
+                    const flowTemperatureZone1 = deviceData.Device.FlowTemperatureZone1 ?? roomTemperatureZone1; // fallback to room temperature melcloud home
+                    const returnTemperatureZone1 = deviceData.Device.ReturnTemperatureZone1 ?? null; // only sensor
 
                     //hot water
                     const hotWaterName = 'Hot Water';
-                    const tankWaterTemperature = deviceData.Device.TankWaterTemperature;
-                    const setTankWaterTemperature = deviceData.Device.SetTankWaterTemperature;
+                    const tankWaterTemperature = deviceData.Device.TankWaterTemperature ?? 40;
+                    const setTankWaterTemperature = deviceData.Device.SetTankWaterTemperature ?? 40;
                     const forcedHotWaterMode = deviceData.Device.ForcedHotWaterMode ? 1 : 0;
                     const ecoHotWater = deviceData.Device.EcoHotWater ?? false;
                     const prohibitHotWater = deviceData.Device.ProhibitHotWater ?? false;
-                    const flowTemperatureWaterTank = deviceData.Device.FlowTemperatureBoiler;
-                    const returnTemperatureWaterTank = deviceData.Device.ReturnTemperatureBoiler;
+                    const flowTemperatureWaterTank = deviceData.Device.FlowTemperatureBoiler ?? null; // only sensor
+                    const returnTemperatureWaterTank = deviceData.Device.ReturnTemperatureBoiler ?? null; // only sensor
 
                     //zone 2
                     const zone2Name = deviceData.Zone2Name ?? 'Zone 2';
                     const roomTemperatureZone2 = deviceData.Device.RoomTemperatureZone2;
                     const operationModeZone2 = deviceData.Device.OperationModeZone2;
                     const setTemperatureZone2 = deviceData.Device.SetTemperatureZone2;
-                    const setHeatFlowTemperatureZone2 = deviceData.Device.SetHeatFlowTemperatureZone2;
-                    const setCoolFlowTemperatureZone2 = deviceData.Device.SetCoolFlowTemperatureZone2;
+                    const setHeatFlowTemperatureZone2 = deviceData.Device.SetHeatFlowTemperatureZone2 ?? setTemperatureZone2;
+                    const setCoolFlowTemperatureZone2 = deviceData.Device.SetCoolFlowTemperatureZone2 ?? setTemperatureZone2;
                     const prohibitZone2 = deviceData.Device.ProhibitZone2 ?? false;
                     const idleZone2 = deviceData.Device.IdleZone2 ?? false;
-                    const flowTemperatureZone2 = deviceData.Device.FlowTemperatureZone2;
-                    const returnTemperatureZone2 = deviceData.Device.ReturnTemperatureZone2;
+                    const flowTemperatureZone2 = deviceData.Device.FlowTemperatureZone2 ?? roomTemperatureZone2; // fallback to room temperature melcloud home
+                    const returnTemperatureZone2 = deviceData.Device.ReturnTemperatureZone2 ?? null; // only sensor
+
+                    //device
+                    const isConnected = accountTypeMelcloud ? !deviceData.Device[connectKey] : deviceData.Device[connectKey];
+                    const isInError = deviceData.Device[errorKey];
 
                     //accessory
                     const obj = {
@@ -1792,26 +1798,24 @@ class DeviceAtw extends EventEmitter {
                         zonesSensors: []
                     };
 
-                    //characteristics array
-                    const characteristics = [];
-
-                    //default values
-                    let name = 'Heat Pump'
-                    let operationModeZone = 0;
-                    let currentOperationMode = 0;
-                    let targetOperationMode = 0;
-                    let roomTemperature = 20;
-                    let setTemperature = 20;
-                    let lockPhysicalControl = 0;
-                    let flowTemperature = 0;
-                    let returnTemperature = 0;
-                    let operationModeSetPropsMinValue = 0;
-                    let operationModeSetPropsMaxValue = 3;
-                    let operationModeSetPropsValidValues = [0];
-                    let temperatureSetPropsMinValue = -35;
-                    let temperatureSetPropsMaxValue = 100;
-
                     for (let i = 0; i < zonesCount; i++) {
+                        //characteristics array
+                        const characteristics = [];
+
+                        let name = '';
+                        let operationModeZone = 0;
+                        let currentOperationMode = 0;
+                        let targetOperationMode = 0;
+                        let roomTemperature = null;
+                        let setTemperature = null;
+                        let lockPhysicalControl = 0;
+                        let operationModeSetPropsMinValue = 0;
+                        let operationModeSetPropsMaxValue = 0;
+                        let operationModeSetPropsValidValues = [];
+                        let temperatureSetPropsMinValue = 0;
+                        let temperatureSetPropsMaxValue = 0;
+
+
                         switch (this.displayType) {
                             case 1: //Heater Cooler
                                 switch (i) {
@@ -1874,7 +1878,7 @@ class DeviceAtw extends EventEmitter {
                                         operationModeSetPropsMinValue = 0;
                                         operationModeSetPropsMaxValue = 1;
                                         operationModeSetPropsValidValues = [0, 1];
-                                        temperatureSetPropsMinValue = 0;
+                                        temperatureSetPropsMinValue = minTankTemperature;
                                         temperatureSetPropsMaxValue = maxTankTemperature;
                                         break;
                                     case caseZone2: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
@@ -1921,7 +1925,8 @@ class DeviceAtw extends EventEmitter {
                                     { type: Characteristic.TemperatureDisplayUnits, value: obj.useFahrenheit }
                                 );
 
-                                if (heatCoolModes === 0 || heatCoolModes === 2) characteristics.push({ type: Characteristic.CoolingThresholdTemperature, value: setTemperature });
+                                if (heatCoolModes === 0 || heatCoolModes === 1) characteristics.push({ type: Characteristic.HeatingThresholdTemperature, value: setTemperature });
+                                if ((heatCoolModes === 0 || heatCoolModes === 2) && i !== caseHotWater) characteristics.push({ type: Characteristic.CoolingThresholdTemperature, value: setTemperature });
                                 break;
                             case 2: //Thermostat
                                 switch (i) {
@@ -2028,6 +2033,12 @@ class DeviceAtw extends EventEmitter {
                                 break;
                         };
 
+                        //update services
+                        for (const { type, value } of characteristics) {
+                            if (!this.functions.isValidValue(value)) continue;
+                            this.melCloudServices?.[i]?.updateCharacteristic(type, value);
+                        }
+
                         //add every zone to array
                         const zone = {
                             name: name,
@@ -2058,7 +2069,7 @@ class DeviceAtw extends EventEmitter {
                                     if (this.accountType === 'melcloudhome') this.emit('info', `Signal strength: ${deviceData.Rssi}dBm`);
                                     break;
                                 case caseZone1: //Zone 1 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
-                                    operationModeText = idleZone1 ? HeatPump.ZoneOperationMapEnumToString[6] : HeatPump.ZoneOperationMapEnumToString[operationModeZone1];
+                                    operationModeText = idleZone1 ? HeatPump.OperationModeZoneMapEnumToString[6] : HeatPump.OperationModeZoneMapEnumToString[operationModeZone1];
                                     this.emit('info', `Operation mode: ${operationModeText}`);
                                     this.emit('info', `Temperature: ${roomTemperature}${obj.temperatureUnit}`);
                                     this.emit('info', `Target temperature: ${setTemperature}${obj.temperatureUnit}`)
@@ -2074,7 +2085,7 @@ class DeviceAtw extends EventEmitter {
                                     this.emit('info', `Lock physical controls: ${lockPhysicalControl ? 'Locked' : 'Unlocked'}`);
                                     break;
                                 case caseZone2: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
-                                    operationModeText = idleZone2 ? HeatPump.ZoneOperationMapEnumToString[6] : HeatPump.ZoneOperationMapEnumToString[operationModeZone2];
+                                    operationModeText = idleZone2 ? HeatPump.OperationModeZoneMapEnumToString[6] : HeatPump.OperationModeZoneMapEnumToString[operationModeZone2];
                                     this.emit('info', `Operation mode: ${operationModeText}`);
                                     this.emit('info', `Temperature: ${roomTemperature}${obj.temperatureUnit}`);
                                     this.emit('info', `Target temperature: ${setTemperature}${obj.temperatureUnit}`)
@@ -2087,52 +2098,60 @@ class DeviceAtw extends EventEmitter {
 
                     //update sensors characteristics
                     for (let i = 0; i < zonesSensorsCount; i++) {
+
+                        // helper function to update sensor characteristics
+                        const updateSensorCharacteristics = (service, value) => {
+                            if (this.functions.isValidValue(value)) service?.updateCharacteristic(Characteristic.CurrentTemperature, value);
+                        };
+
+                        // default values
+                        let name = '';
+                        let roomTemperature = null;
+                        let flowTemperature = null;
+                        let returnTemperature = null;
+
                         switch (i) {
-                            case caseHeatPumpSensor: //Heat Pump
+                            case caseHeatPumpSensor: // Heat Pump
                                 name = heatPumpName;
                                 roomTemperature = outdoorTemperature;
                                 flowTemperature = flowTemperatureHeatPump;
                                 returnTemperature = returnTemperatureHeatPump;
 
-                                //updte characteristics
-                                this.roomTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature);
-                                this.flowTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureHeatPump);
-                                this.returnTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureHeatPump);
+                                updateSensorCharacteristics(this.roomTemperatureSensorService, outdoorTemperature);
+                                updateSensorCharacteristics(this.flowTemperatureSensorService, flowTemperatureHeatPump);
+                                updateSensorCharacteristics(this.returnTemperatureSensorService, returnTemperatureHeatPump);
                                 break;
-                            case caseZone1Sensor: //Zone 1
+                            case caseZone1Sensor: // Zone 1
                                 name = zone1Name;
                                 roomTemperature = roomTemperatureZone1;
                                 flowTemperature = flowTemperatureZone1;
                                 returnTemperature = returnTemperatureZone1;
 
-                                //updte characteristics
-                                this.roomTemperatureZone1SensorService?.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperatureZone1);
-                                this.flowTemperatureZone1SensorService?.updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureZone1);
-                                this.returnTemperatureZone1SensorService?.updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureZone1);
+                                updateSensorCharacteristics(this.roomTemperatureZone1SensorService, roomTemperatureZone1);
+                                updateSensorCharacteristics(this.flowTemperatureZone1SensorService, flowTemperatureZone1);
+                                updateSensorCharacteristics(this.returnTemperatureZone1SensorService, returnTemperatureZone1);
                                 break;
-                            case caseHotWaterSensor: //Hot Water
+                            case caseHotWaterSensor: // Hot Water
                                 name = hotWaterName;
                                 roomTemperature = tankWaterTemperature;
                                 flowTemperature = flowTemperatureWaterTank;
                                 returnTemperature = returnTemperatureWaterTank;
 
-                                //updte characteristics
-                                this.roomTemperatureWaterTankSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, tankWaterTemperature);
-                                this.flowTemperatureWaterTankSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureWaterTank);
-                                this.returnTemperatureWaterTankSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureWaterTank);
+                                updateSensorCharacteristics(this.roomTemperatureWaterTankSensorService, tankWaterTemperature);
+                                updateSensorCharacteristics(this.flowTemperatureWaterTankSensorService, flowTemperatureWaterTank);
+                                updateSensorCharacteristics(this.returnTemperatureWaterTankSensorService, returnTemperatureWaterTank);
                                 break;
-                            case caseZone2Sensor: //Zone 2
+                            case caseZone2Sensor: // Zone 2
                                 name = zone2Name;
                                 roomTemperature = roomTemperatureZone2;
                                 flowTemperature = flowTemperatureZone2;
                                 returnTemperature = returnTemperatureZone2;
 
-                                //updte characteristics
-                                this.roomTemperatureZone2SensorService?.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperatureZone2);
-                                this.flowTemperatureZone2SensorService?.updateCharacteristic(Characteristic.CurrentTemperature, flowTemperatureZone2);
-                                this.returnTemperatureZone2SensorService?.updateCharacteristic(Characteristic.CurrentTemperature, returnTemperatureZone2);
+                                updateSensorCharacteristics(this.roomTemperatureZone2SensorService, roomTemperatureZone2);
+                                updateSensorCharacteristics(this.flowTemperatureZone2SensorService, flowTemperatureZone2);
+                                updateSensorCharacteristics(this.returnTemperatureZone2SensorService, returnTemperatureZone2);
                                 break;
-                        };
+                        }
 
                         //add every sensor to array
                         const sensor = {
@@ -2170,12 +2189,6 @@ class DeviceAtw extends EventEmitter {
                         };
                     }
                     this.accessory = obj;
-
-                    //update services
-                    for (const { type, value } of characteristics) {
-                        if (!this.functions.isValidValue(value)) continue;
-                        this.melCloudService?.[i]?.updateCharacteristic(type, value);
-                    }
 
                     //other sensors
                     this.inStandbyService?.updateCharacteristic(Characteristic.ContactSensorState, inStandbyMode);

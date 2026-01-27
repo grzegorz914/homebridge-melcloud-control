@@ -117,8 +117,6 @@
 
     // Tworzenie przycisków
     accounts.forEach((account, i) => {
-      this.account = account;
-
       const button = document.createElement("button");
       button.type = "button";
       button.id = `button${i}`;
@@ -143,7 +141,8 @@
         formElements.passwd.value = account.passwd || '';
         formElements.language.value = account.language || '0';
         formElements.accountType.value = account.type || 'disabled';
-        formElements.logIn.disabled = !(account.name && account.user && account.passwd && account.language && account.type);
+        formElements.logIn.disabled = !(account.name && account.user && account.passwd && account.language && account.type !== 'disabled');
+        formElements.configButton.disabled = !(account.ataDevices.length > 0 || account.atwDevices.length > 0 || account.ervDevices.length > 0);
 
         this.account = account;
       });
@@ -155,15 +154,13 @@
     // Jeden listener input dla całego formularza
     document.getElementById('configForm').addEventListener('input', async () => {
       const account = this.account;
-      if (!account) return;
-
       account.name = formElements.name.value;
       account.user = formElements.user.value;
       account.passwd = formElements.passwd.value;
       account.language = formElements.language.value;
       account.type = formElements.accountType.value;
-
-      formElements.logIn.disabled = !(account.name && account.user && account.passwd && account.language && account.type);
+      formElements.logIn.disabled = !(account.name && account.user && account.passwd && account.language && account.type !== 'disabled');
+      formElements.configButton.disabled = !(account.ataDevices.length > 0 || account.atwDevices.length > 0 || account.ervDevices.length > 0);
 
       await homebridge.updatePluginConfig(pluginConfig);
       await homebridge.savePluginConfig();
@@ -247,7 +244,7 @@
 
     // Login & Sync Logic
     document.getElementById('logIn').addEventListener('click', async () => {
-      document.getElementById('logIn').className = "btn btn-primary";
+      document.getElementById('logIn').disabled = true;
       const lightingMode = homebridge.userCurrentLightingMode();
       const fontColor = lightingMode === 'dark' ? 'black' : 'white';
 
@@ -262,6 +259,7 @@
 
         if (!response.State) {
           updateInfo('info', response.Info, 'red');
+          document.getElementById('logIn').disabled = false;
           homebridge.hideSpinner();
           return;
         }
@@ -437,13 +435,12 @@
 
         await homebridge.updatePluginConfig(pluginConfig);
         await homebridge.savePluginConfig();
-
       } catch (error) {
         updateInfo('info', `Prepare config error`, "red");
         updateInfo('info1', `Error: ${JSON.stringify(error)}`, "red");
       } finally {
-        document.getElementById('logIn').className = "btn btn-secondary";
         homebridge.hideSpinner();
+        document.getElementById('logIn').disabled = false;
       }
     });
   })();

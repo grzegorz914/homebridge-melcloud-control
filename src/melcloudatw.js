@@ -122,19 +122,18 @@ class MelCloudAtw extends EventEmitter {
                 deviceData.Device.OperationMode = HeatPump.OperationModeMapStringToEnum[deviceData.Device.OperationMode] ?? deviceData.Device.OperationMode;
                 deviceData.Device.OperationModeZone1 = HeatPump.OperationModeZoneMapStringToEnum[deviceData.Device.OperationModeZone1] ?? deviceData.Device.OperationModeZone1;
                 deviceData.Device.OperationModeZone2 = HeatPump.OperationModeZoneMapStringToEnum[deviceData.Device.OperationModeZone2] ?? deviceData.Device.OperationModeZone2;
+                deviceData.Device.HasHotWaterTank = deviceData.Device.HasHotWater ?? false;
             }
             if (this.logDebug) this.emit('debug', `Device Data: ${JSON.stringify(deviceData, null, 2)}`);
 
             //device
             const serialNumber = deviceData.SerialNumber || '4.0.0';
             const firmwareAppVersion = deviceData.Device?.FirmwareAppVersion || '4.0.0';
-            const hasHotWaterTank = deviceData.Device?.HasHotWaterTank;
-            const hasZone2 = deviceData.Device?.HasZone2;
+            const hasHotWaterTank = deviceData.Device?.HasHotWaterTank || false;
+            const hasZone2 = deviceData.Device?.HasZone2 || false;
 
             //units
             const units = Array.isArray(deviceData.Device?.Units) ? deviceData.Device?.Units : [];
-            const unitsCount = units.length;
-
             const { indoor, outdoor } = units.reduce((acc, unit) => {
                 const target = unit.IsIndoor ? 'indoor' : 'outdoor';
                 acc[target] = {
@@ -300,13 +299,8 @@ class MelCloudAtw extends EventEmitter {
                                 operationMode: HeatPump.OperationModeMapEnumToString[deviceData.Device.OperationMode],
                                 operationModeZone1: HeatPump.OperationModeMapEnumToString[deviceData.Device.OperationModeZone1],
                                 operationModeZone2: HeatPump.OperationModeMapEnumToString[deviceData.Device.OperationModeZone2],
-                                opetHeatFlowTemperatureZone1: deviceData.Device.SetHeatFlowTemperatureZone1,
-                                setHeatFlowTemperatureZone2: deviceData.Device.SetHeatFlowTemperatureZone2,
-                                setCoolFlowTemperatureZone1: deviceData.Device.SetCoolFlowTemperatureZone1,
-                                setCoolFlowTemperatureZone2: deviceData.Device.SetCoolFlowTemperatureZone2,
                                 setTankWaterTemperature: deviceData.Device.SetTankWaterTemperature,
-                                forcedHotWaterMode: deviceData.Device.ForcedHotWaterMode,
-                                ecoHotWater: deviceData.Device.EcoHotWater,
+                                forcedHotWaterMode: deviceData.Device.ForcedHotWaterMode
                             };
                             method = 'PUT';
                             path = ApiUrls.Home.Put.Atw.replace('deviceid', deviceData.DeviceID);
