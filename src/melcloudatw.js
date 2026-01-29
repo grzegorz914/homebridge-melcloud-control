@@ -130,7 +130,7 @@ class MelCloudAtw extends EventEmitter {
             const serialNumber = deviceData.SerialNumber || '4.0.0';
             const firmwareAppVersion = deviceData.Device?.FirmwareAppVersion || '4.0.0';
             const hasHotWaterTank = deviceData.Device?.HasHotWaterTank || false;
-            const hasZone2 = deviceData.Device?.HasZone2 || false;
+            const hasZone2 = deviceData.Device.HasZone2 !== false && deviceData.Device.HasZone2 !== null;
 
             //units
             const units = Array.isArray(deviceData.Device?.Units) ? deviceData.Device?.Units : [];

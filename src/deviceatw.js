@@ -398,7 +398,7 @@ class DeviceAtw extends EventEmitter {
                                                         flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationMode;
                                                         break;
                                                 };
-                                                operationModeText = [HeatPump.SystemMapEnumToString[0], HeatPump.SystemMapEnumToString[deviceData.Device.UnitStatus]][this.accessory.power];
+                                                operationModeText = [HeatPump.SystemMapEnumToStringInfo[0], HeatPump.SystemMapEnumToStringInfo[deviceData.Device.UnitStatus]][this.accessory.power];
                                                 break;
                                             case caseZone1: //Zone 1 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
                                                 switch (value) {
@@ -415,7 +415,7 @@ class DeviceAtw extends EventEmitter {
                                                         flag = HeatPump.EffectiveFlags.OperationModeZone1;
                                                         break;
                                                 };
-                                                operationModeText = HeatPump.ZoneOperation[deviceData.Device.OperationModeZone1];
+                                                operationModeText = HeatPump.OperationModeMapEnumToStringInfo[deviceData.Device.OperationModeZone1];
                                                 break;
                                             case caseHotWater: //Hot Water - AUTO, HEAT NOW
                                                 switch (value) {
@@ -449,7 +449,7 @@ class DeviceAtw extends EventEmitter {
                                                         flag = HeatPump.EffectiveFlags.OperationModeZone2;
                                                         break;
                                                 };
-                                                operationModeText = HeatPump.ZoneOperationMapEnumToString[deviceData.Device.OperationModeZone2];
+                                                operationModeText = HeatPump.OperationModeMapEnumToStringInfo[deviceData.Device.OperationModeZone2];
                                                 break;
                                         };
 
@@ -696,7 +696,7 @@ class DeviceAtw extends EventEmitter {
                                                         flag = HeatPump.EffectiveFlags.Power;
                                                         break;
                                                 };
-                                                operationModeText = [HeatPump.SystemMapEnumToString[0], HeatPump.SystemMapEnumToString[deviceData.Device.UnitStatus]][this.accessory.power];
+                                                operationModeText = [HeatPump.SystemMapEnumToStringInfo[0], HeatPump.SystemMapEnumToStringInfo[deviceData.Device.UnitStatus]][this.accessory.power];
                                                 break;
                                             case caseZone1: //Zone 1 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
                                                 switch (value) {
@@ -717,7 +717,7 @@ class DeviceAtw extends EventEmitter {
                                                         flag = HeatPump.EffectiveFlags.OperationModeZone1;
                                                         break;
                                                 };
-                                                operationModeText = HeatPump.ZoneOperationMapEnumToString[deviceData.Device.OperationModeZone1];
+                                                operationModeText = HeatPump.OperationModeMapEnumToStringInfo[deviceData.Device.OperationModeZone1];
                                                 break;
                                             case caseHotWater: //Hot Water - AUTO, HEAT NOW
                                                 switch (value) {
@@ -759,7 +759,7 @@ class DeviceAtw extends EventEmitter {
                                                         flag = HeatPump.EffectiveFlags.OperationModeZone2;
                                                         break;
                                                 };
-                                                operationModeText = HeatPump.ZoneOperationMapEnumToString[deviceData.Device.OperationModeZone2];
+                                                operationModeText = HeatPump.OperationModeMapEnumToStringInfo[deviceData.Device.OperationModeZone2];
                                                 break;
                                         };
 
@@ -1686,7 +1686,7 @@ class DeviceAtw extends EventEmitter {
                     const supportsHeatPump = ![1, 2, 3, 4, 5, 6, 7, 15].includes(this.hideZone);
                     const supportsZone1 = ![2, 3, 4, 8, 9, 10, 11, 15].includes(this.hideZone);
                     const supportsHotWaterTank = ![3, 5, 6, 9, 10, 12, 13, 15].includes(this.hideZone) && deviceData.Device[supportHotWaterKey];
-                    const supportsZone2 = ![4, 6, 7, 10, 11, 13, 14, 15].includes(this.hideZone) && deviceData.Device.HasZone2;
+                    const supportsZone2 = ![4, 6, 7, 10, 11, 13, 14, 15].includes(this.hideZone) && deviceData.Device.HasZone2 !== false && deviceData.Device.HasZone2 !== null;
                     const canHeat = deviceData.Device[supportHeatKey] ?? true;
                     const canCool = deviceData.Device[supportCoolKey] ?? false;
                     const heatCoolModes = canHeat && canCool ? 0 : canHeat ? 1 : canCool ? 2 : 3;
@@ -1709,7 +1709,7 @@ class DeviceAtw extends EventEmitter {
                     const caseHeatPumpSensor = this.temperatureSensor || this.temperatureFlowSensor || this.temperatureReturnSensor ? currentZoneSensorCase++ : -1;
                     const caseZone1Sensor = this.temperatureFlowZone1Sensor || this.temperatureReturnZone1Sensor ? currentZoneSensorCase++ : -1;
                     const caseHotWaterSensor = (this.temperatureFlowWaterTankSensor || this.temperatureReturnWaterTankSensor) && deviceData.Device.HasHotWaterTank ? currentZoneSensorCase++ : -1;
-                    const caseZone2Sensor = (this.temperatureFlowZone2Sensor || this.temperatureReturnZone2Sensor) && deviceData.Device.HasZone2 ? currentZoneSensorCase++ : -1;
+                    const caseZone2Sensor = (this.temperatureFlowZone2Sensor || this.temperatureReturnZone2Sensor) && deviceData.Device.HasZone2 !== false && deviceData.Device.HasZone2 !== null ? currentZoneSensorCase++ : -1;
                     const zonesSensorsCount = currentZoneSensorCase;
 
                     //heat pump
@@ -2061,38 +2061,37 @@ class DeviceAtw extends EventEmitter {
                             let operationModeText = '';
                             switch (i) {
                                 case caseHeatPump: //Heat Pump - HEAT, COOL, OFF
-                                    operationModeText = power ? HeatPump.OperationMode[6] : HeatPump.OperationModeZoneMapEnumToString[operationModeZone1];
-                                    this.emit('info', `Power: ${power ? 'On' : 'Off'}`)
-                                    this.emit('info', `System status: ${HeatPump.SystemMapEnumToString[unitStatus]}`);
-                                    this.emit('info', `Operation mode: ${HeatPump.OperationModeMapEnumToString[operationMode]}`);
-                                    this.emit('info', `Outdoor temperature: ${roomTemperature}${obj.temperatureUnit}`);
-                                    this.emit('info', `Temperature display unit: ${obj.temperatureUnit}`);
-                                    this.emit('info', `Lock physical controls: ${lockPhysicalControl ? 'Locked' : 'Unlocked'}`);
+                                    this.emit('info', `${name} Power: ${power ? 'On' : 'Off'}`)
+                                    this.emit('info', `${name} System status: ${HeatPump.SystemMapEnumToStringInfo[unitStatus]}`);
+                                    this.emit('info', `${name} Operation mode: ${HeatPump.OperationModeMapEnumToStringInfo[operationMode]}`);
+                                    this.emit('info', `${name} Outdoor temperature: ${roomTemperature}${obj.temperatureUnit}`);
+                                    this.emit('info', `${name} Temperature display unit: ${obj.temperatureUnit}`);
+                                    this.emit('info', `${name} Lock physical controls: ${lockPhysicalControl ? 'Locked' : 'Unlocked'}`);
                                     if (this.accountType === 'melcloudhome') this.emit('info', `Signal strength: ${deviceData.Rssi}dBm`);
                                     break;
                                 case caseZone1: //Zone 1 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
-                                    operationModeText = idleZone1 ? HeatPump.OperationModeZoneMapEnumToString[6] : HeatPump.OperationModeZoneMapEnumToString[operationModeZone1];
-                                    this.emit('info', `Operation mode: ${operationModeText}`);
-                                    this.emit('info', `Temperature: ${roomTemperature}${obj.temperatureUnit}`);
-                                    this.emit('info', `Target temperature: ${setTemperature}${obj.temperatureUnit}`)
-                                    this.emit('info', `Temperature display unit: ${obj.temperatureUnit}`);
-                                    this.emit('info', `Lock physical controls: ${lockPhysicalControl ? 'Locked' : 'Unlocked'}`);
+                                    operationModeText = idleZone1 ? HeatPump.OperationModeZoneMapEnumToStringInfo[6] : HeatPump.OperationModeZoneMapEnumToStringInfo[operationModeZone1];
+                                    this.emit('info', `${name} Operation mode: ${operationModeText}`);
+                                    this.emit('info', `${name} Temperature: ${roomTemperature}${obj.temperatureUnit}`);
+                                    this.emit('info', `${name} Target temperature: ${setTemperature}${obj.temperatureUnit}`)
+                                    this.emit('info', `${name} Temperature display unit: ${obj.temperatureUnit}`);
+                                    this.emit('info', `${name} Lock physical controls: ${lockPhysicalControl ? 'Locked' : 'Unlocked'}`);
                                     break;
                                 case caseHotWater: //Hot Water - AUTO, HEAT NOW
                                     operationModeText = operationMode === 1 ? HeatPump.ForceDhwMapEnumToString[1] : HeatPump.ForceDhwMapEnumToString[forcedHotWaterMode ? 1 : 0];
-                                    this.emit('info', `Operation mode: ${operationModeText}`);
-                                    this.emit('info', `Temperature: ${roomTemperature}${obj.temperatureUnit}`);
-                                    this.emit('info', `Target temperature: ${setTemperature}${obj.temperatureUnit}`)
-                                    this.emit('info', `Temperature display unit: ${obj.temperatureUnit}`);
-                                    this.emit('info', `Lock physical controls: ${lockPhysicalControl ? 'Locked' : 'Unlocked'}`);
+                                    this.emit('info', `${name} Operation mode: ${operationModeText}`);
+                                    this.emit('info', `${name} Temperature: ${roomTemperature}${obj.temperatureUnit}`);
+                                    this.emit('info', `${name} Target temperature: ${setTemperature}${obj.temperatureUnit}`)
+                                    this.emit('info', `${name} Temperature display unit: ${obj.temperatureUnit}`);
+                                    this.emit('info', `${name} Lock physical controls: ${lockPhysicalControl ? 'Locked' : 'Unlocked'}`);
                                     break;
                                 case caseZone2: //Zone 2 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
-                                    operationModeText = idleZone2 ? HeatPump.OperationModeZoneMapEnumToString[6] : HeatPump.OperationModeZoneMapEnumToString[operationModeZone2];
-                                    this.emit('info', `Operation mode: ${operationModeText}`);
-                                    this.emit('info', `Temperature: ${roomTemperature}${obj.temperatureUnit}`);
-                                    this.emit('info', `Target temperature: ${setTemperature}${obj.temperatureUnit}`)
-                                    this.emit('info', `Temperature display unit: ${obj.temperatureUnit}`);
-                                    this.emit('info', `Lock physical controls: ${lockPhysicalControl ? 'Locked' : 'Unlocked'}`);
+                                    operationModeText = idleZone2 ? HeatPump.OperationModeZoneMapEnumToStringInfo[6] : HeatPump.OperationModeZoneMapEnumToStringInfo[operationModeZone2];
+                                    this.emit('info', `${name} Operation mode: ${operationModeText}`);
+                                    this.emit('info', `${name} Temperature: ${roomTemperature}${obj.temperatureUnit}`);
+                                    this.emit('info', `${name} Target temperature: ${setTemperature}${obj.temperatureUnit}`)
+                                    this.emit('info', `${name} Temperature display unit: ${obj.temperatureUnit}`);
+                                    this.emit('info', `${name} Lock physical controls: ${lockPhysicalControl ? 'Locked' : 'Unlocked'}`);
                                     break;
                             };
                         }

@@ -65,7 +65,7 @@ export const DeviceType = {
 };
 
 export const AirConditioner = {
-    SystemMapEnumToString: { 0: "Air Conditioner Off", 1: "Air Conditioner On", 2: "Air Conditioner Offline" },
+    SystemMapEnumToStringInfo: { 0: "Air Conditioner Off", 1: "Air Conditioner On", 2: "Air Conditioner Offline" },
     OperationModeMapStringToEnum: { "0": 0, "Heat": 1, "Dry": 2, "Cool": 3, "4": 4, "5": 5, "6": 6, "Fan": 7, "Automatic": 8, "Heat Isee": 9, "Dry Isee": 10, "Cool Isee": 11 },
     OperationModeMapEnumToString: { 0: "0", 1: "Heat", 2: "Dry", 3: "Cool", 4: "4", 5: "5", 6: "6", 7: "Fan", 8: "Automatic", 9: "Heat Isee", 10: "Dry Isee", 11: "Cool Isee" },
     OperationModeMapEnumToEnumWs: { 0: 0, 1: 1, 2: 2, 3: 3, 4: 7, 5: 8 },
@@ -107,14 +107,15 @@ export const AirConditioner = {
 };
 
 export const HeatPump = {
-    SystemMapEnumToString: { 0: "System Off", 1: "System On", 2: "Emergency Run", 3: "Test Run" },
     ZoneNameMapEnumToString: { 0: "Heat Pump", 1: "Zone 1", 2: "Hot Water", 3: "Zone 2" },
+    SystemMapEnumToStringInfo: { 0: "System Off", 1: "System On", 2: "Emergency Run", 3: "Test Run" },
     ControlTypeMapStringToEnum: { "Heat": 0, "Cool": 1 },
     ControlTypeMapEnumToString: { 0: "Heat", 1: "Cool" },
     DefrostMapStringToEnum: { "Normal": 0, "Standby": 1, "Defrost": 2, "Waiting Restart": 3 },
     DefrostMapEnumToString: { 0: "Normal", 1: "Standby", 2: "Defrost", 3: "Waiting Restart" },
     OperationModeMapStringToEnum: { "Idle": 0, "HotWater": 1, "Heating": 2, "Cooling": 3, "HotWaterStorage": 4, "FreezeStat": 5, "Legionella": 6, "HeatEco": 7, "Mode1": 8, "Mode2": 9, "Mode3": 10, "HeatUp": 11 },
     OperationModeMapEnumToString: { 0: "Idle", 1: "HotWater", 2: "Heating", 3: "Cooling", 4: "HotWaterStorage", 5: "FreezeStat", 6: "Legionella", 7: "HeatEco", 8: "Mode1", 9: "Mode2", 10: "Mode3", 11: "HeatUp" },
+    OperationModeMapEnumToStringInfo: { 0: "Idle", 1: "Hot Water", 2: "Heating", 3: "Cooling", 4: "Hot Water Storage", 5: "Freeze Stat", 6: "Legionella", 7: "Heat Eco", 8: "Mode 1", 9: "Mode 2", 10: "Mode 3", 11: "Heat Up" },
     OperationModeDhwMapStringToEnum: { "Normal": 0, "Eco": 1 },
     OperationModeDhwMapEnumToString: { 0: "Normal", 1: "Eco" },
     ForceDhwMapStringToEnum: { "Normal": 0, "HeatNow": 1 },
@@ -122,7 +123,8 @@ export const HeatPump = {
     HolidayMapStringToEnum: { "Normal": 0, "Holiday": 1 },
     HolidayMapEnumToString: { 0: "Normal", 1: "Holiday" },
     OperationModeZoneMapStringToEnum: { "HeatThermostat": 0, "HeatFlowTemperature": 1, "HeatCurve": 2, "CoolThermostat": 3, "CoolFlowTemperature": 4, "FloorDryUp": 5, "Idle": 6 },
-    OperationModeZoneMapEnumToString: { 0: "HeatThermostat", 1: "HeatFlowTemperature", 2: "Heat Curve", 3: "CoolThermostat", 4: "CoolFlowTemperature", 5: "FloorDryUp", 6: "Idle" },
+    OperationModeZoneMapEnumToString: { 0: "HeatThermostat", 1: "HeatFlowTemperature", 2: "HeatCurve", 3: "CoolThermostat", 4: "CoolFlowTemperature", 5: "FloorDryUp", 6: "Idle" },
+    OperationModeZoneMapEnumToStringInfo: { 0: "Heat Thermostat", 1: "Heat Flow Temperature", 2: "Heat Curve", 3: "Cool Thermostat", 4: "Cool Flow Temperature", 5: "Floor Dry Up", 6: "Idle" },
     EffectiveFlags: {
         Power: 1,
         OperationMode: 2,

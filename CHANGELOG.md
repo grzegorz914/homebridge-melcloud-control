@@ -24,6 +24,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - For plugin < v4.6.0 use Homebridge UI <= v5.5.0
 - For plugin >= v4.6.0 use Homebridge UI >= v5.13.0
 
+# [4.7.2] - (29.01.2026)
+
+## Changes
+
+- fix zone2 for ATW devices
+- constants updated
+- log info updated
+- bump dependencies
+- cleanup
+
 # [4.7.1] - (27.01.2026)
 
 ## Changes
