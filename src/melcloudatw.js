@@ -29,28 +29,12 @@ class MelCloudAtw extends EventEmitter {
         let deviceData = null;
         melcloud.on('client', (client) => {
             this.client = client;
-        }).on('devicesList', async (devicesData) => {
-            try {
-                deviceData = devicesData.Devices.find(device => device.DeviceID === this.deviceId);
-                if (!deviceData) return;
-                deviceData.Scenes = devicesData.Scenes ?? [];
-
-                //update state
-                if (this.logDebug) this.emit('debug', `Request update settings: ${JSON.stringify(deviceData.Device, null, 2)}`);
-                await this.updateState('request', deviceData);
-            } catch (error) {
-                if (this.logError) this.emit('error', `Request process message error: ${error}`);
-            }
-        }).on('webSocket', async (parsedMessage) => {
-            try {
-                const messageData = parsedMessage?.[0]?.Data;
-                if (!messageData || !deviceData) return;
-
-                let updateState = false;
-                const unitId = messageData?.id;
-                switch (unitId) {
-                    case this.deviceId:
-                        const messageType = parsedMessage[0].messageType;
+        }).on(this.deviceId, async (type, message) => {
+            switch (type) {
+                case 'ws':
+                    try {
+                        const messageType = message.messageType;
+                        const messageData = message.Data;
                         const settings = this.functions.parseArrayNameValue(messageData.settings);
                         switch (messageType) {
                             case 'unitStateChanged':
@@ -70,8 +54,6 @@ class MelCloudAtw extends EventEmitter {
                                         deviceData.Device[key] = value;
                                     }
                                 }
-
-                                updateState = true;
                                 break;
                             case 'atwUnitFrostProtectionTriggered':
                                 deviceData.FrostProtection.Active = messageData.active;
@@ -84,34 +66,45 @@ class MelCloudAtw extends EventEmitter {
                                         deviceData.Device[key] = value;
                                     }
                                 }
-                                updateState = true;
                                 break;
                             case 'unitHolidayModeTriggered':
                                 deviceData.Device.Power = settings.Power;
                                 deviceData.HolidayMode.Enabled = settings.HolidayMode;
                                 deviceData.HolidayMode.Active = messageData.active;
-                                updateState = true;
                                 break;
                             case 'unitWifiSignalChanged':
                                 deviceData.Rssi = messageData.rssi;
-                                updateState = true;
                                 break;
                             case 'unitCommunicationRestored':
                                 deviceData.Device.IsConnected = true;
                                 break;
                             default:
-                                if (this.logDebug) this.emit('debug', `Unit ${unitId}, received unknown message type: ${parsedMessage}`);
+                                if (this.logDebug) this.emit('debug', `Unit ${this.deviceId}, received unknown message type: ${messageType}`);
                                 return;
                         }
-                        break;
-                    default:
-                        return;
-                }
 
-                //update state
-                if (updateState) await this.updateState('ws', deviceData);
-            } catch (error) {
-                if (this.logError) this.emit('error', `Web socket process message error: ${error}`);
+                        //update state
+                        if (this.logDebug) this.emit('debug', `Web socket update unit ${this.deviceId} settings: ${JSON.stringify(deviceData.Device, null, 2)}`);
+                        await this.updateState('ws', deviceData);
+                    } catch (error) {
+                        if (this.logError) this.emit('error', `Web socket unit ${this.deviceId} process message error: ${error}`);
+                    }
+                    break;
+                case 'request':
+                    try {
+                        //update device data
+                        deviceData = message;
+
+                        //update state
+                        if (this.logDebug) this.emit('debug', `Request update unit ${this.deviceId} settings: ${JSON.stringify(deviceData.Device, null, 2)}`);
+                        await this.updateState('request', deviceData);
+                    } catch (error) {
+                        if (this.logError) this.emit('error', `Request unit ${this.deviceId} process message error: ${error}`);
+                    }
+                    break;
+                default:
+                    if (this.logDebug) this.emit('debug', `Unit ${this.deviceId}, received unknown type: ${type}`);
+                    return;
             }
         });
     }

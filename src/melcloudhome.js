@@ -209,7 +209,12 @@ class MelCloudHome extends EventEmitter {
             await this.functions.saveData(this.buildingsFile, devicesList);
             if (this.logDebug) this.emit('debug', `Buildings list saved`);
 
-            this.emit('devicesList', devicesList);
+            //emit device event
+            for (const deviceData of devicesList.Devices) {
+                deviceData.Scenes = devicesList.Devices.Scenes ?? [];
+                const deviceId = deviceData.DeviceID;
+                this.emit(deviceId, 'request', deviceData);
+            }
 
             return devicesList;
         } catch (error) {
@@ -331,9 +336,10 @@ class MelCloudHome extends EventEmitter {
                                     .on('message', (message) => {
                                         const parsedMessage = JSON.parse(message);
                                         if (this.logDebug) this.emit('debug', `Web socket incoming message: ${JSON.stringify(parsedMessage, null, 2)}`);
-                                        if (parsedMessage.message === 'Forbidden') return;
+                                        const messageData = parsedMessage?.[0]?.Data;
+                                        if (!messageData || parsedMessage.message === 'Forbidden') return;
 
-                                        this.emit('webSocket', parsedMessage);
+                                        this.emit(messageData.id, 'ws', parsedMessage[0]);
                                     });
                             } catch (error) {
                                 if (this.logError) this.emit('error', `Web socket connection failed: ${error}`);

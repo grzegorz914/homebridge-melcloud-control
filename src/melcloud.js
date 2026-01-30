@@ -111,7 +111,12 @@ class MelCloud extends EventEmitter {
             await this.functions.saveData(this.buildingsFile, devicesList);
             if (this.logDebug) this.emit('debug', `Buildings list saved`);
 
-            this.emit('devicesList', devicesList);
+            //emit device event
+            for (const deviceData of devicesList.Devices) {
+                const deviceId = deviceData.DeviceID;
+                deviceData.Scenes = devicesList.Devices.Scenes ?? [];
+                this.emit(deviceId, 'request', deviceData);
+            }
 
             return devicesList;
         } catch (error) {
