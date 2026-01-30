@@ -24,6 +24,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - For plugin < v4.6.0 use Homebridge UI <= v5.5.0
 - For plugin >= v4.6.0 use Homebridge UI >= v5.13.0
 
+# [4.7.3] - (29.01.2026)
+
+## Changes
+
+- fix [#235](https://github.com/grzegorz914/homebridge-melcloud-control/issues/235)
+- fix 2 [#233](https://github.com/grzegorz914/homebridge-melcloud-control/issues/233)
+- fix ATW set temperature for Z1 and Z2
+- fix ATW zone operatin mode
+- config schema updated
+- other fixes for ATA, ATW, ERV
+- cleanup
+
 # [4.7.2] - (29.01.2026)
 
 ## Changes

@@ -362,7 +362,7 @@
                       }
                     ]
                   },
-                  "temperatureSensor": {
+                  "temperatureRoomSensor": {
                     "title": "Room",
                     "type": "boolean",
                     "description": "This enable extra room temperature sensor to use with HomeKit automations."
@@ -1150,50 +1150,100 @@
                       "functionBody": "return model.accounts[arrayIndices[0]].atwDevices[arrayIndices[1]].displayType > 0;"
                     }
                   },
-                  "temperatureSensor": {
-                    "title": "Temperature Sensor Room",
+                  "temperatureOutdoorSensor": {
+                    "title": "Temperature Sensor Outdoor",
                     "type": "boolean",
-                    "description": "This enable extra temperature sensor to use with HomeKit automations."
+                    "description": "This enable extra Outdoor temperature sensor to use with HomeKit automations.",
+                    "condition": {
+                      "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloud';"
+                    }
+                  },
+                  "temperatureRoomSensor": {
+                    "title": "Temperature Room",
+                    "type": "boolean",
+                    "description": "This enable extra Room temperature sensor to use with HomeKit automations.",
+                    "condition": {
+                      "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloud';"
+                    }
                   },
                   "temperatureFlowSensor": {
                     "title": "Temperature Sensor Flow",
                     "type": "boolean",
-                    "description": "This enable extra Flow temperature sensor to use with HomeKit automations."
+                    "description": "This enable extra Flow temperature sensor to use with HomeKit automations.",
+                    "condition": {
+                      "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloud';"
+                    }
                   },
                   "temperatureReturnSensor": {
                     "title": "Temperature Sensor Return",
                     "type": "boolean",
-                    "description": "This enable extra Return temperature sensor to use with HomeKit automations."
+                    "description": "This enable extra Return temperature sensor to use with HomeKit automations.",
+                    "condition": {
+                      "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloud';"
+                    }
+                  },
+                  "temperatureRoomZone1Sensor": {
+                    "title": "Temperature Sensor Room Zone 1",
+                    "type": "boolean",
+                    "description": "This enable extra Room Zone 1 temperature sensor to use with HomeKit automations."
                   },
                   "temperatureFlowZone1Sensor": {
                     "title": "Temperature Sensor Flow Zone 1",
                     "type": "boolean",
-                    "description": "This enable extra Flow Zone 1 temperature sensor to use with HomeKit automations."
+                    "description": "This enable extra Flow Zone 1 temperature sensor to use with HomeKit automations.",
+                    "condition": {
+                      "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloud';"
+                    }
                   },
                   "temperatureReturnZone1Sensor": {
                     "title": "Temperature Sensor Return Zone 1",
                     "type": "boolean",
-                    "description": "This enable extra Return Zone 1 temperature sensor to use with HomeKit automations."
+                    "description": "This enable extra Return Zone 1 temperature sensor to use with HomeKit automations.",
+                    "condition": {
+                      "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloud';"
+                    }
+                  },
+                  "temperatureWaterTankSensor": {
+                    "title": "Temperature Sensor Water Tank",
+                    "type": "boolean",
+                    "description": "This enable extra Water Tank temperature sensor to use with HomeKit automations."
                   },
                   "temperatureFlowWaterTankSensor": {
                     "title": "Temperature Sensor Flow Water Tank",
                     "type": "boolean",
-                    "description": "This enable extra Flow Water Tank temperature sensor to use with HomeKit automations."
+                    "description": "This enable extra Flow Water Tank temperature sensor to use with HomeKit automations.",
+                    "condition": {
+                      "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloud';"
+                    }
                   },
                   "temperatureReturnWaterTankSensor": {
                     "title": "Temperature Sensor Return Water Tank",
                     "type": "boolean",
-                    "description": "This enable extra Return Water Tank temperature sensor to use with HomeKit automations."
+                    "description": "This enable extra Return Water Tank temperature sensor to use with HomeKit automations.",
+                    "condition": {
+                      "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloud';"
+                    }
+                  },
+                  "temperatureRoomZone2Sensor": {
+                    "title": "Temperature Sensor Room Zone 2",
+                    "type": "boolean",
+                    "description": "This enable extra Room Zone 2 temperature sensor to use with HomeKit automations."
                   },
                   "temperatureFlowZone2Sensor": {
                     "title": "Temperature Sensor Flow Zone 2",
                     "type": "boolean",
-                    "description": "This enable extra Flow Zone 2 temperature sensor to use with HomeKit automations."
+                    "description": "This enable extra Flow Zone 2 temperature sensor to use with HomeKit automations.",
+                    "condition": {
+                      "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloud';"
+                    }
                   },
                   "temperatureReturnZone2Sensor": {
                     "title": "Temperature Sensor Return Zone 2",
                     "type": "boolean",
-                    "description": "This enable extra Return Zone 2 temperature sensor to use with HomeKit automations."
+                    "description": "This enable extra Return Zone 2 temperature sensor to use with HomeKit automations.",
+                    "condition": {
+                      "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloud';"
+                    }
                   },
                   "inStandbySensor": {
                     "title": "In Standby",
@@ -1779,7 +1829,7 @@
                       }
                     ]
                   },
-                  "temperatureSensor": {
+                  "temperatureRoomSensor": {
                     "title": "Temperature Sensor Room",
                     "type": "boolean",
                     "description": "This enable extra temperature sensor to use with HomeKit automations."
@@ -2614,8 +2664,8 @@
                                 {
                                   "title": "Sensors",
                                   "items": [
-                                    "accounts[].ataDevices[].temperatureSensor",
                                     "accounts[].ataDevices[].temperatureOutdoorSensor",
+                                    "accounts[].ataDevices[].temperatureRoomSensor",
                                     "accounts[].ataDevices[].inStandbySensor",
                                     "accounts[].ataDevices[].connectSensor",
                                     "accounts[].ataDevices[].errorSensor"
@@ -2775,13 +2825,17 @@
                                 {
                                   "title": "Sensors",
                                   "items": [
-                                    "accounts[].atwDevices[].temperatureSensor",
+                                    "accounts[].atwDevices[].temperatureOutdoorSensor",
+                                    "accounts[].atwDevices[].temperatureRoomSensor",
                                     "accounts[].atwDevices[].temperatureFlowSensor",
                                     "accounts[].atwDevices[].temperatureReturnSensor",
+                                    "accounts[].atwDevices[].temperatureRoomZone1Sensor",
                                     "accounts[].atwDevices[].temperatureFlowZone1Sensor",
                                     "accounts[].atwDevices[].temperatureReturnZone1Sensor",
+                                    "accounts[].atwDevices[].temperatureWaterTankSensor",
                                     "accounts[].atwDevices[].temperatureFlowWaterTankSensor",
                                     "accounts[].atwDevices[].temperatureReturnWaterTankSensor",
+                                    "accounts[].atwDevices[].temperatureRoomZone2Sensor",
                                     "accounts[].atwDevices[].temperatureFlowZone2Sensor",
                                     "accounts[].atwDevices[].temperatureReturnZone2Sensor",
                                     "accounts[].atwDevices[].inStandbySensor",
@@ -2941,8 +2995,8 @@
                                 {
                                   "title": "Sensors",
                                   "items": [
-                                    "accounts[].ervDevices[].temperatureSensor",
                                     "accounts[].ervDevices[].temperatureOutdoorSensor",
+                                    "accounts[].ervDevices[].temperatureRoomSensor",
                                     "accounts[].ervDevices[].temperatureSensorSupply",
                                     "accounts[].ervDevices[].inStandbySensor",
                                     "accounts[].ervDevices[].connectSensor",

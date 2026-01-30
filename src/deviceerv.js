@@ -33,7 +33,7 @@ class DeviceErv extends EventEmitter {
         this.deviceName = device.name;
         this.deviceTypeString = DeviceType[device.type];
         this.displayType = device.displayType;
-        this.temperatureSensor = device.temperatureSensor || false;
+        this.temperatureRoomSensor = device.temperatureRoomSensor || false;
         this.temperatureOutdoorSensor = device.temperatureOutdoorSensor || false;
         this.temperatureSupplySensor = device.temperatureSupplySensor || false;
         this.inStandbySensor = device.inStandbySensor || false;
@@ -557,7 +557,7 @@ class DeviceErv extends EventEmitter {
             };
 
             //temperature sensor service room
-            if (this.temperatureSensor && supportsRoomTemperature && this.accessory.roomTemperature !== null) {
+            if (this.temperatureRoomSensor && supportsRoomTemperature && this.accessory.roomTemperature !== null) {
                 if (this.logDebug) this.emit('debug', `Prepare room temperature sensor service`);
                 this.roomTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Room`, `roomTemperatureSensorService${deviceId}`);
                 this.roomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
@@ -1483,7 +1483,11 @@ class DeviceErv extends EventEmitter {
                     //buttons
                     if (this.buttons.length > 0) {
                         this.buttons.forEach((button, i) => {
-                            const characteristicType = button.characteristicType;
+                            // helper function to update sensor characteristics
+                            const updateSensorCharacteristics = (service, characteristic, value) => {
+                                if (this.functions.isValidValue(value)) service?.[i]?.updateCharacteristic(characteristic, value);
+                            };
+
                             const mode = button.mode;
                             switch (mode) {
                                 case 0: //POWER ON,OFF
@@ -1534,10 +1538,11 @@ class DeviceErv extends EventEmitter {
                             };
 
                             //control
-                            if (button.displayType > 3) this.buttonControlServices?.[i]?.updateCharacteristic(Characteristic.On, button.state);
+                            if (button.displayType > 3) updateSensorCharacteristics(this.buttonControlServices, Characteristic.On, button.state);
 
                             //sensor
-                            if (button.displayType < 7) this.buttonControlSensorServices?.[i]?.updateCharacteristic(characteristicType, button.state);
+                            const characteristicType = button.characteristicType;
+                            if (button.displayType < 7) updateSensorCharacteristics(this.buttonControlSensorServices, characteristicType, button.state);
                         });
                     }
 

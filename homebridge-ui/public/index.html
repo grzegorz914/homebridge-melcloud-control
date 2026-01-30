@@ -117,6 +117,8 @@
 
     // Tworzenie przycisków
     accounts.forEach((account, i) => {
+      this.account = account;
+
       const button = document.createElement("button");
       button.type = "button";
       button.id = `button${i}`;
@@ -142,9 +144,7 @@
         formElements.language.value = account.language || '0';
         formElements.accountType.value = account.type || 'disabled';
         formElements.logIn.disabled = !(account.name && account.user && account.passwd && account.language && account.type !== 'disabled');
-        formElements.configButton.disabled = !(account.ataDevices.length > 0 || account.atwDevices.length > 0 || account.ervDevices.length > 0);
-
-        this.account = account;
+        formElements.configButton.disabled = !((account.ataDevices?.length ?? 0) > 0 || (account.atwDevices?.length ?? 0) > 0 || (account.ervDevices?.length ?? 0) > 0);
       });
     });
 
@@ -160,7 +160,7 @@
       account.language = formElements.language.value;
       account.type = formElements.accountType.value;
       formElements.logIn.disabled = !(account.name && account.user && account.passwd && account.language && account.type !== 'disabled');
-      formElements.configButton.disabled = !(account.ataDevices.length > 0 || account.atwDevices.length > 0 || account.ervDevices.length > 0);
+      formElements.configButton.disabled = !((account.ataDevices?.length ?? 0) > 0 || (account.atwDevices?.length ?? 0) > 0 || (account.ervDevices?.length ?? 0) > 0);
 
       await homebridge.updatePluginConfig(pluginConfig);
       await homebridge.savePluginConfig();
@@ -270,11 +270,7 @@
         account.ervDevices = account.ervDevices ?? [];
 
         // Prepare MELCloud data
-        const newInMelCloud = {
-          ata: [], ataPresets: [], ataSchedules: [], ataScenes: [],
-          atw: [], atwPresets: [], atwSchedules: [], atwScenes: [],
-          erv: [], ervPresets: [], ervSchedules: [], ervScenes: []
-        };
+        const newInMelCloud = { ata: [], ataPresets: [], ataSchedules: [], ataScenes: [], atw: [], atwPresets: [], atwSchedules: [], atwScenes: [], erv: [], ervPresets: [], ervSchedules: [], ervScenes: [] };
         const devicesInMelCloudByType = { ata: [], atw: [], erv: [] };
         const scenesInMelCloud = response.Scenes ?? [];
 

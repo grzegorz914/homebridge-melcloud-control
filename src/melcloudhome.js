@@ -326,11 +326,11 @@ class MelCloudHome extends EventEmitter {
                                         }, 30000);
                                     })
                                     .on('pong', () => {
-                                        if (this.logDebug) this.emit('debug', `Socket received heartbeat`);
+                                        if (this.logDebug) this.emit('debug', `Web socket received heartbeat`);
                                     })
                                     .on('message', (message) => {
                                         const parsedMessage = JSON.parse(message);
-                                        if (this.logDebug) this.emit('debug', `Incoming message: ${JSON.stringify(parsedMessage, null, 2)}`);
+                                        if (this.logDebug) this.emit('debug', `Web socket incoming message: ${JSON.stringify(parsedMessage, null, 2)}`);
                                         if (parsedMessage.message === 'Forbidden') return;
 
                                         this.emit('webSocket', parsedMessage);

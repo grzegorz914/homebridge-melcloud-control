@@ -193,20 +193,6 @@ class MelCloudAtw extends EventEmitter {
 
     async send(accountType, displayType, deviceData, flag, flagData) {
         try {
-
-            //prevent to set out of range temp
-            const minTempZones = 0;
-            const maxTempZones = 60;
-            const minTempWaterTank = 16;
-            const maxTempWaterTank = deviceData.Device.MaxTankTemperature ?? 70;
-
-            deviceData.Device.SetTemperatureZone1 = deviceData.Device.SetTemperatureZone1 < minTempZones ? minTempZones : deviceData.Device.SetTemperatureZone1;
-            deviceData.Device.SetTemperatureZone1 = deviceData.Device.SetTemperatureZone1 > maxTempZones ? maxTempZones : deviceData.Device.SetTemperatureZone1;
-            deviceData.Device.SetTemperatureZone1 = deviceData.Device.SetTemperatureZone2 < minTempZones ? minTempZones : deviceData.Device.SetTemperatureZone2;
-            deviceData.Device.SetTemperatureZone1 = deviceData.Device.SetTemperatureZone2 > maxTempZones ? maxTempZones : deviceData.Device.SetTemperatureZone2;
-            deviceData.Device.SetTankWaterTemperature = deviceData.Device.SetTankWaterTemperature < minTempWaterTank ? minTempWaterTank : deviceData.Device.SetTankWaterTemperature;
-            deviceData.Device.SetTankWaterTemperature = deviceData.Device.SetTankWaterTemperature > maxTempWaterTank ? maxTempWaterTank : deviceData.Device.SetTankWaterTemperature;
-
             let method = null
             let payload = {};
             let path = '';
@@ -226,22 +212,22 @@ class MelCloudAtw extends EventEmitter {
                                 DeviceID: deviceData.Device.DeviceID,
                                 EffectiveFlags: deviceData.Device.EffectiveFlags,
                                 Power: deviceData.Device.Power,
-                                SetTemperatureZone1: deviceData.Device.SetTemperatureZone1,
-                                SetTemperatureZone2: deviceData.Device.SetTemperatureZone2,
                                 OperationMode: deviceData.Device.OperationMode,
                                 OperationModeZone1: deviceData.Device.OperationModeZone1,
-                                OperationModeZone2: deviceData.Device.OperationModeZone2,
+                                SetTemperatureZone1: deviceData.Device.SetTemperatureZone1,
                                 SetHeatFlowTemperatureZone1: deviceData.Device.SetHeatFlowTemperatureZone1,
-                                SetHeatFlowTemperatureZone2: deviceData.Device.SetHeatFlowTemperatureZone2,
                                 SetCoolFlowTemperatureZone1: deviceData.Device.SetCoolFlowTemperatureZone1,
-                                SetCoolFlowTemperatureZone2: deviceData.Device.SetCoolFlowTemperatureZone2,
+                                ProhibitZone1: deviceData.Device.ProhibitHeatingZone1,
                                 SetTankWaterTemperature: deviceData.Device.SetTankWaterTemperature,
                                 ForcedHotWaterMode: deviceData.Device.ForcedHotWaterMode,
                                 EcoHotWater: deviceData.Device.EcoHotWater,
-                                HolidayMode: deviceData.Device.HolidayMode,
-                                ProhibitZone1: deviceData.Device.ProhibitHeatingZone1,
-                                ProhibitZone2: deviceData.Device.ProhibitHeatingZone2,
                                 ProhibitHotWater: deviceData.Device.ProhibitHotWater,
+                                OperationModeZone2: deviceData.Device.OperationModeZone2,
+                                SetTemperatureZone2: deviceData.Device.SetTemperatureZone2,
+                                SetHeatFlowTemperatureZone2: deviceData.Device.SetHeatFlowTemperatureZone2,
+                                SetCoolFlowTemperatureZone2: deviceData.Device.SetCoolFlowTemperatureZone2,
+                                ProhibitZone2: deviceData.Device.ProhibitHeatingZone2,
+                                HolidayMode: deviceData.Device.HolidayMode,
                                 HasPendingCommand: true
                             }
                             path = ApiUrls.Post.Atw;
@@ -294,13 +280,15 @@ class MelCloudAtw extends EventEmitter {
                         default:
                             payload = {
                                 power: deviceData.Device.Power,
-                                setTemperatureZone1: deviceData.Device.SetTemperatureZone1,
-                                setTemperatureZone2: deviceData.Device.SetTemperatureZone2,
+                                inStandbyMode: deviceData.Device.InStandbyMode,
                                 operationMode: HeatPump.OperationModeMapEnumToString[deviceData.Device.OperationMode],
                                 operationModeZone1: HeatPump.OperationModeMapEnumToString[deviceData.Device.OperationModeZone1],
-                                operationModeZone2: HeatPump.OperationModeMapEnumToString[deviceData.Device.OperationModeZone2],
+                                setTemperatureZone1: deviceData.Device.SetTemperatureZone1,
                                 setTankWaterTemperature: deviceData.Device.SetTankWaterTemperature,
-                                forcedHotWaterMode: deviceData.Device.ForcedHotWaterMode
+                                forcedHotWaterMode: deviceData.Device.ForcedHotWaterMode,
+                                prohibitHotWater: deviceData.Device.ProhibitHotWater,
+                                operationModeZone2: HeatPump.OperationModeMapEnumToString[deviceData.Device.OperationModeZone2],
+                                setTemperatureZone2: deviceData.Device.SetTemperatureZone2
                             };
                             method = 'PUT';
                             path = ApiUrls.Home.Put.Atw.replace('deviceid', deviceData.DeviceID);

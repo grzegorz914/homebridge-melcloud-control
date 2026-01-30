@@ -36,7 +36,7 @@ class DeviceAta extends EventEmitter {
         this.heatDryFanMode = device.heatDryFanMode || 1; //NONE, HEAT, DRY, FAN
         this.coolDryFanMode = device.coolDryFanMode || 1; //NONE, COOL, DRY, FAN
         this.autoDryFanMode = device.autoDryFanMode || 1; //NONE, AUTO, DRY, FAN
-        this.temperatureSensor = device.temperatureSensor || false;
+        this.temperatureRoomSensor = device.temperatureRoomSensor || false;
         this.temperatureOutdoorSensor = device.temperatureOutdoorSensor || false;
         this.inStandbySensor = device.inStandbySensor || false;
         this.connectSensor = device.connectSensor || false;
@@ -449,8 +449,8 @@ class DeviceAta extends EventEmitter {
                     };
                     melCloudService.getCharacteristic(Characteristic.CoolingThresholdTemperature) // 16 - 31
                         .setProps({
-                            minValue: this.accessory.minTempCoolDryAuto,
-                            maxValue: this.accessory.maxTempCoolDryAuto,
+                            minValue: this.accessory.minSetCoolDryAutoRoomTemperature,
+                            maxValue: this.accessory.maxSetHeatCoolDryAutoRoomTemperature,
                             minStep: this.accessory.temperatureStep
                         })
                         .onGet(async () => {
@@ -470,8 +470,8 @@ class DeviceAta extends EventEmitter {
                     if (supportsHeat) {
                         melCloudService.getCharacteristic(Characteristic.HeatingThresholdTemperature) // 10 - 31
                             .setProps({
-                                minValue: this.accessory.minTempHeat,
-                                maxValue: this.accessory.maxTempHeat,
+                                minValue: this.accessory.minSetHeatRoomTemperature,
+                                maxValue: this.accessory.maxSetHeatCoolDryAutoRoomTemperature,
                                 minStep: this.accessory.temperatureStep
                             })
                             .onGet(async () => {
@@ -584,8 +584,8 @@ class DeviceAta extends EventEmitter {
                         });
                     melCloudServiceT.getCharacteristic(Characteristic.TargetTemperature)
                         .setProps({
-                            minValue: this.accessory.minTempCoolDryAuto,
-                            maxValue: this.accessory.maxTempCoolDryAuto,
+                            minValue: this.accessory.minSetCoolDryAutoRoomTemperature,
+                            maxValue: this.accessory.maxSetHeatCoolDryAutoRoomTemperature,
                             minStep: this.accessory.temperatureStep
                         })
                         .onGet(async () => {
@@ -594,8 +594,8 @@ class DeviceAta extends EventEmitter {
                         })
                         .onSet(async (value) => {
                             try {
-                                if (deviceData.Device.OperationMode === 1 && value < this.accessory.minTempHeat) {
-                                    value = this.accessory.minTempHeat;
+                                if (deviceData.Device.OperationMode === 1 && value < this.accessory.minSetHeatRoomTemperature) {
+                                    value = this.accessory.minSetHeatRoomTemperature;
                                 } else if (value < 16) {
                                     value = 16;
                                 }
@@ -630,7 +630,7 @@ class DeviceAta extends EventEmitter {
             };
 
             //temperature sensor services
-            if (this.temperatureSensor && this.accessory.roomTemperature !== null) {
+            if (this.temperatureRoomSensor && this.accessory.roomTemperature !== null) {
                 if (this.logDebug) this.emit('debug', `Prepare room temperature sensor service`);
                 this.roomTemperatureSensorService = new Service.TemperatureSensor(`${serviceName} Room`, `roomTemperatureSensorService${deviceId}`);
                 this.roomTemperatureSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
@@ -1538,10 +1538,9 @@ class DeviceAta extends EventEmitter {
                     const supportsCool1 = deviceData.Device[supportCoolKey];
                     const supportsCool = this.coolDryFanMode >= 1;
                     const numberOfFanSpeeds = deviceData.Device.NumberOfFanSpeeds;
-                    const minTempHeat = deviceData.Device.MinTempHeat ?? 10;
-                    const maxTempHeat = deviceData.Device.MaxTempHeat ?? 31;
-                    const minTempCoolDryAuto = accountTypeMelcloud ? 4 : deviceData.Device.MinTempAutomatic ?? 16;
-                    const maxTempCoolDryAuto = deviceData.Device.MaxTempAutomatic ?? 31;
+                    const minSetHeatRoomTemperature = 10;
+                    const maxSetHeatCoolDryAutoRoomTemperature = 31;
+                    const minSetCoolDryAutoRoomTemperature = accountTypeMelcloud ? 4 : deviceData.Device.MinTempAutomatic ?? 16;
 
                     //device state
                     const power = deviceData.Device.Power ?? false;
@@ -1588,10 +1587,9 @@ class DeviceAta extends EventEmitter {
                         supportsDry: supportsDry,
                         supportsCool: supportsCool,
                         supportsStanbyMode: supportsStanbyMode,
-                        minTempHeat: minTempHeat,
-                        maxTempHeat: maxTempHeat,
-                        minTempCoolDryAuto: minTempCoolDryAuto,
-                        maxTempCoolDryAuto: maxTempCoolDryAuto,
+                        minSetHeatRoomTemperature: minSetHeatRoomTemperature,
+                        maxSetHeatCoolDryAutoRoomTemperature: maxSetHeatCoolDryAutoRoomTemperature,
+                        minSetCoolDryAutoRoomTemperature: minSetCoolDryAutoRoomTemperature,
                         power: power,
                         inStandbyMode: inStandbyMode,
                         operationMode: operationMode,
@@ -1877,7 +1875,11 @@ class DeviceAta extends EventEmitter {
                     //buttons
                     if (this.buttons.length > 0) {
                         this.buttons.forEach((button, i) => {
-                            const characteristicType = button.characteristicType;
+                            // helper function to update sensor characteristics
+                            const updateSensorCharacteristics = (service, characteristic, value) => {
+                                if (this.functions.isValidValue(value)) service?.[i]?.updateCharacteristic(characteristic, value);
+                            };
+
                             const mode = button.mode;
                             switch (mode) {
                                 case 0: //POWER ON,OFF
@@ -1991,10 +1993,11 @@ class DeviceAta extends EventEmitter {
                             };
 
                             //control
-                            if (button.displayType > 3) this.buttonControlServices?.[i]?.updateCharacteristic(Characteristic.On, button.state);
+                            if (button.displayType > 3) updateSensorCharacteristics(this.buttonControlServices, Characteristic.On, button.state);
 
                             //sensor
-                            if (button.displayType < 7) this.buttonControlSensorServices?.[i]?.updateCharacteristic(characteristicType, button.state);
+                            const characteristicType = button.characteristicType;
+                            if (button.displayType < 7) updateSensorCharacteristics(this.buttonControlSensorServices, characteristicType, button.state);
                         });
                     }
 
