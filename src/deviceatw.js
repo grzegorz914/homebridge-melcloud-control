@@ -1792,11 +1792,11 @@ class DeviceAtw extends EventEmitter {
                     const holidayMode = deviceData.HolidayMode ?? {};
 
                     //device info
-                    const supportsStanbyMode = deviceData.Device[supportStandbyKey];
+                    const supportsStandbyMode = deviceData.Device[supportStandbyKey];
                     const supportsHeatPump = ![1, 2, 3, 4, 5, 6, 7, 15].includes(this.hideZone);
                     const supportsZone1 = ![2, 3, 4, 8, 9, 10, 11, 15].includes(this.hideZone);
                     const supportsHotWaterTank = ![3, 5, 6, 9, 10, 12, 13, 15].includes(this.hideZone) && deviceData.Device[supportHotWaterKey];
-                    const supportsZone2 = ![4, 6, 7, 10, 11, 13, 14, 15].includes(this.hideZone) && deviceData.Device.HasZone2 !== false && deviceData.Device.HasZone2 !== null;
+                    const supportsZone2 = ![4, 6, 7, 10, 11, 13, 14, 15].includes(this.hideZone) && deviceData.Device.HasZone2 === true;
                     const supportsHeat = deviceData.Device[supportHeatKey] ?? true;
                     const supportsCool = deviceData.Device[supportCoolKey] ?? false;
                     const supportsOutdoorTemperature = deviceData.Device.HasOutdoorTemperature;
@@ -1895,7 +1895,7 @@ class DeviceAtw extends EventEmitter {
                         supportsHotWaterTank: supportsHotWaterTank,
                         supportsZone2: supportsZone2,
                         heatCoolModes: heatCoolModes,
-                        supportsStanbyMode: supportsStanbyMode,
+                        supportsStandbyMode: supportsStandbyMode,
                         supportsOutdoorTemperature: supportsOutdoorTemperature,
                         caseHeatPump: caseHeatPump,
                         caseZone1: caseZone1,
@@ -1998,7 +1998,7 @@ class DeviceAtw extends EventEmitter {
                                                 };
                                                 break;
                                             default:
-                                                if (this.logWarn) this.emit('warn', `${name}, Received unknoen operation mode: ${operationModeZone1}`);
+                                                if (this.logWarn) this.emit('warn', `${name}, Received unknown operation mode: ${operationModeZone1}`);
                                                 return;
                                         }
 
@@ -2028,18 +2028,28 @@ class DeviceAtw extends EventEmitter {
                                         currentOperationMode = !power ? 0 : (idleZone2 ? 1 : [2, 2, 2, 3, 3, 2][operationModeZone2]); //INACTIVE, IDLE, HEATING, COOLING
                                         targetOperationMode = [1, 2, 0, 1, 2, 1][operationModeZone2]; //AUTO, HEAT, COOL
 
-                                        switch (operationModeZone2) {
-                                            case 1: //HEAT FLOW
-                                                setTemperature = setHeatFlowTemperatureZone2;
-                                                roomTemperature = flowTemperatureZone2;
-                                                temperatureSetPropsMinValue = minSetHeatFlowTemperature;
-                                                temperatureSetPropsMaxValue = maxSetHeatFlowTemperature;
-                                                break;
-                                            case 4: //COOL FLOW
-                                                setTemperature = setCoolFlowTemperatureZone2;
-                                                roomTemperature = flowTemperatureZone2;
-                                                temperatureSetPropsMinValue = minSetCoolFlowTemperature;
-                                                temperatureSetPropsMaxValue = maxSetHeatCoolRoomTemperature;
+                                        switch (accountTypeMelcloud) {
+                                            case true: //Melcloud
+                                                switch (operationModeZone2) {
+                                                    case 1: //HEAT FLOW
+                                                        setTemperature = setHeatFlowTemperatureZone2;
+                                                        roomTemperature = flowTemperatureZone2;
+                                                        temperatureSetPropsMinValue = minSetHeatFlowTemperature;
+                                                        temperatureSetPropsMaxValue = maxSetHeatFlowTemperature;
+                                                        break;
+                                                    case 4: //COOL FLOW
+                                                        setTemperature = setCoolFlowTemperatureZone2;
+                                                        roomTemperature = flowTemperatureZone2;
+                                                        temperatureSetPropsMinValue = minSetCoolFlowTemperature;
+                                                        temperatureSetPropsMaxValue = maxSetCoolFlowTemperature;
+                                                        break;
+                                                    default:
+                                                        setTemperature = setTemperatureZone2;
+                                                        roomTemperature = roomTemperatureZone2;
+                                                        temperatureSetPropsMinValue = minSetHeatRoomTemperature;
+                                                        temperatureSetPropsMaxValue = maxSetHeatCoolRoomTemperature;
+                                                        break
+                                                };
                                                 break;
                                             case false: //Melcloud Home
                                                 switch (operationModeZone2) {
@@ -2175,30 +2185,40 @@ class DeviceAtw extends EventEmitter {
                                         currentOperationMode = !power ? 0 : (idleZone2 ? 0 : [1, 1, 1, 2, 2, 1][operationModeZone2]); //OFF, HEAT, COOL
                                         targetOperationMode = [1, 2, 3, 1, 2, 1][operationModeZone2]; //OFF, HEAT, COOL, AUTO
 
-                                        switch (operationModeZone2) {
-                                            case 1: //HEAT FLOW
-                                                setTemperature = setHeatFlowTemperatureZone2;
-                                                roomTemperature = flowTemperatureZone2;
-                                                temperatureSetPropsMinValue = minSetHeatFlowTemperature;
-                                                temperatureSetPropsMaxValue = maxSetHeatFlowTemperature;
-                                                break;
-                                            case 4: //COOL FLOW
-                                                setTemperature = setCoolFlowTemperatureZone2;
-                                                roomTemperature = flowTemperatureZone2;
-                                                temperatureSetPropsMinValue = minSetCoolFlowTemperature;
-                                                temperatureSetPropsMaxValue = maxSetHeatCoolRoomTemperature;
+                                        switch (accountTypeMelcloud) {
+                                            case true: //Melcloud
+                                                switch (operationModeZone2) {
+                                                    case 1: //HEAT FLOW
+                                                        setTemperature = setHeatFlowTemperatureZone2;
+                                                        roomTemperature = flowTemperatureZone2;
+                                                        temperatureSetPropsMinValue = minSetHeatFlowTemperature;
+                                                        temperatureSetPropsMaxValue = maxSetHeatFlowTemperature;
+                                                        break;
+                                                    case 4: //COOL FLOW
+                                                        setTemperature = setCoolFlowTemperatureZone2;
+                                                        roomTemperature = flowTemperatureZone2;
+                                                        temperatureSetPropsMinValue = minSetCoolFlowTemperature;
+                                                        temperatureSetPropsMaxValue = maxSetCoolFlowTemperature;
+                                                        break;
+                                                    default:
+                                                        setTemperature = setTemperatureZone2;
+                                                        roomTemperature = roomTemperatureZone2;
+                                                        temperatureSetPropsMinValue = minSetHeatRoomTemperature;
+                                                        temperatureSetPropsMaxValue = maxSetHeatCoolRoomTemperature;
+                                                        break
+                                                };
                                                 break;
                                             case false: //Melcloud Home
-                                                switch (operationModeZone1) {
+                                                switch (operationModeZone2) {
                                                     case 3: //COOL THERMOSTAT
-                                                        setTemperature = setTemperatureZone1;
-                                                        roomTemperature = roomTemperatureZone1;
+                                                        setTemperature = setTemperatureZone2;
+                                                        roomTemperature = roomTemperatureZone2;
                                                         temperatureSetPropsMinValue = minSetCoolRoomTemperature;
                                                         temperatureSetPropsMaxValue = maxSetHeatCoolRoomTemperature;
                                                         break;
                                                     default:
-                                                        setTemperature = setTemperatureZone1;
-                                                        roomTemperature = roomTemperatureZone1;
+                                                        setTemperature = setTemperatureZone2;
+                                                        roomTemperature = roomTemperatureZone2;
                                                         temperatureSetPropsMinValue = minSetHeatRoomTemperature;
                                                         temperatureSetPropsMaxValue = maxSetHeatCoolRoomTemperature;
                                                         break
