@@ -1,11 +1,10 @@
 import axios from 'axios';
 import EventEmitter from 'events';
 import ImpulseGenerator from './impulsegenerator.js';
-import Functions from './functions.js';
 import { ApiUrls } from './constants.js';
 
 class MelCloud extends EventEmitter {
-    constructor(account, accountFile, buildingsFile, pluginStart = false) {
+    constructor(account, pluginStart = false) {
         super();
         this.accountType = account.type;
         this.user = account.user;
@@ -15,14 +14,7 @@ class MelCloud extends EventEmitter {
         this.logError = account.log?.error;
         this.logDebug = account.log?.debug;
 
-        this.accountFile = accountFile;
-        this.buildingsFile = buildingsFile;
-
         this.client = null;
-        this.functions = new Functions(this.logWarn, this.logError, this.logDebug)
-            .on('warn', warn => this.emit('warn', warn))
-            .on('error', error => this.emit('error', error))
-            .on('debug', debug => this.emit('debug', debug));
 
         if (pluginStart) {
             //lock flags
@@ -54,21 +46,21 @@ class MelCloud extends EventEmitter {
 
     async checkDevicesList() {
         try {
-            const devicesList = { State: false, Info: null, Buildings: [], Devices: [], Scenes: [] }
+            const melCloudDevicesData = { State: false, Status: null, Buildings: [], Devices: [], Scenes: [] }
             if (this.logDebug) this.emit('debug', `Scanning for devices...`);
             const listDevicesData = await this.client(ApiUrls.Get.ListDevices, { method: 'GET', });
 
             if (!listDevicesData || !listDevicesData.data) {
-                devicesList.Info = 'Invalid or empty response from MELCloud API'
-                return devicesList;
+                melCloudDevicesData.Status = 'Invalid or empty response from MELCloud API'
+                return melCloudDevicesData;
             }
 
             const buildingsList = listDevicesData.data;
             if (this.logDebug) this.emit('debug', `Buildings: ${JSON.stringify(buildingsList, null, 2)}`);
 
             if (!Array.isArray(buildingsList) || buildingsList.length === 0) {
-                devicesList.Info = 'No building found'
-                return devicesList;
+                melCloudDevicesData.Status = 'No building found'
+                return melCloudDevicesData;
             }
 
             const devices = [];
@@ -99,26 +91,23 @@ class MelCloud extends EventEmitter {
 
             const devicesCount = devices.length;
             if (devicesCount === 0) {
-                devicesList.Info = 'No devices found'
-                return devicesList;
+                melCloudDevicesData.Status = 'No devices found'
+                return melCloudDevicesData;
             }
 
-            devicesList.State = true;
-            devicesList.Info = `Found ${devicesCount} devices`;
-            devicesList.Buildings = buildingsList;
-            devicesList.Devices = devices;
-
-            await this.functions.saveData(this.buildingsFile, devicesList);
-            if (this.logDebug) this.emit('debug', `Buildings list saved`);
+            melCloudDevicesData.State = true;
+            melCloudDevicesData.Status = `Found ${devicesCount} devices`;
+            melCloudDevicesData.Buildings = buildingsList;
+            melCloudDevicesData.Devices = devices;
 
             //emit device event
-            for (const deviceData of devicesList.Devices) {
+            for (const deviceData of melCloudDevicesData.Devices) {
                 const deviceId = deviceData.DeviceID;
-                deviceData.Scenes = devicesList.Devices.Scenes ?? [];
+                deviceData.Scenes = melCloudDevicesData.Devices.Scenes ?? [];
                 this.emit(deviceId, 'request', deviceData);
             }
 
-            return devicesList;
+            return melCloudDevicesData;
         } catch (error) {
             throw new Error(`Check devices list error: ${error.message}`);
         }
@@ -128,7 +117,7 @@ class MelCloud extends EventEmitter {
         if (this.logDebug) this.emit('debug', `Connecting to MELCloud`);
 
         try {
-            const accountInfo = { State: false, Info: '', Account: null, UseFahrenheit: false }
+            const melCloudAccountData = { State: false, Status: '', Account: null, UseFahrenheit: false }
 
             const payload = {
                 Email: this.user,
@@ -158,11 +147,11 @@ class MelCloud extends EventEmitter {
                 MapLongitude: 'removed',
                 MapLatitude: 'removed'
             };
-            if (this.logDebug) this.emit('debug', `MELCloud Info: ${JSON.stringify(safeConfig, null, 2)}`);
+            if (this.logDebug) this.emit('debug', `Account Info: ${JSON.stringify(safeConfig, null, 2)}`);
 
             if (!contextKey) {
-                accountInfo.Info = 'Context key missing'
-                return accountInfo;
+                melCloudAccountData.Status = 'Context key missing'
+                return melCloudAccountData;
             }
 
             const headers = {
@@ -177,13 +166,12 @@ class MelCloud extends EventEmitter {
             });
             this.emit('client', this.client);
 
-            accountInfo.State = true;
-            accountInfo.Info = 'Connect Success';
-            accountInfo.UseFahrenheit = loginData.UseFahrenheit;
-            accountInfo.Account = account;
-            await this.functions.saveData(this.accountFile, accountInfo);
+            melCloudAccountData.State = true;
+            melCloudAccountData.Status = 'Connect Success';
+            melCloudAccountData.UseFahrenheit = loginData.UseFahrenheit;
+            melCloudAccountData.Account = account;
 
-            return accountInfo
+            return melCloudAccountData
         } catch (error) {
             throw new Error(`Connect error: ${error.message}`);
         }

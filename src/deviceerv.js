@@ -7,7 +7,7 @@ import { TemperatureDisplayUnits, Ventilation, DeviceType } from './constants.js
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceErv extends EventEmitter {
-    constructor(api, account, device, presets, schedules, scenes, buttons, defaultTempsFile, accountInfo, accountFile, melcloud, melcloudDevicesList) {
+    constructor(api, account, device, presets, schedules, scenes, buttons, defaultTempsFile, melCloudClass, melCloudAccountData, melCloudDeviceData) {
         super();
 
         Accessory = api.platformAccessory;
@@ -17,11 +17,10 @@ class DeviceErv extends EventEmitter {
         AccessoryUUID = api.hap.uuid;
 
         //account config
-        this.melcloud = melcloud;
-        this.melcloudDevicesList = melcloudDevicesList;
         this.account = account;
         this.accountType = account.type;
         this.accountName = account.name;
+        this.accountTypeMelCloud = account.type === 'melcloud';
         this.logDeviceInfo = account.log?.deviceInfo || false;
         this.logInfo = account.log?.info || false;
         this.logWarn = account.log?.warn || false;
@@ -47,8 +46,11 @@ class DeviceErv extends EventEmitter {
 
         //files
         this.defaultTempsFile = defaultTempsFile;
-        this.accountInfo = accountInfo;
-        this.accountFile = accountFile;
+
+        //melcloud
+        this.melCloudClass = melCloudClass;
+        this.melCloudDeviceData = melCloudDeviceData;
+        this.melCloudAccountData = melCloudAccountData;
 
         //external integrations
         this.restFul = account.restFul ?? {};
@@ -180,6 +182,7 @@ class DeviceErv extends EventEmitter {
 
     async setOverExternalIntegration(integration, deviceData, key, value) {
         try {
+            const accountTypeMelCloud = this.accountTypeMelCloud;
             let set = false
             let flag = null;
             switch (key) {
@@ -208,7 +211,7 @@ class DeviceErv extends EventEmitter {
                     flag = Ventilation.EffectiveFlags.SetTemperature;
                     break;
                 case 'NightPurgeMode':
-                    if (this.accountType === 'melcloudhome') return;
+                    if (!accountTypeMelCloud) return;
 
                     deviceData.Device[key] = value;
                     flag = Ventilation.EffectiveFlags.NightPurgeMode;
@@ -218,31 +221,31 @@ class DeviceErv extends EventEmitter {
                     flag = Ventilation.EffectiveFlags.SetFanSpeed;
                     break;
                 case 'HideRoomTemperature':
-                    if (this.accountType === 'melcloudhome') return;
+                    if (!accountTypeMelCloud) return;
 
                     deviceData[key] = value;
                     flag = Ventilation.EffectiveFlags.Prohibit;
                     break;
                 case 'HideSupplyTemperature':
-                    if (this.accountType === 'melcloudhome') return;
+                    if (!accountTypeMelCloud) return;
 
                     deviceData[key] = value;
                     flag = Ventilation.EffectiveFlags.Prohibit;
                     break;
                 case 'HideOutdoorTemperature':
-                    if (this.accountType === 'melcloudhome') return;
+                    if (!accountTypeMelCloud) return;
 
                     deviceData[key] = value;
                     flag = Ventilation.EffectiveFlags.Prohibit;
                     break;
                 case 'ScheduleEnabled':
-                    if (this.accountType === 'melcloud') return;
+                    if (accountTypeMelCloud) return;
 
                     deviceData.Device[key].Enabled = value;
                     flag = 'schedule';
                     break;
                 case 'HolidayMode':
-                    if (this.accountType === 'melcloud') return;
+                    if (accountTypeMelCloud) return;
 
                     deviceData.Device[key].Enabled = value;
                     flag = 'holidaymode';
@@ -446,13 +449,13 @@ class DeviceErv extends EventEmitter {
                             return value;
                         })
                         .onSet(async (value) => {
-                            if (this.account.type === 'melcloudhome') return;
+                            if (!this.accountTypeMelCloud) return;
 
                             try {
                                 this.accessory.useFahrenheit = value ? true : false;
-                                this.accountInfo.UseFahrenheit = value ? true : false;
+                                this.melCloudAccountData.UseFahrenheit = value ? true : false;
                                 if (this.logInfo) this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
-                                await this.melCloudErv.send(this.accountType, this.displayType, deviceData, 'account', this.accountInfo);
+                                await this.melCloudErv.send(this.accountType, this.displayType, deviceData, 'account', this.melCloudAccountData);
                             } catch (error) {
                                 if (this.logWarn) this.emit('warn', `Set temperature display unit error: ${error}`);
                             };
@@ -540,13 +543,13 @@ class DeviceErv extends EventEmitter {
                             return value;
                         })
                         .onSet(async (value) => {
-                            if (this.account.type === 'melcloudhome') return;
+                            if (!this.accountTypeMelCloud) return;
 
                             try {
                                 this.accessory.useFahrenheit = value ? true : false;
-                                this.accountInfo.UseFahrenheit = value ? true : false;
+                                this.melCloudAccountData.UseFahrenheit = value ? true : false;
                                 if (this.logInfo) this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
-                                await this.melCloudErv.send(this.accountType, this.displayType, deviceData, 'account', this.accountInfo);
+                                await this.melCloudErv.send(this.accountType, this.displayType, deviceData, 'account', this.melCloudAccountData);
                             } catch (error) {
                                 if (this.logWarn) this.emit('warn', `Set temperature display unit error: ${error}`);
                             };
@@ -1113,7 +1116,7 @@ class DeviceErv extends EventEmitter {
     async start() {
         try {
             //melcloud device
-            this.melCloudErv = new MelCloudErv(this.account, this.device, this.defaultTempsFile, this.accountFile, this.melcloud)
+            this.melCloudErv = new MelCloudErv(this.account, this.device, this.defaultTempsFile, this.melCloudClass)
                 .on('deviceInfo', (modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) => {
                     if (this.logDeviceInfo && this.displayDeviceInfo) {
                         this.emit('devInfo', `---- ${this.deviceTypeString}: ${this.deviceName} ----`);
@@ -1139,11 +1142,11 @@ class DeviceErv extends EventEmitter {
                     this.deviceData = deviceData;
 
                     //keys
-                    const accountTypeMelcloud = this.accountType === 'melcloud';
-                    const tempStepKey = this.accountType === 'melcloud' ? 'TemperatureIncrement' : 'HasHalfDegreeIncrements';
-                    const connectKey = this.accountType === 'melcloud' ? 'Offline' : 'IsConnected';
-                    const errorKey = this.accountType === 'melcloud' ? 'HasError' : 'IsInError';
-                    const supportStandbyKey = accountTypeMelcloud ? 'ModelSupportsStandbyMode' : 'HasStandby';
+                    const accountTypeMelCloud = this.accountTypeMelCloud;
+                    const tempStepKey = accountTypeMelCloud ? 'TemperatureIncrement' : 'HasHalfDegreeIncrements';
+                    const connectKey = accountTypeMelCloud ? 'Offline' : 'IsConnected';
+                    const errorKey = accountTypeMelCloud ? 'HasError' : 'IsInError';
+                    const supportStandbyKey = accountTypeMelCloud ? 'ModelSupportsStandbyMode' : 'HasStandby';
 
                     //presets schedule
                     const presetsOnServer = deviceData.Presets ?? [];
@@ -1201,7 +1204,7 @@ class DeviceErv extends EventEmitter {
                     const setFanSpeed = deviceData.Device.SetFanSpeed;
                     const operationMode = deviceData.Device.OperationMode;
                     const ventilationMode = deviceData.Device.VentilationMode;
-                    const isConnected = accountTypeMelcloud ? !deviceData.Device[connectKey] : deviceData.Device[connectKey];
+                    const isConnected = accountTypeMelCloud ? !deviceData.Device[connectKey] : deviceData.Device[connectKey];
                     const isInError = deviceData.Device[errorKey];
 
                     //accessory
@@ -1250,8 +1253,8 @@ class DeviceErv extends EventEmitter {
                         defaultCoolingSetTemperature: defaultCoolingSetTemperature,
                         lockPhysicalControl: 0,
                         temperatureIncrement: temperatureIncrement,
-                        useFahrenheit: this.accountInfo.useFahrenheit ? 1 : 0,
-                        temperatureUnit: TemperatureDisplayUnits[this.accountInfo.useFahrenheit ? 1 : 0],
+                        useFahrenheit: this.melCloudAccountData.useFahrenheit ? 1 : 0,
+                        temperatureUnit: TemperatureDisplayUnits[this.melCloudAccountData.useFahrenheit ? 1 : 0],
                         isConnected: isConnected,
                         isInError: isInError
                     };
@@ -1563,7 +1566,7 @@ class DeviceErv extends EventEmitter {
                         if (supportsCO2Sensor) this.emit('info', `CO2 level: ${roomCO2Level} ppm`);
                         if (supportsPM25Sensor) this.emit('info', `PM2.5 air quality: ${Ventilation.PM25AirQualityMapEnumToString[pM25AirQuality]}`);
                         if (supportsPM25Sensor) this.emit('info', `PM2.5 level: ${pM25Level} µg/m`);
-                        if (this.accountType === 'melcloudhome') this.emit('info', `Signal strength: ${deviceData.Rssi}dBm`);
+                        if (!this.accountTypeMelCloud) this.emit('info', `Signal strength: ${deviceData.Rssi}dBm`);
                     }
                 })
                 .on('success', (success) => this.emit('success', success))
@@ -1582,7 +1585,7 @@ class DeviceErv extends EventEmitter {
             if (this.restFul.enable || this.mqtt.enable) await this.externalIntegrations();
 
             //check state
-            await this.melCloudErv.checkState(this.melcloudDevicesList);
+            await this.melCloudErv.updateState('request', this.melCloudDeviceData);
 
             //prepare accessory
             const accessory = await this.prepareAccessory();

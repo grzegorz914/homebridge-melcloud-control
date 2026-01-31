@@ -14,17 +14,14 @@ class PluginUiServer extends HomebridgePluginUiServer {
   };
 
   async start(account) {
-    const accountName = account.name;
-    const accountFile = `${this.homebridgeStoragePath}/melcloud/${accountName}_Account`;
-    const buildingsFile = `${this.homebridgeStoragePath}/melcloud/${accountName}_Buildings`;
-    const melCloud = account.type === 'melcloud' ? new MelCloud(account, accountFile, buildingsFile) : new MelCloudHome(account, accountFile, buildingsFile);
+    const melCloudClass = account.type === 'melcloud' ? new MelCloud(account) : new MelCloudHome(account);
 
     try {
-      const accountInfo = await melCloud.connect();
-      if (!accountInfo.State) return accountInfo;
+      const melCloudAccountData = await melCloudClass.connect();
+      if (!melCloudAccountData.State) return melCloudAccountData;
 
-      const devicesList = await melCloud.checkDevicesList();
-      return devicesList;
+      const melCloudDevicesData = await melCloudClass.checkDevicesList();
+      return melCloudDevicesData;
     } catch (error) {
       throw new Error(error);
     }

@@ -3,9 +3,9 @@ import Functions from './functions.js';
 import { ApiUrls, HeatPump } from './constants.js';
 
 class MelCloudAtw extends EventEmitter {
-    constructor(account, device, defaultTempsFile, accountFile, melcloud) {
+    constructor(account, device, defaultTempsFile, melCloudClass) {
         super();
-        this.accountType = account.type;
+        this.accountTypeMelCloud = account.type === 'melcloud';
         this.logSuccess = account.log?.success;
         this.logWarn = account.log?.warn;
         this.logError = account.log?.error;
@@ -14,7 +14,6 @@ class MelCloudAtw extends EventEmitter {
         this.mqttEnabled = account.mqtt?.enable;
         this.deviceId = device.id;
         this.defaultTempsFile = defaultTempsFile;
-        this.accountFile = accountFile;
 
         this.functions = new Functions(this.logWarn, this.logError, this.logDebug)
             .on('warn', warn => this.emit('warn', warn))
@@ -23,11 +22,11 @@ class MelCloudAtw extends EventEmitter {
 
         //set default values
         this.deviceData = {};
-        this.client = melcloud.client;
+        this.client = melCloudClass.client;
 
         //handle melcloud events
         let deviceData = null;
-        melcloud.on('client', (client) => {
+        melCloudClass.on('client', (client) => {
             this.client = client;
         }).on(this.deviceId, async (type, message) => {
             switch (type) {
@@ -111,7 +110,7 @@ class MelCloudAtw extends EventEmitter {
 
     async updateState(type, deviceData) {
         try {
-            if (this.accountType === 'melcloudhome') {
+            if (!this.accountTypeMelCloud) {
                 deviceData.Device.OperationMode = HeatPump.OperationModeMapStringToEnum[deviceData.Device.OperationMode] ?? deviceData.Device.OperationMode;
                 deviceData.Device.OperationModeZone1 = HeatPump.OperationModeZoneMapStringToEnum[deviceData.Device.OperationModeZone1] ?? deviceData.Device.OperationModeZone1;
                 deviceData.Device.OperationModeZone2 = HeatPump.OperationModeZoneMapStringToEnum[deviceData.Device.OperationModeZone2] ?? deviceData.Device.OperationModeZone2;
@@ -172,18 +171,6 @@ class MelCloudAtw extends EventEmitter {
         };
     }
 
-    async checkState(devicesData) {
-        try {
-            const deviceData = devicesData.Devices.find(device => device.DeviceID === this.deviceId);
-            deviceData.Scenes = devicesData.Scenes ?? [];
-            await this.updateState('request', deviceData);
-
-            return true;
-        } catch (error) {
-            throw new Error(`Chaeck state error: ${error.message}`);
-        };
-    }
-
     async send(accountType, displayType, deviceData, flag, flagData) {
         try {
             let method = null
@@ -197,7 +184,6 @@ class MelCloudAtw extends EventEmitter {
                             flagData.Account.LoginData.UseFahrenheit = flagData.UseFahrenheit;
                             payload = { data: flagData.LoginData };
                             path = ApiUrls.Post.UpdateApplicationOptions;
-                            await this.functions.saveData(this.accountFile, flagData);
                             break;
                         default:
                             deviceData.Device.EffectiveFlags = flag;
@@ -233,7 +219,7 @@ class MelCloudAtw extends EventEmitter {
 
                     if (update) {
                         setTimeout(() => {
-                            this.emit('deviceState', deviceData);
+                            this.updateState('request', deviceData);
                         }, 500);
                     }
                     return true;
@@ -293,7 +279,7 @@ class MelCloudAtw extends EventEmitter {
 
                     if (update) {
                         setTimeout(() => {
-                            this.emit('deviceState', deviceData);
+                            this.updateState('request', deviceData);
                         }, 500);
                     }
                     return true;

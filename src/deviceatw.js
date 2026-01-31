@@ -7,7 +7,7 @@ import { TemperatureDisplayUnits, HeatPump, DeviceType } from './constants.js';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceAtw extends EventEmitter {
-    constructor(api, account, device, presets, schedules, scenes, buttons, defaultTempsFile, accountInfo, accountFile, melcloud, melcloudDevicesList) {
+    constructor(api, account, device, presets, schedules, scenes, buttons, defaultTempsFile, melCloudClass, melCloudAccountData, melCloudDeviceData) {
         super();
 
         Accessory = api.platformAccessory;
@@ -17,11 +17,10 @@ class DeviceAtw extends EventEmitter {
         AccessoryUUID = api.hap.uuid;
 
         //account config
-        this.melcloud = melcloud;
-        this.melcloudDevicesList = melcloudDevicesList;
         this.account = account;
         this.accountType = account.type;
         this.accountName = account.name;
+        this.accountTypeMelCloud = account.type === 'melcloud';
         this.logDeviceInfo = account.log?.deviceInfo || false;
         this.logInfo = account.log?.info || false;
         this.logWarn = account.log?.warn || false;
@@ -59,8 +58,11 @@ class DeviceAtw extends EventEmitter {
 
         //files
         this.defaultTempsFile = defaultTempsFile;
-        this.accountInfo = accountInfo;
-        this.accountFile = accountFile;
+
+        //melcloud
+        this.melCloudClass = melCloudClass;
+        this.melCloudDeviceData = melCloudDeviceData;
+        this.melCloudAccountData = melCloudAccountData;
 
         //external integrations
         this.restFul = account.restFul ?? {};
@@ -193,6 +195,7 @@ class DeviceAtw extends EventEmitter {
 
     async setOverExternalIntegration(integration, deviceData, key, value) {
         try {
+            const accountTypeMelCloud = this.accountTypeMelCloud;
             let set = false
             let flag = null;
             switch (key) {
@@ -249,36 +252,36 @@ class DeviceAtw extends EventEmitter {
                     flag = HeatPump.EffectiveFlags.EcoHotWater;
                     break;
                 case 'ProhibitZone1':
-                    if (this.accountType === 'melcloudhome') return;
+                    if (!accountTypeMelCloud) return;
 
                     deviceData.Device[key] = value;
                     flag = HeatPump.EffectiveFlags.ProhibitZone1;
                     break;
                 case 'ProhibitZone2':
-                    if (this.accountType === 'melcloudhome') return;
+                    if (!accountTypeMelCloud) return;
 
                     deviceData.Device[key] = value;
                     flag = HeatPump.EffectiveFlags.ProhibitZone2;
                     break;
                 case 'ProhibitHotWater':
-                    if (this.accountType === 'melcloudhome') return;
+                    if (!accountTypeMelCloud) return;
 
                     deviceData.Device[key] = value;
                     flag = HeatPump.EffectiveFlags.ProhibitHotWater;
                     break;
                 case 'ScheduleEnabled':
-                    if (this.accountType === 'melcloud') return;
+                    if (accountTypeMelCloud) return;
 
                     deviceData.Device[key].Enabled = value;
                     flag = 'schedule';
                     break;
                 case 'HolidayMode':
-                    if (this.accountType === 'melcloud') {
+                    if (accountTypeMelCloud) {
                         deviceData.Device[key] = value;
                         flag = HeatPump.EffectiveFlags.HolidayMode;
                     }
 
-                    if (this.accountType === 'melcloudhome') {
+                    if (!accountTypeMelCloud) {
                         deviceData.Device[key].Enabled = value;
                         flag = 'holidaymode';
                     }
@@ -298,7 +301,7 @@ class DeviceAtw extends EventEmitter {
     //prepare accessory
     async prepareAccessory() {
         try {
-            const accountTypeMelcloud = this.accountType === 'melcloud';
+            const accountTypeMelCloud = this.accountTypeMelCloud;
             const deviceData = this.deviceData;
             const deviceId = this.deviceId;
             const deviceTypeString = this.deviceTypeString;
@@ -486,7 +489,7 @@ class DeviceAtw extends EventEmitter {
                                     .onSet(async (value) => {
                                         try {
                                             let flag = null;
-                                            switch (accountTypeMelcloud) {
+                                            switch (accountTypeMelCloud) {
                                                 case true: //Melcloud
                                                     switch (i) {
                                                         case caseHeatPump: //Heat Pump
@@ -572,7 +575,7 @@ class DeviceAtw extends EventEmitter {
                                     .onSet(async (value) => {
                                         try {
                                             let flag = null;
-                                            switch (accountTypeMelcloud) {
+                                            switch (accountTypeMelCloud) {
                                                 case true: //Melcloud
                                                     switch (i) {
                                                         case caseHeatPump: //Heat Pump
@@ -649,7 +652,7 @@ class DeviceAtw extends EventEmitter {
                                     return value;
                                 })
                                 .onSet(async (value) => {
-                                    if (this.account.type === 'melcloudhome') return;
+                                    if (!this.accountTypeMelCloud) return;
 
                                     try {
                                         value = value ? true : false;
@@ -688,13 +691,13 @@ class DeviceAtw extends EventEmitter {
                                     return value;
                                 })
                                 .onSet(async (value) => {
-                                    if (this.account.type === 'melcloudhome') return;
+                                    if (!this.accountTypeMelCloud) return;
 
                                     try {
                                         this.accessory.useFahrenheit = value ? true : false;
-                                        this.accountInfo.UseFahrenheit = value ? true : false;
+                                        this.melCloudAccountData.UseFahrenheit = value ? true : false;
                                         if (this.logInfo) this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
-                                        await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, 'account', this.accountInfo);
+                                        await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, 'account', this.melCloudAccountData);
                                     } catch (error) {
                                         if (this.logWarn) this.emit('warn', `Set temperature display unit error: ${error}`);
                                     };
@@ -838,7 +841,7 @@ class DeviceAtw extends EventEmitter {
                                 .onSet(async (value) => {
                                     try {
                                         let flag = null;
-                                        switch (accountTypeMelcloud) {
+                                        switch (accountTypeMelCloud) {
                                             case true: //Melcloud
                                                 switch (i) {
                                                     case caseHeatPump: //Heat Pump
@@ -914,13 +917,13 @@ class DeviceAtw extends EventEmitter {
                                     return value;
                                 })
                                 .onSet(async (value) => {
-                                    if (this.account.type === 'melcloudhome') return;
+                                    if (!this.accountTypeMelCloud) return;
 
                                     try {
                                         this.accessory.useFahrenheit = value ? true : false;
-                                        this.accountInfo.UseFahrenheit = value ? true : false;
+                                        this.melCloudAccountData.UseFahrenheit = value ? true : false;
                                         if (this.logInfo) this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
-                                        await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, 'account', this.accountInfo);
+                                        await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, 'account', this.melCloudAccountData);
                                     } catch (error) {
                                         if (this.logWarn) this.emit('warn', `Set temperature display unit error: ${error}`);
                                     };
@@ -1589,12 +1592,12 @@ class DeviceAtw extends EventEmitter {
                                                 flag = HeatPump.EffectiveFlags.Power + HeatPump.EffectiveFlags.OperationMode;
                                                 break;
                                             case 3: //HOLIDAY
-                                                if (this.accountType === 'melcloud') {
+                                                if (this.accountTypeMelCloud) {
                                                     deviceData.Device.HolidayMode = state;
                                                     flag = HeatPump.EffectiveFlags.HolidayMode;
                                                 }
 
-                                                if (this.accountType === 'melcloudhome') {
+                                                if (!accountTypeMelCloud) {
                                                     deviceData.Device.HolidayMode.Enabled = state;
                                                     flag = 'holidaymode';
                                                 }
@@ -1742,7 +1745,7 @@ class DeviceAtw extends EventEmitter {
     async start() {
         try {
             //melcloud device
-            this.melCloudAtw = new MelCloudAtw(this.account, this.device, this.defaultTempsFile, this.accountFile, this.melcloud)
+            this.melCloudAtw = new MelCloudAtw(this.account, this.device, this.defaultTempsFile, this.melCloudClass)
                 .on('deviceInfo', (modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, supportsHotWaterTank, supportsZone2) => {
                     if (this.logDeviceInfo && this.displayDeviceInfo) {
                         this.emit('devInfo', `---- ${this.deviceTypeString}: ${this.deviceName} ----`);
@@ -1757,6 +1760,7 @@ class DeviceAtw extends EventEmitter {
                         this.emit('devInfo', `Hot Water Tank: ${supportsHotWaterTank ? 'Yes' : 'No'}`);
                         this.emit('devInfo', `Zone 2: ${supportsZone2 ? 'Yes' : 'No'}`);
                         this.emit('devInfo', '----------------------------------');
+                        if (!this.accountTypeMelCloud) this.emit('info', `Signal strength: ${deviceData.Rssi}dBm`);
                         this.displayDeviceInfo = false;
                     }
 
@@ -1772,14 +1776,14 @@ class DeviceAtw extends EventEmitter {
                     this.deviceData = deviceData;
 
                     //keys
-                    const accountTypeMelcloud = this.accountType === 'melcloud';
-                    const tempStepKey = this.accountType === 'melcloud' ? 'TemperatureIncrement' : 'HasHalfDegreeIncrements';
-                    const connectKey = this.accountType === 'melcloud' ? 'Offline' : 'IsConnected';
-                    const errorKey = this.accountType === 'melcloud' ? 'HasError' : 'IsInError';
-                    const supportStandbyKey = accountTypeMelcloud ? 'ModelSupportsStandbyMode' : 'HasStandby';
-                    const supportHeatKey = accountTypeMelcloud ? 'CanHeat' : 'HasHeatMode';
-                    const supportCoolKey = accountTypeMelcloud ? 'CanCool' : 'HasCoolingMode';
-                    const supportHotWaterKey = accountTypeMelcloud ? 'HasHotWaterTank' : 'HasHotWater';
+                    const accountTypeMelCloud = this.accountTypeMelCloud;
+                    const tempStepKey = accountTypeMelCloud ? 'TemperatureIncrement' : 'HasHalfDegreeIncrements';
+                    const connectKey = accountTypeMelCloud ? 'Offline' : 'IsConnected';
+                    const errorKey = accountTypeMelCloud ? 'HasError' : 'IsInError';
+                    const supportStandbyKey = accountTypeMelCloud ? 'ModelSupportsStandbyMode' : 'HasStandby';
+                    const supportHeatKey = accountTypeMelCloud ? 'CanHeat' : 'HasHeatMode';
+                    const supportCoolKey = accountTypeMelCloud ? 'CanCool' : 'HasCoolingMode';
+                    const supportHotWaterKey = accountTypeMelCloud ? 'HasHotWaterTank' : 'HasHotWater';
 
                     //presets schedule
                     const presetsOnServer = deviceData.Presets ?? [];
@@ -1873,7 +1877,7 @@ class DeviceAtw extends EventEmitter {
                     const returnTemperatureZone2 = deviceData.Device.ReturnTemperatureZone2;
 
                     //device
-                    const isConnected = accountTypeMelcloud ? !deviceData.Device[connectKey] : deviceData.Device[connectKey];
+                    const isConnected = accountTypeMelCloud ? !deviceData.Device[connectKey] : deviceData.Device[connectKey];
                     const isInError = deviceData.Device[errorKey];
 
                     //accessory
@@ -1907,8 +1911,8 @@ class DeviceAtw extends EventEmitter {
                         caseHotWaterSensor: caseHotWaterSensor,
                         caseZone2Sensor: caseZone2Sensor,
                         sensorsCount: zonesSensorsCount,
-                        useFahrenheit: this.accountInfo.useFahrenheit ? 1 : 0,
-                        temperatureUnit: TemperatureDisplayUnits[this.accountInfo.useFahrenheit ? 1 : 0],
+                        useFahrenheit: this.melCloudAccountData.useFahrenheit ? 1 : 0,
+                        temperatureUnit: TemperatureDisplayUnits[this.melCloudAccountData.useFahrenheit ? 1 : 0],
                         isConnected: isConnected,
                         isInError: isInError,
                         zones: [],
@@ -1958,7 +1962,7 @@ class DeviceAtw extends EventEmitter {
                                         currentOperationMode = !power ? 0 : (idleZone1 ? 1 : [2, 2, 2, 3, 3, 2][operationModeZone1]); //INACTIVE, IDLE, HEATING, COOLING
                                         targetOperationMode = [1, 2, 0, 1, 2, 1][operationModeZone1]; //AUTO, HEAT, COOL
 
-                                        switch (accountTypeMelcloud) {
+                                        switch (accountTypeMelCloud) {
                                             case true: //Melcloud
                                                 switch (operationModeZone1) {
                                                     case 1: //HEAT FLOW
@@ -2028,7 +2032,7 @@ class DeviceAtw extends EventEmitter {
                                         currentOperationMode = !power ? 0 : (idleZone2 ? 1 : [2, 2, 2, 3, 3, 2][operationModeZone2]); //INACTIVE, IDLE, HEATING, COOLING
                                         targetOperationMode = [1, 2, 0, 1, 2, 1][operationModeZone2]; //AUTO, HEAT, COOL
 
-                                        switch (accountTypeMelcloud) {
+                                        switch (accountTypeMelCloud) {
                                             case true: //Melcloud
                                                 switch (operationModeZone2) {
                                                     case 1: //HEAT FLOW
@@ -2117,7 +2121,7 @@ class DeviceAtw extends EventEmitter {
                                         currentOperationMode = !power ? 0 : idleZone1 ? 0 : [1, 1, 1, 2, 2, 1][operationModeZone1]; //OFF, HEAT, COOL
                                         targetOperationMode = [1, 2, 3, 1, 2, 1][operationModeZone1]; //OFF, HEAT, COOL, AUTO
 
-                                        switch (accountTypeMelcloud) {
+                                        switch (accountTypeMelCloud) {
                                             case true: //Melcloud
                                                 switch (operationModeZone1) {
                                                     case 1: //HEAT FLOW
@@ -2185,7 +2189,7 @@ class DeviceAtw extends EventEmitter {
                                         currentOperationMode = !power ? 0 : (idleZone2 ? 0 : [1, 1, 1, 2, 2, 1][operationModeZone2]); //OFF, HEAT, COOL
                                         targetOperationMode = [1, 2, 3, 1, 2, 1][operationModeZone2]; //OFF, HEAT, COOL, AUTO
 
-                                        switch (accountTypeMelcloud) {
+                                        switch (accountTypeMelCloud) {
                                             case true: //Melcloud
                                                 switch (operationModeZone2) {
                                                     case 1: //HEAT FLOW
@@ -2283,7 +2287,7 @@ class DeviceAtw extends EventEmitter {
                                     this.emit('info', `${name} Outdoor temperature: ${roomTemperature}${obj.temperatureUnit}`);
                                     this.emit('info', `${name} Temperature display unit: ${obj.temperatureUnit}`);
                                     this.emit('info', `${name} Lock physical controls: ${lockPhysicalControl ? 'Locked' : 'Unlocked'}`);
-                                    if (!accountTypeMelcloud) this.emit('info', `Signal strength: ${deviceData.Rssi}dBm`);
+                                    if (!accountTypeMelCloud) this.emit('info', `Signal strength: ${deviceData.Rssi}dBm`);
                                     break;
                                 case caseZone1: //Zone 1 - HEAT THERMOSTAT, HEAT FLOW, HEAT CURVE, COOL THERMOSTAT, COOL FLOW, FLOOR DRY UP
                                     operationModeText = idleZone1 ? HeatPump.OperationModeZoneMapEnumToStringInfo[6] : HeatPump.OperationModeZoneMapEnumToStringInfo[operationModeZone];
@@ -2588,7 +2592,7 @@ class DeviceAtw extends EventEmitter {
             if (this.restFul.enable || this.mqtt.enable) await this.externalIntegrations();
 
             //check state
-            await this.melCloudAtw.checkState(this.melcloudDevicesList);
+            await this.melCloudAtw.updateState('request', this.melCloudDeviceData);
 
             //prepare accessory
             const accessory = await this.prepareAccessory();

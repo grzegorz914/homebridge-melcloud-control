@@ -37,7 +37,8 @@ class MelCloudPlatform {
 					continue;
 				}
 				accountsName.push(name);
-				const accountRefreshInterval = (account.refreshInterval ?? 120) * 1000
+				const accountRefreshInterval = (account.refreshInterval ?? 120) * 1000;
+				const accountMelcloud = account.type === 'melcloud';
 
 				//log config
 				const logLevel = {
@@ -64,59 +65,55 @@ class MelCloudPlatform {
 					log.info(`${name}, Config: ${JSON.stringify(safeConfig, null, 2)}`);
 				}
 
-				//define directory and file paths
-				const accountFile = `${prefDir}/${name}_Account`;
-				const buildingsFile = `${prefDir}/${name}_Buildings`;
-
 				try {
 					//create impulse generator
 					const impulseGenerator = new ImpulseGenerator()
 						.on('start', async () => {
 							try {
 								//melcloud account
-								let melcloud;
+								let melCloudClass;
 								let timmers = []
 								switch (account.type) {
 									case 'melcloud':
 										timmers = [{ name: 'checkDevicesList', sampling: accountRefreshInterval }];
-										melcloud = new MelCloud(account, accountFile, buildingsFile, true);
+										melCloudClass = new MelCloud(account, true);
 										break;
 									case 'melcloudhome':
 										timmers = [{ name: 'connect', sampling: 3300000 }, { name: 'checkDevicesList', sampling: 5000 }];
-										melcloud = new MelCloudHome(account, accountFile, buildingsFile, true);
+										melCloudClass = new MelCloudHome(account, true);
 										break;
 									default:
 										if (logLevel.warn) log.warn(`Unknown account type: ${account.type}.`);
 										return;
 								}
-								melcloud.on('success', (msg) => logLevel.success && log.success(`${name}, ${msg}`))
+								melCloudClass.on('success', (msg) => logLevel.success && log.success(`${name}, ${msg}`))
 									.on('info', (msg) => log.info(`${name}, ${msg}`))
 									.on('debug', (msg) => log.info(`${name}, debug: ${msg}`))
 									.on('warn', (msg) => log.warn(`${name}, ${msg}`))
 									.on('error', (msg) => log.error(`${name}, ${msg}`));
 
 								//connect
-								const accountInfo = await melcloud.connect();
-								if (!accountInfo?.State) {
-									if (logLevel.warn) log.warn(`${name}, ${accountInfo?.Info}`);
+								const melCloudAccountData = await melCloudClass.connect();
+								if (!melCloudAccountData?.State) {
+									if (logLevel.warn) log.warn(`${name}, ${melCloudAccountData.Status}`);
 									return;
 								}
-								if (logLevel.success) log.success(`${name}, ${accountInfo.Info}`);
+								if (logLevel.success) log.success(`${name}, ${melCloudAccountData.Status}`);
 
 								//check devices list
-								const melcloudDevicesList = await melcloud.checkDevicesList();
-								if (!melcloudDevicesList.State) {
-									if (logLevel.warn) log.warn(`${name}, ${melcloudDevicesList.Info}`);
+								const melCloudDevicesData = await melCloudClass.checkDevicesList();
+								if (!melCloudDevicesData.State) {
+									if (logLevel.warn) log.warn(`${name}, ${melCloudDevicesData.Status}`);
 									return;
 								}
-								if (logLevel.debug) log.info(melcloudDevicesList.Info);
+								if (logLevel.debug) log.info(melCloudDevicesData.Status);
 								await new Promise(r => setTimeout(r, 1000));
 
 								//start account impulse generator
-								await melcloud.impulseGenerator.state(true, timmers, false);
+								await melCloudClass.impulseGenerator.state(true, timmers, false);
 
 								//filter configured devices
-								const devicesIds = (melcloudDevicesList.Devices ?? []).map(d => String(d.DeviceID));
+								const devicesIds = (melCloudDevicesData.Devices ?? []).map(d => String(d.DeviceID));
 								const ataDevices = (account.ataDevices || []).filter(d => (d.displayType ?? 0) > 0 && devicesIds.includes(d.id));
 								const atwDevices = (account.atwDevices || []).filter(d => (d.displayType ?? 0) > 0 && devicesIds.includes(d.id));
 								const ervDevices = (account.ervDevices || []).filter(d => (d.displayType ?? 0) > 0 && devicesIds.includes(d.id));
@@ -132,19 +129,20 @@ class MelCloudPlatform {
 									const defaultTempsFile = `${prefDir}/${name}_${device.id}_Temps`;
 
 									//device in melcloud
-									const deviceInMelCloud = melcloudDevicesList.Devices.find(d => d.DeviceID === device.id);
+									const melCloudDeviceData = melCloudDevicesData.Devices.find(d => d.DeviceID === device.id);
+									melCloudDeviceData.Scenes = melCloudDevicesData.Scenes ?? [];
 
 									//presets
-									const presetIds = (deviceInMelCloud.Presets ?? []).map(p => String(p.ID));
-									const presets = account.type === 'melcloud' ? (device.presets || []).filter(p => (p.displayType ?? 0) > 0 && presetIds.includes(p.id)) : [];
+									const presetIds = (melCloudDeviceData.Presets ?? []).map(p => String(p.ID));
+									const presets = accountMelcloud ? (device.presets || []).filter(p => (p.displayType ?? 0) > 0 && presetIds.includes(p.id)) : [];
 
 									//schedules
-									const schedulesIds = (deviceInMelCloud.Schedule ?? []).map(s => String(s.Id));
-									const schedules = account.type === 'melcloudhome' ? (device.schedules || []).filter(s => (s.displayType ?? 0) > 0 && schedulesIds.includes(s.id)) : [];
+									const schedulesIds = (melCloudDeviceData.Schedule ?? []).map(s => String(s.Id));
+									const schedules = !accountMelcloud ? (device.schedules || []).filter(s => (s.displayType ?? 0) > 0 && schedulesIds.includes(s.id)) : [];
 
 									//scenes
-									const scenesIds = (melcloudDevicesList.Scenes ?? []).map(s => String(s.Id));
-									const scenes = account.type === 'melcloudhome' ? (device.scenes || []).filter(s => (s.displayType ?? 0) > 0 && scenesIds.includes(s.id)) : [];
+									const scenesIds = (melCloudDevicesData.Scenes ?? []).map(s => String(s.Id));
+									const scenes = !accountMelcloud ? (device.scenes || []).filter(s => (s.displayType ?? 0) > 0 && scenesIds.includes(s.id)) : [];
 
 									//buttons
 									const buttons = (device.buttonsSensors || []).filter(b => (b.displayType ?? 0) > 0);
@@ -171,32 +169,32 @@ class MelCloudPlatform {
 										}
 									}
 
-									let configuredDevice;
+									let deviceClass;
 									switch (deviceType) {
 										case 0: //ATA
-											configuredDevice = new DeviceAta(api, account, device, presets, schedules, scenes, buttons, defaultTempsFile, accountInfo, accountFile, melcloud, melcloudDevicesList);
+											deviceClass = new DeviceAta(api, account, device, presets, schedules, scenes, buttons, defaultTempsFile, melCloudClass, melCloudAccountData, melCloudDeviceData);
 											break;
 										case 1: //ATW
-											configuredDevice = new DeviceAtw(api, account, device, presets, schedules, scenes, buttons, defaultTempsFile, accountInfo, accountFile, melcloud, melcloudDevicesList);
+											deviceClass = new DeviceAtw(api, account, device, presets, schedules, scenes, buttons, defaultTempsFile, melCloudClass, melCloudAccountData, melCloudDeviceData);
 											break;
 										case 2:
 											break;
 										case 3: //ERV
-											configuredDevice = new DeviceErv(api, account, device, presets, schedules, scenes, buttons, defaultTempsFile, accountInfo, accountFile, melcloud, melcloudDevicesList);
+											deviceClass = new DeviceErv(api, account, device, presets, schedules, scenes, buttons, defaultTempsFile, melCloudClass, melCloudAccountData, melCloudDeviceData);
 											break;
 										default:
 											if (logLevel.warn) log.warn(`${name}, ${deviceTypeString}, ${deviceName}, unknown device: ${deviceType}.`);
 											return;
 									}
 
-									configuredDevice.on('devInfo', (info) => logLevel.devInfo && log.info(info))
+									deviceClass.on('devInfo', (info) => logLevel.devInfo && log.info(info))
 										.on('success', (msg) => logLevel.success && log.success(`${name}, ${deviceTypeString}, ${deviceName}, ${msg}`))
 										.on('info', (msg) => log.info(`${name}, ${deviceTypeString}, ${deviceName}, ${msg}`))
 										.on('debug', (msg) => log.info(`${name}, ${deviceTypeString}, ${deviceName}, debug: ${msg}`))
 										.on('warn', (msg) => log.warn(`${name}, ${deviceTypeString}, ${deviceName}, ${msg}`))
 										.on('error', (msg) => log.error(`${name}, ${deviceTypeString}, ${deviceName}, ${msg}`));
 
-									const accessory = await configuredDevice.start();
+									const accessory = await deviceClass.start();
 									if (accessory) {
 										api.publishExternalAccessories(PluginName, [accessory]);
 										if (logLevel.success) log.success(`${name}, ${deviceTypeString}, ${deviceName}, Published as external accessory.`);

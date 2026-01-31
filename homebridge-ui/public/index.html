@@ -255,10 +255,11 @@
 
       try {
         const account = this.account;
-        const response = await homebridge.request('/connect', account);
+        const accountTypeMelcloud = account.type === 'melcloud';
+        const melCloudDevicesData = await homebridge.request('/connect', account);
 
-        if (!response.State) {
-          updateInfo('info', response.Info, 'red');
+        if (!melCloudDevicesData.State) {
+          updateInfo('info', melCloudDevicesData.Status, 'red');
           document.getElementById('logIn').disabled = false;
           homebridge.hideSpinner();
           return;
@@ -272,10 +273,10 @@
         // Prepare MELCloud data
         const newInMelCloud = { ata: [], ataPresets: [], ataSchedules: [], ataScenes: [], atw: [], atwPresets: [], atwSchedules: [], atwScenes: [], erv: [], ervPresets: [], ervSchedules: [], ervScenes: [] };
         const devicesInMelCloudByType = { ata: [], atw: [], erv: [] };
-        const scenesInMelCloud = response.Scenes ?? [];
+        const scenesInMelCloud = melCloudDevicesData.Scenes ?? [];
 
         // Split devices by type
-        const devices = response.Devices;
+        const devices = melCloudDevicesData.Devices;
         for (const device of devices) {
           if (device.Type === 0) devicesInMelCloudByType.ata.push(device);
           if (device.Type === 1) devicesInMelCloudByType.atw.push(device);
@@ -311,7 +312,7 @@
             }
 
             // PRESETS (melcloud)
-            if (account.type === 'melcloud') {
+            if (accountTypeMelcloud) {
               deviceInConfig.presets = (deviceInConfig.presets ?? []).filter(p => String(p.id) !== '0' && String(p.id) !== null);
               const presetsInMelCloud = device.Presets ?? [];
               removedFromConfig.presets.push(...removeStaleEntities(deviceInConfig.presets, presetsInMelCloud, p => p.id, p => p.ID));
@@ -332,7 +333,7 @@
             }
 
             // SCHEDULES & SCENES (melcloudhome)
-            if (account.type === 'melcloudhome') {
+            if (!accountTypeMelcloud) {
               // SCHEDULES
               deviceInConfig.schedules = (deviceInConfig.schedules ?? []).filter(s => String(s.id) !== '0' && String(s.id) !== null);
               const schedulesInMelCloud = device.Schedule ?? [];
@@ -416,9 +417,9 @@
         // New items
         const newParts = [];
         if (newDevicesCount) newParts.push(summarizeChanges('Devices', newInMelCloud.ata, newInMelCloud.atw, newInMelCloud.erv));
-        if (account.type === 'melcloud' && newPresetsCount) newParts.push(summarizeChanges('Presets', newInMelCloud.ataPresets, newInMelCloud.atwPresets, newInMelCloud.ervPresets));
-        if (account.type === 'melcloudhome' && newSchedulesCount) newParts.push(summarizeChanges('Schedules', newInMelCloud.ataSchedules, newInMelCloud.atwSchedules, newInMelCloud.ervSchedules));
-        if (account.type === 'melcloudhome' && newScenesCount) newParts.push(summarizeChanges('Scenes', newInMelCloud.ataScenes, newInMelCloud.atwScenes, newInMelCloud.ervScenes));
+        if (accountTypeMelcloud && newPresetsCount) newParts.push(summarizeChanges('Presets', newInMelCloud.ataPresets, newInMelCloud.atwPresets, newInMelCloud.ervPresets));
+        if (!accountTypeMelcloud && newSchedulesCount) newParts.push(summarizeChanges('Schedules', newInMelCloud.ataSchedules, newInMelCloud.atwSchedules, newInMelCloud.ervSchedules));
+        if (!accountTypeMelcloud && newScenesCount) newParts.push(summarizeChanges('Scenes', newInMelCloud.ataScenes, newInMelCloud.atwScenes, newInMelCloud.ervScenes));
         if (newParts.length) updateInfo('info', `Found new: ${newParts.join('; ')}`, 'green');
 
         // Removed items

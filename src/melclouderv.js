@@ -3,9 +3,9 @@ import Functions from './functions.js';
 import { ApiUrls, Ventilation } from './constants.js';
 
 class MelCloudErv extends EventEmitter {
-    constructor(account, device, defaultTempsFile, accountFile, melcloud) {
+    constructor(account, device, defaultTempsFile, melCloudClass) {
         super();
-        this.accountType = account.type;
+        this.accountTypeMelCloud = account.type === 'melcloud';
         this.logSuccess = account.log?.success;
         this.logWarn = account.log?.warn;
         this.logError = account.log?.error;
@@ -14,7 +14,6 @@ class MelCloudErv extends EventEmitter {
         this.mqttEnabled = account.mqtt?.enable;
         this.deviceId = device.id;
         this.defaultTempsFile = defaultTempsFile;
-        this.accountFile = accountFile;
 
         this.functions = new Functions(this.logWarn, this.logError, this.logDebug)
             .on('warn', warn => this.emit('warn', warn))
@@ -23,11 +22,11 @@ class MelCloudErv extends EventEmitter {
 
         //set default values
         this.deviceData = {};
-        this.client = melcloud.client;
+        this.client = melCloudClass.client;
 
         //handle melcloud events
         let deviceData = null;
-        melcloud.on('client', (client) => {
+        melCloudClass.on('client', (client) => {
             this.client = client;
         }).on(this.deviceId, async (type, message) => {
             switch (type) {
@@ -111,7 +110,7 @@ class MelCloudErv extends EventEmitter {
 
     async updateState(type, deviceData) {
         try {
-            if (this.accountType === 'melcloudhome') {
+            if (!this.accountTypeMelCloud) {
                 //read default temps
                 const temps = await this.functions.readData(this.defaultTempsFile, true);
                 deviceData.Device.DefaultHeatingSetTemperature = temps?.defaultHeatingSetTemperature ?? 20;
@@ -172,18 +171,6 @@ class MelCloudErv extends EventEmitter {
         };
     }
 
-    async checkState(devicesData) {
-        try {
-            const deviceData = devicesData.Devices.find(device => device.DeviceID === this.deviceId);
-            deviceData.Scenes = devicesData.Scenes ?? [];
-            await this.updateState('request', deviceData);
-
-            return true;
-        } catch (error) {
-            throw new Error(`Chaeck state error: ${error.message}`);
-        };
-    }
-
     async send(accountType, displayType, deviceData, flag, flagData) {
         try {
             let method = null
@@ -197,7 +184,6 @@ class MelCloudErv extends EventEmitter {
                             flagData.Account.LoginData.UseFahrenheit = flagData.UseFahrenheit;
                             payload = { data: flagData.LoginData };
                             path = ApiUrls.Post.UpdateApplicationOptions;
-                            await this.functions.saveData(this.accountFile, flagData);
                             break;
                         default:
                             //set target temp based on display mode and ventilation mode
@@ -248,9 +234,9 @@ class MelCloudErv extends EventEmitter {
 
                     if (update) {
                         setTimeout(() => {
-                            this.emit('deviceState', deviceData);
+                            this.updateState('request', deviceData);
                         }, 500);
-                    } this.emit('deviceState', deviceData);
+                    }
                     return true;
                 case "melcloudhome":
                     switch (flag) {
@@ -304,7 +290,7 @@ class MelCloudErv extends EventEmitter {
 
                     if (update) {
                         setTimeout(() => {
-                            this.emit('deviceState', deviceData);
+                            this.updateState('request', deviceData);
                         }, 500);
                     }
                     return true;

@@ -10,7 +10,7 @@ import { ApiUrls, LanguageLocaleMap } from './constants.js';
 const execPromise = promisify(exec);
 
 class MelCloudHome extends EventEmitter {
-    constructor(account, accountFile, buildingsFile, pluginStart = false) {
+    constructor(account, pluginStart = false) {
         super();
         this.accountType = account.type;
         this.user = account.user;
@@ -19,9 +19,6 @@ class MelCloudHome extends EventEmitter {
         this.logWarn = account.log?.warn;
         this.logError = account.log?.error;
         this.logDebug = account.log?.debug;
-
-        this.accountFile = accountFile;
-        this.buildingsFile = buildingsFile;
 
         this.client = null;
         this.connecting = false;
@@ -107,7 +104,7 @@ class MelCloudHome extends EventEmitter {
 
     async checkDevicesList() {
         try {
-            const devicesList = { State: false, Info: null, Buildings: {}, Devices: [], Scenes: [] }
+            const melCloudDevicesData = { State: false, Status: null, Buildings: {}, Devices: [], Scenes: [] }
             if (this.logDebug) this.emit('debug', `Scanning for devices`);
             const listDevicesData = await this.client(ApiUrls.Home.Get.ListDevices, { method: 'GET' });
 
@@ -118,8 +115,8 @@ class MelCloudHome extends EventEmitter {
             if (this.logDebug) this.emit('debug', `Buildings: ${JSON.stringify(buildingsList, null, 2)}`);
 
             if (!buildingsList) {
-                devicesList.Info = 'No buildings found'
-                return devicesList;
+                melCloudDevicesData.Status = 'No buildings found'
+                return melCloudDevicesData;
             }
 
             const devices = buildingsList.flatMap(building => {
@@ -184,8 +181,8 @@ class MelCloudHome extends EventEmitter {
 
             const devicesCount = devices.length;
             if (devicesCount === 0) {
-                devicesList.Info = 'No devices found'
-                return devicesList;
+                melCloudDevicesData.Status = 'No devices found'
+                return melCloudDevicesData;
             }
 
             // Get scenes
@@ -200,23 +197,20 @@ class MelCloudHome extends EventEmitter {
                 if (this.logError) this.emit('error', `Get scenes error: ${error}`);
             }
 
-            devicesList.State = true;
-            devicesList.Info = `Found ${devicesCount} devices ${scenes.length > 0 ? `and ${scenes.length} scenes` : ''}`;
-            devicesList.Buildings = userContext;
-            devicesList.Devices = devices;
-            devicesList.Scenes = scenes;
-
-            await this.functions.saveData(this.buildingsFile, devicesList);
-            if (this.logDebug) this.emit('debug', `Buildings list saved`);
+            melCloudDevicesData.State = true;
+            melCloudDevicesData.Status = `Found ${devicesCount} devices ${scenes.length > 0 ? `and ${scenes.length} scenes` : ''}`;
+            melCloudDevicesData.Buildings = userContext;
+            melCloudDevicesData.Devices = devices;
+            melCloudDevicesData.Scenes = scenes;
 
             //emit device event
-            for (const deviceData of devicesList.Devices) {
-                deviceData.Scenes = devicesList.Devices.Scenes ?? [];
+            for (const deviceData of melCloudDevicesData.Devices) {
+                deviceData.Scenes = melCloudDevicesData.Devices.Scenes ?? [];
                 const deviceId = deviceData.DeviceID;
                 this.emit(deviceId, 'request', deviceData);
             }
 
-            return devicesList;
+            return melCloudDevicesData;
         } catch (error) {
             throw new Error(`Check devices list error: ${error.message}`);
         }
@@ -228,7 +222,7 @@ class MelCloudHome extends EventEmitter {
 
         let browser;
         try {
-            const accountInfo = { State: false, Info: '', Account: {}, UseFahrenheit: false };
+            const connectInfo = { State: false, Status: '', Account: {}, UseFahrenheit: false };
 
             // Get Chromium path from resolver
             const chromiumInfo = await this.functions.ensureChromiumInstalled();
@@ -241,15 +235,15 @@ class MelCloudHome extends EventEmitter {
                 if (this.logDebug) this.emit('debug', `Using Chromium for ${system} (${arch}) at ${chromiumPath}`);
             } else {
                 if (arch === 'arm') {
-                    accountInfo.Info = `No Chromium found for ${system} (${arch}). Please install it manually and try again.`;
-                    return accountInfo;
+                    connectInfo.Status = `No Chromium found for ${system} (${arch}). Please install it manually and try again.`;
+                    return connectInfo;
                 } else {
                     try {
                         chromiumPath = puppeteer.executablePath();
                         if (this.logDebug) this.emit('debug', `Using Puppeteer Chromium for ${system} (${arch}) at ${chromiumPath}`);
                     } catch (error) {
-                        accountInfo.Info = `No Puppeteer Chromium for ${system} (${arch}), error: ${error.message}`;
-                        return accountInfo;
+                        connectInfo.Status = `No Puppeteer Chromium for ${system} (${arch}), error: ${error.message}`;
+                        return connectInfo;
                     }
                 }
             }
@@ -259,8 +253,8 @@ class MelCloudHome extends EventEmitter {
                 const { stdout } = await execPromise(`"${chromiumPath}" --version`);
                 if (this.logDebug) this.emit('debug', `Chromium for ${system} (${arch}) detected: ${stdout.trim()}`);
             } catch (error) {
-                accountInfo.Info = `Chromium for ${system} (${arch}) found at ${chromiumPath}, but execute error: ${error.message}. Please install it manually and try again.`;
-                return accountInfo;
+                connectInfo.Status = `Chromium for ${system} (${arch}) found at ${chromiumPath}, but execute error: ${error.message}. Please install it manually and try again.`;
+                return connectInfo;
             }
 
             // Launch Chromium
@@ -355,8 +349,8 @@ class MelCloudHome extends EventEmitter {
             try {
                 await page.goto(ApiUrls.Home.Base, { waitUntil: ['domcontentloaded', 'networkidle2'], timeout: GLOBAL_TIMEOUT });
             } catch (error) {
-                accountInfo.Info = `Navigation to ${ApiUrls.Home.Base} failed: ${error.message}`;
-                return accountInfo;
+                connectInfo.Status = `Navigation to ${ApiUrls.Home.Base} failed: ${error.message}`;
+                return connectInfo;
             }
 
             // Wait extra to ensure UI is rendered
@@ -365,8 +359,8 @@ class MelCloudHome extends EventEmitter {
             const loginText = await page.evaluate(el => el.textContent.trim(), loginBtn);
 
             if (!['Zaloguj', 'Sign In', 'Login'].includes(loginText)) {
-                accountInfo.Info = `Login button ${loginText} not found`;
-                return accountInfo;
+                connectInfo.Status = `Login button ${loginText} not found`;
+                return connectInfo;
             }
 
             await loginBtn.click();
@@ -375,8 +369,8 @@ class MelCloudHome extends EventEmitter {
             const usernameInput = await page.$('input[name="username"]');
             const passwordInput = await page.$('input[name="password"]');
             if (!usernameInput || !passwordInput) {
-                accountInfo.Info = 'Username or password input not found';
-                return accountInfo;
+                connectInfo.Status = 'Username or password input not found';
+                return connectInfo;
             }
 
             await page.type('input[name="username"]', this.user, { delay: 50 });
@@ -384,8 +378,8 @@ class MelCloudHome extends EventEmitter {
 
             const submitButton = await page.$('input[type="submit"], button[type="submit"]');
             if (!submitButton) {
-                accountInfo.Info = 'Submit button not found';
-                return accountInfo;
+                connectInfo.Status = 'Submit button not found';
+                return connectInfo;
             }
             await Promise.race([Promise.all([submitButton.click(), page.waitForNavigation({ waitUntil: ['domcontentloaded', 'networkidle2'], timeout: GLOBAL_TIMEOUT / 3 })]), new Promise(r => setTimeout(r, GLOBAL_TIMEOUT / 3))]);
 
@@ -400,8 +394,8 @@ class MelCloudHome extends EventEmitter {
             }
 
             if (!c1 || !c2) {
-                accountInfo.Info = 'Cookies C1/C2 missing';
-                return accountInfo;
+                connectInfo.Status = 'Cookies C1/C2 missing';
+                return connectInfo;
             }
 
             const cookies = [
@@ -432,11 +426,10 @@ class MelCloudHome extends EventEmitter {
             });
             this.emit('client', this.client);
 
-            accountInfo.State = true;
-            accountInfo.Info = `Connect Success${this.socketConnected ? ', Web Socket Connected' : ''}`;
-            await this.functions.saveData(this.accountFile, accountInfo);
+            connectInfo.State = true;
+            connectInfo.Status = `Connect Success${this.socketConnected ? ', Web Socket Connected' : ''}`;
 
-            return accountInfo;
+            return connectInfo;
         } catch (error) {
             throw new Error(`Connect error: ${error.message}`);
         } finally {

@@ -7,7 +7,7 @@ import { TemperatureDisplayUnits, AirConditioner, DeviceType } from './constants
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
 class DeviceAta extends EventEmitter {
-    constructor(api, account, device, presets, schedules, scenes, buttons, defaultTempsFile, accountInfo, accountFile, melcloud, melcloudDevicesList) {
+    constructor(api, account, device, presets, schedules, scenes, buttons, defaultTempsFile, melCloudClass, melCloudAccountData, melCloudDeviceData) {
         super();
 
         Accessory = api.platformAccessory;
@@ -17,11 +17,10 @@ class DeviceAta extends EventEmitter {
         AccessoryUUID = api.hap.uuid;
 
         //account config
-        this.melcloud = melcloud;
-        this.melcloudDevicesList = melcloudDevicesList;
         this.account = account;
         this.accountType = account.type;
         this.accountName = account.name;
+        this.accountTypeMelCloud = account.type === 'melcloud';
         this.logDeviceInfo = account.log?.deviceInfo || false;
         this.logInfo = account.log?.info || false;
         this.logWarn = account.log?.warn || false;
@@ -51,8 +50,11 @@ class DeviceAta extends EventEmitter {
 
         //files
         this.defaultTempsFile = defaultTempsFile;
-        this.accountInfo = accountInfo;
-        this.accountFile = accountFile;
+
+        //melcloud
+        this.melCloudClass = melCloudClass;
+        this.melCloudDeviceData = melCloudDeviceData;
+        this.melCloudAccountData = melCloudAccountData;
 
         //external integrations
         this.restFul = account.restFul ?? {};
@@ -186,6 +188,7 @@ class DeviceAta extends EventEmitter {
 
     async setOverExternalIntegration(integration, deviceData, key, value) {
         try {
+            const accountTypeMelCloud = this.accountTypeMelCloud;
             let set = false
             let flag = null;
             switch (key) {
@@ -210,7 +213,7 @@ class DeviceAta extends EventEmitter {
                     flag = AirConditioner.EffectiveFlags.SetTemperature;
                     break;
                 case 'FanSpeed':
-                    key = this.accountType === 'melcloud' ? key : 'SetFanSpeed';
+                    key = accountTypeMelCloud ? key : 'SetFanSpeed';
                     deviceData.Device[key] = value;
                     flag = AirConditioner.EffectiveFlags.SetFanSpeed;
                     break;
@@ -223,55 +226,55 @@ class DeviceAta extends EventEmitter {
                     flag = AirConditioner.EffectiveFlags.VaneVerticalDirection;
                     break;
                 case 'HideVaneControls':
-                    if (this.accountType === 'melcloudhome') return;
+                    if (!accountTypeMelCloud) return;
 
                     deviceData[key] = value;
                     flag = AirConditioner.EffectiveFlags.Prohibit;
                     break;
                 case 'HideDryModeControl':
-                    if (this.accountType === 'melcloudhome') return;
+                    if (!accountTypeMelCloud) return;
 
                     deviceData[key] = value;
                     flag = AirConditioner.EffectiveFlags.Prohibit;
                     break;
                 case 'ProhibitSetTemperature':
-                    if (this.accountType === 'melcloudhome') return;
+                    if (!accountTypeMelCloud) return;
 
                     deviceData.Device[key] = value;
                     flag = AirConditioner.EffectiveFlags.Prohibit;
                     break;
                 case 'ProhibitOperationMode':
-                    if (this.accountType === 'melcloudhome') return;
+                    if (!accountTypeMelCloud) return;
 
                     deviceData.Device[key] = value;
                     flag = AirConditioner.EffectiveFlags.Prohibit;
                     break;
                 case 'ProhibitPower':
-                    if (this.accountType === 'melcloudhome') return;
+                    if (!accountTypeMelCloud) return;
 
                     deviceData.Device[key] = value;
                     flag = AirConditioner.EffectiveFlags.Prohibit;
                     break;
                 case 'FrostProtection':
-                    if (this.accountType === 'melcloud') return;
+                    if (accountTypeMelCloud) return;
 
                     deviceData.Device[key].Enabled = value;
                     flag = 'frostprotection';
                     break;
                 case 'OverheatProtection':
-                    if (this.accountType === 'melcloud') return;
+                    if (accountTypeMelCloud) return;
 
                     deviceData.Device[key].Enabled = value;
                     flag = 'overheatprotection';
                     break;
                 case 'Schedules':
-                    if (this.accountType === 'melcloud') return;
+                    if (accountTypeMelCloud) return;
 
                     deviceData.Device[key].Enabled = value;
                     flag = 'schedule';
                     break;
                 case 'HolidayMode':
-                    if (this.accountType === 'melcloud') return;
+                    if (accountTypeMelCloud) return;
 
                     deviceData.Device[key].Enabled = value;
                     flag = 'holidaymode';
@@ -404,7 +407,7 @@ class DeviceAta extends EventEmitter {
                             })
                             .onSet(async (value) => {
                                 try {
-                                    const fanKey = this.accountType === 'melcloud' ? 'FanSpeed' : 'SetFanSpeed';
+                                    const fanKey = this.accountTypeMelCloud ? 'FanSpeed' : 'SetFanSpeed';
                                     switch (numberOfFanSpeeds) {
                                         case 2: //Fan speed mode 2
                                             value = supportsAutomaticFanSpeed ? [0, 1, 2, 0][value] : [1, 1, 2][value];
@@ -495,7 +498,7 @@ class DeviceAta extends EventEmitter {
                             return value;
                         })
                         .onSet(async (value) => {
-                            if (this.account.type === 'melcloudhome') return;
+                            if (!this.accountTypeMelCloud) return;
 
                             try {
                                 value = value ? true : false;
@@ -514,13 +517,13 @@ class DeviceAta extends EventEmitter {
                             return value;
                         })
                         .onSet(async (value) => {
-                            if (this.account.type === 'melcloudhome') return;
+                            if (!this.accountTypeMelCloud) return;
 
                             try {
                                 this.accessory.useFahrenheit = value ? true : false;
-                                this.accountInfo.UseFahrenheit = value ? true : false;
+                                this.melCloudAccountData.UseFahrenheit = value ? true : false;
                                 if (this.logInfo) this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
-                                await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'account', this.accountInfo);
+                                await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'account', this.melCloudAccountData);
                             } catch (error) {
                                 if (this.logWarn) this.emit('warn', `Set temperature display unit error: ${error}`);
                             };
@@ -613,13 +616,13 @@ class DeviceAta extends EventEmitter {
                             return value;
                         })
                         .onSet(async (value) => {
-                            if (this.account.type === 'melcloudhome') return;
+                            if (!this.accountTypeMelCloud) return;
 
                             try {
                                 this.accessory.useFahrenheit = value ? true : false;
-                                this.accountInfo.UseFahrenheit = value ? true : false;
+                                this.melCloudAccountData.UseFahrenheit = value ? true : false;
                                 if (this.logInfo) this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
-                                await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'account', this.accountInfo);
+                                await this.melCloudAta.send(this.accountType, this.displayType, deviceData, 'account', this.melCloudAccountData);
                             } catch (error) {
                                 if (this.logWarn) this.emit('warn', `Set temperature display unit error: ${error}`);
                             };
@@ -1226,7 +1229,7 @@ class DeviceAta extends EventEmitter {
                             })
                             .onSet(async (state) => {
                                 try {
-                                    const fanKey = this.accountType === 'melcloud' ? 'FanSpeed' : 'SetFanSpeed';
+                                    const fanKey = this.accountTypeMelCloud ? 'FanSpeed' : 'SetFanSpeed';
                                     let flag = null;
                                     switch (mode) {
                                         case 0: //POWER ON,OFF
@@ -1467,7 +1470,7 @@ class DeviceAta extends EventEmitter {
     async start() {
         try {
             //melcloud device
-            this.melCloudAta = new MelCloudAta(this.account, this.device, this.defaultTempsFile, this.accountFile, this.melcloud)
+            this.melCloudAta = new MelCloudAta(this.account, this.device, this.defaultTempsFile, this.melCloudClass)
                 .on('deviceInfo', (modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) => {
                     if (this.logDeviceInfo && this.displayDeviceInfo) {
                         this.emit('devInfo', `---- ${this.deviceTypeString}: ${this.deviceName} ----`);
@@ -1493,19 +1496,19 @@ class DeviceAta extends EventEmitter {
                     this.deviceData = deviceData;
 
                     //keys
-                    const accountTypeMelcloud = this.accountType === 'melcloud';
-                    const fanKey = accountTypeMelcloud ? 'FanSpeed' : 'SetFanSpeed';
-                    const tempStepKey = accountTypeMelcloud ? 'TemperatureIncrement' : 'HasHalfDegreeIncrements';
-                    const connectKey = accountTypeMelcloud ? 'Offline' : 'IsConnected';
-                    const errorKey = accountTypeMelcloud ? 'HasError' : 'IsInError';
-                    const supportAirDirectionKey = accountTypeMelcloud ? 'AirDirectionFunction' : 'HasAirDirectionFunction';
-                    const supportSwingKey = accountTypeMelcloud ? 'SwingFunction' : 'HasSwing';
-                    const supportVideWaneKey = accountTypeMelcloud ? 'ModelSupportsWideVane' : 'SupportsWideVane';
-                    const supportAutoKey = accountTypeMelcloud ? 'ModelSupportsAuto' : 'HasAutoOperationMode';
-                    const supportHeatKey = accountTypeMelcloud ? 'ModelSupportsHeat' : 'HasHeatOperationMode';
-                    const supportDryKey = accountTypeMelcloud ? 'ModelSupportsDry' : 'HasDryOperationMode';
-                    const supportCoolKey = accountTypeMelcloud ? 'ModelSupportsCool' : 'HasCoolOperationMode';
-                    const supportStandbyKey = accountTypeMelcloud ? 'ModelSupportsStandbyMode' : 'HasStandby';
+                    const accountTypeMelCloud = this.accountTypeMelCloud;
+                    const fanKey = accountTypeMelCloud ? 'FanSpeed' : 'SetFanSpeed';
+                    const tempStepKey = accountTypeMelCloud ? 'TemperatureIncrement' : 'HasHalfDegreeIncrements';
+                    const connectKey = accountTypeMelCloud ? 'Offline' : 'IsConnected';
+                    const errorKey = accountTypeMelCloud ? 'HasError' : 'IsInError';
+                    const supportAirDirectionKey = accountTypeMelCloud ? 'AirDirectionFunction' : 'HasAirDirectionFunction';
+                    const supportSwingKey = accountTypeMelCloud ? 'SwingFunction' : 'HasSwing';
+                    const supportVideWaneKey = accountTypeMelCloud ? 'ModelSupportsWideVane' : 'SupportsWideVane';
+                    const supportAutoKey = accountTypeMelCloud ? 'ModelSupportsAuto' : 'HasAutoOperationMode';
+                    const supportHeatKey = accountTypeMelCloud ? 'ModelSupportsHeat' : 'HasHeatOperationMode';
+                    const supportDryKey = accountTypeMelCloud ? 'ModelSupportsDry' : 'HasDryOperationMode';
+                    const supportCoolKey = accountTypeMelCloud ? 'ModelSupportsCool' : 'HasCoolOperationMode';
+                    const supportStandbyKey = accountTypeMelCloud ? 'ModelSupportsStandbyMode' : 'HasStandby';
 
                     //presets schedules
                     const presetsOnServer = deviceData.Presets ?? [];
@@ -1529,7 +1532,7 @@ class DeviceAta extends EventEmitter {
                     const supportsSwingFunction = deviceData.Device[supportSwingKey];
                     const supportsWideVane = deviceData.Device[supportVideWaneKey];
                     const supportsOutdoorTemperature = deviceData.Device.HasOutdoorTemperature;
-                    const supportsFanSpeed = accountTypeMelcloud ? deviceData.Device.ModelSupportsFanSpeed : deviceData.Device.NumberOfFanSpeeds > 0;
+                    const supportsFanSpeed = accountTypeMelCloud ? deviceData.Device.ModelSupportsFanSpeed : deviceData.Device.NumberOfFanSpeeds > 0;
                     const supportsAuto1 = deviceData.Device[supportAutoKey];
                     const supportsAuto = this.autoDryFanMode >= 1 && supportsAuto1
                     const supportsHeat1 = deviceData.Device[supportHeatKey];
@@ -1540,7 +1543,7 @@ class DeviceAta extends EventEmitter {
                     const numberOfFanSpeeds = deviceData.Device.NumberOfFanSpeeds;
                     const minSetHeatRoomTemperature = 10;
                     const maxSetHeatCoolDryAutoRoomTemperature = 31;
-                    const minSetCoolDryAutoRoomTemperature = accountTypeMelcloud ? 4 : deviceData.Device.MinTempAutomatic ?? 16;
+                    const minSetCoolDryAutoRoomTemperature = accountTypeMelCloud ? 4 : deviceData.Device.MinTempAutomatic ?? 16;
 
                     //device state
                     const power = deviceData.Device.Power ?? false;
@@ -1562,7 +1565,7 @@ class DeviceAta extends EventEmitter {
                     const prohibitPower = deviceData.Device.ProhibitPower ?? false;
                     const temperatureStep = deviceData.Device[tempStepKey] ? 0.5 : 1;
                     const outdoorTemperature = deviceData.Device.OutdoorTemperature;
-                    const isConnected = accountTypeMelcloud ? !deviceData.Device[connectKey] : deviceData.Device[connectKey];
+                    const isConnected = accountTypeMelCloud ? !deviceData.Device[connectKey] : deviceData.Device[connectKey];
                     const isInError = deviceData.Device[errorKey];
                     const currentSwingMode = supportsSwingFunction ? (supportsWideVane ? vaneHorizontalDirection === 12 && vaneVerticalDirection === 7 ? 1 : 0 : vaneVerticalDirection === 7 ? 1 : 0) : 0;
 
@@ -1607,8 +1610,8 @@ class DeviceAta extends EventEmitter {
                         currentSwingMode: currentSwingMode,
                         lockPhysicalControl: prohibitSetTemperature && prohibitOperationMode && prohibitPower ? 1 : 0,
                         temperatureStep: temperatureStep,
-                        useFahrenheit: this.accountInfo.useFahrenheit ? 1 : 0,
-                        temperatureUnit: TemperatureDisplayUnits[this.accountInfo.useFahrenheit ? 1 : 0],
+                        useFahrenheit: this.melCloudAccountData.useFahrenheit ? 1 : 0,
+                        temperatureUnit: TemperatureDisplayUnits[this.melCloudAccountData.useFahrenheit ? 1 : 0],
                         isConnected: isConnected,
                         isInError: isInError
                     };
@@ -2016,7 +2019,7 @@ class DeviceAta extends EventEmitter {
                         if (supportsSwingFunction) this.emit('info', `Air direction: ${AirConditioner.AirDirectionMapEnumToString[currentSwingMode]}`);
                         this.emit('info', `Temperature display unit: ${obj.temperatureUnit}`);
                         this.emit('info', `Lock physical controls: ${obj.lockPhysicalControl ? 'Locked' : 'Unlocked'}`);
-                        if (this.accountType === 'melcloudhome') this.emit('info', `Signal strength: ${deviceData.Rssi}dBm`);
+                        if (!this.accountTypeMelCloud) this.emit('info', `Signal strength: ${deviceData.Rssi}dBm`);
                     }
                 })
                 .on('success', (success) => this.emit('success', success))
@@ -2035,7 +2038,7 @@ class DeviceAta extends EventEmitter {
             if (this.restFul.enable || this.mqtt.enable) await this.externalIntegrations();
 
             //check state
-            await this.melCloudAta.checkState(this.melcloudDevicesList);
+            await this.melCloudAta.updateState('request', this.melCloudDeviceData);
 
             //prepare accessory
             const accessory = await this.prepareAccessory();
