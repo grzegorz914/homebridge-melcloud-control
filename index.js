@@ -107,10 +107,6 @@ class MelCloudPlatform {
 									return;
 								}
 								if (logLevel.debug) log.info(melCloudDevicesData.Status);
-								await new Promise(r => setTimeout(r, 1000));
-
-								//start account impulse generator
-								await melCloudClass.impulseGenerator.state(true, timmers, false);
 
 								//filter configured devices
 								const devicesIds = (melCloudDevicesData.Devices ?? []).map(d => String(d.DeviceID));
@@ -203,6 +199,9 @@ class MelCloudPlatform {
 
 								//stop start impulse generator
 								await impulseGenerator.state(false);
+
+								//start melcloud class impulse generator
+								await melCloudClass.impulseGenerator.state(true, timmers, false);
 							} catch (error) {
 								if (logLevel.error) log.error(`${name}, Start impulse generator error, ${error.message ?? error}, trying again.`);
 							}

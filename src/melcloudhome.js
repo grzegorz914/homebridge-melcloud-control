@@ -356,13 +356,6 @@ class MelCloudHome extends EventEmitter {
             // Wait extra to ensure UI is rendered
             await new Promise(r => setTimeout(r, 3000));
             const loginBtn = await page.waitForSelector('button.btn--blue', { timeout: GLOBAL_TIMEOUT / 3 });
-            const loginText = await page.evaluate(el => el.textContent.trim(), loginBtn);
-
-            if (!['Zaloguj', 'Sign In', 'Login'].includes(loginText)) {
-                connectInfo.Status = `Login button ${loginText} not found`;
-                return connectInfo;
-            }
-
             await loginBtn.click();
             await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: GLOBAL_TIMEOUT / 3 });
 

@@ -24,6 +24,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - For plugin < v4.6.0 use Homebridge UI <= v5.5.0
 - For plugin >= v4.6.0 use Homebridge UI >= v5.13.0
 
+# [4.7.8] - (02.02.2026)
+
+## Changes
+
+- fix [#236](https://github.com/grzegorz914/homebridge-melcloud-control/issues/236)
+- cleanup
+
 # [4.7.7] - (01.02.2026)
 
 ## Changes
