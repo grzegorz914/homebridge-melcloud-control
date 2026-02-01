@@ -1786,24 +1786,26 @@ class DeviceAta extends EventEmitter {
 
                     //frost protection
                     if (this.frostProtectionSupport && frostProtection.Enabled !== null) {
-                        this.frostProtectionControlService?.updateCharacteristic(Characteristic.Active, frostProtection.Enabled);
-                        this.frostProtectionControlService?.updateCharacteristic(Characteristic.CurrentHeaterCoolerState, frostProtection.Active ? 2 : 1);
-                        this.frostProtectionControlService?.updateCharacteristic(Characteristic.TargetHeaterCoolerState, 0);
-                        this.frostProtectionControlService?.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature);
-                        this.frostProtectionControlService?.updateCharacteristic(Characteristic.CoolingThresholdTemperature, frostProtection.Max);
-                        this.frostProtectionControlService?.updateCharacteristic(Characteristic.HeatingThresholdTemperature, frostProtection.Min);
+                        this.frostProtectionControlService
+                            ?.updateCharacteristic(Characteristic.Active, frostProtection.Enabled)
+                            .updateCharacteristic(Characteristic.CurrentHeaterCoolerState, frostProtection.Active ? 2 : 1)
+                            .updateCharacteristic(Characteristic.TargetHeaterCoolerState, 0)
+                            .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+                            .updateCharacteristic(Characteristic.CoolingThresholdTemperature, frostProtection.Max)
+                            .updateCharacteristic(Characteristic.HeatingThresholdTemperature, frostProtection.Min);
                         this.frostProtectionControlSensorService?.updateCharacteristic(Characteristic.ContactSensorState, frostProtection.Enabled);
                         this.frostProtectionSensorService?.updateCharacteristic(Characteristic.ContactSensorState, frostProtection.Active);
                     }
 
                     //overheat protection
                     if (this.overheatProtectionSupport && overheatProtection.Enabled !== null) {
-                        this.overheatProtectionControlService?.updateCharacteristic(Characteristic.Active, overheatProtection.Enabled);
-                        this.overheatProtectionControlService?.updateCharacteristic(Characteristic.CurrentHeaterCoolerState, overheatProtection.Active ? 2 : 1);
-                        this.overheatProtectionControlService?.updateCharacteristic(Characteristic.TargetHeaterCoolerState, 0);
-                        this.overheatProtectionControlService?.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature);
-                        this.overheatProtectionControlService?.updateCharacteristic(Characteristic.CoolingThresholdTemperature, overheatProtection.Max);
-                        this.overheatProtectionControlService?.updateCharacteristic(Characteristic.HeatingThresholdTemperature, overheatProtection.Min);
+                        this.overheatProtectionControlService
+                            ?.updateCharacteristic(Characteristic.Active, overheatProtection.Enabled)
+                            .updateCharacteristic(Characteristic.CurrentHeaterCoolerState, overheatProtection.Active ? 2 : 1)
+                            .updateCharacteristic(Characteristic.TargetHeaterCoolerState, 0)
+                            .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature)
+                            .updateCharacteristic(Characteristic.CoolingThresholdTemperature, overheatProtection.Max)
+                            .updateCharacteristic(Characteristic.HeatingThresholdTemperature, overheatProtection.Min);
                         this.overheatProtectionControlSensorService?.updateCharacteristic(Characteristic.ContactSensorState, overheatProtection.Enabled);
                         this.overheatProtectionSensorService?.updateCharacteristic(Characteristic.ContactSensorState, overheatProtection.Active);
                     }
@@ -2019,7 +2021,7 @@ class DeviceAta extends EventEmitter {
                         if (supportsSwingFunction) this.emit('info', `Air direction: ${AirConditioner.AirDirectionMapEnumToString[currentSwingMode]}`);
                         this.emit('info', `Temperature display unit: ${obj.temperatureUnit}`);
                         this.emit('info', `Lock physical controls: ${obj.lockPhysicalControl ? 'Locked' : 'Unlocked'}`);
-                        if (!this.accountTypeMelCloud) this.emit('info', `Signal strength: ${deviceData.Rssi}dBm`);
+                        if (!accountTypeMelCloud) this.emit('info', `Signal strength: ${deviceData.Rssi}dBm`);
                     }
                 })
                 .on('success', (success) => this.emit('success', success))

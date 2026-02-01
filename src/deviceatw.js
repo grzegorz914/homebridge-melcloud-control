@@ -1760,7 +1760,6 @@ class DeviceAtw extends EventEmitter {
                         this.emit('devInfo', `Hot Water Tank: ${supportsHotWaterTank ? 'Yes' : 'No'}`);
                         this.emit('devInfo', `Zone 2: ${supportsZone2 ? 'Yes' : 'No'}`);
                         this.emit('devInfo', '----------------------------------');
-                        if (!this.accountTypeMelCloud) this.emit('info', `Signal strength: ${deviceData.Rssi}dBm`);
                         this.displayDeviceInfo = false;
                     }
 
@@ -2400,12 +2399,13 @@ class DeviceAtw extends EventEmitter {
 
                     //frost protection
                     if (this.frostProtectionSupport && frostProtection.Enabled !== null) {
-                        this.frostProtectionControlService?.updateCharacteristic(Characteristic.Active, frostProtection.Enabled);
-                        this.frostProtectionControlService?.updateCharacteristic(Characteristic.CurrentHeaterCoolerState, frostProtection.Active ? 2 : 1);
-                        this.frostProtectionControlService?.updateCharacteristic(Characteristic.TargetHeaterCoolerState, 0);
-                        this.frostProtectionControlService?.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature);
-                        this.frostProtectionControlService?.updateCharacteristic(Characteristic.CoolingThresholdTemperature, frostProtection.Max);
-                        this.frostProtectionControlService?.updateCharacteristic(Characteristic.HeatingThresholdTemperature, frostProtection.Min);
+                        this.frostProtectionControlService
+                            ?.updateCharacteristic(Characteristic.Active, frostProtection.Enabled)
+                            .updateCharacteristic(Characteristic.CurrentHeaterCoolerState, frostProtection.Active ? 2 : 1)
+                            .updateCharacteristic(Characteristic.TargetHeaterCoolerState, 0)
+                            .updateCharacteristic(Characteristic.CurrentTemperature, roomTemperatureZone1)
+                            .updateCharacteristic(Characteristic.CoolingThresholdTemperature, frostProtection.Max)
+                            .updateCharacteristic(Characteristic.HeatingThresholdTemperature, frostProtection.Min);
                         this.frostProtectionControlSensorService?.updateCharacteristic(Characteristic.ContactSensorState, frostProtection.Enabled);
                         this.frostProtectionSensorService?.updateCharacteristic(Characteristic.ContactSensorState, frostProtection.Active);
                     }

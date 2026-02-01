@@ -1566,7 +1566,7 @@ class DeviceErv extends EventEmitter {
                         if (supportsCO2Sensor) this.emit('info', `CO2 level: ${roomCO2Level} ppm`);
                         if (supportsPM25Sensor) this.emit('info', `PM2.5 air quality: ${Ventilation.PM25AirQualityMapEnumToString[pM25AirQuality]}`);
                         if (supportsPM25Sensor) this.emit('info', `PM2.5 level: ${pM25Level} µg/m`);
-                        if (!this.accountTypeMelCloud) this.emit('info', `Signal strength: ${deviceData.Rssi}dBm`);
+                        if (!accountTypeMelCloud) this.emit('info', `Signal strength: ${deviceData.Rssi}dBm`);
                     }
                 })
                 .on('success', (success) => this.emit('success', success))
