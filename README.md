@@ -102,13 +102,13 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
   * Heater Cooler:
     * Heat Pump:
       * Power `ON/OFF`.
-      * Operating mode `AUTO/HEAT/COOL` - `Power OFF/ON/ON`.
+      * Operating mode `AUTO/HEAT/COOL` - `POWER OFF/ON/ON`.
       * Outdoor temperature `GET`.
       * Physical lock controls all Zones and Hot Water Tank `LOCK/UNLOCK`.
       * Temperature display unit `°F/°C`.
     * Zone 1 and 2:
       * Operating mode heat `AUTO/HEAT/COOL` - `CURVE/HEAT ROOM/HEAT FLOW`.
-      * Operating mode cool `HEAT/COOL` - `COOL ROOM/COOL FLOW`.
+      * Operating mode cool `HEAT/COOL` - `FLOOR DRY UP/COOL ROOM/COOL FLOW`.
       * Temperature `HEATING/COOLING`.
       * Physical lock controls `LOCK/UNLOCK`.
     * Hot Water Tank:
@@ -118,12 +118,12 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
   * Thermostat:
     * Heat Pump:
       * Power `ON/OFF`.
-      * Operating mode `AUTO/HEAT/COOL` - `Power OFF/ON/ON`.
+      * Operating mode `AUTO/HEAT/COOL` - `POWER OFF/ON/ON`.
       * Outdoor temperature `GET`.
       * Temperature display unit `°F/°C`.
     * Zone 1 and 2:
       * Operating mode heat `HEAT/COOL/AUTO` - `HEAT ROOM/HEAT FLOW/CURVE`.
-      * Operating mode cool `HEAT/COOL` - `COOL ROOM/COOL FLOW`.
+      * Operating mode cool `HEAT/COOL/AUTO` - `COOL ROOM/COOL FLOW/FLOOR DRY UP`.
       * Temperature `HEATING/COOLING`.
     * Hot Water Tank:
       * Operating mode `HEAT/AUTO` - `HEAT NOW, AUTO`.
@@ -385,8 +385,6 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | --- | --- | --- | --- | --- | --- |
 | Air Conditioner |     |     |     |      |      |
 | POST | `http//ip:port` | `Power` | `true`, `false` | boolean | Power state. |
-|     | `http//ip:port` | `HideVaneControls` | `true`, `false` | boolean | Hide vane (Only MELCloud). |
-|     | `http//ip:port` | `HideDryModeControl` | `true`, `false` | boolean | Hide dry mode control (Only MELCloud). |
 |     | `http//ip:port` | `ProhibitSetTemperature` | `true`, `false` | boolean | Lock set temperature (Only MELCloud). |
 |     | `http//ip:port` | `ProhibitOperationMode` | `true`, `false` | boolean | Lock set operating mode (Only MELCloud). |
 |     | `http//ip:port` | `ProhibitPower` | `true`, `false` | boolean | Lock set power (Only MELCloud). |
@@ -447,8 +445,6 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | --- | --- | --- | --- | --- | --- |
 | Air Conditioner |     |     |     |      |      |
 | Subscribe | `Set` | `Power` | `true`, `false` | boolean | Power state. |
-|     | `Set` | `HideVaneControls` | `true`, `false` | boolean | Hide vane controls (Only MELCloud). |
-|     | `Set` | `HideDryModeControl` | `true`, `false` | boolean | Hide dry mode control (Only MELCloud). |
 |     | `Set` | `ProhibitSetTemperature` | `true`, `false` | boolean | Lock set temperature (Only MELCloud). |
 |     | `Set` | `ProhibitOperationMode` | `true`, `false` | boolean | Lock set operating mode (Only MELCloud). |
 |     | `Set` | `ProhibitPower` | `true`, `false` | boolean | Lock set power (Only MELCloud). |
