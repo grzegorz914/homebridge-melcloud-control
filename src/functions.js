@@ -197,6 +197,21 @@ class Functions extends EventEmitter {
         );
     }
 
+    toPascalCaseKeys(object) {
+        if (object !== null && typeof object === 'object') {
+            return Object.fromEntries(
+                Object.entries(object)
+                    .filter(([, value]) => value !== undefined)
+                    .map(([key, value]) => [
+                        key.charAt(0).toUpperCase() + key.slice(1),
+                        this.toPascalCaseKeys(value)
+                    ])
+            );
+        }
+
+        return object;
+    }
+
     async adjustTempProtection(currentMin, currentMax, value, type, minRangeMin, maxRangeMin, minRangeMax, maxRangeMax) {
         let min = currentMin;
         let max = currentMax;

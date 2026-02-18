@@ -103,7 +103,7 @@ class MelCloud extends EventEmitter {
             //emit device event
             for (const deviceData of melCloudDevicesData.Devices) {
                 const deviceId = deviceData.DeviceID;
-                deviceData.Scenes = melCloudDevicesData.Devices.Scenes ?? [];
+                deviceData.Scenes = melCloudDevicesData.Scenes ?? [];
                 this.emit(deviceId, 'request', deviceData);
             }
 

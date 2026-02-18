@@ -23,16 +23,15 @@ class MelCloudAta extends EventEmitter {
         //set default values
         this.deviceData = {};
         this.client = melCloudClass.client;
-        this.lock = false;
 
         //handle melcloud events
-        let deviceData = null;
         melCloudClass.on('client', (client) => {
             this.client = client;
         }).on(this.deviceId, async (type, message) => {
             switch (type) {
                 case 'ws':
                     try {
+                        const deviceData = structuredClone(this.deviceData);
                         const messageType = message.messageType;
                         const messageData = message.Data;
                         const settings = this.functions.parseArrayNameValue(messageData.settings);
@@ -105,7 +104,8 @@ class MelCloudAta extends EventEmitter {
                 case 'request':
                     try {
                         //update device data
-                        deviceData = message;
+                        const deviceData = structuredClone(this.deviceData);
+                        Object.assign(deviceData, message);
 
                         //update state
                         if (this.logDebug) this.emit('debug', `Request update unit ${this.deviceId} settings: ${JSON.stringify(deviceData.Device, null, 2)}`);
@@ -115,7 +115,7 @@ class MelCloudAta extends EventEmitter {
                     }
                     break;
                 default:
-                    if (this.logDebug) this.emit('debug', `Unit ${this.deviceId}, received unknown type: ${type}`);
+                    if (this.logDebug) this.emit('debug', `Unit ${this.deviceId}, received unknown event type: ${type}`);
                     return;
             }
         });
@@ -166,6 +166,12 @@ class MelCloudAta extends EventEmitter {
             //filter info
             const { Device: _ignored, ...info } = deviceData;
 
+            //check state changes
+            const previousState = JSON.stringify(this.deviceData);
+            const currentState = JSON.stringify(deviceData);
+            if (previousState === currentState) return;
+            this.deviceData = deviceData;
+
             //restFul
             if (this.restFulEnabled) {
                 this.emit('restFul', 'info', info);
@@ -177,11 +183,6 @@ class MelCloudAta extends EventEmitter {
                 this.emit('mqtt', 'Info', info);
                 this.emit('mqtt', 'State', deviceData.Device);
             }
-
-            //check state changes
-            const deviceDataNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);
-            if (deviceDataNotChanged) return;
-            this.deviceData = deviceData;
 
             //emit info
             this.emit('deviceInfo', indoor.model, outdoor.model, serialNumber, firmwareAppVersion);
@@ -195,44 +196,34 @@ class MelCloudAta extends EventEmitter {
         };
     }
 
-    async send(accountType, displayType, deviceData, flag, flagData) {
+    async send(accountType, displayType, deviceData, payload = {}, flag = null) {
         try {
             let method = null
-            let payload = {};
             let path = '';
             let update = false;
             switch (accountType) {
                 case "melcloud":
                     switch (flag) {
                         case 'account':
-                            flagData.Account.LoginData.UseFahrenheit = flagData.UseFahrenheit;
-                            payload = { data: flagData.LoginData };
+                            payload = { data: payload.LoginData };
                             path = ApiUrls.Post.UpdateApplicationOptions;
                             break;
                         default:
                             if (displayType === 1 && deviceData.Device.OperationMode === 8) {
-                                deviceData.Device.SetTemperature = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
+                                payload.setTemperature = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
                             }
-                            deviceData.Device.EffectiveFlags = flag;
-                            payload = {
-                                DeviceID: deviceData.Device.DeviceID,
-                                EffectiveFlags: deviceData.Device.EffectiveFlags,
-                                Power: deviceData.Device.Power,
-                                SetTemperature: deviceData.Device.SetTemperature,
-                                SetFanSpeed: deviceData.Device.FanSpeed,
-                                OperationMode: deviceData.Device.OperationMode,
-                                VaneHorizontal: deviceData.Device.VaneHorizontalDirection,
-                                VaneVertical: deviceData.Device.VaneVerticalDirection,
-                                DefaultHeatingSetTemperature: deviceData.Device.DefaultHeatingSetTemperature,
-                                DefaultCoolingSetTemperature: deviceData.Device.DefaultCoolingSetTemperature,
-                                ProhibitSetTemperature: deviceData.Device.ProhibitSetTemperature,
-                                ProhibitOperationMode: deviceData.Device.ProhibitOperationMode,
-                                ProhibitPower: deviceData.Device.ProhibitPower,
-                                HideVaneControls: deviceData.HideVaneControls,
-                                HideDryModeControl: deviceData.HideDryModeControl,
-                                HasPendingCommand: true
-                            };
+
+                            flag = !flag ? HeatPump.EffectiveFlags.Power : HeatPump.EffectiveFlags.Power + flag;
+                            payload = this.functions.toPascalCaseKeys({
+                                ...payload,
+                                power: payload.power !== false,
+                                deviceID: deviceData.Device.DeviceID,
+                                effectiveFlags: flag,
+                                hasPendingCommand: true,
+                            });
+
                             path = ApiUrls.Post.Ata;
+                            deviceData.Device = { ...deviceData.Device, ...payload };
                             update = true;
                             break;
                     }
@@ -250,49 +241,56 @@ class MelCloudAta extends EventEmitter {
                     switch (flag) {
                         case 'frostprotection':
                             payload = {
-                                enabled: deviceData.FrostProtection.Enabled,
-                                min: deviceData.FrostProtection.Min,
-                                max: deviceData.FrostProtection.Max,
+                                enabled: payload.enabled,
+                                min: payload.min,
+                                max: payload.max,
                                 units: { ATA: [deviceData.DeviceID] }
                             };
                             method = 'POST';
                             path = ApiUrls.Home.Post.ProtectionFrost;
-                            update = true;
+                            deviceData.FrostProtection.Enabled = payload.enabled;
+                            deviceData.FrostProtection.Min = payload.min;
+                            deviceData.FrostProtection.Max = payload.max;
                             break;
                         case 'overheatprotection':
                             payload = {
-                                enabled: deviceData.OverheatProtection.Enabled,
-                                min: deviceData.OverheatProtection.Min,
-                                max: deviceData.OverheatProtection.Max,
+                                enabled: payload.enabled,
+                                min: payload.min,
+                                max: payload.max,
                                 units: { ATA: [deviceData.DeviceID] }
                             };
                             method = 'POST';
                             path = ApiUrls.Home.Post.ProtectionOverheat;
-                            update = true;
+                            deviceData.OverheatProtection.Enabled = payload.enabled;
+                            deviceData.OverheatProtection.Min = payload.min;
+                            deviceData.OverheatProtection.Max = payload.max;
                             break;
                         case 'holidaymode':
                             payload = {
-                                enabled: deviceData.HolidayMode.Enabled,
+                                enabled: payload.enabled,
                                 startDate: deviceData.HolidayMode.StartDate,
                                 endDate: deviceData.HolidayMode.EndDate,
                                 units: { ATA: [deviceData.DeviceID] }
                             };
                             method = 'POST';
                             path = ApiUrls.Home.Post.HolidayMode;
+                            deviceData.HolidayMode.Enabled = payload.enabled;
                             break;
                         case 'schedule':
-                            payload = { enabled: deviceData.ScheduleEnabled };
                             method = 'PUT';
-                            path = ApiUrls.Home.Put.ScheduleEnableDisable.Home.replace('deviceid', deviceData.DeviceID);
-                            update = true;
+                            path = ApiUrls.Home.Put.ScheduleEnableDisable.replace('deviceid', deviceData.DeviceID);
+                            deviceData.ScheduleEnabled = payload.enabled;
                             break;
                         case 'scene':
                             method = 'PUT';
-                            path = `${ApiUrls.Home.Put.SceneEnableDisable.replace('sceneid', flagData.Id)}${flagData.Enabled ? 'enable' : 'disable'}`;
+                            path = `${ApiUrls.Home.Put.SceneEnableDisable.replace('sceneid', payload.id)}/${payload.enabled ? 'enable' : 'disable'}`;
+                            const scene = deviceData.Scenes.find(s => s.Id === payload.id);
+                            scene.Enabled = payload.enabled;
+                            payload = {};
                             break;
                         default:
                             if (displayType === 1 && deviceData.Device.OperationMode === 8) {
-                                deviceData.Device.SetTemperature = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
+                                payload.setTemperature = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
 
                                 if (this.deviceData.Device.DefaultCoolingSetTemperature !== deviceData.Device.DefaultCoolingSetTemperature || this.deviceData.Device.DefaultHeatingSetTemperature !== deviceData.Device.DefaultHeatingSetTemperature) {
                                     const temps = {
@@ -303,35 +301,27 @@ class MelCloudAta extends EventEmitter {
                                 }
                             }
 
-                            payload = {
-                                power: deviceData.Device.Power,
-                                setTemperature: deviceData.Device.SetTemperature,
-                                setFanSpeed: String(deviceData.Device.SetFanSpeed),
-                                operationMode: AirConditioner.OperationModeMapEnumToString[deviceData.Device.OperationMode],
-                                vaneHorizontalDirection: AirConditioner.VaneHorizontalDirectionMapEnumToString[deviceData.Device.VaneHorizontalDirection],
-                                vaneVerticalDirection: AirConditioner.VaneVerticalDirectionMapEnumToString[deviceData.Device.VaneVerticalDirection],
-                                temperatureIncrementOverride: null,
-                                inStandbyMode: null
-                            };
+                            if (payload.setFanSpeed >= 0) payload.setFanSpeed = String(payload.setFanSpeed);
+                            if (payload.operationMode >= 0) payload.operationMode = AirConditioner.OperationModeMapEnumToString[payload.operationMode];
+                            if (payload.vaneHorizontalDirection >= 0) payload.vaneHorizontalDirection = AirConditioner.VaneHorizontalDirectionMapEnumToString[payload.vaneHorizontalDirection];
+                            if (payload.vaneVerticalDirection >= 0) payload.vaneVerticalDirection = AirConditioner.VaneVerticalDirectionMapEnumToString[payload.vaneVerticalDirection];
+
+                            deviceData.Device = { ...deviceData.Device, ...payload };
                             method = 'PUT';
                             path = ApiUrls.Home.Put.Ata.replace('deviceid', deviceData.DeviceID);
                             break;
                     }
 
                     //send payload
-                    if (this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);
+                    if (!this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);
                     await this.client(path, { method: method, data: payload });
-
-                    if (update) {
-                        setTimeout(() => {
-                            this.updateState('request', deviceData);
-                        }, 500);
-                    }
                     return true;
                 default:
+                    if (this.logWarn) this.emit('warn', `Received unknwn account type: ${accountType}`);
                     return;
             }
         } catch (error) {
+            if (error.response?.status === 500) return;
             throw new Error(`Send data error: ${error.message}`);
         }
     }

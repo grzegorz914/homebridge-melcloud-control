@@ -22,6 +22,7 @@ export const ApiUrls = {
     },
     Home: {
         Base: "https://melcloudhome.com",
+        BaseMobile: "https://mobile.bff.melcloudhome.com",
         WebSocket: "wss://ws.melcloudhome.com/?hash=",
         Get: {
             Configuration: "/api/configuration",
@@ -37,10 +38,13 @@ export const ApiUrls = {
         },
         Put: {
             Ata: "/api/ataunit/deviceid", //{ power: true,setTemperature: 22, setFanSpeed: "auto", operationMode: "heat", vaneHorizontalDirection: "auto",vaneVerticalDirection: "auto", temperatureIncrementOverride: null, inStandbyMode: null}
+            AtaMobile: "/monitor/ataunit/deviceid",
             Atw: "/api/atwunit/deviceid",
+            AtwMobile: "/monitor/atwunit/deviceid",
             Erv: "/api/ervunit/deviceid",
+            ErvMobile: "/monitor/ervunit/deviceid",
             ScheduleEnableDisable: "/api/cloudschedule/deviceid/enabled", // {"enabled": true}
-            SceneEnableDisable: "/api/scene/sceneid/enabledisable",
+            SceneEnableDisable: "/api/scene/sceneid",
         },
         Delete: {
             Schedule: "/api/cloudschedule/deviceid/scheduleid",
@@ -108,17 +112,17 @@ export const AirConditioner = {
 
 export const HeatPump = {
     ZoneNameMapEnumToString: { 0: "Heat Pump", 1: "Zone 1", 2: "Hot Water", 3: "Zone 2" },
-    SystemMapEnumToStringInfo: { 0: "System Off", 1: "System On", 2: "Emergency Run", 3: "Test Run" },
-    ControlTypeMapStringToEnum: { "Heat": 0, "Cool": 1 },
-    ControlTypeMapEnumToString: { 0: "Heat", 1: "Cool" },
+        UnitStatusMapEnumToString: { 0: "Heat", 2: "Cool" },
+    SystemMapEnumToStringInfo: { 0: "Off", 1: "On", 2: "Emergency Run", 3: "Test Run" },
     DefrostMapStringToEnum: { "Normal": 0, "Standby": 1, "Defrost": 2, "Waiting Restart": 3 },
     DefrostMapEnumToString: { 0: "Normal", 1: "Standby", 2: "Defrost", 3: "Waiting Restart" },
-    OperationModeMapStringToEnum: { "Idle": 0, "HotWater": 1, "Heating": 2, "Cooling": 3, "HotWaterStorage": 4, "FreezeStat": 5, "Legionella": 6, "HeatEco": 7, "Mode1": 8, "Mode2": 9, "Mode3": 10, "HeatUp": 11 },
-    OperationModeMapEnumToString: { 0: "Idle", 1: "HotWater", 2: "Heating", 3: "Cooling", 4: "HotWaterStorage", 5: "FreezeStat", 6: "Legionella", 7: "HeatEco", 8: "Mode1", 9: "Mode2", 10: "Mode3", 11: "HeatUp" },
-    OperationModeMapEnumToStringInfo: { 0: "Idle", 1: "Hot Water", 2: "Heating", 3: "Cooling", 4: "Hot Water Storage", 5: "Freeze Stat", 6: "Legionella", 7: "Heat Eco", 8: "Mode 1", 9: "Mode 2", 10: "Mode 3", 11: "Heat Up" },
-    OperationModeZoneMapStringToEnum: { "HeatThermostat": 0, "HeatFlowTemperature": 1, "HeatCurve": 2, "CoolThermostat": 3, "CoolFlowTemperature": 4, "FloorDryUp": 5, "Idle": 6 },
-    OperationModeZoneMapEnumToString: { 0: "HeatThermostat", 1: "HeatFlowTemperature", 2: "HeatCurve", 3: "CoolThermostat", 4: "CoolFlowTemperature", 5: "FloorDryUp", 6: "Idle" },
-    OperationModeZoneMapEnumToStringInfo: { 0: "Heat Thermostat", 1: "Heat Flow Temperature", 2: "Heat Curve", 3: "Cool Thermostat", 4: "Cool Flow Temperature", 5: "Floor Dry Up", 6: "Idle" },
+    OperationModeHeatPumpMapEnumToStringInfo: { 0: "Off", 1: "Heat", 2: "Cool", 3: "Auto" },
+    OperationModeMapStringToEnum: { "Stop": 0, "HotWater": 1, "Heating": 2, "Cooling": 3, "HotWaterStorage": 4, "FreezeStat": 5, "Legionella": 6, "HeatEco": 7, "Mode1": 8, "Mode2": 9, "Mode3": 10, "HeatUp": 11 },
+    OperationModeMapEnumToString: { 0: "Stop", 1: "HotWater", 2: "Heating", 3: "Cooling", 4: "HotWaterStorage", 5: "FreezeStat", 6: "Legionella", 7: "HeatEco", 8: "Mode1", 9: "Mode2", 10: "Mode3", 11: "HeatUp" },
+    OperationModeMapEnumToStringInfo: { 0: "Stop", 1: "Hot Water", 2: "Heating", 3: "Cooling", 4: "Hot Water Storage", 5: "Freeze Stat", 6: "Legionella", 7: "Heat Eco", 8: "Mode 1", 9: "Mode 2", 10: "Mode 3", 11: "Heat Up" },
+    OperationModeZoneMapStringToEnum: { "HeatRoomTemperature": 0, "HeatFlowTemperature": 1, "HeatCurve": 2, "CoolRoomTemperature": 3, "CoolFlowTemperature": 4, "FloorDryUp": 5, "Stop": 6 },
+    OperationModeZoneMapEnumToString: { 0: "HeatRoomTemperature", 1: "HeatFlowTemperature", 2: "HeatCurve", 3: "CoolRoomTemperature", 4: "CoolFlowTemperature", 5: "FloorDryUp", 6: "Stop" },
+    OperationModeZoneMapEnumToStringInfo: { 0: "Heat Room Temperature", 1: "Heat Flow Temperature", 2: "Heat Curve", 3: "Cool Room Temperature", 4: "Cool Flow Temperature", 5: "Floor Dry Up", 6: "Stop" },
     OperationModeDhwMapStringToEnum: { "Normal": 0, "Eco": 1 },
     OperationModeDhwMapEnumToString: { 0: "Normal", 1: "Eco" },
     ForceDhwMapStringToEnum: { "Normal": 0, "HeatNow": 1 },

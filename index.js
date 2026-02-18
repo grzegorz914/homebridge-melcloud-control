@@ -54,10 +54,12 @@ class MelCloudPlatform {
 					log.info(`${name}, debug: did finish launching.`);
 					const safeConfig = {
 						...account,
+						user: 'removed',
 						passwd: 'removed',
 						mqtt: {
 							auth: {
 								...account.mqtt?.auth,
+								user: 'removed',
 								passwd: 'removed',
 							}
 						},
@@ -179,7 +181,7 @@ class MelCloudPlatform {
 											deviceClass = new DeviceErv(api, account, device, presets, schedules, scenes, buttons, defaultTempsFile, melCloudClass, melCloudAccountData, melCloudDeviceData);
 											break;
 										default:
-											if (logLevel.warn) log.warn(`${name}, ${deviceTypeString}, ${deviceName}, unknown device: ${deviceType}.`);
+											if (logLevel.warn) log.warn(`${name}, ${deviceTypeString}, ${deviceName}, received unknown device type: ${deviceType}.`);
 											return;
 									}
 

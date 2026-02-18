@@ -1,7 +1,7 @@
 {
   "displayName": "MELCloud Control",
   "name": "homebridge-melcloud-control",
-  "version": "4.7.8",
+  "version": "4.7.9",
   "description": "Homebridge plugin to control Mitsubishi Air Conditioner, Heat Pump and Energy Recovery Ventilation.",
   "license": "MIT",
   "author": "grzegorz914",
@@ -35,11 +35,11 @@
     "node": "^20 || ^22 || ^24 || ^25"
   },
   "dependencies": {
-    "@homebridge/plugin-ui-utils": "^2.1.2",
-    "mqtt": "^5.14.1",
-    "axios": "^1.13.4",
+    "@homebridge/plugin-ui-utils": "^2.2.0",
+    "mqtt": "^5.15.0",
+    "axios": "^1.13.5",
     "express": "^5.2.1",
-    "puppeteer": "^24.36.1",
+    "puppeteer": "^24.37.3",
     "ws": "^8.19.0"
   },
   "keywords": [
@@ -56,6 +56,10 @@
     "mqtt",
     "restful"
   ],
+  "funding": {
+    "type": "Buy Coffee To",
+    "url": "https://buycoffee.to/grzegorz914"
+  },
   "contributors": [],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

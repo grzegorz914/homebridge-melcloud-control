@@ -25,13 +25,13 @@ class MelCloudErv extends EventEmitter {
         this.client = melCloudClass.client;
 
         //handle melcloud events
-        let deviceData = null;
         melCloudClass.on('client', (client) => {
             this.client = client;
         }).on(this.deviceId, async (type, message) => {
             switch (type) {
                 case 'ws':
                     try {
+                        const deviceData = structuredClone(this.deviceData);
                         const messageType = message.messageType;
                         const messageData = message.Data;
                         const settings = this.functions.parseArrayNameValue(messageData.settings);
@@ -92,7 +92,8 @@ class MelCloudErv extends EventEmitter {
                 case 'request':
                     try {
                         //update device data
-                        deviceData = message;
+                        const deviceData = structuredClone(this.deviceData);
+                        Object.assign(deviceData, message);
 
                         //update state
                         if (this.logDebug) this.emit('debug', `Request update unit ${this.deviceId} settings: ${JSON.stringify(deviceData.Device, null, 2)}`);
@@ -102,7 +103,7 @@ class MelCloudErv extends EventEmitter {
                     }
                     break;
                 default:
-                    if (this.logDebug) this.emit('debug', `Unit ${this.deviceId}, received unknown type: ${type}`);
+                    if (this.logDebug) this.emit('debug', `Unit ${this.deviceId}, received unknown event type: ${type}`);
                     return;
             }
         });
@@ -142,6 +143,12 @@ class MelCloudErv extends EventEmitter {
             //filter info
             const { Device: _ignored, ...info } = deviceData;
 
+            //check state changes
+            const previousState = JSON.stringify(this.deviceData);
+            const currentState = JSON.stringify(deviceData);
+            if (previousState === currentState) return;
+            this.deviceData = deviceData;
+
             //restFul
             if (this.restFulEnabled) {
                 this.emit('restFul', 'info', info);
@@ -153,11 +160,6 @@ class MelCloudErv extends EventEmitter {
                 this.emit('mqtt', 'Info', info);
                 this.emit('mqtt', 'State', deviceData.Device);
             }
-
-            //check state changes
-            const deviceDataHasNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);
-            if (deviceDataHasNotChanged) return;
-            this.deviceData = deviceData;
 
             //emit info
             this.emit('deviceInfo', indoor.model, outdoor.model, serialNumber, firmwareAppVersion);
@@ -171,18 +173,16 @@ class MelCloudErv extends EventEmitter {
         };
     }
 
-    async send(accountType, displayType, deviceData, flag, flagData) {
+    async send(accountType, displayType, deviceData, payload = {}, flag = null) {
         try {
             let method = null
-            let payload = {};
             let path = '';
             let update = false;
             switch (accountType) {
                 case "melcloud":
                     switch (flag) {
                         case 'account':
-                            flagData.Account.LoginData.UseFahrenheit = flagData.UseFahrenheit;
-                            payload = { data: flagData.LoginData };
+                            payload = { data: payload.LoginData };
                             path = ApiUrls.Post.UpdateApplicationOptions;
                             break;
                         default:
@@ -191,40 +191,32 @@ class MelCloudErv extends EventEmitter {
                                 case 1: //Heather/Cooler
                                     switch (deviceData.Device.VentilationMode) {
                                         case 0: //LOSNAY
-                                            deviceData.Device.SetTemperature = deviceData.Device.DefaultHeatingSetTemperature;
+                                            payload.setTemperature = deviceData.Device.DefaultHeatingSetTemperature;
                                             break;
                                         case 1: //BYPASS
-                                            deviceData.Device.SetTemperature = deviceData.Device.DefaultCoolingSetTemperature;
+                                            payload.setTemperature = deviceData.Device.DefaultCoolingSetTemperature;
                                             break;
                                         case 2: //AUTO
                                             const setTemperature = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
-                                            deviceData.Device.SetTemperature = setTemperature;
+                                            payload.setTemperature = setTemperature;
                                             break;
                                     };
                                 case 2: //Thermostat
-                                    deviceData.Device.SetTemperature = deviceData.Device.SetTemperature;
+                                    payload.setTemperature = deviceData.Device.SetTemperature;
                                     break;
                             };
 
                             //device state
-                            deviceData.Device.EffectiveFlags = flag;
-                            payload = {
-                                DeviceID: deviceData.Device.DeviceID,
-                                EffectiveFlags: deviceData.Device.EffectiveFlags,
-                                Power: deviceData.Device.Power,
-                                SetTemperature: deviceData.Device.SetTemperature,
-                                SetFanSpeed: deviceData.Device.SetFanSpeed,
-                                OperationMode: deviceData.Device.OperationMode,
-                                VentilationMode: deviceData.Device.VentilationMode,
-                                DefaultCoolingSetTemperature: deviceData.Device.DefaultCoolingSetTemperature,
-                                DefaultHeatingSetTemperature: deviceData.Device.DefaultHeatingSetTemperature,
-                                HideRoomTemperature: deviceData.Device.HideRoomTemperature,
-                                HideSupplyTemperature: deviceData.Device.HideSupplyTemperature,
-                                HideOutdoorTemperature: deviceData.Device.HideOutdoorTemperature,
-                                NightPurgeMode: deviceData.Device.NightPurgeMode,
-                                HasPendingCommand: true
-                            }
+                            flag = !flag ? HeatPump.EffectiveFlags.Power : HeatPump.EffectiveFlags.Power + flag;
+                            payload = this.functions.toPascalCaseKeys({
+                                ...payload,
+                                power: payload.power !== false,
+                                deviceID: deviceData.Device.DeviceID,
+                                effectiveFlags: flag,
+                                hasPendingCommand: true,
+                            });
                             path = ApiUrls.Post.Erv;
+                            deviceData.Device = { ...deviceData.Device, ...payload };
                             update = true;
                             break;
                     }
@@ -242,27 +234,31 @@ class MelCloudErv extends EventEmitter {
                     switch (flag) {
                         case 'holidaymode':
                             payload = {
-                                enabled: deviceData.HolidayMode.Enabled,
+                                enabled: payload.enabled,
                                 startDate: deviceData.HolidayMode.StartDate,
                                 endDate: deviceData.HolidayMode.EndDate,
                                 units: { ERV: [deviceData.DeviceID] }
                             };
                             method = 'POST';
                             path = ApiUrls.Home.Post.HolidayMode;
+                            deviceData.HolidayMode.Enabled = payload.enabled;
                             break;
                         case 'schedule':
-                            payload = { enabled: deviceData.ScheduleEnabled };
+                            payload = { enabled: payload.enabled };
                             method = 'PUT';
-                            path = ApiUrls.Home.Put.ScheduleEnableDisable.Home.replace('deviceid', deviceData.DeviceID);
-                            update = true;
+                            path = ApiUrls.Home.Put.ScheduleEnableDisable.replace('deviceid', deviceData.DeviceID);
+                            deviceData.ScheduleEnabled = payload.enabled;
                             break;
                         case 'scene':
                             method = 'PUT';
-                            path = `${ApiUrls.Home.Put.SceneEnableDisable.replace('sceneid', flagData.Id)}${flagData.Enabled ? 'enable' : 'disable'}`;
+                            path = `${ApiUrls.Home.Put.SceneEnableDisable.replace('sceneid', payload.id)}/${payload.enabled ? 'enable' : 'disable'}`;
+                            const scene = deviceData.Scenes.find(s => s.Id === payload.id);
+                            scene.Enabled = payload.enabled;
+                            payload = {};
                             break;
                         default:
                             if (displayType === 1 && deviceData.Device.VentilationMode === 2) {
-                                deviceData.Device.SetTemperature = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
+                                payload.setTemperature = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
 
                                 if (this.deviceData.Device.DefaultCoolingSetTemperature !== deviceData.Device.DefaultCoolingSetTemperature || this.deviceData.Device.DefaultHeatingSetTemperature !== deviceData.Device.DefaultHeatingSetTemperature) {
                                     const temps = {
@@ -273,13 +269,11 @@ class MelCloudErv extends EventEmitter {
                                 }
                             }
 
-                            payload = {
-                                power: deviceData.Device.Power,
-                                setTemperature: deviceData.Device.SetTemperature,
-                                setFanSpeed: String(deviceData.Device.SetFanSpeed),
-                                operationMode: Ventilation.OperationModeMapEnumToString[deviceData.Device.OperationMode],
-                                ventilationMode: Ventilation.VentilationModeMapEnumToString[deviceData.Device.VentilationMode],
-                            };
+                            if (payload.setFanSpeed >= 0) payload.setFanSpeed = String(payload.setFanSpeed);
+                            if (payload.operationMode >= 0) payload.operationMode = Ventilation.OperationModeMapEnumToString[payload.operationMode];
+                            if (payload.ventilationMode >= 0) payload.ventilationMode = Ventilation.VentilationModeMapEnumToString[payload.ventilationMode];
+
+                            deviceData.Device = { ...deviceData.Device, ...payload };
                             method = 'PUT';
                             path = ApiUrls.Home.Put.Erv.replace('deviceid', deviceData.DeviceID);
                             break
@@ -287,14 +281,9 @@ class MelCloudErv extends EventEmitter {
 
                     if (this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);
                     await this.client(path, { method: method, data: payload });
-
-                    if (update) {
-                        setTimeout(() => {
-                            this.updateState('request', deviceData);
-                        }, 500);
-                    }
                     return true;
                 default:
+                    if (this.logWarn) this.emit('warn', `Received unknwn account type: ${accountType}`);
                     return;
             }
         } catch (error) {

@@ -15,6 +15,8 @@
 
 Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation Lossnay, manufactured by Mistsubishi and connected to MELCloud or MELCloud Home.
 
+<a href="https://buycoffee.to/grzegorz914" target="_blank"><img src="https://buycoffee.to/static/img/share/share-button-primary.png" style="width: 234px; height: 61px" alt="Postaw mi kawę na buycoffee.to"></a>
+
 </span>
 
 ## Package Requirements
@@ -421,9 +423,6 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | Energy Recovery Ventilation |     |     |     |      |     |
 | POST | `http//ip:port` | `Power` | `true`, `false` | boolean | Power state. |
 |     | `http//ip:port` | `NightPurgeMode` | `true`, `false` | boolean | Night purge mode. |
-|     | `http//ip:port` | `HideRoomTemperature` | `true`, `false` | boolean | Hide room temperature. |
-|     | `http//ip:port` | `HideSupplyTemperature` | `true`, `false` | boolean | Hide supply temperature. |
-|     | `http//ip:port` | `HideOutdoorTemperature` | `true`, `false` | boolean | Hide outdoor temperature. |
 |     | `http//ip:port` | `OperationMode` | `1 - Heat`, `3 - Cool`, `7 - Fan`, `8 - Auto` | integer | Operating mode. |
 |     | `http//ip:port` | `VentilationMode` | `0 - Lossnay`, `1 - Bypass`, `2 - Auto` | integer | Ventilation mode. |
 |     | `http//ip:port` | `SetFanSpeed` | `0 - Auto`, `1`, `2`, `3`, `4` | integer | Fan speed. |
@@ -481,9 +480,6 @@ Homebridge plugin for Air Conditioner, Heat Pump and Energy Recovery Ventilation
 | Energy Recovery Ventilation |     |     |     |      |     |
 | Subscribe | `Set` | `Power` | `true`, `false` | boolean | Power state. |
 |     | `Set` | `NightPurgeMode` | `true`, `false` | boolean | Night purge mode. |
-|     | `Set` | `HideRoomTemperature` | `true`, `false` | boolean | Hide room temperature. |
-|     | `Set` | `HideSupplyTemperature` | `true`, `false` | boolean | Hide supply temperature. |
-|     | `Set` | `HideOutdoorTemperature` | `true`, `false` | boolean | Hide outdoor temperature. |
 |     | `Set` | `OperationMode` | `1 - Heat`, `3 - Cool`, `7 - Fan`, `8 - Auto` | integer | Operating mode. |
 |     | `Set` | `VentilationMode` | `0 - Lossnay`, `1 - Bypass`, `2 - Auto` | integer | Ventilation mode. |
 |     | `Set` | `SetFanSpeed` | `0 - Auto`, `1`, `2`, `3`, `4` | integer | Fan speed. |

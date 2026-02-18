@@ -782,12 +782,6 @@
                               ]
                             },
                             {
-                              "title": "MODE DRY CONTROL HIDE",
-                              "enum": [
-                                7
-                              ]
-                            },
-                            {
                               "title": "VH MODE AUTO",
                               "enum": [
                                 10
@@ -878,12 +872,6 @@
                               ]
                             },
                             {
-                              "title": "VH / VV CONTROLS HIDE",
-                              "enum": [
-                                27
-                              ]
-                            },
-                            {
                               "title": "FAN MODE AUTO",
                               "enum": [
                                 30
@@ -926,25 +914,25 @@
                               ]
                             },
                             {
-                              "title": "LOCK CONTROL All",
+                              "title": "LOCK CONTROL All (Only MELCloud)",
                               "enum": [
                                 37
                               ]
                             },
                             {
-                              "title": "LOCK CONTROL POWER",
+                              "title": "LOCK CONTROL POWER (Only MELCloud)",
                               "enum": [
                                 38
                               ]
                             },
                             {
-                              "title": "LOCK CONTROL MODE",
+                              "title": "LOCK CONTROL MODE (Only MELCloud)",
                               "enum": [
                                 39
                               ]
                             },
                             {
-                              "title": "LOCK CONTROL TEMPERATURE",
+                              "title": "LOCK CONTROL TEMPERATURE (Only MELCloud)",
                               "enum": [
                                 40
                               ]
@@ -1629,13 +1617,13 @@
                               ]
                             },
                             {
-                              "title": "LOCK CONTROL ALL",
+                              "title": "LOCK CONTROL ALL (Only MELCloud)",
                               "enum": [
                                 10
                               ]
                             },
                             {
-                              "title": "Z1 MODE HEAT THERMOSTAT",
+                              "title": "Z1 MODE HEAT ROOM",
                               "enum": [
                                 20
                               ]
@@ -1653,7 +1641,7 @@
                               ]
                             },
                             {
-                              "title": "Z1 MODE COOL THERMOSTAT",
+                              "title": "Z1 MODE COOL ROOM",
                               "enum": [
                                 23
                               ]
@@ -1671,7 +1659,7 @@
                               ]
                             },
                             {
-                              "title": "Z1 LOCK CONTROL",
+                              "title": "Z1 LOCK CONTROL (Only MELCloud)",
                               "enum": [
                                 30
                               ]
@@ -1683,7 +1671,7 @@
                               ]
                             },
                             {
-                              "title": "HW MODE ECO",
+                              "title": "HW MODE ECO (Only MELCloud)",
                               "enum": [
                                 41
                               ]
@@ -1695,7 +1683,7 @@
                               ]
                             },
                             {
-                              "title": "Z2 MODE HEAT THERMOSTAT",
+                              "title": "Z2 MODE HEAT ROOM",
                               "enum": [
                                 60
                               ]
@@ -1713,7 +1701,7 @@
                               ]
                             },
                             {
-                              "title": "Z2 MODE COOL THERMOSTAT",
+                              "title": "Z2 MODE COOL ROOM",
                               "enum": [
                                 63
                               ]
@@ -1731,7 +1719,7 @@
                               ]
                             },
                             {
-                              "title": "Z2 LOCK CONTROL",
+                              "title": "Z2 LOCK CONTROL (Only MELCloud)",
                               "enum": [
                                 70
                               ]
@@ -2259,24 +2247,6 @@
                               "title": "LOCK CONTROL",
                               "enum": [
                                 15
-                              ]
-                            },
-                            {
-                              "title": "ROOM TEMP HIDE",
-                              "enum": [
-                                16
-                              ]
-                            },
-                            {
-                              "title": "SUPPLY TEMP HIDE",
-                              "enum": [
-                                17
-                              ]
-                            },
-                            {
-                              "title": "OUTDOOR TEMP HIDE",
-                              "enum": [
-                                18
                               ]
                             }
                           ],

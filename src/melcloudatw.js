@@ -25,13 +25,13 @@ class MelCloudAtw extends EventEmitter {
         this.client = melCloudClass.client;
 
         //handle melcloud events
-        let deviceData = null;
         melCloudClass.on('client', (client) => {
             this.client = client;
         }).on(this.deviceId, async (type, message) => {
             switch (type) {
                 case 'ws':
                     try {
+                        const deviceData = structuredClone(this.deviceData);
                         const messageType = message.messageType;
                         const messageData = message.Data;
                         const settings = this.functions.parseArrayNameValue(messageData.settings);
@@ -92,7 +92,8 @@ class MelCloudAtw extends EventEmitter {
                 case 'request':
                     try {
                         //update device data
-                        deviceData = message;
+                        const deviceData = structuredClone(this.deviceData);
+                        Object.assign(deviceData, message);
 
                         //update state
                         if (this.logDebug) this.emit('debug', `Request update unit ${this.deviceId} settings: ${JSON.stringify(deviceData.Device, null, 2)}`);
@@ -102,7 +103,7 @@ class MelCloudAtw extends EventEmitter {
                     }
                     break;
                 default:
-                    if (this.logDebug) this.emit('debug', `Unit ${this.deviceId}, received unknown type: ${type}`);
+                    if (this.logDebug) this.emit('debug', `Unit ${this.deviceId}, received unknown event type: ${type}`);
                     return;
             }
         });
@@ -122,7 +123,9 @@ class MelCloudAtw extends EventEmitter {
             const serialNumber = deviceData.SerialNumber || '4.0.0';
             const firmwareAppVersion = deviceData.Device?.FirmwareAppVersion || '4.0.0';
             const hasHotWaterTank = deviceData.Device?.HasHotWaterTank || false;
-            const hasZone2 = deviceData.Device.HasZone2 !== false && deviceData.Device.HasZone2 !== null;
+            const hasZone2 = ![false, 0, 'None', null, undefined].includes(deviceData?.Device?.HasZone2);
+            const ftcModel = deviceData.FtcModel;
+            deviceData.Device.HasZone2 = hasZone2;
 
             //units
             const units = Array.isArray(deviceData.Device?.Units) ? deviceData.Device?.Units : [];
@@ -142,6 +145,12 @@ class MelCloudAtw extends EventEmitter {
             //filter info
             const { Device: _ignored, ...info } = deviceData;
 
+            //check state changes
+            const previousState = JSON.stringify(this.deviceData);
+            const currentState = JSON.stringify(deviceData);
+            if (previousState === currentState) return;
+            this.deviceData = deviceData;
+
             //restFul
             if (this.restFulEnabled) {
                 this.emit('restFul', 'info', info);
@@ -154,13 +163,8 @@ class MelCloudAtw extends EventEmitter {
                 this.emit('mqtt', 'State', deviceData.Device);
             }
 
-            //check state changes
-            const deviceDataHasNotChanged = JSON.stringify(deviceData) === JSON.stringify(this.deviceData);
-            if (deviceDataHasNotChanged) return;
-            this.deviceData = deviceData;
-
             //emit info
-            this.emit('deviceInfo', indoor.model, outdoor.model, serialNumber, firmwareAppVersion, hasHotWaterTank, hasZone2);
+            this.emit('deviceInfo', indoor.model, outdoor.model, serialNumber, firmwareAppVersion, hasHotWaterTank, hasZone2, ftcModel);
 
             //emit state
             this.emit('deviceState', deviceData);
@@ -171,45 +175,30 @@ class MelCloudAtw extends EventEmitter {
         };
     }
 
-    async send(accountType, displayType, deviceData, flag, flagData) {
+    async send(accountType, displayType, deviceData, payload = {}, flag = null) {
         try {
             let method = null
-            let payload = {};
             let path = '';
             let update = false;
             switch (accountType) {
                 case "melcloud":
                     switch (flag) {
                         case 'account':
-                            flagData.Account.LoginData.UseFahrenheit = flagData.UseFahrenheit;
-                            payload = { data: flagData.LoginData };
+                            payload = { data: payload.LoginData };
                             path = ApiUrls.Post.UpdateApplicationOptions;
                             break;
                         default:
-                            deviceData.Device.EffectiveFlags = flag;
-                            payload = {
-                                DeviceID: deviceData.Device.DeviceID,
-                                EffectiveFlags: deviceData.Device.EffectiveFlags,
-                                Power: deviceData.Device.Power,
-                                OperationMode: deviceData.Device.OperationMode,
-                                OperationModeZone1: deviceData.Device.OperationModeZone1,
-                                SetTemperatureZone1: deviceData.Device.SetTemperatureZone1,
-                                SetHeatFlowTemperatureZone1: deviceData.Device.SetHeatFlowTemperatureZone1,
-                                SetCoolFlowTemperatureZone1: deviceData.Device.SetCoolFlowTemperatureZone1,
-                                ProhibitZone1: deviceData.Device.ProhibitHeatingZone1,
-                                SetTankWaterTemperature: deviceData.Device.SetTankWaterTemperature,
-                                ForcedHotWaterMode: deviceData.Device.ForcedHotWaterMode,
-                                EcoHotWater: deviceData.Device.EcoHotWater,
-                                ProhibitHotWater: deviceData.Device.ProhibitHotWater,
-                                OperationModeZone2: deviceData.Device.OperationModeZone2,
-                                SetTemperatureZone2: deviceData.Device.SetTemperatureZone2,
-                                SetHeatFlowTemperatureZone2: deviceData.Device.SetHeatFlowTemperatureZone2,
-                                SetCoolFlowTemperatureZone2: deviceData.Device.SetCoolFlowTemperatureZone2,
-                                ProhibitZone2: deviceData.Device.ProhibitHeatingZone2,
-                                HolidayMode: deviceData.Device.HolidayMode,
-                                HasPendingCommand: true
-                            }
+                            flag = !flag ? HeatPump.EffectiveFlags.Power : HeatPump.EffectiveFlags.Power + flag;
+                            payload = this.functions.toPascalCaseKeys({
+                                ...payload,
+                                power: payload.power !== false,
+                                deviceID: deviceData.Device.DeviceID,
+                                effectiveFlags: flag,
+                                hasPendingCommand: true,
+                            });
+
                             path = ApiUrls.Post.Atw;
+                            deviceData.Device = { ...deviceData.Device, ...payload };
                             update = true;
                             break;
                     }
@@ -227,66 +216,61 @@ class MelCloudAtw extends EventEmitter {
                     switch (flag) {
                         case 'frostprotection':
                             payload = {
-                                enabled: deviceData.FrostProtection.Enabled,
-                                min: deviceData.FrostProtection.Min,
-                                max: deviceData.FrostProtection.Max,
-                                units: { ATA: [deviceData.DeviceID] }
+                                enabled: payload.enabled,
+                                min: payload.min,
+                                max: payload.max,
+                                units: { ATW: [deviceData.DeviceID] }
                             };
                             method = 'POST';
                             path = ApiUrls.Home.Post.ProtectionFrost;
-                            update = true;
+                            deviceData.FrostProtection.Enabled = payload.enabled;
+                            deviceData.FrostProtection.Min = payload.min;
+                            deviceData.FrostProtection.Max = payload.max;
                             break;
                         case 'holidaymode':
                             payload = {
-                                enabled: deviceData.HolidayMode.Enabled,
+                                enabled: payload.enabled,
                                 startDate: deviceData.HolidayMode.StartDate,
                                 endDate: deviceData.HolidayMode.EndDate,
                                 units: { ATW: [deviceData.DeviceID] }
                             };
                             method = 'POST';
                             path = ApiUrls.Home.Post.HolidayMode;
+                            deviceData.HolidayMode.Enabled = payload.enabled;
                             break;
                         case 'schedule':
-                            payload = { enabled: deviceData.ScheduleEnabled };
+                            payload = { enabled: payload.enabled };
                             method = 'PUT';
-                            path = ApiUrls.Home.Put.ScheduleEnableDisable.Home.replace('deviceid', deviceData.DeviceID);
-                            update = true;
+                            path = ApiUrls.Home.Put.ScheduleEnableDisable.replace('deviceid', deviceData.DeviceID);
+                            deviceData.ScheduleEnabled = payload.enabled;
                             break;
                         case 'scene':
                             method = 'PUT';
-                            path = `${ApiUrls.Home.Put.SceneEnableDisable.replace('sceneid', flagData.Id)}${flagData.Enabled ? 'enable' : 'disable'}`;
+                            path = `${ApiUrls.Home.Put.SceneEnableDisable.replace('sceneid', payload.id)}/${payload.enabled ? 'enable' : 'disable'}`;
+                            const scene = deviceData.Scenes.find(s => s.Id === payload.id);
+                            scene.Enabled = payload.enabled;
+                            payload = {};
                             break;
                         default:
-                            payload = {
-                                power: deviceData.Device.Power,
-                                inStandbyMode: deviceData.Device.InStandbyMode,
-                                operationMode: HeatPump.OperationModeMapEnumToString[deviceData.Device.OperationMode],
-                                operationModeZone1: HeatPump.OperationModeMapEnumToString[deviceData.Device.OperationModeZone1],
-                                setTemperatureZone1: deviceData.Device.SetTemperatureZone1,
-                                setTankWaterTemperature: deviceData.Device.SetTankWaterTemperature,
-                                forcedHotWaterMode: deviceData.Device.ForcedHotWaterMode,
-                                prohibitHotWater: deviceData.Device.ProhibitHotWater,
-                                operationModeZone2: HeatPump.OperationModeMapEnumToString[deviceData.Device.OperationModeZone2],
-                                setTemperatureZone2: deviceData.Device.SetTemperatureZone2
-                            };
+                            if (payload.operationMode >= 0) payload.operationMode = HeatPump.OperationModeMapEnumToString[payload.operationMode];
+                            if (payload.operationModeZone1 >= 0) payload.operationModeZone1 = HeatPump.OperationModeZoneMapEnumToString[payload.operationModeZone1];
+                            if (payload.operationModeZone2 >= 0) payload.operationModeZone2 = HeatPump.OperationModeZoneMapEnumToString[payload.operationModeZone2];
+
                             method = 'PUT';
                             path = ApiUrls.Home.Put.Atw.replace('deviceid', deviceData.DeviceID);
+                            deviceData.Device = { ...deviceData.Device, ...payload };
                             break
                     }
 
                     if (this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);
                     await this.client(path, { method: method, data: payload });
-
-                    if (update) {
-                        setTimeout(() => {
-                            this.updateState('request', deviceData);
-                        }, 500);
-                    }
                     return true;
                 default:
+                    if (this.logWarn) this.emit('warn', `Received unknwn account type: ${accountType}`);
                     return;
             }
         } catch (error) {
+            if (error.response?.status === 500) return;
             throw new Error(`Send data error: ${error.message}`);
         }
     }

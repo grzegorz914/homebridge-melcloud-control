@@ -24,6 +24,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - For plugin < v4.6.0 use Homebridge UI <= v5.5.0
 - For plugin >= v4.6.0 use Homebridge UI >= v5.13.0
 
+# [4.7.9] - (18.02.2026)
+
+## Changes
+
+- fix wrong display zone 2 for ATW (MELCloud Home)
+- fix set ATW different params
+- fix get and report wrong ATW modes
+- external integration MQTT and RESTFul updated
+- bump dependencies
+- config schema updated
+- redme update
+- cleanup
+
 # [4.7.8] - (02.02.2026)
 
 ## Changes
