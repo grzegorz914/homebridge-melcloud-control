@@ -213,7 +213,7 @@ class MelCloudAta extends EventEmitter {
                                 payload.setTemperature = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
                             }
 
-                            flag = !flag ? HeatPump.EffectiveFlags.Power : HeatPump.EffectiveFlags.Power + flag;
+                            flag = !flag ? AirConditioner.EffectiveFlags.Power : AirConditioner.EffectiveFlags.Power + flag;
                             payload = this.functions.toPascalCaseKeys({
                                 ...payload,
                                 power: payload.power !== false,

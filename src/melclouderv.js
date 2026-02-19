@@ -207,7 +207,7 @@ class MelCloudErv extends EventEmitter {
                             };
 
                             //device state
-                            flag = !flag ? HeatPump.EffectiveFlags.Power : HeatPump.EffectiveFlags.Power + flag;
+                            flag = !flag ? Ventilation.EffectiveFlags.Power : Ventilation.EffectiveFlags.Power + flag;
                             payload = this.functions.toPascalCaseKeys({
                                 ...payload,
                                 power: payload.power !== false,
