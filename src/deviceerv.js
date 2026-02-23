@@ -1265,7 +1265,7 @@ class DeviceErv extends EventEmitter {
                                     obj.targetOperationMode = 0; // auto
                                     break;
                                 default:
-                                    if (this.logWarn) this.emit('warn', `Received unknown ventilation mode: ${ventilationMode}`);
+                                    if (this.logDebug) this.emit('debug', `Received unknown ventilation mode: ${ventilationMode}`);
                                     return;
                             }
 
@@ -1333,7 +1333,7 @@ class DeviceErv extends EventEmitter {
                                     obj.targetOperationMode = 3; // AUTO
                                     break;
                                 default:
-                                    if (this.logWarn) this.emit('warn', `Received unknown ventilation mode: ${ventilationMode}`);
+                                    if (this.logDebug) this.emit('debug', `Received unknown ventilation mode: ${ventilationMode}`);
                                     return;
                             }
 
@@ -1362,7 +1362,7 @@ class DeviceErv extends EventEmitter {
                             );
                             break;
                         default:
-                            if (this.logWarn) this.emit('warn', `Received unknown display type: ${this.displayType}`);
+                            if (this.logDebug) this.emit('debug', `Received unknown display type: ${this.displayType}`);
                             return;
                     };
 
@@ -1375,9 +1375,9 @@ class DeviceErv extends EventEmitter {
                     }
 
                     //update temperature sensors
-                    this.roomTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature);
-                    this.outdoorTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature);
-                    this.supplyTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, supplyTemperature);
+                    if (this.temperatureRoomSensor) this.roomTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature);
+                    if (this.temperatureOutdoorSensor) this.outdoorTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature);
+                    if (this.temperatureSupplySensor) this.supplyTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, supplyTemperature);
 
                     //update core maintenance
                     this.coreMaintenanceService?.updateCharacteristic(Characteristic.FilterChangeIndication, coreMaintenanceRequired);
@@ -1396,9 +1396,9 @@ class DeviceErv extends EventEmitter {
                         .updateCharacteristic(Characteristic.PM2_5Density, pM25Level);
 
                     //other sensors
-                    this.inStandbyService?.updateCharacteristic(Characteristic.ContactSensorState, inStandbyMode);
-                    this.connectService?.updateCharacteristic(Characteristic.ContactSensorState, isConnected);
-                    this.errorService?.updateCharacteristic(Characteristic.ContactSensorState, isInError);
+                    if (this.inStandbySensor) this.inStandbyService?.updateCharacteristic(Characteristic.ContactSensorState, inStandbyMode);
+                    if (this.connectSensor) this.connectService?.updateCharacteristic(Characteristic.ContactSensorState, isConnected);
+                    if (this.errorSensor) this.errorService?.updateCharacteristic(Characteristic.ContactSensorState, isInError);
 
                     //holiday mode
                     if (this.holidayModeSupport && holidayModeEnabled !== null) {
@@ -1510,7 +1510,7 @@ class DeviceErv extends EventEmitter {
                                     button.state = (obj.lockPhysicalControl === 1);
                                     break;
                                 default: //Unknown button
-                                    if (this.logWarn) this.emit('warn', `Received unknown button mode: ${mode} detected`);
+                                    if (this.logDebug) this.emit('debug', `Received unknown button mode: ${mode} detected`);
                                     return;
                             };
 

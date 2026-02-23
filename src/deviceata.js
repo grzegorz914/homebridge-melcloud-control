@@ -43,6 +43,7 @@ class DeviceAta extends EventEmitter {
         this.frostProtectionSupport = device.frostProtectionSupport || false;
         this.overheatProtectionSupport = device.overheatProtectionSupport || false;
         this.holidayModeSupport = device.holidayModeSupport || false;
+        this.remoteRoomTemperatureSupport = device.remoteRoomTemperatureSupport || false;
         this.presets = presets;
         this.schedules = schedules;
         this.scenes = scenes;
@@ -104,6 +105,7 @@ class DeviceAta extends EventEmitter {
         this.displayDeviceInfo = true;
         this.deviceData = {};
         this.accessory = {};
+        this.remoteRoomTemperature = 20;
     }
 
     async externalIntegrations() {
@@ -260,6 +262,9 @@ class DeviceAta extends EventEmitter {
                     payload.enabled = value;
                     flag = 'holidaymode';
                     break;
+                case 'RemoteRoomTemperature':
+                    this.remoteRoomTemperature = value;
+                    return;
                 default:
                     this.emit('warn', `${integration}, received key: ${key}, value: ${value}`);
                     return;
@@ -1456,6 +1461,7 @@ class DeviceAta extends EventEmitter {
                 })
                 .on('deviceState', async (deviceData) => {
                     this.deviceData = deviceData;
+                    if (this.remoteRoomTemperatureSupport) this.deviceData.Device.RoomTemperature = this.remoteRoomTemperature;
 
                     //keys
                     const accountTypeMelCloud = this.accountTypeMelCloud;
@@ -1630,7 +1636,8 @@ class DeviceAta extends EventEmitter {
                                     obj.targetOperationMode = 2;
                                     break;
                                 default:
-                                    if (this.logWarn) this.emit('warn', `Unknown operating mode: ${operationMode}`);
+                                    if (this.logDebug) this.emit('debug', `Unknown operating mode: ${operationMode}`);
+                                    return;
                             }
                             obj.currentOperationMode = !power ? 0 : (inStandbyMode ? 1 : obj.currentOperationMode);
 
@@ -1711,8 +1718,8 @@ class DeviceAta extends EventEmitter {
                                     obj.targetOperationMode = 2;
                                     break;
                                 default:
-                                    if (this.logWarn) this.emit('warn', `Unknown operating mode: ${operationMode}`);
-                                    break;
+                                    if (this.logDebug) this.emit('debug', `Unknown operating mode: ${operationMode}`);
+                                    return;
                             }
 
                             obj.currentOperationMode = !power ? 0 : obj.currentOperationMode;
@@ -1737,7 +1744,7 @@ class DeviceAta extends EventEmitter {
                             );
                             break;
                         default:
-                            if (this.logWarn) this.emit('warn', `Received unknown display type: ${this.displayType}`);
+                            if (this.logDebug) this.emit('debug', `Received unknown display type: ${this.displayType}`);
                             return;
                     };
                     this.accessory = obj;
@@ -1749,11 +1756,11 @@ class DeviceAta extends EventEmitter {
                     }
 
                     //other sensors
-                    this.roomTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature);
-                    this.outdoorTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature);
-                    this.inStandbyService?.updateCharacteristic(Characteristic.ContactSensorState, inStandbyMode);
-                    this.connectService?.updateCharacteristic(Characteristic.ContactSensorState, isConnected);
-                    this.errorService?.updateCharacteristic(Characteristic.ContactSensorState, isInError);
+                    if (this.temperatureRoomSensor) this.roomTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature);
+                    if (this.temperatureOutdoorSensor) this.outdoorTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature);
+                    if (this.inStandbySensor) this.inStandbyService?.updateCharacteristic(Characteristic.ContactSensorState, inStandbyMode);
+                    if (this.connectSensor) this.connectService?.updateCharacteristic(Characteristic.ContactSensorState, isConnected);
+                    if (this.errorSensor) this.errorService?.updateCharacteristic(Characteristic.ContactSensorState, isInError);
 
                     //frost protection
                     if (this.frostProtectionSupport && frostProtectionEnabled !== null) {

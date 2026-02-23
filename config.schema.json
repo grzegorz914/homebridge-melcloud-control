@@ -411,6 +411,11 @@
                       "functionBody": "return model.accounts[arrayIndices[0]].type === 'melcloudhome';"
                     }
                   },
+                  "remoteRoomTemperatureSupport": {
+                    "title": "Remote Room Temperature",
+                    "type": "boolean",
+                    "description": "This enable support to update room temperature with MQTT or RESTFul."
+                  },
                   "presets": {
                     "title": "Presets",
                     "type": "array",
@@ -2646,7 +2651,8 @@
                                   "items": [
                                     "accounts[].ataDevices[].frostProtectionSupport",
                                     "accounts[].ataDevices[].overheatProtectionSupport",
-                                    "accounts[].ataDevices[].holidayModeSupport"
+                                    "accounts[].ataDevices[].holidayModeSupport",
+                                    "accounts[].ataDevices[].remoteRoomTemperatureSupport"
                                   ]
                                 },
                                 {

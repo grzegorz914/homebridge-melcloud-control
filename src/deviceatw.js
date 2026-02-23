@@ -2020,7 +2020,7 @@ class DeviceAtw extends EventEmitter {
                                                 };
                                                 break;
                                             default:
-                                                if (this.logWarn) this.emit('warn', `Received unknown account type: ${this.accountType}`);
+                                                if (this.logDebug) this.emit('debug', `Received unknown account type: ${this.accountType}`);
                                                 return;
                                         }
 
@@ -2092,7 +2092,7 @@ class DeviceAtw extends EventEmitter {
                                                 };
                                                 break;
                                             default:
-                                                if (this.logWarn) this.emit('warn', `Received unknown account type: ${this.accountType}`);
+                                                if (this.logDebug) this.emit('debug', `Received unknown account type: ${this.accountType}`);
                                                 return;
                                         }
 
@@ -2102,7 +2102,7 @@ class DeviceAtw extends EventEmitter {
                                         operationModeSetPropsValidValues = [[0, 1, 2], [0, 1, 2], [1, 2], [0]][heatCoolModes];
                                         break;
                                     default:
-                                        if (this.logWarn) this.emit('warn', `Received unknown zone: ${i}`);
+                                        if (this.logDebug) this.emit('debug', `Received unknown zone: ${i}`);
                                         return;
                                 };
 
@@ -2183,7 +2183,7 @@ class DeviceAtw extends EventEmitter {
                                                 };
                                                 break;
                                             default:
-                                                if (this.logWarn) this.emit('warn', `Received unknown account type: ${this.accountType}`);
+                                                if (this.logDebug) this.emit('debug', `Received unknown account type: ${this.accountType}`);
                                                 return;
                                         }
 
@@ -2253,7 +2253,7 @@ class DeviceAtw extends EventEmitter {
                                                 };
                                                 break;
                                             default:
-                                                if (this.logWarn) this.emit('warn', `Received unknown account type: ${this.accountType}`);
+                                                if (this.logDebug) this.emit('debug', `Received unknown account type: ${this.accountType}`);
                                                 return;
                                         }
 
@@ -2262,7 +2262,7 @@ class DeviceAtw extends EventEmitter {
                                         operationModeSetPropsValidValues = [[1, 2, 3], [1, 2, 3], [1, 2], [0]][heatCoolModes];
                                         break;
                                     default:
-                                        if (this.logWarn) this.emit('warn', `Received unknown zone: ${i}`);
+                                        if (this.logDebug) this.emit('debug', `Received unknown zone: ${i}`);
                                         return;
                                 };
 
@@ -2276,7 +2276,7 @@ class DeviceAtw extends EventEmitter {
                                 );
                                 break;
                             default:
-                                if (this.logWarn) this.emit('warn', `Received unknown display type: ${this.displayType}`);
+                                if (this.logDebug) this.emit('debug', `Received unknown display type: ${this.displayType}`);
                                 return;
                         };
 
@@ -2422,10 +2422,10 @@ class DeviceAtw extends EventEmitter {
                     this.accessory = obj;
 
                     //other sensors
-                    this.outdoorTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature);
-                    this.inStandbyService?.updateCharacteristic(Characteristic.ContactSensorState, inStandbyMode);
-                    this.connectService?.updateCharacteristic(Characteristic.ContactSensorState, isConnected);
-                    this.errorService?.updateCharacteristic(Characteristic.ContactSensorState, isInError);
+                    if (this.temperatureOutdoorSensor) this.outdoorTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature);
+                    if (this.inStandbySensor) this.inStandbyService?.updateCharacteristic(Characteristic.ContactSensorState, inStandbyMode);
+                    if (this.connectSensor) this.connectService?.updateCharacteristic(Characteristic.ContactSensorState, isConnected);
+                    if (this.errorSensor) this.errorService?.updateCharacteristic(Characteristic.ContactSensorState, isInError);
 
                     //frost protection
                     if (this.frostProtectionSupport && frostProtectionEnabled !== null) {
@@ -2593,8 +2593,8 @@ class DeviceAtw extends EventEmitter {
                                     button.state = prohibitZone2;
                                     break;
                                 default: //Unknown button
-                                    if (this.logWarn) this.emit('warn', `Received unknown button mode: ${mode} detected`);
-                                    break;
+                                    if (this.logDebug) this.emit('debug', `Received unknown button mode: ${mode} detected`);
+                                    return;
                             };
 
                             //control
