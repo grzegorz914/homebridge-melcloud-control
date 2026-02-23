@@ -265,6 +265,7 @@
 | `ataDevices[].inStandbySensor` | This enable `In Standby Mode` sensor to use with HomeKit automations. |
 | `ataDevices[].connectSensor` | This enable `Connect State` sensor to use with HomeKit automations. |
 | `ataDevices[].errorSensor` | This enable `Error` sensor to use with HomeKit automations. |
+| `ataDevices[].remoteRoomTemperatureSupport` | This enable support to update `Room Temperature` with `MQTT` or `RESTFul`. |
 | `ataDevices[].frostProtectionSupport` | This enable extra `Frost Protection` control and sensors to use with HomeKit automations. |
 | `ataDevices[].overheatProtectionSupport` | This enable extra `Overheat Protection` control and sensors to use with HomeKit automations. |
 | `ataDevices[].holidayModeSupport` | This enable extra `Holiday Mode` control and sensors to use with HomeKit automations. |
@@ -399,6 +400,7 @@
 |     | `http//ip:port` | `OverheatProtection` | `true`, `false` | boolean | Overheat protection (Only MELCloud Home). |
 |     | `http//ip:port` | `Schedules` | `true`, `false` | boolean | Schedules (Only MELCloud Home). |
 |     | `http//ip:port` | `HolidayMode` | `true`, `false` | boolean | Holiday mode. |
+|     | `http//ip:port` | `RemoteRoomTemperature` | `23.0` | float | Remote room temperature. |
 | Heat Pump |     |     |     |      |     |
 | POST | `http//ip:port` | `Power` | `true`, `false` | boolean | Power state. |
 |     | `http//ip:port` | `OperationModeZone1` | `0 - Heat Room`, `1 - Heat Flow`, `2 - Heat Curve`, `3 - Cool Room`, `4 - Cool Flow`, `5 - Flor Dry Up` | integer | Operating mode zone 1. |
@@ -456,6 +458,7 @@
 |     | `Set` | `OverheatProtection` | `true`, `false` | boolean | Overheat protection (Only MELCloud Home). |
 |     | `Set` | `Schedules` | `true`, `false` | boolean | Schedules (Only MELCloud Home). |
 |     | `Set` | `HolidayMode` | `true`, `false` | boolean | Holiday mode. |
+|     | `Set` | `RemoteRoomTemperature` | `23.0` | float | Remote room temperature. |
 | Heat Pump |     |     |     |      |     |
 | Subscribe | `Set` | `Power` | `true`, `false` | boolean | Power state. |
 |     | `Set` | `OperationModeZone1` | `0 - Heat Room`, `1 - Heat Flow`, `2 - Heat Curve`, `3 - Cool Room`, `4 - Cool Flow`, `5 - Flor Dry Up` | integer | Operating mode zone 1. |
