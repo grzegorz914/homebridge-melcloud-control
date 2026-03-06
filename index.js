@@ -32,8 +32,10 @@ class MelCloudPlatform {
 			//loop through accounts
 			for (const account of config.accounts) {
 				const { name, user, passwd, language, type } = account;
-				if (!name || accountsName.includes(name) || !user || !passwd || !language || !type) {
-					log.warn(`Account ${!name ? 'name missing' : (accountsName.includes(name) ? 'name duplicated' : name)} ${!user ? ', user missing' : ''}${!passwd ? ', password missing' : ''}${!language ? ', language missing' : ''}${!type ? ', type disabled' : ''} in config, will not be published in the Home app`);
+				if (type === 'disabled') continue;
+
+				if (!name || accountsName.includes(name) || !user || !passwd || !language) {
+					log.warn(`Account ${!name ? 'name missing' : (accountsName.includes(name) ? 'name duplicated' : name)} ${!user ? ', user missing' : ''}${!passwd ? ', password missing' : ''}${!language ? ', language missing' : ''} in config, will not be published in the Home app`);
 					continue;
 				}
 				accountsName.push(name);
@@ -75,7 +77,7 @@ class MelCloudPlatform {
 								//melcloud account
 								let melCloudClass;
 								let timmers = []
-								switch (account.type) {
+								switch (type) {
 									case 'melcloud':
 										timmers = [{ name: 'checkDevicesList', sampling: accountRefreshInterval }];
 										melCloudClass = new MelCloud(account, true);
@@ -181,6 +183,7 @@ class MelCloudPlatform {
 											deviceClass = new DeviceErv(api, account, device, presets, schedules, scenes, buttons, defaultTempsFile, melCloudClass, melCloudAccountData, melCloudDeviceData);
 											break;
 										default:
+											if (logLevel.warn) log.warn(`${name}, ${deviceTypeString}, ${deviceName}, received unknown device type: ${deviceType}.`);
 											continue;
 									}
 
