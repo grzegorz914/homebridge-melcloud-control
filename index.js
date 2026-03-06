@@ -181,8 +181,7 @@ class MelCloudPlatform {
 											deviceClass = new DeviceErv(api, account, device, presets, schedules, scenes, buttons, defaultTempsFile, melCloudClass, melCloudAccountData, melCloudDeviceData);
 											break;
 										default:
-											if (logLevel.warn) log.warn(`${name}, ${deviceTypeString}, ${deviceName}, received unknown device type: ${deviceType}.`);
-											return;
+											continue;
 									}
 
 									deviceClass.on('devInfo', (info) => logLevel.devInfo && log.info(info))

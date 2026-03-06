@@ -2422,10 +2422,10 @@ class DeviceAtw extends EventEmitter {
                     this.accessory = obj;
 
                     //other sensors
-                    if (this.temperatureOutdoorSensor) this.outdoorTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature);
-                    if (this.inStandbySensor) this.inStandbyService?.updateCharacteristic(Characteristic.ContactSensorState, inStandbyMode);
-                    if (this.connectSensor) this.connectService?.updateCharacteristic(Characteristic.ContactSensorState, isConnected);
-                    if (this.errorSensor) this.errorService?.updateCharacteristic(Characteristic.ContactSensorState, isInError);
+                    if (this.temperatureOutdoorSensor && outdoorTemperature != null) this.outdoorTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature);
+                    if (this.inStandbySensor && inStandbyMode != null) this.inStandbyService?.updateCharacteristic(Characteristic.ContactSensorState, inStandbyMode);
+                    if (this.connectSensor && isConnected != null) this.connectService?.updateCharacteristic(Characteristic.ContactSensorState, isConnected);
+                    if (this.errorSensor && isInError != null) this.errorService?.updateCharacteristic(Characteristic.ContactSensorState, isInError);
 
                     //frost protection
                     if (this.frostProtectionSupport && frostProtectionEnabled !== null) {
