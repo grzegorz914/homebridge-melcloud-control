@@ -384,7 +384,7 @@ class DeviceAta extends EventEmitter {
                     if (supportsFanSpeed) {
                         melCloudService.getCharacteristic(Characteristic.RotationSpeed)
                             .setProps({
-                                minValue: 0,
+                                minValue: this.accessory.fanSpeedSetPropsMinValue,
                                 maxValue: this.accessory.fanSpeedSetPropsMaxValue,
                                 minStep: 1
                             })
@@ -396,23 +396,12 @@ class DeviceAta extends EventEmitter {
                                 try {
                                     const payload = {};
                                     const fanKeySet = accountTypeMelCloud ? 'fanSpeed' : 'setFanSpeed';
-                                    switch (numberOfFanSpeeds) {
-                                        case 2: //Fan speed mode 2
-                                            value = supportsAutomaticFanSpeed ? [0, 1, 2, 0][value] : [1, 1, 2][value];
-                                            break;
-                                        case 3: //Fan speed mode 3
-                                            value = supportsAutomaticFanSpeed ? [0, 1, 2, 3, 0][value] : [1, 1, 2, 3][value];
-                                            break;
-                                        case 4: //Fan speed mode 4
-                                            value = supportsAutomaticFanSpeed ? [0, 1, 2, 3, 4, 0][value] : [1, 1, 2, 3, 4][value];
-                                            break;
-                                        case 5: //Fan speed mode 5
-                                            value = supportsAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 0][value] : [1, 1, 2, 3, 4, 5][value];
-                                            break;
-                                    };
+                                    const max = numberOfFanSpeeds;
+                                    const minValue = supportsAutomaticFanSpeed ? 0 : 1;
+                                    const clampedValue = Math.min(Math.max(value, minValue), max);
 
-                                    payload[fanKeySet] = value;
-                                    if (this.logInfo) this.emit('info', `Set fan speed mode: ${AirConditioner.FanSpeedMapEnumToString[value]}`);
+                                    payload[fanKeySet] = clampedValue;
+                                    if (this.logInfo) this.emit('info', `Set fan speed mode: ${AirConditioner.FanSpeedMapEnumToString[clampedValue]}`);
                                     await this.melCloudAta.send(this.accountType, this.displayType, deviceData, payload, AirConditioner.EffectiveFlags.SetFanSpeed);
                                 } catch (error) {
                                     if (this.logWarn) this.emit('warn', `Set fan speed mode error: ${error}`);
@@ -1652,15 +1641,17 @@ class DeviceAta extends EventEmitter {
                             //fan speed mode
                             if (supportsFanSpeed) {
                                 const max = numberOfFanSpeeds;
-                                const autoIndex = supportsAutomaticFanSpeed ? max + 1 : 0;
-                                const speeds = [autoIndex];
 
-                                for (let i = 1; i <= max; i++) {
-                                    speeds.push(i);
-                                }
+                                // ograniczamy wartość do zakresu API
+                                const minValue = supportsAutomaticFanSpeed ? 0 : 1;
+                                const maxValue = max;
 
-                                obj.currentFanSpeed = speeds[setFanSpeed];
-                                obj.fanSpeedSetPropsMaxValue = supportsAutomaticFanSpeed ? max + 1 : max;
+                                // zabezpieczenie przed out-of-bounds
+                                const clampedValue = Math.min(Math.max(setFanSpeed, minValue), maxValue);
+
+                                obj.currentFanSpeed = clampedValue;
+                                obj.fanSpeedSetPropsMinValue = minValue;
+                                obj.fanSpeedSetPropsMaxValue = maxValue;
                             }
 
                             //create characteristics

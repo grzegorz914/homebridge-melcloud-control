@@ -348,7 +348,7 @@ class DeviceErv extends EventEmitter {
                     if (supportsFanSpeed) {
                         melCloudService.getCharacteristic(Characteristic.RotationSpeed)
                             .setProps({
-                                minValue: 0,
+                                minValue: this.accessory.fanSpeedSetPropsMinValue,
                                 maxValue: this.accessory.fanSpeedSetPropsMaxValue,
                                 minStep: 1
                             })
@@ -358,23 +358,13 @@ class DeviceErv extends EventEmitter {
                             })
                             .onSet(async (value) => {
                                 try {
-                                    switch (numberOfFanSpeeds) {
-                                        case 2: //Fan speed mode 2
-                                            value = supportsAutomaticFanSpeed ? [0, 1, 2, 0][value] : [1, 1, 2][value];
-                                            break;
-                                        case 3: //Fan speed mode 3
-                                            value = supportsAutomaticFanSpeed ? [0, 1, 2, 3, 0][value] : [1, 1, 2, 3][value];
-                                            break;
-                                        case 4: //Fan speed mode 4
-                                            value = supportsAutomaticFanSpeed ? [0, 1, 2, 3, 4, 0][value] : [1, 1, 2, 3, 4][value];
-                                            break;
-                                        case 5: //Fan speed mode 5
-                                            value = supportsAutomaticFanSpeed ? [0, 1, 2, 3, 4, 5, 0][value] : [1, 1, 2, 3, 4, 5][value];
-                                            break;;
-                                    };
+                                    const payload = {};
+                                    const max = numberOfFanSpeeds;
+                                    const minValue = supportsAutomaticFanSpeed ? 0 : 1;
+                                    const clampedValue = Math.min(Math.max(value, minValue), max);
 
-                                    const payload = { setFanSpeed: value };
-                                    if (this.logInfo) this.emit('info', `Set fan speed mode: ${Ventilation.FanSpeedMapEnumToString[value]}`);
+                                    payload.setFanSpeed = clampedValue;
+                                    if (this.logInfo) this.emit('info', `Set fan speed mode: ${Ventilation.FanSpeedMapEnumToString[clampedValue]}`);
                                     await this.melCloudErv.send(this.accountType, this.displayType, deviceData, payload, Ventilation.EffectiveFlags.SetFanSpeed);
                                 } catch (error) {
                                     if (this.logWarn) this.emit('warn', `Set fan speed mode error: ${error}`);
@@ -1281,21 +1271,19 @@ class DeviceErv extends EventEmitter {
                             obj.operationModeSetPropsValidValues = operationModevalidValues;
 
                             //fan speed mode
-                            obj.fanSpeedSetPropsMaxValue = 2;
-
-                            // fan speed mode
                             if (supportsFanSpeed) {
                                 const max = numberOfFanSpeeds;
-                                const autoIndex = supportsAutomaticFanSpeed ? max + 1 : 0;
 
-                                // Tworzymy tablicę prędkości: [auto?, 1..N]
-                                const speeds = [autoIndex];
-                                for (let i = 1; i <= max; i++) {
-                                    speeds.push(i);
-                                }
+                                // ograniczamy wartość do zakresu API
+                                const minValue = supportsAutomaticFanSpeed ? 0 : 1;
+                                const maxValue = max;
 
-                                obj.fanSpeed = speeds[setFanSpeed];
-                                obj.fanSpeedSetPropsMaxValue = supportsAutomaticFanSpeed ? max + 1 : max;
+                                // zabezpieczenie przed out-of-bounds
+                                const clampedValue = Math.min(Math.max(setFanSpeed, minValue), maxValue);
+
+                                obj.fanSpeed = clampedValue;
+                                obj.fanSpeedSetPropsMinValue = minValue;
+                                obj.fanSpeedSetPropsMaxValue = maxValue;
                             }
 
                             //create characteristics
@@ -1304,11 +1292,11 @@ class DeviceErv extends EventEmitter {
                                 { type: Characteristic.CurrentHeaterCoolerState, value: obj.currentOperationMode },
                                 { type: Characteristic.TargetHeaterCoolerState, value: obj.targetOperationMode },
                                 { type: Characteristic.CurrentTemperature, value: roomTemperature },
-                                { type: Characteristic.RotationSpeed, value: obj.fanSpeed },
                                 { type: Characteristic.LockPhysicalControls, value: obj.lockPhysicalControl },
                                 { type: Characteristic.TemperatureDisplayUnits, value: obj.useFahrenheit },
                             );
 
+                            if (supportsFanSpeed) characteristics.push({ type: Characteristic.RotationSpeed, value: obj.fanSpeed });
                             if (supportsCoolOperationMode) characteristics.push({ type: Characteristic.CoolingThresholdTemperature, value: defaultCoolingSetTemperature });
                             if (supportsHeatOperationMode) characteristics.push({ type: Characteristic.HeatingThresholdTemperature, value: defaultHeatingSetTemperature });
                             break;

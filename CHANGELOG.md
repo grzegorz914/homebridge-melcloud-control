@@ -24,6 +24,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - For plugin < v4.6.0 use Homebridge UI <= v5.5.0
 - For plugin >= v4.6.0 use Homebridge UI >= v5.13.0
 
+# [4.8.3] - (17.03.2026)
+
+## Changes
+
+- fix fan mode control and display
+- fix account disable
+- bump dependencies
+- redme update
+- cleanup
+
 # [4.8.0] - (23.02.2026)
 
 ## Changes
