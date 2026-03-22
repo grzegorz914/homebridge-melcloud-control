@@ -216,7 +216,6 @@ class MelCloudErv extends EventEmitter {
                                 hasPendingCommand: true,
                             });
                             path = ApiUrls.Post.Erv;
-                            deviceData.Device = { ...deviceData.Device, ...payload };
                             update = true;
                             break;
                     }
@@ -224,7 +223,9 @@ class MelCloudErv extends EventEmitter {
                     if (this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);
                     await this.client(path, { method: 'POST', data: payload });
 
+                    //update state
                     if (update) {
+                        deviceData.Device = { ...deviceData.Device, ...payload };
                         setTimeout(() => {
                             this.updateState('request', deviceData);
                         }, 500);
@@ -269,11 +270,17 @@ class MelCloudErv extends EventEmitter {
                                 }
                             }
 
-                            if (payload.setFanSpeed >= 0) payload.setFanSpeed = String(payload.setFanSpeed);
-                            if (payload.operationMode >= 0) payload.operationMode = Ventilation.OperationModeMapEnumToString[payload.operationMode];
-                            if (payload.ventilationMode >= 0) payload.ventilationMode = Ventilation.VentilationModeMapEnumToString[payload.ventilationMode];
+                            if (payload.setFanSpeed != null) payload.setFanSpeed = String(payload.setFanSpeed);
+                            if (payload.operationMode != null) payload.operationMode = Ventilation.OperationModeMapEnumToString[payload.operationMode];
+                            if (payload.ventilationMode != null) payload.ventilationMode = Ventilation.VentilationModeMapEnumToString[payload.ventilationMode];
 
-                            deviceData.Device = { ...deviceData.Device, ...payload };
+                            //cleanup undefined
+                            Object.keys(payload).forEach(key => {
+                                if (payload[key] === undefined) {
+                                    delete payload[key];
+                                }
+                            });
+
                             method = 'PUT';
                             path = ApiUrls.Home.Put.Erv.replace('deviceid', deviceData.DeviceID);
                             break
@@ -281,6 +288,9 @@ class MelCloudErv extends EventEmitter {
 
                     if (this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);
                     await this.client(path, { method: method, data: payload });
+
+                    //update state
+                    deviceData.Device = { ...deviceData.Device, ...payload };
                     return true;
                 default:
                     if (this.logWarn) this.emit('warn', `Received unknwn account type: ${accountType}`);

@@ -223,7 +223,6 @@ class MelCloudAta extends EventEmitter {
                             });
 
                             path = ApiUrls.Post.Ata;
-                            deviceData.Device = { ...deviceData.Device, ...payload };
                             update = true;
                             break;
                     }
@@ -231,7 +230,9 @@ class MelCloudAta extends EventEmitter {
                     if (this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);
                     await this.client(path, { method: 'POST', data: payload });
 
+                    //update state
                     if (update) {
+                        deviceData.Device = { ...deviceData.Device, ...payload };
                         setTimeout(() => {
                             this.updateState('request', deviceData);
                         }, 500);
@@ -301,12 +302,18 @@ class MelCloudAta extends EventEmitter {
                                 }
                             }
 
-                            if (payload.setFanSpeed >= 0) payload.setFanSpeed = String(payload.setFanSpeed);
-                            if (payload.operationMode >= 0) payload.operationMode = AirConditioner.OperationModeMapEnumToString[payload.operationMode];
-                            if (payload.vaneHorizontalDirection >= 0) payload.vaneHorizontalDirection = AirConditioner.VaneHorizontalDirectionMapEnumToString[payload.vaneHorizontalDirection];
-                            if (payload.vaneVerticalDirection >= 0) payload.vaneVerticalDirection = AirConditioner.VaneVerticalDirectionMapEnumToString[payload.vaneVerticalDirection];
+                            if (payload.setFanSpeed != null) payload.setFanSpeed = String(payload.setFanSpeed);
+                            if (payload.operationMode != null) payload.operationMode = AirConditioner.OperationModeMapEnumToString[payload.operationMode];
+                            if (payload.vaneHorizontalDirection != null) payload.vaneHorizontalDirection = AirConditioner.VaneHorizontalDirectionMapEnumToString[payload.vaneHorizontalDirection];
+                            if (payload.vaneVerticalDirection != null) payload.vaneVerticalDirection = AirConditioner.VaneVerticalDirectionMapEnumToString[payload.vaneVerticalDirection];
 
-                            deviceData.Device = { ...deviceData.Device, ...payload };
+                            //cleanup undefined
+                            Object.keys(payload).forEach(key => {
+                                if (payload[key] === undefined) {
+                                    delete payload[key];
+                                }
+                            });
+
                             method = 'PUT';
                             path = ApiUrls.Home.Put.Ata.replace('deviceid', deviceData.DeviceID);
                             break;
@@ -315,6 +322,9 @@ class MelCloudAta extends EventEmitter {
                     //send payload
                     if (this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);
                     await this.client(path, { method: method, data: payload });
+
+                    //update state
+                    deviceData.Device = { ...deviceData.Device, ...payload };
                     return true;
                 default:
                     if (this.logWarn) this.emit('warn', `Received unknwn account type: ${accountType}`);

@@ -198,7 +198,6 @@ class MelCloudAtw extends EventEmitter {
                             });
 
                             path = ApiUrls.Post.Atw;
-                            deviceData.Device = { ...deviceData.Device, ...payload };
                             update = true;
                             break;
                     }
@@ -206,7 +205,9 @@ class MelCloudAtw extends EventEmitter {
                     if (this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);
                     await this.client(path, { method: 'POST', data: payload });
 
+                    //update state
                     if (update) {
+                        deviceData.Device = { ...deviceData.Device, ...payload };
                         setTimeout(() => {
                             this.updateState('request', deviceData);
                         }, 500);
@@ -252,18 +253,27 @@ class MelCloudAtw extends EventEmitter {
                             payload = {};
                             break;
                         default:
-                            if (payload.operationMode >= 0) payload.operationMode = HeatPump.OperationModeMapEnumToString[payload.operationMode];
-                            if (payload.operationModeZone1 >= 0) payload.operationModeZone1 = HeatPump.OperationModeZoneMapEnumToString[payload.operationModeZone1];
-                            if (payload.operationModeZone2 >= 0) payload.operationModeZone2 = HeatPump.OperationModeZoneMapEnumToString[payload.operationModeZone2];
+                            if (payload.operationMode != null) payload.operationMode = HeatPump.OperationModeMapEnumToString[payload.operationMode];
+                            if (payload.operationModeZone1 != null) payload.operationModeZone1 = HeatPump.OperationModeZoneMapEnumToString[payload.operationModeZone1];
+                            if (payload.operationModeZone2 != null) payload.operationModeZone2 = HeatPump.OperationModeZoneMapEnumToString[payload.operationModeZone2];
+
+                            //cleanup undefined
+                            Object.keys(payload).forEach(key => {
+                                if (payload[key] === undefined) {
+                                    delete payload[key];
+                                }
+                            });
 
                             method = 'PUT';
                             path = ApiUrls.Home.Put.Atw.replace('deviceid', deviceData.DeviceID);
-                            deviceData.Device = { ...deviceData.Device, ...payload };
                             break
                     }
 
                     if (this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);
                     await this.client(path, { method: method, data: payload });
+
+                    //update state
+                    deviceData.Device = { ...deviceData.Device, ...payload };
                     return true;
                 default:
                     if (this.logWarn) this.emit('warn', `Received unknwn account type: ${accountType}`);

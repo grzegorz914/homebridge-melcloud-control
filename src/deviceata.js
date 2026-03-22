@@ -298,7 +298,7 @@ class DeviceAta extends EventEmitter {
             const supportsOutdoorTemperature = this.accessory.supportsOutdoorTemperature;
             const numberOfFanSpeeds = this.accessory.numberOfFanSpeeds;
             const supportsSwingFunction = this.accessory.supportsSwingFunction;
-            const supportsVideWane = this.accessory.supportsVideWane;
+            const supportsWideVane = this.accessory.supportsWideVane;
             const autoDryFanMode = [this.accessory.operationMode, 8, supportsDry ? 2 : 8, 7][this.autoDryFanMode]; //NONE, AUTO - 8, DRY - 2, FAN - 7
             const heatDryFanMode = [this.accessory.operationMode, 1, supportsDry ? 2 : 1, 7][this.heatDryFanMode]; //NONE, HEAT - 1, DRY - 2, FAN - 7
             const coolDryFanMode = [this.accessory.operationMode, 3, supportsDry ? 2 : 3, 7][this.coolDryFanMode]; //NONE, COOL - 3, DRY - 2, FAN - 7
@@ -419,7 +419,7 @@ class DeviceAta extends EventEmitter {
                             .onSet(async (value) => {
                                 try {
                                     const payload = {};
-                                    if (supportsVideWane) payload.vaneHorizontalDirection = value ? 12 : 0;
+                                    if (supportsWideVane) payload.vaneHorizontalDirection = value ? 12 : 0;
                                     payload.vaneVerticalDirection = value ? 7 : 0;
                                     if (this.logInfo) this.emit('info', `Set air direction mode: ${AirConditioner.AirDirectionMapEnumToString[value]}`);
                                     await this.melCloudAta.send(this.accountType, this.displayType, deviceData, payload, AirConditioner.EffectiveFlags.VaneVerticalVaneHorizontal);
@@ -1460,7 +1460,7 @@ class DeviceAta extends EventEmitter {
                     const errorKey = accountTypeMelCloud ? 'HasError' : 'IsInError';
                     const supportAirDirectionKey = accountTypeMelCloud ? 'AirDirectionFunction' : 'HasAirDirectionFunction';
                     const supportSwingKey = accountTypeMelCloud ? 'SwingFunction' : 'HasSwing';
-                    const supportVideWaneKey = accountTypeMelCloud ? 'ModelSupportsWideVane' : 'SupportsWideVane';
+                    const supportWideVaneKey = accountTypeMelCloud ? 'ModelSupportsWideVane' : 'SupportsWideVane';
                     const supportAutoKey = accountTypeMelCloud ? 'ModelSupportsAuto' : 'HasAutoOperationMode';
                     const supportHeatKey = accountTypeMelCloud ? 'ModelSupportsHeat' : 'HasHeatOperationMode';
                     const supportDryKey = accountTypeMelCloud ? 'ModelSupportsDry' : 'HasDryOperationMode';
@@ -1490,7 +1490,7 @@ class DeviceAta extends EventEmitter {
                     const supportsAutomaticFanSpeed = !!deviceData.Device.HasAutomaticFanSpeed;
                     const supportsAirDirectionFunction = !!deviceData.Device[supportAirDirectionKey];
                     const supportsSwingFunction = !!deviceData.Device[supportSwingKey];
-                    const supportsWideVane = !!deviceData.Device[supportVideWaneKey];
+                    const supportsWideVane = !!deviceData.Device[supportWideVaneKey];
                     const supportsOutdoorTemperature = !!deviceData.Device.HasOutdoorTemperature && this.functions.isValidValue(deviceData.Device.OutdoorTemperature);
                     const supportsFanSpeed = accountTypeMelCloud ? !!deviceData.Device.ModelSupportsFanSpeed : deviceData.Device.NumberOfFanSpeeds > 0;
                     const supportsAuto1 = !!deviceData.Device[supportAutoKey];
