@@ -7,6 +7,10 @@ on:
 
 jobs:
   stale:
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/stale@v8
