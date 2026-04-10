@@ -437,7 +437,6 @@ class DeviceErv extends EventEmitter {
                             };
                         });
                     this.melCloudService = melCloudService;
-                    accessory.addService(melCloudService);
                     break;
                 case 2: //Thermostat
                     if (this.logDebug) this.emit('debug', `Prepare thermostat service`);
@@ -531,13 +530,14 @@ class DeviceErv extends EventEmitter {
                             };
                         });
                     this.melCloudService = melCloudServiceT;
-                    accessory.addService(melCloudServiceT);
                     break;
                 default:
                     if (this.logWarn) this.emit('warn', `Received unknown display type: ${this.displayType}`);
                     return;
-
             };
+
+            //add service to accessory
+            accessory.addService(this.melCloudService);
 
             //temperature sensor service room
             if (this.temperatureRoomSensor && supportsRoomTemperature) {
@@ -1150,8 +1150,8 @@ class DeviceErv extends EventEmitter {
                     const supportsBypassVentilationMode = !!deviceData.Device.HasBypassVentilationMode;
                     const supportsAutomaticFanSpeed = !!deviceData.Device.HasAutomaticFanSpeed;
                     const actualVentilationMode = deviceData.Device.ActualVentilationMode;
+                    const numberOfFanSpeeds = deviceData.Device.NumberOfFanSpeeds ?? 0;
                     const supportsFanSpeed = numberOfFanSpeeds > 0;
-                    const numberOfFanSpeeds = supportsFanSpeed ? deviceData.Device.NumberOfFanSpeeds : 0;
                     const coreMaintenanceRequired = deviceData.Device.CoreMaintenanceRequired ?? null;
                     const filterMaintenanceRequired = deviceData.Device.FilterMaintenanceRequired ?? null;
                     const temperatureIncrement = deviceData.Device[tempStepKey] ?? 1;
@@ -1246,11 +1246,9 @@ class DeviceErv extends EventEmitter {
                                     obj.targetOperationMode = 2;  // cool
                                     break;
                                 case 2: // AUTO
-                                    if (actualVentilationMode === 0) {
-                                        obj.currentOperationMode = 2; // heating
-                                    } else if (actualVentilationMode === 1) {
-                                        obj.currentOperationMode = 3; // cooling
-                                    } else if (this.logWarn) this.emit('warn', `Received unknown actual ventilation mode: ${actualVentilationMode}`);
+                                    if (actualVentilationMode === 0) obj.currentOperationMode = 2; // HEAT
+                                    if (actualVentilationMode === 1) obj.currentOperationMode = 3; // COOL
+                                    if (this.logWarn && (actualVentilationMode !== 0 || actualVentilationMode !== 1)) this.emit('warn', `Received unknown actual ventilation mode: ${actualVentilationMode}`);
 
                                     obj.targetOperationMode = 0; // auto
                                     break;
@@ -1297,8 +1295,8 @@ class DeviceErv extends EventEmitter {
                             );
 
                             if (supportsFanSpeed) characteristics.push({ type: Characteristic.RotationSpeed, value: obj.fanSpeed });
-                            if (supportsCoolOperationMode) characteristics.push({ type: Characteristic.CoolingThresholdTemperature, value: defaultCoolingSetTemperature });
-                            if (supportsHeatOperationMode) characteristics.push({ type: Characteristic.HeatingThresholdTemperature, value: defaultHeatingSetTemperature });
+                            if (supportsCoolOperationMode) characteristics.push({ type: Characteristic.CoolingThresholdTemperature, value: ventilationMode === 2 ? defaultCoolingSetTemperature : setTemperature });
+                            if (supportsHeatOperationMode) characteristics.push({ type: Characteristic.HeatingThresholdTemperature, value: ventilationMode === 2 ? defaultHeatingSetTemperature : setTemperature });
                             break;
                         case 2: //Thermostat
                             //operation mode - 0, HEAT, 2, COOL, 4, 5, 6, FAN, AUTO
@@ -1312,11 +1310,9 @@ class DeviceErv extends EventEmitter {
                                     obj.targetOperationMode = 2;  // COOL
                                     break;
                                 case 2: // AUTO
-                                    if (actualVentilationMode === 0) {
-                                        obj.currentOperationMode = 1; // HEAT
-                                    } else if (actualVentilationMode === 1) {
-                                        obj.currentOperationMode = 2; // COOL
-                                    } else if (this.logWarn) this.emit('warn', `Received unknown actual ventilation mode: ${actualVentilationMode}`);
+                                    if (actualVentilationMode === 0) obj.currentOperationMode = 1; // HEAT
+                                    if (actualVentilationMode === 1) obj.currentOperationMode = 2; // COOL
+                                    if (this.logWarn && (actualVentilationMode !== 0 || actualVentilationMode !== 1)) this.emit('warn', `Received unknown actual ventilation mode: ${actualVentilationMode}`);
 
                                     obj.targetOperationMode = 3; // AUTO
                                     break;
@@ -1363,9 +1359,9 @@ class DeviceErv extends EventEmitter {
                     }
 
                     //update temperature sensors
-                    if (this.temperatureRoomSensor) this.roomTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature);
-                    if (this.temperatureOutdoorSensor) this.outdoorTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature);
-                    if (this.temperatureSupplySensor) this.supplyTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, supplyTemperature);
+                    if (this.temperatureRoomSensor && supportsRoomTemperature) this.roomTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature);
+                    if (this.temperatureOutdoorSensor && supportsOutdoorTemperature) this.outdoorTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature);
+                    if (this.temperatureSupplySensor && supportsSupplyTemperature) this.supplyTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, supplyTemperature);
 
                     //update core maintenance
                     this.coreMaintenanceService?.updateCharacteristic(Characteristic.FilterChangeIndication, coreMaintenanceRequired);
@@ -1384,9 +1380,9 @@ class DeviceErv extends EventEmitter {
                         .updateCharacteristic(Characteristic.PM2_5Density, pM25Level);
 
                     //other sensors
-                    if (this.inStandbySensor) this.inStandbyService?.updateCharacteristic(Characteristic.ContactSensorState, inStandbyMode);
-                    if (this.connectSensor) this.connectService?.updateCharacteristic(Characteristic.ContactSensorState, isConnected);
-                    if (this.errorSensor) this.errorService?.updateCharacteristic(Characteristic.ContactSensorState, isInError);
+                    if (this.inStandbySensor && inStandbyMode != null) this.inStandbyService?.updateCharacteristic(Characteristic.ContactSensorState, inStandbyMode);
+                    if (this.connectSensor && isConnected != null) this.connectService?.updateCharacteristic(Characteristic.ContactSensorState, isConnected);
+                    if (this.errorSensor && isInError != null) this.errorService?.updateCharacteristic(Characteristic.ContactSensorState, isInError);
 
                     //holiday mode
                     if (this.holidayModeSupport && holidayModeEnabled !== null) {

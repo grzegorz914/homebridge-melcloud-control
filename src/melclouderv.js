@@ -125,8 +125,6 @@ class MelCloudErv extends EventEmitter {
 
             //units
             const units = Array.isArray(deviceData.Device?.Units) ? deviceData.Device?.Units : [];
-            const unitsCount = units.length;
-
             const { indoor, outdoor } = units.reduce((acc, unit) => {
                 const target = unit.IsIndoor ? 'indoor' : 'outdoor';
                 acc[target] = {

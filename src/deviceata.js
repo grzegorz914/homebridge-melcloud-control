@@ -511,7 +511,6 @@ class DeviceAta extends EventEmitter {
                             };
                         });
                     this.melCloudService = melCloudService;
-                    accessory.addService(melCloudService);
                     break;
                 case 2: //Thermostat
                     if (this.logDebug) this.emit('debug', `Prepare thermostat service`);
@@ -610,12 +609,14 @@ class DeviceAta extends EventEmitter {
                             };
                         });
                     this.melCloudService = melCloudServiceT;
-                    accessory.addService(melCloudServiceT);
                     break;
                 default:
                     if (this.logWarn) this.emit('warn', `Received unknown display type: ${this.displayType}`);
                     return;
             };
+
+            //add service to accessory
+            accessory.addService(this.melCloudService);
 
             //temperature sensor services
             if (this.temperatureRoomSensor && this.accessory.roomTemperature !== null) {
@@ -1748,7 +1749,7 @@ class DeviceAta extends EventEmitter {
 
                     //other sensors
                     if (this.temperatureRoomSensor && roomTemperature != null) this.roomTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, roomTemperature);
-                    if (this.temperatureOutdoorSensor && outdoorTemperature != null) this.outdoorTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature);
+                    if (this.temperatureOutdoorSensor && supportsOutdoorTemperature) this.outdoorTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature);
                     if (this.inStandbySensor && inStandbyMode != null) this.inStandbyService?.updateCharacteristic(Characteristic.ContactSensorState, inStandbyMode);
                     if (this.connectSensor && isConnected != null) this.connectService?.updateCharacteristic(Characteristic.ContactSensorState, isConnected);
                     if (this.errorSensor && isInError != null) this.errorService?.updateCharacteristic(Characteristic.ContactSensorState, isInError);
