@@ -55,8 +55,8 @@ export const ApiUrls = {
             AtwMobile: "/monitor/atwunit/deviceid",
             Erv: "/api/ervunit/deviceid",
             ErvMobile: "/monitor/ervunit/deviceid",
-            ScheduleEnableDisable: "/api/cloudschedule/deviceid/enabled", // {"enabled": true}
-            SceneEnableDisable: "/api/scene/sceneid",
+            ScheduleEnableDisable: "/monitor/cloudschedule/deviceid/enabled", // {"enabled": true}
+            SceneEnableDisable: "/monitor/scene/sceneid",
         },
         Delete: {
             Schedule: "/api/cloudschedule/deviceid/scheduleid",
