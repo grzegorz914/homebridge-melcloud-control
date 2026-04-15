@@ -21,20 +21,32 @@ export const ApiUrls = {
         EnergyCostReport: "/EnergyCost/Report",
     },
     Home: {
+        UserAgent: "MonitorAndControl.App.Mobile/52 CFNetwork/3860.400.51 Darwin/25.3.0",
         Base: "https://melcloudhome.com",
         BaseMobile: "https://mobile.bff.melcloudhome.com",
+        AuthBase: "https://auth.melcloudhome.com",
+        MockBase: "http://localhost:8080",
+        OauthClientId: "homemobile",
+        OauthRedirectUri: "melcloudhome://",
+        OauthScopes: "openid profile email offline_access IdentityServerApi",
+        CognitoBase: "https://live-melcloudhome.auth.eu-west-1.amazoncognito.com",
+        CognitoDomainSuffix: ".amazoncognito.com",
         WebSocket: "wss://ws.melcloudhome.com/?hash=",
         Get: {
             Configuration: "/api/configuration",
-            ListDevices: "/api/user/context",
-            Scenes: "/api/user/scenes",
+            Context: "/context",
+            Scenes: "/monitor/user/scenes",
+            TelemetryEnergy: "/telemetry/telemetry/energy/deviceid",
+            TelemetryActual: "/telemetry/telemetry/actual/deviceid",
+            ReportTrendSummary: "/report/v1/trendsummary",
+            SystemInvites: "/systeminvites"
         },
         Post: {
-            ProtectionFrost: "/api/protection/frost", //{"enabled":true,"min":13,"max":16,"units":{"ATA":["deviceid"]}}
-            ProtectionOverheat: "/api/protection/overheat", //{"enabled":true,"min":32,"max":35,"units":{"ATA":["deviceid"]}}
-            HolidayMode: "/api/holidaymode", //{"enabled":true,"startDate":"2025-11-11T17:42:24.913","endDate":"2026-06-01T09:18:00","units":{"ATA":["deviceid"]}}
-            Schedule: "/api/cloudschedule/deviceid", //{"days":[2],"time":"17:59:00","enabled":true,"id":"scheduleid","power":false,"operationMode":null,"setPoint":null,"vaneVerticalDirection":null,"vaneHorizontalDirection":null,"setFanSpeed":null}
-            Scene: "/api/scene", //{"id": "sceneid", "userId": "userid","name": "Poza domem","enabled": false,"icon": "AwayIcon","ataSceneSettings": [{"unitId": "deviceid","ataSettings": { "power": false, "operationMode": "heat","setFanSpeed": "auto","vaneHorizontalDirection": "auto", "vaneVerticalDirection": "auto", "setTemperature": 21,"temperatureIncrementOverride": null,"inStandbyMode": null},"previousSettings": null}],"atwSceneSettings": []}
+            ProtectionFrost: "/monitor/protection/frost", //{"enabled":true,"min":13,"max":16,"units":{"ATA":["deviceid"]}}
+            ProtectionOverheat: "/monitor/protection/overheat", //{"enabled":true,"min":32,"max":35,"units":{"ATA":["deviceid"]}}
+            HolidayMode: "/monitor/holidaymode", //{"enabled":true,"startDate":"2025-11-11T17:42:24.913","endDate":"2026-06-01T09:18:00","units":{"ATA":["deviceid"]}}
+            Schedule: "/monitor/cloudschedule/deviceid", //{"days":[2],"time":"17:59:00","enabled":true,"id":"scheduleid","power":false,"operationMode":null,"setPoint":null,"vaneVerticalDirection":null,"vaneHorizontalDirection":null,"setFanSpeed":null}
+            Scene: "/monitor/scene", //{"id": "sceneid", "userId": "userid","name": "Poza domem","enabled": false,"icon": "AwayIcon","ataSceneSettings": [{"unitId": "deviceid","ataSettings": { "power": false, "operationMode": "heat","setFanSpeed": "auto","vaneHorizontalDirection": "auto", "vaneVerticalDirection": "auto", "setTemperature": 21,"temperatureIncrementOverride": null,"inStandbyMode": null},"previousSettings": null}],"atwSceneSettings": []}
         },
         Put: {
             Ata: "/api/ataunit/deviceid", //{ power: true,setTemperature: 22, setFanSpeed: "auto", operationMode: "heat", vaneHorizontalDirection: "auto",vaneVerticalDirection: "auto", temperatureIncrementOverride: null, inStandbyMode: null}
@@ -77,8 +89,8 @@ export const AirConditioner = {
     FanSpeedMapEnumToString: { 0: "Auto", 1: "One", 2: "Two", 3: "Three", 4: "Four", 5: "Five" },
     SetFanSpeedMapStringToEnum: { "Auto": 0, "One": 1, "Two": 2, "Three": 3, "Four": 4, "Five": 5, "0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5 },
     SetFanSpeedMapEnumToString: { 0: "Auto", 1: "One", 2: "Two", 3: "Three", 4: "Four", 5: "Five" },
-    AktualFanSpeedMapStringToEnum: { "Auto": 0, "One": 1, "Two": 2, "Three": 3, "Four": 4, "Five": 5, "0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5 },
-    AktualFanSpeedMapEnumToString: { 0: "Quiet", 1: "One", 2: "Two", 3: "Three", 4: "Four", 5: "Five" },
+    AktualFanSpeedMapStringToEnum: { "Auto": 0, "One": 1, "Two": 2, "Three": 3, "Four": 4, "Five": 5, "Off": 6, "0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5 },
+    AktualFanSpeedMapEnumToString: { 0: "Quiet", 1: "One", 2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Off" },
     VaneVerticalDirectionMapStringToEnum: { "Auto": 0, "One": 1, "Two": 2, "Three": 3, "Four": 4, "Five": 5, "Six": 6, "Swing": 7 },
     VaneVerticalDirectionMapEnumToString: { 0: "Auto", 1: "One", 2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six", 7: "Swing" },
     VaneVerticalDirectionMapEnumToEnumWs: { 6: 7 },
@@ -112,7 +124,7 @@ export const AirConditioner = {
 
 export const HeatPump = {
     ZoneNameMapEnumToString: { 0: "Heat Pump", 1: "Zone 1", 2: "Hot Water", 3: "Zone 2" },
-        UnitStatusMapEnumToString: { 0: "Heat", 2: "Cool" },
+    UnitStatusMapEnumToString: { 0: "Heat", 2: "Cool" },
     SystemMapEnumToStringInfo: { 0: "Off", 1: "On", 2: "Emergency Run", 3: "Test Run" },
     DefrostMapStringToEnum: { "Normal": 0, "Standby": 1, "Defrost": 2, "Waiting Restart": 3 },
     DefrostMapEnumToString: { 0: "Normal", 1: "Standby", 2: "Defrost", 3: "Waiting Restart" },

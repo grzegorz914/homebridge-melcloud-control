@@ -1,102 +1,332 @@
 import axios from 'axios';
-import WebSocket from 'ws';
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import crypto from 'crypto';
 import EventEmitter from 'events';
-import puppeteer from 'puppeteer';
 import ImpulseGenerator from './impulsegenerator.js';
 import Functions from './functions.js';
-import { ApiUrls, LanguageLocaleMap } from './constants.js';
-const execPromise = promisify(exec);
+import RequestPacer from './requestpacer.js';
+import { CookieJar } from 'tough-cookie';
+import { wrapper } from 'axios-cookiejar-support';
+import { URL } from 'url';
+import { ApiUrls } from './constants.js';
 
 class MelCloudHome extends EventEmitter {
     constructor(account, pluginStart = false) {
         super();
-        this.accountType = account.type;
+
         this.user = account.user;
         this.passwd = account.passwd;
-        this.language = account.language;
+        this.logInfo = account.log?.info;
         this.logWarn = account.log?.warn;
         this.logError = account.log?.error;
         this.logDebug = account.log?.debug;
-
-        this.client = null;
-        this.connecting = false;
-        this.socketConnected = false;
-        this.heartbeat = null;
 
         this.functions = new Functions(this.logWarn, this.logError, this.logDebug)
             .on('warn', warn => this.emit('warn', warn))
             .on('error', error => this.emit('error', error))
             .on('debug', debug => this.emit('debug', debug));
 
+        this.pacer = new RequestPacer();
+
+        // Axios clients
+        this.authClient = null; // cookie-jar client używany tylko podczas auth flow
+        this.client = null; // API client używany do requestów po zalogowaniu
+
+        // Token state
+        this.accessToken = null;
+        this.refreshToken = null;
+        this.tokenExpiry = 0; // Unix timestamp (sekundy)
+
+        // Flaga zapobiegająca wielokrotnemu dodaniu interceptorów
+        this._interceptorsAttached = false;
+
         if (pluginStart) {
-            //lock flags
-            this.locks = {
-                connect: false,
-                checkDevicesList: false
-            };
             this.impulseGenerator = new ImpulseGenerator()
-                .on('connect', () => this.handleWithLock('connect', async () => {
-                    await this.connect();
-                }))
-                .on('checkDevicesList', () => this.handleWithLock('checkDevicesList', async () => {
+                .on('checkDevicesList', async () => {
                     await this.checkDevicesList();
-                }))
+                })
                 .on('state', (state) => {
                     this.emit(state ? 'success' : 'warn', `Impulse generator ${state ? 'started' : 'stopped'}`);
                 });
         }
     }
 
-    async handleWithLock(lockKey, fn) {
-        if (this.locks[lockKey]) return;
+    // ── Utils ─────────────────────────────────────────────────────────────────
 
-        this.locks[lockKey] = true;
-        try {
-            await fn();
-        } catch (error) {
-            this.emit('error', `Inpulse generator error: ${error}`);
-        } finally {
-            this.locks[lockKey] = false;
+    capitalizeKeysDeep(obj) {
+        if (Array.isArray(obj)) return obj.map(item => this.capitalizeKeysDeep(item));
+        if (obj && typeof obj === 'object') {
+            return Object.fromEntries(
+                Object.entries(obj).map(([k, v]) => [
+                    k.charAt(0).toUpperCase() + k.slice(1),
+                    this.capitalizeKeysDeep(v),
+                ])
+            );
         }
+        return obj;
     }
 
-    cleanupSocket() {
-        if (this.heartbeat) {
-            clearInterval(this.heartbeat);
-            this.heartbeat = null;
+    // ── Token state ───────────────────────────────────────────────────────────
+
+    isTokenExpired() {
+        if (!this.accessToken) return true;
+        return Date.now() / 1000 >= this.tokenExpiry - 60;
+    }
+
+    // ── Axios clients ─────────────────────────────────────────────────────────
+
+    ensureAuthClient() {
+        if (this.authClient) return this.authClient;
+
+        const jar = new CookieJar();
+        const instance = wrapper(
+            axios.create({
+                jar,
+                timeout: 30_000,
+                headers: {
+                    Accept: 'application/json',
+                    'User-Agent': ApiUrls.Home.UserAgent,
+                },
+                maxRedirects: 5,
+                validateStatus: () => true,
+            })
+        );
+
+        this.authClient = instance;
+        return instance;
+    }
+
+    ensureClient() {
+        if (this.client) return this.client;
+
+        this.client = axios.create({
+            baseURL: ApiUrls.Home.BaseMobile,
+            timeout: 30_000,
+            headers: {
+                Accept: 'application/json',
+                'User-Agent': ApiUrls.Home.UserAgent,
+            },
+        });
+
+        return this.client;
+    }
+
+    // ── Pacer helper ──────────────────────────────────────────────────────────
+
+    pace(fn) {
+        return this.pacer.run(fn);
+    }
+
+    // ── PKCE ──────────────────────────────────────────────────────────────────
+
+    generatePkce() {
+        const verifier = crypto.randomBytes(32).toString('base64url');
+        const challenge = crypto.createHash('sha256').update(verifier).digest('base64url');
+        return { verifier, challenge };
+    }
+
+    // ── CSRF token ────────────────────────────────────────────────────────────
+
+    extractCsrfToken(html) {
+        return (
+            /<input[^>]+name="_csrf"[^>]+value="([^"]+)"/.exec(html)?.[1] ??
+            /<input[^>]+value="([^"]+)"[^>]+name="_csrf"/.exec(html)?.[1] ??
+            /name="_csrf"\s+value="([^"]+)"/.exec(html)?.[1] ??
+            null
+        );
+    }
+
+    // ── Follow callback redirect ──────────────────────────────────────────────
+
+    async followCallbackForCode(client, callbackQs) {
+        const qs = callbackQs.replace(/&amp;/g, '&');
+        const callbackUrl = `${ApiUrls.Home.AuthBase}/connect/authorize/callback?${qs}`;
+
+        const resp = await this.pace(() =>
+            client.get(callbackUrl, {
+                headers: { 'User-Agent': ApiUrls.Home.UserAgent },
+                maxRedirects: 0,
+            })
+        );
+        let location = resp.headers?.location ?? '';
+
+        if (location.startsWith('melcloudhome://')) {
+            const m = /code=([^&]+)/.exec(location);
+            if (m) return m[1];
         }
 
-        this.socketConnected = false;
+        if (!location || location === '/')
+            throw new Error('Callback returned empty or root redirect');
+
+        // Jeden dodatkowy hop
+        const redirectUrl = location.startsWith('http')
+            ? location
+            : `${ApiUrls.Home.AuthBase}${location}`;
+
+        const resp2 = await this.pace(() =>
+            client.get(redirectUrl, {
+                headers: { 'User-Agent': ApiUrls.Home.UserAgent },
+                maxRedirects: 0,
+            })
+        );
+        location = resp2.headers?.location ?? '';
+
+        const m = /code=([^&]+)/.exec(location);
+        if (!m) throw new Error('Failed to extract auth code from redirect');
+        return m[1];
     }
+
+    // ── Token exchange ────────────────────────────────────────────────────────
+
+    async exchangeCodeForTokens(client, authCode, codeVerifier) {
+        if (this.logDebug) this.emit('debug', 'Step 6: Token exchange');
+
+        const resp = await this.pace(() =>
+            client.post(
+                `${ApiUrls.Home.AuthBase}/connect/token`,
+                new URLSearchParams({
+                    grant_type: 'authorization_code',
+                    code: authCode,
+                    redirect_uri: ApiUrls.Home.OauthRedirectUri,
+                    code_verifier: codeVerifier,
+                    client_id: ApiUrls.Home.OauthClientId,
+                }),
+                { headers: { 'User-Agent': ApiUrls.Home.UserAgent } }
+            )
+        );
+
+        if (resp.status >= 500) throw new Error(`Token exchange server error: HTTP ${resp.status}`);
+        if (resp.status !== 200) throw new Error(`Token exchange failed: HTTP ${resp.status}`);
+
+        this.accessToken = resp.data.access_token;
+        this.refreshToken = resp.data.refresh_token ?? this.refreshToken;
+        this.tokenExpiry = Date.now() / 1000 + (resp.data.expires_in ?? 3600);
+
+        if (this.logDebug) this.emit('debug', 'Authentication successful');
+        return true;
+    }
+
+    // ── Token refresh ─────────────────────────────────────────────────────────
+
+    async refreshAccessToken() {
+        if (!this.refreshToken) throw new Error('No refresh token available');
+
+        const client = this.ensureAuthClient();
+
+        const resp = await this.pace(() =>
+            client.post(
+                `${ApiUrls.Home.AuthBase}/connect/token`,
+                new URLSearchParams({
+                    grant_type: 'refresh_token',
+                    refresh_token: this.refreshToken,
+                    client_id: ApiUrls.Home.OauthClientId,
+                }),
+                { headers: { 'User-Agent': ApiUrls.Home.UserAgent } }
+            )
+        );
+
+        if (resp.status !== 200) {
+            this.accessToken = null;
+            this.refreshToken = null;
+            throw new Error('Refresh token rejected');
+        }
+
+        this.accessToken = resp.data.access_token;
+        this.refreshToken = resp.data.refresh_token ?? this.refreshToken;
+        this.tokenExpiry = Date.now() / 1000 + (resp.data.expires_in ?? 3600);
+        return true;
+    }
+
+    // ── Auto-refresh: refresh token lub pełne logowanie od nowa ──────────────
+
+    async refreshOrRelogin() {
+        if (this.refreshToken) {
+            try {
+                await this.refreshAccessToken();
+                if (this.logDebug) this.emit('debug', 'Token refreshed successfully');
+                return;
+            } catch (err) {
+                if (this.logDebug) this.emit('debug', `Refresh token rejected (${err.message}), falling back to full re-login`);
+            }
+        }
+
+        if (this.logDebug) this.emit('debug', 'Performing full re-login');
+        await this.connect();
+    }
+
+    // ── Interceptory do automatycznego odświeżania tokena ─────────────────────
+
+    attachTokenInterceptors() {
+        if (this._interceptorsAttached) return;
+        this._interceptorsAttached = true;
+
+        const apiClient = this.ensureClient();
+
+        // Request interceptor — dokłada aktualny token przed każdym requestem.
+        // Jeśli token wygasł, odświeża go najpierw.
+        apiClient.interceptors.request.use(async (config) => {
+            if (this.isTokenExpired()) {
+                if (this.logDebug) this.emit('debug', 'Token expired or missing — refreshing before request');
+                await this.refreshOrRelogin();
+            }
+            config.headers['Authorization'] = `Bearer ${this.accessToken}`;
+            return config;
+        });
+
+        // Response interceptor — obsługuje 401 który może przyjść mimo świeżego tokena
+        // (np. token odwołany po stronie serwera). Ponawia request dokładnie raz.
+        apiClient.interceptors.response.use(
+            response => response,
+            async (error) => {
+                const originalRequest = error.config;
+
+                if (error.response?.status === 401 && !originalRequest._retried) {
+                    originalRequest._retried = true;
+                    if (this.logDebug) this.emit('debug', 'Got 401 — refreshing token and retrying request');
+
+                    try {
+                        await this.refreshOrRelogin();
+                        originalRequest.headers['Authorization'] = `Bearer ${this.accessToken}`;
+                        return apiClient(originalRequest);
+                    } catch (refreshError) {
+                        this.emit('error', `Token refresh failed: ${refreshError.message}`);
+                        return Promise.reject(refreshError);
+                    }
+                }
+
+                return Promise.reject(error);
+            }
+        );
+    }
+
+    // ── Buduje connectInfo po udanym token exchange ───────────────────────────
+
+    buildConnectInfo(connectInfo, exchangeRes) {
+        if (exchangeRes) {
+            // ensureClient() tworzy client jeśli nie istnieje.
+            // attachTokenInterceptors() dodaje interceptory tylko przy pierwszym wywołaniu.
+            this.ensureClient();
+            this.attachTokenInterceptors();
+            this.emit('client', this.client);
+        }
+
+        connectInfo.State = exchangeRes;
+        connectInfo.Status = exchangeRes ? 'Connect Success' : 'Connect Failed at token exchange';
+
+        return connectInfo;
+    }
+
+    // ── Scenes & Devices ──────────────────────────────────────────────────────
 
     async checkScenesList() {
         try {
-            if (this.logDebug) this.emit('debug', `Scanning for scenes`);
-            const listScenesData = await this.client(ApiUrls.Home.Get.Scenes, { method: 'GET', });
+            if (this.logDebug) this.emit('debug', 'Scanning for scenes');
 
-            const scenesList = listScenesData.data;
+            const resp = await this.client.get(ApiUrls.Home.Get.Scenes);
+            const scenesList = resp.data;
+
             if (this.logDebug) this.emit('debug', `Scenes: ${JSON.stringify(scenesList, null, 2)}`);
 
-            const capitalizeKeysDeep = obj => {
-                if (Array.isArray(obj)) {
-                    return obj.map(item => capitalizeKeysDeep(item));
-                }
-
-                if (obj && typeof obj === 'object') {
-                    return Object.fromEntries(
-                        Object.entries(obj).map(([key, value]) => [
-                            key.charAt(0).toUpperCase() + key.slice(1),
-                            capitalizeKeysDeep(value)
-                        ])
-                    );
-                }
-
-                return obj;
-            };
-
-            return capitalizeKeysDeep(scenesList);
+            return this.capitalizeKeysDeep(scenesList);
         } catch (error) {
             throw new Error(`Check scenes list error: ${error.message}`);
         }
@@ -104,337 +334,327 @@ class MelCloudHome extends EventEmitter {
 
     async checkDevicesList() {
         try {
-            const melCloudDevicesData = { State: false, Status: null, Buildings: {}, Devices: [], Scenes: [] }
-            if (this.logDebug) this.emit('debug', `Scanning for devices`);
-            const listDevicesData = await this.client(ApiUrls.Home.Get.ListDevices, { method: 'GET' });
+            const result = { State: false, Status: null, Buildings: {}, Devices: [], Scenes: [] };
+            if (this.logDebug) this.emit('debug', 'Scanning for devices');
 
-            const userContext = listDevicesData.data;
+            const resp = await this.client.get(ApiUrls.Home.Get.Context);
+            const userContext = resp.data;
+            //if (this.logDebug) this.emit('debug', `User Context: ${JSON.stringify(userContext, null, 2)}`);
+
             const buildings = userContext.buildings ?? [];
             const guestBuildings = userContext.guestBuildings ?? [];
             const buildingsList = [...buildings, ...guestBuildings];
+
             if (this.logDebug) this.emit('debug', `Buildings: ${JSON.stringify(buildingsList, null, 2)}`);
 
-            if (!buildingsList) {
-                melCloudDevicesData.Status = 'No buildings found'
-                return melCloudDevicesData;
+            if (buildingsList.length === 0) {
+                result.Status = 'No buildings found';
+                return result;
             }
 
-            const devices = buildingsList.flatMap(building => {
-                // Funkcja kapitalizująca klucze obiektu
-                const capitalizeKeys = obj => Object.fromEntries(Object.entries(obj).map(([key, value]) => [key.charAt(0).toUpperCase() + key.slice(1), value]));
+            const capitalizeKeys = obj => Object.fromEntries(
+                Object.entries(obj).map(([k, v]) => [k.charAt(0).toUpperCase() + k.slice(1), v])
+            );
 
-                // Rekurencyjna kapitalizacja kluczy w obiekcie lub tablicy
-                const capitalizeKeysDeep = obj => {
-                    if (Array.isArray(obj)) return obj.map(capitalizeKeysDeep);
-                    if (obj && typeof obj === 'object') {
-                        return Object.fromEntries(Object.entries(obj).map(([key, value]) => [key.charAt(0).toUpperCase() + key.slice(1), capitalizeKeysDeep(value)]));
-                    }
-                    return obj;
+            const createDevice = (device, type) => {
+                const settingsObject = Object.fromEntries(
+                    (device.Settings || []).map(({ name, value }) => [
+                        name.charAt(0).toUpperCase() + name.slice(1),
+                        this.functions.convertValue(value),
+                    ])
+                );
+
+                const deviceObject = {
+                    ...capitalizeKeys(device.Capabilities || {}),
+                    ...settingsObject,
+                    DeviceType: type,
+                    FirmwareAppVersion: device.ConnectedInterfaceIdentifier,
+                    IsConnected: device.IsConnected,
                 };
 
-                // Funkcja tworząca finalny obiekt Device
-                const createDevice = (device, type) => {
-                    // Settings już kapitalizowane w nazwach
-                    const settingsArray = device.Settings || [];
-                    const settingsObject = Object.fromEntries(
-                        settingsArray.map(({ name, value }) => {
-                            let parsedValue = this.functions.convertValue(value);
-                            const key = name.charAt(0).toUpperCase() + name.slice(1);
-                            return [key, parsedValue];
-                        })
-                    );
+                if (device.FrostProtection) device.FrostProtection = capitalizeKeys(device.FrostProtection);
+                if (device.OverheatProtection) device.OverheatProtection = capitalizeKeys(device.OverheatProtection);
+                if (device.HolidayMode) device.HolidayMode = capitalizeKeys(device.HolidayMode);
+                if (Array.isArray(device.Schedule)) device.Schedule = device.Schedule.map(s => this.capitalizeKeysDeep(s));
 
-                    // Scal Capabilities + Settings + DeviceType w Device
-                    const deviceObject = {
-                        ...capitalizeKeys(device.Capabilities || {}),
-                        ...settingsObject,
-                        DeviceType: type,
-                        FirmwareAppVersion: device.ConnectedInterfaceIdentifier,
-                        IsConnected: device.IsConnected
-                    };
+                const { Settings, Capabilities, Id, GivenDisplayName, ...rest } = device;
 
-                    // Kapitalizacja brakujących obiektów/tablic
-                    if (device.FrostProtection) device.FrostProtection = { ...capitalizeKeys(device.FrostProtection || {}) };
-                    if (device.OverheatProtection) device.OverheatProtection = { ...capitalizeKeys(device.OverheatProtection || {}) };
-                    if (device.HolidayMode) device.HolidayMode = { ...capitalizeKeys(device.HolidayMode || {}) };
-                    if (Array.isArray(device.Schedule)) device.Schedule = device.Schedule.map(capitalizeKeysDeep || []);
-
-                    // Usuń stare pola Settings i Capabilities
-                    const { Settings, Capabilities, Id, GivenDisplayName, ...rest } = device;
-
-                    return {
-                        ...rest,
-                        Type: type,
-                        DeviceID: Id,
-                        DeviceName: GivenDisplayName,
-                        SerialNumber: Id,
-                        Device: deviceObject,
-                    };
+                return {
+                    ...rest,
+                    Type: type,
+                    DeviceID: Id,
+                    DeviceName: GivenDisplayName,
+                    SerialNumber: Id,
+                    Device: deviceObject,
                 };
+            };
 
-                return [
-                    ...(building.airToAirUnits || []).map(d => createDevice(capitalizeKeys(d), 0)),
-                    ...(building.airToWaterUnits || []).map(d => createDevice(capitalizeKeys(d), 1)),
-                    ...(building.airToVentilationUnits || []).map(d => createDevice(capitalizeKeys(d), 3))
-                ];
-            });
+            const devices = buildingsList.flatMap(building => [
+                ...(building.airToAirUnits || []).map(d => createDevice(capitalizeKeys(d), 0)),
+                ...(building.airToWaterUnits || []).map(d => createDevice(capitalizeKeys(d), 1)),
+                ...(building.airToVentilationUnits || []).map(d => createDevice(capitalizeKeys(d), 3)),
+            ]);
 
-            const devicesCount = devices.length;
-            if (devicesCount === 0) {
-                melCloudDevicesData.Status = 'No devices found'
-                return melCloudDevicesData;
+            if (devices.length === 0) {
+                result.Status = 'No devices found';
+                return result;
             }
 
-            // Get scenes
+            // Sceny
             let scenes = [];
             try {
-                const scenesList = await this.checkScenesList();
-                if (this.logDebug) this.emit('debug', `Found ${scenesList.length} scenes`);
-                if (scenesList.length > 0) {
-                    scenes = scenesList;
-                }
+                scenes = await this.checkScenesList();
+                if (this.logDebug) this.emit('debug', `Found ${scenes.length} scenes`);
             } catch (error) {
                 if (this.logError) this.emit('error', `Get scenes error: ${error}`);
             }
 
-            melCloudDevicesData.State = true;
-            melCloudDevicesData.Status = `Found ${devicesCount} devices ${scenes.length > 0 ? `and ${scenes.length} scenes` : ''}`;
-            melCloudDevicesData.Buildings = userContext;
-            melCloudDevicesData.Devices = devices;
-            melCloudDevicesData.Scenes = scenes;
+            result.State = true;
+            result.Status = `Found ${devices.length} devices${scenes.length > 0 ? ` and ${scenes.length} scenes` : ''}`;
+            result.Buildings = userContext;
+            result.Devices = devices;
+            result.Scenes = scenes;
 
-            //emit device event
-            for (const deviceData of melCloudDevicesData.Devices) {
-                deviceData.Scenes = melCloudDevicesData.Scenes ?? [];
-                const deviceId = deviceData.DeviceID;
-                this.emit(deviceId, 'request', deviceData);
+            for (const deviceData of result.Devices) {
+                deviceData.Scenes = result.Scenes;
+                this.emit(deviceData.DeviceID, 'request', deviceData);
             }
 
-            return melCloudDevicesData;
+            return result;
         } catch (error) {
             throw new Error(`Check devices list error: ${error.message}`);
         }
     }
 
+    // ── Connect ───────────────────────────────────────────────────────────────
+
     async connect() {
         if (this.logDebug) this.emit('debug', 'Connecting to MELCloud Home');
-        const GLOBAL_TIMEOUT = 120000;
 
-        let browser;
         try {
             const connectInfo = { State: false, Status: '', Account: {}, UseFahrenheit: false };
 
-            // Get Chromium path from resolver
-            const chromiumInfo = await this.functions.ensureChromiumInstalled();
-            let chromiumPath = chromiumInfo.path;
-            const arch = chromiumInfo.arch;
-            const system = chromiumInfo.system;
+            const client = this.ensureAuthClient();
+            const { verifier: codeVerifier, challenge: codeChallenge } = this.generatePkce();
+            const state = crypto.randomBytes(16).toString('base64url');
 
-            // If path is found, use it
-            if (chromiumPath) {
-                if (this.logDebug) this.emit('debug', `Using Chromium for ${system} (${arch}) at ${chromiumPath}`);
+            // ── Step 1: PAR ──────────────────────────────────────────────────
+            if (this.logDebug) this.emit('debug', 'Step 1: PAR request');
+
+            const parResp = await this.pace(() =>
+                client.post(
+                    `${ApiUrls.Home.AuthBase}/connect/par`,
+                    new URLSearchParams({
+                        response_type: 'code',
+                        state,
+                        code_challenge: codeChallenge,
+                        code_challenge_method: 'S256',
+                        client_id: ApiUrls.Home.OauthClientId,
+                        scope: ApiUrls.Home.OauthScopes,
+                        redirect_uri: ApiUrls.Home.OauthRedirectUri,
+                    }),
+                    { headers: { 'User-Agent': ApiUrls.Home.UserAgent } }
+                )
+            );
+
+            if (parResp.status >= 500) throw new Error(`PAR server error: HTTP ${parResp.status}`);
+            if (parResp.status !== 201) throw new Error(`PAR request failed: HTTP ${parResp.status}`);
+
+            const requestUri = parResp.data.request_uri;
+            if (this.logDebug) this.emit('debug', `PAR OK: request_uri=${requestUri.slice(0, 50)}...`);
+
+            // ── Step 2: Authorize → Cognito login page ────────────────────────
+            if (this.logDebug) this.emit('debug', 'Step 2: Authorize redirect to Cognito');
+
+            const authorizeUrl =
+                `${ApiUrls.Home.AuthBase}/connect/authorize` +
+                `?client_id=${ApiUrls.Home.OauthClientId}&request_uri=${requestUri}`;
+
+            let authCode = null;
+            let cognitoLoginUrl = null;
+            let csrfToken = null;
+
+            const authResp = await this.pace(() =>
+                client.get(authorizeUrl, {
+                    headers: { 'User-Agent': ApiUrls.Home.UserAgent },
+                    maxRedirects: 5,
+                })
+            );
+
+            if (authResp.status >= 500) throw new Error(`Authorize server error: HTTP ${authResp.status}`);
+
+            const finalUrl = authResp.request?.res?.responseUrl ?? authorizeUrl;
+            const parsed = new URL(finalUrl);
+            const body = typeof authResp.data === 'string'
+                ? authResp.data
+                : JSON.stringify(authResp.data);
+
+            if (parsed.hostname?.endsWith(ApiUrls.Home.CognitoDomainSuffix) && parsed.pathname.includes('/login')) {
+                // Happy path: strona logowania Cognito
+                csrfToken = this.extractCsrfToken(body);
+                if (!csrfToken) throw new Error('Failed to extract CSRF token from Cognito login page');
+                cognitoLoginUrl = finalUrl;
+                if (this.logDebug) this.emit('debug', 'Cognito login page OK');
             } else {
-                if (arch === 'arm') {
-                    connectInfo.Status = `No Chromium found for ${system} (${arch}). Please install it manually and try again.`;
-                    return connectInfo;
+                // Fast path: istniejąca sesja — kod dostępny od razu
+                const codeMatch = /code=([^&"' ]+)/.exec(finalUrl) || /code=([^&"' ]+)/.exec(body);
+                if (codeMatch) {
+                    authCode = codeMatch[1];
+                    if (this.logDebug) this.emit('debug', 'Existing session detected, got auth code directly');
                 } else {
-                    try {
-                        chromiumPath = puppeteer.executablePath();
-                        if (this.logDebug) this.emit('debug', `Using Puppeteer Chromium for ${system} (${arch}) at ${chromiumPath}`);
-                    } catch (error) {
-                        connectInfo.Status = `No Puppeteer Chromium for ${system} (${arch}), error: ${error.message}`;
-                        return connectInfo;
+                    const cbMatch = /\/connect\/authorize\/callback\?([^"' ]+)/.exec(body);
+                    if (cbMatch) {
+                        authCode = await this.followCallbackForCode(client, cbMatch[1]);
+                        if (this.logDebug) this.emit('debug', 'Existing session: followed callback for code');
+                    } else {
+                        throw new Error(`Unexpected auth response: ${finalUrl}`);
                     }
                 }
             }
 
-            // Verify Chromium executable
-            try {
-                const { stdout } = await execPromise(`"${chromiumPath}" --version`);
-                if (this.logDebug) this.emit('debug', `Chromium for ${system} (${arch}) detected: ${stdout.trim()}`);
-            } catch (error) {
-                connectInfo.Status = `Chromium for ${system} (${arch}) found at ${chromiumPath}, but execute error: ${error.message}. Please install it manually and try again.`;
-                return connectInfo;
+            // Fast-path: pomiń etap logowania
+            if (authCode) {
+                if (this.logDebug) this.emit('debug', 'Re-login with existing session (skipping credentials)');
+                const exchangeRes = await this.exchangeCodeForTokens(client, authCode, codeVerifier);
+                return this.buildConnectInfo(connectInfo, exchangeRes);
             }
 
-            // Launch Chromium
-            if (this.logDebug) this.emit('debug', `Launching Chromium...`);
-            browser = await puppeteer.launch({
-                headless: true,
-                executablePath: chromiumPath,
-                timeout: GLOBAL_TIMEOUT,
-                args: [
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox',
-                    '--disable-dev-shm-usage',
-                    '--single-process',
-                    '--disable-gpu',
-                    '--no-zygote'
-                ]
-            });
-            browser.on('disconnected', () => this.logDebug && this.emit('debug', 'Browser disconnected'));
+            // ── Step 3: Wyślij dane logowania do Cognito ──────────────────────
+            if (this.logDebug) this.emit('debug', 'Step 3: Submit credentials to Cognito');
 
-            const page = await browser.newPage();
-            page.on('error', error => this.logError && this.emit('error', `Page crashed: ${error.message}`));
-            page.on('pageerror', error => this.logError && this.emit('error', `Browser error: ${error.message}`));
-            page.setDefaultTimeout(GLOBAL_TIMEOUT);
-            page.setDefaultNavigationTimeout(GLOBAL_TIMEOUT);
+            const cognitoHostname = new URL(cognitoLoginUrl).hostname;
 
-            // CDP session
-            const client = await page.createCDPSession();
-            await client.send('Network.enable')
-            client.on('Network.webSocketCreated', ({ url }) => {
-                try {
-                    if (url.startsWith(`${ApiUrls.Home.WebSocket}`)) {
-                        const params = new URL(url).searchParams;
-                        const hash = params.get('hash');
-                        if (this.logDebug) this.emit('debug', `Web socket hash detected: ${hash}`);
-
-                        // Web socket connection
-                        if (!this.connecting && !this.socketConnected) {
-                            this.connecting = true;
-
-                            try {
-                                const headers = {
-                                    'Origin': ApiUrls.Home.Base,
-                                    'Pragma': 'no-cache',
-                                    'Cache-Control': 'no-cache'
-                                };
-                                const webSocket = new WebSocket(`${ApiUrls.Home.WebSocket}${hash}`, { headers: headers })
-                                    .on('error', (error) => {
-                                        if (this.logError) this.emit('error', `Web socket error: ${error}`);
-                                        try {
-                                            webSocket.close();
-                                        } catch { }
-                                    })
-                                    .on('close', () => {
-                                        if (this.logDebug) this.emit('debug', `Web socket closed`);
-                                        this.cleanupSocket();
-                                    })
-                                    .on('open', () => {
-                                        this.socketConnected = true;
-                                        this.connecting = false;
-                                        if (this.logDebug) this.emit('debug', `Web Socket Connected`);
-
-                                        // heartbeat
-                                        this.heartbeat = setInterval(() => {
-                                            if (webSocket.readyState === webSocket.OPEN) {
-                                                if (this.logDebug) this.emit('debug', `Web socket send heartbeat`);
-                                                webSocket.ping();
-                                            }
-                                        }, 30000);
-                                    })
-                                    .on('pong', () => {
-                                        if (this.logDebug) this.emit('debug', `Web socket received heartbeat`);
-                                    })
-                                    .on('message', (message) => {
-                                        const parsedMessage = JSON.parse(message);
-                                        if (this.logDebug) this.emit('debug', `Web socket incoming message: ${JSON.stringify(parsedMessage, null, 2)}`);
-                                        const messageData = parsedMessage?.[0]?.Data;
-                                        if (!messageData || parsedMessage.message === 'Forbidden') return;
-
-                                        this.emit(messageData.id, 'ws', parsedMessage[0]);
-                                    });
-                            } catch (error) {
-                                if (this.logError) this.emit('error', `Web socket connection failed: ${error}`);
-                                this.cleanupSocket();
-                            }
-                        }
+            // maxRedirects: 0 — Cognito używa response_mode=form_post.
+            // Przechwytujemy 302 zanim axios podąży za nim do IdentityServera (→ 500).
+            const credResp = await this.pace(() =>
+                client.post(
+                    cognitoLoginUrl,
+                    new URLSearchParams({
+                        _csrf: csrfToken,
+                        username: this.user,
+                        password: this.passwd,
+                        cognitoAsfData: '',
+                    }),
+                    {
+                        headers: {
+                            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/22F76',
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            Origin: `https://${cognitoHostname}`,
+                            Referer: cognitoLoginUrl,
+                        },
+                        maxRedirects: 0,
                     }
-                } catch (error) {
-                    if (this.logError) this.emit('error', `CDP web socket created handler error: ${error.message}`);
+                )
+            );
+
+            if (this.logDebug) {
+                this.emit('debug', `Step 3 response status: ${credResp.status}`);
+                this.emit('debug', `Step 3 response location: ${credResp.headers?.location ?? '(none)'}`);
+            }
+
+            // status 200 = zostaliśmy na stronie Cognito → złe hasło
+            if (credResp.status === 200) throw new Error('Authentication failed: Invalid username or password');
+            if (credResp.status >= 500) throw new Error(`Cognito server error: HTTP ${credResp.status}`);
+
+            // ── Step 4: POST do signin-oidc-meu (emulacja form_post z Cognito) ──
+            // Cognito normalnie robi POST z code+state w body do IdentityServera.
+            // My dostaliśmy 302 z tymi parametrami w query — wysyłamy je jako POST body.
+            if (this.logDebug) this.emit('debug', 'Step 4: Follow Cognito → IdentityServer redirect');
+
+            const cognitoRedirectLocation = credResp.headers?.location ?? '';
+            if (!cognitoRedirectLocation) throw new Error('No Location header in Cognito response');
+
+            if (this.logDebug) this.emit('debug', `Step 4 location: ${cognitoRedirectLocation}`);
+
+            const signinParsed = new URL(cognitoRedirectLocation);
+            const signinBase = `${signinParsed.protocol}//${signinParsed.host}${signinParsed.pathname}`;
+            const signinParams = new URLSearchParams(signinParsed.search);
+
+            if (this.logDebug) this.emit('debug', `Step 4 POST to: ${signinBase} params: ${[...signinParams.keys()].join(', ')}`);
+
+            const signinResp = await this.pace(() =>
+                client.post(signinBase, signinParams, {
+                    headers: {
+                        'User-Agent': ApiUrls.Home.UserAgent,
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    maxRedirects: 0,
+                })
+            );
+
+            if (this.logDebug) {
+                this.emit('debug', `Step 4 signin status: ${signinResp.status}`);
+                this.emit('debug', `Step 4 signin location: ${signinResp.headers?.location ?? '(none)'}`);
+            }
+
+            // ── Step 5: Podążaj za łańcuchem redirectów aż do auth code ──────────
+            // IdentityServer przekierowuje przez kilka etapów:
+            // /ExternalLogin/Callback → /connect/authorize/callback → melcloudhome://
+            if (this.logDebug) this.emit('debug', 'Step 5: Following redirect chain to auth code');
+
+            let currentResp = signinResp;
+            const MAX_HOPS = 6;
+
+            for (let hop = 0; hop < MAX_HOPS; hop++) {
+                const hopStatus = currentResp.status;
+                const hopLocation = currentResp.headers?.location ?? '';
+                const hopBody = typeof currentResp.data === 'string' ? currentResp.data : '';
+
+                if (this.logDebug) this.emit('debug', `Step 5 hop ${hop}: status=${hopStatus} location=${hopLocation || '(none)'}`);
+
+                // A: melcloudhome:// z code=
+                if (hopLocation.startsWith('melcloudhome://')) {
+                    const m = /code=([^&"' ]+)/.exec(hopLocation);
+                    if (m) { authCode = m[1]; break; }
                 }
-            });
 
-            try {
-                await page.goto(ApiUrls.Home.Base, { waitUntil: ['domcontentloaded', 'networkidle2'], timeout: GLOBAL_TIMEOUT });
-            } catch (error) {
-                connectInfo.Status = `Navigation to ${ApiUrls.Home.Base} failed: ${error.message}`;
-                return connectInfo;
+                // B: /connect/authorize/callback w location lub body
+                const cbMatch = /\/connect\/authorize\/callback\?([^"' ]+)/.exec(hopLocation)
+                    || /\/connect\/authorize\/callback\?([^"' ]+)/.exec(hopBody);
+                if (cbMatch) {
+                    if (this.logDebug) this.emit('debug', 'Step 5: delegating to followCallbackForCode');
+                    authCode = await this.followCallbackForCode(client, cbMatch[1]);
+                    break;
+                }
+
+                // C: code= bezpośrednio w location
+                const codeInLocation = /code=([^&"' ]+)/.exec(hopLocation);
+                if (codeInLocation) { authCode = codeInLocation[1]; break; }
+
+                // D: code= w body
+                const codeInBody = /code=([^&"' ]+)/.exec(hopBody);
+                if (codeInBody) { authCode = codeInBody[1]; break; }
+
+                // Zwykły redirect — podążaj dalej
+                if ((hopStatus === 301 || hopStatus === 302 || hopStatus === 303) && hopLocation) {
+                    const nextUrl = hopLocation.startsWith('http')
+                        ? hopLocation
+                        : `${ApiUrls.Home.AuthBase}${hopLocation}`;
+
+                    currentResp = await this.pace(() =>
+                        client.get(nextUrl, {
+                            headers: { 'User-Agent': ApiUrls.Home.UserAgent },
+                            maxRedirects: 0,
+                        })
+                    );
+                    continue;
+                }
+
+                throw new Error(`Unexpected response in redirect chain: status=${hopStatus}, location=${hopLocation}`);
             }
 
-            // Wait extra to ensure UI is rendered
-            await new Promise(r => setTimeout(r, 3000));
-            const loginBtn = await page.waitForSelector('button.btn--blue', { timeout: GLOBAL_TIMEOUT / 3 });
-            await loginBtn.click();
-            await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: GLOBAL_TIMEOUT / 3 });
+            if (!authCode) throw new Error('Failed to extract auth code after redirect chain');
 
-            const usernameInput = await page.$('input[name="username"]');
-            const passwordInput = await page.$('input[name="password"]');
-            if (!usernameInput || !passwordInput) {
-                connectInfo.Status = 'Username or password input not found';
-                return connectInfo;
-            }
+            if (this.logDebug) this.emit('debug', `Got auth code: ${authCode.slice(0, 20)}...`);
 
-            await page.type('input[name="username"]', this.user, { delay: 50 });
-            await page.type('input[name="password"]', this.passwd, { delay: 50 });
+            // ── Step 6: Wymień kod na tokeny ──────────────────────────────────
+            const exchangeRes = await this.exchangeCodeForTokens(client, authCode, codeVerifier);
+            return this.buildConnectInfo(connectInfo, exchangeRes);
 
-            const submitButton = await page.$('input[type="submit"], button[type="submit"]');
-            if (!submitButton) {
-                connectInfo.Status = 'Submit button not found';
-                return connectInfo;
-            }
-            await Promise.race([Promise.all([submitButton.click(), page.waitForNavigation({ waitUntil: ['domcontentloaded', 'networkidle2'], timeout: GLOBAL_TIMEOUT / 3 })]), new Promise(r => setTimeout(r, GLOBAL_TIMEOUT / 3))]);
-
-            // Extract cookies
-            let c1 = null, c2 = null;
-            const start = Date.now();
-            while ((!c1 || !c2) && Date.now() - start < GLOBAL_TIMEOUT / 2) {
-                const cookies = await browser.cookies();
-                c1 = cookies.find(c => c.name === '__Secure-monitorandcontrolC1')?.value || c1;
-                c2 = cookies.find(c => c.name === '__Secure-monitorandcontrolC2')?.value || c2;
-                if (!c1 || !c2) await new Promise(r => setTimeout(r, 500));
-            }
-
-            if (!c1 || !c2) {
-                connectInfo.Status = 'Cookies C1/C2 missing';
-                return connectInfo;
-            }
-
-            const cookies = [
-                '__Secure-monitorandcontrol=chunks-2',
-                `__Secure-monitorandcontrolC1=${c1}`,
-                `__Secure-monitorandcontrolC2=${c2}`
-            ].join('; ');
-
-            const userAgent = await page.evaluate(() => navigator.userAgent);
-            const headers = {
-                'Accept': '*/*',
-                'Accept-Encoding': 'gzip, deflate, br',
-                'Accept-Language': LanguageLocaleMap[this.language],
-                'Cookie': cookies,
-                'Priority': 'u=3, i',
-                'Referer': ApiUrls.Home.Dashboard,
-                'Sec-Fetch-Dest': 'empty',
-                'Sec-Fetch-Mode': 'cors',
-                'Sec-Fetch-Site': 'same-origin',
-                'User-Agent': userAgent,
-                'x-csrf': '1'
-            };
-
-            this.client = axios.create({
-                baseURL: ApiUrls.Home.Base,
-                timeout: 30000,
-                headers: headers
-            });
-            this.emit('client', this.client);
-
-            connectInfo.State = true;
-            connectInfo.Status = `Connect Success${this.socketConnected ? ', Web Socket Connected' : ''}`;
-
-            return connectInfo;
         } catch (error) {
             throw new Error(`Connect error: ${error.message}`);
-        } finally {
-            if (browser) {
-                try { await browser.close(); }
-                catch (closeErr) {
-                    if (this.logError) this.emit('error', `Failed to close Puppeteer: ${closeErr.message}`);
-                }
-            }
         }
     }
 }
 
 export default MelCloudHome;
-

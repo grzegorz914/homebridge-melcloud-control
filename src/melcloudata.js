@@ -315,7 +315,7 @@ class MelCloudAta extends EventEmitter {
                             });
 
                             method = 'PUT';
-                            path = ApiUrls.Home.Put.Ata.replace('deviceid', deviceData.DeviceID);
+                            path = ApiUrls.Home.Put.AtaMobile.replace('deviceid', deviceData.DeviceID);
                             break;
                     }
 

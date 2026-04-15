@@ -24,6 +24,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - For plugin < v4.6.0 use Homebridge UI <= v5.5.0
 - For plugin >= v4.6.0 use Homebridge UI >= v5.13.0
 
+# [4.9.0] - (15.04.2026)
+
+## Changes
+
+- refactor MELCloud Home to use Bearer token for authentication instead of cookies, fix [#240]
+- bump dependencies
+- cleanup
+
 # [4.8.7] - (10.04.2026)
 
 ## Changes

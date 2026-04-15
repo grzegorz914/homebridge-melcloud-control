@@ -265,7 +265,7 @@ class MelCloudAtw extends EventEmitter {
                             });
 
                             method = 'PUT';
-                            path = ApiUrls.Home.Put.Atw.replace('deviceid', deviceData.DeviceID);
+                            path = ApiUrls.Home.Put.AtwMobile.replace('deviceid', deviceData.DeviceID);
                             break
                     }
 

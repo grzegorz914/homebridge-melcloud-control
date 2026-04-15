@@ -280,7 +280,7 @@ class MelCloudErv extends EventEmitter {
                             });
 
                             method = 'PUT';
-                            path = ApiUrls.Home.Put.Erv.replace('deviceid', deviceData.DeviceID);
+                            path = ApiUrls.Home.Put.ErvMobile.replace('deviceid', deviceData.DeviceID);
                             break
                     }
 
