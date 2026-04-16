@@ -24,6 +24,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - For plugin < v4.6.0 use Homebridge UI <= v5.5.0
 - For plugin >= v4.6.0 use Homebridge UI >= v5.13.0
 
+# [4.10.0] - (16.04.2026)
+
+## Changes
+
+- added web socket for real time data update with MELCloud Home
+- cleanup
+
 # [4.9.1] - (15.04.2026)
 
 ## Changes

@@ -10,6 +10,7 @@ export const ApiUrls = {
         RefreshUnit: "/Device/RequestRefresh?id=deviceid",
         DeviceState: "/Device/Get?id=DID&buildingID=BID",
         TileState: "/Tile/Get2?id=DID&buildingID=BID",
+        Scenes: "/Scene/List"
     },
     Post: {
         ClientLogin: "/Login/ClientLogin",
@@ -22,10 +23,8 @@ export const ApiUrls = {
     },
     Home: {
         UserAgent: "MonitorAndControl.App.Mobile/52 CFNetwork/3860.400.51 Darwin/25.3.0",
-        Base: "https://melcloudhome.com",
-        BaseMobile: "https://mobile.bff.melcloudhome.com",
+        Base: "https://mobile.bff.melcloudhome.com",
         AuthBase: "https://auth.melcloudhome.com",
-        MockBase: "http://localhost:8080",
         OauthClientId: "homemobile",
         OauthRedirectUri: "melcloudhome://",
         OauthScopes: "openid profile email offline_access IdentityServerApi",
@@ -33,13 +32,14 @@ export const ApiUrls = {
         CognitoDomainSuffix: ".amazoncognito.com",
         WebSocket: "wss://ws.melcloudhome.com/?hash=",
         Get: {
-            Configuration: "/api/configuration",
-            Context: "/context",
-            Scenes: "/monitor/user/scenes",
+            Config: "/config", //{"feature_management":{"feature_flags":[{"id":"energyProduced","enabled":"true"},{"id":"enableManual4thGenClaiming","enabled":"false"}]},"sentryLogging":{"enableSentryLogging":"/mch/monitorAndControlMobile/enableSentryLogging"}}
+            Context: "/context", //{}
+            Scenes: "/monitor/user/scenes", //[{}]
+            SystemInvites: "/monitor/user/systeminvites", //[]
+            NotificationSettings: "/monitor.user/notificationsettings", //{"054dd950-f6e0-4195-bea7-59d8ea0668c2": true
             TelemetryEnergy: "/telemetry/telemetry/energy/deviceid",
             TelemetryActual: "/telemetry/telemetry/actual/deviceid",
-            ReportTrendSummary: "/report/v1/trendsummary",
-            SystemInvites: "/systeminvites"
+            ReportTrendSummary: "/report/v1/trendsummary"
         },
         Post: {
             ProtectionFrost: "/monitor/protection/frost", //{"enabled":true,"min":13,"max":16,"units":{"ATA":["deviceid"]}}
@@ -49,18 +49,15 @@ export const ApiUrls = {
             Scene: "/monitor/scene", //{"id": "sceneid", "userId": "userid","name": "Poza domem","enabled": false,"icon": "AwayIcon","ataSceneSettings": [{"unitId": "deviceid","ataSettings": { "power": false, "operationMode": "heat","setFanSpeed": "auto","vaneHorizontalDirection": "auto", "vaneVerticalDirection": "auto", "setTemperature": 21,"temperatureIncrementOverride": null,"inStandbyMode": null},"previousSettings": null}],"atwSceneSettings": []}
         },
         Put: {
-            Ata: "/api/ataunit/deviceid", //{ power: true,setTemperature: 22, setFanSpeed: "auto", operationMode: "heat", vaneHorizontalDirection: "auto",vaneVerticalDirection: "auto", temperatureIncrementOverride: null, inStandbyMode: null}
-            AtaMobile: "/monitor/ataunit/deviceid",
-            Atw: "/api/atwunit/deviceid",
-            AtwMobile: "/monitor/atwunit/deviceid",
-            Erv: "/api/ervunit/deviceid",
-            ErvMobile: "/monitor/ervunit/deviceid",
-            ScheduleEnableDisable: "/monitor/cloudschedule/deviceid/enabled", // {"enabled": true}
-            SceneEnableDisable: "/monitor/scene/sceneid",
+            Ata: "/monitor/ataunit/deviceid", //{ power: true,setTemperature: 22, setFanSpeed: "auto", operationMode: "heat", vaneHorizontalDirection: "auto",vaneVerticalDirection: "auto", temperatureIncrementOverride: null, inStandbyMode: null}
+            Atw: "/monitor/atwunit/deviceid",
+            Erv: "/monitor/ervunit/deviceid",
+            ScheduleEnabled: "/monitor/cloudschedule/deviceid/enabled", // {"enabled": true}
+            SceneEnableDisable: "/monitor/scene/sceneid", //https://mobile.bff.melcloudhome.com/monitor/scene/sceneid/enable or disable
         },
         Delete: {
-            Schedule: "/api/cloudschedule/deviceid/scheduleid",
-            Scene: "/api/scene/sceneid"
+            Schedule: "/monitor/cloudschedule/deviceid/scheduleid",
+            Scene: "/monitor/scene/sceneid"
         },
         Referers: {
             GetPutScenes: "https://melcloudhome.com/scenes",
@@ -68,7 +65,7 @@ export const ApiUrls = {
             PostProtectionFrost: "https://melcloudhome.com/ata/deviceid/frostprotection",
             PostProtectionOverheat: "https://melcloudhome.com/ata/deviceid/overheatprotection",
             PutDeviceSettings: "https://melcloudhome.com/dashboard",
-            PutScheduleEnabled: "https://melcloudhome.com/ata/deviceid/schedule",
+            PutScheduleEnabled: "https://melcloudhome.com/ata/deviceid/schedule"
         }
     }
 };

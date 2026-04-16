@@ -83,14 +83,14 @@ class MelCloudPlatform {
 										melCloudClass = new MelCloud(account, true);
 										break;
 									case 'melcloudhome':
-										timmers = [{ name: 'checkDevicesList', sampling: 7000 }];
+										timmers = [{ name: 'checkDevicesList', sampling: 10000 }];
 										melCloudClass = new MelCloudHome(account, true);
 										break;
 									default:
 										if (logLevel.warn) log.warn(`Unknown account type: ${account.type}.`);
 										return;
 								}
-								melCloudClass.on('success', (msg) => logLevel.success && log.success(`${name}, ${msg}`))
+								melCloudClass.on('success', (msg) => log.success(`${name}, ${msg}`))
 									.on('info', (msg) => log.info(`${name}, ${msg}`))
 									.on('debug', (msg) => log.info(`${name}, debug: ${msg}`))
 									.on('warn', (msg) => log.warn(`${name}, ${msg}`))
@@ -111,6 +111,7 @@ class MelCloudPlatform {
 									return;
 								}
 								if (logLevel.debug) log.info(melCloudDevicesData.Status);
+
 
 								//filter configured devices
 								const devicesIds = (melCloudDevicesData.Devices ?? []).map(d => String(d.DeviceID));
@@ -187,8 +188,8 @@ class MelCloudPlatform {
 											continue;
 									}
 
-									deviceClass.on('devInfo', (info) => logLevel.devInfo && log.info(info))
-										.on('success', (msg) => logLevel.success && log.success(`${name}, ${deviceTypeString}, ${deviceName}, ${msg}`))
+									deviceClass.on('devInfo', (info) => log.info(info))
+										.on('success', (msg) => log.success(`${name}, ${deviceTypeString}, ${deviceName}, ${msg}`))
 										.on('info', (msg) => log.info(`${name}, ${deviceTypeString}, ${deviceName}, ${msg}`))
 										.on('debug', (msg) => log.info(`${name}, ${deviceTypeString}, ${deviceName}, debug: ${msg}`))
 										.on('warn', (msg) => log.warn(`${name}, ${deviceTypeString}, ${deviceName}, ${msg}`))

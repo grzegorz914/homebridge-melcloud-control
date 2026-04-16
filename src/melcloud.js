@@ -10,6 +10,7 @@ class MelCloud extends EventEmitter {
         this.user = account.user;
         this.passwd = account.passwd;
         this.language = account.language;
+        this.logSuccess = account.log?.success;
         this.logWarn = account.log?.warn;
         this.logError = account.log?.error;
         this.logDebug = account.log?.debug;
@@ -26,7 +27,7 @@ class MelCloud extends EventEmitter {
                     await this.checkDevicesList();
                 }))
                 .on('state', (state) => {
-                    this.emit(state ? 'success' : 'warn', `Impulse generator ${state ? 'started' : 'stopped'}`);
+                    if (this.logSuccess) this.emit(state ? 'success' : 'warn', `Impulse generator ${state ? 'started' : 'stopped'}`);
                 });
         }
     }

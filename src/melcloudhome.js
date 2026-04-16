@@ -1,4 +1,5 @@
 import axios from 'axios';
+import WebSocket from 'ws';
 import crypto from 'crypto';
 import EventEmitter from 'events';
 import ImpulseGenerator from './impulsegenerator.js';
@@ -15,10 +16,12 @@ class MelCloudHome extends EventEmitter {
 
         this.user = account.user;
         this.passwd = account.passwd;
+        this.logSuccess = account.log?.success;
         this.logInfo = account.log?.info;
         this.logWarn = account.log?.warn;
         this.logError = account.log?.error;
         this.logDebug = account.log?.debug;
+        this.pluginStart = pluginStart;
 
         this.functions = new Functions(this.logWarn, this.logError, this.logDebug)
             .on('warn', warn => this.emit('warn', warn))
@@ -28,16 +31,25 @@ class MelCloudHome extends EventEmitter {
         this.pacer = new RequestPacer();
 
         // Axios clients
-        this.authClient = null; // cookie-jar client używany tylko podczas auth flow
-        this.client = null; // API client używany do requestów po zalogowaniu
+        this.authClient = null; // cookie-jar client used only during the auth flow
+        this.client = null; // API client used for all post-login requests
 
         // Token state
         this.accessToken = null;
         this.refreshToken = null;
-        this.tokenExpiry = 0; // Unix timestamp (sekundy)
+        this.tokenExpiry = 0; // Unix timestamp (seconds)
 
-        // Flaga zapobiegająca wielokrotnemu dodaniu interceptorów
-        this._interceptorsAttached = false;
+        // Flag preventing duplicate interceptor registration on re-login
+        this.interceptorsAttached = false;
+
+        // WebSocket state
+        this.socket = null;
+        this.socketConnected = false;
+        this.connecting = false;
+        this.heartbeat = null;
+        this.reconnectTimer = null;
+        this.reconnectDelay = 5_000;   // ms, grows exponentially up to reconnectDelayMax
+        this.reconnectDelayMax = 300_000; // 5 minutes
 
         if (pluginStart) {
             this.impulseGenerator = new ImpulseGenerator()
@@ -50,8 +62,124 @@ class MelCloudHome extends EventEmitter {
         }
     }
 
+    // ── WebSocket ─────────────────────────────────────────────────────────────
+
+    // Resets all WebSocket state and clears the heartbeat interval.
+    cleanupSocket() {
+        if (this.heartbeat) {
+            clearInterval(this.heartbeat);
+            this.heartbeat = null;
+        }
+        this.socket = null;
+        this.socketConnected = false;
+        this.connecting = false;
+    }
+
+    // Opens a WebSocket connection using the user ID from /api/user/context as the hash.
+    // Called automatically after a successful login and on every reconnect attempt.
+    async connectSocket() {
+        if (this.connecting || this.socketConnected) return;
+        this.connecting = true;
+
+        let hash;
+        try {
+            const resp = await this.client.get(ApiUrls.Home.Get.Context);
+            hash = resp.data?.id ?? null;
+            if (!hash) throw new Error('id field missing in context response');
+        } catch (err) {
+            if (this.logError) this.emit('error', `WebSocket: cannot get hash: ${err.message}`);
+            this.connecting = false;
+            this.scheduleReconnect();
+            return;
+        }
+
+        const url = `${ApiUrls.Home.WebSocket}${hash}`;
+        const headers = {
+            Origin: ApiUrls.Home.Base,
+            Pragma: 'no-cache',
+            'Cache-Control': 'no-cache',
+        };
+
+        if (this.logDebug) this.emit('debug', `WebSocket connecting: ${url.slice(0, 60)}...`);
+
+        try {
+            const ws = new WebSocket(url, { headers });
+            this.socket = ws;
+
+            ws.on('error', (error) => {
+                if (this.logError) this.emit('error', `WebSocket error: ${error.message}`);
+                try { ws.close(); } catch { /* ignore if already closed */ }
+            });
+
+            ws.on('close', () => {
+                if (this.logDebug) this.emit('debug', 'WebSocket closed');
+                this.cleanupSocket();
+                this.scheduleReconnect();
+            });
+
+            ws.on('open', () => {
+                this.socketConnected = true;
+                this.connecting = false;
+                this.reconnectDelay = 5_000; // reset backoff on successful connection
+                if (this.reconnectTimer) {
+                    clearTimeout(this.reconnectTimer);
+                    this.reconnectTimer = null;
+                }
+                if (this.logSuccess) this.emit('success', 'WebSocket connected');
+
+                // Send a ping every 30 s to keep the connection alive
+                this.heartbeat = setInterval(() => {
+                    if (ws.readyState === WebSocket.OPEN) {
+                        if (this.logDebug) this.emit('debug', 'WebSocket heartbeat sent');
+                        ws.ping();
+                    }
+                }, 30_000);
+            });
+
+            ws.on('pong', () => {
+                if (this.logDebug) this.emit('debug', 'WebSocket heartbeat received');
+            });
+
+            ws.on('message', (message) => {
+                try {
+                    const parsed = JSON.parse(message);
+                    const messageData = parsed?.[0]?.Data;
+
+                    if (this.logDebug) this.emit('debug', `WebSocket message: ${JSON.stringify(parsed, null, 2)}`);
+
+                    // Ignore empty payloads and server-side auth errors
+                    if (!messageData || parsed.message === 'Forbidden') return;
+
+                    this.emit(messageData.id, 'ws', parsed[0]);
+                } catch (err) {
+                    if (this.logError) this.emit('error', `WebSocket message parse error: ${err.message}`);
+                }
+            });
+
+        } catch (error) {
+            if (this.logError) this.emit('error', `WebSocket connection failed: ${error.message}`);
+            this.cleanupSocket();
+            this.scheduleReconnect();
+        }
+    }
+
+    // Schedules a reconnect attempt using exponential backoff (5 s → 10 s → … → 5 min).
+    scheduleReconnect() {
+        if (this.reconnectTimer) return; // already scheduled
+
+        if (this.logDebug) this.emit('debug', `WebSocket reconnecting in ${this.reconnectDelay / 1000} s...`);
+
+        this.reconnectTimer = setTimeout(async () => {
+            this.reconnectTimer = null;
+            await this.connectSocket();
+        }, this.reconnectDelay);
+
+        this.reconnectDelay = Math.min(this.reconnectDelay * 2, this.reconnectDelayMax);
+    }
+
     // ── Utils ─────────────────────────────────────────────────────────────────
 
+    // Recursively capitalizes the first letter of every object key.
     capitalizeKeysDeep(obj) {
         if (Array.isArray(obj)) return obj.map(item => this.capitalizeKeysDeep(item));
         if (obj && typeof obj === 'object') {
@@ -67,6 +195,7 @@ class MelCloudHome extends EventEmitter {
 
     // ── Token state ───────────────────────────────────────────────────────────
 
+    // Returns true when the access token is absent or expires within 60 seconds.
     isTokenExpired() {
         if (!this.accessToken) return true;
         return Date.now() / 1000 >= this.tokenExpiry - 60;
@@ -74,11 +203,12 @@ class MelCloudHome extends EventEmitter {
 
     // ── Axios clients ─────────────────────────────────────────────────────────
 
+    // Returns (creating if needed) the cookie-jar client used during the OAuth flow.
     ensureAuthClient() {
         if (this.authClient) return this.authClient;
 
         const jar = new CookieJar();
-        const instance = wrapper(
+        this.authClient = wrapper(
             axios.create({
                 jar,
                 timeout: 30_000,
@@ -87,19 +217,19 @@ class MelCloudHome extends EventEmitter {
                     'User-Agent': ApiUrls.Home.UserAgent,
                 },
                 maxRedirects: 5,
-                validateStatus: () => true,
+                validateStatus: () => true, // handle all status codes manually
             })
         );
 
-        this.authClient = instance;
-        return instance;
+        return this.authClient;
     }
 
+    // Returns (creating if needed) the API client used for all post-login requests.
     ensureClient() {
         if (this.client) return this.client;
 
         this.client = axios.create({
-            baseURL: ApiUrls.Home.BaseMobile,
+            baseURL: ApiUrls.Home.Base,
             timeout: 30_000,
             headers: {
                 Accept: 'application/json',
@@ -110,7 +240,7 @@ class MelCloudHome extends EventEmitter {
         return this.client;
     }
 
-    // ── Pacer helper ──────────────────────────────────────────────────────────
+    // ── Pacer ─────────────────────────────────────────────────────────────────
 
     pace(fn) {
         return this.pacer.run(fn);
@@ -126,6 +256,7 @@ class MelCloudHome extends EventEmitter {
 
     // ── CSRF token ────────────────────────────────────────────────────────────
 
+    // Extracts the _csrf token value from the Cognito login page HTML.
     extractCsrfToken(html) {
         return (
             /<input[^>]+name="_csrf"[^>]+value="([^"]+)"/.exec(html)?.[1] ??
@@ -135,8 +266,9 @@ class MelCloudHome extends EventEmitter {
         );
     }
 
-    // ── Follow callback redirect ──────────────────────────────────────────────
+    // ── OAuth helpers ─────────────────────────────────────────────────────────
 
+    // Follows the /connect/authorize/callback redirect chain and returns the auth code.
     async followCallbackForCode(client, callbackQs) {
         const qs = callbackQs.replace(/&amp;/g, '&');
         const callbackUrl = `${ApiUrls.Home.AuthBase}/connect/authorize/callback?${qs}`;
@@ -154,10 +286,9 @@ class MelCloudHome extends EventEmitter {
             if (m) return m[1];
         }
 
-        if (!location || location === '/')
-            throw new Error('Callback returned empty or root redirect');
+        if (!location || location === '/') throw new Error('Callback returned empty or root redirect');
 
-        // Jeden dodatkowy hop
+        // One additional hop if needed
         const redirectUrl = location.startsWith('http')
             ? location
             : `${ApiUrls.Home.AuthBase}${location}`;
@@ -175,8 +306,7 @@ class MelCloudHome extends EventEmitter {
         return m[1];
     }
 
-    // ── Token exchange ────────────────────────────────────────────────────────
-
+    // Exchanges an authorization code for access and refresh tokens.
     async exchangeCodeForTokens(client, authCode, codeVerifier) {
         if (this.logDebug) this.emit('debug', 'Step 6: Token exchange');
 
@@ -207,11 +337,11 @@ class MelCloudHome extends EventEmitter {
 
     // ── Token refresh ─────────────────────────────────────────────────────────
 
+    // Uses the stored refresh token to obtain a new access token.
     async refreshAccessToken() {
         if (!this.refreshToken) throw new Error('No refresh token available');
 
         const client = this.ensureAuthClient();
-
         const resp = await this.pace(() =>
             client.post(
                 `${ApiUrls.Home.AuthBase}/connect/token`,
@@ -236,57 +366,66 @@ class MelCloudHome extends EventEmitter {
         return true;
     }
 
-    // ── Auto-refresh: refresh token lub pełne logowanie od nowa ──────────────
-
+    // Attempts a token refresh; falls back to a full re-login if the refresh token is
+    // missing or rejected. A single shared Promise prevents concurrent refresh races.
     async refreshOrRelogin() {
-        if (this.refreshToken) {
-            try {
-                await this.refreshAccessToken();
-                if (this.logDebug) this.emit('debug', 'Token refreshed successfully');
-                return;
-            } catch (err) {
-                if (this.logDebug) this.emit('debug', `Refresh token rejected (${err.message}), falling back to full re-login`);
-            }
-        }
+        if (this.refreshPromise) return this.refreshPromise;
 
-        if (this.logDebug) this.emit('debug', 'Performing full re-login');
-        await this.connect();
+        this.refreshPromise = (async () => {
+            if (this.refreshToken) {
+                try {
+                    await this.refreshAccessToken();
+                    if (this.logDebug) this.emit('debug', 'Token refreshed successfully');
+                    return;
+                } catch (err) {
+                    if (this.logDebug) this.emit('debug', `Refresh token rejected (${err.message}), falling back to full re-login`);
+                }
+            }
+
+            if (this.logDebug) this.emit('debug', 'Performing full re-login');
+            await this.connect();
+        })().finally(() => {
+            this.refreshPromise = null;
+        });
+
+        return this.refreshPromise;
     }
 
-    // ── Interceptory do automatycznego odświeżania tokena ─────────────────────
+    // ── Token interceptors ────────────────────────────────────────────────────
 
+    // Attaches request and response interceptors to the API client.
+    // Safe to call multiple times — interceptors are registered only once.
     attachTokenInterceptors() {
-        if (this._interceptorsAttached) return;
-        this._interceptorsAttached = true;
+        if (this.interceptorsAttached) return;
+        this.interceptorsAttached = true;
 
         const apiClient = this.ensureClient();
 
-        // Request interceptor — dokłada aktualny token przed każdym requestem.
-        // Jeśli token wygasł, odświeża go najpierw.
+        // Inject a fresh Authorization header before every request.
+        // If the token is expired, refresh it first.
         apiClient.interceptors.request.use(async (config) => {
             if (this.isTokenExpired()) {
-                if (this.logDebug) this.emit('debug', 'Token expired or missing — refreshing before request');
+                if (this.logDebug) this.emit('debug', 'Token expired — refreshing before request');
                 await this.refreshOrRelogin();
             }
             config.headers['Authorization'] = `Bearer ${this.accessToken}`;
             return config;
         });
 
-        // Response interceptor — obsługuje 401 który może przyjść mimo świeżego tokena
-        // (np. token odwołany po stronie serwera). Ponawia request dokładnie raz.
+        // On 401, refresh the token and retry the original request exactly once.
         apiClient.interceptors.response.use(
             response => response,
             async (error) => {
-                const originalRequest = error.config;
+                const original = error.config;
 
-                if (error.response?.status === 401 && !originalRequest._retried) {
-                    originalRequest._retried = true;
-                    if (this.logDebug) this.emit('debug', 'Got 401 — refreshing token and retrying request');
+                if (error.response?.status === 401 && !original.retried) {
+                    original.retried = true;
+                    if (this.logDebug) this.emit('debug', 'Got 401 — refreshing token and retrying');
 
                     try {
                         await this.refreshOrRelogin();
-                        originalRequest.headers['Authorization'] = `Bearer ${this.accessToken}`;
-                        return apiClient(originalRequest);
+                        original.headers['Authorization'] = `Bearer ${this.accessToken}`;
+                        return apiClient(original);
                     } catch (refreshError) {
                         this.emit('error', `Token refresh failed: ${refreshError.message}`);
                         return Promise.reject(refreshError);
@@ -298,147 +437,48 @@ class MelCloudHome extends EventEmitter {
         );
     }
 
-    // ── Buduje connectInfo po udanym token exchange ───────────────────────────
+    // ── Post-login setup ──────────────────────────────────────────────────────
 
-    buildConnectInfo(connectInfo, exchangeRes) {
+    // Finalises the connect flow: sets up the API client, attaches interceptors,
+    // emits the 'client' event and opens the WebSocket connection.
+    async buildConnectInfo(connectInfo, exchangeRes) {
         if (exchangeRes) {
-            // ensureClient() tworzy client jeśli nie istnieje.
-            // attachTokenInterceptors() dodaje interceptory tylko przy pierwszym wywołaniu.
             this.ensureClient();
             this.attachTokenInterceptors();
-            this.emit('client', this.client);
+
+            if (this.pluginStart) {
+                this.emit('client', this.client);
+                await this.connectSocket().catch(err => {
+                    if (this.logError) this.emit('error', `WebSocket initial connect failed: ${err.message}`);
+                });
+            }
         }
 
         connectInfo.State = exchangeRes;
-        connectInfo.Status = exchangeRes ? 'Connect Success' : 'Connect Failed at token exchange';
+        connectInfo.Status = exchangeRes ? 'Connect Success' : 'Connect Failed';
 
         return connectInfo;
     }
 
-    // ── Scenes & Devices ──────────────────────────────────────────────────────
-
-    async checkScenesList() {
-        try {
-            if (this.logDebug) this.emit('debug', 'Scanning for scenes');
-
-            const resp = await this.client.get(ApiUrls.Home.Get.Scenes);
-            const scenesList = resp.data;
-
-            if (this.logDebug) this.emit('debug', `Scenes: ${JSON.stringify(scenesList, null, 2)}`);
-
-            return this.capitalizeKeysDeep(scenesList);
-        } catch (error) {
-            throw new Error(`Check scenes list error: ${error.message}`);
-        }
-    }
-
-    async checkDevicesList() {
-        try {
-            const result = { State: false, Status: null, Buildings: {}, Devices: [], Scenes: [] };
-            if (this.logDebug) this.emit('debug', 'Scanning for devices');
-
-            const resp = await this.client.get(ApiUrls.Home.Get.Context);
-            const userContext = resp.data;
-            //if (this.logDebug) this.emit('debug', `User Context: ${JSON.stringify(userContext, null, 2)}`);
-
-            const buildings = userContext.buildings ?? [];
-            const guestBuildings = userContext.guestBuildings ?? [];
-            const buildingsList = [...buildings, ...guestBuildings];
-
-            if (this.logDebug) this.emit('debug', `Buildings: ${JSON.stringify(buildingsList, null, 2)}`);
-
-            if (buildingsList.length === 0) {
-                result.Status = 'No buildings found';
-                return result;
-            }
-
-            const capitalizeKeys = obj => Object.fromEntries(
-                Object.entries(obj).map(([k, v]) => [k.charAt(0).toUpperCase() + k.slice(1), v])
-            );
-
-            const createDevice = (device, type) => {
-                const settingsObject = Object.fromEntries(
-                    (device.Settings || []).map(({ name, value }) => [
-                        name.charAt(0).toUpperCase() + name.slice(1),
-                        this.functions.convertValue(value),
-                    ])
-                );
-
-                const deviceObject = {
-                    ...capitalizeKeys(device.Capabilities || {}),
-                    ...settingsObject,
-                    DeviceType: type,
-                    FirmwareAppVersion: device.ConnectedInterfaceIdentifier,
-                    IsConnected: device.IsConnected,
-                };
-
-                if (device.FrostProtection) device.FrostProtection = capitalizeKeys(device.FrostProtection);
-                if (device.OverheatProtection) device.OverheatProtection = capitalizeKeys(device.OverheatProtection);
-                if (device.HolidayMode) device.HolidayMode = capitalizeKeys(device.HolidayMode);
-                if (Array.isArray(device.Schedule)) device.Schedule = device.Schedule.map(s => this.capitalizeKeysDeep(s));
-
-                const { Settings, Capabilities, Id, GivenDisplayName, ...rest } = device;
-
-                return {
-                    ...rest,
-                    Type: type,
-                    DeviceID: Id,
-                    DeviceName: GivenDisplayName,
-                    SerialNumber: Id,
-                    Device: deviceObject,
-                };
-            };
-
-            const devices = buildingsList.flatMap(building => [
-                ...(building.airToAirUnits || []).map(d => createDevice(capitalizeKeys(d), 0)),
-                ...(building.airToWaterUnits || []).map(d => createDevice(capitalizeKeys(d), 1)),
-                ...(building.airToVentilationUnits || []).map(d => createDevice(capitalizeKeys(d), 3)),
-            ]);
-
-            if (devices.length === 0) {
-                result.Status = 'No devices found';
-                return result;
-            }
-
-            // Sceny
-            let scenes = [];
-            try {
-                scenes = await this.checkScenesList();
-                if (this.logDebug) this.emit('debug', `Found ${scenes.length} scenes`);
-            } catch (error) {
-                if (this.logError) this.emit('error', `Get scenes error: ${error}`);
-            }
-
-            result.State = true;
-            result.Status = `Found ${devices.length} devices${scenes.length > 0 ? ` and ${scenes.length} scenes` : ''}`;
-            result.Buildings = userContext;
-            result.Devices = devices;
-            result.Scenes = scenes;
-
-            for (const deviceData of result.Devices) {
-                deviceData.Scenes = result.Scenes;
-                this.emit(deviceData.DeviceID, 'request', deviceData);
-            }
-
-            return result;
-        } catch (error) {
-            throw new Error(`Check devices list error: ${error.message}`);
-        }
-    }
-
     // ── Connect ───────────────────────────────────────────────────────────────
 
+    // Full OAuth 2.0 PKCE login flow:
+    //   Step 1 — Pushed Authorization Request (PAR)
+    //   Step 2 — Authorize redirect → Cognito login page (or fast-path if session exists)
+    //   Step 3 — POST credentials to Cognito (maxRedirects: 0 to intercept form_post)
+    //   Step 4 — POST Cognito callback params to IdentityServer /signin-oidc-meu
+    //   Step 5 — Follow redirect chain until the auth code is found
+    //   Step 6 — Exchange auth code for access + refresh tokens
     async connect() {
         if (this.logDebug) this.emit('debug', 'Connecting to MELCloud Home');
 
         try {
             const connectInfo = { State: false, Status: '', Account: {}, UseFahrenheit: false };
-
             const client = this.ensureAuthClient();
             const { verifier: codeVerifier, challenge: codeChallenge } = this.generatePkce();
             const state = crypto.randomBytes(16).toString('base64url');
 
-            // ── Step 1: PAR ──────────────────────────────────────────────────
+            // ── Step 1: PAR ───────────────────────────────────────────────────
             if (this.logDebug) this.emit('debug', 'Step 1: PAR request');
 
             const parResp = await this.pace(() =>
@@ -485,18 +525,16 @@ class MelCloudHome extends EventEmitter {
 
             const finalUrl = authResp.request?.res?.responseUrl ?? authorizeUrl;
             const parsed = new URL(finalUrl);
-            const body = typeof authResp.data === 'string'
-                ? authResp.data
-                : JSON.stringify(authResp.data);
+            const body = typeof authResp.data === 'string' ? authResp.data : JSON.stringify(authResp.data);
 
             if (parsed.hostname?.endsWith(ApiUrls.Home.CognitoDomainSuffix) && parsed.pathname.includes('/login')) {
-                // Happy path: strona logowania Cognito
+                // Happy path: landed on the Cognito login page
                 csrfToken = this.extractCsrfToken(body);
                 if (!csrfToken) throw new Error('Failed to extract CSRF token from Cognito login page');
                 cognitoLoginUrl = finalUrl;
                 if (this.logDebug) this.emit('debug', 'Cognito login page OK');
             } else {
-                // Fast path: istniejąca sesja — kod dostępny od razu
+                // Fast path: existing IdentityServer session — auth code available immediately
                 const codeMatch = /code=([^&"' ]+)/.exec(finalUrl) || /code=([^&"' ]+)/.exec(body);
                 if (codeMatch) {
                     authCode = codeMatch[1];
@@ -512,20 +550,21 @@ class MelCloudHome extends EventEmitter {
                 }
             }
 
-            // Fast-path: pomiń etap logowania
+            // Skip credential submission when we already have a code
             if (authCode) {
                 if (this.logDebug) this.emit('debug', 'Re-login with existing session (skipping credentials)');
                 const exchangeRes = await this.exchangeCodeForTokens(client, authCode, codeVerifier);
-                return this.buildConnectInfo(connectInfo, exchangeRes);
+                return await this.buildConnectInfo(connectInfo, exchangeRes);
             }
 
-            // ── Step 3: Wyślij dane logowania do Cognito ──────────────────────
+            // ── Step 3: Submit credentials to Cognito ─────────────────────────
+            // maxRedirects: 0 — Cognito uses response_mode=form_post, so after a
+            // successful login it POSTs back to IdentityServer (/signin-oidc-meu).
+            // We intercept the 302 before axios follows it to avoid a 500 from Kestrel.
             if (this.logDebug) this.emit('debug', 'Step 3: Submit credentials to Cognito');
 
             const cognitoHostname = new URL(cognitoLoginUrl).hostname;
 
-            // maxRedirects: 0 — Cognito używa response_mode=form_post.
-            // Przechwytujemy 302 zanim axios podąży za nim do IdentityServera (→ 500).
             const credResp = await this.pace(() =>
                 client.post(
                     cognitoLoginUrl,
@@ -552,13 +591,14 @@ class MelCloudHome extends EventEmitter {
                 this.emit('debug', `Step 3 response location: ${credResp.headers?.location ?? '(none)'}`);
             }
 
-            // status 200 = zostaliśmy na stronie Cognito → złe hasło
+            // HTTP 200 means Cognito returned the login page again → wrong password
             if (credResp.status === 200) throw new Error('Authentication failed: Invalid username or password');
             if (credResp.status >= 500) throw new Error(`Cognito server error: HTTP ${credResp.status}`);
 
-            // ── Step 4: POST do signin-oidc-meu (emulacja form_post z Cognito) ──
-            // Cognito normalnie robi POST z code+state w body do IdentityServera.
-            // My dostaliśmy 302 z tymi parametrami w query — wysyłamy je jako POST body.
+            // ── Step 4: POST Cognito callback params to IdentityServer ─────────
+            // Cognito normally POSTs code+state to /signin-oidc-meu (form_post).
+            // We received a 302 with those params in the query string, so we replay
+            // them as a POST body — exactly as Cognito would have done.
             if (this.logDebug) this.emit('debug', 'Step 4: Follow Cognito → IdentityServer redirect');
 
             const cognitoRedirectLocation = credResp.headers?.location ?? '';
@@ -587,9 +627,9 @@ class MelCloudHome extends EventEmitter {
                 this.emit('debug', `Step 4 signin location: ${signinResp.headers?.location ?? '(none)'}`);
             }
 
-            // ── Step 5: Podążaj za łańcuchem redirectów aż do auth code ──────────
-            // IdentityServer przekierowuje przez kilka etapów:
-            // /ExternalLogin/Callback → /connect/authorize/callback → melcloudhome://
+            // ── Step 5: Follow redirect chain until the auth code is found ────
+            // IdentityServer redirects through several hops:
+            //   /ExternalLogin/Callback → /connect/authorize/callback → melcloudhome://
             if (this.logDebug) this.emit('debug', 'Step 5: Following redirect chain to auth code');
 
             let currentResp = signinResp;
@@ -602,13 +642,13 @@ class MelCloudHome extends EventEmitter {
 
                 if (this.logDebug) this.emit('debug', `Step 5 hop ${hop}: status=${hopStatus} location=${hopLocation || '(none)'}`);
 
-                // A: melcloudhome:// z code=
+                // A: custom scheme redirect carrying the auth code
                 if (hopLocation.startsWith('melcloudhome://')) {
                     const m = /code=([^&"' ]+)/.exec(hopLocation);
                     if (m) { authCode = m[1]; break; }
                 }
 
-                // B: /connect/authorize/callback w location lub body
+                // B: IdentityServer authorize callback — delegate to helper
                 const cbMatch = /\/connect\/authorize\/callback\?([^"' ]+)/.exec(hopLocation)
                     || /\/connect\/authorize\/callback\?([^"' ]+)/.exec(hopBody);
                 if (cbMatch) {
@@ -617,15 +657,15 @@ class MelCloudHome extends EventEmitter {
                     break;
                 }
 
-                // C: code= bezpośrednio w location
+                // C: auth code directly in the Location header
                 const codeInLocation = /code=([^&"' ]+)/.exec(hopLocation);
                 if (codeInLocation) { authCode = codeInLocation[1]; break; }
 
-                // D: code= w body
+                // D: auth code in the response body
                 const codeInBody = /code=([^&"' ]+)/.exec(hopBody);
                 if (codeInBody) { authCode = codeInBody[1]; break; }
 
-                // Zwykły redirect — podążaj dalej
+                // Standard redirect — follow the next hop
                 if ((hopStatus === 301 || hopStatus === 302 || hopStatus === 303) && hopLocation) {
                     const nextUrl = hopLocation.startsWith('http')
                         ? hopLocation
@@ -647,12 +687,125 @@ class MelCloudHome extends EventEmitter {
 
             if (this.logDebug) this.emit('debug', `Got auth code: ${authCode.slice(0, 20)}...`);
 
-            // ── Step 6: Wymień kod na tokeny ──────────────────────────────────
+            // ── Step 6: Exchange auth code for tokens ─────────────────────────
             const exchangeRes = await this.exchangeCodeForTokens(client, authCode, codeVerifier);
-            return this.buildConnectInfo(connectInfo, exchangeRes);
+            return await this.buildConnectInfo(connectInfo, exchangeRes);
 
         } catch (error) {
             throw new Error(`Connect error: ${error.message}`);
+        }
+    }
+
+    // ── Scenes ────────────────────────────────────────────────────────────────
+
+    async checkScenesList() {
+        try {
+            if (this.logDebug) this.emit('debug', 'Scanning for scenes');
+
+            const resp = await this.client.get(ApiUrls.Home.Get.Scenes);
+            if (this.logDebug) this.emit('debug', `Scenes: ${JSON.stringify(resp.data, null, 2)}`);
+
+            return this.capitalizeKeysDeep(resp.data);
+        } catch (error) {
+            throw new Error(`Check scenes list error: ${error.message}`);
+        }
+    }
+
+    // ── Devices ───────────────────────────────────────────────────────────────
+
+    async checkDevicesList() {
+        try {
+            const result = { State: false, Status: null, Buildings: {}, Devices: [], Scenes: [] };
+            if (this.logDebug) this.emit('debug', 'Scanning for devices');
+
+            const resp = await this.client.get(ApiUrls.Home.Get.Context);
+            const userContext = resp.data;
+
+            const buildingsList = [
+                ...(userContext.buildings ?? []),
+                ...(userContext.guestBuildings ?? []),
+            ];
+
+            if (this.logDebug) this.emit('debug', `Buildings: ${JSON.stringify(buildingsList, null, 2)}`);
+
+            if (buildingsList.length === 0) {
+                result.Status = 'No buildings found';
+                return result;
+            }
+
+            // Shallow capitalize — used for flat objects (Capabilities, FrostProtection, etc.)
+            const capitalizeKeys = obj => Object.fromEntries(
+                Object.entries(obj).map(([k, v]) => [k.charAt(0).toUpperCase() + k.slice(1), v])
+            );
+
+            const createDevice = (device, type) => {
+                const settingsObject = Object.fromEntries(
+                    (device.Settings || []).map(({ name, value }) => [
+                        name.charAt(0).toUpperCase() + name.slice(1),
+                        this.functions.convertValue(value),
+                    ])
+                );
+
+                const deviceObject = {
+                    ...capitalizeKeys(device.Capabilities || {}),
+                    ...settingsObject,
+                    DeviceType: type,
+                    FirmwareAppVersion: device.ConnectedInterfaceIdentifier,
+                    IsConnected: device.IsConnected,
+                };
+
+                if (device.FrostProtection) device.FrostProtection = capitalizeKeys(device.FrostProtection);
+                if (device.OverheatProtection) device.OverheatProtection = capitalizeKeys(device.OverheatProtection);
+                if (device.HolidayMode) device.HolidayMode = capitalizeKeys(device.HolidayMode);
+                if (Array.isArray(device.Schedule)) {
+                    device.Schedule = device.Schedule.map(s => this.capitalizeKeysDeep(s));
+                }
+
+                const { Settings, Capabilities, Id, GivenDisplayName, ...rest } = device;
+
+                return {
+                    ...rest,
+                    Type: type,
+                    DeviceID: Id,
+                    DeviceName: GivenDisplayName,
+                    SerialNumber: Id,
+                    Device: deviceObject,
+                };
+            };
+
+            const devices = buildingsList.flatMap(building => [
+                ...(building.airToAirUnits || []).map(d => createDevice(capitalizeKeys(d), 0)),
+                ...(building.airToWaterUnits || []).map(d => createDevice(capitalizeKeys(d), 1)),
+                ...(building.airToVentilationUnits || []).map(d => createDevice(capitalizeKeys(d), 3)),
+            ]);
+
+            if (devices.length === 0) {
+                result.Status = 'No devices found';
+                return result;
+            }
+
+            let scenes = [];
+            try {
+                scenes = await this.checkScenesList();
+                if (this.logDebug) this.emit('debug', `Found ${scenes.length} scenes`);
+            } catch (error) {
+                if (this.logError) this.emit('error', `Get scenes error: ${error.message}`);
+            }
+
+            result.State = true;
+            result.Status = `Found ${devices.length} devices${scenes.length > 0 ? ` and ${scenes.length} scenes` : ''}`;
+            result.Buildings = userContext;
+            result.Devices = devices;
+            result.Scenes = scenes;
+
+            for (const deviceData of result.Devices) {
+                deviceData.Scenes = result.Scenes;
+                this.emit(deviceData.DeviceID, 'request', deviceData);
+            }
+
+            return result;
+        } catch (error) {
+            throw new Error(`Check devices list error: ${error.message}`);
         }
     }
 }

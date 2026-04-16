@@ -6,7 +6,6 @@ class MelCloudAtw extends EventEmitter {
     constructor(account, device, defaultTempsFile, melCloudClass) {
         super();
         this.accountTypeMelCloud = account.type === 'melcloud';
-        this.logSuccess = account.log?.success;
         this.logWarn = account.log?.warn;
         this.logError = account.log?.error;
         this.logDebug = account.log?.debug;
@@ -242,7 +241,7 @@ class MelCloudAtw extends EventEmitter {
                         case 'schedule':
                             payload = { enabled: payload.enabled };
                             method = 'PUT';
-                            path = ApiUrls.Home.Put.ScheduleEnableDisable.replace('deviceid', deviceData.DeviceID);
+                            path = ApiUrls.Home.Put.ScheduleEnabled.replace('deviceid', deviceData.DeviceID);
                             deviceData.ScheduleEnabled = payload.enabled;
                             break;
                         case 'scene':
@@ -265,7 +264,7 @@ class MelCloudAtw extends EventEmitter {
                             });
 
                             method = 'PUT';
-                            path = ApiUrls.Home.Put.AtwMobile.replace('deviceid', deviceData.DeviceID);
+                            path = ApiUrls.Home.Put.Atw.replace('deviceid', deviceData.DeviceID);
                             break
                     }
 
