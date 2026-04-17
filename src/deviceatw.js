@@ -66,6 +66,7 @@ class DeviceAtw extends EventEmitter {
 
         //external integrations
         this.restFul = account.restFul ?? {};
+        this.restFul.port = device.restFulPort;
         this.restFulConnected = false;
         this.mqtt = account.mqtt ?? {};
         this.mqttConnected = false;

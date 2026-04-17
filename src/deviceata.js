@@ -59,6 +59,7 @@ class DeviceAta extends EventEmitter {
 
         //external integrations
         this.restFul = account.restFul ?? {};
+        this.restFul.port = device.restFulPort;
         this.restFulConnected = false;
         this.mqtt = account.mqtt ?? {};
         this.mqttConnected = false;
@@ -114,7 +115,7 @@ class DeviceAta extends EventEmitter {
         if (restFulEnabled) {
             try {
                 this.restFul1 = new RestFul({
-                    port: this.restFul.port,
+                    port: this.device.restFulPort,
                     logWarn: this.logWarn,
                     logDebug: this.logDebug
                 })

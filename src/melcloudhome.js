@@ -1,4 +1,6 @@
 import axios from 'axios';
+import http from 'http';
+import https from 'https';
 import WebSocket from 'ws';
 import crypto from 'crypto';
 import EventEmitter from 'events';
@@ -54,7 +56,7 @@ class MelCloudHome extends EventEmitter {
         if (pluginStart) {
             this.impulseGenerator = new ImpulseGenerator()
                 .on('checkDevicesList', async () => {
-                    await this.checkDevicesList();
+                    await this.checkDevicesListWithRetry();
                 })
                 .on('state', (state) => {
                     this.emit(state ? 'success' : 'warn', `Impulse generator ${state ? 'started' : 'stopped'}`);
@@ -125,7 +127,7 @@ class MelCloudHome extends EventEmitter {
                     clearTimeout(this.reconnectTimer);
                     this.reconnectTimer = null;
                 }
-                if (this.logSuccess) this.emit('success', 'WebSocket connected');
+                if (this.logSuccess && this.pluginStart) this.emit('success', 'WebSocket connected');
 
                 // Send a ping every 30 s to keep the connection alive
                 this.heartbeat = setInterval(() => {
@@ -225,8 +227,14 @@ class MelCloudHome extends EventEmitter {
     }
 
     // Returns (creating if needed) the API client used for all post-login requests.
+    // Uses a keepAlive agent with a short socket timeout to prevent stale connections
+    // from causing indefinite hangs after server-side idle timeouts (~5 h symptom).
     ensureClient() {
         if (this.client) return this.client;
+
+        // keepAlive reuses TCP connections; freeSocketTimeout closes idle sockets
+        // before the server silently drops them (typically after a few minutes).
+        const agentOptions = { keepAlive: true, freeSocketTimeout: 30_000 };
 
         this.client = axios.create({
             baseURL: ApiUrls.Home.Base,
@@ -235,6 +243,8 @@ class MelCloudHome extends EventEmitter {
                 Accept: 'application/json',
                 'User-Agent': ApiUrls.Home.UserAgent,
             },
+            httpAgent: new http.Agent(agentOptions),
+            httpsAgent: new https.Agent(agentOptions),
         });
 
         return this.client;
@@ -712,6 +722,24 @@ class MelCloudHome extends EventEmitter {
     }
 
     // ── Devices ───────────────────────────────────────────────────────────────
+
+    // Wraps checkDevicesList with a single retry on timeout or network error.
+    // Prevents the plugin from restarting when a stale TCP socket causes a one-off hang.
+    async checkDevicesListWithRetry() {
+        try {
+            return await this.checkDevicesList();
+        } catch (error) {
+            const isRetryable = error.message.includes('timeout') || error.message.includes('ECONNRESET') || error.message.includes('ECONNREFUSED') || error.message.includes('socket hang up');
+
+            if (isRetryable) {
+                if (this.logWarn) this.emit('warn', `checkDevicesList failed (${error.message}) — retrying once`);
+                await new Promise(resolve => setTimeout(resolve, 3_000));
+                return await this.checkDevicesList();
+            }
+
+            throw error;
+        }
+    }
 
     async checkDevicesList() {
         try {
