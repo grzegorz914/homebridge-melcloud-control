@@ -25,6 +25,7 @@ class DeviceAta extends EventEmitter {
         this.logInfo = account.log?.info || false;
         this.logWarn = account.log?.warn || false;
         this.logDebug = account.log?.debug || false;
+        this.logError = account.log?.error || false;
 
         //device config
         this.device = device;
@@ -192,7 +193,6 @@ class DeviceAta extends EventEmitter {
     async setOverExternalIntegration(integration, deviceData, key, value) {
         try {
             const accountTypeMelCloud = this.accountTypeMelCloud;
-            let set = false
             let payload = {};
             let flag = null;
             switch (key) {
@@ -240,7 +240,7 @@ class DeviceAta extends EventEmitter {
                     break;
                 case 'ProhibitPower':
                     if (!accountTypeMelCloud) return;
-                    payload.prohibitOperationMode = value;
+                    payload.prohibitPower = value;
                     flag = AirConditioner.EffectiveFlags.Prohibit;
                     break;
                 case 'FrostProtection':
@@ -271,8 +271,7 @@ class DeviceAta extends EventEmitter {
                     return;
             };
 
-            set = await this.melCloudAta.send(this.accountType, this.displayType, deviceData, payload, flag);
-            return set;
+            return await this.melCloudAta.send(this.accountType, this.displayType, deviceData, payload, flag);
         } catch (error) {
             throw new Error(`${integration} set key: ${key}, value: ${value}, error: ${error.message ?? error}`);
         };
@@ -937,7 +936,7 @@ class DeviceAta extends EventEmitter {
                         try {
                             const payload = { enabled: state };
                             if (this.logInfo) this.emit('info', `Holiday mode: ${state ? 'Enabled' : 'Disabled'}`);
-                            await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, payload, 'holidaymode');
+                            await this.melCloudAta.send(this.accountType, this.displayType, deviceData, payload, 'holidaymode');
                         } catch (error) {
                             if (this.logWarn) this.emit('warn', `Set holiday mode error: ${error}`);
                         };
@@ -1086,7 +1085,7 @@ class DeviceAta extends EventEmitter {
                                         const payload = { enabled: state };
                                         const scheduleData = schedulesOnServer.find(s => s.Id === schedule.id);
                                         if (this.logInfo) this.emit('info', `Schedules: ${state ? 'Enabled' : 'Disabled'}`);
-                                        await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, payload, 'schedule', scheduleData);
+                                        await this.melCloudAta.send(this.accountType, this.displayType, deviceData, payload, 'schedule', scheduleData);
                                     } catch (error) {
                                         if (this.logWarn) this.emit('warn', `Set schedules error: ${error}`);
                                     };
@@ -1200,16 +1199,16 @@ class DeviceAta extends EventEmitter {
                     //get name prefix
                     const namePrefix = button.namePrefix;
 
-                    const serviceName = namePrefix ? `${accessoryName} ${name}` : name;
+                    const serviceName1 = namePrefix ? `${accessoryName} ${name}` : name;
                     const serviceType = button.serviceType;
                     const characteristicType = button.characteristicType;
 
                     //control
                     if (button.displayType > 3) {
                         if (this.logDebug) this.emit('debug', `Prepare button control ${name} service`);
-                        const buttonControlService = new Service.Switch(serviceName, `buttonControlService${deviceId} ${i}`);
+                        const buttonControlService = new Service.Switch(serviceName1, `buttonControlService${deviceId} ${i}`);
                         buttonControlService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                        buttonControlService.setCharacteristic(Characteristic.ConfiguredName, serviceName);
+                        buttonControlService.setCharacteristic(Characteristic.ConfiguredName, serviceName1);
                         buttonControlService.getCharacteristic(Characteristic.On)
                             .onGet(async () => {
                                 const state = button.state;
@@ -1403,7 +1402,7 @@ class DeviceAta extends EventEmitter {
 
                     //sensor
                     if (button.displayType < 7) {
-                        if (this.logDebug) this.emit('debug', `Prepare scene control sensor ${name} service`);
+                        this.emit('debug', `Prepare button control sensor ${name} service`);
                         const buttonControlSensorService = new serviceType(serviceName, `buttonControlSensorService${deviceId} ${i}`);
                         buttonControlSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                         buttonControlSensorService.setCharacteristic(Characteristic.ConfiguredName, serviceName);

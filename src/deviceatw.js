@@ -25,6 +25,7 @@ class DeviceAtw extends EventEmitter {
         this.logInfo = account.log?.info || false;
         this.logWarn = account.log?.warn || false;
         this.logDebug = account.log?.debug || false;
+        this.logError = account.log?.error || false;
 
         //device config
         this.device = device;
@@ -197,7 +198,6 @@ class DeviceAtw extends EventEmitter {
     async setOverExternalIntegration(integration, deviceData, key, value) {
         try {
             const accountTypeMelCloud = this.accountTypeMelCloud;
-            let set = false
             let payload = {};
             let flag = null;
             switch (key) {
@@ -289,8 +289,7 @@ class DeviceAtw extends EventEmitter {
                     return;
             };
 
-            set = await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, payload, flag);
-            return set;
+            return await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, payload, flag);
         } catch (error) {
             throw new Error(`${integration} set key: ${key}, value: ${value}, error: ${error.message ?? error}`);
         };
@@ -704,6 +703,7 @@ class DeviceAtw extends EventEmitter {
                                     };
                                 });
                             this.melCloudServices.push(melCloudService);
+                            accessory.addService(melCloudService);
                             break;
                         case 2: //Thermostat
                             if (this.logDebug) this.emit('debug', `Prepare thermostat ${zoneName} service`);
@@ -931,14 +931,12 @@ class DeviceAtw extends EventEmitter {
                                     };
                                 });
                             this.melCloudServices.push(melCloudServiceT);
+                            accessory.addService(melCloudServiceT);
                             break;
                         default:
                             if (this.logWarn) this.emit('warn', `Received unknown display type: ${this.displayType}`);
                             return;
                     };
-
-                    //add service to accessory
-                    accessory.addService(this.melCloudServices);
                 });
             }
 
@@ -1188,7 +1186,7 @@ class DeviceAtw extends EventEmitter {
                         try {
                             const payload = { enabled: state ? true : false, min: deviceData.FrostProtection.Min, max: deviceData.FrostProtection.Max };
                             if (this.logInfo) this.emit('info', `Frost protection: ${state ? 'Enabled' : 'Disabled'}`);
-                            await this.melCloudAta.send(this.accountType, this.displayType, deviceData, payload, 'frostprotection');
+                            await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, payload, 'frostprotection');
                         } catch (error) {
                             if (this.logWarn) this.emit('warn', `Set frost protection error: ${error}`);
                         };
@@ -1212,7 +1210,7 @@ class DeviceAtw extends EventEmitter {
                         try {
                             const payload = { enabled: true, min: deviceData.FrostProtection.Min, max: deviceData.FrostProtection.Max };
                             if (this.logInfo) this.emit('info', `Frost protection: Enabled`);
-                            await this.melCloudAta.send(this.accountType, this.displayType, deviceData, payload, 'frostprotection');
+                            await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, payload, 'frostprotection');
                         } catch (error) {
                             if (this.logWarn) this.emit('warn', `Set frost protection error: ${error}`);
                         };
@@ -1237,7 +1235,7 @@ class DeviceAtw extends EventEmitter {
                             let { min, max } = await this.functions.adjustTempProtection(deviceData.FrostProtection.Min, deviceData.FrostProtection.Max, value, 'max', 4, 14, 6, 16);
                             const payload = { enabled: deviceData.FrostProtection.Enabled, min: min, max: max };
                             if (this.logInfo) this.emit('info', `Set frost protection max. temperature: ${max}${this.accessory.temperatureUnit}`);
-                            await this.melCloudAta.send(this.accountType, this.displayType, deviceData, payload, 'frostprotection');
+                            await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, payload, 'frostprotection');
                         } catch (error) {
                             if (this.logWarn) this.emit('warn', `Set frost protection max. temperature error: ${error}`);
                         };
@@ -1257,7 +1255,7 @@ class DeviceAtw extends EventEmitter {
                             let { min, max } = await this.functions.adjustTempProtection(deviceData.FrostProtection.Min, deviceData.FrostProtection.Max, value, 'min', 4, 14, 6, 16);
                             const payload = { enabled: deviceData.FrostProtection.Enabled, min: min, max: max };
                             if (this.logInfo) this.emit('info', `Set frost protection min. temperature: ${min}${this.accessory.temperatureUnit}`);
-                            await this.melCloudAta.send(this.accountType, this.displayType, deviceData, payload, 'frostprotection');
+                            await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, payload, 'frostprotection');
                         } catch (error) {
                             if (this.logWarn) this.emit('warn', `Set frost protection min. temperature error: ${error}`);
                         };
@@ -1406,7 +1404,7 @@ class DeviceAtw extends EventEmitter {
                                     };
 
                                     if (this.logInfo) this.emit('info', `Preset ${name}: ${state ? 'Set' : 'Unset'}`);
-                                    await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, payload, AirConditioner.EffectiveFlags.Presets);
+                                    await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, payload, HeatPump.EffectiveFlags.Presets);
                                 } catch (error) {
                                     if (this.logWarn) this.emit('warn', `Set preset error: ${error}`);
                                 };
@@ -1570,7 +1568,7 @@ class DeviceAtw extends EventEmitter {
                 if (this.logDebug) this.emit('debug', `Prepare buttons / sensors services`);
                 this.buttonControlServices = [];
                 this.buttonControlSensorServices = [];
-                this.buttons.lengthforEach((button, i) => {
+                this.buttons.forEach((button, i) => {
                     //get mode
                     const mode = button.mode;
 
@@ -1596,7 +1594,7 @@ class DeviceAtw extends EventEmitter {
                                 return state;
                             })
                             .onSet(async (state) => {
-                                if (displayType > 0 && displayType < 3) {
+                                if (this.displayType > 0 && this.displayType < 3) {
                                     try {
                                         const payload = {};
                                         let flag = null;
@@ -2052,7 +2050,7 @@ class DeviceAtw extends EventEmitter {
                                         state = true;
                                         operationModeRaw = operationModeZone2;
                                         currentOperationMode = !power ? 0 : (idleZone2 ? 1 : [2, 2, 2, 3, 3, 3, 1][operationModeZone2]); //INACTIVE, IDLE, HEATING, COOLING
-                                        if (operationModeZone1 < 6) targetOperationMode = [1, 1, 0, 2, 2, 0][operationModeZone2]; //AUTO, HEAT, COOL
+                                        if (operationModeZone2 < 6) targetOperationMode = [1, 1, 0, 2, 2, 0][operationModeZone2]; //AUTO, HEAT, COOL
 
                                         switch (this.accountType) {
                                             case 'melcloud': //Melcloud

@@ -94,7 +94,7 @@ class MelCloudAta extends EventEmitter {
                         }
 
                         //update state
-                        if (this.logDebug) this.emit('debug', `Web socket update unit ${this.deviceId}settings: ${JSON.stringify(deviceData.Device, null, 2)}`);
+                        if (this.logDebug) this.emit('debug', `Web socket update unit ${this.deviceId} settings: ${JSON.stringify(deviceData.Device, null, 2)}`);
                         await this.updateState('ws', deviceData);
                     } catch (error) {
                         if (this.logError) this.emit('error', `Web socket unit ${this.deviceId} process message error: ${error}`);
@@ -285,7 +285,7 @@ class MelCloudAta extends EventEmitter {
                             method = 'PUT';
                             path = `${ApiUrls.Home.Put.SceneEnableDisable.replace('sceneid', payload.id)}/${payload.enabled ? 'enable' : 'disable'}`;
                             const scene = deviceData.Scenes.find(s => s.Id === payload.id);
-                            scene.Enabled = payload.enabled;
+                            if (scene) scene.Enabled = payload.enabled;
                             payload = {};
                             break;
                         default:
@@ -315,18 +315,16 @@ class MelCloudAta extends EventEmitter {
 
                             method = 'PUT';
                             path = ApiUrls.Home.Put.Ata.replace('deviceid', deviceData.DeviceID);
+                            deviceData.Device = { ...deviceData.Device, ...payload };
                             break;
                     }
 
                     //send payload
                     if (this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);
                     await this.client(path, { method: method, data: payload });
-
-                    //update state
-                    deviceData.Device = { ...deviceData.Device, ...payload };
                     return true;
                 default:
-                    if (this.logWarn) this.emit('warn', `Received unknwn account type: ${accountType}`);
+                    if (this.logWarn) this.emit('warn', `Received unknown account type: ${accountType}`);
                     return;
             }
         } catch (error) {

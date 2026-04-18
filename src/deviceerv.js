@@ -25,6 +25,7 @@ class DeviceErv extends EventEmitter {
         this.logInfo = account.log?.info || false;
         this.logWarn = account.log?.warn || false;
         this.logDebug = account.log?.debug || false;
+        this.logError = account.log?.error || false;
 
         //device config
         this.device = device;
@@ -184,7 +185,6 @@ class DeviceErv extends EventEmitter {
     async setOverExternalIntegration(integration, deviceData, key, value) {
         try {
             const accountTypeMelCloud = this.accountTypeMelCloud;
-            let set = false
             let payload = {};
             let flag = null;
             switch (key) {
@@ -236,8 +236,7 @@ class DeviceErv extends EventEmitter {
                     return;
             };
 
-            set = await this.melCloudErv.send(this.accountType, this.displayType, deviceData, payload, flag);
-            return set;
+            return await this.melCloudErv.send(this.accountType, this.displayType, deviceData, payload, flag);
         } catch (error) {
             throw new Error(`${integration} set key: ${key}, value: ${value}, error: ${error.message ?? error}`);
         };
@@ -525,7 +524,7 @@ class DeviceErv extends EventEmitter {
                                 this.melCloudAccountData.Account.LoginData.UseFahrenheit = value ? true : false;
                                 const payload = this.melCloudAccountData;
                                 if (this.logInfo) this.emit('info', `Set temperature display unit: ${TemperatureDisplayUnits[value]}`);
-                                await this.melCloudErv.send(this.accountType, this.displayType, deviceData, payload, 'account', this.melCloudAccountData);
+                                await this.melCloudErv.send(this.accountType, this.displayType, deviceData, payload, 'account');
                             } catch (error) {
                                 if (this.logWarn) this.emit('warn', `Set temperature display unit error: ${error}`);
                             };
@@ -708,7 +707,7 @@ class DeviceErv extends EventEmitter {
                         try {
                             const payload = { enabled: state };
                             if (this.logInfo) this.emit('info', `Holiday mode: ${state ? 'Enabled' : 'Disabled'}`);
-                            await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, payload, 'holidaymode');
+                            await this.melCloudErv.send(this.accountType, this.displayType, deviceData, payload, 'holidaymode');
                         } catch (error) {
                             if (this.logWarn) this.emit('warn', `Set holiday mode error: ${error}`);
                         };
@@ -797,7 +796,7 @@ class DeviceErv extends EventEmitter {
                                     };
 
                                     if (this.logInfo) this.emit('info', `Preset ${name}: ${state ? 'Set' : 'Unset'}`);
-                                    await this.melCloudErv.send(this.accountType, this.displayType, deviceData, payload, AirConditioner.EffectiveFlags.Presets);
+                                    await this.melCloudErv.send(this.accountType, this.displayType, deviceData, payload, Ventilation.EffectiveFlags.Presets);
                                 } catch (error) {
                                     if (this.logWarn) this.emit('warn', `Set preset error: ${error}`);
                                 };
@@ -857,7 +856,7 @@ class DeviceErv extends EventEmitter {
                                         const payload = { enabled: state };
                                         const scheduleData = schedulesOnServer.find(s => s.Id === schedule.id);
                                         if (this.logInfo) this.emit('info', `Schedules: ${state ? 'Enabled' : 'Disabled'}`);
-                                        await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, payload, 'schedule', scheduleData);
+                                        await this.melCloudErv.send(this.accountType, this.displayType, deviceData, payload, 'schedule', scheduleData);
                                     } catch (error) {
                                         if (this.logWarn) this.emit('warn', `Set schedules error: ${error}`);
                                     };
@@ -930,7 +929,7 @@ class DeviceErv extends EventEmitter {
                                     const sceneData = scenesOnServer.find(s => s.Id === scene.id);
                                     const payload = { id: sceneData.Id, enabled: state };
                                     if (this.logInfo) this.emit('info', `Scene ${name}: ${state ? 'Set' : 'Unset'}`);
-                                    await this.melCloudAta.send(this.accountType, this.displayType, deviceData, payload, 'scene');
+                                    await this.melCloudErv.send(this.accountType, this.displayType, deviceData, payload, 'scene');
                                 } catch (error) {
                                     if (this.logWarn) this.emit('warn', `Set scene error: ${error}`);
                                 };
@@ -1249,7 +1248,7 @@ class DeviceErv extends EventEmitter {
                                 case 2: // AUTO
                                     if (actualVentilationMode === 0) obj.currentOperationMode = 2; // HEAT
                                     if (actualVentilationMode === 1) obj.currentOperationMode = 3; // COOL
-                                    if (this.logWarn && (actualVentilationMode !== 0 || actualVentilationMode !== 1)) this.emit('warn', `Received unknown actual ventilation mode: ${actualVentilationMode}`);
+                                    if (this.logWarn && (actualVentilationMode !== 0 && actualVentilationMode !== 1)) this.emit('warn', `Received unknown actual ventilation mode: ${actualVentilationMode}`);
 
                                     obj.targetOperationMode = 0; // auto
                                     break;
@@ -1313,7 +1312,7 @@ class DeviceErv extends EventEmitter {
                                 case 2: // AUTO
                                     if (actualVentilationMode === 0) obj.currentOperationMode = 1; // HEAT
                                     if (actualVentilationMode === 1) obj.currentOperationMode = 2; // COOL
-                                    if (this.logWarn && (actualVentilationMode !== 0 || actualVentilationMode !== 1)) this.emit('warn', `Received unknown actual ventilation mode: ${actualVentilationMode}`);
+                                    if (this.logWarn && (actualVentilationMode !== 0 && actualVentilationMode !== 1)) this.emit('warn', `Received unknown actual ventilation mode: ${actualVentilationMode}`);
 
                                     obj.targetOperationMode = 3; // AUTO
                                     break;
@@ -1515,8 +1514,8 @@ class DeviceErv extends EventEmitter {
                         this.emit('info', `Current ventilation mode: ${Ventilation.OperationModeMapEnumToString[actualVentilationMode]}`);
                         this.emit('info', `Target temperature: ${setTemperature}${obj.temperatureUnit}`);
                         if (supportsRoomTemperature) this.emit('info', `Room temperature: ${roomTemperature}${obj.temperatureUnit}`);
-                        if (supportsSupplyTemperature) this.emit('info', `Supply temperature: ${roomTemperature}${obj.temperatureUnit}`);
-                        if (supportsOutdoorTemperature) this.emit('info', `Outdoor temperature: ${roomTemperature}${obj.temperatureUnit}`);
+                        if (supportsSupplyTemperature) this.emit('info', `Supply temperature: ${supplyTemperature}${obj.temperatureUnit}`);
+                        if (supportsOutdoorTemperature) this.emit('info', `Outdoor temperature: ${outdoorTemperature}${obj.temperatureUnit}`);
                         this.emit('info', `Fan speed mode: ${Ventilation.FanSpeedMapEnumToString[setFanSpeed]}`);
                         this.emit('info', `Temperature display unit: ${obj.temperatureUnit}`);
                         this.emit('info', `Core maintenance: ${Ventilation.CoreMaintenanceMapEnumToString[coreMaintenanceRequired]}`);

@@ -39,7 +39,7 @@ class MelCloud extends EventEmitter {
         try {
             await fn();
         } catch (error) {
-            this.emit('error', `Inpulse generator error: ${error}`);
+            this.emit('error', `Impulse generator error: ${error}`);
         } finally {
             this.locks[lockKey] = false;
         }
