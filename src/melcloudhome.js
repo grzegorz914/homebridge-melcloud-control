@@ -128,6 +128,7 @@ class MelCloudHome extends EventEmitter {
                     this.reconnectTimer = null;
                 }
                 if (this.logSuccess && this.pluginStart) this.emit('success', 'WebSocket connected');
+                this.pluginStart = false; // only log the first successful connection after plugin start
 
                 // Send a ping every 30 s to keep the connection alive
                 this.heartbeat = setInterval(() => {
