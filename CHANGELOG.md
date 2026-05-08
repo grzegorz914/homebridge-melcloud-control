@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - For plugin < v4.6.0 use Homebridge UI <= v5.5.0
 - For plugin >= v4.6.0 use Homebridge UI >= v5.13.0
 
-## [4.10.4] - (08.05.2026)
+## [4.10.5] - (08.05.2026)
 
 ### Changes
 
