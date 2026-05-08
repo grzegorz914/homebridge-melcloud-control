@@ -116,85 +116,6 @@ class DeviceAtw extends EventEmitter {
         this.accessory = {};
     }
 
-    async externalIntegrations() {
-        //RESTFul server
-        const restFulEnabled = this.restFul.enable || false;
-        if (restFulEnabled) {
-            try {
-
-                this.restFul1 = new RestFul({
-                    port: this.restFul.port,
-                    logWarn: this.logWarn,
-                    logDebug: this.logDebug
-                })
-                    .on('connected', (message) => {
-                        this.restFulConnected = true;
-                        this.emit('success', message);
-                    })
-                    .on('set', async (key, value) => {
-                        try {
-                            await this.setOverExternalIntegration('RESTFul', this.deviceData, key, value);
-                        } catch (error) {
-                            this.emit('warn', error);
-                        };
-                    })
-                    .on('debug', (debug) => {
-                        this.emit('debug', debug);
-                    })
-                    .on('warn', (warn) => {
-                        this.emit('warn', warn);
-                    })
-                    .on('error', (error) => {
-                        this.emit('error', error);
-                    });
-            } catch (error) {
-                if (this.logWarn) this.emit('warn', `RESTFul integration start error: ${error}`);
-            };
-        }
-
-        //MQTT client
-        const mqttEnabled = this.mqtt.enable || false;
-        if (mqttEnabled) {
-            try {
-                this.mqtt1 = new Mqtt({
-                    host: this.mqtt.host,
-                    port: this.mqtt.port || 1883,
-                    clientId: this.mqtt.clientId ? `melcloud_${this.mqtt.clientId}_${Math.random().toString(16).slice(3)}` : `melcloud_${Math.random().toString(16).slice(3)}`,
-                    prefix: this.mqtt.prefix ? `melcloud/${this.mqtt.prefix}/${this.deviceTypeString}/${this.deviceName}` : `melcloud/${this.deviceTypeString}/${this.deviceName}`,
-                    user: this.mqtt.auth?.user,
-                    passwd: this.mqtt.auth?.passwd,
-                    logWarn: this.logWarn,
-                    logDebug: this.logDebug
-                })
-                    .on('connected', (message) => {
-                        this.mqttConnected = true;
-                        this.emit('success', message);
-                    })
-                    .on('subscribed', (message) => {
-                        this.emit('success', message);
-                    })
-                    .on('set', async (key, value) => {
-                        try {
-                            await this.setOverExternalIntegration('MQTT', this.deviceData, key, value);
-                        } catch (error) {
-                            this.emit('warn', error);
-                        };
-                    })
-                    .on('debug', (debug) => {
-                        this.emit('debug', debug);
-                    })
-                    .on('warn', (warn) => {
-                        this.emit('warn', warn);
-                    })
-                    .on('error', (error) => {
-                        this.emit('error', error);
-                    });
-            } catch (error) {
-                if (this.logWarn) this.emit('warn', `MQTT integration start error: ${error}`);
-            };
-        }
-    }
-
     async setOverExternalIntegration(integration, deviceData, key, value) {
         try {
             const accountTypeMelCloud = this.accountTypeMelCloud;
@@ -210,7 +131,7 @@ class DeviceAtw extends EventEmitter {
                     break;
                 case 'SetTemperatureZone1':
                     payload.setTemperatureZone1 = value;
-                    flag = HeatPump.EffectiveFlags.SetTemperatureZone2;
+                    flag = HeatPump.EffectiveFlags.SetTemperatureZone1;
                     break;
                 case 'SetHeatFlowTemperatureZone1':
                     payload.setHeatFlowTemperatureZone1 = value;
@@ -223,7 +144,7 @@ class DeviceAtw extends EventEmitter {
                 case 'ProhibitZone1':
                     if (!accountTypeMelCloud) return;
                     payload.prohibitZone1 = value;
-                    flag = HeatPump.EffectiveFlags.ProhibitZone1;
+                    flag = HeatPump.EffectiveFlags.ProhibitHeatingZone1;
                     break;
                 case 'ForcedHotWaterMode':
                     payload.forcedHotWaterMode = value;
@@ -261,7 +182,7 @@ class DeviceAtw extends EventEmitter {
                 case 'ProhibitZone2':
                     if (!accountTypeMelCloud) return;
                     payload.prohibitZone2 = value;
-                    flag = HeatPump.EffectiveFlags.ProhibitZone2;
+                    flag = HeatPump.EffectiveFlags.ProhibitHeatingZone2;
                     break;
                 case 'FrostProtection':
                     if (accountTypeMelCloud) return;
@@ -293,6 +214,83 @@ class DeviceAtw extends EventEmitter {
         } catch (error) {
             throw new Error(`${integration} set key: ${key}, value: ${value}, error: ${error.message ?? error}`);
         };
+    }
+
+    async externalIntegrations() {
+        //RESTFul server
+        const restFulEnabled = this.restFul.enable || false;
+        if (restFulEnabled) {
+            try {
+                await new Promise((resolve) => {
+                    const timer = setTimeout(resolve, 5000);
+                    this.restFul1 = new RestFul({
+                        port: this.device.restFul.port,
+                        logWarn: this.logWarn,
+                        logDebug: this.logDebug,
+                    })
+                        .once('connected', (success) => {
+                            clearTimeout(timer);
+                            this.restFulConnected = true;
+                            this.emit('success', success);
+                            resolve();
+                        })
+                        .on('set', async (key, value) => {
+                            try {
+                                await this.setOverExternalIntegration('RESTFul', this.deviceData, key, value);
+                            } catch (error) {
+                                if (this.logWarn) this.emit('warn', `RESTFul set error: ${error}`);
+                            };
+                        })
+                        .on('debug', (debug) => this.emit('debug', debug))
+                        .on('warn', (warn) => this.emit('warn', warn))
+                        .on('error', (error) => this.emit('error', error));
+                });
+            } catch (error) {
+                this.emit('warn', `RESTFul integration start error: ${error}`);
+            }
+        }
+
+        const mqttEnabled = this.mqtt.enable || false;
+        if (mqttEnabled) {
+            try {
+                await new Promise((resolve) => {
+                    const timer = setTimeout(resolve, 10000);
+                    this.mqtt1 = new Mqtt({
+                        host: this.mqtt.host,
+                        port: this.mqtt.port || 1883,
+                        clientId: this.mqtt.clientId ? `melcloud_${this.mqtt.clientId}_${Math.random().toString(16).slice(3)}` : `melcloud_${Math.random().toString(16).slice(3)}`,
+                        prefix: this.mqtt.prefix ? `melcloud/${this.mqtt.prefix}/${this.deviceTypeString}/${this.deviceName}` : `melcloud/${this.deviceTypeString}/${this.deviceName}`,
+                        user: this.mqtt.auth?.user,
+                        passwd: this.mqtt.auth?.passwd,
+                        logWarn: this.logWarn,
+                        logDebug: this.logDebug
+                    })
+                        .once('connected', (success) => {
+                            clearTimeout(timer);
+                            this.mqttConnected = true;
+                            this.emit('success', success);
+                            resolve();
+                        })
+                        .on('subscribed', (success) => {
+                            this.emit('success', success);
+                        })
+                        .on('set', async (key, value) => {
+                            try {
+                                await this.setOverExternalIntegration('MQTT', this.deviceData, key, value);
+                            } catch (error) {
+                                if (this.logWarn) this.emit('warn', `MQTT set, error: ${error}`);
+                            };
+                        })
+                        .on('debug', (debug) => this.emit('debug', debug))
+                        .on('warn', (warn) => this.emit('warn', warn))
+                        .on('error', (error) => this.emit('error', error));
+                });
+            } catch (error) {
+                this.emit('warn', `MQTT integration start error: ${error}`);
+            }
+        };
+
+        return true;
     }
 
     //prepare accessory
@@ -1415,7 +1413,7 @@ class DeviceAtw extends EventEmitter {
 
                     //sensor
                     if (preset.displayType < 7) {
-                        if (this.logDebug) this.emit('debug', `Prepare preset control sensor s${name}  ervice`);
+                        if (this.logDebug) this.emit('debug', `Prepare preset control sensor ${name} service`);
                         const presetControlSensorService = new serviceType(serviceName1, `presetControlSensorService${deviceId} ${i}`);
                         presetControlSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
                         presetControlSensorService.setCharacteristic(Characteristic.ConfiguredName, `${serviceName1} Control`);
@@ -1512,7 +1510,7 @@ class DeviceAtw extends EventEmitter {
                 this.scenes.forEach((scene, i) => {
 
                     //get name
-                    const name = scene.name || `Scens ${i}`;
+                    const name = scene.name || `Scene ${i}`;
 
                     //get name prefix
                     const namePrefix = scene.namePrefix;
@@ -1619,7 +1617,7 @@ class DeviceAtw extends EventEmitter {
                                                 }
 
                                                 if (!accountTypeMelCloud) {
-                                                    payload.holidayMode.enabled = state;
+                                                    payload.enabled = state;
                                                     flag = 'holidaymode';
                                                 }
                                                 break;
@@ -1754,6 +1752,9 @@ class DeviceAtw extends EventEmitter {
     //start
     async start() {
         try {
+            //start external integrations
+            if (this.restFul.enable || this.mqtt.enable) await this.externalIntegrations();
+
             //melcloud device
             this.melCloudAtw = new MelCloudAtw(this.account, this.device, this.defaultTempsFile, this.melCloudClass)
                 .on('deviceInfo', (modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion, supportsHotWaterTank, supportsZone2, ftcModel) => {
@@ -2211,7 +2212,7 @@ class DeviceAtw extends EventEmitter {
                                         state = true;
                                         operationModeRaw = operationModeZone2;
                                         currentOperationMode = !power ? 0 : idleZone2 ? 0 : [1, 1, 1, 2, 2, 2, 0][operationModeZone2]; //OFF, HEAT, COOL
-                                        if (operationModeZone1 < 6) targetOperationMode = [1, 1, 3, 2, 2, 3][operationModeZone2]; //OFF, HEAT, COOL, AUTO
+                                        if (operationModeZone2 < 6) targetOperationMode = [1, 1, 3, 2, 2, 3][operationModeZone2]; //OFF, HEAT, COOL, AUTO
 
                                         switch (this.accountType) {
                                             case 'melcloud': //Melcloud
@@ -2532,44 +2533,41 @@ class DeviceAtw extends EventEmitter {
                                 case 2: //COOL
                                     button.state = power ? (operationMode === 1) : false;
                                     break;
-                                case 53: //HOLIDAY
+                                case 3: //HOLIDAY
                                     button.state = power ? holidayMode.Enabled : false;
                                     break;
                                 case 10: //ALL ZONES PHYSICAL LOCK CONTROL
                                     button.state = power ? (prohibitZone1 && prohibitHotWater && prohibitZone2) : false;
                                     break;
-                                case 20: //HOT WATER AUTO
-                                    button.state = power ? (forcedHotWaterMode === false) : false;
-                                    break;
-                                case 21: //ECO
-                                    button.state = power ? (ecoHotWater === true) : false;
-                                    break;
-                                case 22: //FORCE HEAT
-                                    button.state = power ? (forcedHotWaterMode === true) : false;
-                                    break;
-                                case 30: //PHYSICAL LOCK CONTROL
-                                    button.state = (prohibitHotWater === true);
-                                    break;
-                                case 40: //ZONE 1 HEAT ROOM
+                                case 20: //ZONE 1 HEAT ROOM
                                     button.state = power ? (operationModeZone1 === 0) : false;
                                     break;
-                                case 41: //HEAT FLOW
+                                case 21: //HEAT FLOW
                                     button.state = power ? (operationModeZone1 === 1) : false;
                                     break;
-                                case 42: //HEAT CURVE
+                                case 22: //HEAT CURVE
                                     button.state = power ? (operationModeZone1 === 2) : false;
                                     break;
-                                case 43: //COOL ROOM
+                                case 23: //COOL ROOM
                                     button.state = power ? (operationModeZone1 === 3) : false;
                                     break;
-                                case 44: //COOL FLOW
+                                case 24: //COOL FLOW
                                     button.state = power ? (operationModeZone1 === 4) : false;
                                     break;
-                                case 45: //FLOOR DRY UP
+                                case 25: //FLOOR DRY UP
                                     button.state = power ? (operationModeZone1 === 5) : false;
                                     break;
-                                case 50: //PHYSICAL LOCK CONTROL
+                                case 30: //PHYSICAL LOCK CONTROL ZONE 1
                                     button.state = prohibitZone1;
+                                    break;
+                                case 40: //HOT WATER FORCE
+                                    button.state = power ? (forcedHotWaterMode === true) : false;
+                                    break;
+                                case 41: //ECO
+                                    button.state = power ? (ecoHotWater === true) : false;
+                                    break;
+                                case 50: //PHYSICAL LOCK CONTROL HOT WATER
+                                    button.state = (prohibitHotWater === true);
                                     break;
                                 case 60: //ZONE 2 HEAT ROOM
                                     button.state = power ? (operationModeZone2 === 0) : false;
@@ -2617,9 +2615,6 @@ class DeviceAtw extends EventEmitter {
                 .on('mqtt', async (topic, message) => {
                     if (this.mqttConnected) await this.mqtt1.publish(topic, message);
                 });
-
-            //start external integrations
-            if (this.restFul.enable || this.mqtt.enable) await this.externalIntegrations();
 
             //check state
             await this.melCloudAtw.updateState('request', this.melCloudDeviceData);

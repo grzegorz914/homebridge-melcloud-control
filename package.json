@@ -32,7 +32,7 @@
   ],
   "engines": {
     "homebridge": "^1.8.0 || ^2.0.0",
-    "node": "^20 || ^22 || ^24 || ^25"
+    "node": "^20 || ^22 || ^24 || ^25 || ^26"
   },
   "dependencies": {
     "@homebridge/plugin-ui-utils": "^2.2.3",

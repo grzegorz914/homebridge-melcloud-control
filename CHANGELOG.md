@@ -24,52 +24,65 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - For plugin < v4.6.0 use Homebridge UI <= v5.5.0
 - For plugin >= v4.6.0 use Homebridge UI >= v5.13.0
 
-# [4.10.2] - (18.04.2026)
+## [4.10.4] - (08.05.2026)
 
-## Changes
+### Changes
+
+- fix RESTFul and MQTT set commands not working after externalIntegrations refactor (missing deviceData argument)
+- fix ATW SetTemperatureZone1 sending wrong EffectiveFlag (was SetTemperatureZone2)
+- fix ATW ProhibitZone1/ProhibitZone2 referencing undefined EffectiveFlags (now ProhibitHeatingZone1/ProhibitHeatingZone2)
+- fix ATW holiday mode button TypeError for MELCloud Home (payload.holidayMode.enabled → payload.enabled)
+- fix ATW Zone 2 thermostat target operation mode using operationModeZone1 instead of operationModeZone2
+- fix ATW button state update using wrong mode numbers for Zone 1 and Hot Water (modes 20-50 were swapped)
+- fix ATW Holiday button state never updating (case 53 → case 3)
+- fix typos in debug log messages
+
+## [4.10.2] - (18.04.2026)
+
+### Changes
 
 - fix [#243](https://github.com/grzegorz914/homebridge-melcloud-control/issues/243)
 - cleanup
 
-# [4.10.1] - (17.04.2026)
+## [4.10.1] - (17.04.2026)
 
-## Changes
+### Changes
 
 - fix RESTFul port assigned
 - stability and performance improvements
 - cleanup
 
-# [4.10.0] - (16.04.2026)
+## [4.10.0] - (16.04.2026)
 
-## Changes
+### Changes
 
 - added web socket for real time data update with MELCloud Home
 - cleanup
 
-# [4.9.1] - (15.04.2026)
+## [4.9.1] - (15.04.2026)
 
-## Changes
+### Changes
 
 - fix scene and shedule enable/disable for MELCloud Home
 
-# [4.9.0] - (15.04.2026)
+## [4.9.0] - (15.04.2026)
 
-## Changes
+### Changes
 
 - refactor MELCloud Home to use Bearer token for authentication instead of cookies, fix [#240]
 - bump dependencies
 - cleanup
 
-# [4.8.7] - (10.04.2026)
+## [4.8.7] - (10.04.2026)
 
-## Changes
+### Changes
 
 - refactor connect manager
 - cleanup
 
-# [4.8.4] - (22.03.2026)
+## [4.8.4] - (22.03.2026)
 
-## Changes
+### Changes
 
 - fix report correct fan mode fter power ON with HK
 - fix wide vane support
@@ -77,9 +90,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - bump dependencies
 - cleanup
 
-# [4.8.3] - (17.03.2026)
+## [4.8.3] - (17.03.2026)
 
-## Changes
+### Changes
 
 - fix fan mode control and display
 - fix account disable
@@ -87,9 +100,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - redme update
 - cleanup
 
-# [4.8.0] - (23.02.2026)
+## [4.8.0] - (23.02.2026)
 
-## Changes
+### Changes
 
 - add support to update room temperature over MQTT or RESTFul, fix [#238](https://github.com/grzegorz914/homebridge-melcloud-control/issues/238)
 - bump dependencies
@@ -97,9 +110,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - redme update
 - cleanup
 
-# [4.7.10] - (19.02.2026)
+## [4.7.10] - (19.02.2026)
 
-## Changes
+### Changes
 
 - fix [#237](https://github.com/grzegorz914/homebridge-melcloud-control/issues/237)
 - bump dependencies
@@ -107,9 +120,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - redme update
 - cleanup
 
-# [4.7.9] - (18.02.2026)
+## [4.7.9] - (18.02.2026)
 
-## Changes
+### Changes
 
 - fix wrong display zone 2 for ATW (MELCloud Home)
 - fix set ATW different params
@@ -120,44 +133,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - redme update
 - cleanup
 
-# [4.7.8] - (02.02.2026)
+## [4.7.8] - (02.02.2026)
 
-## Changes
+### Changes
 
 - fix [#236](https://github.com/grzegorz914/homebridge-melcloud-control/issues/236)
 - cleanup
 
-# [4.7.7] - (01.02.2026)
+## [4.7.7] - (01.02.2026)
 
-## Changes
+### Changes
 
 - fix frost protection characteristics current temp update for ATW
 - cleanup
 
-# [4.7.6] - (31.01.2026)
+## [4.7.6] - (31.01.2026)
 
-## Changes
-
-- stability and performance improvements
-- cleanup
-
-# [4.7.5] - (30.01.2026)
-
-## Changes
+### Changes
 
 - stability and performance improvements
 - cleanup
 
-# [4.7.4] - (29.01.2026)
+## [4.7.5] - (30.01.2026)
 
-## Changes
+### Changes
+
+- stability and performance improvements
+- cleanup
+
+## [4.7.4] - (29.01.2026)
+
+### Changes
 
 - fix ATW Zone 2
 - cleanup
 
-# [4.7.3] - (29.01.2026)
+## [4.7.3] - (29.01.2026)
 
-## Changes
+### Changes
 
 - fix [#235](https://github.com/grzegorz914/homebridge-melcloud-control/issues/235)
 - fix 2 [#233](https://github.com/grzegorz914/homebridge-melcloud-control/issues/233)
@@ -167,9 +180,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - other fixes for ATA, ATW, ERV
 - cleanup
 
-# [4.7.2] - (29.01.2026)
+## [4.7.2] - (29.01.2026)
 
-## Changes
+### Changes
 
 - fix zone2 for ATW devices
 - constants updated
@@ -177,17 +190,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - bump dependencies
 - cleanup
 
-# [4.7.1] - (27.01.2026)
+## [4.7.1] - (27.01.2026)
 
-## Changes
+### Changes
 
 - add falback to power for unit status in melcloud home
 - constants updated
 - cleanup
 
-# [4.7.0] - (27.01.2026)
+## [4.7.0] - (27.01.2026)
 
-## Changes
+### Changes
 
 - add support for ATW, fix [#233](https://github.com/grzegorz914/homebridge-melcloud-control/issues/233), thanks @bastienb99
 - fix [#232](https://github.com/grzegorz914/homebridge-melcloud-control/issues/232)
@@ -196,75 +209,75 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - bump dependencies
 - cleanup
 
-# [4.6.6] - (23.01.2026)
+## [4.6.6] - (23.01.2026)
 
-## Changes
+### Changes
 
 - fix devices array initialization from UI on first run, fix [#231](https://github.com/grzegorz914/homebridge-melcloud-control/issues/231)
 - config schema updated
 - bump dependencies
 - cleanup
 
-# [4.6.4] - (10.01.2026)
+## [4.6.4] - (10.01.2026)
 
-## Changes
+### Changes
 
 - config schema updated
 - fix hide log success and dev info
 - bump dependencies
 - cleanup
 
-# [4.6.3] - (01.01.2026)
+## [4.6.3] - (01.01.2026)
 
-## Changes
+### Changes
 
 - config schema updated
 - cleanup
 
-# [4.6.2] - (01.01.2026)
+## [4.6.2] - (01.01.2026)
 
-## Changes
+### Changes
 
 - improvement support of Homebridge UI >= v5.13.0
 - config schema updated
 - redme updated
 - cleanup
 
-# [4.6.1] - (29.12.2025)
+## [4.6.1] - (29.12.2025)
 
-## Changes
+### Changes
 
 - config schema updated
 - redme updated
 - cleanup
 
-# [4.6.0] - (28.12.2025)
+## [4.6.0] - (28.12.2025)
 
-## Changes
+### Changes
 
 - added support for Homebridge UI >= v5.13.0, [#228](https://github.com/grzegorz914/homebridge-melcloud-control/issues/228)
 - config schema updated
 - redme updated
 - cleanup
 
-# [4.5.7] - (24.12.2025)
+## [4.5.7] - (24.12.2025)
 
-## Changes
+### Changes
 
 - fix [#229](https://github.com/grzegorz914/homebridge-melcloud-control/issues/229)
 - cleanup
 
-# [4.5.6] - (22.12.2025)
+## [4.5.6] - (22.12.2025)
 
-## Changes
+### Changes
 
 - improvements of arch detection
 - fix install chrome browser for docker image
 - cleanup
 
-# [4.5.5] - (21.12.2025)
+## [4.5.5] - (21.12.2025)
 
-## Changes
+### Changes
 
 - fix characteristics warning in Thermostat mode if frost protection active
 - fix device type shows undefined
@@ -272,21 +285,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - redme updated
 - cleanup
 
-# [4.5.4] - (19.12.2025)
+## [4.5.4] - (19.12.2025)
 
-## Changes
+### Changes
 
 - MELCLoud, fix[#227](https://github.com/grzegorz914/homebridge-melcloud-control/issues/227)
 
-# [4.5.3] - (19.12.2025)
+## [4.5.3] - (19.12.2025)
 
-## Changes
+### Changes
 
 - MELCLoud Home, fix[#227](https://github.com/grzegorz914/homebridge-melcloud-control/issues/227)
 
-# [4.5.0] - (19.12.2025)
+## [4.5.0] - (19.12.2025)
 
-## Changes
+### Changes
 
 - stability and performance improvements
 - remove oldnot existed presets, schedules, scenes fom config during (Connect To Melcloud)
@@ -295,9 +308,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - redme updated
 - cleanup
 
-# [4.4.0] - (10.12.2025)
+## [4.4.0] - (10.12.2025)
 
-## Changes
+### Changes
 
 - added possibility to set frost protection min/max temperaure (ATA, ATW)
 - added possibility to set overheat protection min/max temperture (ATA)
@@ -306,59 +319,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - bump dependencies
 - cleanup
 
-# [4.3.11] - (07.12.2025)
+## [4.3.11] - (07.12.2025)
 
-## Changes
+### Changes
 
 - stability and performance improvements
 - bump dependencies
 - cleanup
 
-# [4.3.9] - (01.12.2025)
+## [4.3.9] - (01.12.2025)
 
-## Changes
+### Changes
 
 - stability and performance improvements
 - fix vane H/V display wrong state
 - cleanup
 
-# [4.3.8] - (29.11.2025)
+## [4.3.8] - (29.11.2025)
 
-## Changes
+### Changes
 
 - display warning if device is disabled in config
 - display warning if device not exist in MELCLoud and is configured in config
 - cleanup
 
-# [4.3.7] - (28.11.2025)
+## [4.3.7] - (28.11.2025)
 
-## Changes
+### Changes
 
 - fix operation mode FAN and AUTO for MELCloud Home ATA
 - stability and performance improvements
 - config schema updated
 - cleanup
 
-# [4.3.5] - (24.11.2025)
+## [4.3.5] - (24.11.2025)
 
-## Changes
+### Changes
 
 - removed device refresh time settings
 - stability and performance improvements
 - redme updated
 - cleanup
 
-# [4.3.4] - (23.11.2025)
+## [4.3.4] - (23.11.2025)
 
-## Changes
+### Changes
 
 - fix account monitoring start
 - stability improvements
 - cleanup
 
-# [4.3.3] - (22.11.2025)
+## [4.3.3] - (22.11.2025)
 
-## Changes
+### Changes
 
 - fix [#224](https://github.com/grzegorz914/homebridge-melcloud-control/issues/224)
 - fix presets report wrong state
@@ -367,44 +380,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - bump dependencies
 - cleanup
 
-# [4.3.2] - (21.11.2025)
+## [4.3.2] - (21.11.2025)
 
-## Changes
+### Changes
 
 - stability improvements
 - cleanup
 
-# [4.3.0] - (20.11.2025)
+## [4.3.0] - (20.11.2025)
 
-## Changes
+### Changes
 
 - use web socket for Real Time communication with MELCloud Home
 - cleanup
 
-# [4.2.8] - (18.11.2025)
+## [4.2.8] - (18.11.2025)
 
-## Changes
+### Changes
 
 - added option to set only switch for presets, scenes, schedules or buttons
 - readme updated
 - cleanup
 
-# [4.2.7] - (18.11.2025)
+## [4.2.7] - (18.11.2025)
 
-## Changes
+### Changes
 
 - fix [#220](https://github.com/grzegorz914/homebridge-melcloud-control/issues/220)
 
-# [4.2.6] - (18.11.2025)
+## [4.2.6] - (18.11.2025)
 
-## Changes
+### Changes
 
 - stability improvements of RESTFul and MQTT start
 - cleanup
 
-# [4.2.5] - (17.11.2025)
+## [4.2.5] - (17.11.2025)
 
-## Changes
+### Changes
 
 - fix device control stop working after some time
 - fix device state not refresh
@@ -416,7 +429,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [4.2.3] - (15.11.2025)
 
-## Changes
+### Changes
 
 - added scenes support for MELCloud Home
 - fix some issues
@@ -427,7 +440,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [4.2.2] - (14.11.2025)
 
-## Changes
+### Changes
 
 - added in standby mode sensor
 - fix device control after some time
@@ -438,7 +451,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [4.2.1] - (13.11.2025)
 
-## Changes
+### Changes
 
 - RESTFul and MQTT update for MELCloud Home
 - bump dependencies
@@ -448,7 +461,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [4.2.0] - (13.11.2025)
 
-## Changes
+### Changes
 
 - initial support for MELCloud Home ATW device
 - added frost protection control for MELCloud Home ATA device
@@ -460,7 +473,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [4.1.2] - (11.11.2025)
 
-## Changes
+### Changes
 
 - fix [#218](https://github.com/grzegorz914/homebridge-melcloud-control/issues/218)
 - added schedules support for MELCLoud Home ATA devices
@@ -470,7 +483,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [4.1.1] - (10.11.2025)
 
-## Changes
+### Changes
 
 - added shedule sensor for MELCLoud Home ATA devices
 - config schema updated
@@ -479,7 +492,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [4.1.0] - (10.11.2025)
 
-## Changes
+### Changes
 
 - changed accessory category for ATA devices, required add accessory to KomeKit again
 - added frost protection sensor for MELCLoud Home ATA devices
@@ -491,7 +504,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [4.0.3] - (08.11.2025)
 
-## Changes
+### Changes
 
 - fix ATW and ERV for old MELCloud
 - bump dependencies
@@ -500,7 +513,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [4.0.2] - (06.11.2025)
 
-## Changes
+### Changes
 
 - fix RESTFul extrnal integration for MELCloud Home devices
 - readme updated
@@ -508,7 +521,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [4.0.1] - (06.11.2025)
 
-## Changes
+### Changes
 
 - fix start error for old MELCLoud after update
 - bump dependencies
@@ -517,7 +530,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [4.0.0] - (05.11.2025)
 
-## Changes
+### Changes
 
 - added support for MELCloud Home ATA devices [#215](https://github.com/grzegorz914/homebridge-melcloud-control/issues/215)
 - added error sensor
@@ -527,19 +540,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.9.5] - (02.09.2025)
 
-## Changes
+### Changes
 
 - fix ERV start error
 
 ## [3.9.4] - (02.09.2025)
 
-## Changes
+### Changes
 
 - fix [#213](https://github.com/grzegorz914/homebridge-melcloud-control/issues/213)
 
 ## [3.9.0] - (18.08.2025)
 
-## Changes
+### Changes
 
 - Config UI CONECT TO MELCLOUD updated
   - automayically remove devices not existed in melcloud
@@ -549,7 +562,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.8.14] - (26.06.2025)
 
-## Changes
+### Changes
 
 - fix [#199](https://github.com/grzegorz914/homebridge-melcloud-control/issues/199)
 - fix [#205](https://github.com/grzegorz914/homebridge-melcloud-control/issues/205)
@@ -557,41 +570,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.8.13] - (26.06.2025)
 
-## Changes
+### Changes
 
 - fix [#206](https://github.com/grzegorz914/homebridge-melcloud-control/issues/206)
 
 ## [3.8.6] - (24.05.2025)
 
-## Changes
+### Changes
 
 - fix [#200](https://github.com/grzegorz914/homebridge-melcloud-control/issues/200)
 - cleanup
 
 ## [3.8.5] - (24.05.2025)
 
-## Changes
+### Changes
 
 - fix [#199](https://github.com/grzegorz914/homebridge-melcloud-control/issues/199)
 - cleanup
 
 ## [3.8.3] - (20.05.2025)
 
-## Changes
+### Changes
 
 - fix [#198](https://github.com/grzegorz914/homebridge-melcloud-control/issues/198)
 - cleanup
 
 ## [3.8.1] - (10.05.2025)
 
-## Changes
+### Changes
 
 - fix temperature sensors
 - cleanup
 
 ## [3.8.0] - (05.05.2025)
 
-## Changes
+### Changes
 
 - add possibility to hide individual zone accessory in Home app for ATW device, solved[#194](https://github.com/grzegorz914/homebridge-melcloud-control/issues/194)
 - publish sensors independent from hiden zones for ATW devices
@@ -603,25 +616,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.7.5] - (25.03.2025)
 
-## Changes
+### Changes
 
 - fix[#192](https://github.com/grzegorz914/homebridge-melcloud-control/issues/192), thanks @helloabunai
 
 ## [3.7.3] - (15.03.2025)
 
-## Changes
+### Changes
 
 - updated Homebridge UI interface
 
 ## [3.7.1] - (14.03.2025)
 
-## Changes
+### Changes
 
 - removed possibility to disable indyvidual accessory due to duplicated function with displayMode
 
 ## [3.7.0] - (13.03.2025)
 
-## Changes
+### Changes
 
 - added possibility to disable indyvidual accessory
 - bump dependencies
@@ -631,14 +644,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.6.9] - (28.02.2025)
 
-## Changes
+### Changes
 
 - fix[#191](https://github.com/grzegorz914/homebridge-melcloud-control/issues/191)
 - cleanup
 
 ## [3.6.7] - (26.02.2025)
 
-## Changes
+### Changes
 
 - bump dependencies
 - cleanup
@@ -646,31 +659,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.6.6] - (25.02.2025)
 
-## Changes
+### Changes
 
 - fix [#190](https://github.com/grzegorz914/homebridge-melcloud-control/issues/190)
 
 ## [3.6.4] - (09.02.2025)
 
-## Changes
+### Changes
 
 - fix plugin crash if config dosnt contain devices
 
 ## [3.6.3] - (07.02.2025)
 
-## Changes
+### Changes
 
 - stability and improvements
 
 ## [3.6.2] - (04.03.2025)
 
-## Changes
+### Changes
 
 - fix [#188](https://github.com/grzegorz914/homebridge-melcloud-control/issues/188)
 
 ## [3.6.1] - (29.01.2025)
 
-## Changes
+### Changes
 
 - refactor cnnect and reconnect code
 - refactor external integrations MQTT and RESTFul
@@ -679,7 +692,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.6.0] - (29.01.2025)
 
-## Changes
+### Changes
 
 - added possibility to disable/enable log success, info, warn, error
 - refactor cnnect code
@@ -690,7 +703,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.5.0] - (06.12.2024)
 
-## Changes
+### Changes
 
 - added possibility to set device refresh state indyvidually for every device
 - bump deependemcies
@@ -700,21 +713,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.4.4] - (05.12.2024)
 
-## Changes
+### Changes
 
 - fix [#184](https://github.com/grzegorz914/homebridge-melcloud-control/issues/184)
 - bump deependemcies
 
 ## [3.4.3] - (02.12.2024)
 
-## Changes
+### Changes
 
 - fix [#182](https://github.com/grzegorz914/homebridge-melcloud-control/issues/182)
 - cleanup
 
 ## [3.4.0] - (30.11.2024)
 
-## Changes
+### Changes
 
 - move from commonJS to esm module, fixing [#180](https://github.com/grzegorz914/homebridge-melcloud-control/issues/180)
 - moved constants.json to constants.js
@@ -722,21 +735,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.3.20] - (25.09.2024)
 
-## Changes
+### Changes
 
 - fix ATA characteristics warning after plugin restart if device in DRY or FAN mode
 - cleanup  
 
 ## [3.3.19] - (25.09.2024)
 
-## Changes
+### Changes
 
 - fix apply presets for ATA
 - cleanup  
 
 ## [3.3.18] - (25.09.2024)
 
-## Changes
+### Changes
 
 - fix get/set temperature during operation mode change for ATA
 - fix [#168](https://github.com/grzegorz914/homebridge-melcloud-control/issues/168)
@@ -744,7 +757,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.3.17] - (24.09.2024)
 
-## Changes
+### Changes
 
 - fix operation mode for ATA - Thermostat if device go to OFF
 - move some error to warn
@@ -752,7 +765,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.3.16] - (23.09.2024)
 
-## Changes
+### Changes
 
 - fix report wrong target mode if device is OFF and the plugin or bridge reboots
 - fix [#167](https://github.com/grzegorz914/homebridge-melcloud-control/issues/167)
@@ -760,21 +773,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.3.15] - (21.09.2024)
 
-## Changes
+### Changes
 
 - fix report wrong target temperature in Heat/Cool mode for ATA and ERV
 - cleanup
 
 ## [3.3.14] - (21.09.2024)
 
-## Changes
+### Changes
 
 - code improvements
 - cleanup
 
 ## [3.3.13] - (20.09.2024)
 
-## Changes
+### Changes
 
 - fix [#166](https://github.com/grzegorz914/homebridge-melcloud-control/issues/166)
 - readme update with explanation of AUTO mode in Heather/Cooler and Thermostat mode
@@ -782,14 +795,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.3.5] - (15.09.2024)
 
-## Changes
+### Changes
 
 - fix[#162](https://github.com/grzegorz914/homebridge-melcloud-control/issues/162)
 - cleanup
 
 ## [3.3.3] - (13.09.2024)
 
-## Changes
+### Changes
 
 - fix[#159](https://github.com/grzegorz914/homebridge-melcloud-control/issues/159)
 - fix [#158](https://github.com/grzegorz914/homebridge-melcloud-control/issues/158)
@@ -797,7 +810,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.3.2] - (13.09.2024)
 
-## Changes
+### Changes
 
 - corrct setProps for heating/cooling threshold
 - update ERV code to support heating/cooling threshold in auto mode
@@ -805,7 +818,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.3.1] - (13.09.2024)
 
-## Changes
+### Changes
 
 - fix update default Heating/Cooling characteristic temp
 - fix display current state of operation mode:
@@ -821,7 +834,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.3.0] - (12.09.2024)
 
-## Changes
+### Changes
 
 - added full support for AUTO mode with dead band, low and high temperature
 - fix some log info message
@@ -830,7 +843,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.2.0] - (11.09.2024)
 
-## Changes
+### Changes
 
 - added possibility to set previous value for buttons [#154](https://github.com/grzegorz914/homebridge-melcloud-control/issues/154)
 - move some message to warning
@@ -839,40 +852,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.1.11] - (09.09.2024)
 
-## Changes
+### Changes
 
 - cleanup
 
 ## [3.1.9] - (05.08.2024)
 
-## Changes
+### Changes
 
 - prevent load device if display mode set to 0 or unknown [#150](https://github.com/grzegorz914/homebridge-melcloud-control/issues/150)
 - cleanup
 
 ## [3.1.8] - (03.08.2024)
 
-## Changes
+### Changes
 
 - fix [#149](https://github.com/grzegorz914/homebridge-melcloud-control/issues/149)
 - cleanup
 
 ## [3.1.4] - (02.08.2024)
 
-## Changes
+### Changes
 
 - fix [#145](https://github.com/grzegorz914/homebridge-melcloud-control/issues/145)
 - cleanup
 
 ## [3.1.2] - (31.08.2024)
 
-## Changes
+### Changes
 
 - fix presets configured array
 
 ## [3.1.0] - (31.08.2024)
 
-## Changes
+### Changes
 
 - improvements in plugin config UI
 - added presets config indyvidually
@@ -882,7 +895,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.0.7] - (30.08.2024)
 
-## Changes
+### Changes
 
 - improvements in plugin config UI
 - config schema update
@@ -890,7 +903,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.0.0] - (29.08.2024)
 
-## Changes
+### Changes
 
 - added homebridge UI server
 - whole new concept get all devices from melcloud usin config UI X
@@ -900,7 +913,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.4.0] - (28.08.2024)
 
-## Changes
+### Changes
 
 - required upcomming homebridge 2.x.x required
 - bump dependencies
@@ -908,14 +921,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.3.3] - (28.08.2024)
 
-## Changes
+### Changes
 
 - cleanup and refactor accessory code
 - bump dependencies
 
 ## [2.3.0] - (25.08.2024)
 
-## Changes
+### Changes
 
 - removed from config.json `ataDisableAutoMode`, `ataDisableHeatMode`, `ataAutoHeatMode`
 - added to config.json `ataHeatDryFanMode`, `ataCoolDryFanMode`, `ataAutoDryFanMode`
@@ -926,7 +939,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.2.0] - (18.08.2024)
 
-## Changes
+### Changes
 
 - fix MQTT and RESTFul start
 - add control over RESTFul POST JSON Object
@@ -934,14 +947,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.1.1] - (18.08.2024)
 
-## Changes
+### Changes
 
 - fix correct catch error
 - log improvements
 
 ## [2.1.0] - (16.08.2024)
 
-## Changes
+### Changes
 
 - added possibility to set device state refresh inteval
 - rebuilt connect to melcloud code
@@ -952,7 +965,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.0] - (14.08.2024)
 
-## Changes
+### Changes
 
 - RestFul and MQTT refactor
 - bump dependencies
@@ -960,21 +973,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.4] - (14.08.2024)
 
-## Changes
+### Changes
 
 - hide passwords, tokens, serial numbers, by typing and display in Config UI
 - remove return duplicate promises from whole code
 
 ## [1.1.3] - (06.08.2024)
 
-## Changes  
+### Changes
 
 - fix [#131](https://github.com/grzegorz914/homebridge-melcloud-control/issues/131)
 - bump dependencies
 
 ## [1.1.0] - (23.07.2024)
 
-## Changes  
+### Changes
 
 - allow enable/disable every extra temperature sensor indyvidually [#126](https://github.com/grzegorz914/homebridge-melcloud-control/issues/126)
 - cleanup
@@ -982,7 +995,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.7] - (06.07.2024)
 
-## Changes  
+### Changes
 
 - refactor buttons code
 - cleanup
@@ -990,35 +1003,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.1] - (22.06.2024)
 
-## Changes
+### Changes
 
 - check duplicate account name if run only one Homebridge instance
 - cleanup  
 
 ## [1.0.0] - (21.06.2024)
 
-## Changes
+### Changes
 
 - added [#120](https://github.com/grzegorz914/homebridge-melcloud-control/issues/120) possibility run same device many times in other account or in other homebridge instance
-- cleanup
-
-## [1.0.0] - (21.06.2024)
-
-## Changes
-
 - added [#109](https://github.com/grzegorz914/homebridge-melcloud-control/issues/109), possibility filter out specific device and not exposed to the Homebridge/homekit by deviceId
-- cleanup  
+- cleanup
 
 ## [0.21.0] - (25.03.2024)
 
-## Changes
+### Changes
 
 - added [#109](https://github.com/grzegorz914/homebridge-melcloud-control/issues/109), possibility filter out specific device and not exposed to the Homebridge/homekit by deviceId
 - cleanup
 
 ## [0.20.1] - (10.03.2024)
 
-## Changes
+### Changes
 
 - prevent set out of range temperature for Heat Pump
 - prevent set out of range temperature for Energy Recovery Ventilation
@@ -1026,7 +1033,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.20.0] - (10.03.2024)
 
-## Changes
+### Changes
 
 - dynamically update temp unit
 - prevent set out of range temperature for Air Conditioner
@@ -1034,14 +1041,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.19.0] - (02.03.2024)
 
-## Changes
+### Changes
 
 - added support to control devices over MQTT protocol
 - cleanup
 
 ## [0.18.0] - (02.03.2024)
 
-## Changes
+### Changes
 
 - added temperature sensors for heat pump, flow, return, zone 1, zone 2, water tank
 - fix [#91](https://github.com/grzegorz914/homebridge-melcloud-control/issues/91), thanks @alesf
@@ -1053,7 +1060,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.17.0] - (01.03.2024)
 
-## Changes
+### Changes
 
 - added outdoor/room temperature sensors for Air Conditioner if supported
 - added outdoor/room/supply temperature sensors for Losnay if supported
@@ -1063,7 +1070,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.16.0] - (10.02.2024)
 
-## Changes
+### Changes
 
 - removed possibility to set indyvidual refresh time for ATA, ATW, ERV state
 - full code refactor for ATA, ATW, ERV
@@ -1075,7 +1082,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.15.0] - (05.02.2024)
 
-## Changes
+### Changes
 
 - added possibility to set indyvidual refresh time for Account Settings and ATA, ATW, ERV state, [#68](https://github.com/grzegorz914/homebridge-melcloud-control/issues/68)
 - config.schema updated
@@ -1083,14 +1090,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.14.1] - (06.01.2024)
 
-## Changes
+### Changes
 
 - added possibility to enable/disable the accessory name as a prefix for button/sensor name
 - config.schema updated
 
 ## [0.14.0] - (06.01.2024)
 
-## Changes
+### Changes
 
 - added mode SPLIT to Vane V [#62](https://github.com/grzegorz914/homebridge-melcloud-control/issues/62)
 - fix Vane V mode assignment for buttons/sensors
@@ -1099,7 +1106,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.13.0] - (30.07.2023)
 
-## Changes
+### Changes
 
 - added RESTFul server
 - code refactor and cleanup
@@ -1107,7 +1114,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.12.0] - (21.07.2023)
 
-## Changes
+### Changes
 
 - added extra temperature sensor for Heater/Cooler control mode to use with automations
 - config.schema updeted
@@ -1115,7 +1122,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.11.0] - (25.03.2023)
 
-## Changes
+### Changes
 
 - full support of ERV Lossnay, fix [#37](https://github.com/grzegorz914/homebridge-melcloud-control/issues/37)
 - added core maintenance indicator for ERV LOSSNAY
@@ -1126,7 +1133,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.10.0] - (15.03.2023)
 
-## Changes
+### Changes
 
 - added filter maintenance indicator for ERV LOSSNAY
 - config.schema updated
@@ -1134,7 +1141,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.9.0] - (14.03.2023)
 
-## Changes
+### Changes
 
 - changed properties in config.json from `ataHeatMode` to `ataAutoHeatMode`
 - updated selectable options for `ataAutoHeatMode` to `DRY/FAN`, `FAN/DRY`
@@ -1145,7 +1152,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.8.0] - (13.03.2023)
 
-## Changes
+### Changes
 
 - added possibility selec mode DRY/FAN for Heat if Heat not supported by device
 - config.schema updated
@@ -1153,20 +1160,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.7.1] - (13.03.2023)
 
-## Changes
+### Changes
 
 - cleanup
 
 ## [0.7.0] - (12.03.2023)
 
-## Changes
+### Changes
 
 - added for Air Conditioner DRY operating mode if HEAT not supported or FAN if DRY not supported too
 - cleanup
 
 ## [0.6.0] - (08.03.2023)
 
-## Changes
+### Changes
 
 - added full support for Heat Pump control, thanks @Reliktdragons for testing
 - fixed MQTT client
@@ -1176,7 +1183,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.5.0] - (02.02.2023)
 
-## Changes
+### Changes
 
 - added None/Contact/Motion/Occupancy Sensor for displayType in the buttons/sensors section
 - code refactor and fixes
@@ -1186,27 +1193,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.5] - (02.01.2023)
 
-## Changes
+### Changes
 
 - code refactor
 - small fixes in fan speeds
 
 ## [0.4.4] - (31.12.2022)
 
-## Changes
+### Changes
 
 - bump dependencies
 
 ## [0.4.3] - (06.12.2022)
 
-## Changes Homebridge >= 1.6
+### Changes Homebridge >= 1.6
 
 - fix characteristic was supplied illegal value: number 0 exceeded minimum of 10
 - bump dependencies
 
 ## [0.4.2] - (15.10.2022)
 
-## Changes
+### Changes
 
 - code cleanup
 - fixed display wrong current state for Heat Pump in log
@@ -1223,7 +1230,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.1] - (21.09.2022)
 
-## Changes
+### Changes
 
 - removed mode AUTO for Energy Recovery Ventilation if device not support it
 - removed mode AUTO for Air Conditioner if device not support it
@@ -1233,14 +1240,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.0] - (21.09.2022)
 
-## Changes
+### Changes
 
 - added possibility individually configure (control mode, presets and buttons) for devices of same type
 - update config.schema json
 
 ## [0.3.2] - (20.09.2022)
 
-## Changes
+### Changes
 
 - fixed many bugs in Heat Pump, thanks user @choooli for patience and tests
 - fixed some bugs in Enrgy Recovery Ventilation (Test phase)
@@ -1249,14 +1256,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.1] - (29.08.2022)
 
-## Changes
+### Changes
 
 - code cleanup
 - mqtt topics standarization
 
 ## [0.3.0] - (27.08.2022)
 
-## Changes
+### Changes
 
 - code cleanup and rebuild
 - stability improvements
@@ -1269,27 +1276,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.16] - (24.07.2022)
 
-## Changes
+### Changes
 
 - fix node.js warning
 - bump minimum version of hombridge to v1.4
 
 ## [0.2.15] - (24.07.2022)
 
-## Changes
+### Changes
 
 - code cleanup
 - code rebuild
 
 ## [0.2.14] - (23.07.2022)
 
-## Changes
+### Changes
 
 - update accessory display name and type
 
 ## [0.2.12] - (23.07.2022)
 
-## Changes
+### Changes
 
 - code rebuild and cleanup
 - reduced MELCloud backroground refresh data to 30sec
@@ -1297,7 +1304,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.11] - (22.07.2022)
 
-## Changes
+### Changes
 
 - fixed [#7](https://github.com/grzegorz914/homebridge-melcloud-control/issues/7)
 - fixed [#8](https://github.com/grzegorz914/homebridge-melcloud-control/issues/8)
@@ -1307,7 +1314,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.10] - (05.07.2022)
 
-## Changes
+### Changes
 
 - added auto detection of device support standby mode
 - some logs cosmetics changes
@@ -1315,45 +1322,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.9] - (04.07.2022)
 
-## Changes
+### Changes
 
 - fix [#6](https://github.com/grzegorz914/homebridge-melcloud-control/issues/6)
 - added auto detection of device support automatic fan speed mode and detect numbers of fan speeds
 
 ## [0.2.8] - (03.07.2022)
 
-## Changes
+### Changes
 
 - fix Rotation Speed warning
 
 ## [0.2.7] - (03.07.2022)
 
-## Changes
+### Changes
 
 - fix sometimes device switch off if set new temp
 
 ## [0.2.6] - (03.07.2022)
 
-## Changes
+### Changes
 
 - fix [#4](https://github.com/grzegorz914/homebridge-melcloud-control/issues/4)
 - fix [#5](https://github.com/grzegorz914/homebridge-melcloud-control/issues/5)
 
 ## [0.2.5] - (02.07.2022)
 
-## Changes
+### Changes
 
 - fix setProp step for celsius
 
 ## [0.2.4] - (02.07.2022)
 
-## Changes
+### Changes
 
 - fix heating cooling threshold warning
 
 ## [0.2.3] - (27.06.2022)
 
-## Changes
+### Changes
 
 - removed vane H and V tilt angle characteristics from accessory, the data is not available on MELCloud api
 - stability improvements
@@ -1361,13 +1368,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.2] - (27.06.2022)
 
-## Changes
+### Changes
 
 - fix select button mone abowe as 9
 
 ## [0.2.1] - (27.06.2022)
 
-## Changes
+### Changes
 
 - config schema updated
 - readme updated
@@ -1381,19 +1388,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - control vane V all modes with buttons
 - control fan speed all modes with buttons
 
-## Changes
+### Changes
 
 - code cleanup
 
 ## [0.1.2] - (26.06.2022)
 
-## Changes
+### Changes
 
 - rebuilded refresch device state
 
 ## [0.1.1] - (26.06.2022)
 
-## Changes
+### Changes
 
 - added lock physical controls for Heater/Cooler accessory
 - fix display undefined value for fan speed mode in log
@@ -1401,7 +1408,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.0] - (26.06.2022)
 
-## Changes
+### Changes
 
 - full code rebuild
 - fix display buttons state
@@ -1410,38 +1417,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.11] - (20.06.2022)
 
-## Changes
+### Changes
 
 - fix update state of buttons
 
 ## [0.0.10] - (20.06.2022)
 
-## Changes
+### Changes
 
 - fix add all operating mode for buttons
 
 ## [0.0.9] - (20.06.2022)
 
-## Changes
+### Changes
 
 - added possibility to set all modes using extra buttons fix [#2](https://github.com/grzegorz914/homebridge-melcloud-control/issues/2)
 
 ## [0.0.8] - (19.06.2022)
 
-## Changes
+### Changes
 
 - code cleanup
 
 ## [0.0.7] - (19.06.2022)
 
-## Changes
+### Changes
 
 - fix warning for DefaultHeatingSetTemperature
 - code cleanup
 
 ## [0.0.6] - (19.06.2022)
 
-## Changes
+### Changes
 
 - fix set Target Temperature in Auto Mode
 - prepare for Heat Pump and Energy Recovery Ventilation
@@ -1449,7 +1456,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.5] - (19.06.2022)
 
-## Changes
+### Changes
 
 - fix parse building structure and read devices [#1](https://github.com/grzegorz914/homebridge-melcloud-control/issues/1)
 - fix set Temperature treshold
@@ -1458,24 +1465,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.4] - (18.06.2022)
 
-## Changes
+### Changes
 
 - first working version
 
 ## [0.0.3] - (18.06.2022)
 
-## Changes
+### Changes
 
 - test release 3
 
 ## [0.0.2] - (17.06.2022)
 
-## Changes
+### Changes
 
 - test release 2
 
 ## [0.0.1] - (16.06.2022)
 
-## Changes
+### Changes
 
 - test release

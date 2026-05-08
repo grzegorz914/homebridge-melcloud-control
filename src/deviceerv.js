@@ -104,84 +104,6 @@ class DeviceErv extends EventEmitter {
         this.accessory = {};
     }
 
-    async externalIntegrations() {
-        //RESTFul server
-        const restFulEnabled = this.restFul.enable || false;
-        if (restFulEnabled) {
-            try {
-                this.restFul1 = new RestFul({
-                    port: this.restFul.port,
-                    logWarn: this.logWarn,
-                    logDebug: this.logDebug
-                })
-                    .on('connected', (message) => {
-                        this.restFulConnected = true;
-                        this.emit('success', message);
-                    })
-                    .on('set', async (key, value) => {
-                        try {
-                            await this.setOverExternalIntegration('RESTFul', this.deviceData, key, value);
-                        } catch (error) {
-                            this.emit('warn', error);
-                        };
-                    })
-                    .on('debug', (debug) => {
-                        this.emit('debug', debug);
-                    })
-                    .on('warn', (warn) => {
-                        this.emit('warn', warn);
-                    })
-                    .on('error', (error) => {
-                        this.emit('error', error);
-                    });
-            } catch (error) {
-                if (this.logWarn) this.emit('warn', `RESTFul integration start error: ${error}`);
-            };
-        }
-
-        //MQTT client
-        const mqttEnabled = this.mqtt.enable || false;
-        if (mqttEnabled) {
-            try {
-                this.mqtt1 = new Mqtt({
-                    host: this.mqtt.host,
-                    port: this.mqtt.port || 1883,
-                    clientId: this.mqtt.clientId ? `melcloud_${this.mqtt.clientId}_${Math.random().toString(16).slice(3)}` : `melcloud_${Math.random().toString(16).slice(3)}`,
-                    prefix: this.mqtt.prefix ? `melcloud/${this.mqtt.prefix}/${this.deviceTypeString}/${this.deviceName}` : `melcloud/${this.deviceTypeString}/${this.deviceName}`,
-                    user: this.mqtt.auth?.user,
-                    passwd: this.mqtt.auth?.passwd,
-                    logWarn: this.logWarn,
-                    logDebug: this.logDebug
-                })
-                    .on('connected', (message) => {
-                        this.mqttConnected = true;
-                        this.emit('success', message);
-                    })
-                    .on('subscribed', (message) => {
-                        this.emit('success', message);
-                    })
-                    .on('set', async (key, value) => {
-                        try {
-                            await this.setOverExternalIntegration('MQTT', this.deviceData, key, value);
-                        } catch (error) {
-                            this.emit('warn', error);
-                        };
-                    })
-                    .on('debug', (debug) => {
-                        this.emit('debug', debug);
-                    })
-                    .on('warn', (warn) => {
-                        this.emit('warn', warn);
-                    })
-                    .on('error', (error) => {
-                        this.emit('error', error);
-                    });
-            } catch (error) {
-                if (this.logWarn) this.emit('warn', `MQTT integration start error: ${error}`);
-            };
-        }
-    }
-
     async setOverExternalIntegration(integration, deviceData, key, value) {
         try {
             const accountTypeMelCloud = this.accountTypeMelCloud;
@@ -240,6 +162,83 @@ class DeviceErv extends EventEmitter {
         } catch (error) {
             throw new Error(`${integration} set key: ${key}, value: ${value}, error: ${error.message ?? error}`);
         };
+    }
+
+    async externalIntegrations() {
+        //RESTFul server
+        const restFulEnabled = this.restFul.enable || false;
+        if (restFulEnabled) {
+            try {
+                await new Promise((resolve) => {
+                    const timer = setTimeout(resolve, 5000);
+                    this.restFul1 = new RestFul({
+                        port: this.device.restFul.port,
+                        logWarn: this.logWarn,
+                        logDebug: this.logDebug,
+                    })
+                        .once('connected', (success) => {
+                            clearTimeout(timer);
+                            this.restFulConnected = true;
+                            this.emit('success', success);
+                            resolve();
+                        })
+                        .on('set', async (key, value) => {
+                            try {
+                                await this.setOverExternalIntegration('RESTFul', this.deviceData, key, value);
+                            } catch (error) {
+                                if (this.logWarn) this.emit('warn', `RESTFul set error: ${error}`);
+                            };
+                        })
+                        .on('debug', (debug) => this.emit('debug', debug))
+                        .on('warn', (warn) => this.emit('warn', warn))
+                        .on('error', (error) => this.emit('error', error));
+                });
+            } catch (error) {
+                this.emit('warn', `RESTFul integration start error: ${error}`);
+            }
+        }
+
+        const mqttEnabled = this.mqtt.enable || false;
+        if (mqttEnabled) {
+            try {
+                await new Promise((resolve) => {
+                    const timer = setTimeout(resolve, 10000);
+                    this.mqtt1 = new Mqtt({
+                        host: this.mqtt.host,
+                        port: this.mqtt.port || 1883,
+                        clientId: this.mqtt.clientId ? `melcloud_${this.mqtt.clientId}_${Math.random().toString(16).slice(3)}` : `melcloud_${Math.random().toString(16).slice(3)}`,
+                        prefix: this.mqtt.prefix ? `melcloud/${this.mqtt.prefix}/${this.deviceTypeString}/${this.deviceName}` : `melcloud/${this.deviceTypeString}/${this.deviceName}`,
+                        user: this.mqtt.auth?.user,
+                        passwd: this.mqtt.auth?.passwd,
+                        logWarn: this.logWarn,
+                        logDebug: this.logDebug
+                    })
+                        .once('connected', (success) => {
+                            clearTimeout(timer);
+                            this.mqttConnected = true;
+                            this.emit('success', success);
+                            resolve();
+                        })
+                        .on('subscribed', (success) => {
+                            this.emit('success', success);
+                        })
+                        .on('set', async (key, value) => {
+                            try {
+                                await this.setOverExternalIntegration('MQTT', this.deviceData, key, value);
+                            } catch (error) {
+                                if (this.logWarn) this.emit('warn', `MQTT set, error: ${error}`);
+                            };
+                        })
+                        .on('debug', (debug) => this.emit('debug', debug))
+                        .on('warn', (warn) => this.emit('warn', warn))
+                        .on('error', (error) => this.emit('error', error));
+                });
+            } catch (error) {
+                this.emit('warn', `MQTT integration start error: ${error}`);
+            }
+        };
+
+        return true;
     }
 
     //prepare accessory
@@ -1083,6 +1082,9 @@ class DeviceErv extends EventEmitter {
     //start
     async start() {
         try {
+            //start external integrations
+            if (this.restFul.enable || this.mqtt.enable) await this.externalIntegrations();
+
             //melcloud device
             this.melCloudErv = new MelCloudErv(this.account, this.device, this.defaultTempsFile, this.melCloudClass)
                 .on('deviceInfo', (modelIndoor, modelOutdoor, serialNumber, firmwareAppVersion) => {
@@ -1538,9 +1540,6 @@ class DeviceErv extends EventEmitter {
                 .on('mqtt', async (topic, message) => {
                     if (this.mqttConnected) await this.mqtt1.publish(topic, message);
                 });
-
-            //start external integrations
-            if (this.restFul.enable || this.mqtt.enable) await this.externalIntegrations();
 
             //check state
             await this.melCloudErv.updateState('request', this.melCloudDeviceData);
