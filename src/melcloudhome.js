@@ -56,7 +56,11 @@ class MelCloudHome extends EventEmitter {
         if (pluginStart) {
             this.impulseGenerator = new ImpulseGenerator()
                 .on('checkDevicesList', async () => {
-                    await this.checkDevicesListWithRetry();
+                    try {
+                        await this.checkDevicesListWithRetry();
+                    } catch (error) {
+                        if (this.logError) this.emit('error', `checkDevicesList error: ${error.message}`);
+                    }
                 })
                 .on('state', (state) => {
                     this.emit(state ? 'success' : 'warn', `Impulse generator ${state ? 'started' : 'stopped'}`);
@@ -730,7 +734,8 @@ class MelCloudHome extends EventEmitter {
         try {
             return await this.checkDevicesList();
         } catch (error) {
-            const isRetryable = error.message.includes('timeout') || error.message.includes('ECONNRESET') || error.message.includes('ECONNREFUSED') || error.message.includes('socket hang up');
+            const statusCode = error.response?.status;
+            const isRetryable = error.message.includes('timeout') || error.message.includes('ECONNRESET') || error.message.includes('ECONNREFUSED') || error.message.includes('socket hang up') || statusCode === 404 || (statusCode >= 500 && statusCode <= 599);
 
             if (isRetryable) {
                 if (this.logWarn) this.emit('warn', `checkDevicesList failed (${error.message}) — retrying once`);
