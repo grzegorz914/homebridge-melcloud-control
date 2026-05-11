@@ -24,6 +24,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - For plugin < v4.6.0 use Homebridge UI <= v5.5.0
 - For plugin >= v4.6.0 use Homebridge UI >= v5.13.0
 
+## [4.10.7] - (11.05.2026)
+
+### Changes
+
+- fix WebSocket 404 error crashing child bridge: checkDevicesListWithRetry now treats HTTP 404/5xx as retryable, ImpulseGenerator callback wrapped in try/catch to prevent unhandled rejection
+- fix ERV SetTemperature commands sent Power-only effectiveFlags (Ventilation.EffectiveFlags.SetTemperature was undefined, now 16)
+- fix ERV NightPurgeMode command sent Power-only effectiveFlags (Ventilation.EffectiveFlags.NightPurgeMode was undefined, now 32)
+- fix ATW preset apply sent Power-only effectiveFlags (HeatPump.EffectiveFlags.Presets was undefined, now covers all preset payload fields)
+
 ## [4.10.5] - (08.05.2026)
 
 ### Changes

@@ -165,6 +165,7 @@ export const HeatPump = {
         SetHeatFlowTemperatureZone2: 281474976710656,
         SetCoolFlowTemperatureZone1: 281474976710656,
         SetCoolFlowTemperatureZone2: 281474976710656,
+        Presets: 281517926449852,
         All: 281483566710825
     }
 };
@@ -200,6 +201,8 @@ export const Ventilation = {
         OperationMode: 2,
         VentilationMode: 4,
         SetFanSpeed: 8,
+        SetTemperature: 16,
+        NightPurgeMode: 32,
         Prohibit: 64,
         HolidayMode: 131072,
         All: 281483566710825
