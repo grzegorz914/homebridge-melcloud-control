@@ -54,8 +54,7 @@ class DeviceErv extends EventEmitter {
         this.melCloudAccountData = melCloudAccountData;
 
         //external integrations
-        this.restFul = account.restFul ?? {};
-        this.restFul.port = device.restFulPort;
+        this.restFul = device.restFul ?? {};
         this.restFulConnected = false;
         this.mqtt = account.mqtt ?? {};
         this.mqttConnected = false;
@@ -379,7 +378,8 @@ class DeviceErv extends EventEmitter {
                                 minStep: this.accessory.temperatureIncrement
                             })
                             .onGet(async () => {
-                                const value = this.accessory.ventilationMode === 2 ? this.accessory.defaultHeatingSetTemperature : this.accessory.setTemperature;
+                                const raw = this.accessory.ventilationMode === 2 ? this.accessory.defaultHeatingSetTemperature : this.accessory.setTemperature;
+                                const value = Math.max(raw, this.accessory.minTempCoolDryAuto);
                                 return value;
                             })
                             .onSet(async (value) => {
@@ -402,7 +402,8 @@ class DeviceErv extends EventEmitter {
                                 minStep: this.accessory.temperatureIncrement
                             })
                             .onGet(async () => {
-                                const value = this.accessory.ventilationMode === 2 ? this.accessory.defaultHeatingSetTemperature : this.accessory.setTemperature;
+                                const raw = this.accessory.ventilationMode === 2 ? this.accessory.defaultHeatingSetTemperature : this.accessory.setTemperature;
+                                const value = Math.max(raw, this.accessory.minTempHeat);
                                 return value;
                             })
                             .onSet(async (value) => {
@@ -497,7 +498,7 @@ class DeviceErv extends EventEmitter {
                             minStep: this.accessory.temperatureIncrement
                         })
                         .onGet(async () => {
-                            const value = this.accessory.setTemperature;
+                            const value = Math.max(this.accessory.setTemperature, this.accessory.minTempHeat);
                             return value;
                         })
                         .onSet(async (value) => {
@@ -1297,8 +1298,8 @@ class DeviceErv extends EventEmitter {
                             );
 
                             if (supportsFanSpeed) characteristics.push({ type: Characteristic.RotationSpeed, value: obj.fanSpeed });
-                            if (supportsCoolOperationMode) characteristics.push({ type: Characteristic.CoolingThresholdTemperature, value: ventilationMode === 2 ? defaultCoolingSetTemperature : setTemperature });
-                            if (supportsHeatOperationMode) characteristics.push({ type: Characteristic.HeatingThresholdTemperature, value: ventilationMode === 2 ? defaultHeatingSetTemperature : setTemperature });
+                            if (supportsCoolOperationMode) characteristics.push({ type: Characteristic.CoolingThresholdTemperature, value: Math.max(ventilationMode === 2 ? defaultCoolingSetTemperature : setTemperature, minTempCoolDryAuto) });
+                            if (supportsHeatOperationMode) characteristics.push({ type: Characteristic.HeatingThresholdTemperature, value: Math.max(ventilationMode === 2 ? defaultHeatingSetTemperature : setTemperature, minTempHeat) });
                             break;
                         case 2: //Thermostat
                             //operation mode - 0, HEAT, 2, COOL, 4, 5, 6, FAN, AUTO
@@ -1343,7 +1344,7 @@ class DeviceErv extends EventEmitter {
                                 { type: Characteristic.CurrentHeatingCoolingState, value: obj.currentOperationMode },
                                 { type: Characteristic.TargetHeatingCoolingState, value: obj.targetOperationMode },
                                 { type: Characteristic.CurrentTemperature, value: roomTemperature },
-                                { type: Characteristic.TargetTemperature, value: setTemperature },
+                                { type: Characteristic.TargetTemperature, value: Math.max(setTemperature, minTempHeat) },
                                 { type: Characteristic.TemperatureDisplayUnits, value: obj.useFahrenheit },
                             );
                             break;

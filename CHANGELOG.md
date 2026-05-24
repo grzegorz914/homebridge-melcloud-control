@@ -24,6 +24,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - For plugin < v4.6.0 use Homebridge UI <= v5.5.0
 - For plugin >= v4.6.0 use Homebridge UI >= v5.13.0
 
+## [4.10.8] - (24.05.2026)
+
+### Changes
+
+- fix RESTFul port never correctly delivered to device handlers: index.js was mutating the shared account.restFul object instead of creating a per-device copy, leaving device.restFul undefined and causing a TypeError crash in externalIntegrations() for any device with RESTFul enabled
+- fix ATA button sensor services created with the device service name instead of the button-specific name, causing all button sensors to share an identical display name
+- fix missing logDebug guard on ATA button sensor service debug emit
+- fix temperature characteristics returning values below their configured minimum (Math.max clamp applied to onGet handlers for CoolingThresholdTemperature, HeatingThresholdTemperature and TargetTemperature in ATA, ATW and ERV)
+- bump axios 1.16.0 → 1.16.1
+- bump ws 8.20.0 → 8.21.0
+
 ## [4.10.7] - (11.05.2026)
 
 ### Changes

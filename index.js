@@ -211,7 +211,8 @@ class MelCloudPlatform {
 		const buttons = (device.buttonsSensors || []).filter(b => (b.displayType ?? 0) > 0);
 
 		// Store port on device — never mutate the shared account object
-		account.restFul.port = type === 'melcloudhome'
+		device.restFul = { ...(account.restFul ?? {}) };
+		device.restFul.port = type === 'melcloudhome'
 			? `${3000}${index}`
 			: (device.id).slice(-4).replace(/^0/, '9');
 

@@ -59,8 +59,7 @@ class DeviceAta extends EventEmitter {
         this.melCloudAccountData = melCloudAccountData;
 
         //external integrations
-        this.restFul = account.restFul ?? {};
-        this.restFul.port = device.restFulPort;
+        this.restFul = device.restFul ?? {};
         this.restFulConnected = false;
         this.mqtt = account.mqtt ?? {};
         this.mqttConnected = false;
@@ -432,7 +431,8 @@ class DeviceAta extends EventEmitter {
                             minStep: this.accessory.temperatureStep
                         })
                         .onGet(async () => {
-                            const value = this.accessory.operationMode === 8 ? this.accessory.defaultCoolingSetTemperature : this.accessory.setTemperature;
+                            const raw = this.accessory.operationMode === 8 ? this.accessory.defaultCoolingSetTemperature : this.accessory.setTemperature;
+                            const value = Math.max(raw, this.accessory.minSetCoolDryAutoRoomTemperature);
                             return value;
                         })
                         .onSet(async (value) => {
@@ -453,7 +453,8 @@ class DeviceAta extends EventEmitter {
                                 minStep: this.accessory.temperatureStep
                             })
                             .onGet(async () => {
-                                const value = this.accessory.operationMode === 8 ? this.accessory.defaultHeatingSetTemperature : this.accessory.setTemperature;
+                                const raw = this.accessory.operationMode === 8 ? this.accessory.defaultHeatingSetTemperature : this.accessory.setTemperature;
+                                const value = Math.max(raw, this.accessory.minSetHeatRoomTemperature);
                                 return value;
                             })
                             .onSet(async (value) => {
@@ -568,7 +569,7 @@ class DeviceAta extends EventEmitter {
                             minStep: this.accessory.temperatureStep
                         })
                         .onGet(async () => {
-                            const value = this.accessory.setTemperature;
+                            const value = Math.max(this.accessory.setTemperature, this.accessory.minSetCoolDryAutoRoomTemperature);
                             return value;
                         })
                         .onSet(async (value) => {
@@ -1399,10 +1400,10 @@ class DeviceAta extends EventEmitter {
 
                     //sensor
                     if (button.displayType < 7) {
-                        this.emit('debug', `Prepare button control sensor ${name} service`);
-                        const buttonControlSensorService = new serviceType(serviceName, `buttonControlSensorService${deviceId} ${i}`);
+                        if (this.logDebug) this.emit('debug', `Prepare button control sensor ${name} service`);
+                        const buttonControlSensorService = new serviceType(serviceName1, `buttonControlSensorService${deviceId} ${i}`);
                         buttonControlSensorService.addOptionalCharacteristic(Characteristic.ConfiguredName);
-                        buttonControlSensorService.setCharacteristic(Characteristic.ConfiguredName, serviceName);
+                        buttonControlSensorService.setCharacteristic(Characteristic.ConfiguredName, serviceName1);
                         buttonControlSensorService.getCharacteristic(characteristicType)
                             .onGet(async () => {
                                 const state = button.state;
@@ -1663,10 +1664,10 @@ class DeviceAta extends EventEmitter {
                                 { type: Characteristic.CurrentTemperature, value: roomTemperature },
                                 { type: Characteristic.LockPhysicalControls, value: obj.lockPhysicalControl },
                                 { type: Characteristic.TemperatureDisplayUnits, value: obj.useFahrenheit },
-                                { type: Characteristic.CoolingThresholdTemperature, value: operationMode === 8 ? defaultCoolingSetTemperature : setTemperature }
+                                { type: Characteristic.CoolingThresholdTemperature, value: Math.max(operationMode === 8 ? defaultCoolingSetTemperature : setTemperature, minSetCoolDryAutoRoomTemperature) }
                             );
 
-                            if (supportsHeat) characteristics.push({ type: Characteristic.HeatingThresholdTemperature, value: operationMode === 8 ? defaultHeatingSetTemperature : setTemperature });
+                            if (supportsHeat) characteristics.push({ type: Characteristic.HeatingThresholdTemperature, value: Math.max(operationMode === 8 ? defaultHeatingSetTemperature : setTemperature, minSetHeatRoomTemperature) });
                             if (supportsFanSpeed) characteristics.push({ type: Characteristic.RotationSpeed, value: obj.currentFanSpeed });
                             if (supportsSwingFunction) characteristics.push({ type: Characteristic.SwingMode, value: obj.currentSwingMode });
                             break;
@@ -1731,7 +1732,7 @@ class DeviceAta extends EventEmitter {
                                 { type: Characteristic.CurrentHeatingCoolingState, value: obj.currentOperationMode },
                                 { type: Characteristic.TargetHeatingCoolingState, value: obj.targetOperationMode },
                                 { type: Characteristic.CurrentTemperature, value: roomTemperature },
-                                { type: Characteristic.TargetTemperature, value: setTemperature },
+                                { type: Characteristic.TargetTemperature, value: Math.max(setTemperature, minSetCoolDryAutoRoomTemperature) },
                                 { type: Characteristic.TemperatureDisplayUnits, value: obj.useFahrenheit }
                             );
                             break;

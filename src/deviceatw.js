@@ -66,8 +66,7 @@ class DeviceAtw extends EventEmitter {
         this.melCloudAccountData = melCloudAccountData;
 
         //external integrations
-        this.restFul = account.restFul ?? {};
-        this.restFul.port = device.restFulPort;
+        this.restFul = device.restFul ?? {};
         this.restFulConnected = false;
         this.mqtt = account.mqtt ?? {};
         this.mqttConnected = false;
@@ -475,7 +474,7 @@ class DeviceAtw extends EventEmitter {
                                         minStep: this.accessory.temperatureIncrement
                                     })
                                     .onGet(async () => {
-                                        const value = zone.setTemperature;
+                                        const value = Math.max(zone.setTemperature, zone.temperaturesSetPropsMinValue);
                                         return value;
                                     })
                                     .onSet(async (value) => {
@@ -563,7 +562,7 @@ class DeviceAtw extends EventEmitter {
                                         minStep: this.accessory.temperatureIncrement
                                     })
                                     .onGet(async () => {
-                                        const value = zone.setTemperature;
+                                        const value = Math.max(zone.setTemperature, zone.temperaturesSetPropsMinValue);
                                         return value;
                                     })
                                     .onSet(async (value) => {
@@ -831,7 +830,7 @@ class DeviceAtw extends EventEmitter {
                                     minStep: this.accessory.temperatureIncrement
                                 })
                                 .onGet(async () => {
-                                    const value = zone.setTemperature;
+                                    const value = Math.max(zone.setTemperature, zone.temperaturesSetPropsMinValue);
                                     return value;
                                 })
                                 .onSet(async (value) => {
@@ -2117,8 +2116,8 @@ class DeviceAtw extends EventEmitter {
                                     { type: Characteristic.TemperatureDisplayUnits, value: obj.useFahrenheit }
                                 );
 
-                                if (heatCoolModes === 0 || heatCoolModes === 1) characteristics.push({ type: Characteristic.HeatingThresholdTemperature, value: setTemperature });
-                                if ((heatCoolModes === 0 || heatCoolModes === 2) && i !== caseHotWater) characteristics.push({ type: Characteristic.CoolingThresholdTemperature, value: setTemperature });
+                                if (heatCoolModes === 0 || heatCoolModes === 1) characteristics.push({ type: Characteristic.HeatingThresholdTemperature, value: Math.max(setTemperature, temperatureSetPropsMinValue) });
+                                if ((heatCoolModes === 0 || heatCoolModes === 2) && i !== caseHotWater) characteristics.push({ type: Characteristic.CoolingThresholdTemperature, value: Math.max(setTemperature, temperatureSetPropsMinValue) });
                                 break;
                             case 2: //Thermostat
                                 switch (i) {
@@ -2272,7 +2271,7 @@ class DeviceAtw extends EventEmitter {
                                     { type: Characteristic.CurrentHeatingCoolingState, value: currentOperationMode },
                                     { type: Characteristic.TargetHeatingCoolingState, value: targetOperationMode },
                                     { type: Characteristic.CurrentTemperature, value: roomTemperature },
-                                    { type: Characteristic.TargetTemperature, value: setTemperature },
+                                    { type: Characteristic.TargetTemperature, value: Math.max(setTemperature, temperatureSetPropsMinValue) },
                                     { type: Characteristic.TemperatureDisplayUnits, value: obj.useFahrenheit }
                                 );
                                 break;
