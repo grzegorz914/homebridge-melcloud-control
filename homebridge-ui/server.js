@@ -1,6 +1,11 @@
 import { HomebridgePluginUiServer } from '@homebridge/plugin-ui-utils';
+import { promises as fsPromises } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import MelCloud from '../src/melcloud.js';
 import MelCloudHome from '../src/melcloudhome.js';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 class PluginUiServer extends HomebridgePluginUiServer {
   constructor() {
@@ -12,6 +17,15 @@ class PluginUiServer extends HomebridgePluginUiServer {
     //this MUST be called when you are ready to accept requests
     this.ready();
   };
+
+  async writeResult(result) {
+    try {
+      await fsPromises.writeFile(
+        join(__dirname, 'public', '_result.json'),
+        JSON.stringify({ ...result, ts: Date.now() })
+      );
+    } catch (_) {}
+  }
 
   withTimeout(promise, ms, label) {
     const timer = new Promise((_, reject) =>
@@ -26,13 +40,19 @@ class PluginUiServer extends HomebridgePluginUiServer {
     try {
       this.pushEvent('status', 'Connecting to account...');
       const melCloudAccountData = await this.withTimeout(melCloudClass.connect(), 90_000, 'connect');
-      if (!melCloudAccountData.State) return melCloudAccountData;
+      if (!melCloudAccountData.State) {
+        await this.writeResult({ ok: true, data: melCloudAccountData });
+        return melCloudAccountData;
+      }
 
       this.pushEvent('status', 'Loading devices...');
       const melCloudDevicesData = await this.withTimeout(melCloudClass.checkDevicesList(), 60_000, 'checkDevicesList');
+      await this.writeResult({ ok: true, data: melCloudDevicesData });
       return melCloudDevicesData;
     } catch (error) {
-      throw new Error(error.message ?? String(error));
+      const msg = error.message ?? String(error);
+      await this.writeResult({ ok: false, error: msg });
+      throw new Error(msg);
     }
   }
 }

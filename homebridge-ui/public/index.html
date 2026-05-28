@@ -257,6 +257,31 @@
       return parts.length ? `${type}: ${parts.join(', ')}` : '';
     }
 
+    // Trigger the operation via homebridge.request() (Socket.IO — unreliable for response),
+    // then poll _result.json via HTTP until the server writes the result.
+    async function requestViaFile(path, body, ms = 15000) {
+      const ts = Date.now();
+
+      homebridge.request(path, body).catch(() => {}); // fire-and-forget
+
+      const deadline = ts + ms;
+      while (Date.now() < deadline) {
+        await new Promise(r => setTimeout(r, 300));
+        try {
+          const res = await fetch(`_result.json?t=${Date.now()}`);
+          if (!res.ok) continue;
+          const data = await res.json();
+          if ((data.ts ?? 0) >= ts) {
+            if (data.ok) return data.data ?? true;
+            throw new Error(data.error || 'Unknown error');
+          }
+        } catch (e) {
+          if (e.message && e.message !== 'Failed to fetch') throw e;
+        }
+      }
+      throw new Error('Request timed out');
+    }
+
     // Login & Sync Logic
     $('logIn').addEventListener('click', async () => {
       $('logIn').disabled = true;
@@ -268,16 +293,10 @@
       updateInfo('info2', '', fontColor);
       homebridge.showSpinner();
 
-      const statusListener = event => updateInfo('info', event.data, fontColor);
-      homebridge.addEventListener('status', statusListener);
-
       try {
         const account = this.account;
         const accountTypeMelcloud = account.type === 'melcloud';
-        const connectTimeout = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Connection timed out — please try again')), 160_000)
-        );
-        const melCloudDevicesData = await Promise.race([homebridge.request('/connect', account), connectTimeout]);
+        const melCloudDevicesData = await requestViaFile('/connect', account, 160_000);
 
         if (!melCloudDevicesData.State) {
           updateInfo('info', melCloudDevicesData.Status, 'red');
@@ -457,13 +476,11 @@
         await homebridge.updatePluginConfig(pluginConfig);
         await homebridge.savePluginConfig();
       } catch (error) {
-        const msg = error?.message || error?.error || String(error);
-        updateInfo('info', 'Connection failed', 'red');
-        updateInfo('info1', msg, 'red');
+        updateInfo('info', `Prepare config error`, "red");
+        updateInfo('info1', `Error: ${JSON.stringify(error)}`, "red");
       } finally {
         homebridge.hideSpinner();
         $('logIn').disabled = false;
-        try { homebridge.removeEventListener?.('status', statusListener); } catch (_) {}
       }
     });
   })();

@@ -24,6 +24,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - For plugin < v4.6.0 use Homebridge UI <= v5.5.0
 - For plugin >= v4.6.0 use Homebridge UI >= v5.13.0
 
+## [4.10.12] - (28.05.2026)
+
+### Changes
+
+- fix: plugin config UI — Connect to MELCloud spinner no longer hangs indefinitely
+- fix: server responses now delivered via HTTP file polling, bypassing unreliable Socket.IO server→client channel in Homebridge Config UI
+
 ## [4.10.9] - (28.05.2026)
 
 ### Changes
