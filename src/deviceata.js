@@ -393,13 +393,10 @@ class DeviceAta extends EventEmitter {
                             })
                             .onSet(async (value) => {
                                 try {
-                                    const payload = {};
-                                    const fanKeySet = accountTypeMelCloud ? 'fanSpeed' : 'setFanSpeed';
                                     const max = numberOfFanSpeeds;
                                     const minValue = supportsAutomaticFanSpeed ? 0 : 1;
                                     const clampedValue = Math.min(Math.max(value, minValue), max);
-
-                                    payload[fanKeySet] = clampedValue;
+                                    const payload = { setFanSpeed: clampedValue };
                                     if (this.logInfo) this.emit('info', `Set fan speed mode: ${AirConditioner.FanSpeedMapEnumToString[clampedValue]}`);
                                     await this.melCloudAta.send(this.accountType, this.displayType, deviceData, payload, AirConditioner.EffectiveFlags.SetFanSpeed);
                                 } catch (error) {
