@@ -348,7 +348,7 @@ class DeviceErv extends EventEmitter {
                             .setProps({
                                 minValue: this.accessory.fanSpeedSetPropsMinValue,
                                 maxValue: this.accessory.fanSpeedSetPropsMaxValue,
-                                minStep: this.accessory.fanSpeedSetPropsMinStep
+                                minStep: 1
                             })
                             .onGet(async () => {
                                 const value = this.accessory.fanSpeed;
@@ -358,12 +358,11 @@ class DeviceErv extends EventEmitter {
                                 try {
                                     const payload = {};
                                     const max = numberOfFanSpeeds;
-                                    const minFanSpeed = supportsAutomaticFanSpeed ? 0 : 1;
-                                    // Reverse-map from 0-100 HomeKit scale to raw fan speed level
-                                    const rawFanSpeed = value === 0 ? 0 : Math.max(minFanSpeed, Math.min(max, Math.round((value / 100) * max)));
+                                    const minValue = supportsAutomaticFanSpeed ? 0 : 1;
+                                    const clampedValue = Math.min(Math.max(value, minValue), max);
 
-                                    payload.setFanSpeed = rawFanSpeed;
-                                    if (this.logInfo) this.emit('info', `Set fan speed mode: ${Ventilation.FanSpeedMapEnumToString[rawFanSpeed]}`);
+                                     payload.setFanSpeed = clampedValue;
+                                    if (this.logInfo) this.emit('info', `Set fan speed mode: ${Ventilation.FanSpeedMapEnumToString[clampedValue]}`);
                                     await this.melCloudErv.send(this.accountType, this.displayType, deviceData, payload, Ventilation.EffectiveFlags.SetFanSpeed);
                                 } catch (error) {
                                     if (this.logWarn) this.emit('warn', `Set fan speed mode error: ${error}`);
@@ -1274,16 +1273,16 @@ class DeviceErv extends EventEmitter {
 
                             //fan speed mode
                             if (supportsFanSpeed) {
-                                const max = numberOfFanSpeeds;
-                                const minRaw = supportsAutomaticFanSpeed ? 0 : 1;
-                                const rawFanSpeed = Math.min(Math.max(setFanSpeed, minRaw), max);
-                                // Scale raw fan speed to 0-100 HomeKit range
-                                const scaledFanSpeed = rawFanSpeed === 0 ? 0 : Math.round((rawFanSpeed / max) * 100);
+                                // ograniczamy wartość do zakresu API
+                                const minValue = supportsAutomaticFanSpeed ? 0 : 1;
+                                const maxValue = numberOfFanSpeeds;
 
-                                obj.fanSpeed = scaledFanSpeed;
-                                obj.fanSpeedSetPropsMinValue = 0;
-                                obj.fanSpeedSetPropsMaxValue = 100;
-                                obj.fanSpeedSetPropsMinStep = Math.round(100 / max);
+                                // zabezpieczenie przed out-of-bounds
+                                const clampedValue = Math.min(Math.max(setFanSpeed, minValue), maxValue);
+
+                                obj.currentFanSpeed = clampedValue;
+                                obj.fanSpeedSetPropsMinValue = minValue;
+                                obj.fanSpeedSetPropsMaxValue = maxValue;
                             }
 
                             //create characteristics
