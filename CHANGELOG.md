@@ -24,6 +24,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - For plugin < v4.6.0 use Homebridge UI <= v5.5.0
 - For plugin >= v4.6.0 use Homebridge UI >= v5.13.0
 
+## [4.10.9] - (28.05.2026)
+
+### Changes
+
+- fix ATA HeaterCooler Active.onSet now includes current OperationMode (EffectiveFlags: PowerOperationMode) when powering on, preventing MELCloud from resetting the operation mode to Auto when iOS sends a spurious Active=1 alongside a fan speed change
+- fix ATA and ERV RotationSpeed characteristic scaled to 0-100 HomeKit range instead of raw 0-N; GET scales raw fan speed to percentage (level 1 of 5 → 20%), SET reverse-maps percentage back to raw level, setProps maxValue set to 100 with minStep = 100/numberOfFanSpeeds so the slider snaps to clean positions
+
 ## [4.10.8] - (24.05.2026)
 
 ### Changes

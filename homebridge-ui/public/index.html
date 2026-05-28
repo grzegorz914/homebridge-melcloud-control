@@ -268,10 +268,16 @@
       updateInfo('info2', '', fontColor);
       homebridge.showSpinner();
 
+      const statusListener = event => updateInfo('info', event.data, fontColor);
+      homebridge.addEventListener('status', statusListener);
+
       try {
         const account = this.account;
         const accountTypeMelcloud = account.type === 'melcloud';
-        const melCloudDevicesData = await homebridge.request('/connect', account);
+        const connectTimeout = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Connection timed out — please try again')), 160_000)
+        );
+        const melCloudDevicesData = await Promise.race([homebridge.request('/connect', account), connectTimeout]);
 
         if (!melCloudDevicesData.State) {
           updateInfo('info', melCloudDevicesData.Status, 'red');
@@ -445,14 +451,19 @@
         if (removedScenesCount) removedParts.push(`Scenes: ${removedScenesCount}`);
         if (removedParts.length) updateInfo('info1', `Removed old: ${removedParts.join('; ')}`, 'orange');
 
+        homebridge.hideSpinner();
+        $('logIn').disabled = false;
+
         await homebridge.updatePluginConfig(pluginConfig);
-        await homebridge.savePluginConfig(pluginConfig);
+        await homebridge.savePluginConfig();
       } catch (error) {
-        updateInfo('info', `Prepare config error`, "red");
-        updateInfo('info1', `Error: ${JSON.stringify(error)}`, "red");
+        const msg = error?.message || error?.error || String(error);
+        updateInfo('info', 'Connection failed', 'red');
+        updateInfo('info1', msg, 'red');
       } finally {
         homebridge.hideSpinner();
         $('logIn').disabled = false;
+        try { homebridge.removeEventListener?.('status', statusListener); } catch (_) {}
       }
     });
   })();
