@@ -24,6 +24,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - For plugin < v4.6.0 use Homebridge UI <= v5.5.0
 - For plugin >= v4.6.0 use Homebridge UI >= v5.13.0
 
+## [4.10.13] - (04.06.2026)
+
+### Fixed
+
+- RESTful / MQTT: after a network or power restart, the REST server returned `"This data is not available at this time."` for all endpoints and never recovered without a manual plugin restart; root cause: each retry attempt created a new Express server on the same port — the second and subsequent servers silently failed to bind (port already in use, no error handler), leaving `restFulConnected = false`, so all `update()` calls were skipped even after the device successfully reconnected; fixed by creating RestFul/MQTT instances lazily per device on the first successful `registerDevice` call and reusing them across all retry attempts via a `deviceStates` Map; the `'set'` handler is attached once via an `activeDevice` reference updated only after a successful connect; applies to DeviceAta, DeviceAtw and DeviceErv
+
 ## [4.10.12] - (28.05.2026)
 
 ### Changes

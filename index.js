@@ -6,6 +6,8 @@ import DeviceAta from './src/deviceata.js';
 import DeviceAtw from './src/deviceatw.js';
 import DeviceErv from './src/deviceerv.js';
 import ImpulseGenerator from './src/impulsegenerator.js';
+import RestFul from './src/restful.js';
+import Mqtt from './src/mqtt.js';
 import { PluginName, PlatformName, DeviceType } from './src/constants.js';
 
 class MelCloudPlatform {
@@ -93,6 +95,20 @@ class MelCloudPlatform {
 			log.info(`${name}, config: ${JSON.stringify(safeConfig, null, 2)}`);
 		}
 
+		// Per-device state that persists across retries — RestFul/MQTT are created
+		// once (lazily on first successful registerDevice call) and reused thereafter.
+		const allConfigDevices = [
+			...(account.ataDevices || []),
+			...(account.atwDevices || []),
+			...(account.ervDevices || []),
+		].filter(d => (d.displayType ?? 0) > 0);
+
+		const deviceStates = new Map(allConfigDevices.map(device => [device, {
+			restFul1: null, restFulConnected: false,
+			mqtt1: null, mqttConnected: false,
+			activeDevice: null,
+		}]));
+
 		// The startup impulse generator retries the full connect+discover cycle
 		// every 120 s until it succeeds, then hands off to the melcloud class
 		// impulse generator and stops itself.
@@ -102,7 +118,7 @@ class MelCloudPlatform {
 					await this.startAccount(
 						account, name, type, accountMelcloud,
 						accountRefreshInterval, prefDir, logLevel,
-						log, api, impulseGenerator
+						log, api, impulseGenerator, deviceStates
 					);
 				} catch (error) {
 					if (logLevel.error) log.error(`${name}, Start impulse generator error, ${error.message ?? error}, trying again.`);
@@ -117,7 +133,7 @@ class MelCloudPlatform {
 
 	// ── Connect, discover and register accessories for one account ────────────
 
-	async startAccount(account, name, type, accountMelcloud, accountRefreshInterval, prefDir, logLevel, log, api, impulseGenerator) {
+	async startAccount(account, name, type, accountMelcloud, accountRefreshInterval, prefDir, logLevel, log, api, impulseGenerator, deviceStates) {
 		let timers;
 		let melCloudClass;
 
@@ -172,7 +188,7 @@ class MelCloudPlatform {
 			await this.registerDevice({
 				account, device, index, name, type, accountMelcloud,
 				prefDir, logLevel, log, api,
-				melCloudClass, melCloudAccountData, melCloudDevicesData,
+				melCloudClass, melCloudAccountData, melCloudDevicesData, deviceStates,
 			});
 		}
 
@@ -183,7 +199,7 @@ class MelCloudPlatform {
 
 	// ── Register a single device as a Homebridge accessory ───────────────────
 
-	async registerDevice({ account, device, index, name, type, accountMelcloud, prefDir, logLevel, log, api, melCloudClass, melCloudAccountData, melCloudDevicesData }) {
+	async registerDevice({ account, device, index, name, type, accountMelcloud, prefDir, logLevel, log, api, melCloudClass, melCloudAccountData, melCloudDevicesData, deviceStates }) {
 		device.id = String(device.id);
 
 		const deviceName = device.name;
@@ -232,13 +248,86 @@ class MelCloudPlatform {
 			}
 		}
 
-		// Construct the device class — original arg order preserved
+		// Lazily create RestFul/MQTT on the first successful call — port/connection
+		// is bound once and reused across all retry attempts via deviceStates.
+		// The 'set' handler routes to activeDevice so it always targets the live instance.
+		const state = deviceStates.get(device);
+		const mqtt = account.mqtt ?? {};
+
+		if (!state.restFul1 && device.restFul?.enable) {
+			try {
+				await new Promise((resolve) => {
+					const timer = setTimeout(resolve, 5000);
+					state.restFul1 = new RestFul({
+						port: device.restFul.port,
+						logWarn: logLevel.warn,
+						logDebug: logLevel.debug,
+					})
+						.once('connected', (msg) => {
+							clearTimeout(timer);
+							state.restFulConnected = true;
+							if (logLevel.success) log.success(`${name}, ${deviceTypeString}, ${deviceName}, ${msg}`);
+							resolve();
+						})
+						.on('set', async (key, value) => {
+							try {
+								if (state.activeDevice) await state.activeDevice.setOverExternalIntegration('RESTFul', state.activeDevice.deviceData, key, value);
+							} catch (error) {
+								if (logLevel.warn) log.warn(`${name}, ${deviceTypeString}, ${deviceName}, RESTFul set error: ${error.message ?? error}`);
+							}
+						})
+						.on('debug', (msg) => logLevel.debug && log.info(`${name}, ${deviceTypeString}, ${deviceName}, debug: ${msg}`))
+						.on('warn', (msg) => logLevel.warn && log.warn(`${name}, ${deviceTypeString}, ${deviceName}, ${msg}`))
+						.on('error', (msg) => logLevel.error && log.error(`${name}, ${deviceTypeString}, ${deviceName}, ${msg}`));
+				});
+			} catch (error) {
+				if (logLevel.warn) log.warn(`${name}, ${deviceTypeString}, ${deviceName}, RESTFul start error: ${error.message ?? error}`);
+			}
+		}
+
+		if (!state.mqtt1 && mqtt.enable) {
+			try {
+				await new Promise((resolve) => {
+					const timer = setTimeout(resolve, 10000);
+					state.mqtt1 = new Mqtt({
+						host: mqtt.host,
+						port: mqtt.port || 1883,
+						clientId: mqtt.clientId ? `melcloud_${mqtt.clientId}_${Math.random().toString(16).slice(3)}` : `melcloud_${Math.random().toString(16).slice(3)}`,
+						prefix: mqtt.prefix ? `melcloud/${mqtt.prefix}/${deviceTypeString}/${deviceName}` : `melcloud/${deviceTypeString}/${deviceName}`,
+						user: mqtt.auth?.user,
+						passwd: mqtt.auth?.passwd,
+						logWarn: logLevel.warn,
+						logDebug: logLevel.debug,
+					})
+						.once('connected', (msg) => {
+							clearTimeout(timer);
+							state.mqttConnected = true;
+							if (logLevel.success) log.success(`${name}, ${deviceTypeString}, ${deviceName}, ${msg}`);
+							resolve();
+						})
+						.on('set', async (key, value) => {
+							try {
+								if (state.activeDevice) await state.activeDevice.setOverExternalIntegration('MQTT', state.activeDevice.deviceData, key, value);
+							} catch (error) {
+								if (logLevel.warn) log.warn(`${name}, ${deviceTypeString}, ${deviceName}, MQTT set error: ${error.message ?? error}`);
+							}
+						})
+						.on('debug', (msg) => logLevel.debug && log.info(`${name}, ${deviceTypeString}, ${deviceName}, debug: ${msg}`))
+						.on('warn', (msg) => logLevel.warn && log.warn(`${name}, ${deviceTypeString}, ${deviceName}, ${msg}`))
+						.on('error', (msg) => logLevel.error && log.error(`${name}, ${deviceTypeString}, ${deviceName}, ${msg}`));
+				});
+			} catch (error) {
+				if (logLevel.warn) log.warn(`${name}, ${deviceTypeString}, ${deviceName}, MQTT start error: ${error.message ?? error}`);
+			}
+		}
+
+		// Construct the device class — pass pre-created RestFul/MQTT instances
 		let deviceClass;
 		switch (deviceType) {
-			case 0: deviceClass = new DeviceAta(api, account, device, presets, schedules, scenes, buttons, defaultTempsFile, melCloudClass, melCloudAccountData, melCloudDeviceData); break; // ATA
-			case 1: deviceClass = new DeviceAtw(api, account, device, presets, schedules, scenes, buttons, defaultTempsFile, melCloudClass, melCloudAccountData, melCloudDeviceData); break; // ATW
-			case 2: return;                                                                                                                                                                   // reserved
-			case 3: deviceClass = new DeviceErv(api, account, device, presets, schedules, scenes, buttons, defaultTempsFile, melCloudClass, melCloudAccountData, melCloudDeviceData); break; // ERV
+			case 0: deviceClass = new DeviceAta(api, account, device, presets, schedules, scenes, buttons, defaultTempsFile, melCloudClass, melCloudAccountData, melCloudDeviceData, state.restFul1, state.restFulConnected, state.mqtt1, state.mqttConnected); break; // ATA
+			case 1: deviceClass = new DeviceAtw(api, account, device, presets, schedules, scenes, buttons, defaultTempsFile, melCloudClass, melCloudAccountData, melCloudDeviceData, state.restFul1, state.restFulConnected, state.mqtt1, state.mqttConnected); break; // ATW
+			case 2: return;                                                                                                                                                                                                                                           // reserved
+			case 3: deviceClass = new DeviceErv(api, account, device, presets, schedules, scenes, buttons, defaultTempsFile, melCloudClass, melCloudAccountData, melCloudDeviceData, state.restFul1, state.restFulConnected, state.mqtt1, state.mqttConnected); break; // ERV
 			default:
 				if (logLevel.warn) log.warn(`${name}, ${deviceTypeString}, ${deviceName}, received unknown device type: ${deviceType}.`);
 				return;
@@ -254,6 +343,7 @@ class MelCloudPlatform {
 
 		const accessory = await deviceClass.start();
 		if (accessory) {
+			state.activeDevice = deviceClass;
 			api.publishExternalAccessories(PluginName, [accessory]);
 			if (logLevel.success) log.success(`${name}, ${deviceTypeString}, ${deviceName}, Published as external accessory.`);
 		}
