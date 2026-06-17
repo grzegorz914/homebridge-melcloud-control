@@ -473,7 +473,7 @@ class DeviceAta extends EventEmitter {
                                         break;
                                 };
 
-                                const payload = { operationMode: value };
+                                const payload = { power: value === 0 ? false : true, operationMode: value };
                                 if (this.logInfo) this.emit('info', `Set operation mode: ${AirConditioner.OperationModeMapEnumToString[value]}`);
                                 await this.melCloudAta.send(this.accountType, this.displayType, deviceData, payload, flag);
                             } catch (error) {
