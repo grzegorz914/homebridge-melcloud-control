@@ -1784,6 +1784,7 @@ class DeviceAtw extends EventEmitter {
                     const flowTemperatureHeatPump = deviceData.Device.FlowTemperature;
                     const returnTemperatureHeatPump = deviceData.Device.ReturnTemperature;
                     const operationModeHeatPump = accountTypeMelCloud ? deviceData.Device.UnitStatus : [1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0][operationMode]; //HEAT, COOL / STOP HOTWATER HEAT COOL
+                    const statusHeatPump = accountTypeMelCloud ? deviceData.Device.UnitStatus : [2, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0][operationMode]; //HEAT, COOL / STOP HOTWATER HEAT COOL
                     
                     //zone 1
                     const zone1Name = deviceData.Zone1Name ?? 'Zone 1';
@@ -2238,7 +2239,7 @@ class DeviceAtw extends EventEmitter {
                             let operationModeText = '';
                             switch (i) {
                                 case caseHeatPump: //Heat Pump - HEAT, COOL, OFF
-                                    this.emit('info', `${name}, Status: ${!power ? 'Off' : (inStandbyMode ? 'Idle' : HeatPump.UnitStatusMapEnumToString[operationModeHeatPump])}`);
+                                    this.emit('info', `${name}, Status: ${!power ? 'Off' : (inStandbyMode ? 'Idle' : HeatPump.UnitStatusMapEnumToString[statusHeatPump])}`);
                                     this.emit('info', `${name}, Operation mode: ${HeatPump.OperationModeMapEnumToStringInfo[operationMode]}`);
                                     if (supportsOutdoorTemperature) this.emit('info', `${name}, Outdoor temperature: ${outdoorTemperature}${obj.temperatureUnit}`);
                                     this.emit('info', `${name}, Temperature display unit: ${obj.temperatureUnit}`);
