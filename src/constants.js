@@ -121,7 +121,7 @@ export const AirConditioner = {
 
 export const HeatPump = {
     ZoneNameMapEnumToString: { 0: "Heat Pump", 1: "Zone 1", 2: "Hot Water", 3: "Zone 2" },
-    UnitStatusMapEnumToString: { 0: "Heat", 2: "Cool" },
+    UnitStatusMapEnumToString: { 0: "Heat", 1: "Cool", 2: "Stop" },
     SystemMapEnumToStringInfo: { 0: "Off", 1: "On", 2: "Emergency Run", 3: "Test Run" },
     DefrostMapStringToEnum: { "Normal": 0, "Standby": 1, "Defrost": 2, "Waiting Restart": 3 },
     DefrostMapEnumToString: { 0: "Normal", 1: "Standby", 2: "Defrost", 3: "Waiting Restart" },

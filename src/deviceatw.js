@@ -1710,7 +1710,7 @@ class DeviceAtw extends EventEmitter {
                     const tempStepKey = accountTypeMelCloud ? 'TemperatureIncrement' : 'HasHalfDegreeIncrements';
                     const connectKey = accountTypeMelCloud ? 'Offline' : 'IsConnected';
                     const errorKey = accountTypeMelCloud ? 'HasError' : 'IsInError';
-                    const supportHeatKey = accountTypeMelCloud ? 'CanHeat' : 'HasHeatMode';
+                    const supportHeatKey = accountTypeMelCloud ? 'CanHeat' : 'HasHeatZone1'; // melcloud home app report hasHeatZone1 and 2
                     const supportCoolKey = accountTypeMelCloud ? 'CanCool' : 'HasCoolingMode';
                     const supportHotWaterKey = accountTypeMelCloud ? 'HasHotWaterTank' : 'HasHotWater';
 
@@ -1726,16 +1726,15 @@ class DeviceAtw extends EventEmitter {
                     const holidayMode = deviceData.HolidayMode ?? {};
                     const holidayModeEnabled = holidayMode.Enabled ?? null;
 
-                    //device info
-                    const supportsStandbyMode = deviceData.Device.ModelSupportsStandbyMode ?? (deviceData.Device.InStandbyMode !== null && deviceData.Device.InStandbyMode !== undefined);
+                    //heat pump info
                     const supportsHeatPump = ![1, 2, 3, 4, 5, 6, 7, 15].includes(this.hideZone);
-                    const supportsZone1 = ![2, 3, 4, 8, 9, 10, 11, 15].includes(this.hideZone);
-                    const supportsHotWaterTank = ![3, 5, 6, 9, 10, 12, 13, 15].includes(this.hideZone) && !!deviceData.Device[supportHotWaterKey];
-                    const supportsZone2 = ![4, 6, 7, 10, 11, 13, 14, 15].includes(this.hideZone) && deviceData.Device.HasZone2;
-
+                    const supportsStandbyMode = deviceData.Device.ModelSupportsStandbyMode ?? (deviceData.Device.InStandbyMode !== null && deviceData.Device.InStandbyMode !== undefined);
                     const supportsHeat = !!deviceData.Device[supportHeatKey];
                     const supportsCool = !!deviceData.Device[supportCoolKey];
                     const supportsOutdoorTemperature = !!deviceData.Device.HasOutdoorTemperature && this.functions.isValidValue(deviceData.Device.OutdoorTemperature);
+                    const supportsBiler = !!deviceData.Device.HasBoiler; // only melcloud home
+                    const supportsDualRoomTemperature = !!deviceData.Device.HasDualRoomTemperature; // only melcloud home
+                    const supportsWirelessRemote = !!deviceData.Device.HasWirelessRemote; // only melcloud home
                     const heatCoolModes = supportsHeat && supportsCool ? 0 : supportsHeat ? 1 : supportsCool ? 2 : 3;
                     const temperatureIncrement = deviceData.Device[tempStepKey] ?? 1;
                     const minSetHeatFlowTemperature = 25;
@@ -1748,11 +1747,22 @@ class DeviceAtw extends EventEmitter {
                     const minSetTankTemperature = deviceData.Device.MinTankTemperature ?? 10;
                     const maxSetTankTemperature = deviceData.Device.MaxTankTemperature ?? 60;
 
-                    //zones
+                    //zone 1 info
                     let currentZoneCase = 0;
                     const caseHeatPump = supportsHeatPump ? currentZoneCase++ : -1;
+                    const supportsZone1 = ![2, 3, 4, 8, 9, 10, 11, 15].includes(this.hideZone);
+                    const supportsZone1Heat = !!deviceData.Device.HasHeatZone1;
+                    const supportsThermostatZone1 = !!deviceData.Device.HasThermostatZone1; // only melcloud home
                     const caseZone1 = supportsZone1 ? currentZoneCase++ : -1;
+
+                    //hot water info
+                    const supportsHotWaterTank = ![3, 5, 6, 9, 10, 12, 13, 15].includes(this.hideZone) && !!deviceData.Device[supportHotWaterKey];
                     const caseHotWater = supportsHotWaterTank ? currentZoneCase++ : -1;
+
+                    //zone 2 info
+                    const supportsZone2 = ![4, 6, 7, 10, 11, 13, 14, 15].includes(this.hideZone) && deviceData.Device.HasZone2;
+                    const supportsZone2Heat = !!deviceData.Device.HasHeatZone2;
+                    const supportsThermostatZone2 = !!deviceData.Device.HasThermostatZone2; // only melcloud home
                     const caseZone2 = supportsZone2 ? currentZoneCase++ : -1;
                     const zonesCount = currentZoneCase;
 
@@ -1767,15 +1777,14 @@ class DeviceAtw extends EventEmitter {
                     //heat pump
                     const heatPumpName = 'Heat Pump';
                     const power = !!deviceData.Device.Power;
-                    const unitStatus = deviceData.Device.UnitStatus ?? 0; //HEAT, COOL
                     const operationMode = deviceData.Device.OperationMode; //VALVE 3D
-                    const operationModeHeatPump = accountTypeMelCloud ? unitStatus : (operationMode === 3 ? 1 : 0); //HEAT, COOL
                     const inStandbyMode = deviceData.Device.InStandbyMode ?? operationMode === 0;
                     const outdoorTemperature = deviceData.Device.OutdoorTemperature;
                     const roomTemperatureHeatPump = accountTypeMelCloud && supportsOutdoorTemperature ? outdoorTemperature : deviceData.Device.RoomTemperatureZone1; // fallback to room temp zone 1
                     const flowTemperatureHeatPump = deviceData.Device.FlowTemperature;
                     const returnTemperatureHeatPump = deviceData.Device.ReturnTemperature;
-
+                    const operationModeHeatPump = accountTypeMelCloud ? deviceData.Device.UnitStatus : [1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0][operationMode]; //HEAT, COOL / STOP HOTWATER HEAT COOL
+                    
                     //zone 1
                     const zone1Name = deviceData.Zone1Name ?? 'Zone 1';
                     const roomTemperatureZone1 = deviceData.Device.RoomTemperatureZone1;
@@ -1826,7 +1835,6 @@ class DeviceAtw extends EventEmitter {
                         holidayModeEnabled: holidayModeEnabled,
                         power: power,
                         inStandbyMode: inStandbyMode,
-                        unitStatus: unitStatus,
                         idleZone1: idleZone1,
                         idleZone2: idleZone2,
                         temperatureIncrement: temperatureIncrement,
