@@ -312,14 +312,14 @@ class DeviceAtw extends EventEmitter {
                                                         payload.power = false;
                                                         break;
                                                     case 1: //HEAT
-                                                        if (accountTypeMelCloud) deviceData.Device.UnitStatus = 0;
                                                         payload.power = true;
-                                                        //payload.operationMode = 2;
+                                                        if (accountTypeMelCloud) deviceData.Device.UnitStatus = 0;
+                                                        if (!accountTypeMelCloud) payload.operationMode = 2;
                                                         break;
                                                     case 2: //COOL
-                                                        if (accountTypeMelCloud) deviceData.Device.UnitStatus = 1;
                                                         payload.power = true;
-                                                        //payload.operationMode = 3;
+                                                        if (accountTypeMelCloud) deviceData.Device.UnitStatus = 1;
+                                                        if (!accountTypeMelCloud) payload.operationMode = 3;
                                                         break;
                                                 };
                                                 operationModeText = HeatPump.OperationModeHeatPumpMapEnumToStringInfo[value];
@@ -656,14 +656,14 @@ class DeviceAtw extends EventEmitter {
                                                         payload.power = false;
                                                         break;
                                                     case 1: //HEAT
-                                                        if (accountTypeMelCloud) deviceData.Device.UnitStatus = 0;
                                                         payload.power = true;
-                                                        //payload.operationMode = 2;
+                                                        if (accountTypeMelCloud) deviceData.Device.UnitStatus = 0;
+                                                        if (!accountTypeMelCloud) payload.operationMode = 2;
                                                         break;
                                                     case 2: //COOL
-                                                        if (accountTypeMelCloud) deviceData.Device.UnitStatus = 1;
                                                         payload.power = true;
-                                                        //payload.operationMode = 3;
+                                                        if (accountTypeMelCloud) deviceData.Device.UnitStatus = 1;
+                                                        if (!accountTypeMelCloud) payload.operationMode = 3;
                                                         break;
                                                     case 3: //AUTO - not used
                                                         return;
@@ -1785,7 +1785,7 @@ class DeviceAtw extends EventEmitter {
                     const returnTemperatureHeatPump = deviceData.Device.ReturnTemperature;
                     const operationModeHeatPump = accountTypeMelCloud ? deviceData.Device.UnitStatus : [1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0][operationMode]; //HEAT, COOL / STOP HOTWATER HEAT COOL
                     const statusHeatPump = accountTypeMelCloud ? deviceData.Device.UnitStatus : [2, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0][operationMode]; //HEAT, COOL / STOP HOTWATER HEAT COOL
-                    
+
                     //zone 1
                     const zone1Name = deviceData.Zone1Name ?? 'Zone 1';
                     const roomTemperatureZone1 = deviceData.Device.RoomTemperatureZone1;

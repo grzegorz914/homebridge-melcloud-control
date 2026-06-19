@@ -455,25 +455,30 @@ class DeviceAta extends EventEmitter {
                         .onSet(async (value) => {
                             try {
                                 let flag = null;
+                                let power = null;
                                 switch (value) {
                                     case 0: //OFF - POWER OFF
+                                        power = false;
                                         value = deviceData.Device.OperationMode;
                                         break;
                                     case 1: //HEAT - HEAT
+                                        power = true;
                                         value = heatDryFanMode;
                                         flag = AirConditioner.EffectiveFlags.OperationModeSetTemperature;
                                         break;
                                     case 2: //COOL - COOL
+                                        power = true;
                                         value = coolDryFanMode;
                                         flag = AirConditioner.EffectiveFlags.OperationModeSetTemperature
                                         break;
                                     case 3: //AUTO - AUTO
+                                        power = true;
                                         value = autoDryFanMode;
                                         flag = AirConditioner.EffectiveFlags.OperationModeSetTemperature;
                                         break;
                                 };
 
-                                const payload = { power: value === 0 ? false : true, operationMode: value };
+                                const payload = { power, operationMode: value };
                                 if (this.logInfo) this.emit('info', `Set operation mode: ${AirConditioner.OperationModeMapEnumToString[value]}`);
                                 await this.melCloudAta.send(this.accountType, this.displayType, deviceData, payload, flag);
                             } catch (error) {
