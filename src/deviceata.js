@@ -135,7 +135,7 @@ class DeviceAta extends EventEmitter {
                     flag = AirConditioner.EffectiveFlags.SetTemperature;
                     break;
                 case 'FanSpeed':
-                    key = accountTypeMelCloud ? 'fanSpeed' : 'setFanSpeed';
+                    key = 'setFanSpeed';
                     payload[key] = value;
                     flag = AirConditioner.EffectiveFlags.SetFanSpeed;
                     break;
@@ -1143,7 +1143,7 @@ class DeviceAta extends EventEmitter {
                             .onSet(async (state) => {
                                 try {
                                     const fanKey = accountTypeMelCloud ? 'FanSpeed' : 'SetFanSpeed';
-                                    const fanKeySet = accountTypeMelCloud ? 'fanSpeed' : 'setFanSpeed';
+                                    const fanKeySet = 'setFanSpeed';
                                     let payload = {};
                                     let flag = null;
                                     switch (mode) {
