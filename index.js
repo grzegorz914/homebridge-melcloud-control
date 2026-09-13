@@ -294,6 +294,7 @@ class MelCloudPlatform {
 						port: mqtt.port || 1883,
 						clientId: mqtt.clientId ? `melcloud_${mqtt.clientId}_${Math.random().toString(16).slice(3)}` : `melcloud_${Math.random().toString(16).slice(3)}`,
 						prefix: mqtt.prefix ? `melcloud/${mqtt.prefix}/${deviceTypeString}/${deviceName}` : `melcloud/${deviceTypeString}/${deviceName}`,
+						protocolVersion: mqtt.protocolVersion,
 						user: mqtt.auth?.user,
 						passwd: mqtt.auth?.passwd,
 						logWarn: logLevel.warn,

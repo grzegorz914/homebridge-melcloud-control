@@ -2382,7 +2382,7 @@
                   "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}|([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)(\\.([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?))*)$",
                   "description": "Here set the IP/Hostname of MQTT Broker.",
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].mqtt.enable === true;"
+                    "functionBody": "return model.accounts[arrayIndices[0]].mqtt.enable === true;"
                   }
                 },
                 "port": {
@@ -2391,7 +2391,7 @@
                   "placeholder": 1883,
                   "description": "Here set the port of MQTT Broker.",
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].mqtt.enable === true;"
+                    "functionBody": "return model.accounts[arrayIndices[0]].mqtt.enable === true;"
                   }
                 },
                 "clientId": {
@@ -2400,7 +2400,7 @@
                   "placeholder": "client id",
                   "description": "Here optional set the Client ID of MQTT Broker.",
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].mqtt.enable === true"
+                    "functionBody": "return model.accounts[arrayIndices[0]].mqtt.enable === true"
                   }
                 },
                 "prefix": {
@@ -2409,7 +2409,26 @@
                   "placeholder": "home",
                   "description": "Here set the prefix.",
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].mqtt.enable === true;"
+                    "functionBody": "return model.accounts[arrayIndices[0]].mqtt.enable === true;"
+                  }
+                },
+                "protocolVersion": {
+                  "title": "Protocol Version",
+                  "type": "integer",
+                  "default": 5,
+                  "oneOf": [
+                    {
+                      "title": "5.0",
+                      "enum": [5]
+                    },
+                    {
+                      "title": "3.1.1",
+                      "enum": [4]
+                    }
+                  ],
+                  "description": "MQTT protocol version used to connect to the broker. Some brokers (e.g. the ioBroker MQTT adapter) only support 3.1.1 and will silently reject 5.0 connections.",
+                  "condition": {
+                    "functionBody": "return model.accounts[arrayIndices[0]].mqtt.enable === true;"
                   }
                 },
                 "auth": {
@@ -2427,7 +2446,7 @@
                       "placeholder": "user",
                       "description": "Here set the user of MQTT Broker.",
                       "condition": {
-                        "functionBody": "return model.devices[arrayIndices].mqtt.auth.enable === true;"
+                        "functionBody": "return model.accounts[arrayIndices[0]].mqtt.auth.enable === true;"
                       }
                     },
                     "passwd": {
@@ -2437,12 +2456,12 @@
                       "description": "Here set the password of MQTT Broker.",
                       "format": "password",
                       "condition": {
-                        "functionBody": "return model.devices[arrayIndices].mqtt.auth.enable === true;"
+                        "functionBody": "return model.accounts[arrayIndices[0]].mqtt.auth.enable === true;"
                       }
                     }
                   },
                   "condition": {
-                    "functionBody": "return model.devices[arrayIndices].mqtt.enable === true;"
+                    "functionBody": "return model.accounts[arrayIndices[0]].mqtt.enable === true;"
                   },
                   "allOf": [
                     {
@@ -3067,6 +3086,7 @@
                             "accounts[].mqtt.port",
                             "accounts[].mqtt.clientId",
                             "accounts[].mqtt.prefix",
+                            "accounts[].mqtt.protocolVersion",
                             {
                               "key": "accounts[].mqtt.auth",
                               "title": "Authorization",
