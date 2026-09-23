@@ -37,7 +37,8 @@
             "debug": false
           },
           "restFul": {
-            "enable": false
+            "enable": false,
+            "token": ""
           },
           "mqtt": {
             "enable": false,
@@ -45,6 +46,7 @@
             "port": 1883,
             "clientId": "",
             "prefix": "",
+            "protocolVersion": 5,
             "auth": {
               "enable": false,
               "user": "",
