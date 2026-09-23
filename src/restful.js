@@ -7,6 +7,7 @@ class RestFul extends EventEmitter {
     constructor(config) {
         super();
         this.port = config.port;
+        this.token = config.token;
         this.logWarn = config.logWarn;
         this.logDebug = config.logDebug;
 
@@ -43,6 +44,12 @@ class RestFul extends EventEmitter {
             // POST route to update values
             app.post('/', (req, res) => {
                 try {
+                    const providedToken = req.headers['x-api-token'];
+                    if (!this.token || providedToken !== this.token) {
+                        if (this.logWarn) this.emit('warn', 'RESTFul Unauthorized request');
+                        return res.status(401).json({ error: 'RESTFul Unauthorized' });
+                    }
+
                     const obj = req.body;
                     if (!obj || typeof obj !== 'object' || Object.keys(obj).length === 0) {
                         if (this.logWarn) this.emit('warn', 'RESTFul Invalid JSON payload');
