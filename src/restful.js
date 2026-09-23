@@ -26,6 +26,26 @@ class RestFul extends EventEmitter {
             app.set('json spaces', 2);
             app.use(json());
 
+            // Basic in-memory rate limiter to prevent request flooding/resource exhaustion (CWE-770)
+            const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+            const RATE_LIMIT_MAX_REQUESTS = 100;
+            const requestCounts = new Map();
+            app.use((req, res, next) => {
+                const now = Date.now();
+                const entry = requestCounts.get(req.ip) ?? { count: 0, start: now };
+                if (now - entry.start > RATE_LIMIT_WINDOW_MS) {
+                    entry.count = 0;
+                    entry.start = now;
+                }
+                entry.count += 1;
+                requestCounts.set(req.ip, entry);
+                if (entry.count > RATE_LIMIT_MAX_REQUESTS) {
+                    if (this.logWarn) this.emit('warn', `RESTFul rate limit exceeded for: ${req.ip}, ${req.method} ${req.path}`);
+                    return res.status(429).json({ error: 'RESTFul Too Many Requests' });
+                }
+                next();
+            });
+
             // Optional token auth, when a token is configured every route requires "Authorization: Bearer <token>"
             if (this.token) {
                 app.use((req, res, next) => {
