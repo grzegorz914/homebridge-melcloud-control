@@ -358,6 +358,7 @@
 | `log.debug` | This enable debug log will be displayed in console. |
 | `restFul{}` | RSTful object. |
 | `restFul.enable` | This enable RESTful server will start automatically and respond to any path request. |
+| `restFul.token` | Here optional set the access token. When set, every request must send the header `Authorization: Bearer <token>`, otherwise the server responds `401`. |
 | `mqtt{}` | MQTT object. |
 | `mqtt.enable` | This enable MQTT Broker will start automatically and publish all awailable PV data. |
 | `mqtt.host` | Here set the `IP Address` or `Hostname` for MQTT Broker. |
@@ -376,6 +377,7 @@
   * MELCLoud Home, start at `30000`, correct port is displayed in HB log during start.
 * POST data as a JSON Object `{OperationMode: 8}`.
 * Header content type must be `application/json`.
+* If `Token` is set, every request (GET and POST) must send the header `Authorization: Bearer <token>`.
 * Path `status` response all available paths.
 
 | Method | URL | Path | Response | Type |

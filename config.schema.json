@@ -2362,6 +2362,16 @@
                   "type": "boolean",
                   "default": false,
                   "description": "This enable RESTful server."
+                },
+                "token": {
+                  "title": "Token",
+                  "type": "string",
+                  "placeholder": "optional",
+                  "description": "Optional access token. When set, every request must send the header 'Authorization: Bearer <token>'. Leave empty to keep the server open on the local network.",
+                  "format": "password",
+                  "condition": {
+                    "functionBody": "return model.accounts[arrayIndices[0]].restFul.enable === true;"
+                  }
                 }
               }
             },
@@ -3074,7 +3084,8 @@
                           "key": "accounts[].restFul",
                           "title": "RESTFul",
                           "items": [
-                            "accounts[].restFul.enable"
+                            "accounts[].restFul.enable",
+                            "accounts[].restFul.token"
                           ]
                         },
                         {
