@@ -55,7 +55,7 @@
     * Power `ON/OFF`.
     * Operating mode `AUTO/HEAT/COOL/POWER OFF`.
     * Temperature `HEATING/COOLING/AUTO`.
-    * Fan speed `AUTO/1/2/3/4/5`.
+    * Fan speed `OFF/N-SPEEDS/AUTO`.
     * Swing mode `AUTO/SWING`.
     * Physical lock controls `LOCK/UNLOCK`.
     * Temperature display unit `°F/°C`.
@@ -162,7 +162,7 @@
   * Heater Cooler:
     * Power `ON/OFF`.
     * Operating mode `AUTO/HEAT/COOL/POWER OFF` - `AUTO, LOSSNAY, BYPASS, POWER OFF`.
-    * Fan speed `AUTO/1/2/3/4`.
+    * Fan speed `OFF/N-SPEEDS/AUTO`.
     * Temperature display unit `°F/°C`.
   * Thermostat:
     * Power `ON/OFF`.

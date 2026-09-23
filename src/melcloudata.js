@@ -207,15 +207,35 @@ class MelCloudAta extends EventEmitter {
                             payload = { data: payload.LoginData };
                             path = ApiUrls.Post.UpdateApplicationOptions;
                             break;
-                        default:
-                            if (displayType === 1 && deviceData.Device.OperationMode === 8) {
-                                payload.setTemperature = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
+                        default: {
+                            //compare against the API wrapper's own live-polled state, not the caller's closure-captured (possibly stale) deviceData
+                            const changes = this.functions.filterChanges(payload, this.deviceData.Device);
+
+                            if (Object.keys(changes).length === 0) {
+                                if (this.logDebug) this.emit('debug', `Ignore send, no changes: ${JSON.stringify(payload)}`);
+                                return true;
                             }
 
-                            flag = !flag ? AirConditioner.EffectiveFlags.Power : AirConditioner.EffectiveFlags.Power + flag;
+                            if (displayType === 1 && deviceData.Device.OperationMode === 8) {
+                                changes.setTemperature = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
+                            }
+
+                            //rebuild effective flags from only the fields that actually changed, Power always stays forced
+                            const flagBits = {
+                                operationMode: AirConditioner.EffectiveFlags.OperationMode,
+                                setTemperature: AirConditioner.EffectiveFlags.SetTemperature,
+                                setFanSpeed: AirConditioner.EffectiveFlags.SetFanSpeed,
+                                vaneVerticalDirection: AirConditioner.EffectiveFlags.VaneVertical,
+                                vaneHorizontalDirection: AirConditioner.EffectiveFlags.VaneHorizontal,
+                                prohibitSetTemperature: AirConditioner.EffectiveFlags.Prohibit,
+                                prohibitOperationMode: AirConditioner.EffectiveFlags.Prohibit,
+                                prohibitPower: AirConditioner.EffectiveFlags.Prohibit,
+                            };
+                            flag = Object.keys(changes).reduce((acc, key) => acc | (flagBits[key] ?? 0), AirConditioner.EffectiveFlags.Power);
+
                             payload = this.functions.toPascalCaseKeys({
-                                ...payload,
-                                power: payload.power !== false,
+                                ...changes,
+                                power: changes.power !== false,
                                 deviceID: deviceData.Device.DeviceID,
                                 effectiveFlags: flag,
                                 hasPendingCommand: true,
@@ -224,6 +244,7 @@ class MelCloudAta extends EventEmitter {
                             path = ApiUrls.Post.Ata;
                             update = true;
                             break;
+                        }
                     }
 
                     if (this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);
@@ -288,9 +309,17 @@ class MelCloudAta extends EventEmitter {
                             if (scene) scene.Enabled = payload.enabled;
                             payload = {};
                             break;
-                        default:
+                        default: {
+                            //compare against the API wrapper's own live-polled state, not the caller's closure-captured (possibly stale) deviceData
+                            const changes = this.functions.filterChanges(payload, this.deviceData.Device);
+
+                            if (Object.keys(changes).length === 0) {
+                                if (this.logDebug) this.emit('debug', `Ignore send, no changes: ${JSON.stringify(payload)}`);
+                                return true;
+                            }
+
                             if (displayType === 1 && deviceData.Device.OperationMode === 8) {
-                                payload.setTemperature = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
+                                changes.setTemperature = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
 
                                 if (this.deviceData.Device.DefaultCoolingSetTemperature !== deviceData.Device.DefaultCoolingSetTemperature || this.deviceData.Device.DefaultHeatingSetTemperature !== deviceData.Device.DefaultHeatingSetTemperature) {
                                     const temps = {
@@ -301,26 +330,21 @@ class MelCloudAta extends EventEmitter {
                                 }
                             }
 
-                            if (payload.setFanSpeed != null) payload.setFanSpeed = String(payload.setFanSpeed);
-                            if (payload.operationMode != null) payload.operationMode = AirConditioner.OperationModeMapEnumToString[payload.operationMode];
-                            if (payload.vaneHorizontalDirection != null) payload.vaneHorizontalDirection = AirConditioner.VaneHorizontalDirectionMapEnumToString[payload.vaneHorizontalDirection];
-                            if (payload.vaneVerticalDirection != null) payload.vaneVerticalDirection = AirConditioner.VaneVerticalDirectionMapEnumToString[payload.vaneVerticalDirection];
+                            if (changes.setFanSpeed != null) changes.setFanSpeed = String(changes.setFanSpeed);
+                            if (changes.operationMode != null) changes.operationMode = AirConditioner.OperationModeMapEnumToString[changes.operationMode];
+                            if (changes.vaneHorizontalDirection != null) changes.vaneHorizontalDirection = AirConditioner.VaneHorizontalDirectionMapEnumToString[changes.vaneHorizontalDirection];
+                            if (changes.vaneVerticalDirection != null) changes.vaneVerticalDirection = AirConditioner.VaneVerticalDirectionMapEnumToString[changes.vaneVerticalDirection];
 
-                            //cleanup undefined
-                            Object.keys(payload).forEach(key => {
-                                if (payload[key] === undefined) {
-                                    delete payload[key];
-                                }
-                            });
-
+                            payload = changes;
                             method = 'PUT';
                             path = ApiUrls.Home.Put.Ata.replace('deviceid', deviceData.DeviceID);
                             deviceData.Device = { ...deviceData.Device, ...payload };
                             break;
+                        }
                     }
 
                     //send payload
-                    if (this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);
+                    if (!this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);
                     await this.client(path, { method: method, data: payload });
                     return true;
                 default:

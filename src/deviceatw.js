@@ -126,62 +126,48 @@ class DeviceAtw extends EventEmitter {
                     break;
                 case 'OperationModeZone1':
                     payload.operationModeZone1 = value;
-                    flag = HeatPump.EffectiveFlags.OperationModeZone1;
                     break;
                 case 'SetTemperatureZone1':
                     payload.setTemperatureZone1 = value;
-                    flag = HeatPump.EffectiveFlags.SetTemperatureZone1;
                     break;
                 case 'SetHeatFlowTemperatureZone1':
                     payload.setHeatFlowTemperatureZone1 = value;
-                    flag = HeatPump.EffectiveFlags.SetHeatFlowTemperatureZone1;
                     break;
                 case 'SetCoolFlowTemperatureZone1':
                     payload.setCoolFlowTemperatureZone1 = value;
-                    flag = HeatPump.EffectiveFlags.SetCoolFlowTemperatureZone1;
                     break;
                 case 'ProhibitZone1':
                     if (!accountTypeMelCloud) return;
                     payload.prohibitZone1 = value;
-                    flag = HeatPump.EffectiveFlags.ProhibitHeatingZone1;
                     break;
                 case 'ForcedHotWaterMode':
                     payload.forcedHotWaterMode = value;
-                    flag = HeatPump.EffectiveFlags.ForcedHotWaterMode;
                     break;
                 case 'EcoHotWater':
                     if (!accountTypeMelCloud) return;
                     payload.ecoHotWater = value;
-                    flag = HeatPump.EffectiveFlags.EcoHotWater;
                     break;
                 case 'SetTankWaterTemperature':
                     payload.setTankWaterTemperature = value;
-                    flag = HeatPump.EffectiveFlags.SetTankWaterTemperature;
                     break;
                 case 'ProhibitHotWater':
                     payload.prohibitHotWater = value;
-                    flag = HeatPump.EffectiveFlags.ProhibitHotWater;
                     break;
                 case 'OperationModeZone2':
                     payload.operationModeZone2 = value;
-                    flag = HeatPump.EffectiveFlags.OperationModeZone2;
                     break;
                 case 'SetTemperatureZone2':
                     payload.setTemperatureZone2 = value;
-                    flag = HeatPump.EffectiveFlags.SetTemperatureZone2;
                     break;
                 case 'SetHeatFlowTemperatureZone2':
                     payload.setHeatFlowTemperatureZone2 = value;
-                    flag = HeatPump.EffectiveFlags.SetHeatFlowTemperatureZone2;
                     break;
                 case 'SetCoolFlowTemperatureZone2':
                     payload.setCoolFlowTemperatureZone2 = value;
-                    flag = HeatPump.EffectiveFlags.SetCoolFlowTemperatureZone2;
                     break;
                 case 'ProhibitZone2':
                     if (!accountTypeMelCloud) return;
                     payload.prohibitZone2 = value;
-                    flag = HeatPump.EffectiveFlags.ProhibitHeatingZone2;
                     break;
                 case 'FrostProtection':
                     if (accountTypeMelCloud) return;
@@ -196,7 +182,6 @@ class DeviceAtw extends EventEmitter {
                 case 'HolidayMode':
                     if (accountTypeMelCloud) {
                         payload.holidayMode = value;
-                        flag = HeatPump.EffectiveFlags.HolidayMode;
                     }
 
                     if (!accountTypeMelCloud) {
@@ -304,7 +289,6 @@ class DeviceAtw extends EventEmitter {
                                     try {
                                         const payload = {};
                                         let operationModeText = '';
-                                        let flag = null;
                                         switch (i) {
                                             case caseHeatPump: //Heat Pump - Operation Mode - IDLE, HOT WATER, HEATING, COOLING, HOT WATER STORAGE, FREEZE STAT, LEGIONELLA, HEATING ECO, MODE 1, MODE 2, MODE 3, HEATING UP // Unit Status - HEAT, COOL
                                                 switch (value) {
@@ -328,15 +312,12 @@ class DeviceAtw extends EventEmitter {
                                                 switch (value) {
                                                     case 0: //AUTO - HEAT CURVE / FLOOR DRY UP
                                                         payload.operationModeZone1 = [2, 5][zone.operationModeHeatPump];
-                                                        flag = HeatPump.EffectiveFlags.OperationModeZone1;
                                                         break;
                                                     case 1: //HEAT - HEAT ROOM / COOL ROOM
                                                         payload.operationModeZone1 = [0, 3][zone.operationModeHeatPump];
-                                                        flag = HeatPump.EffectiveFlags.OperationModeZone1;
                                                         break;
                                                     case 2: //COOL - HEAT FLOW / COOL FLOW
                                                         payload.operationModeZone1 = [1, 4][zone.operationModeHeatPump];
-                                                        flag = HeatPump.EffectiveFlags.OperationModeZone1;
                                                         break;
                                                 };
                                                 operationModeText = HeatPump.OperationModeZoneMapEnumToStringInfo[payload.operationModeZone1];
@@ -345,15 +326,12 @@ class DeviceAtw extends EventEmitter {
                                                 switch (value) {
                                                     case 0: //AUTO
                                                         //payload.forcedHotWaterMode = false;
-                                                        //flag = HeatPump.EffectiveFlags.ForcedHotWaterMode;
                                                         return;
                                                     case 1: //HEAT
                                                         payload.forcedHotWaterMode = true;
-                                                        flag = HeatPump.EffectiveFlags.ForcedHotWaterMode;
                                                         break;
                                                     case 2: //COOL
                                                         //payload.forcedHotWaterMode = false;
-                                                        //flag = HeatPump.EffectiveFlags.ForcedHotWaterMode;
                                                         return
                                                 };
                                                 operationModeText = HeatPump.ForceDhwMapEnumToStringInfo[payload.forcedHotWaterMode ? 1 : 0];
@@ -362,15 +340,12 @@ class DeviceAtw extends EventEmitter {
                                                 switch (value) {
                                                     case 0: //AUTO - HEAT CURVE / FLOOR DRY UP
                                                         payload.operationModeZone2 = [2, 5][zone.operationModeHeatPump];
-                                                        flag = HeatPump.EffectiveFlags.OperationModeZone2;
                                                         break;
                                                     case 1: //HEAT - HEAT ROOM / COOL ROOM
                                                         payload.operationModeZone2 = [0, 3][zone.operationModeHeatPump];
-                                                        flag = HeatPump.EffectiveFlags.OperationModeZone2;
                                                         break;
                                                     case 2: //COOL - HEAT FLOW / COOL FLOW
                                                         payload.operationModeZone2 = [1, 4][zone.operationModeHeatPump];
-                                                        flag = HeatPump.EffectiveFlags.OperationModeZone2;
                                                         break;
                                                 };
                                                 operationModeText = HeatPump.OperationModeZoneMapEnumToStringInfo[payload.operationModeZone2];
@@ -378,7 +353,7 @@ class DeviceAtw extends EventEmitter {
                                         };
 
                                         if (this.logInfo) this.emit('info', `${zoneName}, Set operation mode: ${operationModeText}`);
-                                        await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, payload, flag);
+                                        await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, payload);
                                     } catch (error) {
                                         if (this.logWarn) this.emit('warn', `${zoneName}, Set operation mode error: ${error}`);
                                     };
@@ -403,46 +378,37 @@ class DeviceAtw extends EventEmitter {
                                     .onSet(async (value) => {
                                         try {
                                             const payload = {};
-                                            let flag = null;
                                             switch (this.accountType) {
                                                 case 'melcloud': //Melcloud
                                                     switch (i) {
                                                         case caseHeatPump: //Heat Pump
-                                                            //flag = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone1;
                                                             return;
                                                         case caseZone1: //Zone 1
                                                             switch (zone.operationModeRaw) {
                                                                 case 1: //HEAT FLOW
                                                                     payload.setHeatFlowTemperatureZone1 = value;
-                                                                    flag = HeatPump.EffectiveFlags.SetHeatFlowTemperatureZone1;
                                                                     break;
                                                                 case 4: //COOL FLOW
                                                                     payload.setCoolFlowTemperatureZone1 = value;
-                                                                    flag = HeatPump.EffectiveFlags.SetCoolFlowTemperatureZone1;
                                                                     break;
                                                                 default:
                                                                     payload.setTemperatureZone1 = value;
-                                                                    flag = HeatPump.EffectiveFlags.SetTemperatureZone1;
                                                                     break
                                                             };
                                                             break;
                                                         case caseHotWater: //Hot Water
                                                             payload.setTankWaterTemperature = value;
-                                                            flag = HeatPump.EffectiveFlags.SetTankWaterTemperature;
                                                             break;
                                                         case caseZone2: //Zone 2
                                                             switch (zone.operationModeRaw) {
                                                                 case 1: //HEAT FLOW
                                                                     payload.setHeatFlowTemperatureZone2 = value;
-                                                                    flag = HeatPump.EffectiveFlags.SetHeatFlowTemperatureZone2;
                                                                     break;
                                                                 case 4: //COOL FLOW
                                                                     payload.setCoolFlowTemperatureZone2 = value;
-                                                                    flag = HeatPump.EffectiveFlags.SetCoolFlowTemperatureZone2;
                                                                     break;
                                                                 default:
                                                                     payload.setTemperatureZone2 = value;
-                                                                    flag = HeatPump.EffectiveFlags.SetTemperatureZone2;
                                                                     break
                                                             };
                                                             break;
@@ -451,7 +417,6 @@ class DeviceAtw extends EventEmitter {
                                                 case 'melcloudhome':
                                                     switch (i) {
                                                         case caseHeatPump: //Heat Pump
-                                                            //flag = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone1;
                                                             return;
                                                         case caseZone1: //Zone 1
                                                             payload.setTemperatureZone1 = value;
@@ -470,7 +435,7 @@ class DeviceAtw extends EventEmitter {
                                             }
 
                                             if (this.logInfo) this.emit('info', `${zoneName}, Set cooling threshold temperature: ${value}${this.accessory.temperatureUnit}`);
-                                            await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, payload, flag);
+                                            await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, payload);
                                         } catch (error) {
                                             if (this.logWarn) this.emit('warn', `${zoneName}, Set cooling threshold temperature error: ${error}`);
                                         };
@@ -491,46 +456,37 @@ class DeviceAtw extends EventEmitter {
                                     .onSet(async (value) => {
                                         try {
                                             const payload = {};
-                                            let flag = null;
                                             switch (this.accountType) {
                                                 case 'melcloud': //Melcloud
                                                     switch (i) {
                                                         case caseHeatPump: //Heat Pump
-                                                            //flag = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone1;
                                                             return;
                                                         case caseZone1: //Zone 1
                                                             switch (zone.operationModeRaw) {
                                                                 case 1: //HEAT FLOW
                                                                     payload.setHeatFlowTemperatureZone1 = value;
-                                                                    flag = HeatPump.EffectiveFlags.SetHeatFlowTemperatureZone1;
                                                                     break;
                                                                 case 4: //COOL FLOW
                                                                     payload.setCoolFlowTemperatureZone1 = value;
-                                                                    flag = HeatPump.EffectiveFlags.SetCoolFlowTemperatureZone1;
                                                                     break;
                                                                 default:
                                                                     payload.setTemperatureZone1 = value;
-                                                                    flag = HeatPump.EffectiveFlags.SetTemperatureZone1;
                                                                     break
                                                             };
                                                             break;
                                                         case caseHotWater: //Hot Water
                                                             payload.setTankWaterTemperature = value;
-                                                            flag = HeatPump.EffectiveFlags.SetTankWaterTemperature;
                                                             break;
                                                         case caseZone2: //Zone 2
                                                             switch (zone.operationModeRaw) {
                                                                 case 1: //HEAT FLOW
                                                                     payload.setHeatFlowTemperatureZone2 = value;
-                                                                    flag = HeatPump.EffectiveFlags.SetHeatFlowTemperatureZone2;
                                                                     break;
                                                                 case 4: //COOL FLOW
                                                                     payload.setCoolFlowTemperatureZone2 = value;
-                                                                    flag = HeatPump.EffectiveFlags.SetCoolFlowTemperatureZone2;
                                                                     break;
                                                                 default:
                                                                     payload.setTemperatureZone2 = value;
-                                                                    flag = HeatPump.EffectiveFlags.SetTemperatureZone2;
                                                                     break
                                                             };
                                                             break;
@@ -539,7 +495,6 @@ class DeviceAtw extends EventEmitter {
                                                 case 'melcloudhome':
                                                     switch (i) {
                                                         case caseHeatPump: //Heat Pump
-                                                            //flag = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone1;
                                                             return;
                                                         case caseZone1: //Zone 1
                                                             payload.setTemperatureZone1 = value;
@@ -558,7 +513,7 @@ class DeviceAtw extends EventEmitter {
                                             }
 
                                             if (this.logInfo) this.emit('info', `${zoneName}, Set heating threshold temperature: ${value}${this.accessory.temperatureUnit}`);
-                                            await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, payload, flag);
+                                            await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, payload);
                                         } catch (error) {
                                             if (this.logWarn) this.emit('warn', `${zoneName}, Set heating threshold temperature error: ${error}`);
                                         };
@@ -573,32 +528,27 @@ class DeviceAtw extends EventEmitter {
                                     try {
                                         value = value ? true : false;
                                         const payload = {};
-                                        let flag = null;
                                         switch (i) {
                                             case caseHeatPump: //Heat Pump
                                                 if (accountTypeMelCloud) payload.prohibitZone1 = value;
                                                 payload.prohibitHotWater = value;
                                                 if (accountTypeMelCloud) payload.prohibitZone2 = value;
-                                                flag = HeatPump.EffectiveFlags.ProhibitHeatingZone1 + HeatPump.EffectiveFlags.ProhibitHotWater + HeatPump.EffectiveFlags.ProhibitHeatingZone2;
                                                 break;
                                             case caseZone1: //Zone 1
                                                 if (!accountTypeMelCloud) return;
                                                 payload.prohibitZone1 = value;
-                                                flag = HeatPump.EffectiveFlags.ProhibitHeatingZone1;
                                                 break;
                                             case caseHotWater: //Hot Water
                                                 payload.prohibitHotWater = value;
-                                                flag = HeatPump.EffectiveFlags.ProhibitHotWater;
                                                 break;
                                             case caseZone2: //Zone 2
                                                 if (!accountTypeMelCloud) return;
                                                 payload.prohibitZone2 = value;
-                                                flag = HeatPump.EffectiveFlags.ProhibitHeatingZone2;
                                                 break;
                                         };
 
                                         if (this.logInfo) this.emit('info', `${zoneName}, Set lock physical controls: ${value ? 'Lock' : 'Unlock'}`);
-                                        await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, payload, flag);
+                                        await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, payload);
                                     } catch (error) {
                                         if (this.logWarn) this.emit('warn', `${zoneName}, Set lock physical controls error: ${error}`);
                                     };
@@ -648,7 +598,6 @@ class DeviceAtw extends EventEmitter {
                                     try {
                                         let operationModeText = '';
                                         const payload = {};
-                                        let flag = null;
                                         switch (i) {
                                             case caseHeatPump: //Heat Pump - Operation Mode - IDLE, HOT WATER, HEATING, COOLING, HOT WATER STORAGE, FREEZE STAT, LEGIONELLA, HEATING ECO, MODE 1, MODE 2, MODE 3, HEATING UP // Unit Status - HEAT, COOL
                                                 switch (value) {
@@ -674,19 +623,15 @@ class DeviceAtw extends EventEmitter {
                                                 switch (value) {
                                                     case 0: //OFF
                                                         //payload.operationModeZone1 = 2;
-                                                        //flag = HeatPump.EffectiveFlags.OperationModeZone1;
                                                         return;
                                                     case 1: //HEAT - HEAT ROOM / COOL ROOM
                                                         payload.operationModeZone1 = [0, 3][zone.operationModeHeatPump];
-                                                        flag = HeatPump.EffectiveFlags.OperationModeZone1;
                                                         break;
                                                     case 2: //COOL - HEAT FLOW / COOL FLOW
                                                         payload.operationModeZone1 = [1, 4][zone.operationModeHeatPump];
-                                                        flag = HeatPump.EffectiveFlags.OperationModeZone1;
                                                         break;
                                                     case 3: //AUTO - HEAT CURVE / FLOOR DRY UP
                                                         payload.operationModeZone1 = [2, 5][zone.operationModeHeatPump];
-                                                        flag = HeatPump.EffectiveFlags.OperationModeZone1;
                                                         break;
                                                 };
                                                 operationModeText = HeatPump.OperationModeZoneMapEnumToStringInfo[payload.operationModeZone1];
@@ -695,19 +640,15 @@ class DeviceAtw extends EventEmitter {
                                                 switch (value) {
                                                     case 0: //OFF
                                                         //payload.forcedHotWaterMode = false;
-                                                        //flag = HeatPump.EffectiveFlags.ForcedHotWaterMode;
                                                         return;
                                                     case 1: //HEAT
                                                         payload.forcedHotWaterMode = true;
-                                                        flag = HeatPump.EffectiveFlags.ForcedHotWaterMode;
                                                         break;
                                                     case 2: //COOL
                                                         //payload.forcedHotWaterMode = false;
-                                                        //flag = HeatPump.EffectiveFlags.ForcedHotWaterMode;
                                                         return;
                                                     case 3: //AUTO
                                                         payload.forcedHotWaterMode = false;
-                                                        flag = HeatPump.EffectiveFlags.ForcedHotWaterMode;
                                                         break;
                                                 };
                                                 operationModeText = HeatPump.ForceDhwMapEnumToStringInfo[payload.forcedHotWaterMode ? 1 : 0];
@@ -716,19 +657,15 @@ class DeviceAtw extends EventEmitter {
                                                 switch (value) {
                                                     case 0: //OFF
                                                         //payload.operationModeZone2 = 2;
-                                                        //flag = HeatPump.EffectiveFlags.OperationModeZone2;
                                                         return;
                                                     case 1: //HEAT - HEAT ROOM / COOL ROOM
                                                         payload.operationModeZone2 = [0, 3][zone.operationModeHeatPump];
-                                                        flag = HeatPump.EffectiveFlags.OperationModeZone2;
                                                         break;
                                                     case 2: //COOL - HEAT FLOW / COOL FLOW
                                                         payload.operationModeZone2 = [1, 4][zone.operationModeHeatPump];
-                                                        flag = HeatPump.EffectiveFlags.OperationModeZone2;
                                                         break;
                                                     case 3: //AUTO - HEAT CURVE / FLOOR DRY UP
                                                         payload.operationModeZone2 = [2, 5][zone.operationModeHeatPump];
-                                                        flag = HeatPump.EffectiveFlags.OperationModeZone2;
                                                         break;
                                                 };
                                                 operationModeText = HeatPump.OperationModeZoneMapEnumToStringInfo[payload.operationModeZone2];
@@ -736,7 +673,7 @@ class DeviceAtw extends EventEmitter {
                                         };
 
                                         if (this.logInfo) this.emit('info', `${zoneName}, Set operation mode: ${operationModeText}`);
-                                        await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, payload, flag);
+                                        await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, payload);
                                     } catch (error) {
                                         if (this.logWarn) this.emit('warn', `${zoneName}, Set operation mode error: ${error}`);
                                     };
@@ -759,46 +696,37 @@ class DeviceAtw extends EventEmitter {
                                 .onSet(async (value) => {
                                     try {
                                         const payload = {};
-                                        let flag = null;
                                         switch (this.accountType) {
                                             case 'melcloud': //Melcloud
                                                 switch (i) {
                                                     case caseHeatPump: //Heat Pump
-                                                        //flag = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone1;
                                                         return;
                                                     case caseZone1: //Zone 1
                                                         switch (zone.operationModeRaw) {
                                                             case 1: //HEAT FLOW
                                                                 payload.setHeatFlowTemperatureZone1 = value;
-                                                                flag = HeatPump.EffectiveFlags.SetHeatFlowTemperatureZone1;
                                                                 break;
                                                             case 4: //COOL FLOW
                                                                 payload.setCoolFlowTemperatureZone1 = value;
-                                                                flag = HeatPump.EffectiveFlags.SetCoolFlowTemperatureZone1;
                                                                 break;
                                                             default:
                                                                 payload.setTemperatureZone1 = value;
-                                                                flag = HeatPump.EffectiveFlags.SetTemperatureZone1;
                                                                 break
                                                         };
                                                         break;
                                                     case caseHotWater: //Hot Water
                                                         payload.setTankWaterTemperature = value;
-                                                        flag = HeatPump.EffectiveFlags.SetTankWaterTemperature;
                                                         break;
                                                     case caseZone2: //Zone 2
                                                         switch (zone.operationModeRaw) {
                                                             case 1: //HEAT FLOW
                                                                 payload.setHeatFlowTemperatureZone2 = value;
-                                                                flag = HeatPump.EffectiveFlags.SetHeatFlowTemperatureZone2;
                                                                 break;
                                                             case 4: //COOL FLOW
                                                                 payload.setCoolFlowTemperatureZone2 = value;
-                                                                flag = HeatPump.EffectiveFlags.SetCoolFlowTemperatureZone2;
                                                                 break;
                                                             default:
                                                                 payload.setTemperatureZone2 = value;
-                                                                flag = HeatPump.EffectiveFlags.SetTemperatureZone2;
                                                                 break
                                                         };
                                                         break;
@@ -807,7 +735,6 @@ class DeviceAtw extends EventEmitter {
                                             case 'melcloudhome':
                                                 switch (i) {
                                                     case caseHeatPump: //Heat Pump
-                                                        //flag = CONSTANTS.HeatPump.EffectiveFlags.SetTemperatureZone1;
                                                         return;
                                                     case caseZone1: //Zone 1
                                                         payload.setTemperatureZone1 = value;
@@ -826,7 +753,7 @@ class DeviceAtw extends EventEmitter {
                                         }
 
                                         if (this.logInfo) this.emit('info', `${zoneName}, Set temperature: ${value}${this.accessory.temperatureUnit}`);
-                                        await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, payload, flag);
+                                        await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, payload);
                                     } catch (error) {
                                         if (this.logWarn) this.emit('warn', `${zoneName}, Set temperature error: ${error}`);
                                     };
@@ -1324,7 +1251,7 @@ class DeviceAtw extends EventEmitter {
                                     };
 
                                     if (this.logInfo) this.emit('info', `Preset ${name}: ${state ? 'Set' : 'Unset'}`);
-                                    await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, payload, HeatPump.EffectiveFlags.Presets);
+                                    await this.melCloudAtw.send(this.accountType, this.displayType, deviceData, payload);
                                 } catch (error) {
                                     if (this.logWarn) this.emit('warn', `Set preset error: ${error}`);
                                 };
@@ -1525,17 +1452,14 @@ class DeviceAtw extends EventEmitter {
                                             case 1: //HEAT
                                                 button.previousValue = state ? deviceData.Device.UnitStatus : button.previousValue ?? deviceData.Device.UnitStatus;
                                                 if (accountTypeMelCloud) deviceData.Device.UnitStatus = state ? 0 : button.previousValue;
-                                                flag = HeatPump.EffectiveFlags.OperationMode;
                                                 break;
                                             case 2: //COOL
                                                 button.previousValue = state ? deviceData.Device.UnitStatus : button.previousValue ?? deviceData.Device.UnitStatus;
                                                 if (accountTypeMelCloud) deviceData.Device.UnitStatus = state ? 1 : button.previousValue;
-                                                flag = HeatPump.EffectiveFlags.OperationMode;
                                                 break;
                                             case 3: //HOLIDAY
                                                 if (accountTypeMelCloud) {
                                                     payload.holidayMode = state;
-                                                    flag = HeatPump.EffectiveFlags.HolidayMode;
                                                 }
 
                                                 if (!accountTypeMelCloud) {
@@ -1547,90 +1471,72 @@ class DeviceAtw extends EventEmitter {
                                                 if (accountTypeMelCloud) payload.prohibitZone1 = state;
                                                 payload.prohibitHotWater = state;
                                                 if (accountTypeMelCloud) payload.prohibitZone2 = state;
-                                                flag = HeatPump.EffectiveFlags.ProhibitHeatingZone1 + HeatPump.EffectiveFlags.ProhibitHotWater + HeatPump.EffectiveFlags.ProhibitHeatingZone2;
                                                 break;
                                             case 20: //ZONE 1 HEAT ROOM
                                                 button.previousValue = state ? deviceData.Device.OperationModeZone1 : button.previousValue ?? deviceData.Device.OperationModeZone1;
                                                 payload.operationModeZone1 = state ? 0 : button.previousValue;
-                                                flag = HeatPump.EffectiveFlags.OperationModeZone1;
                                                 break;
                                             case 21: //HEAT FLOW
                                                 button.previousValue = state ? deviceData.Device.OperationModeZone1 : button.previousValue ?? deviceData.Device.OperationModeZone1;
                                                 payload.operationModeZone1 = state ? 1 : button.previousValue;
-                                                flag = HeatPump.EffectiveFlags.OperationModeZone1;
                                                 break;
                                             case 22: //HEAT CURVE
                                                 button.previousValue = state ? deviceData.Device.OperationModeZone1 : button.previousValue ?? deviceData.Device.OperationModeZone1;
                                                 payload.operationModeZone1 = state ? 2 : button.previousValue;
-                                                flag = HeatPump.EffectiveFlags.OperationModeZone1;
                                                 break;
                                             case 23: //COOL ROOM
                                                 button.previousValue = state ? deviceData.Device.OperationModeZone1 : button.previousValue ?? deviceData.Device.OperationModeZone1;
                                                 payload.operationModeZone1 = state ? 3 : button.previousValue;
-                                                flag = HeatPump.EffectiveFlags.OperationModeZone1;
                                                 break;
                                             case 24: //COOL FLOW
                                                 button.previousValue = state ? deviceData.Device.OperationModeZone1 : button.previousValue ?? deviceData.Device.OperationModeZone1;
                                                 payload.operationModeZone1 = state ? 4 : button.previousValue;
-                                                flag = HeatPump.EffectiveFlags.OperationModeZone1;
                                                 break;
                                             case 25: //FLOOR DRY UP
                                                 button.previousValue = state ? deviceData.Device.OperationModeZone1 : button.previousValue ?? deviceData.Device.OperationModeZone1;
                                                 payload.operationModeZone1 = state ? 5 : button.previousValue;
-                                                flag = HeatPump.EffectiveFlags.OperationModeZone1;
                                                 break;
                                             case 30: //PHYSICAL LOCK CONTROL
                                                 if (!accountTypeMelCloud) return;
                                                 payload.prohibitZone1 = state;
-                                                flag = HeatPump.EffectiveFlags.ProhibitHeatingZone1;
                                                 break;
                                             case 40: //HOT WATER NORMAL/FORCE HOT WATER
                                                 payload.forcedHotWaterMode = state;
-                                                flag = HeatPump.EffectiveFlags.ForcedHotWaterMode;
                                                 break;
                                             case 41: //NORMAL/ECO
                                                 if (!accountTypeMelCloud) return;
                                                 payload.ecoHotWater = state;
-                                                flag = HeatPump.EffectiveFlags.EcoHotWater;
                                                 break;
                                             case 50: //PHYSICAL LOCK CONTROL
                                                 payload.prohibitHotWater = state;
-                                                flag = HeatPump.EffectiveFlags.ProhibitHotWater;
                                                 break;
                                             case 60: //ZONE 2 HEAT ROOM
                                                 button.previousValue = state ? deviceData.Device.OperationModeZone2 : button.previousValue ?? deviceData.Device.OperationModeZone2;
                                                 payload.operationModeZone2 = state ? 0 : button.previousValue;
-                                                flag = HeatPump.EffectiveFlags.OperationModeZone2;
                                                 break;
                                             case 61: // HEAT FLOW
                                                 button.previousValue = state ? deviceData.Device.OperationModeZone2 : button.previousValue ?? deviceData.Device.OperationModeZone2;
                                                 payload.operationModeZone2 = state ? 1 : button.previousValue;
-                                                flag = HeatPump.EffectiveFlags.OperationModeZone2;
                                                 break;
                                             case 62: //HEAT CURVE
                                                 button.previousValue = state ? deviceData.Device.OperationModeZone2 : button.previousValue ?? deviceData.Device.OperationModeZone2;
                                                 payload.operationModeZone2 = state ? 2 : button.previousValue;
-                                                flag = HeatPump.EffectiveFlags.OperationModeZone2;
                                                 break;
                                             case 63: //COOL ROOM
                                                 button.previousValue = state ? deviceData.Device.OperationModeZone2 : button.previousValue ?? deviceData.Device.OperationModeZone2;
                                                 payload.operationModeZone2 = state ? 3 : button.previousValue;
-                                                flag = HeatPump.EffectiveFlags.OperationModeZone2;
                                                 break;
                                             case 64: //COOL FLOW
                                                 button.previousValue = state ? deviceData.Device.OperationModeZone2 : button.previousValue ?? deviceData.Device.OperationModeZone2;
                                                 payload.operationModeZone2 = state ? 4 : button.previousValue;
-                                                flag = HeatPump.EffectiveFlags.OperationModeZone2;
                                                 break;
                                             case 65: //FLOOR DRY UP
                                                 button.previousValue = state ? deviceData.Device.OperationModeZone2 : button.previousValue ?? deviceData.Device.OperationModeZone2;
                                                 payload.operationModeZone2 = state ? 5 : button.previousValue;
-                                                flag = HeatPump.EffectiveFlags.OperationModeZone2;
                                                 break;
                                             case 70: //PHYSICAL LOCK CONTROL
                                                 if (!accountTypeMelCloud) return;
                                                 payload.prohibitZone2 = state;
-                                                flag = HeatPump.EffectiveFlags.ProhibitHeatingZone2;
                                                 break;
                                             default:
                                                 if (this.logWarn) this.emit('warn', `Received unknown button mode: ${mode}`);

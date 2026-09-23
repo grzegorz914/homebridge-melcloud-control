@@ -182,32 +182,51 @@ class MelCloudErv extends EventEmitter {
                             payload = { data: payload.LoginData };
                             path = ApiUrls.Post.UpdateApplicationOptions;
                             break;
-                        default:
+                        default: {
+                            //compare against the API wrapper's own live-polled state, not the caller's closure-captured (possibly stale) deviceData
+                            const changes = this.functions.filterChanges(payload, this.deviceData.Device);
+
+                            if (Object.keys(changes).length === 0) {
+                                if (this.logDebug) this.emit('debug', `Ignore send, no changes: ${JSON.stringify(payload)}`);
+                                return true;
+                            }
+
                             //set target temp based on display mode and ventilation mode
                             switch (displayType) {
                                 case 1: //Heather/Cooler
                                     switch (deviceData.Device.VentilationMode) {
                                         case 0: //LOSNAY
-                                            payload.setTemperature = deviceData.Device.DefaultHeatingSetTemperature;
+                                            changes.setTemperature = deviceData.Device.DefaultHeatingSetTemperature;
                                             break;
                                         case 1: //BYPASS
-                                            payload.setTemperature = deviceData.Device.DefaultCoolingSetTemperature;
+                                            changes.setTemperature = deviceData.Device.DefaultCoolingSetTemperature;
                                             break;
                                         case 2: //AUTO
                                             const setTemperature = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
-                                            payload.setTemperature = setTemperature;
+                                            changes.setTemperature = setTemperature;
                                             break;
                                     };
                                 case 2: //Thermostat
-                                    payload.setTemperature = deviceData.Device.SetTemperature;
+                                    changes.setTemperature = deviceData.Device.SetTemperature;
                                     break;
                             };
 
-                            //device state
-                            flag = !flag ? Ventilation.EffectiveFlags.Power : Ventilation.EffectiveFlags.Power + flag;
+                            //rebuild effective flags from only the fields that actually changed, Power always stays forced
+                            const flagBits = {
+                                operationMode: Ventilation.EffectiveFlags.OperationMode,
+                                ventilationMode: Ventilation.EffectiveFlags.VentilationMode,
+                                setFanSpeed: Ventilation.EffectiveFlags.SetFanSpeed,
+                                setTemperature: Ventilation.EffectiveFlags.SetTemperature,
+                                nightPurgeMode: Ventilation.EffectiveFlags.NightPurgeMode,
+                                prohibitSetTemperature: Ventilation.EffectiveFlags.Prohibit,
+                                prohibitOperationMode: Ventilation.EffectiveFlags.Prohibit,
+                                prohibitPower: Ventilation.EffectiveFlags.Prohibit,
+                            };
+                            flag = Object.keys(changes).reduce((acc, key) => acc | (flagBits[key] ?? 0), Ventilation.EffectiveFlags.Power);
+
                             payload = this.functions.toPascalCaseKeys({
-                                ...payload,
-                                power: payload.power !== false,
+                                ...changes,
+                                power: changes.power !== false,
                                 deviceID: deviceData.Device.DeviceID,
                                 effectiveFlags: flag,
                                 hasPendingCommand: true,
@@ -215,6 +234,7 @@ class MelCloudErv extends EventEmitter {
                             path = ApiUrls.Post.Erv;
                             update = true;
                             break;
+                        }
                     }
 
                     if (this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);
@@ -254,9 +274,17 @@ class MelCloudErv extends EventEmitter {
                             if (scene) scene.Enabled = payload.enabled;
                             payload = {};
                             break;
-                        default:
+                        default: {
+                            //compare against the API wrapper's own live-polled state, not the caller's closure-captured (possibly stale) deviceData
+                            const changes = this.functions.filterChanges(payload, this.deviceData.Device);
+
+                            if (Object.keys(changes).length === 0) {
+                                if (this.logDebug) this.emit('debug', `Ignore send, no changes: ${JSON.stringify(payload)}`);
+                                return true;
+                            }
+
                             if (displayType === 1 && deviceData.Device.VentilationMode === 2) {
-                                payload.setTemperature = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
+                                changes.setTemperature = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
 
                                 if (this.deviceData.Device.DefaultCoolingSetTemperature !== deviceData.Device.DefaultCoolingSetTemperature || this.deviceData.Device.DefaultHeatingSetTemperature !== deviceData.Device.DefaultHeatingSetTemperature) {
                                     const temps = {
@@ -267,21 +295,16 @@ class MelCloudErv extends EventEmitter {
                                 }
                             }
 
-                            if (payload.setFanSpeed != null) payload.setFanSpeed = String(payload.setFanSpeed);
-                            if (payload.operationMode != null) payload.operationMode = Ventilation.OperationModeMapEnumToString[payload.operationMode];
-                            if (payload.ventilationMode != null) payload.ventilationMode = Ventilation.VentilationModeMapEnumToString[payload.ventilationMode];
+                            if (changes.setFanSpeed != null) changes.setFanSpeed = String(changes.setFanSpeed);
+                            if (changes.operationMode != null) changes.operationMode = Ventilation.OperationModeMapEnumToString[changes.operationMode];
+                            if (changes.ventilationMode != null) changes.ventilationMode = Ventilation.VentilationModeMapEnumToString[changes.ventilationMode];
 
-                            //cleanup undefined
-                            Object.keys(payload).forEach(key => {
-                                if (payload[key] === undefined) {
-                                    delete payload[key];
-                                }
-                            });
-
+                            payload = changes;
                             method = 'PUT';
                             path = ApiUrls.Home.Put.Erv.replace('deviceid', deviceData.DeviceID);
                             deviceData.Device = { ...deviceData.Device, ...payload };
-                            break
+                            break;
+                        }
                     }
 
                     if (this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);

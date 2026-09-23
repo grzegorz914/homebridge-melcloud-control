@@ -77,6 +77,25 @@ class Functions extends EventEmitter {
         );
     }
 
+    //returns only the payload keys whose value differs from the matching PascalCase field in current device state
+    filterChanges(payload, current) {
+        if (!payload || typeof payload !== 'object' || !current) return { ...payload };
+
+        const changes = {};
+        for (const [key, value] of Object.entries(payload)) {
+            if (value === undefined) continue;
+            const pascalKey = key.charAt(0).toUpperCase() + key.slice(1);
+            if (current[pascalKey] !== value) changes[key] = value;
+        }
+
+        return changes;
+    }
+
+    //true if at least one key in payload differs from the matching PascalCase field in current device state
+    hasChanges(payload, current) {
+        return Object.keys(this.filterChanges(payload, current)).length > 0;
+    }
+
     toPascalCaseKeys(object) {
         if (object !== null && typeof object === 'object') {
             return Object.fromEntries(

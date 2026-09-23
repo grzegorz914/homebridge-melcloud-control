@@ -111,36 +111,28 @@ class DeviceErv extends EventEmitter {
             switch (key) {
                 case 'Power':
                     payload.power = value;
-                    flag = Ventilation.EffectiveFlags.Power;
                     break;
                 case 'OperationMode':
                     payload.operationMode = value;
-                    flag = Ventilation.EffectiveFlags.OperationMode;
                     break;
                 case 'VentilationMode':
                     payload.ventilationMode = value;
-                    flag = Ventilation.EffectiveFlags.VentilationMode;
                     break;
                 case 'SetTemperature':
                     payload.setTemperature = value;
-                    flag = Ventilation.EffectiveFlags.SetTemperature;
                     break;
                 case 'DefaultCoolingSetTemperature':
                     payload.defaultCoolingSetTemperature = value;
-                    flag = Ventilation.EffectiveFlags.SetTemperature;
                     break;
                 case 'DefaultHeatingSetTemperature':
                     payload.defaultHeatingSetTemperature = value;
-                    flag = Ventilation.EffectiveFlags.SetTemperature;
                     break;
                 case 'NightPurgeMode':
                     if (!accountTypeMelCloud) return;
                     payload.nightPurgeMode = value;
-                    flag = Ventilation.EffectiveFlags.NightPurgeMode;
                     break;
                 case 'SetFanSpeed':
                     payload.setFanSpeed = value;
-                    flag = Ventilation.EffectiveFlags.SetFanSpeed;
                     break;
                 case 'Schedules':
                     if (accountTypeMelCloud) return;
@@ -220,7 +212,7 @@ class DeviceErv extends EventEmitter {
                             try {
                                 const payload = { power: state ? true : false };
                                 if (this.logInfo) this.emit('info', `Set power: ${state ? 'On' : 'Off'}`);
-                                await this.melCloudErv.send(this.accountType, this.displayType, deviceData, payload, Ventilation.EffectiveFlags.Power);
+                                await this.melCloudErv.send(this.accountType, this.displayType, deviceData, payload);
                             } catch (error) {
                                 if (this.logWarn) this.emit('warn', `Set power error: ${error}`);
                             };
@@ -256,7 +248,7 @@ class DeviceErv extends EventEmitter {
 
                                 const payload = { ventilationMode: value };
                                 if (this.logInfo) this.emit('info', `Set operation mode: ${Ventilation.VentilationModeMapEnumToString[value]}`);
-                                await this.melCloudErv.send(this.accountType, this.displayType, deviceData, payload, Ventilation.EffectiveFlags.VentilationMode);
+                                await this.melCloudErv.send(this.accountType, this.displayType, deviceData, payload);
                             } catch (error) {
                                 if (this.logWarn) this.emit('warn', `Set operation mode error: ${error}`);
                             };
@@ -274,19 +266,20 @@ class DeviceErv extends EventEmitter {
                                 minStep: 1
                             })
                             .onGet(async () => {
-                                const value = this.accessory.fanSpeed;
+                                const value = this.accessory.currentFanSpeed;
                                 return value;
                             })
                             .onSet(async (value) => {
                                 try {
-                                    const payload = {};
-                                    const max = numberOfFanSpeeds;
-                                    const minValue = supportsAutomaticFanSpeed ? 0 : 1;
-                                    const clampedValue = Math.min(Math.max(value, minValue), max);
+                                    //0 is the dial's floor, paired by HomeKit itself with Active going false - nothing to send, real speeds start at 1
+                                    if (value === 0) return;
 
-                                     payload.setFanSpeed = clampedValue;
+                                    //Auto sits at the top slot, past the highest real speed
+                                    const isAutoSlot = supportsAutomaticFanSpeed && value >= numberOfFanSpeeds + 1;
+                                    const clampedValue = isAutoSlot ? 0 : Math.min(Math.max(value, 1), numberOfFanSpeeds);
+                                    const payload = { setFanSpeed: clampedValue };
                                     if (this.logInfo) this.emit('info', `Set fan speed mode: ${Ventilation.FanSpeedMapEnumToString[clampedValue]}`);
-                                    await this.melCloudErv.send(this.accountType, this.displayType, deviceData, payload, Ventilation.EffectiveFlags.SetFanSpeed);
+                                    await this.melCloudErv.send(this.accountType, this.displayType, deviceData, payload);
                                 } catch (error) {
                                     if (this.logWarn) this.emit('warn', `Set fan speed mode error: ${error}`);
                                 };
@@ -310,7 +303,7 @@ class DeviceErv extends EventEmitter {
                                     deviceData.Device.DefaultCoolingSetTemperature = value;
                                     const payload = {};
                                     if (this.logInfo) this.emit('info', `Set cooling threshold temperature: ${value}${this.accessory.temperatureUnit}`);
-                                    await this.melCloudErv.send(this.accountType, this.displayType, deviceData, payload, Ventilation.EffectiveFlags.SetTemperature);
+                                    await this.melCloudErv.send(this.accountType, this.displayType, deviceData, payload);
                                 } catch (error) {
                                     if (this.logWarn) this.emit('warn', `Set cooling threshold temperature error: ${error}`);
                                 };
@@ -334,7 +327,7 @@ class DeviceErv extends EventEmitter {
                                     deviceData.Device.DefaultHeatingSetTemperature = value;
                                     const payload = {};
                                     if (this.logInfo) this.emit('info', `Set heating threshold temperature: ${value}${this.accessory.temperatureUnit}`);
-                                    await this.melCloudErv.send(this.accountType, this.displayType, deviceData, payload, Ventilation.EffectiveFlags.SetTemperature);
+                                    await this.melCloudErv.send(this.accountType, this.displayType, deviceData, payload);
                                 } catch (error) {
                                     if (this.logWarn) this.emit('warn', `Set heating threshold temperature error: ${error}`);
                                 };
@@ -383,28 +376,23 @@ class DeviceErv extends EventEmitter {
                         .onSet(async (value) => {
                             try {
                                 const payload = {};
-                                let flag = null;
                                 switch (value) {
                                     case 0: //OFF - POWER OFF
                                         payload.power = false;
-                                        flag = Ventilation.EffectiveFlags.Power;
                                         break;
                                     case 1: //HEAT - LOSSNAY
                                         payload.power = true;
-                                        flag = Ventilation.EffectiveFlags.Power + Ventilation.EffectiveFlags.VentilationMode;
                                         break;
                                     case 2: //COOL - BYPASS
                                         payload.ventilationMode = supportsBypassVentilationMode ? 1 : 0;
-                                        flag = Ventilation.EffectiveFlags.Power + Ventilation.EffectiveFlags.VentilationMode;
                                         break;
                                     case 3: //AUTO - AUTO
                                         payload.ventilationMode = supportsAutoVentilationMode ? 2 : 0;
-                                        flag = Ventilation.EffectiveFlags.Power + Ventilation.EffectiveFlags.VentilationMode;
                                         break;
                                 };
 
                                 if (this.logInfo) this.emit('info', `Set operation mode: ${Ventilation.VentilationModeMapEnumToString[payload.ventilationMode]}`);
-                                await this.melCloudErv.send(this.accountType, this.displayType, deviceData, payload, flag);
+                                await this.melCloudErv.send(this.accountType, this.displayType, deviceData, payload);
                             } catch (error) {
                                 if (this.logWarn) this.emit('warn', `Set operation mode error: ${error}`);
                             };
@@ -428,7 +416,7 @@ class DeviceErv extends EventEmitter {
                             try {
                                 const payload = { setTemperature: value };
                                 if (this.logInfo) this.emit('info', `Set temperature: ${value}${this.accessory.temperatureUnit}`);
-                                await this.melCloudErv.send(this.accountType, this.displayType, deviceData, payload, Ventilation.EffectiveFlags.SetTemperature);
+                                await this.melCloudErv.send(this.accountType, this.displayType, deviceData, payload);
                             } catch (error) {
                                 if (this.logWarn) this.emit('warn', `Set temperature error: ${error}`);
                             };
@@ -719,7 +707,7 @@ class DeviceErv extends EventEmitter {
                                     };
 
                                     if (this.logInfo) this.emit('info', `Preset ${name}: ${state ? 'Set' : 'Unset'}`);
-                                    await this.melCloudErv.send(this.accountType, this.displayType, deviceData, payload, Ventilation.EffectiveFlags.Presets);
+                                    await this.melCloudErv.send(this.accountType, this.displayType, deviceData, payload);
                                 } catch (error) {
                                     if (this.logWarn) this.emit('warn', `Set preset error: ${error}`);
                                 };
@@ -911,59 +899,47 @@ class DeviceErv extends EventEmitter {
                             .onSet(async (state) => {
                                 try {
                                     let payload = {};
-                                    let flag = null;
                                     switch (mode) {
                                         case 0: //POWER ON,OFF
                                             payload.power = state;
-                                            flag = Ventilation.EffectiveFlags.Power;
                                             break;
                                         case 1: //OPERATING MODE RECOVERY
                                             button.previousValue = state ? deviceData.Device.VentilationMode : button.previousValue ?? deviceData.Device.VentilationMode;
                                             payload.VentilationMode = state ? 0 : button.previousValue;
-                                            flag = Ventilation.EffectiveFlags.Power + Ventilation.EffectiveFlags.VentilationMode;
                                             break;
                                         case 2: //OPERATING MODE BYPASS
                                             button.previousValue = state ? deviceData.Device.VentilationMode : button.previousValue ?? deviceData.Device.VentilationMode;
                                             payload.ventilationMode = state ? 1 : button.previousValue;
-                                            flag = Ventilation.EffectiveFlags.Power + Ventilation.EffectiveFlags.VentilationMode;
                                             break
                                         case 3: //OPERATING MODE AUTO
                                             button.previousValue = state ? deviceData.Device.VentilationMode : button.previousValue ?? deviceData.Device.VentilationMode;
                                             payload.ventilationMode = state ? 2 : button.previousValue;
-                                            flag = Ventilation.EffectiveFlags.Power + Ventilation.EffectiveFlags.VentilationMode;
                                             break;
                                         case 4: //NIGHT PURGE MODE
                                             payload.nightPurgeMode = state;
-                                            flag = Ventilation.EffectiveFlags.Power
                                             break;
                                         case 10: //FAN SPEED MODE AUTO
                                             button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue ?? deviceData.Device.SetFanSpeed;
                                             payload.setFanSpeed = state ? 0 : button.previousValue;
-                                            flag = Ventilation.EffectiveFlags.Power + Ventilation.EffectiveFlags.SetFanSpeed;
                                             break;
                                         case 11: //FAN SPEED MODE 1
                                             button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue ?? deviceData.Device.SetFanSpeed;
                                             payload.setFanSpeed = state ? 1 : button.previousValue;
-                                            flag = Ventilation.EffectiveFlags.Power + Ventilation.EffectiveFlags.SetFanSpeed;
                                             break;
                                         case 12: //FAN SPEED MODE 2
                                             button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue ?? deviceData.Device.SetFanSpeed;
                                             payload.setFanSpeed = state ? 2 : button.previousValue;
-                                            flag = Ventilation.EffectiveFlags.Power + Ventilation.EffectiveFlags.SetFanSpeed;
                                             break;
                                         case 13: //FAN SPEED MODE 3
                                             button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue ?? deviceData.Device.SetFanSpeed;
                                             payload.setFanSpeed = state ? 3 : button.previousValue;
-                                            flag = Ventilation.EffectiveFlags.Power + Ventilation.EffectiveFlags.SetFanSpeed;
                                             break;
                                         case 14: //FAN MODE 4
                                             button.previousValue = state ? deviceData.Device.SetFanSpeed : button.previousValue ?? deviceData.Device.SetFanSpeed;
                                             payload.setFanSpeed = state ? 4 : button.previousValue;
-                                            flag = Ventilation.EffectiveFlags.Power + Ventilation.EffectiveFlags.SetFanSpeed;
                                             break;
                                         case 15: //PHYSICAL LOCK CONTROLS
                                             deviceData.Device = deviceData.Device;
-                                            flag = Ventilation.EffectiveFlags.Prohibit;
                                             break;
                                         default:
                                             if (this.logWarn) this.emit('warn', `Received unknown button mode: ${mode}`);
@@ -971,7 +947,7 @@ class DeviceErv extends EventEmitter {
                                     };
 
                                     if (this.logInfo) this.emit('info', `Button ${name}: ${state ? `Enabled` : `Disabled`}`);
-                                    await this.melCloudErv.send(this.accountType, this.displayType, deviceData, payload, flag);
+                                    await this.melCloudErv.send(this.accountType, this.displayType, deviceData, payload);
                                 } catch (error) {
                                     if (this.logWarn) this.emit('warn', `Set button error: ${error}`);
                                 };
@@ -1193,15 +1169,15 @@ class DeviceErv extends EventEmitter {
 
                             //fan speed mode
                             if (supportsFanSpeed) {
-                                // ograniczamy wartość do zakresu API
-                                const minValue = supportsAutomaticFanSpeed ? 0 : 1;
-                                const maxValue = numberOfFanSpeeds;
+                                //0 is the dial's floor (paired with off), never sent as a real speed - Auto sits at the top slot past the highest real speed
+                                const maxValue = supportsAutomaticFanSpeed ? numberOfFanSpeeds + 1 : numberOfFanSpeeds;
+                                //if the device somehow reports Auto (0) while not actually supporting it, fall through to the normal clamp (never display 0, that's reserved for off)
+                                const isAuto = setFanSpeed === 0 && supportsAutomaticFanSpeed;
 
-                                // zabezpieczenie przed out-of-bounds
-                                const clampedValue = Math.min(Math.max(setFanSpeed, minValue), maxValue);
-
-                                obj.currentFanSpeed = clampedValue;
-                                obj.fanSpeedSetPropsMinValue = minValue;
+                                obj.currentFanSpeed = isAuto
+                                    ? maxValue
+                                    : Math.min(Math.max(setFanSpeed, 1), numberOfFanSpeeds);
+                                obj.fanSpeedSetPropsMinValue = 0;
                                 obj.fanSpeedSetPropsMaxValue = maxValue;
                             }
 
@@ -1215,7 +1191,7 @@ class DeviceErv extends EventEmitter {
                                 { type: Characteristic.TemperatureDisplayUnits, value: obj.useFahrenheit },
                             );
 
-                            if (supportsFanSpeed) characteristics.push({ type: Characteristic.RotationSpeed, value: obj.fanSpeed });
+                            if (supportsFanSpeed) characteristics.push({ type: Characteristic.RotationSpeed, value: obj.currentFanSpeed });
                             if (supportsCoolOperationMode) characteristics.push({ type: Characteristic.CoolingThresholdTemperature, value: Math.max(ventilationMode === 2 ? defaultCoolingSetTemperature : setTemperature, minTempCoolDryAuto) });
                             if (supportsHeatOperationMode) characteristics.push({ type: Characteristic.HeatingThresholdTemperature, value: Math.max(ventilationMode === 2 ? defaultHeatingSetTemperature : setTemperature, minTempHeat) });
                             break;

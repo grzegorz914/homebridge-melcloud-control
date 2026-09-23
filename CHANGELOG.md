@@ -18,11 +18,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - v4 Added support for MELCloud Home.
   - v4.1 Changed accessory category for ATA devices, required add accessory to KomeKit again
   - v4.6 Added support for Homebridge UI >= v5.13.0
+  - v4.11.0 Changed RotationSpeed range for ATA/ERV (Auto moved to the top slot, 0 is now "off" only), if Home still shows the old range, remove and re-add the accessory
 
 ## Warning
 
 - For plugin < v4.6.0 use Homebridge UI <= v5.5.0
 - For plugin >= v4.6.0 use Homebridge UI >= v5.13.0
+
+## [4.11.0] - (23.09.2026)
+
+### Changes
+
+- fix: [#259](https://github.com/grzegorz914/homebridge-melcloud-control/issues/259) - turning ON an ATA/ERV unit from Apple Home could silently override Auto fan speed with a fixed speed. Apple Home's combined HeaterCooler dial sends a stray RotationSpeed value together with Active on every power-on, and Auto (raw `0`) shared the same dial position as "off". `MelCloudAta`/`MelCloudAtw`/`MelCloudErv` `send()` now diffs the outgoing command against live device state and only sends fields that actually changed, and RotationSpeed for ATA/ERV is remapped so `0` is reserved exclusively for "off" (matching HomeKit's own dial semantics), with Auto moved to the top slot past the highest real speed
+- fix: ERV RotationSpeed `onGet` read `this.accessory.fanSpeed`, a field that was never populated (only `currentFanSpeed` was set), so the characteristic never reported a value
+- changed: `MelCloudAtw.send()` now diffs against live device state the same way as ATA/ERV and rebuilds `EffectiveFlags` from only the fields that actually changed (using `+` rather than `|` to combine bits, since some HeatPump flags exceed 32 bits and would silently truncate under bitwise OR in JS)
+- cleanup: removed the now-redundant explicit `EffectiveFlags` arguments passed from `deviceata.js`/`deviceatw.js`/`deviceerv.js` to `send()`. The value is fully recomputed from the changed payload keys, so the caller-supplied numeric flag was dead code. The special string flags (`'account'`, `'frostprotection'`, `'overheatprotection'`, `'holidaymode'`, `'schedule'`, `'scene'`) are unaffected
+- fix: ATW classic MELCloud `HolidayMode` changes were missing a matching bit in the rebuilt `EffectiveFlags` table, so the mode change would not have been applied
+- bump dependencies
+- cleanup
+- readme update
 
 ## [4.10.19] - (13.09.2026)
 

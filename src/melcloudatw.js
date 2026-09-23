@@ -186,11 +186,40 @@ class MelCloudAtw extends EventEmitter {
                             payload = { data: payload.LoginData };
                             path = ApiUrls.Post.UpdateApplicationOptions;
                             break;
-                        default:
-                            flag = !flag ? HeatPump.EffectiveFlags.Power : HeatPump.EffectiveFlags.Power + flag;
+                        default: {
+                            //compare against the API wrapper's own live-polled state, not the caller's closure-captured (possibly stale) deviceData
+                            const changes = this.functions.filterChanges(payload, this.deviceData.Device);
+                            if (Object.keys(changes).length === 0) {
+                                if (this.logDebug) this.emit('debug', `Ignore send, no changes: ${JSON.stringify(payload)}`);
+                                return true;
+                            }
+
+                            //rebuild effective flags from only the fields that actually changed, Power always stays forced
+                            //NOTE: use + not | - some HeatPump flags exceed 32 bits (e.g. SetHeatFlowTemperatureZone1 = 2^48), and
+                            //the bitwise OR operator truncates to a 32-bit int in JS, silently corrupting large flag values
+                            const flagBits = {
+                                operationMode: HeatPump.EffectiveFlags.OperationMode,
+                                operationModeZone1: HeatPump.EffectiveFlags.OperationModeZone1,
+                                operationModeZone2: HeatPump.EffectiveFlags.OperationModeZone2,
+                                ecoHotWater: HeatPump.EffectiveFlags.EcoHotWater,
+                                holidayMode: HeatPump.EffectiveFlags.HolidayMode,
+                                setTankWaterTemperature: HeatPump.EffectiveFlags.SetTankWaterTemperature,
+                                forcedHotWaterMode: HeatPump.EffectiveFlags.ForcedHotWaterMode,
+                                setTemperatureZone1: HeatPump.EffectiveFlags.SetTemperatureZone1,
+                                setTemperatureZone2: HeatPump.EffectiveFlags.SetTemperatureZone2,
+                                setHeatFlowTemperatureZone1: HeatPump.EffectiveFlags.SetHeatFlowTemperatureZone1,
+                                setHeatFlowTemperatureZone2: HeatPump.EffectiveFlags.SetHeatFlowTemperatureZone2,
+                                setCoolFlowTemperatureZone1: HeatPump.EffectiveFlags.SetCoolFlowTemperatureZone1,
+                                setCoolFlowTemperatureZone2: HeatPump.EffectiveFlags.SetCoolFlowTemperatureZone2,
+                                prohibitZone1: HeatPump.EffectiveFlags.ProhibitHeatingZone1,
+                                prohibitZone2: HeatPump.EffectiveFlags.ProhibitHeatingZone2,
+                                prohibitHotWater: HeatPump.EffectiveFlags.ProhibitHotWater,
+                            };
+                            flag = Object.keys(changes).reduce((acc, key) => acc + (flagBits[key] ?? 0), HeatPump.EffectiveFlags.Power);
+
                             payload = this.functions.toPascalCaseKeys({
-                                ...payload,
-                                power: payload.power !== false,
+                                ...changes,
+                                power: changes.power !== false,
                                 deviceID: deviceData.Device.DeviceID,
                                 effectiveFlags: flag,
                                 hasPendingCommand: true,
@@ -199,6 +228,7 @@ class MelCloudAtw extends EventEmitter {
                             path = ApiUrls.Post.Atw;
                             update = true;
                             break;
+                        }
                     }
 
                     if (this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);
@@ -251,22 +281,24 @@ class MelCloudAtw extends EventEmitter {
                             if (scene) scene.Enabled = payload.enabled;
                             payload = {};
                             break;
-                        default:
-                            if (payload.operationMode != null) payload.operationMode = HeatPump.OperationModeMapEnumToString[payload.operationMode];
-                            if (payload.operationModeZone1 != null) payload.operationModeZone1 = HeatPump.OperationModeZoneMapEnumToString[payload.operationModeZone1];
-                            if (payload.operationModeZone2 != null) payload.operationModeZone2 = HeatPump.OperationModeZoneMapEnumToString[payload.operationModeZone2];
+                        default: {
+                            //compare against the API wrapper's own live-polled state, not the caller's closure-captured (possibly stale) deviceData
+                            const changes = this.functions.filterChanges(payload, this.deviceData.Device);
+                            if (Object.keys(changes).length === 0) {
+                                if (this.logDebug) this.emit('debug', `Ignore send, no changes: ${JSON.stringify(payload)}`);
+                                return true;
+                            }
 
-                            //cleanup undefined
-                            Object.keys(payload).forEach(key => {
-                                if (payload[key] === undefined) {
-                                    delete payload[key];
-                                }
-                            });
+                            if (changes.operationMode != null) changes.operationMode = HeatPump.OperationModeMapEnumToString[changes.operationMode];
+                            if (changes.operationModeZone1 != null) changes.operationModeZone1 = HeatPump.OperationModeZoneMapEnumToString[changes.operationModeZone1];
+                            if (changes.operationModeZone2 != null) changes.operationModeZone2 = HeatPump.OperationModeZoneMapEnumToString[changes.operationModeZone2];
 
+                            payload = changes;
                             method = 'PUT';
                             path = ApiUrls.Home.Put.Atw.replace('deviceid', deviceData.DeviceID);
                             deviceData.Device = { ...deviceData.Device, ...payload };
-                            break
+                            break;
+                        }
                     }
 
                     if (this.logDebug) this.emit('debug', `Send data: ${JSON.stringify(payload, null, 2)}`);
