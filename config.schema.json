@@ -2441,6 +2441,15 @@
                     "functionBody": "return model.accounts[arrayIndices[0]].mqtt.enable === true;"
                   }
                 },
+                "haDiscovery": {
+                  "title": "HA Discovery",
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Publish Home Assistant MQTT discovery messages. Air Conditioner as climate, Heat Pump zones as climate and hot water tank as water_heater, Energy Recovery Ventilation as fan. Uses the built-in Home Assistant MQTT integration.",
+                  "condition": {
+                    "functionBody": "return model.accounts[arrayIndices[0]].mqtt.enable === true;"
+                  }
+                },
                 "auth": {
                   "title": "Authorization",
                   "type": "object",
@@ -3098,6 +3107,7 @@
                             "accounts[].mqtt.clientId",
                             "accounts[].mqtt.prefix",
                             "accounts[].mqtt.protocolVersion",
+                            "accounts[].mqtt.haDiscovery",
                             {
                               "key": "accounts[].mqtt.auth",
                               "title": "Authorization",

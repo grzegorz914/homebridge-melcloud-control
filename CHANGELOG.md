@@ -25,6 +25,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - For plugin < v4.6.0 use Homebridge UI <= v5.5.0
 - For plugin >= v4.6.0 use Homebridge UI >= v5.13.0
 
+## [4.12.0] - (23.09.2026)
+
+### Changes
+
+- added: Home Assistant MQTT discovery (`HA Discovery` option in the MQTT section), using the built-in Home Assistant MQTT integration
+  - Air Conditioner as `climate` with modes, target and room temperature, action, fan speed, vertical and horizontal vane
+  - Heat Pump zones as `climate` with presets Room / Flow / Curve, hot water tank as `water_heater` with heat pump / eco / high demand modes
+  - Energy Recovery Ventilation as `fan` with speed and Lossnay / Bypass / Auto presets
+- added: MQTT availability topic (`<prefix>/Availability`, retained `online` / `offline` last will) when HA Discovery is enabled
+- readme update
+- sample config update
+
 ## [4.11.3] - (23.09.2026)
 
 ### Changes

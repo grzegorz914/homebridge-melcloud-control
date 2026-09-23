@@ -1,6 +1,7 @@
 import EventEmitter from 'events';
 import MelCloudAta from './melcloudata.js';
 import Functions from './functions.js';
+import HaDiscovery from './hadiscovery.js';
 import { TemperatureDisplayUnits, AirConditioner, DeviceType } from './constants.js';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
@@ -1305,6 +1306,32 @@ class DeviceAta extends EventEmitter {
         }
     }
 
+    //home assistant discovery
+    haReady() {
+        if (!this.mqttConnected || !this.mqtt.haDiscovery) return false;
+        if (this.ha) return true;
+
+        try {
+            this.ha = new HaDiscovery(this.mqtt1, { deviceId: this.deviceId, name: this.deviceName, model: this.model });
+            return true;
+        } catch (error) {
+            if (!this.haErrorLogged && this.logWarn) this.emit('warn', `HA Discovery setup error: ${error.message ?? error}`);
+            this.haErrorLogged = true;
+            return false;
+        }
+    }
+
+    async haPublish(capabilities, state) {
+        if (!this.haReady()) return;
+
+        try {
+            await this.ha.publishEntity('climate', '', this.ha.ataClimate(capabilities));
+            await this.ha.updateState(HaDiscovery.ataState(state));
+        } catch (error) {
+            if (this.logWarn) this.emit('warn', `HA Discovery publish error: ${error.message ?? error}`);
+        }
+    }
+
     //start
     async start() {
         try {
@@ -1621,6 +1648,23 @@ class DeviceAta extends EventEmitter {
                             return;
                     };
                     this.accessory = obj;
+
+                    //home assistant, device capabilities (not the HomeKit mode mapping)
+                    this.haPublish({
+                        supportsHeat: supportsHeat1,
+                        supportsCool: supportsCool1,
+                        supportsDry: supportsDry && !hideDryModeControl,
+                        supportsAuto: supportsAuto1,
+                        supportsFanSpeed,
+                        numberOfFanSpeeds,
+                        supportsAutomaticFanSpeed,
+                        supportsAirDirectionFunction: supportsAirDirectionFunction && !hideVaneControls,
+                        supportsSwingFunction,
+                        supportsWideVane: supportsWideVane && !hideVaneControls,
+                        minTemp: minSetHeatRoomTemperature,
+                        maxTemp: maxSetHeatCoolDryAutoRoomTemperature,
+                        tempStep: temperatureStep
+                    }, { power, operationMode, inStandbyMode, roomTemperature, setTemperature, setFanSpeed, vaneVerticalDirection, vaneHorizontalDirection });
 
                     //update services
                     for (const { type, value } of characteristics) {

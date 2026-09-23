@@ -1,6 +1,7 @@
 import EventEmitter from 'events';
 import MelCloudAtw from './melcloudatw.js';
 import Functions from './functions.js';
+import HaDiscovery from './hadiscovery.js';
 import { TemperatureDisplayUnits, HeatPump, DeviceType } from './constants.js';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
@@ -1577,6 +1578,41 @@ class DeviceAtw extends EventEmitter {
         };
     }
 
+    //home assistant discovery
+    haReady() {
+        if (!this.mqttConnected || !this.mqtt.haDiscovery) return false;
+        if (this.ha) return true;
+
+        try {
+            this.ha = new HaDiscovery(this.mqtt1, { deviceId: this.deviceId, name: this.deviceName, model: this.model });
+            return true;
+        } catch (error) {
+            if (!this.haErrorLogged && this.logWarn) this.emit('warn', `HA Discovery setup error: ${error.message ?? error}`);
+            this.haErrorLogged = true;
+            return false;
+        }
+    }
+
+    async haPublish(capabilities, power, zones, tank) {
+        if (!this.haReady()) return;
+
+        try {
+            const state = { power };
+            for (const zone of zones) {
+                const range = HaDiscovery.atwZoneRange(zone.operationMode);
+                await this.ha.publishEntity('climate', `zone${zone.zone}`, this.ha.atwZoneClimate(zone.zone, { name: zone.name, supportsCool: capabilities.supportsCool, tempStep: capabilities.tempStep, ...range }));
+                state[`zone${zone.zone}`] = HaDiscovery.atwZoneState(power, zone);
+            }
+            if (tank) {
+                await this.ha.publishEntity('water_heater', 'tank', this.ha.atwWaterHeater({ name: tank.name, supportsEco: capabilities.supportsEco, minTemp: tank.minTemp, maxTemp: tank.maxTemp, tempStep: capabilities.tempStep }));
+                state.tank = HaDiscovery.atwTankState(tank);
+            }
+            await this.ha.updateState(state);
+        } catch (error) {
+            if (this.logWarn) this.emit('warn', `HA Discovery publish error: ${error.message ?? error}`);
+        }
+    }
+
     //start
     async start() {
         try {
@@ -2255,6 +2291,18 @@ class DeviceAtw extends EventEmitter {
                         };
                     }
                     this.accessory = obj;
+
+                    //home assistant, zones and tank from device capabilities (not the HomeKit hide zone setting)
+                    const haZones = [
+                        { zone: 1, name: zone1Name, operationMode: operationModeZone1, setTemperature: setTemperatureZone1, setHeatFlowTemperature: setHeatFlowTemperatureZone1, setCoolFlowTemperature: setCoolFlowTemperatureZone1, roomTemperature: roomTemperatureZone1, idle: idleZone1 },
+                        ...(deviceData.Device.HasZone2 ? [{ zone: 2, name: zone2Name, operationMode: operationModeZone2, setTemperature: setTemperatureZone2, setHeatFlowTemperature: setHeatFlowTemperatureZone2, setCoolFlowTemperature: setCoolFlowTemperatureZone2, roomTemperature: roomTemperatureZone2, idle: idleZone2 }] : [])
+                    ];
+                    const haTank = deviceData.Device[supportHotWaterKey] ? { name: hotWaterName, forcedHotWaterMode, ecoHotWater, setTankWaterTemperature, tankWaterTemperature, minTemp: minSetTankTemperature, maxTemp: maxSetTankTemperature } : null;
+                    this.haPublish({
+                        supportsCool,
+                        supportsEco: accountTypeMelCloud,
+                        tempStep: temperatureIncrement === true || temperatureIncrement === 0.5 ? 0.5 : 1
+                    }, power, haZones, haTank);
 
                     //other sensors
                     if (this.temperatureOutdoorSensor && supportsOutdoorTemperature) this.outdoorTemperatureSensorService?.updateCharacteristic(Characteristic.CurrentTemperature, outdoorTemperature);

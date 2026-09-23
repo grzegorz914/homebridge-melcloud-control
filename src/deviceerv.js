@@ -1,6 +1,7 @@
 import EventEmitter from 'events';
 import MelCloudErv from './melclouderv.js';
 import Functions from './functions.js';
+import HaDiscovery from './hadiscovery.js';
 import { TemperatureDisplayUnits, Ventilation, DeviceType } from './constants.js';
 let Accessory, Characteristic, Service, Categories, AccessoryUUID;
 
@@ -979,6 +980,32 @@ class DeviceErv extends EventEmitter {
         };
     }
 
+    //home assistant discovery
+    haReady() {
+        if (!this.mqttConnected || !this.mqtt.haDiscovery) return false;
+        if (this.ha) return true;
+
+        try {
+            this.ha = new HaDiscovery(this.mqtt1, { deviceId: this.deviceId, name: this.deviceName, model: this.model });
+            return true;
+        } catch (error) {
+            if (!this.haErrorLogged && this.logWarn) this.emit('warn', `HA Discovery setup error: ${error.message ?? error}`);
+            this.haErrorLogged = true;
+            return false;
+        }
+    }
+
+    async haPublish(capabilities, state) {
+        if (!this.haReady()) return;
+
+        try {
+            await this.ha.publishEntity('fan', '', this.ha.ervFan(capabilities));
+            await this.ha.updateState(HaDiscovery.ervState(state));
+        } catch (error) {
+            if (this.logWarn) this.emit('warn', `HA Discovery publish error: ${error.message ?? error}`);
+        }
+    }
+
     //start
     async start() {
         try {
@@ -1248,6 +1275,13 @@ class DeviceErv extends EventEmitter {
                     };
 
                     this.accessory = obj;
+
+                    //home assistant
+                    this.haPublish({
+                        supportsBypass: supportsBypassVentilationMode,
+                        supportsAuto: supportsAutoVentilationMode,
+                        numberOfFanSpeeds
+                    }, { power, setFanSpeed, ventilationMode });
 
                     //update services
                     for (const { type, value } of characteristics) {

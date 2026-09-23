@@ -45,7 +45,7 @@
   * Physical lock controls `LOCK/UNLOCK`, only MELCloud.
   * Functions, using extra `Buttons`, switch to `OFF` restore previous state.
   * Automations, shortcuts and Siri.
-  * External integrations, [RESTFul](https://github.com/grzegorz914/homebridge-melcloud-control?tab=readme-ov-file#restful-integration), [MQTT](https://github.com/grzegorz914/homebridge-melcloud-control?tab=readme-ov-file#mqtt-integration).
+  * External integrations, [RESTFul](https://github.com/grzegorz914/homebridge-melcloud-control?tab=readme-ov-file#restful-integration), [MQTT](https://github.com/grzegorz914/homebridge-melcloud-control?tab=readme-ov-file#mqtt-integration), [HA Discovery](https://www.home-assistant.io/integrations/mqtt/#mqtt-discovery).
 * Control devices over local network You need use ESP module and [Tasmota Control](https://github.com/grzegorz914/homebridge-tasmota-control) plugin.
 
 ### Control Mode
@@ -366,6 +366,7 @@
 | `mqtt.clientId` | Here optional set the `Client Id` of MQTT Broker. |
 | `mqtt.prefix` | Here set the `Prefix` for `Topic` or leave empty. |
 | `mqtt.protocolVersion` | Here select the MQTT protocol version, `5.0` (default) or `3.1.1` for brokers that only support 3.1.1 (e.g. ioBroker MQTT adapter). |
+| `mqtt.haDiscovery` | If enabled, devices are published to Home Assistant with MQTT discovery. Air Conditioner as `climate`, Heat Pump zones as `climate` and hot water tank as `water_heater`, Energy Recovery Ventilation as `fan`. |
 | `mqtt.auth{}` | MQTT authorization object. |
 | `mqtt.auth.enable` | Here enable authorization for MQTT Broker. |
 | `mqtt.auth.user` | Here set the MQTT Broker user. |
@@ -438,6 +439,13 @@
 ### MQTT Integration
 
 * Subscribe data as a JSON Object `{"Power": true}`
+* HA Discovery - if enabled, devices appear in Home Assistant through the built-in [MQTT integration](https://www.home-assistant.io/integrations/mqtt/#mqtt-discovery), no custom integration is needed. Additional retained topics:
+  * `homeassistant/climate/melcloud_<id>/config` - Air Conditioner, modes off / heat / cool / dry / fan_only / auto, target and room temperature, fan speed, vertical and horizontal vane.
+  * `homeassistant/climate/melcloud_<id>_zone1/config`, `..._zone2/config` - Heat Pump zones, modes off / heat / cool, presets `Room`, `Flow`, `Curve`. Target temperature is the room or flow temperature of the current preset. `off` turns the whole heat pump off.
+  * `homeassistant/water_heater/melcloud_<id>_tank/config` - Heat Pump hot water tank, modes `heat_pump`, `eco` (MELCloud only), `high_demand` (forced hot water).
+  * `homeassistant/fan/melcloud_<id>/config` - Energy Recovery Ventilation, on / off, fan speed, presets `Lossnay`, `Bypass`, `Auto`.
+  * `HA State` - state for the entities above.
+  * `Availability` - `online`, `offline` (last will).
 
 | Direction | Topic | Message | Type |
 | --- | --- | --- | --- |
