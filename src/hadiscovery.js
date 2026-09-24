@@ -156,6 +156,60 @@ class HaDiscovery {
         };
     }
 
+    // ---------------------------------------------------------------- prohibit
+    // One select with every combination of the device locks, parts: [{ name, key }].
+    // order 'binary' - first part is the highest bit: Off, Power, Mode, Mode Power, Temp, Temp Power, Temp Mode, All
+    // order 'lexical' - combinations in part order: Off, Zone 1, Zone 1 Zone 2, Zone 1 Water, Zone 2, Zone 2 Water, Water, All
+    prohibitSelect(parts, order = 'binary') {
+        const combos = HaDiscovery.prohibitCombos(parts, order);
+        const options = combos.map(values => HaDiscovery.prohibitName(parts, values));
+        const masks = JSON.stringify(Object.fromEntries(combos.map((values, i) => [options[i], values.reduce((mask, v, bit) => mask | (v ? 1 << bit : 0), 0)])));
+        const values = parts.map((p, bit) => `"${p.key}": {{ "true" if (m[value] // ${1 << bit}) % 2 == 1 else "false" }}`).join(', ');
+        return {
+            name: 'Prohibit',
+            icon: 'mdi:lock',
+            entity_category: 'config',
+            options,
+            state_topic: this.stateTopic,
+            value_template: '{{ value_json.prohibit }}',
+            command_topic: this.commandTopic,
+            command_template: `{% set m = ${masks} %}{${values}}`
+        };
+    }
+
+    // Every lock combination as an array of booleans in part order
+    static prohibitCombos(parts, order = 'binary') {
+        const n = parts.length;
+        if (order === 'binary') {
+            return [...Array(1 << n).keys()].map(mask => parts.map((p, i) => ((mask >> (n - 1 - i)) & 1) === 1));
+        }
+
+        const combos = [];
+        const walk = (start, picked) => {
+            for (let i = start; i < n; i++) {
+                const next = [...picked, i];
+                combos.push(next);
+                walk(i + 1, next);
+            }
+        };
+        walk(0, []);
+        const toValues = (picked) => parts.map((p, i) => picked.includes(i));
+        const partial = combos.filter(picked => n === 1 || picked.length < n).map(toValues);
+        return [parts.map(() => false), ...partial, ...(n > 1 ? [parts.map(() => true)] : [])];
+    }
+
+    static prohibitOptions(parts, order = 'binary') {
+        return HaDiscovery.prohibitCombos(parts, order).map(values => HaDiscovery.prohibitName(parts, values));
+    }
+
+    // Name of a lock combination, values in the same order as parts
+    static prohibitName(parts, values) {
+        const locked = parts.filter((p, i) => values[i]);
+        if (locked.length === 0) return 'Off';
+        if (parts.length > 1 && locked.length === parts.length) return 'All';
+        return locked.map(p => p.name).join(' ');
+    }
+
     // ---------------------------------------------------------------- ATW
     atwZoneClimate(zone, c) {
         const z = `zone${zone}`;

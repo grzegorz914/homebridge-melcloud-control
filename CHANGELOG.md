@@ -25,6 +25,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - For plugin < v4.6.0 use Homebridge UI <= v5.5.0
 - For plugin >= v4.6.0 use Homebridge UI >= v5.13.0
 
+## [4.13.0] - (24.09.2026)
+
+### Changes
+
+- added: HA Discovery, device locks as one `select` in the device configuration
+  - Air Conditioner (MELCloud only): `Off`, `Power`, `Mode`, `Mode Power`, `Temp`, `Temp Power`, `Temp Mode`, `All`
+  - Heat Pump: `Off`, `Zone 1`, `Zone 1 Zone 2`, `Zone 1 Water`, `Zone 2`, `Zone 2 Water`, `Water`, `All` (zone locks MELCloud only)
+- readme update
+
 ## [4.12.0] - (23.09.2026)
 
 ### Changes

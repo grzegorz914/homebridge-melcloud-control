@@ -444,6 +444,7 @@
   * `homeassistant/climate/melcloud_<id>_zone1/config`, `..._zone2/config` - Heat Pump zones, modes off / heat / cool, presets `Room`, `Flow`, `Curve`. Target temperature is the room or flow temperature of the current preset. `off` turns the whole heat pump off.
   * `homeassistant/water_heater/melcloud_<id>_tank/config` - Heat Pump hot water tank, modes `heat_pump`, `eco` (MELCloud only), `high_demand` (forced hot water).
   * `homeassistant/fan/melcloud_<id>/config` - Energy Recovery Ventilation, on / off, fan speed, presets `Lossnay`, `Bypass`, `Auto`.
+  * `homeassistant/select/melcloud_<id>_prohibit/config` - locks as one select in the device configuration. Air Conditioner (MELCloud only): `Off`, `Power`, `Mode`, `Mode Power`, `Temp`, `Temp Power`, `Temp Mode`, `All`. Heat Pump: `Off`, `Zone 1`, `Zone 1 Zone 2`, `Zone 1 Water`, `Zone 2`, `Zone 2 Water`, `Water`, `All` (zone locks MELCloud only).
   * `HA State` - state for the entities above.
   * `Availability` - `online`, `offline` (last will).
 

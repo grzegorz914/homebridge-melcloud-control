@@ -1326,7 +1326,15 @@ class DeviceAta extends EventEmitter {
 
         try {
             await this.ha.publishEntity('climate', '', this.ha.ataClimate(capabilities));
-            await this.ha.updateState(HaDiscovery.ataState(state));
+            const haState = HaDiscovery.ataState(state);
+
+            // Locks work only with MELCloud
+            if (capabilities.supportsProhibit) {
+                const parts = [{ name: 'Temp', key: 'ProhibitSetTemperature' }, { name: 'Mode', key: 'ProhibitOperationMode' }, { name: 'Power', key: 'ProhibitPower' }];
+                await this.ha.publishEntity('select', 'prohibit', this.ha.prohibitSelect(parts));
+                haState.prohibit = HaDiscovery.prohibitName(parts, [state.prohibitSetTemperature, state.prohibitOperationMode, state.prohibitPower]);
+            }
+            await this.ha.updateState(haState);
         } catch (error) {
             if (this.logWarn) this.emit('warn', `HA Discovery publish error: ${error.message ?? error}`);
         }
@@ -1663,8 +1671,9 @@ class DeviceAta extends EventEmitter {
                         supportsWideVane: supportsWideVane && !hideVaneControls,
                         minTemp: minSetHeatRoomTemperature,
                         maxTemp: maxSetHeatCoolDryAutoRoomTemperature,
-                        tempStep: temperatureStep
-                    }, { power, operationMode, inStandbyMode, roomTemperature, setTemperature, setFanSpeed, vaneVerticalDirection, vaneHorizontalDirection });
+                        tempStep: temperatureStep,
+                        supportsProhibit: accountTypeMelCloud
+                    }, { power, operationMode, inStandbyMode, roomTemperature, setTemperature, setFanSpeed, vaneVerticalDirection, vaneHorizontalDirection, prohibitSetTemperature, prohibitOperationMode, prohibitPower });
 
                     //update services
                     for (const { type, value } of characteristics) {

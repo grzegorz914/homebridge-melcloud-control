@@ -1607,6 +1607,23 @@ class DeviceAtw extends EventEmitter {
                 await this.ha.publishEntity('water_heater', 'tank', this.ha.atwWaterHeater({ name: tank.name, supportsEco: capabilities.supportsEco, minTemp: tank.minTemp, maxTemp: tank.maxTemp, tempStep: capabilities.tempStep }));
                 state.tank = HaDiscovery.atwTankState(tank);
             }
+
+            // Zone locks work only with MELCloud, the hot water lock with both accounts
+            const parts = [];
+            const values = [];
+            for (const zone of zones) {
+                if (!capabilities.supportsZoneProhibit) continue;
+                parts.push({ name: `Zone ${zone.zone}`, key: `ProhibitZone${zone.zone}` });
+                values.push(zone.prohibit);
+            }
+            if (tank) {
+                parts.push({ name: 'Water', key: 'ProhibitHotWater' });
+                values.push(tank.prohibit);
+            }
+            if (parts.length > 0) {
+                await this.ha.publishEntity('select', 'prohibit', this.ha.prohibitSelect(parts, 'lexical'));
+                state.prohibit = HaDiscovery.prohibitName(parts, values);
+            }
             await this.ha.updateState(state);
         } catch (error) {
             if (this.logWarn) this.emit('warn', `HA Discovery publish error: ${error.message ?? error}`);
@@ -2294,13 +2311,14 @@ class DeviceAtw extends EventEmitter {
 
                     //home assistant, zones and tank from device capabilities (not the HomeKit hide zone setting)
                     const haZones = [
-                        { zone: 1, name: zone1Name, operationMode: operationModeZone1, setTemperature: setTemperatureZone1, setHeatFlowTemperature: setHeatFlowTemperatureZone1, setCoolFlowTemperature: setCoolFlowTemperatureZone1, roomTemperature: roomTemperatureZone1, idle: idleZone1 },
-                        ...(deviceData.Device.HasZone2 ? [{ zone: 2, name: zone2Name, operationMode: operationModeZone2, setTemperature: setTemperatureZone2, setHeatFlowTemperature: setHeatFlowTemperatureZone2, setCoolFlowTemperature: setCoolFlowTemperatureZone2, roomTemperature: roomTemperatureZone2, idle: idleZone2 }] : [])
+                        { zone: 1, name: zone1Name, operationMode: operationModeZone1, setTemperature: setTemperatureZone1, setHeatFlowTemperature: setHeatFlowTemperatureZone1, setCoolFlowTemperature: setCoolFlowTemperatureZone1, roomTemperature: roomTemperatureZone1, idle: idleZone1, prohibit: prohibitZone1 },
+                        ...(deviceData.Device.HasZone2 ? [{ zone: 2, name: zone2Name, operationMode: operationModeZone2, setTemperature: setTemperatureZone2, setHeatFlowTemperature: setHeatFlowTemperatureZone2, setCoolFlowTemperature: setCoolFlowTemperatureZone2, roomTemperature: roomTemperatureZone2, idle: idleZone2, prohibit: prohibitZone2 }] : [])
                     ];
-                    const haTank = deviceData.Device[supportHotWaterKey] ? { name: hotWaterName, forcedHotWaterMode, ecoHotWater, setTankWaterTemperature, tankWaterTemperature, minTemp: minSetTankTemperature, maxTemp: maxSetTankTemperature } : null;
+                    const haTank = deviceData.Device[supportHotWaterKey] ? { name: hotWaterName, forcedHotWaterMode, ecoHotWater, setTankWaterTemperature, tankWaterTemperature, minTemp: minSetTankTemperature, maxTemp: maxSetTankTemperature, prohibit: prohibitHotWater } : null;
                     this.haPublish({
                         supportsCool,
                         supportsEco: accountTypeMelCloud,
+                        supportsZoneProhibit: accountTypeMelCloud,
                         tempStep: temperatureIncrement === true || temperatureIncrement === 0.5 ? 0.5 : 1
                     }, power, haZones, haTank);
 
