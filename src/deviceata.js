@@ -1666,7 +1666,8 @@ class DeviceAta extends EventEmitter {
                         supportsFanSpeed,
                         numberOfFanSpeeds,
                         supportsAutomaticFanSpeed,
-                        supportsAirDirectionFunction: supportsAirDirectionFunction && !hideVaneControls,
+                        // AirDirectionFunction is the i-See air direction, not the vertical vane itself
+                        supportsVaneVertical: vaneVerticalDirection !== null && vaneVerticalDirection !== undefined && !hideVaneControls,
                         supportsSwingFunction,
                         supportsWideVane: supportsWideVane && !hideVaneControls,
                         minTemp: minSetHeatRoomTemperature,

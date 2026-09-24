@@ -104,7 +104,7 @@ class HaDiscovery {
             });
         }
 
-        if (c.supportsAirDirectionFunction) {
+        if (c.supportsVaneVertical) {
             const swingModes = ['auto', '1', '2', '3', '4', '5', ...(c.supportsSwingFunction ? ['swing'] : [])];
             Object.assign(entity, {
                 swing_modes: swingModes,
