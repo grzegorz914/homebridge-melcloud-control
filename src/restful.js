@@ -28,7 +28,9 @@ class RestFul extends EventEmitter {
             // Request rate limit per client, protects Homebridge from request floods (CWE-770)
             const rateLimitWindow = 60 * 1000;
             const rateLimitMax = 600;
+            const rateLimitClients = 1000;
             const clients = new Map();
+            let clientsLimitWarned = 0;
             app.use((req, res, next) => {
                 const now = Date.now();
 
@@ -41,6 +43,15 @@ class RestFul extends EventEmitter {
 
                 let client = clients.get(req.ip);
                 if (!client || now - client.start >= rateLimitWindow) {
+                    // Hard limit of tracked addresses, new addresses wait until older windows expire
+                    if (!client && clients.size >= rateLimitClients) {
+                        if (now - clientsLimitWarned >= rateLimitWindow) {
+                            clientsLimitWarned = now;
+                            if (this.logWarn) this.emit('warn', `RESTFul too many clients (${rateLimitClients}) in one minute, new clients are rejected until the window ends`);
+                        }
+                        res.set('Retry-After', String(Math.ceil(rateLimitWindow / 1000)));
+                        return res.status(429).json({ error: 'RESTFul Too Many Requests' });
+                    }
                     client = { count: 0, start: now, warned: false };
                     clients.set(req.ip, client);
                 }
