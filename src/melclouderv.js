@@ -211,7 +211,7 @@ class MelCloudErv extends EventEmitter {
                                     break;
                             };
 
-                            //rebuild effective flags from only the fields that actually changed, Power always stays forced
+                            //rebuild effective flags from only the fields that actually changed
                             const flagBits = {
                                 operationMode: Ventilation.EffectiveFlags.OperationMode,
                                 ventilationMode: Ventilation.EffectiveFlags.VentilationMode,
@@ -222,11 +222,12 @@ class MelCloudErv extends EventEmitter {
                                 prohibitOperationMode: Ventilation.EffectiveFlags.Prohibit,
                                 prohibitPower: Ventilation.EffectiveFlags.Prohibit,
                             };
-                            flag = Object.keys(changes).reduce((acc, key) => acc | (flagBits[key] ?? 0), Ventilation.EffectiveFlags.Power);
+                            // Only an explicit Power command may switch the device on or off, other settings keep the current power state
+                            const powerFlag = changes.power !== undefined ? Ventilation.EffectiveFlags.Power : 0;
+                            flag = Object.keys(changes).reduce((acc, key) => acc | (flagBits[key] ?? 0), powerFlag);
 
                             payload = this.functions.toPascalCaseKeys({
                                 ...changes,
-                                power: changes.power !== false,
                                 deviceID: deviceData.Device.DeviceID,
                                 effectiveFlags: flag,
                                 hasPendingCommand: true,

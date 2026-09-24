@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Heat Pump: `Off`, `Zone 1`, `Zone 1 Zone 2`, `Zone 1 Water`, `Zone 2`, `Zone 2 Water`, `Water`, `All` (zone locks MELCloud only)
 - added: RESTFul request rate limit, 600 requests per minute per client, answered with `429` and `Retry-After`, one log warning per client and minute. Replaces the approach proposed in #261 which blocked clients polling faster than every 0.6 s, kept every client address forever and logged every rejected request
 - fix: HA Discovery, vertical vane (`swing_mode`) was not shown when the device reports `AirDirectionFunction: false` (the i-See air direction function, not the vane). It is now shown whenever the device reports a vertical vane position
+- fix: MELCloud (classic) any setting change (temperature, fan speed, vane, mode, locks, hot water...) switched an OFF device ON. Since v4.7.9 every command was sent with a forced `Power: true` and the Power effective flag. Now only an explicit `Power` command changes the power state, like before v4.7.9 when the current power state was sent
 - readme update
 
 ## [4.12.0] - (23.09.2026)

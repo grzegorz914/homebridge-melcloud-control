@@ -220,7 +220,7 @@ class MelCloudAta extends EventEmitter {
                                 changes.setTemperature = (deviceData.Device.DefaultCoolingSetTemperature + deviceData.Device.DefaultHeatingSetTemperature) / 2;
                             }
 
-                            //rebuild effective flags from only the fields that actually changed, Power always stays forced
+                            //rebuild effective flags from only the fields that actually changed
                             const flagBits = {
                                 operationMode: AirConditioner.EffectiveFlags.OperationMode,
                                 setTemperature: AirConditioner.EffectiveFlags.SetTemperature,
@@ -231,11 +231,12 @@ class MelCloudAta extends EventEmitter {
                                 prohibitOperationMode: AirConditioner.EffectiveFlags.Prohibit,
                                 prohibitPower: AirConditioner.EffectiveFlags.Prohibit,
                             };
-                            flag = Object.keys(changes).reduce((acc, key) => acc | (flagBits[key] ?? 0), AirConditioner.EffectiveFlags.Power);
+                            // Only an explicit Power command may switch the device on or off, other settings keep the current power state
+                            const powerFlag = changes.power !== undefined ? AirConditioner.EffectiveFlags.Power : 0;
+                            flag = Object.keys(changes).reduce((acc, key) => acc | (flagBits[key] ?? 0), powerFlag);
 
                             payload = this.functions.toPascalCaseKeys({
                                 ...changes,
-                                power: changes.power !== false,
                                 deviceID: deviceData.Device.DeviceID,
                                 effectiveFlags: flag,
                                 hasPendingCommand: true,

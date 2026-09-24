@@ -194,7 +194,7 @@ class MelCloudAtw extends EventEmitter {
                                 return true;
                             }
 
-                            //rebuild effective flags from only the fields that actually changed, Power always stays forced
+                            //rebuild effective flags from only the fields that actually changed
                             //NOTE: use + not | - some HeatPump flags exceed 32 bits (e.g. SetHeatFlowTemperatureZone1 = 2^48), and
                             //the bitwise OR operator truncates to a 32-bit int in JS, silently corrupting large flag values
                             const flagBits = {
@@ -215,11 +215,12 @@ class MelCloudAtw extends EventEmitter {
                                 prohibitZone2: HeatPump.EffectiveFlags.ProhibitHeatingZone2,
                                 prohibitHotWater: HeatPump.EffectiveFlags.ProhibitHotWater,
                             };
-                            flag = Object.keys(changes).reduce((acc, key) => acc + (flagBits[key] ?? 0), HeatPump.EffectiveFlags.Power);
+                            // Only an explicit Power command may switch the device on or off, other settings keep the current power state
+                            const powerFlag = changes.power !== undefined ? HeatPump.EffectiveFlags.Power : 0;
+                            flag = Object.keys(changes).reduce((acc, key) => acc + (flagBits[key] ?? 0), powerFlag);
 
                             payload = this.functions.toPascalCaseKeys({
                                 ...changes,
-                                power: changes.power !== false,
                                 deviceID: deviceData.Device.DeviceID,
                                 effectiveFlags: flag,
                                 hasPendingCommand: true,
