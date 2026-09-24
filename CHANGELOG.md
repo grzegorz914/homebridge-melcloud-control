@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - added: HA Discovery, device locks as one `select` in the device configuration
   - Air Conditioner (MELCloud only): `Off`, `Power`, `Mode`, `Mode Power`, `Temp`, `Temp Power`, `Temp Mode`, `All`
   - Heat Pump: `Off`, `Zone 1`, `Zone 1 Zone 2`, `Zone 1 Water`, `Zone 2`, `Zone 2 Water`, `Water`, `All` (zone locks MELCloud only)
+- added: RESTFul request rate limit, 600 requests per minute per client, answered with `429` and `Retry-After`, one log warning per client and minute. Replaces the approach proposed in #261 which blocked clients polling faster than every 0.6 s, kept every client address forever and logged every rejected request
 - readme update
 
 ## [4.12.0] - (23.09.2026)
