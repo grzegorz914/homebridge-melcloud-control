@@ -64,6 +64,8 @@ class DeviceAta extends EventEmitter {
         this.mqtt = account.mqtt ?? {};
         this.mqtt1 = mqtt1;
         this.mqttConnected = mqttConnected;
+        // The broker may come online after the start or restart, the device then publishes again
+        this.mqtt1?.on('online', () => this.mqttOnline().catch((error) => this.emit('warn', `MQTT online error: ${error}`)));
 
         const serviceType = [null, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor, null];
         const characteristicType = [null, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState, null];
@@ -1321,7 +1323,15 @@ class DeviceAta extends EventEmitter {
         }
     }
 
+    // MQTT connected, at start when the broker was not running yet or after a restart of the broker
+    async mqttOnline() {
+        this.mqttConnected = true;
+        this.ha?.reset();
+        if (this.haLast) await this.haPublish(...this.haLast);
+    }
+
     async haPublish(capabilities, state) {
+        this.haLast = [capabilities, state];
         if (!this.haReady()) return;
 
         try {

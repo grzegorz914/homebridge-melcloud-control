@@ -33,6 +33,12 @@ class HaDiscovery {
     }
 
     // Publish (or republish when changed) one retained discovery message
+    // The broker may have lost the retained messages (restart without persistence), the next publish sends everything again
+    reset() {
+        this.lastConfig = {};
+        this.lastState = '';
+    }
+
     async publishEntity(component, suffix, entity) {
         const objectId = suffix ? `${this.baseId}_${suffix}` : this.baseId;
         const topic = `${this.mqtt.haPrefix}/${component}/${objectId}/config`;
