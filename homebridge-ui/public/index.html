@@ -477,7 +477,7 @@
         await homebridge.savePluginConfig();
       } catch (error) {
         updateInfo('info', `Prepare config error`, "red");
-        updateInfo('info1', `Error: ${JSON.stringify(error)}`, "red");
+        updateInfo('info1', `Error: ${error?.message ?? JSON.stringify(error)}`, "red");
       } finally {
         homebridge.hideSpinner();
         $('logIn').disabled = false;
