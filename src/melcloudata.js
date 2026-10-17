@@ -12,6 +12,8 @@ class MelCloudAta extends EventEmitter {
         this.restFulEnabled = account.restFul?.enable;
         this.mqttEnabled = account.mqtt?.enable;
         this.deviceId = device.id;
+        this.temperatureOutdoorSensor = device.temperatureOutdoorSensor || false;
+        this.melCloudClass = melCloudClass;
         this.defaultTempsFile = defaultTempsFile;
 
         this.functions = new Functions(this.logWarn, this.logError, this.logDebug)
@@ -22,6 +24,8 @@ class MelCloudAta extends EventEmitter {
         //set default values
         this.deviceData = {};
         this.client = melCloudClass.client;
+        this.outdoorReading = null;
+        this.outdoorCheckedAt = 0;
 
         //handle melcloud events
         melCloudClass.on('client', (client) => {
@@ -120,8 +124,33 @@ class MelCloudAta extends EventEmitter {
         });
     }
 
+    // MELCloud Home does not send the outdoor temperature in the status of the unit, read it from the trend summary report
+    // every 30 minutes, the report is updated only while the unit is running
+    async checkOutdoorTemperature(deviceData) {
+        if (this.accountTypeMelcloud || !this.temperatureOutdoorSensor || (deviceData.Device.HasOutdoorTemperature && !this.outdoorReading)) return;
+
+        const now = Date.now();
+        if (now - this.outdoorCheckedAt >= 1_800_000) {
+            this.outdoorCheckedAt = now;
+            try {
+                this.outdoorReading = await this.melCloudClass.getOutdoorTemperature(this.deviceId) ?? this.outdoorReading;
+            } catch (error) {
+                if (this.logWarn) this.emit('warn', `Unit ${this.deviceId}, ${error.message}`);
+            }
+        }
+
+        if (!this.outdoorReading) return;
+        const { value, timestamp } = this.outdoorReading;
+        if (this.logDebug && timestamp && now - timestamp > 10_800_000) this.emit('debug', `Unit ${this.deviceId}, outdoor temperature ${value} is older than 3 hours, last measurement ${new Date(timestamp).toLocaleString()}`);
+
+        deviceData.Device.HasOutdoorTemperature = true;
+        deviceData.Device.OutdoorTemperature = value;
+    }
+
     async updateState(type, deviceData) {
         try {
+            await this.checkOutdoorTemperature(deviceData);
+
             if (!this.accountTypeMelcloud) {
                 if (type === 'ws') {
                     deviceData.Device.OperationMode = AirConditioner.OperationModeMapEnumToEnumWs[deviceData.Device.OperationMode] ?? deviceData.Device.OperationMode;

@@ -726,6 +726,36 @@ class MelCloudHome extends EventEmitter {
         }
     }
 
+    // Latest outdoor temperature of a unit from the trend summary report, the status of the unit does not contain it.
+    // The last point of every dataset is stamped with the generation time of the report and only repeats the last known
+    // value, so the time of the real measurement is the point before it. Returns null when the unit has no outdoor reading.
+    async getOutdoorTemperature(unitId) {
+        try {
+            const day = (offset) => new Date(Date.now() + offset * 86400000).toISOString().slice(0, 10);
+            const params = { unitId, period: 'Daily', from: `${day(-1)}T00:00:00.0000000`, to: `${day(1)}T00:00:00.0000000` };
+            const resp = await this.client.get(ApiUrls.Home.Get.ReportTrendSummary, { params });
+            if (this.logDebug) this.emit('debug', `Trend summary unit ${unitId}: ${JSON.stringify(resp.data)}`);
+
+            const reports = Array.isArray(resp.data) ? resp.data : [];
+            const datasets = reports.flatMap(report => report.datasets ?? []);
+            const outdoor = datasets.find(dataset => dataset.id === 'outside_temperature');
+            const points = (outdoor?.data ?? []).filter(point => this.functions.isValidValue(point?.y));
+
+            if (points.length > 0) {
+                const last = points.at(-1);
+                const otherStamps = datasets.filter(dataset => dataset !== outdoor).map(dataset => dataset.data?.at(-1)?.x);
+                const carried = points.length > 1 && otherStamps.includes(last.x);
+                return { value: last.y, timestamp: Date.parse((carried ? points.at(-2) : last).x) || null };
+            }
+
+            // no point in the requested range, use the last value before it
+            const trigger = reports.flatMap(report => report.previousTriggers ?? []).find(item => item.measure === 'outside_temperature' && this.functions.isValidValue(item.value));
+            return trigger ? { value: trigger.value, timestamp: Date.parse(trigger.trigger) || null } : null;
+        } catch (error) {
+            throw new Error(`Get outdoor temperature error: ${error.message}`);
+        }
+    }
+
     // ── Devices ───────────────────────────────────────────────────────────────
 
     // Wraps checkDevicesList with a single retry on timeout or network error.

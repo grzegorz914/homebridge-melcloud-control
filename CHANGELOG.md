@@ -25,6 +25,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - For plugin < v4.6.0 use Homebridge UI <= v5.5.0
 - For plugin >= v4.6.0 use Homebridge UI >= v5.13.0
 
+## [4.14.0-beta.0] - (17.10.2026)
+
+### Changes
+
+- added: MELCloud Home, outdoor temperature sensor for Air Conditioner (ATA) from the trend summary report, because the status of the unit does not contain the outdoor temperature
+  - the sensor is created when `Outdoor Temperature Sensor` is enabled and the unit has an outdoor reading in the report, the report is read every 30 minutes
+  - the report is updated only while the unit is running, so the sensor keeps the last known value when the unit is off
+  - units without an outdoor reading, for example multi split systems, stay without the sensor
+
 ## [4.13.2] - (17.10.2026)
 
 ### Changes
