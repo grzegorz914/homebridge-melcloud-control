@@ -25,6 +25,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - For plugin < v4.6.0 use Homebridge UI <= v5.5.0
 - For plugin >= v4.6.0 use Homebridge UI >= v5.13.0
 
+## [4.14.0-beta.1] - (17.10.2026)
+
+### Changes
+
+- fixed: MELCloud Home, the outdoor temperature of the report was an old value of the previous day, because the report window ended at midnight at the beginning of the current day. The report is now requested from the current day
+
 ## [4.14.0-beta.0] - (17.10.2026)
 
 ### Changes

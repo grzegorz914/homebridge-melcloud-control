@@ -731,8 +731,12 @@ class MelCloudHome extends EventEmitter {
     // value, so the time of the real measurement is the point before it. Returns null when the unit has no outdoor reading.
     async getOutdoorTemperature(unitId) {
         try {
-            const day = (offset) => new Date(Date.now() + offset * 86400000).toISOString().slice(0, 10);
-            const params = { unitId, period: 'Daily', from: `${day(-1)}T00:00:00.0000000`, to: `${day(1)}T00:00:00.0000000` };
+            // the report is a window of 7 days that ends at midnight after `from` and `to` is ignored, so `from` must be today
+            const day = (offset) => {
+                const date = new Date(Date.now() + offset * 86400000);
+                return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+            };
+            const params = { unitId, period: 'Daily', from: `${day(0)}T00:00:00.0000000`, to: `${day(1)}T00:00:00.0000000` };
             const resp = await this.client.get(ApiUrls.Home.Get.ReportTrendSummary, { params });
             if (this.logDebug) this.emit('debug', `Trend summary unit ${unitId}: ${JSON.stringify(resp.data)}`);
 
