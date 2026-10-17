@@ -25,6 +25,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - For plugin < v4.6.0 use Homebridge UI <= v5.5.0
 - For plugin >= v4.6.0 use Homebridge UI >= v5.13.0
 
+## [4.13.2] - (17.10.2026)
+
+### Changes
+
+- fixed: Config UI, the error shown after a failed Login and Sync was an empty object `{}`, now the real error message is shown
+
 ## [4.13.1] - (29.09.2026)
 
 ### Changes
