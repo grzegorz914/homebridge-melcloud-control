@@ -73,6 +73,7 @@ class DeviceAtw extends EventEmitter {
         this.mqttConnected = mqttConnected;
         // The broker may come online after the start or restart, the device then publishes again
         this.mqtt1?.on('online', () => this.mqttOnline().catch((error) => this.emit('warn', `MQTT online error: ${error}`)));
+        this.mqtt1?.on('offline', () => { this.mqttConnected = false; });
 
         const serviceType = [null, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor, Service.MotionSensor, Service.OccupancySensor, Service.ContactSensor, null];
         const characteristicType = [null, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState, Characteristic.MotionDetected, Characteristic.OccupancyDetected, Characteristic.ContactSensorState, null];
